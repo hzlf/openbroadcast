@@ -14,7 +14,7 @@ class FixedTaxRate(BaseCartModifier):
     use a more dynamic configuration system, such as settings or models to
     hold the tax values...
     """
-    TAX_PERCENTAGE = Decimal('12')
+    TAX_PERCENTAGE = Decimal('8')
 
     def get_extra_cart_price_field(self, cart):
         """
@@ -58,7 +58,7 @@ class FixedShippingCosts(BaseCartModifier):
         try:
             for item in cart.items.all():
                 if item.product.needs_shipping:
-                    shipping = 20
+                    shipping = 1
         except Exception, e:
             pass
         

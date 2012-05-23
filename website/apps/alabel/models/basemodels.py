@@ -146,7 +146,12 @@ class License(MPTTModel):
     def __unicode__(self):
         return self.name
 
+class ProfessionManager(models.Manager):
 
+    def listed(self):
+        return self.get_query_set().filter(in_listing=True)
+    
+    
 class Profession(models.Model):
     
     name = models.CharField(max_length=200)
@@ -160,7 +165,7 @@ class Profession(models.Model):
     updated = models.DateField(auto_now=True, editable=False)
     
     # manager
-    objects = models.Manager()
+    objects = ProfessionManager()
 
     # meta
     class Meta:
@@ -173,12 +178,39 @@ class Profession(models.Model):
         return self.name
     
     
+class Mediaformat(models.Model):
+    
+    name = models.CharField(max_length=50)
+    excerpt = models.TextField(blank=True, null=True) 
+    in_listing = models.BooleanField(default=True, verbose_name='Include in listings')
+    
+    # manager
+    objects = models.Manager()
 
+    # meta
+    class Meta:
+        app_label = 'alabel'
+        verbose_name = _('Mediaformat')
+        verbose_name_plural = _('Mediaformat')
+        ordering = ('name', )
+    
+    def __unicode__(self):
+        return self.name
+    
+    
 
+class RelationManager(models.Manager):
 
+    def generic(self):
+        return self.get_query_set().filter(service='generic')
+
+    def specific(self):
+        return self.get_query_set().exclude(service='generic')
+    
+    
 class Relation(models.Model):
     
-    name = models.CharField(max_length=200, blank=True, null=True)
+    name = models.CharField(max_length=200, blank=True, null=True, help_text=(_('Additionally override the name.')))
     url = models.URLField(max_length=512)
 
     content_type = models.ForeignKey(ContentType)
@@ -193,6 +225,7 @@ class Relation(models.Model):
         ('discogs', _('Discogs')),
         ('wikipedia', _('Wikipedia')),
         ('musicbrainz', _('Musicbrainz')),
+        ('bandcamp', _('Bandcamp')),
     )
     service = models.CharField(max_length=50, default='generic', choices=SERVICE_CHOICES)
     
@@ -208,7 +241,7 @@ class Relation(models.Model):
     updated = models.DateField(auto_now=True, editable=False)
     
     # manager
-    objects = models.Manager()
+    objects = RelationManager()
 
     # meta
     class Meta:
@@ -225,12 +258,24 @@ class Relation(models.Model):
         """
         try to extract service
         """
-        
-        if self.url.find('www.discogs.com') != -1:
-            self.service = 'discogs' 
+               
+        if self.url.find('facebook.com') != -1:
+            self.service = 'facebook'
+            
+        if self.url.find('youtube.com') != -1:
+            self.service = 'youtube' 
+                   
+        if self.url.find('discogs.com') != -1:
+            self.service = 'discogs'
                    
         if self.url.find('wikipedia.org') != -1:
             self.service = 'wikipedia'
+                   
+        if self.url.find('musicbrainz.org') != -1:
+            self.service = 'musicbrainz'
+                   
+        if self.url.find('bandcamp.com') != -1:
+            self.service = 'bandcamp'
 
         super(Relation, self).save(*args, **kwargs)
     

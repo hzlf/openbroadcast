@@ -1,7 +1,7 @@
 from django.contrib import admin
 from cms.admin.placeholderadmin import PlaceholderAdmin
 
-from alabel.models import Label, Release, Artist, License, Media, Profession, Playlist, Format, Relation
+from alabel.models import Label, Release, Artist, License, Media, Profession, Playlist, Format, Relation, Mediaformat
 #from alabel.models import ArtistProfessions, MediaExtraartists, PlaylistMedia
 from alabel.models import ArtistProfessions, MediaExtraartists, ReleaseExtraartists, PlaylistMedia, ReleaseRelations
 
@@ -79,7 +79,7 @@ class RelationsInline(GenericTabularInline):
     model = Relation
     extra=2
     fieldsets = [
-        (None,               {'fields': ['url', 'service']}),
+        (None,               {'fields': ['url', 'name', 'service']}),
     ]
     readonly_fields = ['service']
 
@@ -96,7 +96,7 @@ class ReleaseAdmin(PlaceholderAdmin, BaseAdmin):
     
     """"""
     fieldsets = [
-        (None,               {'fields': ['name', 'slug', 'main_image', 'release_country', 'label', 'catalognumber', 'releasedate', 'excerpt']}),
+        (None,               {'fields': ['name', 'slug', ('main_image', 'cover_image',), ('label', 'catalognumber', 'releasedate', 'release_country'), 'publish_date', 'enable_comments', 'main_format', 'excerpt']}),
         ('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
     ]
     
@@ -121,19 +121,25 @@ class ArtistProfessionsInline(admin.TabularInline):
 class MediaExtraartistsInline(admin.TabularInline):
     model = MediaExtraartists
     extra=1
-      
+
+
+         
 class ArtistAdmin(PlaceholderAdmin, BaseAdmin):
     
 
+    list_display   = ('name', 'listed', 'priority',)
+    search_fields = ['name', 'media__name',]
+    list_filter = ('priority', 'listed')
     
     # inlines = [LabelInline]
-    inlines = [RelationsInline, ArtistProfessionsInline, ArtistMembersInline, ArtistParentsInline]
+    inlines = [RelationsInline, ArtistProfessionsInline, ArtistMembersInline, ArtistParentsInline,]
     
     prepopulated_fields = {"slug": ("name",)}
+    readonly_fields = ["folder",]
     
     """"""
     fieldsets = [
-        (None,               {'fields': ['name', 'slug', 'main_image', 'real_name', 'excerpt', ]}),
+        (None,               {'fields': ['name', 'slug', 'main_image', 'aliases', 'real_name', ('priority', 'listed', 'disable_link',), 'enable_comments', 'excerpt', 'folder', ]}),
         ('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
     ]
     
@@ -164,11 +170,14 @@ admin.site.register(Profession, ProfessionAdmin)
     
 class MediaAdmin(BaseAdmin):
     
-    list_display   = ('name', 'release', 'artist', 'mediatype', 'tracknumber')
+    list_display   = ('name', 'release', 'artist', 'mediatype', 'tracknumber', 'processed')
     search_fields = ['artist__name', 'release__name']
-    list_filter = ('artist__name','release__name')
+    list_filter = ('artist__name','release__name', 'mediatype', 'license__name', 'processed')
     
     inlines = [MediaExtraartistsInline]
+
+
+    
     
     """"""
     fieldsets = [
@@ -177,6 +186,10 @@ class MediaAdmin(BaseAdmin):
                  }),
 
         ('Mixed content', {'fields': ['description'], 'classes': ['']}),
+        ('Advanced options [Know what you are doing!!!!!!!!]', {
+            'classes': ('collapse',),
+            'fields': ('processed',)
+        }),
     ]
     
     
@@ -192,4 +205,9 @@ class PlaylistAdmin(BaseAdmin):
     inlines = [PlaylistmediaInline]  
     
 admin.site.register(Playlist, PlaylistAdmin)
+        
+class MediaformatAdmin(BaseAdmin):
+    pass
+    
+admin.site.register(Mediaformat, MediaformatAdmin)
 

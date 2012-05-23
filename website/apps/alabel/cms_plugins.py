@@ -7,6 +7,7 @@ from django.utils.translation import ugettext as _
 
 from alabel.models import MediaPlugin as MediaPluginModel
 from alabel.models import ReleasePlugin as ReleasePluginModel
+from alabel.models import ArtistPlugin as ArtistPluginModel
 
 
 @plugin_pool.register_plugin
@@ -49,6 +50,26 @@ class ReleasePlugin(CMSPluginBase):
             'object': instance.release,
             'item': instance.release,
             'release': instance.release,
+            'placeholder': placeholder,
+        })
+        return context
+
+""""""
+@plugin_pool.register_plugin
+class ArtistPlugin(CMSPluginBase):
+    model = ArtistPluginModel
+    name = _("Artist Plugin")
+    render_template = "alabel/cmsplugin/artist.html"
+
+    # meta
+    class Meta:
+        app_label = 'alabel'
+
+    def render(self, context, instance, placeholder):
+        
+        context.update({
+            'instance': instance,
+            'object': instance.artist,
             'placeholder': placeholder,
         })
         return context

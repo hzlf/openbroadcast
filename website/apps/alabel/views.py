@@ -16,6 +16,8 @@ from ashop.util.base import get_download_permissions
 
 from alabel.forms import ReleaseForm
 
+from alabel.filters import ReleaseFilter
+
 class ArtistListView(ListView):
     
     # context_object_name = "artist_list"
@@ -30,18 +32,28 @@ class ArtistListView(ListView):
         if profession:
             kwargs[ 'professions' ] = get_object_or_404(Profession, name__iexact=profession)
 
-        #return Artist.objects.filter(**kwargs)
-        print '# profs'
-        professions = Profession.objects.filter(in_listing=0)
-        print professions
-        return Artist.objects.exclude(professions=professions)
+
+        return Artist.objects.listed().filter(**kwargs)
     
 class ReleaseListView(ListView):
     
     # context_object_name = "artist_list"
-    # template_name = "alabel/artist_list.html"
+    template_name = "alabel/release_list.html"
     
+    
+
+
+    def get_context_data(self, **kwargs):
+        context = super(ReleaseListView, self).get_context_data(**kwargs)
+        
+        context['filter'] = self.filter
+        context['release_list'] = self.filter
+        return context
+    
+
     def get_queryset(self):
+
+        # return render_to_response('my_app/template.html', {'filter': f})
 
         kwargs = {}
         
@@ -50,7 +62,9 @@ class ReleaseListView(ListView):
         if profession:
             kwargs[ 'professions' ] = get_object_or_404(Profession, name__iexact=profession)
         
-        return Release.objects.filter(**kwargs)
+        self.filter = ReleaseFilter(self.request.GET, queryset=Release.objects.active().filter(**kwargs))
+
+        return Release.objects.active().filter(**kwargs)
 
 
 class MediaListView(ListView):
@@ -86,7 +100,7 @@ class ReleaseDetailView(DetailView):
     
     def get_context_data(self, **kwargs):
         
-        mimetype="application/xhtml+xml",
+        #mimetype="application/xhtml+xml",
         context = super(ReleaseDetailView, self).get_context_data(**kwargs)
 
         # context['products'] = context['release'].releaseproduct.all() # obsolete - handled via release.get_products()
@@ -106,9 +120,12 @@ class ReleaseDetailView(DetailView):
 
         print downloads
         """
+        
+        images = []
 
         context['downloads'] = downloads
-        context['all_items'] = Release.objects.all()
+        context['images'] = images
+        #context['all_items'] = Release.objects.all()
         
         
         return context
@@ -193,8 +210,6 @@ def release_download(request, slug, format, version):
     
     version = 'base' 
     
-    
-    
     """
     check permissions
     """
@@ -258,6 +273,18 @@ def media_download(request, slug, format, version):
     filename = '%s.%s' % (filename, format)
     
     return sendfile(request, cache_file, attachment=True, attachment_filename=filename)
+
+
+def stream_html5(request, uuid):
+    
+    media = get_object_or_404(Media, uuid=uuid)
+
+    stream_permission = True
+
+    if not stream_permission:
+        raise Http403
+    
+    return sendfile(request, media.get_default_stream_file().path)
 
 
 

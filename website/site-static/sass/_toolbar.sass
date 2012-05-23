@@ -1,0 +1,109 @@
+/* Toolbar styleing */
+
+@import "vars"
+@import "mixins"
+
+/* AJAX loading indicator
+div#toolbar_holder
+  background-color: #ffffff
+  height: 58px
+  &.active
+    background-image: url(/media/img/ajax-loader.gif)
+    background-position: 7px 43px
+    background-repeat: no-repeat
+  
+  
+
+#toolbar
+  border-top: 1px solid #333
+  background-color: #333
+  .divider
+    width: 11px
+    height: 20px
+	
+  .button
+    padding: 1px 6px 1px 6px
+    margin: 0px 0px 0px 6px
+    border: 1px solid #555
+    color: #ccc
+    background: url(/media/img/prototype/toolbar_but_bg.png)
+    height: 20px
+    cursor: pointer
+    &:hover
+      border: 1px solid #999
+      color: #fff
+	  
+  .field
+    border: 1px solid #555555
+    font-size: 100%
+    padding: 2px 1px 2px 1px
+    margin: 0px 0px 4px 6px
+    background: #333
+    color: #888
+    &:focus
+      border: 1px solid #888
+      border-top: 1px solid #555
+      border-left: 1px solid #555
+      background: #555
+	  
+    &#username, &#password
+      width: 130px
+      height: 14px
+
+  .navleft
+    float: left
+    margin: 8px 0px 8px 12px
+    color: #bbb
+    li
+      display: inline
+      list-style-type: none
+      float: left
+    a
+      text-decoration: none
+      color: #ccc
+      padding: 5px 8px 4px 8px
+      &:hover
+        color: #fff
+      &.on
+        color: #fff
+        border: 1px solid #aaa
+        padding: 4px 7px 3px 7px
+
+  .navright
+    margin: 6px 20px 2px 0px
+    float: right
+    .link
+      float: right
+      margin-top: 1px
+    a
+      text-decoration: none
+      color: #ccc
+      margin: 0px 0px 4px 8px
+    
+
+
+
+
+/* ---------- subnav ----------
+
+
+.subnav
+  padding: 8px 0px 0px 108px
+  li
+    list-style: none
+    float: left
+  a
+    color: #666
+    text-decoration: none
+    padding: 0px 7px 0px 7px
+    border-right: 1px solid #999
+    &.on
+      color: $main-a
+      text-decoration: none
+      padding: 0px 7px 0px 7px
+    &:hover
+      color: $main-a
+  li
+    &:last-child a
+      border-right: none !important
+

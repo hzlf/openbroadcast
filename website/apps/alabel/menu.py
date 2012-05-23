@@ -1,8 +1,12 @@
+from django.utils.translation import ugettext_lazy as _
+from django.core.urlresolvers import reverse
+
 from menus.base import Modifier, Menu, NavigationNode
 from menus.menu_pool import menu_pool
-from django.utils.translation import ugettext_lazy as _
+from cms.menu_bases import CMSAttachMenu
 
-from alabel.models import Profession
+
+from alabel.models import Profession, Release, Artist
 
 class TestMenu(Menu):
 
@@ -25,12 +29,88 @@ class TestMenu(Menu):
         for profession in professions:
             # print profession
             
-            node = NavigationNode(profession.name, "/artists/?profession=" + profession.name, profession.id, 2)
+            node = NavigationNode(profession.name, "/artists/?profession=" + profession.name, profession.id, 4)
             nodes.append(node)
         
         return nodes
 
-menu_pool.register_menu(TestMenu)
+#menu_pool.register_menu(TestMenu)
+
+
+
+
+class ReleaseMenu(CMSAttachMenu):
+    
+    name = _("Release Menu")
+    
+    def get_nodes(self, request):
+        nodes = []
+        for release in Release.objects.active():
+            try:
+                node = NavigationNode(
+                    release.name,
+                    reverse('ReleaseDetailView', args=[release.slug]),
+                    release.pk
+                )
+                nodes.append(node)
+                print 'added'
+            except Exception, e:
+                print e
+
+        return nodes
+    
+menu_pool.register_menu(ReleaseMenu)
+
+
+
+
+class ArtistMenu(CMSAttachMenu):
+    
+    name = _("Artist Menu")
+    
+    def get_nodes(self, request):
+        nodes = []
+        for artist in Artist.objects.listed():
+            try:
+                node = NavigationNode(
+                    artist.name,
+                    reverse('ArtistDetailView', args=[artist.slug]),
+                    artist.pk
+                )
+                nodes.append(node)
+                print 'added'
+            except Exception, e:
+                print e
+
+        return nodes
+    
+menu_pool.register_menu(ArtistMenu)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

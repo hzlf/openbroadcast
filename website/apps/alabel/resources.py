@@ -9,6 +9,8 @@ from easy_thumbnails.files import get_thumbnailer
 from settings import *
 from alabel.models import Release, Media, Artist, Label
 
+from lib.templatetags.truncate import *
+
 from filer.models.filemodels import *
 from filer.models.foldermodels import *
 from filer.models.audiomodels import *
@@ -99,6 +101,7 @@ class MediaResource(ModelResource):
 
 
 class ReleaseResource(ModelResource, APIBaseMixin):
+    
     model = Release
     fields = ('name', 'media', 'images', 'url')
     exclude = ('label', 'folder', 'placeholder_1')
@@ -127,6 +130,9 @@ class ArtistResource(ModelResource, APIBaseMixin):
     fields = ('uuid', 'name', 'url', 'images', 'pics', 'permalink')
     ordering = ('created',)
     
+    def name(self, instance):
+        return truncate_chars_inner(instance.name, 30)
+    
     def releases(self, instance):
         pass
     
@@ -137,7 +143,7 @@ def parse_media(media):
     entry = {}
     
     try:
-        entry['name'] = media.name
+        entry['name'] = truncate_chars_inner(media.name, 24)
     except Exception, e:
         entry['name'] = False
     
@@ -159,7 +165,7 @@ def parse_media(media):
     try:
         api_url = reverse('artist-resource-detail', None, kwargs={'uuid': media.artist.uuid})
         print api_url
-        entry['artist'] = { 'name': media.artist.name, 'permalink': media.artist.get_absolute_url, 'url': api_url }
+        entry['artist'] = { 'name': truncate_chars_inner(media.artist.name, 30), 'permalink': media.artist.get_absolute_url, 'url': api_url }
     except Exception, e:
         entry['artist'] = False
         
@@ -179,8 +185,8 @@ def parse_media(media):
         entry['stream'] = { 
                            #'file': media.master.file, 
                            'file': media.get_stream_file('mp3', 'base'), 
-                           #'uri': media.get_stream_file('mp3', 'base').url, 
-                           'uri': '/media/filer/2012/02/11/base.mp3',
+                           #'media_id': media.id, 
+                           'uri': '/tracks/' + media.uuid + '/stream_html5/',
                            'rtmp_host': 'rtmp://' + RTMP_HOST + ':' + RTMP_PORT + '/', 
                            'rtmp_app': RTMP_APP,
                            'uuid' : media.uuid,

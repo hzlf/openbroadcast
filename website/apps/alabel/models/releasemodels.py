@@ -1,5 +1,6 @@
 # python
 import datetime
+from datetime import *
 import time
 import uuid
 import shutil
@@ -11,6 +12,7 @@ from zipfile import ZipFile
 
 # django
 from django.db import models
+from django.db.models import Q
 from django.db.models.signals import post_save
 from django.template.defaultfilters import slugify
 from django.contrib.auth.models import User
@@ -41,6 +43,8 @@ from filer.fields.image import FilerImageField
 from filer.fields.audio import FilerAudioField
 from filer.fields.file import FilerFileField
 
+
+
 # modules
 from taggit.managers import TaggableManager
 from django_countries import CountryField
@@ -66,6 +70,22 @@ FORCE_CATALOGNUMBER = False
 # shop
 #from ashop.models import Hardwarerelease, Downloadrelease
 
+
+
+
+
+class ReleaseManager(models.Manager):
+
+    def active(self):
+        now = datetime.now()
+        return self.get_query_set().filter(
+                Q(publish_date__isnull=True) |
+                Q(publish_date__lte=now)
+                )
+
+
+
+
 class Release(models.Model):
     
     #__metaclass__=classmaker()
@@ -80,6 +100,7 @@ class Release(models.Model):
     uuid = UUIDField()
     
     main_image = FilerImageField(null=True, blank=True, related_name="release_main_image", rel='')
+    cover_image = FilerImageField(null=True, blank=True, related_name="release_cover_image", rel='', help_text=_('Cover close-up. Used e.g. for embedding in digital files.'))
     
     
     if FORCE_CATALOGNUMBER:
@@ -90,12 +111,15 @@ class Release(models.Model):
     releasedate = models.DateField(blank=True, null=True)
     pressings = models.PositiveIntegerField(max_length=12, default=0)
     
+    publish_date = models.DateTimeField(default=datetime.now, blank=True, null=True, help_text=_('If set this Release will not be published on the site before the given date.'))
+
+    main_format = models.ForeignKey(Mediaformat, null=True, blank=True, on_delete=models.SET_NULL)
+    
     # 
     excerpt = models.TextField(blank=True, null=True)
     
     # cms field
     placeholder_1 = PlaceholderField('placeholder_1')
-    
     
     RELEASETYPE_CHOICES = (
         ('ep', _('EP')),
@@ -126,10 +150,11 @@ class Release(models.Model):
     
     # tagging
     tags = TaggableManager(blank=True)
+
+    enable_comments = models.BooleanField(_('Enable Comments'), default=True)
     
     # manager
-    objects = models.Manager()
-    # objects = PolymorphicManager()
+    objects = ReleaseManager()
     
     # auto-update
     created = models.DateField(auto_now_add=True, editable=False)
@@ -140,11 +165,27 @@ class Release(models.Model):
         app_label = 'alabel'
         verbose_name = _('Release')
         verbose_name_plural = _('Releases')
-        ordering = ('releasedate', )
+        ordering = ('-releasedate', )
     
     
     def __unicode__(self):
         return self.name
+    
+    def is_active(self):
+        
+        now = date.today()
+        try:
+            if not self.releasedate:
+                return True
+            
+            if self.releasedate <= now:
+                return True
+        
+        except:
+            pass
+
+        return False
+
 
     def get_absolute_url(self):
         # TODO: Make right
@@ -157,10 +198,22 @@ class Release(models.Model):
         return self.releaseproduct.all()
     
     def get_artists(self):
-        """
-        Strange, somehow it is not possible to use "Artist" here...
-        """
+
         artists = []
+        
+        try:
+            re = ReleaseExtraartists.objects.filter(release=self, profession__name="Albumartist")
+            for ea in re:
+                print ea.artist
+                artists.append(ea.artist)
+                
+            if len(artists) > 0:
+                return artists
+        
+        except Exception, e:
+            pass
+
+                
         medias = self.get_media()
         for media in medias:
             artists.append(media.artist)
@@ -176,13 +229,21 @@ class Release(models.Model):
         roles = ReleaseExtraartists.objects.filter(release=self.pk)
         
         for role in roles:
-            role.artist.profession = role.profession.name
-            artists.append(role.artist)
+            try:
+                role.artist.profession = role.profession.name
+                artists.append(role.artist)
+            except:
+                pass
  
         return artists
     
     def get_downloads(self):
+        
         downloads = File.objects.filter(folder=self.get_folder('downloads')).all()
+
+        if len(downloads) < 1:
+            return None
+        
         return downloads
     
     
@@ -283,7 +344,18 @@ class Release(models.Model):
             
         return cache_file_path
 
-    
+    def get_extraimages(self):
+        
+        if self.folder:
+            folder = self.get_folder('pictures')
+            images = folder.files.instance_of(Image)
+
+        if len(images) > 0:
+            return images
+        else:
+            return None
+                
+                
 
     def get_folder(self, name):
         

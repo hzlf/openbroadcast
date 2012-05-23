@@ -2,9 +2,7 @@
 
 {% if allauth.facebook_enabled %}
 
-
 <script>
-
 
   window.FB_login = function() {}
   window.fbAsyncInit = function() {
@@ -43,10 +41,6 @@
    }(document));
 </script>
 
-
-
-	
-	
 {% endif %}
 
 
@@ -54,7 +48,6 @@
 
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-28856125-1']);
-  _gaq.push(['_setDomainName', 'anorg.net']);
   _gaq.push(['_setAllowLinker', true]);
   _gaq.push(['_trackPageview']);
 
@@ -63,5 +56,14 @@
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
+  
+
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
 
 </script>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>

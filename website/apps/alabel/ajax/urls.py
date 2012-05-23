@@ -1,15 +1,14 @@
 from django.conf.urls.defaults import *
+from django.views.decorators.cache import cache_page
 
 # app imports
-# from alabel.models import Artist, Release, Media, Label
 from alabel.ajax.views import *
-
 
 urlpatterns = patterns('',
 
     # releases                   
-    (r'^releases/$', ReleaseAjaxListView.as_view()),
-    #(r'^releases/(?P<slug>[-\w]+)/$', ReleaseDetailView.as_view()),
+    (r'^releases/$', cache_page(ReleaseAjaxListView.as_view(), 60*60)),
+    (r'^artists/$', cache_page(ArtistAjaxListView.as_view(), 60*60)),
 
     
 )

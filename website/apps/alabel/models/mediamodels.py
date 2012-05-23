@@ -3,6 +3,7 @@ import datetime
 import uuid
 import shutil
 import sys
+import time
 
 # django
 from django.db import models
@@ -60,7 +61,7 @@ from lib.audioprocessing.processing import create_wave_images, AudioProcessingEx
 
 # logging
 import logging
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
     
     
 ################
@@ -81,8 +82,17 @@ class Media(models.Model):
     uuid = UUIDField(null=True, blank=True)
     isrc = models.CharField(max_length=12, null=True, blank=True, help_text="International Standard Recording Code")
     
+    master_path = models.CharField(max_length=2048, null=True, blank=True, help_text="Master Path", editable=False)
+    
     # processed & lock flag (needed for models that have maintenance/init/save tasks)
-    processed = models.PositiveIntegerField(max_length=2, default=0, editable=False)
+
+    
+    PROCESSED_CHOICES = (
+        (0, _('Waiting')),
+        (1, _('Done')),
+        (2, _('Error')),
+    )
+    processed = models.PositiveIntegerField(max_length=2, default=0, choices=PROCESSED_CHOICES)
     lock = models.PositiveIntegerField(max_length=1, default=0, editable=False)
     
     tracknumber = models.PositiveIntegerField(max_length=12, default=0)
@@ -157,7 +167,9 @@ class Media(models.Model):
         return '%sdownload/%s/%s/' % (self.get_absolute_url(), format, version)
     
     
-    
+    def get_master_path(self):
+        
+        return self.master.path
     
     """
     gets the 'real' file, eg flac-master, stream-preview etc.
@@ -173,6 +185,10 @@ class Media(models.Model):
         file = File.objects.get(original_filename=filename, folder=self.folder)
         
         return file.file
+    
+    
+    def get_default_stream_file(self):
+        return self.get_stream_file('mp3', 'base')
     
     def get_cache_file(self, format, version):
         # TODO: improve...
@@ -208,7 +224,7 @@ class Media(models.Model):
     """
     def get_audiofile(self):
         try:
-            return audiotools.open(self.master.path)
+            return audiotools.open(self.master_path)
         except Exception, e:
             print e
             return None
@@ -227,15 +243,41 @@ class Media(models.Model):
     # @task
     def convert(self, format, version):
         
+        log = logging.getLogger('alabel.mediamodels.convert')
+        
+        log.info('Media id: %s - Encoder: %s/%s' % (self.pk, format, version))
+        
         status = 0
         
         dst_file = str(version) + '.' + str(format)
-        src_path = self.master.path    
+        #src_path = self.master.path
+        src_path = self.master_path
     
         tmp_directory = tempfile.mkdtemp()
         tmp_path = tmp_directory + '/' + dst_file
         
-
+        log.info('Media id: %s - dst_file: %s' % (self.pk, dst_file))
+        log.info('Media id: %s - src_path: %s' % (self.pk, src_path))
+        log.info('Media id: %s - tmp_path: %s' % (self.pk, tmp_path))
+        
+        print
+        print
+        print
+        print '##########################################################'
+        time.sleep(0.5)
+        print 'self',
+        print self
+        
+        print 'self.master',
+        print self.master
+        
+        print 'self.master_path',
+        print self.master_path
+        time.sleep(0.5)
+        print '##########################################################'
+        print
+        print
+        print
     
         """
         get duration
@@ -244,7 +286,8 @@ class Media(models.Model):
             try:
                 self.duration = int(self.get_audiofile().seconds_length() * 1000)
             except Exception, e:
-                return None
+                print e
+                self.duration = 0
         
         
         """
@@ -261,13 +304,17 @@ class Media(models.Model):
             print dst_file
             print '-'
             
+            print 'sleeping 0.5 secs...'
+            
+            time.sleep(0.5)
+            
             if format == 'mp3':
                 # TODO: make compression variable / configuration dependant
                 
-                compression = '5'
+                compression = '2'
                 
                 if version == 'base':
-                    compression = '2'
+                    compression = '0'
                     
                 if version == 'low':
                     compression = '6'
@@ -286,6 +333,12 @@ class Media(models.Model):
                 
                 print 'pre audiotools'
                 try:
+                    print 'audiotools.open',
+                    print 'src_path:',
+                    print src_path
+                    print 'tmp_path:',
+                    print tmp_path
+                    
                     audiotools.open(src_path).convert(tmp_path, audiotools.WaveAudio, progress=self.convert_progress)
                 except Exception, e:
                     print 'error converting to WAV: ', 
@@ -360,6 +413,7 @@ class Media(models.Model):
             status = 1
         
         except Exception, e:
+            print "error adding file to the cache :( "
             status = 2
             print e
         
@@ -373,8 +427,7 @@ class Media(models.Model):
         except Exception, e:
             print e
         
-        self.processed = status
-        self.save()
+        # self.save()
         
         return status
         
@@ -514,9 +567,8 @@ class Media(models.Model):
     TODO: unify calls
     """
     def convert_progress(self, x, y):
-        pass
-        #print 'conversion:',
-        #print "%d%%" % (x * 100 / y)
+        # pass
+        print 'conversion: %s' % (x * 100 / y)
         
     def progress_callback(self, percentage):
         pass
@@ -525,11 +577,30 @@ class Media(models.Model):
         
         
     
+    def dummy(self):
         
+        formats_media = FORMATS_MEDIA
+        
+        for source, versions in formats_media.iteritems():
+            for version in versions:
+                print "%s/%s" % (source, version)
     
     
     def generate_media_versions(self):
-        self.generate_media_versions_task.delay(self)
+        
+        print '-'
+        print '-'
+        print "!!!! generate_media_versions:",
+        print "SELF.PROCESSED:",
+        print self.processed
+        print '-'
+        print '-'
+        
+        if self.processed == 0:
+            self.generate_media_versions_task.delay(self)
+        else:
+            print 'processed not 0'
+            pass
     
     """
     format conversion & co. takes the master and processes versions as configured
@@ -537,8 +608,25 @@ class Media(models.Model):
     @task
     def generate_media_versions_task(obj):
         
+        print '-'
+        print '-'
+        print "!!!! generate_media_versions_task:",
+        print "OBJ.PROCESSED:",
+        print obj.processed
+        print '-'
+        print '-'
+
+        log = logging.getLogger('alabel.mediamodels.generate_media_versions_task')
+        
+        log.info('Media id: %s - Generate Versions' % (obj.pk))
+        log.debug('sleeping some secs... waiting for db transaction to be complete')
+        
         print 
-        print '*******************************************************'
+        print '**********************************************************'
+    
+        print 'sleeping some secs.. waiting for db transaction to be complete'
+    
+        time.sleep(4)
     
         try:
             old_files = File.objects.filter(folder=obj.folder).all()
@@ -546,32 +634,77 @@ class Media(models.Model):
                 print 'cache-folder: %s' % obj.folder 
                 print 'delete: %s | %s' % (old_file, old_file.path)
                 os.remove(old_file.path)
+                log.info('Delete from cache: %s' % (old_file.path))
                 old_file.delete()
                 
         except Exception, e:
+            log.warning('Delete from cache: %s' % (e))
             print e
     
         """
         Skip errors # TODO: find a way to retry/reprocess
         ignored a.t.m.
         """
-        if not obj.processed == 2: 
-            pass
+        #if not obj.processed == 2: 
+        #    pass
         
-        print '*******************************************************'
+        print '**********************************************************'
         
         print
-        print 'sending jobs to task-queue'
+        print 'sending jobs to encoder-queue'
         print
         
         # call without '.delay' for straight developing 
-        obj.convert('wav', 'base') 
+        
+        """
+        log.info('Media id: %s - Sending to Encoder: %s/%s' % (obj.pk, 'wav', 'base'))
+        obj.convert('wav', 'base')
+        
+        log.info('Media id: %s - Sending to Encoder: %s/%s' % (obj.pk, 'flac', 'base'))
         obj.convert('flac', 'base') 
+        
+        log.info('Media id: %s - Sending to Encoder: %s/%s' % (obj.pk, 'mp3', 'base'))
         obj.convert('mp3', 'base')
+        
+        log.info('Media id: %s - Sending to Encoder: %s/%s' % (obj.pk, 'mp3', 'low'))
         obj.convert('mp3', 'low')
+        """
+        
+        formats_media = FORMATS_MEDIA
+        for source, versions in formats_media.iteritems():
+            for version in versions:
+                log.info('Media id: %s - Sending to Encoder: %s/%s' % (obj.pk, source, version))
+                obj.convert(source, version)
+        
+        
+        # check if everything went fine (= if cache files available)
+        
+        print "Theoretically done... Let's check the result."
+        
+        try:
+            
+            c = obj.get_cache_file('wav', 'base')
+            print c
+            c = obj.get_cache_file('flac', 'base')
+            print c
+            c = obj.get_cache_file('mp3', 'base')
+            print c
+            #c = obj.get_cache_file('mp3', 'low')
+            #print c
+            
+            obj.processed = 1;
+            obj.save();
+            
+            
+        except Exception, e:
+            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+            print e
+            obj.processed = 2;
+            obj.save();
+            
 
         
-        
+        print "* EOL"
             
             
 
@@ -621,12 +754,15 @@ class Media(models.Model):
                     print e
             
             try:
-                if meta.supports_images() and self.release.main_image:
+                
+                cover_image = self.release.cover_image if self.release.cover_image else self.release.main_image
+                
+                if meta.supports_images() and cover_image:
                     for i in meta.images():
                         meta.delete_image(i)
                         
                     opt = dict(size=(200, 200), crop=True, bw=False, quality=80)
-                    image = get_thumbnailer(self.release.main_image).get_thumbnail(opt)
+                    image = get_thumbnailer(cover_image).get_thumbnail(opt)
                     meta.add_image(get_raw_image(image.path, 0))
                     
             except Exception, e:
@@ -655,8 +791,12 @@ class Media(models.Model):
         
     def save(self, *args, **kwargs):
         
+        log = logging.getLogger('alabel.mediamodels.save')
+        log.info('Media id: %s - Save' % (self.pk))
+
         if not self.uuid:
             self.uuid = str(uuid.uuid4())
+            log.info('Media id: %s - Created uuid: %s' % (self.pk, self.uuid))
         
         """
         check if master changed. if yes we need to reprocess the cached files
@@ -664,25 +804,40 @@ class Media(models.Model):
         if self.pk is not None:
             orig = Media.objects.get(pk=self.pk)
             if orig.master != self.master:
+                log.info('Media id: %s - Master changed from "%s" to "%s"' % (self.pk, orig.master, self.master))
                 self.processed = 0
         
         try:
             cache_folder = self.folder
         except Exception, e:
+            print e
+            log.info('Media id: %s - cache folder does not exist' % (self.pk))
             cache_folder = None
         
         folder_name = str(self.uuid)
         if not cache_folder:
             parent_folder, created = Folder.objects.get_or_create(name='cache')
             folder, created = Folder.objects.get_or_create(name=folder_name, parent=parent_folder)
+            log.info('Media id: %s - cache folder set to: %s' % (self.pk, folder.name))
             self.folder = folder
+            
+        if self.master:
+            log.info('Media id: %s - set master path to: %s' % (self.pk, self.master.path))
+            self.master_path = self.master.path
                 
         super(Media, self).save(*args, **kwargs)
         
 # media post save
 def media_post_save(sender, **kwargs):
+    log = logging.getLogger('alabel.mediamodels.media_post_save')
     obj = kwargs['instance']
+    
+    print "media_post_save - PROCESSED?:",
+    print obj.processed
+    
     if obj.processed == 0:
+        log.info('Media id: %s - Re-Process' % (obj.pk))
+        pass
         obj.generate_media_versions()
 
 # register

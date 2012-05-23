@@ -43,8 +43,13 @@ django-notification
 django-sendfile>=0.3.0
 django-multilingual-ng>=0.1.21
 
+# CMS related & plugins
+markdown
+django-pagedown
+cmsplugin-pagedown
+
 # rest / API
-djangorestframework>=0.3.3
+# djangorestframework>=0.3.3 # in app code
 
 # python libs
 PIL>=1.1.7
@@ -67,6 +72,7 @@ scikits.audiolab>=0.11.0
 
 # repo installs
 -e git://github.com/snoball/facebook-python-sdk.git#egg=FacebookSDK
+-e git://github.com/alex/django-filter.git#egg=django-filter
 
 # shop
 django-paypal==0.1.2

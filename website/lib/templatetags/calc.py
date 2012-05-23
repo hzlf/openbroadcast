@@ -23,3 +23,7 @@ def squaretuple(value):
 @register.filter 
 def halftuple(value):
     return '%sx%s' % (value, int(value) / 2) 
+
+@register.filter 
+def widetuple(value):
+    return '%sx%s' % (value, int(value) / 16 * 9) 

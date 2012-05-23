@@ -265,6 +265,7 @@ INSTALLED_APPS = (
     #'cmsplugin_youtube',
     #'cmsplugin_vimeo',
     #'cmsplugin_soundcloud',
+    'cmsplugin_pagedown',
 
     'multilingual',
     'disqus',
@@ -306,10 +307,10 @@ INSTALLED_APPS = (
     #'teaser',
     
     # shop apps
-    #'shop',
-    #'shop_ajax',
-    #'paypal.standard.ipn',
-    #'shop_paypal',
+    'shop',
+    'shop_ajax',
+    'paypal.standard.ipn',
+    'shop_paypal',
     #'discount',
 
     'wikisyntax',

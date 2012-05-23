@@ -4,10 +4,10 @@
 
 {% block extras %}
 
-{% addtoblock "js" %}
-{% compress js %}{% endcompress %} <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jwplayer/jwplayer-5.8.js"></script>
-<script src="{{ STATIC_URL }}js/lib/jquery.cycle.lite.js" type="text/javascript" charset="utf-8"></script>
-{% endaddtoblock %}
+{% compress js %}{% endcompress %}
+{% addtoblock "js" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jwplayer/jwplayer-5.9.js"></script>{% endaddtoblock %}
+{% addtoblock "js" %}<script src="{{ STATIC_URL }}js/lib/jquery.cycle.lite.js" type="text/javascript" charset="utf-8"></script>{% endaddtoblock %}
+
 
 {% addtoblock "js" %}
 	<script type="text/javascript">
@@ -54,13 +54,13 @@
 				<!-- CONTENT INSERTED FROM TPL_MEDIA -->
 			</div>
 			<!-- here sits the flash part of the player... -->
-			<div class="controls" id="aplayer_controls" style="visibility: hidden;" >
-				<div id="aplayer_container" style="height: 1px"></div>
+			<div class="controls" id="aplayer_controls" style="" >
+				<div id="aplayer_container" style="height: 1px; width: 1px"></div>
 			</div>
 		</div>
 	</div>
 	<div class="footer">
-		<div class="wrapper">
+		<div class="wrapper" style="color: #5a5a5a; overflow: auto;">
 		</div>
 	</div>
 	
@@ -77,5 +77,8 @@
 			<div class="console"></div>
 		</div>
 	</div>
+	
+	<div class="ajax-indicator" id="ajax_indicator">&nbsp;</div>
+	
 </div>
 {% endblock %}

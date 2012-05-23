@@ -14,6 +14,8 @@ class HardwarereleaseAdmin(BaseAdmin):
     """
     release products always are tied to a release. slug & name are inherited
     """
+    list_display   = ('name', 'format', 'unit_price', 'active')
+    
     readonly_fields = ['name', 'slug']
 
 admin.site.register(Hardwarerelease, HardwarereleaseAdmin)
@@ -21,7 +23,7 @@ admin.site.register(Hardwarerelease, HardwarereleaseAdmin)
 
 class DownloadreleaseAdmin(BaseAdmin, GuardedModelAdmin):
     
-    list_display   = ('name', 'format', 'unit_price')
+    list_display   = ('name', 'format', 'unit_price', 'active')
 
     """
     release products always are tied to a release. slug & name are inherited

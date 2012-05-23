@@ -32,7 +32,7 @@ class Releaseproduct(Product):
         app_label = 'ashop'
         verbose_name = _('Releaseproduct')
         verbose_name_plural = _('Releaseproducts')
-        ordering = ['name']
+        ordering = ['-polymorphic_ctype', '-unit_price', 'name',]
         
         
     def get_type(self):
@@ -44,6 +44,13 @@ class Releaseproduct(Product):
             return 'download'
     
 
+    def is_soldout(self):
+        
+        if self.get_type() == 'download':
+            return False
+        
+        if self.get_type() == 'hardware' and self.stock < 1:
+            return True
         
 
     
@@ -76,6 +83,8 @@ class Hardwarerelease(Releaseproduct):
     
     circulation = models.IntegerField(null=True, blank=True, help_text=_('Circulation'))
     
+    stock = models.IntegerField(null=True, blank=True, help_text=_('Stock. [If set to 0 the release will be marked as sold-out]'))
+    
     MEDIUM_CHOICES = (
         ('Vinyl', (
                 ('7inch', "7''"),
@@ -83,6 +92,8 @@ class Hardwarerelease(Releaseproduct):
                 ('12inch', "12''"),
                 ('cd', "CD"),
                 ('tape', "Tape"),
+                ('tapedvd', "Tape/DVD"),
+                ('puzzle', "Puzzle"),
             )
         ),
         ('other', 'Other'),
@@ -114,6 +125,9 @@ class Downloadrelease(Releaseproduct):
 
     
     format = models.ForeignKey('alabel.Format', related_name='releaseformat')
+    
+    def description(self):
+        return _('Digital Download.')
 
     class Meta:
         app_label = 'ashop'
@@ -211,6 +225,15 @@ Add object permissions after successfull purchase (logged in users only)
 def confirmed_purchase(sender, **kwargs):
 
     order = kwargs.get('order')
+    
+    # emails...
+    print
+    print '#########################################'
+    print 'PURCHASE CONFIRMED'
+    print '#########################################'
+    print
+    
+    
     
     if order.user:
         """

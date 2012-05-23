@@ -54,19 +54,30 @@ class ObjectRelationNode(template.Node):
         ct = ContentType.objects.get_for_model(item)
         
         rcus = RelatedContent.objects.filter(content_type=ct,object_id=item.id)
-        
         rcds = RelatedContent.objects.filter(parent_content_type=ct,parent_object_id=item.id)
             
         ru = []
         rd = []
+        
+        rr = []
+        ra = []
         for rc in rcus:
-            ru.append(rc.content_object)
+            ru.append(rc.parent_content_object) #
         for rc in rcds:
-            rd.append(rc.content_object)
+            if rc.content_type.name not in ['Release', 'Artist']:
+                rd.append(rc.content_object)
+            if rc.content_type.name == 'Release':
+                rr.append(rc.content_object)
+            if rc.content_type.name == 'Artist':
+                ra.append(rc.content_object)
+            
         
 
         context['related_up'] = ru
         context['related_down'] = rd
+        
+        context['related_releases'] = rr
+        context['related_artists'] = ra
 
         return ''
 
