@@ -1,0 +1,62 @@
+
+
+			<div id="" class="left container information">
+
+				<div class="wrapper">
+					<h1>{{=name}}</h1>
+					<h2><a class="parent_link" href="{{=artist.permalink}}">{{=artist.name}}</a></h2>
+					
+				</div>
+				
+				
+				<div class="controls">
+					
+					<!-- NOTE: same structure as eg in aplayer_inline.html -->
+					<div class="left icon-container">
+						<ul class="horizontal">
+							
+							<li class="icon-container prev">
+								<a href="#prev" title="Previous">
+									<span class="icon"></span>
+									<span class="text expandable">Previous</span>
+								</a>
+							</li>
+							
+							<li class="icon-container pause">
+								<a href="#pause" title="Stop">
+									<span class="icon"></span>
+									<span class="text expandable">Pause</span>
+								</a>
+							</li>
+							
+							<li class="icon-container play">
+								<a href="#play" title="Play">
+									<span class="icon"></span>
+									<span class="text expandable">Play</span>
+								</a>
+							</li>
+							
+							<li class="icon-container next">
+								<a href="#next" title="Next">
+									<span class="icon"></span>
+									<span class="text expandable">Next</span>
+								</a>
+							</li>
+							
+			
+						</ul>
+					</div>
+					
+				</div>
+
+			</div>
+			
+			<div id="" class="right container image">
+				<div class="wrapper">
+					{{#each images }}
+					<img id="artist_image_{{=$itemNumber}}" src="{{=m}}" />
+					{{/each}}	
+				</div>
+			</div>
+			
+			<div class="clear"></div>

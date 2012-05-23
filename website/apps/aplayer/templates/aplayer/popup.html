@@ -1,0 +1,81 @@
+{% extends "aplayer/base.html" %}
+
+{% load sekizai_tags compress include_raw i18n %}
+
+{% block extras %}
+
+{% addtoblock "js" %}
+{% compress js %}{% endcompress %} <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jwplayer/jwplayer-5.8.js"></script>
+<script src="{{ STATIC_URL }}js/lib/jquery.cycle.lite.js" type="text/javascript" charset="utf-8"></script>
+{% endaddtoblock %}
+
+{% addtoblock "js" %}
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('.footer').live('hover', function(e) {
+				$(this).addClass("hover");
+			});
+			$('.footer').live('mouseleave', function(e) {
+				$(this).removeClass("hover");
+			});
+		});
+	</script>
+{% endaddtoblock %}
+
+{% addtoblock "css" %}
+<style type="text/css">
+
+
+</style>
+{% endaddtoblock %}
+
+{% endblock %}
+
+{% block inner %} <!-- include unparsed template for js rendering -->
+<script id="tpl_media" type="text/x-jquery-tmpl">
+	{% include_raw "aplayer/tpl_media.html" %}
+</script>
+<script id="tpl_screen" type="text/x-jquery-tmpl">
+	{% include_raw "aplayer/tpl_screen.html" %}
+</script>
+<div id="popup_root">
+	<div class="header aplayer">
+		<div class="wrapper">
+			<!-- controls and display, ui part. -->
+			<div class="container screen controls" id="aplayer_screen">
+				<!-- CONTENT INSERTED FROM TPL_SCREEN -->
+			</div>
+		</div>
+	</div>
+	<div class="inner aplayer">
+		<div class="wrapper">
+			<!-- the playlist holder -->
+			<div class="listing extended playlist" id="aplayer_playlist">
+				<!-- CONTENT INSERTED FROM TPL_MEDIA -->
+			</div>
+			<!-- here sits the flash part of the player... -->
+			<div class="controls" id="aplayer_controls" style="visibility: hidden;" >
+				<div id="aplayer_container" style="height: 1px"></div>
+			</div>
+		</div>
+	</div>
+	<div class="footer">
+		<div class="wrapper">
+		</div>
+	</div>
+	
+	<div class="ovaerlay aplayer" id="overlay_container">
+		<div class="wrapper">
+			<h1>{% trans "Please wait" %}</h1>
+			<h2>{% trans "Loading the player could take some seconds..." %}</h2>
+			
+			<p>If you see this thext for more than a few seconds, chances are high that something went wrong.</p>
+			<p>So please just close this popup-window and try to click play again.</p>
+			<!--
+			<p class="message error">ERROR LOADING PLAYER - Sorry for this...</p>
+			-->
+			<div class="console"></div>
+		</div>
+	</div>
+</div>
+{% endblock %}

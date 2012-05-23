@@ -1,0 +1,71 @@
+{% load  compress sekizai_tags %}
+<!-- 
+	shared js/css includes for templates. (eg main-site, popup, etc) 
+	MUST be included in <head></head> !!!!!!!!
+-->
+
+
+	<!-- load jquery from cdn, fallback if neccessary -->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/lib/jquery-1.7.1.min.js"><\/script>')</script>
+
+	
+	
+	
+	{% compress js %}
+	<!-- libs -->
+	<script src="{{ STATIC_URL }}js/lib/modernizr-2.0.6.min.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- site scripts -->
+	<script src="{{ STATIC_URL }}js/util.base.js" type="text/javascript" charset="utf-8"></script>
+	<script src="{{ STATIC_URL }}js/asite.base.js" type="text/javascript" charset="utf-8"></script>
+	<script src="{{ STATIC_URL }}js/asite.ui.js" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="{{ STATIC_URL }}js/aplayer.base.js" type="text/javascript" charset="utf-8"></script>
+	<script src="{{ STATIC_URL }}js/aplayer.ui.js" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="{{ STATIC_URL }}js/ashop.base.js" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="{{ STATIC_URL }}js/marc.work-in-progress.js" type="text/javascript" charset="utf-8"></script>
+	
+	{% endcompress %}
+	
+	
+
+  
+  	<!-- js-pre, rendered BEFORE the default "js" block -->
+	{% addtoblock "js-pre" %}
+	{% endaddtoblock %}
+  
+  
+  	<!-- js-post, rendered AFTER the default "js" block -->
+	{% addtoblock "js-post" %}
+		{% compress js %}
+		<!-- 
+			plugins (the ones that are included on most pages and so are worth to include globaly/compressed) 
+			actually the y could be added to the global scripts, but TODO: this somehow conflicts with the
+			cms-toolbar (and the admin jquery version)
+		-->
+		
+		<!-- navigation -->
+		<script src="{{ STATIC_URL }}js/lib/superfish.js" type="text/javascript" charset="utf-8"></script>
+		<script src="{{ STATIC_URL }}js/lib/supersubs.js" type="text/javascript" charset="utf-8"></script>
+		<!-- js inline template-rendering -->
+		<script src="{{ STATIC_URL }}js/lib/jsrender.js" type="text/javascript" charset="utf-8"></script>
+		<!-- image loader -->
+		<script src="{{ STATIC_URL }}js/lib/jail.0.9.5.js" type="text/javascript" charset="utf-8"></script>
+		<script src="{{ STATIC_URL }}js/lib/hoverIntent.js" type="text/javascript" charset="utf-8"></script>
+		<script src="{{ STATIC_URL }}js/lib/jquery.tabslide-1.3.js" type="text/javascript" charset="utf-8"></script>
+		<!-- scroller with wheel-support -->
+		<script src="{{ STATIC_URL }}js/lib/jquery.jscrollpane.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="{{ STATIC_URL }}js/lib/jquery.mousewheel-3.0.4.min.js" type="text/javascript" charset="utf-8"></script>
+		<!-- tooltips & co -->
+		<script src="{{ STATIC_URL }}js/lib/jquery.qtip.min.js" type="text/javascript" charset="utf-8"></script>
+		{% endcompress %}
+		
+		
+	{% endaddtoblock %}
+
+
+	
+

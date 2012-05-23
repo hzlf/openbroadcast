@@ -1,0 +1,15 @@
+from django import template
+import pprint
+import cgi
+
+from django.contrib.humanize.templatetags.humanize import intcomma
+
+from settings import SHOP_CURRENCY
+
+register = template.Library()
+
+@register.filter
+def currency(dollars):
+    dollars = float(dollars)
+    return "%s%s%s" % (SHOP_CURRENCY['character'] + SHOP_CURRENCY['separator'], intcomma(int(dollars)), ("%0.2f" % dollars)[-3:])
+    #return "<span class=\"symbol\">%s</span><span>%s%s</span>" % (SHOP_CURRENCY['character'] + SHOP_CURRENCY['separator'], intcomma(int(dollars)), ("%0.2f" % dollars)[-3:])

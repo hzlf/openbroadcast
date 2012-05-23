@@ -1,0 +1,75 @@
+{% load cms_tags sekizai_tags compress %}
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+
+<!--head -->
+<head>
+
+{% include 'aplayer/_head.html' %}
+
+{% render_block "css" %}
+
+{% render_block "js-pre" %}
+
+</head>
+
+<!--body -->
+<body class="popup aplayer">
+
+	{% block inner %}
+	{% endblock %}
+	
+	{% block extras %}
+	{% endblock %}
+
+
+	<!-- main javascript block -->
+	{% render_block "js" %}
+	
+	<script type="text/javascript">
+		//<![CDATA[//><!--
+		
+		var settings = settings || {};
+		settings.debug = true;
+				
+		// local / window-dependent container
+		var local = local || {};
+		local.type = 'popup';
+		
+		parent_win = window.opener;
+		
+		$(document).ready(function() {
+
+				
+			
+			
+			// set some variables to be available in script file
+			aplayer.vars.swf_url = '{{ STATIC_URL }}swf/lib/jwplayer/jwplayer-5.8.swf';
+			aplayer.vars.skin_url = '{{ STATIC_URL }}css/lib/jwplayer/ulysses.zip';
+			
+			
+			asite.vars.aplayer_width = 630;
+			asite.vars.aplayer_height = 630;
+			
+			// create interface
+			asite.ui.init();
+			
+			aplayer.base.init();
+			aplayer.ui.init();
+			aplayer.ui.playhead();
+			
+		});
+		//--><!]]>
+	</script>
+
+	
+	<!-- verry last scripts -->
+	{% render_block "js-post" %}
+
+
+	
+</body>
+  
+</html>

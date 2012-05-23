@@ -1,0 +1,84 @@
+# THIS IS THE 'REAL' ONE !!
+
+# via aptitude:
+# libsoundfile-dev libmysqlclient-dev
+
+
+# server & deployment
+gunicorn-console==0.1.12
+gunicorn==0.14.2
+
+# code coverage and ci
+#django-jenkins==0.12.1
+#pyflakes==0.5.0
+#pep8==1.0.1
+
+# caching
+python-memcached==1.48
+python-varnish==0.2.1
+
+# development
+django-extensions==0.8
+django-debug-toolbar>=0.8.4
+
+
+
+# django modules
+Django==1.3.1
+django-disqus==0.4.1
+django-staticfiles==1.2.1
+django-compressor==1.1.2
+
+django-mailer==0.1.0
+django-email-confirmation==0.2
+django-timezones==0.2
+django-uni-form==0.9.0
+
+django-guardian==1.0.4
+django-celery==2.5.5
+django-tinymce>=1.5.1b2
+django-pagination>=1.0.7
+django-notification>=0.2
+
+django-classy-tags==0.3.4.1
+django-mptt==0.5.2
+
+django-taggit==0.9.3
+django-taggit-templatetags==0.4.6dev
+django-sendfile==0.3.0
+django-multilingual-ng==0.1.21
+django-countries==1.2
+djangorestframework==0.3.3
+
+
+# cms related
+django-cms>=2.2
+
+
+# python libs
+PIL==1.1.7
+BeautifulSoup==3.2.0
+pytz==2011h
+oauth2==1.5.211
+python-openid>=2.2.5
+vobject==0.8.1c
+chardet==1.0.1
+textile
+easy-thumbnails>=1.0-alpha-21
+
+MySQL-python>=1.2.3
+South>=0.7.3
+
+# audio shizzle
+numpy
+-e git://github.com/hzlf/python-audio-tools.git#egg=python-audio-tools
+docutils>=0.8.1
+scikits.audiolab>=0.11.0
+
+
+
+#
+django-shop>=0.0.13
+django-paypal==0.1.2
+-e git://github.com/snoball/facebook-python-sdk.git#egg=FacebookSDK
+

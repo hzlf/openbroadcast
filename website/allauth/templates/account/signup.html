@@ -1,0 +1,76 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+{% load uni_form_tags allauth_tags %}
+
+{% block head_title %}{% trans "Signup" %}{% endblock %}
+
+
+
+
+
+
+{% block sidebar %}
+{% if allauth.socialaccount_enabled  %}
+<h1>{% trans "Sign Up with an existing account" %}</h1>
+<div class="socialaccount providers">
+	<ul class="horizontal">
+	{% include "socialaccount/snippets/provider_list.html" %}
+	</ul>
+
+</div>
+{% endif %}
+{% endblock %}
+
+
+
+{% block body %}
+    <h1>{% trans "Sign Up" %}</h1>
+    
+    
+	{% if extra == "login_reason" %}
+	{% include "account/snippets/login_reason.html" %}
+	{% endif %}
+    
+
+	
+	<p>{% trans "Already have an account?" %} <a href="{{ login_url }}">{% trans "Sign in here" %}</a>.</p>
+	
+
+
+
+
+    {% if user.is_authenticated %}
+		{% include "account/snippets/already_logged_in.html" %}
+    {% else %}
+        
+        
+	    <form class="signup uniForm" id="signup_form" method="post" action="{% url account_signup %}">
+	        {% csrf_token %}
+	        <fieldset class="inlineLabels">
+	            {{ form|as_uni_form }}
+	            {% if redirect_field_value %}
+	                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+	            {% endif %}
+	            <div class="buttonHolder">
+	                <button class="primaryAction" type="submit">{% trans "Sign Up" %} &raquo;</button>
+	            </div>
+	        </fieldset>
+	    </form>
+	    
+	    <p>
+	    	<span>*</span> {% trans "Required fields." %} 
+	    </p>
+	    <p>
+	    	{% trans "E-Mail is optional, but recommended. (To retrieve a new password in case you loose it...)" %} 
+	    </p>
+        
+       
+        
+    {% endif %}
+    
+    {% fbconnect %}
+    
+{% endblock %}
+
+

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+
+{% block cms_main %}
+<div class="container cms main">
+
+	<div class="left container main col-2">
+		<div class="boxed">
+			<div class="wrapper">
+			{% with width=630 columns=2 %}
+			{% placeholder main %}
+			{% endwith %}
+			</div>
+		</div>
+	</div>
+
+	<div class="clear"></div>
+	
+</div>
+{% endblock %}
+
+
+
+{% block cms_aux %}
+	{% placeholder aux %}
+{% endblock %}
