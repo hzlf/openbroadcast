@@ -2,7 +2,7 @@
 $main-a: #00BB00
 $main-b: #6633CC
 
-$img-path: '/media/img/prototype/'
+$img-path: '/static/img/prototype/'
 
 $footer_fix-height: 20px
 
@@ -16,9 +16,9 @@ $footer_fix-height: 20px
   padding: 0 0 $footer_fix-height 0
   //padding: 0 0 0 0
   &.ajax_loading
-    /*cursor: wait !important
+    /*cursor: wait !important*/
     cursor: progress !important
-    /*background-color: #efefef
+    /*background-color: #efefef*/
   &.blur
     cursor: pointer !important
   
@@ -42,11 +42,21 @@ div#footer_fix
 html body
   overflow: auto
  
-div#wrapper_main
-  height: 100%
-  overflow: auto
+
+  div#wrapper_main
+    height: 100%
+    overflow: auto
+ 
+  // make some space for the toolbar
+  #cms_toolbar-toggle
+    top: 40px
+  &.toolbar-visible
+    #cms_toolbar-toggle
+      top: 0
+    div#wrapper_main
+      margin-top: 42px
   
-  
+
   
 
 #main
@@ -118,7 +128,7 @@ img, div, p, table, td, tr
     margin-bottom: 17px
   ul
     list-style: none
-    list-style-image: url(/media/img/prototype/list_img4.png)
+    list-style-image: url(/static/img/prototype/list_img4.png)
     ul
       margin-bottom: 0px
   ol
@@ -145,7 +155,7 @@ img, div, p, table, td, tr
     position: absolute
     border-top: 1px solid #000
     border-left: 1px solid #000
-    background: white url(/media/img/prototype/img_big.png)
+    background: white url(/static/img/prototype/img_big.png)
     width: 15px
     height: 15px
     bottom: 0px
@@ -290,7 +300,7 @@ table.front td
   margin-bottom: 23px
   div
     padding: 3px 0px 2px 19px
-    background-image: url(/media/img/prototype/action.png)
+    background-image: url(/static/img/prototype/action.png)
     background-repeat: no-repeat
     background-position: 0px 3px
     border-bottom: 1px solid #ccc
@@ -303,7 +313,7 @@ table.front td
   .disabled
     cursor: wait
     color: #bbb
-    background-image: url(/media/img/prototype/action_off.png)
+    background-image: url(/static/img/prototype/action_off.png)
     &:hover
       cursor: default
       background-color: #fff
@@ -322,7 +332,7 @@ table.front td
 .boxtitle
   color: #333
   padding: 3px 0px 2px 19px
-  background-image: url(/media/img/prototype/box_handler.png)
+  background-image: url(/static/img/prototype/box_handler.png)
   background-repeat: no-repeat
   &:hover
     cursor: pointer
@@ -346,19 +356,19 @@ table.front td
       color: #333333
     &.plus
       /*|s|
-      background-image: url(/media/img/prototype/box_item_plus_on.png)
+      background-image: url(/static/img/prototype/box_item_plus_on.png)
       background-repeat: no-repeat
   &.plus
     /*|s|
-    background-image: url(/media/img/prototype/box_item_plus.png)
+    background-image: url(/static/img/prototype/box_item_plus.png)
     background-repeat: no-repeat
   &.minus
     /*|s|
-    background-image: url(/media/img/prototype/box_item_minus.png)
+    background-image: url(/static/img/prototype/box_item_minus.png)
     background-repeat: no-repeat
   &.folder
     /*|s|
-    background-image: url(/media/img/prototype/box_item_folder.png)
+    background-image: url(/static/img/prototype/box_item_folder.png)
     background-repeat: no-repeat
 
 .box.boxon
@@ -378,7 +388,7 @@ table.front td
 .boxtitle.boxon
   //font-weight:bold;
   color: #000
-  background-image: url(/media/img/prototype/box_handler_on.png)
+  background-image: url(/static/img/prototype/box_handler_on.png)
 
 .boxend
   border-top: 1px solid #ddd
@@ -399,7 +409,7 @@ table.front td
   color: #333
   margin-right: 30px !important
   padding: 3px 0px 2px 19px
-  background-image: url(/media/img/prototype/box_handler.png)
+  background-image: url(/static/img/prototype/box_handler.png)
   background-repeat: no-repeat
   &:hover
     cursor: pointer
@@ -424,7 +434,7 @@ table.front td
 .content_boxtitle.boxon
   //font-weight:bold;
   color: #000
-  background-image: url(/media/img/prototype/box_handler_on.png)
+  background-image: url(/static/img/prototype/box_handler_on.png)
 
 .content_boxmore
   float: right
@@ -470,7 +480,7 @@ div.research_sets
 
 .timeline_muster
   position: absolute
-  background-image: url(/media/img/prototype/timeline_bg.png)
+  background-image: url(/static/img/prototype/timeline_bg.png)
   background-position: left 0
   width: 1800px
   height: 80px
@@ -553,14 +563,14 @@ div.research_sets
   .timelineholder
     &.horizontal #timeline
       position: absolute
-      background-image: url("/media/img/prototype/timeline_bg.png")
+      background-image: url("/static/img/prototype/timeline_bg.png")
       background-position: left top
       background-repeat: repeat-x
       width: 6000px
       height: 100%
     &.vertical #timeline
       position: absolute
-      background-image: url("/media/img/prototype/timeline_bg_v.png")
+      background-image: url("/static/img/prototype/timeline_bg_v.png")
       background-position: right 0
       background-repeat: repeat-y
       width: 100%
@@ -586,7 +596,7 @@ div.research_sets
   .timelineelement
     list-style: none
     color: $main-b
-    //background-image: url("/media/img/prototype/timeline_element_bg.png"); 
+    //background-image: url("/static/img/prototype/timeline_element_bg.png"); 
     //background-position: right bottom;
     background: #f8f3ff
     margin: 4px 0 0 4px
@@ -606,7 +616,7 @@ div.research_sets
 #timeline
   .timelineelement:hover, .on
     color: $main-a
-    //background-image: url("/media/img/prototype/timeline_element_bg_on.png"); 
+    //background-image: url("/static/img/prototype/timeline_element_bg_on.png"); 
     //background-position: right bottom;
     background: #d4f3da
     border-top: solid 1px $main-a
@@ -619,12 +629,12 @@ div.research_sets
     padding-left: 24px
 
 .status_proposed
-  background-image: url("/media/img/prototype/status_proposed.png")
+  background-image: url("/static/img/prototype/status_proposed.png")
   background-position: left top
   background-repeat: no-repeat
 
 .file_music
-  background-image: url("/media/img/prototype/file_music.png")
+  background-image: url("/static/img/prototype/file_music.png")
   background-position: left top
   background-repeat: no-repeat
 
@@ -651,7 +661,7 @@ div.research_sets
   height: 10px
   border-left: solid 1px #AAAAAA
   border-right: solid 1px #AAAAAA
-  background: url("/media/img/prototype/timeline_slider_bg.png")
+  background: url("/static/img/prototype/timeline_slider_bg.png")
   background-position: left 0
 
 #timelinenav
@@ -690,24 +700,24 @@ div.research_sets
   cursor: pointer
   border: solid 1px #CEBDED
   padding: 2px 2px 2px 2px
-  //background:#f8f3ff url("/media/img/prototype/list_play_button2_s.png") no-repeat 2px 2px;
+  //background:#f8f3ff url("/static/img/prototype/list_play_button2_s.png") no-repeat 2px 2px;
   td
     padding-right: 6px
   &.placeholder
     background: #ddd
   .mp
-    background: #f8f3ff url("/media/img/prototype/list_play_button2_s.png") no-repeat 2px 2px
+    background: #f8f3ff url("/static/img/prototype/list_play_button2_s.png") no-repeat 2px 2px
 
 .deletebut
   width: 20px
   height: 20px
-  background: url("/media/img/prototype/delete.png") no-repeat 2px 2px
+  background: url("/static/img/prototype/delete.png") no-repeat 2px 2px
   &.black
-    background: url("/media/img/prototype/delete_black.png") no-repeat 2px 2px
+    background: url("/static/img/prototype/delete_black.png") no-repeat 2px 2px
   &:hover
-    background: url("/media/img/prototype/delete_hover.png") no-repeat 2px 2px
+    background: url("/static/img/prototype/delete_hover.png") no-repeat 2px 2px
   &.black:hover
-    background: url("/media/img/prototype/delete_black_hover.png") no-repeat 2px 2px
+    background: url("/static/img/prototype/delete_black_hover.png") no-repeat 2px 2px
 
 /* ---------- section classes ----------
 
@@ -718,7 +728,7 @@ div.research_sets
 .sectiontitle
   color: #333
   padding: 3px 0px 2px 19px
-  background-image: url(/media/img/prototype/box_handler.png)
+  background-image: url(/static/img/prototype/box_handler.png)
   background-repeat: no-repeat
   background-color: #fff
   span
@@ -735,7 +745,7 @@ div.research_sets
 
 .sectiontitle.sectionon
   color: #000
-  background-image: url(/media/img/prototype/box_handler_on.png)
+  background-image: url(/static/img/prototype/box_handler_on.png)
   //background-color:#f5f5f5;
   border-bottom: 1px dotted #ccc
   a
@@ -762,9 +772,9 @@ div.research_sets
         font-weight: bold
         padding-left: 20px
     &.close .header
-      background-image: url(/media/img/prototype/box_handler.png)
+      background-image: url(/static/img/prototype/box_handler.png)
     &.open .header
-      background-image: url(/media/img/prototype/box_handler_on.png)
+      background-image: url(/static/img/prototype/box_handler_on.png)
     &.close .description
       display: none
     &.open .description
@@ -791,7 +801,7 @@ ul
     li
       margin: 0px !important
       padding: 0px 180px 0px 19px
-      background: url(/media/img/prototype/list_img.png) no-repeat
+      background: url(/static/img/prototype/list_img.png) no-repeat
 
 table
   border-collapse: collapse
@@ -829,10 +839,10 @@ a
     text-decoration: none
   &.extern
     padding-right: 17px
-    background: url(/media/img/prototype/link_extern.png) no-repeat right
+    background: url(/static/img/prototype/link_extern.png) no-repeat right
   &.mail
     padding-left: 19px
-    background: url(/media/img/prototype/link_mail.png) no-repeat
+    background: url(/static/img/prototype/link_mail.png) no-repeat
 
 button.mainlink
   font-family: inherit
@@ -843,7 +853,7 @@ button.mainlink
   border-bottom: 1px solid #666
   border-right: 1px solid #666
   width: auto !important
-  background: url(/media/img/prototype/formbut_bg_a.png)
+  background: url(/static/img/prototype/formbut_bg_a.png)
 
 p
   color: #666
@@ -854,33 +864,33 @@ p
 
 a
   &.action
-    background: url(/media/img/prototype/action.png)
+    background: url(/static/img/prototype/action.png)
     background-repeat: no-repeat
     background-position: -2px -2px
     padding-left: 13px
   &.action2
     padding: 3px 10px 2px 10px
     color: #fff
-    background: url(/media/img/prototype/formbut_bg_a.png)
+    background: url(/static/img/prototype/formbut_bg_a.png)
     border-bottom: 1px solid #666
     border-right: 1px solid #666
     &:hover
       text-decoration: none
-      background: url(/media/img/prototype/formbut_bg_a_on.png)
+      background: url(/static/img/prototype/formbut_bg_a_on.png)
     &.desabled
       padding: 3px 10px 2px 10px
       color: #888
-      background: url(/media/img/prototype/formbut_bg_des.png)
+      background: url(/static/img/prototype/formbut_bg_des.png)
       border-bottom: 1px solid #aaa
       border-right: 1px solid #aaa
   &.reply
-    background: url(/media/img/prototype/forum_reply.png)
+    background: url(/static/img/prototype/forum_reply.png)
     background-repeat: no-repeat
     background-position: -2px -2px
     padding-left: 17px
   &.userlink
     color: inherit
-    //background:url(/media/img/prototype/bg_dotted.png);
+    //background:url(/static/img/prototype/bg_dotted.png);
     //background-position:bottom;
     text-decoration: underline
     //border-bottom:1px dotted;
@@ -1187,76 +1197,76 @@ div
 /* ---------- modul classes ----------
 
 .icon-obp
-  background: url(/media/img/prototype/obp.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/obp.png) no-repeat 0px 5px
 
 .icon-myaccount
-  background: url(/media/img/prototype/mod_myaccount.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_myaccount.png) no-repeat 0px 5px
 
 .icon-contacts
-  background: url(/media/img/prototype/mod_contacts.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_contacts.png) no-repeat 0px 5px
 
 .icon-groups
-  background: url(/media/img/prototype/mod_groups.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_groups.png) no-repeat 0px 5px
 
 .icon-dashboard
-  background: url(/media/img/prototype/mod_dashboard.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_dashboard.png) no-repeat 0px 5px
 
 .icon-activities
-  background: url(/media/img/prototype/mod_activities.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_activities.png) no-repeat 0px 5px
 
 .icon-profile
-  background: url(/media/img/prototype/mod_profile.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_profile.png) no-repeat 0px 5px
 
 .icon-blog
-  background: url(/media/img/prototype/mod_blog.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_blog.png) no-repeat 0px 5px
 
 .icon-calendar
-  background: url(/media/img/prototype/mod_calendar.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_calendar.png) no-repeat 0px 5px
 
 .icon-messages
-  background: url(/media/img/prototype/mod_messages.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_messages.png) no-repeat 0px 5px
 
 .icon-ideapool
-  background: url(/media/img/prototype/mod_ideapool.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_ideapool.png) no-repeat 0px 5px
 
 .icon-projects
   /*|s|
-  background: url(/media/img/prototype/mod_projects.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_projects.png) no-repeat 0px 5px
 
 .icon-projectplaner
-  background: url(/media/img/prototype/mod_projectplaner.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_projectplaner.png) no-repeat 0px 5px
 
 .icon-preproduction
-  background: url(/media/img/prototype/mod_preproduction.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_preproduction.png) no-repeat 0px 5px
 
 .icon-programmscheduler
-  background: url(/media/img/prototype/mod_programmscheduler.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_programmscheduler.png) no-repeat 0px 5px
 
 .icon-humanresources
-  background: url(/media/img/prototype/mod_humanresources.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_humanresources.png) no-repeat 0px 5px
 
 .icon-ccontent
-  background: url(/media/img/prototype/mod_communitycontent.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_communitycontent.png) no-repeat 0px 5px
 
 .icon-othercontent
-  background: url(/media/img/prototype/mod_othercontent.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_othercontent.png) no-repeat 0px 5px
 
 .icon-playlists
-  background: url(/media/img/prototype/mod_preproduction.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_preproduction.png) no-repeat 0px 5px
 
 .icon-transmission
-  background: url(/media/img/prototype/mod_transmission.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_transmission.png) no-repeat 0px 5px
 
 .icon-profile
-  background: url(/media/img/prototype/mod_profile.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_profile.png) no-repeat 0px 5px
 
 .icon-users
-  background: url(/media/img/prototype/mod_users.png) no-repeat 0px 5px
+  background: url(/static/img/prototype/mod_users.png) no-repeat 0px 5px
 
 
 /* New icon styleing
 .icon-library
-  background: url(/media/img/base/module.icon.library.png) no-repeat 0px 5px
+  background: url(/static/img/base/module.icon.library.png) no-repeat 0px 5px
 
 
 
@@ -1308,7 +1318,7 @@ div
       padding: 2px 0px 0px 6px
     &.selected
       padding-right: 21px
-      background-image: url(/media/img/prototype/table_order.png)
+      background-image: url(/static/img/prototype/table_order.png)
       background-repeat: no-repeat
       background-position: right
       background-color: #ccc
@@ -1390,7 +1400,7 @@ div
   border-top: 1px solid #e3dbf2
   border-left: 1px solid #e3dbf2
   margin: 0px 3px 3px 0px
-  background-image: url(/media/img/prototype/genre_bg.png)
+  background-image: url(/static/img/prototype/genre_bg.png)
   background-repeat: no-repeat
   background-position: bottom right
 
@@ -1403,7 +1413,7 @@ div
 
 tr
   &.locked, &.closedx
-    background: url(/media/img/prototype/list_closed_bg.png)
+    background: url(/static/img/prototype/list_closed_bg.png)
 
 td.status
   padding: 5px 2px 2px 2px !important
@@ -1420,20 +1430,20 @@ td.status
       //color:#999;
 
 div.locked
-  background-image: url(/media/img/prototype/schraffur.png)
+  background-image: url(/static/img/prototype/schraffur.png)
 
 
 
 .iconbut
   color: #fff
-  background: url(/media/img/prototype/formbut_bg.png)
+  background: url(/static/img/prototype/formbut_bg.png)
   border: 1px solid #bbb
   border-bottom: 1px solid #666
   border-right: 1px solid #666
   height: inherit
   cursor: pointer
   &:hover
-    background: url(/media/img/prototype/formbut_bg_a.png)
+    background: url(/static/img/prototype/formbut_bg_a.png)
   img
     margin: 4px 5px 3px 5px
 
@@ -1442,7 +1452,7 @@ div.locked
 /* Tagbar
 
 a#tagcloud_inline_toggle
-  background-image: url(/media/img/base/tagcloud.open_close.png)
+  background-image: url(/static/img/base/tagcloud.open_close.png)
   background-repeat: no-repeat
   background-position: right top
   padding: 0 18px 0 0
@@ -1451,7 +1461,7 @@ a#tagcloud_inline_toggle
 
 /*
 .tagbar
-  background: url(/media/img/prototype/forminput_bg.png)
+  background: url(/static/img/prototype/forminput_bg.png)
   //padding:3px;
   border: 1px solid #ccc
   border-top: 1px solid #999
@@ -1465,7 +1475,7 @@ a#tagcloud_inline_toggle
     padding: 0px 6px 1px 5px
     margin: 1px 0px 1px 1px
     float: left
-    background-image: url(/media/img/prototype/tag_bg_s.png)
+    background-image: url(/static/img/prototype/tag_bg_s.png)
     background-repeat: no-repeat
     background-position: bottom right
     &.tbsearch
@@ -1475,7 +1485,7 @@ a#tagcloud_inline_toggle
       padding: 0px 6px 1px 5px
       margin: 1px 0px 1px 1px
       float: left
-      background-image: url(/media/img/prototype/search_bg_s.png)
+      background-image: url(/static/img/prototype/search_bg_s.png)
       background-repeat: no-repeat
       background-position: bottom right
     &.tbgenre
@@ -1486,7 +1496,7 @@ a#tagcloud_inline_toggle
       padding: 0px 6px 1px 5px
       margin: 1px 0px 1px 1px
       float: left
-      background-image: url(/media/img/prototype/genre_bg_s.png)
+      background-image: url(/static/img/prototype/genre_bg_s.png)
       background-repeat: no-repeat
       background-position: bottom right
     &.tbfilter
@@ -1497,7 +1507,7 @@ a#tagcloud_inline_toggle
       padding: 0px 6px 1px 5px
       margin: 1px 0px 1px 1px
       float: left
-      background-image: url(/media/img/prototype/filter_bg_s.png)
+      background-image: url(/static/img/prototype/filter_bg_s.png)
       background-repeat: no-repeat
       background-position: bottom right
     &:hover
@@ -1576,7 +1586,7 @@ div.tagcloud.inline
     border: 1px solid #bbb
     color: $main-b
     cursor: pointer
-    background-image: url(/media/img/prototype/white_50.png)
+    background-image: url(/static/img/prototype/white_50.png)
     &.on
       //background:#d4f3da;
       border: 1px solid #666
@@ -1591,7 +1601,7 @@ div.tagcloud.inline
   //border:1px solid #ff00ff;
 
 .contentsearchfield
-  background: url(/media/img/prototype/forminput_bg.png)
+  background: url(/static/img/prototype/forminput_bg.png)
   border: 1px solid #ccc
   border-top: 1px solid #999
   border-left: 1px solid #999
@@ -1624,7 +1634,7 @@ form
     border-left: 1px solid #999
     width: 99%
     padding: 3px
-    background: url(/media/img/prototype/forminput_bg.png)
+    background: url(/static/img/prototype/forminput_bg.png)
     &.full
       background: #eee
       //border:1px solid #ccc;
@@ -1673,17 +1683,17 @@ input
     margin: 0px 8px 0px 0px
     border: none
     color: #fff
-    background: url(/media/img/prototype/formbut_bg.png)
+    background: url(/static/img/prototype/formbut_bg.png)
     border-bottom: 1px solid #666
     border-right: 1px solid #666
     width: auto !important
     &.active
-      background: url(/media/img/prototype/formbut_bg_a.png)
+      background: url(/static/img/prototype/formbut_bg_a.png)
       width: auto !important
   &.isearch:focus
     background: #eee
   &.submit:hover
-    background: url(/media/img/prototype/formbut_bg_a_on.png)
+    background: url(/static/img/prototype/formbut_bg_a_on.png)
 
 .textarea-plain
   border: 1px solid #aaa
@@ -1710,14 +1720,14 @@ input
   padding: 3px 10px 3px 10px
   margin: 0px 5px 0px 0px
   color: #f4ebfd
-  background: url(/media/img/prototype/formbut_bg_a.png)
+  background: url(/static/img/prototype/formbut_bg_a.png)
   border: 1px solid #774488
   border-top: 1px solid #8a63d9
 
 a.button
   color: #f4ebfd
   &:hover
-    background: url(/media/img/prototype/formbut_bg_a_on.png)
+    background: url(/static/img/prototype/formbut_bg_a_on.png)
     border: 1px solid #669966
     border-top: 1px solid #3db502
     color: #ddfedd
@@ -1725,12 +1735,12 @@ a.button
 
 .button
   &.off
-    background: url(/media/img/prototype/formbut_bg.png)
+    background: url(/static/img/prototype/formbut_bg.png)
     border: 1px solid #888
     border-top: 1px solid #999
     color: #fff
     &:hover
-      background: url(/media/img/prototype/formbut_bg_off.png)
+      background: url(/static/img/prototype/formbut_bg_off.png)
       border: 1px solid #666
       border-top: 1px solid #888
       color: #fff
@@ -1740,7 +1750,7 @@ a.button
     //border-top:1px solid #999;
     color: $main-b
     &:hover
-      background: url(/media/img/prototype/formbut_bg_off.png)
+      background: url(/static/img/prototype/formbut_bg_off.png)
       border: 1px solid #666
       border-top: 1px solid #888
       color: #fff
@@ -1759,27 +1769,27 @@ a.button
   /*|s| juni 09
   margin-top: -2px
   height: 18px
-  background: transparent url(/media/img/prototype/but_bg_a.png) no-repeat right
+  background: transparent url(/static/img/prototype/but_bg_a.png) no-repeat right
   &:hover
     cursor: pointer
-    background: transparent url(/media/img/prototype/but_bg_a_on.png) no-repeat right
+    background: transparent url(/static/img/prototype/but_bg_a_on.png) no-repeat right
     a
-      background: transparent url(/media/img/prototype/but_bg_a_on_left.png) no-repeat left !important
+      background: transparent url(/static/img/prototype/but_bg_a_on_left.png) no-repeat left !important
   a
     line-height: 16px
-    background: transparent url(/media/img/prototype/but_bg_a_left.png) no-repeat left
+    background: transparent url(/static/img/prototype/but_bg_a_left.png) no-repeat left
     position: relative
     left: -10px
     padding: 2px 0px 4px 10px
     color: #f4ebfd
     white-space: nowrap
     &:hover
-      background: url(/media/img/prototype/but_bg_a_on_left.png) no-repeat left
+      background: url(/static/img/prototype/but_bg_a_on_left.png) no-repeat left
       color: #FFFFFF
       text-decoration: none
 
 inputxx.submit.active
-  background: url(/media/img/prototype/formbut_bg_a.png)
+  background: url(/static/img/prototype/formbut_bg_a.png)
   width: auto !important
 
 /* ---------- form2 neu ------------
@@ -1815,28 +1825,28 @@ inputxx.submit.active
     padding-top: 6px
     font-size: 11px
   .fieldinfo
-    background: url(/media/img/prototype/forminfo.png)
+    background: url(/static/img/prototype/forminfo.png)
     background-repeat: no-repeat
     padding-left: 22px
   .requiredfield
     border: 1px solid #9774d7
     border-bottom: 1px solid #d7c5e8
     border-right: 1px solid #d7c5e8
-    background: url(/media/img/prototype/forminput_bg_r.png)
+    background: url(/static/img/prototype/forminput_bg_r.png)
     &:focus
       background: #ebe7fa
   .errorfield
     border: 1px solid #f95555
     border-bottom: 1px solid #fbc0c0
     border-right: 1px solid #fbc0c0
-    background: url(/media/img/prototype/forminput_bg_e.png)
+    background: url(/static/img/prototype/forminput_bg_e.png)
     &:focus
       background: #fbe7e7
   .error
     color: #FF0000
     font-size: 11px
   .addfields
-    background: url(/media/img/prototype/formadd.png)
+    background: url(/static/img/prototype/formadd.png)
     background-repeat: no-repeat
     padding-left: 22px
   .access
@@ -1844,15 +1854,15 @@ inputxx.submit.active
     padding-right: 22px
     height: 19px
     &.public
-      background: url(/media/img/prototype/form_access_public.png)
+      background: url(/static/img/prototype/form_access_public.png)
       background-repeat: no-repeat
       background-position: right
     &.loggedin
-      background: url(/media/img/prototype/form_access_loggedin.png)
+      background: url(/static/img/prototype/form_access_loggedin.png)
       background-repeat: no-repeat
       background-position: right
     &.private
-      background: url(/media/img/prototype/form_access_private.png)
+      background: url(/static/img/prototype/form_access_private.png)
       background-repeat: no-repeat
       background-position: right
   .formaction
@@ -1914,7 +1924,7 @@ inputxx.submit.active
   margin-top: 10px
   padding-left: 4px
   padding-top: 0px
-  background-image: url(/media/img/prototype/comparison_marker.png)
+  background-image: url(/static/img/prototype/comparison_marker.png)
   color: #ffffff
   font-size: 8px
   background-repeat: no-repeat
@@ -1945,11 +1955,11 @@ inputxx.submit.active
     list-style: none
     margin-left: 17px
   .folder
-    background: url(/media/img/prototype/filebrowser_handler.png) no-repeat
+    background: url(/static/img/prototype/filebrowser_handler.png) no-repeat
   a
     cursor: pointer
   .open
-    background: url(/media/img/prototype/filebrowser_handler_on.png) no-repeat
+    background: url(/static/img/prototype/filebrowser_handler_on.png) no-repeat
 
 .bg-selected
   background-color: #eee6ff !important
@@ -2078,14 +2088,14 @@ a:focus, input:focus
     height: 94px
     overflow: hidden
   .more_bg
-    background-image: url(/media/img/prototype/calendar_more.png)
+    background-image: url(/static/img/prototype/calendar_more.png)
     background-position: bottom right
     background-repeat: no-repeat
   .nomonthday
-    background-image: url(/media/img/prototype/calendar_bg_off.png)
+    background-image: url(/static/img/prototype/calendar_bg_off.png)
     background-repeat: repeat-x
   .monthday
-    background-image: url(/media/img/prototype/calendar_bg.png)
+    background-image: url(/static/img/prototype/calendar_bg.png)
     background-repeat: repeat-x
     text-align: left
     height: 94px
@@ -2099,10 +2109,10 @@ a:focus, input:focus
   .sunday, .saturday
     background-color: #F9F9F9
   .nomonthday.overlap
-    background-image: url(/media/img/prototype/calendar_bg_overlap_off.png)
+    background-image: url(/static/img/prototype/calendar_bg_overlap_off.png)
     background-repeat: repeat-x
   .monthday.overlap
-    background-image: url(/media/img/prototype/calendar_bg_overlap.png)
+    background-image: url(/static/img/prototype/calendar_bg_overlap.png)
     background-repeat: repeat-x
   .normal
     font-family: verdana
@@ -2128,7 +2138,7 @@ a:focus, input:focus
   .nomonthday td
     padding-top: 6px
     margin-top: 3px
-    background-image: url(/media/img/prototype/calendar_off.png)
+    background-image: url(/static/img/prototype/calendar_off.png)
     //border-top:1px dotted #ccc !important;
   .monthday td
     padding-top: 6px
@@ -2184,7 +2194,7 @@ a:focus, input:focus
   height: 12px
   margin-top: 1px
   margin-right: 4px
-  background-image: url(/media/img/prototype/event_activator_bg.png)
+  background-image: url(/static/img/prototype/event_activator_bg.png)
   background-color: #FFFFFF
   border: 1px solid #999
 
@@ -2200,14 +2210,14 @@ a:focus, input:focus
   margin-right: 7px
   padding-right: 22px
   &.message
-    background-image: url(/media/img/prototype/calendar_message.png)
+    background-image: url(/static/img/prototype/calendar_message.png)
     background-position: right
     background-repeat: no-repeat
 
 .check_all
   width: 13px
   height: 12px
-  background-image: url(/media/img/prototype/check_all.png)
+  background-image: url(/static/img/prototype/check_all.png)
   cursor: pointer
 
 /* - events -
@@ -2426,13 +2436,13 @@ table
 
 .exp
   padding-right: 0px !important
-  background-image: url(/media/img/prototype/box_handler.png)
+  background-image: url(/static/img/prototype/box_handler.png)
   background-repeat: no-repeat
   background-position: 0px 2px
 
 .expanded
   padding-right: 0px !important
-  background-image: url(/media/img/prototype/box_handler_on.png)
+  background-image: url(/static/img/prototype/box_handler_on.png)
   background-repeat: no-repeat
   background-position: 0px 2px
 
@@ -2452,10 +2462,10 @@ table
   border: 1px solid #bbb
   //border-top:0px;
   padding: 1px 2px 0px 16px
-  background: #dddddd url(/media/img/prototype/box_handler.png) no-repeat -2px -2px
+  background: #dddddd url(/static/img/prototype/box_handler.png) no-repeat -2px -2px
   cursor: pointer
   &.open
-    background-image: url(/media/img/prototype/box_handler_on.png) !important
+    background-image: url(/static/img/prototype/box_handler_on.png) !important
 
 .boxsub-content
   display: none
@@ -2464,32 +2474,32 @@ table
 .boxsub
   .b-closer
     float: right
-    background: url(/media/img/prototype/basket_remove.png) no-repeat
+    background: url(/static/img/prototype/basket_remove.png) no-repeat
     width: 17px
     height: 18px
   .i-closer
     float: right
-    background: url(/media/img/prototype/boxsub_item_remove.png) no-repeat
+    background: url(/static/img/prototype/boxsub_item_remove.png) no-repeat
     width: 17px
     height: 18px
   .i-add
     float: right
-    background: url(/media/img/prototype/boxsub_item_add.png) no-repeat
+    background: url(/static/img/prototype/boxsub_item_add.png) no-repeat
     width: 17px
     height: 18px
 
 .b-closer:hover, .i-closer:hover
-  background: url(/media/img/prototype/boxsub_remove_on.png) no-repeat !important
+  background: url(/static/img/prototype/boxsub_remove_on.png) no-repeat !important
 
 .boxsub
   .b-pl
     float: right
-    background: url(/media/img/prototype/basket_to_pl.png) no-repeat
+    background: url(/static/img/prototype/basket_to_pl.png) no-repeat
     width: 17px
     height: 18px
   .b-play
     float: right
-    background: url(/media/img/prototype/list_play_button2_s.png) no-repeat
+    background: url(/static/img/prototype/list_play_button2_s.png) no-repeat
     width: 17px
     height: 18px
 
@@ -2625,7 +2635,7 @@ table
 /* pageplayer
 
 .fadeindiv
-  background: url(/media/img/prototype/basket_remove.png) no-repeat
+  background: url(/static/img/prototype/basket_remove.png) no-repeat
 
   
   

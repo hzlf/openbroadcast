@@ -1,0 +1,26 @@
+/* CSS Document */
+.ui-dialog { border: 0px !important; padding:8px !important; background:url(../../img/dialog_bg.png) ;-moz-border-radius:8px;-webkit-border-radius:8px; }
+.ui-dialog .ui-dialog-titlebar { background: #fff !important; border:0px !important;}
+.ui-dialog .ui-dialog-title { float: left; } 
+.ui-dialog .ui-dialog-titlebar-close { position: absolute; right: .3em; top: 50%; width: 19px; margin: -10px 0 0 0; padding: 1px; height: 18px; }
+.ui-dialog .ui-dialog-titlebar-close span { display: block; margin: 1px; }
+.ui-dialog .ui-dialog-titlebar-close:hover, .ui-dialog .ui-dialog-titlebar-close:focus { padding: 0; }
+.ui-dialog .ui-dialog-content { padding: .5em 1em; background: #fff; overflow: auto; zoom: 1; }
+.ui-dialog .ui-dialog-buttonpane { text-align: left; border-width: 1px 0 0 0; background-image: none; margin: .5em 0 0 0; padding: .3em 1em .5em .4em; }
+.ui-dialog .ui-dialog-buttonpane button { float: right; margin: .5em .4em .5em 0; cursor: pointer; padding: 2px 5x 2px 5px; line-height: 1.4em; width:auto; overflow:visible; }
+.ui-dialog .ui-resizable-se { width: 14px; height: 14px; right: 13px; bottom: 13px; }
+.ui-draggable .ui-dialog-titlebar { cursor: move; }
+
+
+
+.ui-tabs { padding: 0px; zoom: 1;}
+
+.ui-tabs .ui-tabs-nav { list-style: none; position: relative; padding: .2em .2em 0;border-top:0px;border-left:0px;border-right:0px;background:#eee}
+.ui-tabs .ui-tabs-nav li { position: relative; float: left; border-bottom-width: 0 !important; margin: 0 .2em -1px 0; padding: 0; background:#ddd}
+.ui-tabs .ui-tabs-nav li a { float: left; text-decoration: none; padding: .2em 0.5em; }
+.ui-tabs .ui-tabs-nav li.ui-tabs-selected { padding-bottom: 1px; border-bottom-width: 0;background:#fff }
+.ui-tabs .ui-tabs-nav li.ui-tabs-selected a, .ui-tabs .ui-tabs-nav li.ui-state-disabled a, .ui-tabs .ui-tabs-nav li.ui-state-processing a { cursor: text; }
+.ui-tabs .ui-tabs-nav li a, .ui-tabs.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-selected a { cursor: pointer; } /* first selector in group seems obsolete, but required to overcome bug in Opera applying cursor: text overall if defined elsewhere... */
+.ui-tabs .ui-tabs-panel { padding: 1em 1.4em; display: block; border-width: 0; background: none; }
+.ui-tabs .ui-tabs-hide { display: none !important; }
+.ui-tabs-head {background:#eee;padding:5px 5px 5px 5px};

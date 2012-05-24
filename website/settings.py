@@ -316,6 +316,9 @@ INSTALLED_APPS = (
     'wikisyntax',
     'taggit',
     #'taggit_templatetags',
+    
+    # helpers
+    'dev',
 )
 
 

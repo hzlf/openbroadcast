@@ -1,0 +1,124 @@
+/*
+------------------------------------------------------------------------------------------------
+-- STRUCTURE
+------------------------------------------------------------------------------------------------
+*/
+
+/*
+------------------------------------------------------------------------------------------------
+-- FORMATTING
+------------------------------------------------------------------------------------------------
+*/
+
+	table{
+		border-collapse:collapse;
+		/*width:auto;*/
+		width: 100%;
+	}
+
+
+	thead th {
+				height: 22px;
+				line-height: 20px;
+	}
+
+	tbody th
+	{
+		padding-left:30px;
+		background-color:#ffffff !important;
+		font-weight:bold;
+		vertical-align:top;
+		border-bottom: 1px solid #DDDDDD !important;
+	}
+	
+	tr{
+		border-top:1px dotted #CCC;
+		}
+		
+	tr:first-child{
+		border-top:none;
+		}
+		
+	td, th{
+		padding:3px 10px 3px 6px;
+		
+		font-size: 80%; /* TODO: Fix This */
+		
+		}
+		
+	th{
+		text-align:left;
+		}
+		
+	tfoot td{
+		padding-top:15px;
+		border:none !important;
+		text-align:center;
+		}
+		
+	caption{
+		font-size:14px;
+		font-weight:bold;
+		border-bottom:1px solid #AAA;
+		padding:3px;
+		}
+		
+/*
+------------------------------------------------------------------------------------------------
+-- SPECIAL
+------------------------------------------------------------------------------------------------
+*/
+
+	/* titles */
+
+		tr.row-group {
+			border-top:none !important;
+		}
+
+		.row-group td {
+			text-align:left;
+			border-bottom: 1px solid #000;
+			font-weight:bold;
+			font-variant:small-caps;
+			height:50px; 
+			vertical-align:bottom;
+			color:#C03;
+		}
+		
+	/* zebra striping */
+
+		.zebra th
+		{
+			padding-left:30px;
+			background-color:#ddd !important;
+		}
+		
+		.zebra td{
+			background-color:#EEEEEE;
+		}
+		
+	/* formatting */
+
+		.red{
+			color:red !important;
+			}
+			
+		.green{
+			color:green;
+			}
+			
+		.blue{
+			color:blue;
+			}
+			
+		.joined{
+			border-left:1px solid #000;
+			border-right:1px solid #000;
+			background:#EEE;
+		}
+		
+	/* form elements */
+		
+		table input, table select{
+			width:100%;
+			}

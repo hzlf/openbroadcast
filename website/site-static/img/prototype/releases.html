@@ -1,0 +1,574 @@
+<html xmlns:fb="http://developers.facebook.com/schema/" xmlns:og="http://opengraphprotocol.org/schema/" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"><title>openbroadcast prototype</title></head><body class="base" id="body" leftmargin="0" topmargin="0" marginheight="0" marginwidth="0"><pre class="xdebug-var-dump" dir="ltr"><small>boolean</small> <font color="#75507b">false</font>
+</pre><pre class="xdebug-var-dump" dir="ltr"><small>boolean</small> <font color="#75507b">false</font>
+</pre>
+
+	
+	
+    
+
+	
+	
+	<script type="text/javascript" src="releases_files/general.js"></script><div firebugversion="1.5.4" style="display: none;" id="_firebugConsole"></div>
+	
+	<script type="text/javascript" src="releases_files/jquery-1.js"></script>
+
+	<script type="text/javascript" src="releases_files/jquery_004.js"></script>
+	<script type="text/javascript" src="releases_files/jquery-ui.js"></script>
+	<script type="text/javascript" src="releases_files/jquery_005.js"></script>
+	<script type="text/javascript" src="releases_files/jquery_002.js"></script>
+	<script type="text/javascript" src="releases_files/jquery.js"></script>
+	<script type="text/javascript" src="releases_files/jquery_006.js"></script>
+	<script type="text/javascript" src="releases_files/jquery_003.js"></script>
+	
+	
+	
+	<script type="text/javascript" src="releases_files/obp.js"></script>
+	
+	<link type="text/css" rel="stylesheet" href="releases_files/jquery-ui-custom.css">
+	<link type="text/css" rel="stylesheet" href="releases_files/jquery-ui-custom-tb.css">
+	<link type="text/css" rel="stylesheet" href="releases_files/table.css">
+	<link type="text/css" rel="stylesheet" href="releases_files/style.css">
+	<link type="text/css" rel="stylesheet" href="releases_files/scheduler.css">
+	<link type="text/css" rel="stylesheet" href="releases_files/listview.css">
+	
+	<link type="text/css" rel="stylesheet" href="releases_files/plugins.css">
+	<!-- <link type="text/css" rel="stylesheet" href="/kmod/static/css/toolbar.css"> -->
+	
+	
+	
+	
+  
+  <script type="text/javascript">
+  // make context+co available for js
+  obp.vars = function() {};
+  obp.vars.context = 'content';
+  obp.vars.section = 'music';
+  obp.vars.subset = 'releases';
+  obp.vars.action = 'whatever';
+  
+  </script>
+  
+	<!-- start: body -->
+	
+		<!-- facebook root element -->
+		<div id="fb-root"></div>
+		
+		
+		<!-- start: toolbar -->
+				<div id="toolbar_holder" style="background-color: rgb(255, 255, 255); height: 70px;" class="">
+		<div id="elgg_toolbar">
+			<div id="toolbar">
+				<div id="navright">
+					<form method="post">
+						<div style="float: right;">
+							<input value="Login" class="tbutton" type="submit">
+						</div>
+						<div style="float: right;">
+							<input value="Passwort" name="password" style="width: 120px;" class="tfield password" type="text">
+						</div>
+						<div style="float: right;">
+							<input value="Username" name="username" style="width: 120px;" class="tfield" type="text">
+						</div><input value="login" name="action" type="hidden">
+						<div style="float: right;" class="divider">
+							&nbsp;
+						</div>
+					</form>
+					<form>
+						<div style="float: right;">
+							<input value="search" class="tbutton" type="submit">
+						</div>
+						<div style="float: right;">
+							<input name="search" style="width: 120px;" class="tfield" type="text">
+						</div>
+						<div class="clear"></div>
+					</form>
+				</div>
+				
+				
+				
+								<div class="navleft">
+					<div style="float: left; margin-left: -10px; margin-right: 0px;">
+						<a style="padding: 0px;" href="http://vdeb.openbroadcast.ch/openbroadcast/">open proadcast</a>
+						/
+						<a style="padding-left: 0px;" href="http://vdeb.openbroadcast.ch/openbroadcast/plattform/">platform</a>
+					</div>
+				<ul><li><a id="main_nav-network" href="http://vdeb.openbroadcast.ch/v11/network" class="main_nav" active="">Network</a></li><li><a id="main_nav-content" href="http://vdeb.openbroadcast.ch/v11/content" class="on main_nav" active="1">Content</a></li><li><a id="main_nav-program" href="http://vdeb.openbroadcast.ch/v11/program" class="main_nav" active="">Program</a></li></ul>				</div>
+				
+				
+				
+				
+				
+				
+				
+				<div class="clear"></div>
+			</div>
+			<div class="subnav">
+			
+			
+			
+				<ul class="nav_sub" style="display: none;" id="nav_sub-network"><li><a href="http://vdeb.openbroadcast.ch/user/friends/list">Contacts</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/groups">Groups</a></li></ul><ul class="nav_sub" id="nav_sub-content"><li><a href="http://vdeb.openbroadcast.ch/v11/mixtapes">Mixtapes</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/content/library/releases" class="on">Music</a></li></ul><ul class="nav_sub" style="display: none;" id="nav_sub-program"><li><a href="http://vdeb.openbroadcast.ch/v11/nowplaying">Now Playing</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/program/transmissions/transmissions/browse">Transmissions</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/scheduler">Scheduler</a></li></ul>			
+			
+			
+			<!-- 
+				<ul>
+					<li>
+						<a href="=content&amp;c=ccontent" class="">Community Content</a>
+					</li>
+					<li>
+						<a href="=content&amp;c=othercontent" class="">Media Library</a>
+					</li>
+					<li>
+						<a href="=content&amp;c=playlists" class="on">Playlists</a>
+					</li>
+				</ul>
+				 -->
+				
+			</div>
+			<div class="clear"></div>
+		</div>
+		</div>
+		<!-- end: toolbar -->
+		
+		
+		
+		
+		
+		
+		
+		<!-- start: main container -->
+		<div id="container">
+		
+			<div class="hfixw" id="maincontent">
+			
+			
+				<!-- start: headline / icon (large one) -->
+				
+				<div id="modhead">
+					<div class="modheadaction"></div>
+					<div class="icontitle green icon-playlists">
+						Music Library					</div>
+					<div class="clear"></div>
+				</div>
+				
+								<!-- end: headline / icon (large one) -->
+				
+				<!-- start: intra-module navigation -->
+				
+
+				<div id="modnav">
+					
+					<div style="float: right;">
+						<ul>
+						<li><a href="#" style="border-right: medium none;" id="tagcloud_inline_toggle">Tagcloud</a></li>
+						</ul>
+					</div>
+					
+					<div>
+						<ul>
+						<li><a href="http://vdeb.openbroadcast.ch/v11/releases" class="on">Releases</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/artists">Artists</a></li>						</ul>
+					</div>
+					
+					
+					<div class="clear"></div>
+				</div>
+				
+								<!-- end: intra-module navigation -->
+				
+				
+				
+				<!-- start: inner content holder -->
+				<div id="content-holder">
+				
+				
+				<!-- start: main content holder / 2col -->
+				
+
+				
+				
+				
+					<!-- start: sidebar -->
+					<div id="splitpane-sidebar">
+						<div id="modaction">
+							<a href="http://vdeb.openbroadcast.ch/v11/content/library/=content&amp;c=playlists&amp;cc=create" class=""></a>
+							<div>
+								Create new Playlist
+							</div><a href="#" class="multilistaction desabled"></a>
+							<div>
+								Add selected to Watchlist
+							</div><a href="#" class="multilistaction desabled"></a>
+							<div>
+								Add selected to Basket
+							</div>
+							<div id="selection_save">
+								Save current Research
+							</div>
+						</div>
+
+
+
+						
+						
+												
+
+						
+						
+						
+
+						
+
+						<div class="boxend"></div>
+					</div>
+				
+				 				<!-- end: sidebar -->
+					
+					
+					
+					
+					
+					<!-- start: inner content -->
+					<div id="splitpane-content">
+					
+
+
+						<div class="mp-list" id="ident--medialist">
+						
+			
+							<!-- start: tagcloud (inline) -->
+														<!-- end: searchbar (inline) -->
+						
+			
+							<!-- start: searchbar (inline) -->
+														<!-- end: searchbar (inline) -->
+							
+							
+							<!-- start: listing header / paginator -->
+													
+							<div class="listhead">
+								<div style="float: right;">
+								Array								</div>
+								<div>
+									<a href="http://vdeb.openbroadcast.ch/v11/content/library/=content&amp;c=playlists&amp;cc=&amp;listview=list"><img src="releases_files/list_view_list_on.png" align="top"></a> <a href="http://vdeb.openbroadcast.ch/v11/content/library/=content&amp;c=playlists&amp;cc=&amp;listview=icons"><img src="releases_files/list_view_icons.png" align="top"></a> &nbsp;
+								</div>
+							</div>
+														<!-- end: listing header / paginator -->
+							
+							
+							
+							<!-- start: listing output -->
+							
+<div class="listview container releases s">
+
+		<div class="list_header">
+		<div class="list_header_item c1">&nbsp;</div>
+		<div class="list_header_item c2 sortable active asc">Name</div>
+		<div class="list_header_item c3">Tracks</div>
+		<div class="list_header_item c4">Label</div>
+		<div class="list_header_item c5">License</div>
+		<div class="list_header_item c6 sortable ">Released</div>
+		<div class="list_header_item c7">Type</div>
+	</div>
+	
+	
+	
+	<div class="list_body">
+	
+
+		<div class="list_body_row selectable unpublished" id="list_item_373">
+			<div class="list_body_item c1">
+						</div>
+			<div class="list_body_item c2">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">[UNKNOWN]</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/">lala</a></li></ul>			</div>
+			<div class="list_body_item c3">
+			1			</div>
+			<div class="list_body_item c4">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">[UNKNOWN]</a></li></ul><li>1			</li></div>
+			<div class="list_body_item c5">lolo</div>
+			<div class="list_body_item c6">
+			
+			<ul></ul>
+			</div>
+			<div class="list_body_item c7">
+			<ul></ul>			</div>
+		</div>
+
+		<div class="list_body_row selectable " id="list_item_580">
+			<div class="list_body_item c1">
+						</div>
+			<div class="list_body_item c2">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">asdbkasdabsdjhajshbad</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/">lala</a></li></ul>			</div>
+			<div class="list_body_item c3">
+			1			</div>
+			<div class="list_body_item c4">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">asdbkasdabsdjhajshbad</a></li></ul><li>1			</li></div>
+			<div class="list_body_item c5">lolo</div>
+			<div class="list_body_item c6">
+			
+			<ul></ul>
+			</div>
+			<div class="list_body_item c7">
+			<ul></ul>			</div>
+		</div>
+
+		<div class="list_body_row selectable " id="list_item_581">
+			<div class="list_body_item c1">
+						</div>
+			<div class="list_body_item c2">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">Wave Funk (CAT204)</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/">lala</a></li></ul>			</div>
+			<div class="list_body_item c3">
+			1			</div>
+			<div class="list_body_item c4">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">Wave Funk (CAT204)</a></li></ul><li>1			</li></div>
+			<div class="list_body_item c5">lolo</div>
+			<div class="list_body_item c6">
+			
+			<ul></ul>
+			</div>
+			<div class="list_body_item c7">
+			<ul></ul>			</div>
+		</div>
+
+		<div class="list_body_row selectable " id="list_item_582">
+			<div class="list_body_item c1">
+						</div>
+			<div class="list_body_item c2">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">UndergrouNDW -  German New Wave Rarities</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/">lala</a></li></ul>			</div>
+			<div class="list_body_item c3">
+			1			</div>
+			<div class="list_body_item c4">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">UndergrouNDW -  German New Wave Rarities</a></li></ul><li>1			</li></div>
+			<div class="list_body_item c5">lolo</div>
+			<div class="list_body_item c6">
+			
+			<ul></ul>
+			</div>
+			<div class="list_body_item c7">
+			<ul></ul>			</div>
+		</div>
+
+		<div class="list_body_row selectable " id="list_item_583">
+			<div class="list_body_item c1">
+						</div>
+			<div class="list_body_item c2">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">King of the Beats (disc 1)</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/">lala</a></li></ul>			</div>
+			<div class="list_body_item c3">
+			0 / 14			</div>
+			<div class="list_body_item c4">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">King of the Beats (disc 1)</a></li></ul><li>1			</li></div>
+			<div class="list_body_item c5">lolo</div>
+			<div class="list_body_item c6">
+			
+			<ul></ul>
+			</div>
+			<div class="list_body_item c7">
+			<ul><li>official</li><li>compilation</li></ul>			</div>
+		</div>
+
+		<div class="list_body_row selectable " id="list_item_584">
+			<div class="list_body_item c1">
+						</div>
+			<div class="list_body_item c2">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">Azzurra</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/">lala</a></li></ul>			</div>
+			<div class="list_body_item c3">
+			0 / 3			</div>
+			<div class="list_body_item c4">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">Azzurra</a></li></ul><li>1			</li></div>
+			<div class="list_body_item c5">lolo</div>
+			<div class="list_body_item c6">
+			
+			<ul></ul>
+			</div>
+			<div class="list_body_item c7">
+			<ul><li>official</li><li>ep</li></ul>			</div>
+		</div>
+
+		<div class="list_body_row selectable " id="list_item_585">
+			<div class="list_body_item c1">
+						</div>
+			<div class="list_body_item c2">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">Baby I'm Yours</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/">lala</a></li></ul>			</div>
+			<div class="list_body_item c3">
+			1 / 7			</div>
+			<div class="list_body_item c4">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">Baby I'm Yours</a></li></ul><li>1			</li></div>
+			<div class="list_body_item c5">lolo</div>
+			<div class="list_body_item c6">
+			
+			<ul></ul>
+			</div>
+			<div class="list_body_item c7">
+			<ul><li>official</li><li>ep</li></ul>			</div>
+		</div>
+
+		<div class="list_body_row selectable " id="list_item_586">
+			<div class="list_body_item c1">
+						</div>
+			<div class="list_body_item c2">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">I ♥ Techno 2008</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/">lala</a></li></ul>			</div>
+			<div class="list_body_item c3">
+			4 / 22			</div>
+			<div class="list_body_item c4">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">I ♥ Techno 2008</a></li></ul><li>1			</li></div>
+			<div class="list_body_item c5">lolo</div>
+			<div class="list_body_item c6">
+			
+			<ul></ul>
+			</div>
+			<div class="list_body_item c7">
+			<ul><li>official</li><li>compilation</li></ul>			</div>
+		</div>
+
+		<div class="list_body_row selectable " id="list_item_587">
+			<div class="list_body_item c1">
+						</div>
+			<div class="list_body_item c2">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">Für Immer</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/">lala</a></li></ul>			</div>
+			<div class="list_body_item c3">
+			0 / 15			</div>
+			<div class="list_body_item c4">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">Für Immer</a></li></ul><li>1			</li></div>
+			<div class="list_body_item c5">lolo</div>
+			<div class="list_body_item c6">
+			
+			<ul></ul>
+			</div>
+			<div class="list_body_item c7">
+			<ul><li>compilation</li></ul>			</div>
+		</div>
+
+		<div class="list_body_row selectable " id="list_item_588">
+			<div class="list_body_item c1">
+						</div>
+			<div class="list_body_item c2">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">More Songs for Dreamsleepers and the Very Awake</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/">lala</a></li></ul>			</div>
+			<div class="list_body_item c3">
+			0 / 13			</div>
+			<div class="list_body_item c4">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">More Songs for Dreamsleepers and the Very Awake</a></li></ul><li>1			</li></div>
+			<div class="list_body_item c5">lolo</div>
+			<div class="list_body_item c6">
+			
+			<ul></ul>
+			</div>
+			<div class="list_body_item c7">
+			<ul><li>official</li><li>album</li></ul>			</div>
+		</div>
+
+		<div class="list_body_row selectable " id="list_item_589">
+			<div class="list_body_item c1">
+						</div>
+			<div class="list_body_item c2">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">Artcore 3</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/">lala</a></li></ul>			</div>
+			<div class="list_body_item c3">
+			1			</div>
+			<div class="list_body_item c4">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">Artcore 3</a></li></ul><li>1			</li></div>
+			<div class="list_body_item c5">lolo</div>
+			<div class="list_body_item c6">
+			
+			<ul></ul>
+			</div>
+			<div class="list_body_item c7">
+			<ul></ul>			</div>
+		</div>
+
+		<div class="list_body_row selectable " id="list_item_590">
+			<div class="list_body_item c1">
+						</div>
+			<div class="list_body_item c2">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">Rhythm And Stealth</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/">lala</a></li></ul>			</div>
+			<div class="list_body_item c3">
+			1 / 10			</div>
+			<div class="list_body_item c4">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">Rhythm And Stealth</a></li></ul><li>1			</li></div>
+			<div class="list_body_item c5">lolo</div>
+			<div class="list_body_item c6">
+			
+			<ul></ul>
+			</div>
+			<div class="list_body_item c7">
+			<ul><li>official</li><li>album</li></ul>			</div>
+		</div>
+
+		<div class="list_body_row selectable " id="list_item_591">
+			<div class="list_body_item c1">
+						</div>
+			<div class="list_body_item c2">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">33 Tage In Ketten</a></li><li><a href="http://vdeb.openbroadcast.ch/v11/">lala</a></li></ul>			</div>
+			<div class="list_body_item c3">
+			1 / 15			</div>
+			<div class="list_body_item c4">
+			<ul><li class="bold"><a href="http://vdeb.openbroadcast.ch/v11/">33 Tage In Ketten</a></li></ul><li>1			</li></div>
+			<div class="list_body_item c5">lolo</div>
+			<div class="list_body_item c6">
+			
+			<ul></ul>
+			</div>
+			<div class="list_body_item c7">
+			<ul><li>compilation</li></ul>			</div>
+		</div>	</div>
+	
+
+</div>							<!-- end: listing output -->
+
+							
+						</div>
+
+
+				
+					</div>
+					<!-- end: inner content -->
+					
+					
+					
+				</div>
+				<!-- end: inner content holder -->
+				
+				
+				
+				
+				<!-- start: footer -->
+				
+
+				<div style="border-top: 1px solid rgb(187, 187, 187); clear: both; width: 730px;" class="footer">
+				
+				
+					<table style="margin-top: 8px; color: rgb(51, 51, 51); font-size: 14px; line-height: 15px; table-layout: fixed;" width="100%">
+						<tbody>
+							<tr>
+								<td>
+									<strong>Open Broadcast</strong><br>
+									<a href="http://vdeb.openbroadcast.ch/openbroadcast/index.php?c=contact">Contact<br></a> <a href="http://vdeb.openbroadcast.ch/openbroadcast/index.php?c=about">Über Open Braodcast<br></a> <a href="http://vdeb.openbroadcast.ch/openbroadcast/index.php?c=terms">Terms of use<br></a> <a href="http://vdeb.openbroadcast.ch/openbroadcast/index.php?c=privacy">Privacy<br></a> <a href="http://vdeb.openbroadcast.ch/openbroadcast/index.php?c=credits">Credits<br></a>
+								</td>
+								<td style="border-left: 1px solid rgb(221, 221, 221); padding-left: 10px;">
+									<strong>Radio machen</strong><br>
+									<a href="http://vdeb.openbroadcast.ch/openbroadcast/plattform/index.php">Plattform<br></a> <a href="http://vdeb.openbroadcast.ch/openbroadcast/index.php?c=studios">Studios<br></a><a href="http://vdeb.openbroadcast.ch/openbroadcast/index.php?c=community">Community<br></a>
+								</td>
+								<td style="border-left: 1px solid rgb(221, 221, 221); padding-left: 10px;">
+									<strong>Radio hören</strong><br>
+									<a href="http://vdeb.openbroadcast.ch/openbroadcast/index.php?c=about">Aktuelles Programm<br></a> <a href="http://vdeb.openbroadcast.ch/openbroadcast/index.php?c=about">Player<br></a> <a href="http://vdeb.openbroadcast.ch/openbroadcast/index.php?c=about">Programmkonzept<br></a>
+								</td>
+								<td style="border-left: 1px solid rgb(221, 221, 221); padding-left: 10px;">
+									<strong>Radio Frequentieren</strong><br>
+									<a href="http://vdeb.openbroadcast.ch/openbroadcast/index.php?c=village">Radio Village<br></a> <a href="http://vdeb.openbroadcast.ch/openbroadcast/index.php?c=dstation">Digital Station<br></a> <a href="http://vdeb.openbroadcast.ch/openbroadcast/index.php?c=events">Events<br></a>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					<div style="margin-top: 12px; padding-top: 10px; color: rgb(153, 153, 153); font-size: 11px;">
+						© 2009, openbroadcast.ch, Utengasse 3, 4057 Basel, +41 (0)61 2836000
+						<br>
+						Memory: 4,177.14KB | Execution: 0.21658 seconds
+					</div>
+				</div>					<!-- end: footer -->				
+				
+							
+				<!-- start: meta output -->
+								<!-- end: meta output -->
+
+				
+				
+				
+			</div>
+		</div>
+		<!-- end: main container -->
+	<div id="ui-datepicker-div" class="ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all ui-helper-hidden-accessible"></div></body></html>

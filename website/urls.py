@@ -17,6 +17,9 @@ urlpatterns = patterns('',
     #url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r"^admin/", include(admin.site.urls)),
     
+    
+    (r'^dev/', include('dev.urls')), # shop main urls
+    
     # varnish / ESI
     # (r'^esi/', include('esi.urls')),
     
