@@ -76,6 +76,7 @@ MIDDLEWARE_CLASSES = (
     'cms.middleware.user.CurrentUserMiddleware',
     'cms.middleware.toolbar.ToolbarMiddleware',
     # custom
+    'lib.middleware.ProfileMiddleware',
     'lib.middleware.PrettifyMiddlewareBS',
 )
 

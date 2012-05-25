@@ -1,6 +1,6 @@
 # server & deployment
 gunicorn-console>=0.1.12
-gunicorn>=0.14.2
+gunicorn==0.13.4 # important! newer version does not work
 
 # code coverage and ci
 django-jenkins==0.12.1
