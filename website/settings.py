@@ -76,8 +76,8 @@ MIDDLEWARE_CLASSES = (
     'cms.middleware.user.CurrentUserMiddleware',
     'cms.middleware.toolbar.ToolbarMiddleware',
     # custom
-    'lib.middleware.ProfileMiddleware',
-    'lib.middleware.PrettifyMiddlewareBS',
+    #'lib.middleware.ProfileMiddleware',
+    #'lib.middleware.PrettifyMiddlewareBS',
 )
 
 CACHE_BACKEND = 'locmem:///'
@@ -117,6 +117,8 @@ CMS related settings (template/placeholder setup etc)
 """
 
 CMS_USE_TINYMCE = False
+CMS_REDIRECTS = True
+#CMS_MODERATOR = True
 
 CMS_TEMPLATES = (
     # generic templates

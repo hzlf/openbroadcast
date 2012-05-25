@@ -1,0 +1,37 @@
+{% extends "layout_base.html" %}
+	
+
+	{% block heading %}
+	<!-- heading / icon (large one) -->
+	<div id="heading">
+		{% include "skeleton/heading.html" %}
+	</div>
+	<!-- heading / icon (large one) -->
+	{% endblock %}
+	
+	
+	{% block modnav %}
+	<!-- start: intra-module navigation -->
+	<div id="modnav">
+		{% include "skeleton/modnav.html" %}
+	</div>
+	<!-- end: intra-module navigation -->
+	{% endblock %}
+
+
+
+
+
+	
+	{% block inner %}
+	<div>
+		{% block cms_main %}{% endblock %}
+	</div>
+	{% endblock %}
+	
+
+	
+	{% block cms_sidebar %}
+	{% endblock %}
+
+	

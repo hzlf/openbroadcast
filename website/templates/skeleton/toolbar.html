@@ -1,0 +1,22 @@
+{% load menu_tags %}
+
+	<div id="toolbar">
+		<div class="navright">
+			<div class="right">
+				<a href="https://www.facebook.com/logout.php?next=http%3A%2F%2Fopenbroadcast.ch%2Fauth%2Flogout&amp;access_token=143733768986545%7C0e903068eaee101f60f4b58a6239245d">Logout</a>
+			</div>
+		</div>
+		<div class="navleft">
+			<div style="float: left; margin-left: -10px; margin-right: 0px;">
+				<a href="https://www.openbroadcast.ch/" style="color: #777777; font-weight: bold;">open broadcast</a>
+			</div>
+			<ul class="left navigation-main">
+				{% show_menu 0 1 100 100 "menu/navigation_main.html" %}
+			</ul>
+		</div>
+		<div class="clear"></div>
+	</div>
+	<div class="subnav">
+		{% show_menu 0 1 100 100 "menu/navigation_sub.html" %}
+	</div>
+	<div class="clear"></div>

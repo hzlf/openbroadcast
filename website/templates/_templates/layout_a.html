@@ -1,15 +1,12 @@
-{% extends "layout_base.html" %}
+{% extends "cms_base.html" %}
+
 {% load cms_tags %}
 
-
-{% block main %}
-
-{% placeholder main %}
-
+{% block cms_main %}
+	{% placeholder main %}
 {% endblock %}
 
 
-
-{% block cms_aux %}
-	{% placeholder aux %}
+{% block cms_sidebar %}
+	{% placeholder "aux" or %}There is no sidebar...{% endplaceholder %}
 {% endblock %}
