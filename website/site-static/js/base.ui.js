@@ -68,9 +68,9 @@ base.ui.iface = function() {
     }).bind("blur", function(event) {
     	
     	if(base.ui.use_effects) {
-    		$('body').animate({opacity:0.7},{queue:true,duration:200});
+    		$('body').animate({opacity:0.9},{queue:true,duration:200});
     	} else {
-    		$('body').css('opacity', 0.7);
+    		$('body').css('opacity', 0.9);
     	}
 		$('body').addClass('blur');
 
@@ -778,6 +778,7 @@ base.ui.toolbar = function() {
 	// show active submenus
 	$('.navigation-sub > li.descendant').parent().css('display', 'block');
 	$('.navigation-sub > li.selected').parent().css('display', 'block');
+	$('.navigation-sub > li.ancestor').parent().css('display', 'block');
 	
 	
 	

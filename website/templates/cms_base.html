@@ -24,14 +24,15 @@
 
 	
 	{% block inner %}
-	<div>
+	<div class="content cms">
 		{% block cms_main %}{% endblock %}
 	</div>
 	{% endblock %}
 	
 
-	
-	{% block cms_sidebar %}
+	{% block sidebar %}
+	<div class="content cms">
+		{% block cms_sidebar %}{% endblock %}
+	</div>
 	{% endblock %}
-
 	

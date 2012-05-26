@@ -34,6 +34,10 @@ def openbroadcast_ch():
     env.storage = '/storage/www_data/openbroadcast.ch'
     env.user = 'root'
     
+    
+def build_ci():
+    local('wget %s' % ('http://ci.lab.anorg.net/job/ch-openbroadcast/build?token=BUILD'))
+    
 
 def deploy():
     """

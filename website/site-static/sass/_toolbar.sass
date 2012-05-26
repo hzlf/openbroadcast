@@ -58,16 +58,19 @@ div#toolbar_holder
       display: inline
       list-style-type: none
       float: left
-    a
-      text-decoration: none
-      color: #ccc
-      padding: 5px 8px 4px 8px
-      &:hover
-        color: #fff
-      &.on
-        color: #fff
-        border: 1px solid #aaa
-        padding: 4px 7px 3px 7px
+      a
+        text-decoration: none
+        color: #ccc
+        padding: 5px 8px 4px 8px
+        &:hover
+          color: #fff
+        
+      &.selected, &.ancestor
+        a
+          color: #fff
+          border: 1px solid #aaa
+          padding: 4px 7px 3px 7px
+        
 
   .navright
     margin: 6px 20px 2px 0px
@@ -92,17 +95,21 @@ div#toolbar_holder
   li
     list-style: none
     float: left
-  a
-    color: #666
-    text-decoration: none
-    padding: 0px 7px 0px 7px
-    border-right: 1px solid #999
-    &.on
-      color: $main-a
+    a
+      color: #666
       text-decoration: none
       padding: 0px 7px 0px 7px
-    &:hover
-      color: $main-a
+      border-right: 1px solid #999
+      
+      &:hover
+        color: $main-a
+        
+    &.selected, &.ancestor
+      a
+        color: $main-a
+        text-decoration: none
+        padding: 0px 7px 0px 7px
+      
   li
     &:last-child a
       border-right: none !important
