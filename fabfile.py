@@ -143,7 +143,7 @@ def deploy():
             print e        
         
         try:
-            run('/srv/%s/bin/python /%s/src/website/manage.py collectstatic --noinput' % (env.site_id, env.path))
+            run('/srv/%s/bin/python /%s/src/website/manage.py collectstatic --noinput --verbosity=0' % (env.site_id, env.path))
             run('/srv/%s/bin/python /%s/src/website/manage.py compress -f' % (env.site_id, env.path))
         except Exception, e:
             print e
