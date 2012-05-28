@@ -15,6 +15,7 @@ class LibraryMenu(CMSAttachMenu):
     
     def get_nodes(self, request):
         nodes = []
+        """
         node = NavigationNode(
             _('Releases'),
             reverse('ReleaseListView', args=[]),
@@ -27,7 +28,8 @@ class LibraryMenu(CMSAttachMenu):
             123
         )
         nodes.append(node)
-
+        """
+        
         return nodes
     
 menu_pool.register_menu(LibraryMenu)
