@@ -1,0 +1,105 @@
+{% load thumbnail i18n truncate %}
+
+
+<!-- list item s -->
+
+
+<div class="list_body_row selectable  published owner  view edit stream collect download" id="list_item_19287">
+	<div class="list_body_item c1 image_center_bg" style="background-image: url({% thumbnail item.main_image 36x36 crop upscale subject_location=item.main_image.subject_location %});">
+		<ul>
+			<!-- Play link  -->
+			<li class="play">
+				<a href="/en/content/library/releases/19287-fieber-remixed/play.json#0#replace" title="Play" class="playable popup"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
+			</li>
+		</ul>
+	</div>
+	<div class="list_body_item c2">
+		<ul>
+			<li class="bold">
+				<a href="{{ item.get_absolute_url }}" title="{{ item.name }}">{{ item.name|truncate_chars_inner:24 }}</a>
+			</li>
+			<li>
+				
+				{% for artist in item.get_artists %}
+				{% if artist.get_absolute_url %}
+				<a href="{{ artist.get_absolute_url }}">{{ artist.name|truncate_chars_inner:32 }}</a>{% if not forloop.last %},{% endif %}
+				{% else %}
+				<span>{{ artist.name|truncate_chars_inner:32 }}</span>{% if not forloop.last %},{% endif %}
+				{% endif %}
+				{% endfor %}
+				
+				<!--
+				<a href="/en/content/library/artists/12721-oliver-huntemann/releases.html" title="Oliver Huntemann">Oliver Huntemann</a>&nbsp;<a href="/content/library/releases?artist_ids=12721&amp;page=1" title="Only show releases by Oliver Huntemann" style="vertical-align: top;"><span class="filter icon"></span></a>
+				-->
+			</li>
+		</ul>
+	</div>
+	<div class="list_body_item c3">
+		<ul class="indicator">
+			<li class="indicator q3"><img src="/static/img/base/spacer.png" width="2" height="10" alt="Indicator" title="37 Degrees (Arnaud Rebotini&#039;s Blackstrobe Remix)" />
+			</li>
+		</ul>
+	</div>
+	<div class="list_body_item c4">
+		<ul>
+			<li class="bold">
+				{% if item.label %}
+				
+				<a href="{{ item.label.get_absolute_url }}" title="{{ item.label.name }}">{{ item.label.name|truncate_chars_inner:24 }}</a>
+
+				<!--
+				<a href="/en/content/library/labels/5867-confused-recordings/profile.html">Confused  … rdings</a>&nbsp;<a href="/content/library/releases?label_ids=5867&amp;page=1" title="Only show releases on Confused Recordings" style="vertical-align: top;"><span class="filter icon"></span></a>
+				-->
+				{% else %}
+				&nbsp;
+				{% endif %}
+			</li>
+			<li class="small">
+				CON 58
+			</li>
+		</ul>
+	</div>
+	<div class="list_body_item c5 license restricted_commercial">
+		<a href="/en/content/library/licenses/1-restricted_commercial/inline.html" title="License details" class="dialog modal"><img src="/static/img/icons/transparent_16x16.png" width="78" height="24" alt="License" class="noborder" /></a>
+	</div>
+	<div class="list_body_item c6">
+		<ul>
+			<li>
+				09.2006
+			</li>
+			<li class="small">
+				Germany
+			</li>
+		</ul>
+	</div>
+	<div class="list_body_item c7">
+		<ul>
+			<li>
+				Album
+			</li>
+			<li class="small">
+				Official
+			</li>
+		</ul>
+	</div>
+	<div class="list_body_item c8 action">
+		<!-- Actions sub-view  -->
+		<div class="wrapper">
+			<div class="right">
+				<ul>
+					<li class="basket">
+						<a href="#release:19287:default" title="Add to Basket" class="collectable"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
+					</li>
+				</ul>
+			</div>
+			<div>
+				<ul>
+					<li class="download">
+						<a href="#release:19287:mp3" title="Download Release" class="downloadable queue"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
+					</li>
+				</ul>
+			</div>
+			<div class="clear"></div>
+		</div>
+	</div>
+</div>

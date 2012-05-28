@@ -7,7 +7,7 @@ import sys
 
 import re
 
-from alabel.models import Artist, Release, Media, Label, Format
+from alibrary.models import Artist, Release, Media, Label, Format
 from ashop.models import Downloadrelease, Downloadmedia
 
 
@@ -62,7 +62,7 @@ class ProductCreator(object):
 
 class Command(NoArgsCommand):
     """
-    Import directory structure into alabel:
+    Import directory structure into alibrary:
 
         manage.py import_folder --path=/tmp/assets/images
     """

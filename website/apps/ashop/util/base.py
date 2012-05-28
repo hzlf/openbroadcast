@@ -1,6 +1,6 @@
 import itertools
 
-from alabel.models import Release
+from alibrary.models import Release
 
 from django.contrib.auth.models import AnonymousUser
 from shop.models.ordermodel import Order

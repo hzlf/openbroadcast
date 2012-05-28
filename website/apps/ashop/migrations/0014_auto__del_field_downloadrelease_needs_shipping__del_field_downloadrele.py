@@ -31,7 +31,7 @@ class Migration(SchemaMigration):
 
 
     models = {
-        'alabel.artist': {
+        'alibrary.artist': {
             'Meta': {'ordering': "('name',)", 'object_name': 'Artist'},
             'biography': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'created': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
@@ -39,29 +39,29 @@ class Migration(SchemaMigration):
             'folder': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'artist_folder'", 'null': 'True', 'to': "orm['filer.Folder']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'main_image': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'artist_main_image'", 'null': 'True', 'to': "orm['filer.Image']"}),
-            'members': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['alabel.Artist']", 'through': "orm['alabel.ArtistMembership']", 'symmetrical': 'False'}),
+            'members': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['alibrary.Artist']", 'through': "orm['alibrary.ArtistMembership']", 'symmetrical': 'False'}),
             'multiple': ('django.db.models.fields.NullBooleanField', [], {'null': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-            'professions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['alabel.Profession']", 'through': "orm['alabel.ArtistProfessions']", 'symmetrical': 'False'}),
+            'professions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['alibrary.Profession']", 'through': "orm['alibrary.ArtistProfessions']", 'symmetrical': 'False'}),
             'real_name': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '100', 'db_index': 'True'}),
             'updated': ('django.db.models.fields.DateField', [], {'auto_now': 'True', 'blank': 'True'}),
             'uuid': ('django.db.models.fields.CharField', [], {'max_length': '36', 'blank': 'True'})
         },
-        'alabel.artistmembership': {
+        'alibrary.artistmembership': {
             'Meta': {'object_name': 'ArtistMembership'},
-            'child': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'artist_child'", 'to': "orm['alabel.Artist']"}),
+            'child': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'artist_child'", 'to': "orm['alibrary.Artist']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'parent': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'artist_parent'", 'to': "orm['alabel.Artist']"}),
-            'profession': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'artist_membership_profession'", 'null': 'True', 'to': "orm['alabel.Profession']"})
+            'parent': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'artist_parent'", 'to': "orm['alibrary.Artist']"}),
+            'profession': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'artist_membership_profession'", 'null': 'True', 'to': "orm['alibrary.Profession']"})
         },
-        'alabel.artistprofessions': {
+        'alibrary.artistprofessions': {
             'Meta': {'object_name': 'ArtistProfessions'},
-            'artist': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['alabel.Artist']"}),
+            'artist': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['alibrary.Artist']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'profession': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['alabel.Profession']"})
+            'profession': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['alibrary.Profession']"})
         },
-        'alabel.label': {
+        'alibrary.label': {
             'Meta': {'ordering': "('name',)", 'object_name': 'Label'},
             'address': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'country': ('django_countries.fields.CountryField', [], {'max_length': '2', 'null': 'True', 'blank': 'True'}),
@@ -74,14 +74,14 @@ class Migration(SchemaMigration):
             'level': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
             'lft': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-            'parent': ('mptt.fields.TreeForeignKey', [], {'blank': 'True', 'related_name': "'label_children'", 'null': 'True', 'to': "orm['alabel.Label']"}),
+            'parent': ('mptt.fields.TreeForeignKey', [], {'blank': 'True', 'related_name': "'label_children'", 'null': 'True', 'to': "orm['alibrary.Label']"}),
             'rght': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '100', 'db_index': 'True'}),
             'tree_id': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
             'updated': ('django.db.models.fields.DateField', [], {'auto_now': 'True', 'blank': 'True'}),
             'uuid': ('django.db.models.fields.CharField', [], {'default': "'829427c7-2d7e-496e-b1f6-df5de9dc1f4e'", 'max_length': '36'})
         },
-        'alabel.profession': {
+        'alibrary.profession': {
             'Meta': {'ordering': "('name',)", 'object_name': 'Profession'},
             'created': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'excerpt': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
@@ -90,15 +90,15 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
             'updated': ('django.db.models.fields.DateField', [], {'auto_now': 'True', 'blank': 'True'})
         },
-        'alabel.release': {
+        'alibrary.release': {
             'Meta': {'ordering': "('releasedate',)", 'object_name': 'Release'},
             'catalognumber': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
             'created': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'excerpt': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'extra_artists': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': "orm['alabel.Profession']", 'null': 'True', 'through': "orm['alabel.ReleaseExtraartists']", 'blank': 'True'}),
+            'extra_artists': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': "orm['alibrary.Profession']", 'null': 'True', 'through': "orm['alibrary.ReleaseExtraartists']", 'blank': 'True'}),
             'folder': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'release_folder'", 'null': 'True', 'to': "orm['filer.Folder']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'label': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'release_label'", 'to': "orm['alabel.Label']"}),
+            'label': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'release_label'", 'to': "orm['alibrary.Label']"}),
             'main_image': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'release_main_image'", 'null': 'True', 'to': "orm['filer.Image']"}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
             'placeholder_1': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['cms.Placeholder']", 'null': 'True'}),
@@ -109,12 +109,12 @@ class Migration(SchemaMigration):
             'updated': ('django.db.models.fields.DateField', [], {'auto_now': 'True', 'blank': 'True'}),
             'uuid': ('django.db.models.fields.CharField', [], {'max_length': '36', 'blank': 'True'})
         },
-        'alabel.releaseextraartists': {
+        'alibrary.releaseextraartists': {
             'Meta': {'object_name': 'ReleaseExtraartists'},
-            'artist': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'release_extraartist_artist'", 'to': "orm['alabel.Artist']"}),
+            'artist': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'release_extraartist_artist'", 'to': "orm['alibrary.Artist']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'profession': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'release_extraartist_profession'", 'null': 'True', 'to': "orm['alabel.Profession']"}),
-            'release': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'release_extraartist_release'", 'to': "orm['alabel.Release']"})
+            'profession': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'release_extraartist_profession'", 'null': 'True', 'to': "orm['alibrary.Profession']"}),
+            'release': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'release_extraartist_release'", 'to': "orm['alibrary.Release']"})
         },
         'ashop.baseproduct': {
             'Meta': {'ordering': "['name']", 'object_name': 'Baseproduct', '_ormbases': ['shop.Product']},
@@ -141,7 +141,7 @@ class Migration(SchemaMigration):
         'ashop.releaseproduct': {
             'Meta': {'ordering': "['name']", 'object_name': 'Releaseproduct', '_ormbases': ['shop.Product']},
             'product_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['shop.Product']", 'unique': 'True', 'primary_key': 'True'}),
-            'release': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'releaseproduct_release'", 'to': "orm['alabel.Release']"})
+            'release': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'releaseproduct_release'", 'to': "orm['alibrary.Release']"})
         },
         'ashop.singleproduct': {
             'Meta': {'object_name': 'SingleProduct', 'db_table': "'cmsplugin_singleproduct'", '_ormbases': ['cms.CMSPlugin']},

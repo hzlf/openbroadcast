@@ -38,7 +38,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(PROJECT_DIR, 'data.db'),
-        #'NAME': '/Users/ohrstrom/srv/alabel/data.db',
+        #'NAME': '/Users/ohrstrom/srv/alibrary/data.db',
     },
 }
 
@@ -299,13 +299,14 @@ INSTALLED_APPS = (
     
     # custom apps/*
     'asite',
-    'alabel',
+    'alibrary',
     'aplayer',
     'genericrelations',
     'ashop',
     'ashop.addressmodel',
     #'acalendar',
     #'articles',
+    'spurl',
     'lib',
     #'teaser',
     
@@ -318,7 +319,11 @@ INSTALLED_APPS = (
 
     'wikisyntax',
     'taggit',
+    'tagging',
+    'pure_pagination',
     #'taggit_templatetags',
+    
+    'obp_legacy',
     
     # helpers
     'dev',
@@ -336,6 +341,16 @@ DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
 }
 TEMP_DIR = '%s/%s' % (PROJECT_DIR, 'temp')
+
+
+PAGINATION_SETTINGS = {
+    'PAGE_RANGE_DISPLAYED': 5,
+    'MARGIN_PAGES_DISPLAYED': 2,
+}
+
+FORMATS_MEDIA = {
+    'mp3': ['base', 'low'],    
+}
 
 """
 API-Keys (override in local_settings)
@@ -480,8 +495,8 @@ Other app related
 wikisyntax, eg allows tor resolve [a:Artists Name] to object
 """
 WIKISYNTAX = (
-    ('r','alabel.util.object_linker.WikiRelease'),
-    ('a','alabel.util.object_linker.WikiArtist'),
+    ('r','alibrary.util.object_linker.WikiRelease'),
+    ('a','alibrary.util.object_linker.WikiArtist'),
 )
 WIKISYNTAX_DISABLE_CACHE = True
 
@@ -505,7 +520,7 @@ BROKER_VHOST = "/"
 streaming server
 """
 RTMP_HOST = '127.0.0.2'
-RTMP_APP = 'alabel'
+RTMP_APP = 'alibrary'
 RTMP_PORT = '1935'
 
 
@@ -543,7 +558,7 @@ IMAGE_BASE_SIZES = {
 # jenkins
 PROJECT_APPS = (
     'aplayer',
-    #'alabel',
+    #'alibrary',
 )
 JENKINS_TASKS = (
     'django_jenkins.tasks.run_pylint',

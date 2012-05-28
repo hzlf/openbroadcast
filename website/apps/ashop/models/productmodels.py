@@ -19,7 +19,7 @@ from shop.order_signals import *
 from guardian.models import UserObjectPermission
 from guardian.shortcuts import assign
 
-from alabel.models import Release, Media
+from alibrary.models import Release, Media
 
 
 
@@ -124,7 +124,7 @@ class Downloadrelease(Releaseproduct):
     circulation = False
 
     
-    format = models.ForeignKey('alabel.Format', related_name='releaseformat')
+    format = models.ForeignKey('alibrary.Format', related_name='releaseformat')
     
     def description(self):
         return _('Digital Download.')
@@ -154,7 +154,7 @@ class Downloadmedia(Product):
     # relations
     media = models.ForeignKey(Media, related_name='mediaproduct')
     
-    format = models.ForeignKey('alabel.Format', related_name='mediaformat')
+    format = models.ForeignKey('alibrary.Format', related_name='mediaformat')
 
     needs_shipping = False
     medium = _('Digital')

@@ -24,10 +24,10 @@ class Migration(SchemaMigration):
         db.add_column('filer_audio', 'tracknumber', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, max_length=3), keep_default=False)
 
         # Adding field 'Audio.license'
-        db.add_column('filer_audio', 'license', self.gf('django.db.models.fields.related.ForeignKey')(related_name='audio_license', null=True, to=orm['alabel.License'], blank=True), keep_default=False)
+        db.add_column('filer_audio', 'license', self.gf('django.db.models.fields.related.ForeignKey')(related_name='audio_license', null=True, to=orm['alibrary.License'], blank=True), keep_default=False)
 
         # Adding field 'Audio.artist'
-        db.add_column('filer_audio', 'artist', self.gf('django.db.models.fields.related.ForeignKey')(related_name='audio_artist', null=True, to=orm['alabel.Artist'], blank=True), keep_default=False)
+        db.add_column('filer_audio', 'artist', self.gf('django.db.models.fields.related.ForeignKey')(related_name='audio_artist', null=True, to=orm['alibrary.Artist'], blank=True), keep_default=False)
 
 
     models = {

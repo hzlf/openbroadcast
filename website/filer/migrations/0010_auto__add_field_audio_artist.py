@@ -9,7 +9,7 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         
         # Adding field 'Audio.artist'
-        db.add_column('filer_audio', 'artist', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='audio_artist', null=True, to=orm['alabel.Artist']), keep_default=False)
+        db.add_column('filer_audio', 'artist', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='audio_artist', null=True, to=orm['alibrary.Artist']), keep_default=False)
 
 
     def backwards(self, orm):
@@ -19,24 +19,24 @@ class Migration(SchemaMigration):
 
 
     models = {
-        'alabel.artist': {
+        'alibrary.artist': {
             'Meta': {'ordering': "('name',)", 'object_name': 'Artist'},
             'biography': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'created': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'excerpt': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'folder': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'artist_folder'", 'null': 'True', 'to': "orm['filer.Folder']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'members': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['alabel.Artist']", 'through': "orm['alabel.ArtistMembership']", 'symmetrical': 'False'}),
+            'members': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['alibrary.Artist']", 'through': "orm['alibrary.ArtistMembership']", 'symmetrical': 'False'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
             'real_name': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
             'updated': ('django.db.models.fields.DateField', [], {'auto_now': 'True', 'blank': 'True'})
         },
-        'alabel.artistmembership': {
+        'alibrary.artistmembership': {
             'Meta': {'object_name': 'ArtistMembership'},
-            'child': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'artist_child'", 'to': "orm['alabel.Artist']"}),
+            'child': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'artist_child'", 'to': "orm['alibrary.Artist']"}),
             'function': ('django.db.models.fields.CharField', [], {'max_length': '128', 'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'parent': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'artist_parent'", 'to': "orm['alabel.Artist']"})
+            'parent': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'artist_parent'", 'to': "orm['alibrary.Artist']"})
         },
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -76,7 +76,7 @@ class Migration(SchemaMigration):
         },
         'filer.audio': {
             'Meta': {'object_name': 'Audio', '_ormbases': ['filer.File']},
-            'artist': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'audio_artist'", 'null': 'True', 'to': "orm['alabel.Artist']"}),
+            'artist': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'audio_artist'", 'null': 'True', 'to': "orm['alibrary.Artist']"}),
             'file_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['filer.File']", 'unique': 'True', 'primary_key': 'True'})
         },
         'filer.clipboard': {

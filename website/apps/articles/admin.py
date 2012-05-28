@@ -52,7 +52,7 @@ class ArticleAdmin(GenericAdminModelAdmin, PlaceholderAdmin):
     form = ArticleAdminForm
     
     
-    content_type_whitelist = ('alabel/artist','alabel/media','alabel/release','acalendar/event',)
+    content_type_whitelist = ('alibrary/artist','alibrary/media','alibrary/release','acalendar/event',)
     
     inlines = [RelatedContentInline,]
     

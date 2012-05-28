@@ -1,0 +1,226 @@
+{% extends "layout_base.html" %}
+{% load spurl cache i18n truncate  %}
+
+	
+
+	{% block heading %}
+	<!-- heading / icon (large one) -->
+	<div id="heading">
+		{% include "skeleton/heading.html" %}
+	</div>
+	<!-- heading / icon (large one) -->
+	{% endblock %}
+	
+	
+	{% block modnav %}
+	<!-- start: intra-module navigation -->
+	<div id="modnav">
+		{% include "skeleton/modnav.html" %}
+	</div>
+	<!-- end: intra-module navigation -->
+	{% endblock %}
+
+
+	{% block tagcloud %}
+	<div style="padding: 2px 0px 15px; width: 730px; display: block;" class="tagcloud inline">
+		<a href="/content/library/releases?page=1&amp;tags=12" class="tag1" style="">Abstract</a>
+		<a href="/content/library/releases?page=1&amp;tags=18" class="tag1" style="">Acoustic</a>
+		<a href="/content/library/releases?page=1&amp;tags=33" class="tag1" style="">Alternative</a>
+		<a href="/content/library/releases?page=1&amp;tags=36" class="tag1" style="">Alternative&nbsp;Rock</a>
+		<a href="/content/library/releases?page=1&amp;tags=39" class="tag1" style="">Ambient</a>
+		<a href="/content/library/releases?page=1&amp;tags=80" class="tag1" style="">Blues</a>
+		<a href="/content/library/releases?page=1&amp;tags=92" class="tag1" style="">Breakbeat</a>
+		<a href="/content/library/releases?page=1&amp;tags=94" class="tag1" style="">Breaks</a>
+		<a href="/content/library/releases?page=1&amp;tags=2" class="tag1" style="">Country</a>
+		<a href="/content/library/releases?page=1&amp;tags=161" class="tag1" style="">Deep&nbsp;House</a>
+		<a href="/content/library/releases?page=1&amp;tags=177" class="tag1" style="">Disco</a>
+		<a href="/content/library/releases?page=1&amp;tags=194" class="tag2" style="">Downtempo</a>
+		<a href="/content/library/releases?page=1&amp;tags=198" class="tag1" style="">Drum&nbsp;n&nbsp;Bass</a>
+		<a href="/content/library/releases?page=1&amp;tags=200" class="tag1" style="">Dub</a>
+		<a href="/content/library/releases?page=1&amp;tags=203" class="tag1" style="">Dubstep</a>
+		<a href="/content/library/releases?page=1&amp;tags=211" class="tag1" style="">EBM</a>
+		<a href="/content/library/releases?page=1&amp;tags=217" class="tag2" style="">Electro</a>
+		<a href="/content/library/releases?page=1&amp;tags=223" class="tag9" style="">Electronic</a>
+		<a href="/content/library/releases?page=1&amp;tags=239" class="tag2" style="">Experimental</a>
+		<a href="/content/library/releases?page=1&amp;tags=258" class="tag1" style="">Folk</a>
+		<a href="/content/library/releases?page=1&amp;tags=260" class="tag1" style="">Folk&nbsp;Rock</a>
+		<a href="/content/library/releases?page=1&amp;tags=269" class="tag1" style="">Funk</a>
+		<a href="/content/library/releases?page=1&amp;tags=270" class="tag1" style="">Funk&nbsp;/&nbsp;Soul</a>
+		<a href="/content/library/releases?page=1&amp;tags=275" class="tag1" style="">Future&nbsp;Jazz</a>
+		<a href="/content/library/releases?page=1&amp;tags=323" class="tag2" style="">Hip&nbsp;Hop</a>
+		<a href="/content/library/releases?page=1&amp;tags=332" class="tag1" style="">House</a>
+		<a href="/content/library/releases?page=1&amp;tags=334" class="tag1" style="">IDM</a>
+		<a href="/content/library/releases?page=1&amp;tags=338" class="tag2" style="">Indie&nbsp;Rock</a>
+		<a href="/content/library/releases?page=1&amp;tags=341" class="tag1" style="">Industrial</a>
+		<a href="/content/library/releases?page=1&amp;tags=357" class="tag2" style="">Jazz</a>
+		<a href="/content/library/releases?page=1&amp;tags=393" class="tag1" style="">Latin</a>
+		<a href="/content/library/releases?page=1&amp;tags=397" class="tag1" style="">Leftfield</a>
+		<a href="/content/library/releases?page=1&amp;tags=411" class="tag1" style="">Lo-Fi</a>
+		<a href="/content/library/releases?page=1&amp;tags=442" class="tag1" style="">Minimal</a>
+		<a href="/content/library/releases?page=1&amp;tags=482" class="tag1" style="">New&nbsp;Wave</a>
+		<a href="/content/library/releases?page=1&amp;tags=489" class="tag1" style="">Non-Music</a>
+		<a href="/content/library/releases?page=1&amp;tags=524" class="tag2" style="">Pop</a>
+		<a href="/content/library/releases?page=1&amp;tags=526" class="tag1" style="">Pop&nbsp;Rock</a>
+		<a href="/content/library/releases?page=1&amp;tags=547" class="tag1" style="">Psychedelic&nbsp;Rock</a>
+		<a href="/content/library/releases?page=1&amp;tags=550" class="tag1" style="">Punk</a>
+		<a href="/content/library/releases?page=1&amp;tags=565" class="tag1" style="">Reggae</a>
+		<a href="/content/library/releases?page=1&amp;tags=576" class="tag6" style="">Rock</a>
+		<a href="/content/library/releases?page=1&amp;tags=634" class="tag1" style="">Soul</a>
+		<a href="/content/library/releases?page=1&amp;tags=638" class="tag1" style="">Soundtrack</a>
+		<a href="/content/library/releases?page=1&amp;tags=651" class="tag1" style="">Stage&nbsp;&nbsp;Screen</a>
+		<a href="/content/library/releases?page=1&amp;tags=680" class="tag2" style="">Synth-pop</a>
+		<a href="/content/library/releases?page=1&amp;tags=686" class="tag1" style="">Tech&nbsp;House</a>
+		<a href="/content/library/releases?page=1&amp;tags=687" class="tag1" style="">Techno</a>
+		<a href="/content/library/releases?page=1&amp;tags=709" class="tag1" style="">Trip&nbsp;Hop</a>
+		<a href="/content/library/releases?page=1&amp;tags=747" class="tag1" style="">World</a>
+		<div class="clear"></div>
+	</div>
+	{% endblock %}
+					
+					
+					
+	{% block searchbar %}
+	<div class="searchbar">
+		<div class="tagbar">
+			<!-- search field -->
+			<div style="float: left;">
+				<input type="text" id="searchbar_input" name="searchbar_input" value="&lt; Search &gt;" class="blur" />
+			</div>
+			<div style="float: right; padding: 4px 3px 0px;">
+				<img class="search_clear" src="/static/img/prototype/i_clearsearch.png" alt="Clear" />
+			</div>
+			<div class="clear"></div>
+		</div>
+	</div>
+	{% endblock %}
+					
+					
+					
+
+
+
+
+
+	{% block inner %}
+	
+	
+	
+	<div class="listhead">
+		<div style="float: right;">
+			
+			
+			{% include "element/_pagination.html" %}
+			
+			<!--
+			<p class="pagination">
+				First
+				&lt;&lt; <strong>1</strong>
+				<a href="/content/library/releases?page=2">2</a>
+				<a href="/content/library/releases?page=3">3</a>
+				<a href="/content/library/releases?page=4">4</a>
+				<a href="/content/library/releases?page=5">5</a>
+				<a href="/content/library/releases?page=6">6</a>
+				<a href="/content/library/releases?page=444">&hellip;</a>
+				<a href="/content/library/releases?page=882">882</a>
+				<a href="/content/library/releases?page=883">883</a>
+				<a href="/content/library/releases?page=884">884</a>
+				<a href="/content/library/releases?page=2" rel="next"> &gt;&gt; </a>
+				<a href="/content/library/releases?page=884" rel="last">Last</a>
+			</p>
+			-->
+		</div>
+		
+		<div class="wrapper list_style">
+			<div>
+				<ul>
+					<li class="left">
+						<a href="#" title="Set Style" class="action list_style s {% if list_style == "s" %}active{% endif %}"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Disply Type" /></a>
+					</li>
+					<li class="left">
+						<a href="#" title="Set Style" class="action list_style m {% if list_style == "m" %}active{% endif %}"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Disply Type" /></a>
+					</li>
+					<li class="left">
+						<a href="#" title="Set Style" class="action list_style l {% if list_style == "l" %}active{% endif %}"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Disply Type" /></a>
+					</li><li class="clear"></li>
+				</ul>
+			</div>
+		</div>
+		
+	</div>
+	<!-- end: listing header / paginator -->
+	
+	
+	<!-- start: listing output -->
+	<div class="listview container releases {{ list_style }}">
+		
+		<div class="list_header">
+			<div class="list_header_item c1">
+				&nbsp;
+			</div>
+			<div class="list_header_item c2 sortable {% if get.order_by == "name" %}active{% endif %} {{ get.direction }}">
+				<!--
+				<a href="/content/library/releases?direction=asc&amp;order_by=name" style="display: block;">Name</a>
+				-->
+				<a href="{% spurl base=request.get_full_path set_query="order_by=name" toggle_query="direction=ascending,descending" %}" style="display: block;">Name</a>
+			</div>
+			<div class="list_header_item c3">
+				Tracks
+			</div>
+			<div class="list_header_item c4">
+				Label
+			</div>
+			<div class="list_header_item c5">
+				License
+			</div>
+			<div class="list_header_item c6 sortable {% if get.order_by == "releasedate" %}active{% endif %} {{ get.direction }}">
+				<!--
+				<a href="/content/library/releases?direction=asc&amp;order_by=releasedate" style="display: block;">Released</a>
+				-->
+				<a href="{% spurl base=request.get_full_path set_query="order_by=releasedate" toggle_query="direction=ascending,descending" %}" style="display: block;">Released</a>
+			</div>
+			<div class="list_header_item c7">
+				Type
+			</div>
+			<div class="list_header_item c8">
+				&nbsp;
+			</div>
+		</div>
+		
+		<div class="list_body">
+
+			{% for item in release_list %}
+				{# cache 1 item item.updated #}
+				{% include "alibrary/release/list_item_s.html" %}
+				{# endcache #}
+			{% endfor %}
+			
+			{# include "dummy/release_listing_inner.html" #}
+			
+		</div>
+	</div>
+	
+	
+	<!-- start: listing footer -->
+	<div class="listview footer">
+		<div class="right ipp">
+			<a href="#12" class="active">12</a>&nbsp;<a href="#24">24</a>&nbsp;<a href="#36">36</a>&nbsp;
+		</div>
+		<div id="control_selection" class="left control_selection">
+			<span>Selection:</span>
+			<a href="#selection:invert" class="action">Invert</a>&nbsp;<a href="#selection:all" class="action">All</a>&nbsp;<a href="#selection:clear" class="action">None</a>
+		</div>
+		<div class="clear">
+			&nbsp;
+		</div>
+	</div>
+	<!-- end: listing footer -->
+	
+	{% endblock %}
+	
+
+	
+	{% block sidebar %}
+		{% include "dummy/release_listing_sidebar.html" %}
+	{% endblock %}
+
+	

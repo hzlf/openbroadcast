@@ -11,7 +11,7 @@ from filer.utils.pil_exif import get_exif_for_file
 import os
 
 # cross imports
-# from alabel.models import Artist, License
+# from alibrary.models import Artist, License
 
 class Audio(File):
     SIDEBAR_Audio_WIDTH = 210

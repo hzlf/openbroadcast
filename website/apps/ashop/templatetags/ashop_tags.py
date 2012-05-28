@@ -8,7 +8,7 @@ from classytags.arguments import Argument
 from shop.util.cart import get_or_create_cart
 from shop.models.productmodel import Product
 
-from alabel.models import Release
+from alibrary.models import Release
 
 from ashop.util.base import *
 
