@@ -94,7 +94,7 @@ class ReleaseManager(models.Manager):
 class Release(MigrationMixin):
     
     # core fields
-    uuid = UUIDField(primary_key=True)
+    uuid = UUIDField(primary_key=False)
     name = models.CharField(max_length=200)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     

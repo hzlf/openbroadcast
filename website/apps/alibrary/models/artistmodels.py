@@ -67,7 +67,7 @@ class ArtistManager(models.Manager):
 
 class Artist(MigrationMixin):
     
-    uuid = UUIDField(primary_key=True)
+    uuid = UUIDField(primary_key=False)
     name = models.CharField(max_length=400)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
