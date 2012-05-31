@@ -59,6 +59,9 @@ from settings import TEMP_DIR
 # logging
 import logging
 logger = logging.getLogger(__name__)
+
+from alibrary.util.signals import library_post_save
+from alibrary.util.slug import unique_slugify
     
     
 ################
@@ -90,10 +93,10 @@ class ReleaseManager(models.Manager):
 
 class Release(MigrationMixin):
     
-    #__metaclass__=classmaker()
-    
+    # core fields
+    uuid = UUIDField(primary_key=True)
     name = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=100, unique=False)
+    slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
     
     release_country = models.CharField(max_length=200, blank=True, null=True)
@@ -387,47 +390,22 @@ class Release(MigrationMixin):
             
         return folder
     
+
     
     def save(self, *args, **kwargs):
-        
-        """
-        Depending if folders organized by catalognumber
-        """
-        if FORCE_CATALOGNUMBER:
-            folder_name = self.catalognumber
-        else:
-            folder_name = self.name
-        
-        """
-        if not self.product:
-            product, created = Baseproduct.objects.get_or_create(name=self.catalognumber, slug=self.slug)
-            self.product = product
-        """
-        
-        if not self.folder:
-            try:
-                folder, created = Folder.objects.get_or_create(name=folder_name, parent=self.label.folder)
-                self.folder = folder
-                
-                # create subdirs
-                Folder.objects.get_or_create(name='pictures', parent=self.folder)
-                Folder.objects.get_or_create(name='tracks', parent=self.folder)
-                Folder.objects.get_or_create(name='assets', parent=self.folder)
-                Folder.objects.get_or_create(name='downloads', parent=self.folder)
-            except Exception, e:
-                print e
-            
-            
+
         """
         clear release cache
         """
         self.clear_cache_file()
-            
-            
+        
+        unique_slugify(self, self.name)
+        
         super(Release, self).save(*args, **kwargs)
 
 
 tagging.register(Release)
+post_save.connect(library_post_save, sender=Release)  
 
 
 class ReleaseExtraartists(models.Model):

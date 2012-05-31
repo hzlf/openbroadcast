@@ -21,7 +21,7 @@ from django.http import HttpResponse # needed for absolute url
 from settings import *
 
 # django-extensions (http://packages.python.org/django-extensions/)
-from django_extensions.db.fields import UUIDField
+from django_extensions.db.fields import UUIDField, AutoSlugField
 
 # cms
 from cms.models import CMSPlugin, Page
@@ -55,6 +55,9 @@ from alibrary.models.releasemodels import *
 from alibrary.models.mediamodels import *
 from alibrary.models.playlistmodels import *
 
+from alibrary.util.signals import library_post_save
+from alibrary.util.slug import unique_slugify
+
 
 
 class ArtistManager(models.Manager):
@@ -64,12 +67,9 @@ class ArtistManager(models.Manager):
 
 class Artist(MigrationMixin):
     
-    name = models.CharField(max_length=200)
-    
-    slug = models.SlugField(max_length=100, unique=False)
-    #uuid = models.CharField(max_length=36, unique=False, default=str(uuid.uuid4()), editable=False)
-    #slug = AutoSlugField(populate_from='name')
-    uuid = UUIDField()
+    uuid = UUIDField(primary_key=True)
+    name = models.CharField(max_length=400)
+    slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
     main_image = FilerImageField(null=True, blank=True, related_name="artist_main_image", rel='')
     
@@ -83,13 +83,13 @@ class Artist(MigrationMixin):
         (3, '***'),
         (4, '****'),
     )
-    priority = models.IntegerField(default=1, choices=PRIORITY_CHOICES, help_text=_('Priority for sorting'))
+    #priority = models.IntegerField(default=1, choices=PRIORITY_CHOICES, help_text=_('Priority for sorting'))
 
     
     # cms field
     placeholder_1 = PlaceholderField('placeholder_1')
 
-    multiple = models.NullBooleanField(null=True, blank=True)
+    #multiple = models.NullBooleanField(null=True, blank=True)
     
     listed = models.BooleanField(verbose_name='Include in listings', default=True, help_text=_('Should this Artist be shown on the default Artist-list?'))
     disable_link = models.BooleanField(verbose_name='Disable Link', default=False, help_text=_('Disable Linking. Useful e.g. for "Varius Artists"'))
@@ -110,7 +110,7 @@ class Artist(MigrationMixin):
     professions = models.ManyToManyField(Profession, through='ArtistProfessions')
     
     # tagging
-    tags = TaggableManager(blank=True)
+    #tags = TaggableManager(blank=True)
 
     enable_comments = models.BooleanField(_('Enable Comments'), default=True)
     
@@ -126,12 +126,9 @@ class Artist(MigrationMixin):
         app_label = 'alibrary'
         verbose_name = _('Artist')
         verbose_name_plural = _('Artists')
-        ordering = ('-priority', 'name', )
+        ordering = ('name', )
     
     def __unicode__(self):
-        
-        if self.is_multiple():
-            return 'COMBO: ' + self.name
         
         return self.name
 
@@ -204,23 +201,11 @@ class Artist(MigrationMixin):
         
         
     def save(self, *args, **kwargs):
-        
-        folder_name = self.name
-        parent, created = Folder.objects.get_or_create(name='Artists')
-        
-        if not self.folder:
-            folder, created = Folder.objects.get_or_create(name=folder_name, parent=parent)
-            self.folder = folder
-            
-            # create subdirs
-            Folder.objects.get_or_create(name='pictures', parent=self.folder)
-            Folder.objects.get_or_create(name='press', parent=self.folder)
-            Folder.objects.get_or_create(name='downloads', parent=self.folder)
-
-            
+        unique_slugify(self, self.name)
         super(Artist, self).save(*args, **kwargs)
     
-    
+# register
+post_save.connect(library_post_save, sender=Artist)      
 
 class ArtistMembership(models.Model):
     

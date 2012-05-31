@@ -6,6 +6,7 @@ import sys
 
 # django
 from django.db import models
+from django import forms
 from django.db.models.signals import post_save
 from django.template.defaultfilters import slugify
 from django.contrib.auth.models import User
@@ -43,6 +44,10 @@ from easy_thumbnails.files import get_thumbnailer
 # model extensions
 from mptt.models import MPTTModel, TreeForeignKey, TreeManyToManyField 
 
+# django-extensions (http://packages.python.org/django-extensions/)
+from django_extensions.db.fields import UUIDField, AutoSlugField
+
+
 
 # logging
 import logging
@@ -51,7 +56,8 @@ logger = logging.getLogger(__name__)
 
 ################
 from alibrary.models import *
-
+from alibrary.util.signals import library_post_save
+from alibrary.util.slug import unique_slugify
 
 class MigrationMixin(models.Model):
     
@@ -72,13 +78,12 @@ class MigrationMixin(models.Model):
 
 
 class Label(MPTTModel, MigrationMixin):
+
+    # core fields
+    uuid = UUIDField(primary_key=True)
+    name = models.CharField(max_length=400)
+    slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
-    
-    
-    name = models.CharField(max_length=200)
-    
-    slug = models.SlugField(max_length=100, unique=False)
-    uuid = models.CharField(max_length=36, unique=False, default=str(uuid.uuid4()), editable=False)
     
     labelcode = models.CharField(max_length=50)
     country = CountryField(blank=True, null=True)
@@ -116,17 +121,22 @@ class Label(MPTTModel, MigrationMixin):
     def get_folder(self, name):
         folder, created = Folder.objects.get_or_create(name=name, parent=self.folder)
         return folder
-        
-        
+
     def save(self, *args, **kwargs):
-        
-        folder_name = self.name
-        
-        if not self.folder:
-            folder, created = Folder.objects.get_or_create(name=folder_name)
-            self.folder = folder 
-            
+        unique_slugify(self, self.name)
         super(Label, self).save(*args, **kwargs)
+    
+        
+
+
+# register
+post_save.connect(library_post_save, sender=Label)   
+ 
+        
+        
+        
+        
+        
 
 class License(MPTTModel):
     
@@ -233,7 +243,8 @@ class Relation(models.Model):
     url = models.URLField(max_length=512)
 
     content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
+    # object_id = models.PositiveIntegerField()
+    object_id = UUIDField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')
 
 

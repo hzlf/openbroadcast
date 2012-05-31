@@ -51,7 +51,7 @@ class LegacyImporter(object):
         Mapping new <> legacy
         """
         r.name = lr.name
-        print u'%s' % r.name
+        print u'%s' % r.id
         
         r.save()
         
@@ -93,7 +93,7 @@ class LegacyImporter(object):
         """
         Loop tracks and track-related artists
         """
-        """
+        """""" 
         for lm in lms:
             m, created = Media.objects.get_or_create(legacy_id=lm.media.id)
             m.slug = slugify(lm.media.name)
@@ -129,7 +129,7 @@ class LegacyImporter(object):
                 
                 m.artist = a
                 m.save()
-        """     
+            
             
             
         

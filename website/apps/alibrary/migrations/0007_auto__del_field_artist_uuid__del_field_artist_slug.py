@@ -8,14 +8,22 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting field 'Release.tags'
-        db.delete_column('alibrary_release', 'tags')
+        # Deleting field 'Artist.uuid'
+        db.delete_column('alibrary_artist', 'uuid')
+
+        # Deleting field 'Artist.slug'
+        db.delete_column('alibrary_artist', 'slug')
 
 
     def backwards(self, orm):
-        # Adding field 'Release.tags'
-        db.add_column('alibrary_release', 'tags',
-                      self.gf('tagging.fields.TagField')(null=True),
+        # Adding field 'Artist.uuid'
+        db.add_column('alibrary_artist', 'uuid',
+                      self.gf('django.db.models.fields.CharField')(default='', max_length=36, blank=True),
+                      keep_default=False)
+
+        # Adding field 'Artist.slug'
+        db.add_column('alibrary_artist', 'slug',
+                      self.gf('django.db.models.fields.SlugField')(default=None, max_length=100),
                       keep_default=False)
 
 
@@ -41,9 +49,7 @@ class Migration(SchemaMigration):
             'priority': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'professions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['alibrary.Profession']", 'through': "orm['alibrary.ArtistProfessions']", 'symmetrical': 'False'}),
             'real_name': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '100'}),
-            'updated': ('django.db.models.fields.DateField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'uuid': ('django.db.models.fields.CharField', [], {'max_length': '36', 'blank': 'True'})
+            'updated': ('django.db.models.fields.DateField', [], {'auto_now': 'True', 'blank': 'True'})
         },
         'alibrary.artistmembership': {
             'Meta': {'object_name': 'ArtistMembership'},
@@ -81,7 +87,6 @@ class Migration(SchemaMigration):
             'email_main': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
             'first_placeholder': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['cms.Placeholder']", 'null': 'True'}),
             'folder': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'label_folder'", 'null': 'True', 'to': "orm['filer.Folder']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'labelcode': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
             'legacy_id': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'level': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
@@ -90,10 +95,10 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
             'parent': ('mptt.fields.TreeForeignKey', [], {'blank': 'True', 'related_name': "'label_children'", 'null': 'True', 'to': "orm['alibrary.Label']"}),
             'rght': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '100'}),
+            'slug': ('django_extensions.db.fields.AutoSlugField', [], {'allow_duplicates': 'False', 'max_length': '50', 'separator': "u'-'", 'blank': 'True', 'populate_from': "'name'", 'overwrite': 'True'}),
             'tree_id': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
             'updated': ('django.db.models.fields.DateField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'uuid': ('django.db.models.fields.CharField', [], {'default': "'0dc1d43f-ad87-4a0b-a7b5-5a245211cf0e'", 'max_length': '36'})
+            'uuid': ('django.db.models.fields.CharField', [], {'max_length': '36', 'primary_key': 'True'})
         },
         'alibrary.license': {
             'Meta': {'ordering': "('name',)", 'object_name': 'License'},
@@ -111,7 +116,7 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '100'}),
             'tree_id': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
             'updated': ('django.db.models.fields.DateField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'uuid': ('django.db.models.fields.CharField', [], {'default': "'cb10d031-5527-4776-9343-a589e9acf4c9'", 'max_length': '36'})
+            'uuid': ('django.db.models.fields.CharField', [], {'default': "'71ff56f3-f105-4a75-a306-0ad79b26039f'", 'max_length': '36'})
         },
         'alibrary.media': {
             'Meta': {'ordering': "('tracknumber',)", 'object_name': 'Media'},
@@ -221,7 +226,7 @@ class Migration(SchemaMigration):
             'release_country': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
             'releasedate': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'releasetype': ('django.db.models.fields.CharField', [], {'default': "'other'", 'max_length': '12'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '100'}),
+            'slug': ('django_extensions.db.fields.AutoSlugField', [], {'allow_duplicates': 'False', 'max_length': '50', 'separator': "u'-'", 'blank': 'True', 'populate_from': "'name'", 'overwrite': 'True'}),
             'updated': ('django.db.models.fields.DateField', [], {'auto_now': 'True', 'blank': 'True'}),
             'uuid': ('django.db.models.fields.CharField', [], {'max_length': '36', 'blank': 'True'})
         },

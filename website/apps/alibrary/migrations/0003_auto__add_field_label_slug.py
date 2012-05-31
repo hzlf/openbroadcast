@@ -8,23 +8,15 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'Artist.legacy_id'
-        db.add_column('alibrary_artist', 'legacy_id',
-                      self.gf('django.db.models.fields.IntegerField')(null=True, blank=True),
-                      keep_default=False)
-
-        # Adding field 'Artist.migrated'
-        db.add_column('alibrary_artist', 'migrated',
-                      self.gf('django.db.models.fields.DateField')(null=True, blank=True),
+        # Adding field 'Label.slug'
+        db.add_column('alibrary_label', 'slug',
+                      self.gf('django_extensions.db.fields.AutoSlugField')(allow_duplicates=False, max_length=50, separator=u'-', blank=True, default='', populate_from='name', overwrite=False),
                       keep_default=False)
 
 
     def backwards(self, orm):
-        # Deleting field 'Artist.legacy_id'
-        db.delete_column('alibrary_artist', 'legacy_id')
-
-        # Deleting field 'Artist.migrated'
-        db.delete_column('alibrary_artist', 'migrated')
+        # Deleting field 'Label.slug'
+        db.delete_column('alibrary_label', 'slug')
 
 
     models = {
@@ -89,17 +81,18 @@ class Migration(SchemaMigration):
             'email_main': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
             'first_placeholder': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['cms.Placeholder']", 'null': 'True'}),
             'folder': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'label_folder'", 'null': 'True', 'to': "orm['filer.Folder']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'labelcode': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
+            'legacy_id': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'level': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
             'lft': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
+            'migrated': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
             'parent': ('mptt.fields.TreeForeignKey', [], {'blank': 'True', 'related_name': "'label_children'", 'null': 'True', 'to': "orm['alibrary.Label']"}),
             'rght': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '100'}),
+            'slug': ('django_extensions.db.fields.AutoSlugField', [], {'allow_duplicates': 'False', 'max_length': '50', 'separator': "u'-'", 'blank': 'True', 'populate_from': "'name'", 'overwrite': 'False'}),
             'tree_id': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
             'updated': ('django.db.models.fields.DateField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'uuid': ('django.db.models.fields.CharField', [], {'default': "'4e023a75-2032-4d12-9e96-e68a40b434e3'", 'max_length': '36'})
+            'uuid': ('django.db.models.fields.CharField', [], {'max_length': '36', 'primary_key': 'True'})
         },
         'alibrary.license': {
             'Meta': {'ordering': "('name',)", 'object_name': 'License'},
@@ -117,7 +110,7 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '100'}),
             'tree_id': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
             'updated': ('django.db.models.fields.DateField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'uuid': ('django.db.models.fields.CharField', [], {'default': "'36040799-2ebb-4122-808f-52b6471752f3'", 'max_length': '36'})
+            'uuid': ('django.db.models.fields.CharField', [], {'default': "'0900f9dc-f79e-493b-8bbc-3c37b8ccb2f1'", 'max_length': '36'})
         },
         'alibrary.media': {
             'Meta': {'ordering': "('tracknumber',)", 'object_name': 'Media'},

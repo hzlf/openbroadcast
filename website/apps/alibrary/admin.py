@@ -40,17 +40,18 @@ class LabelInline(admin.TabularInline):
 
 class MediaInline(admin.TabularInline):
     model = Media
-    exclude = ['tags', 'description']
+    exclude = ['description',]
     extra = 1
     
 class LabelAdmin(PlaceholderAdmin, BaseAdmin):
     
     # inlines = [LabelInline]
-    prepopulated_fields = {"slug": ("name",)}
+    #prepopulated_fields = {"slug": ("name",)}
+    readonly_fields = ['slug']
     
     """"""
     fieldsets = [
-        (None,               {'fields': ['name', 'slug', 'folder']}),
+        (None,               {'fields': ['name', 'slug']}),
         
         ('Relations', {'fields': ['parent'], 'classes': ['']}),
         
@@ -87,13 +88,14 @@ class RelationsInline(GenericTabularInline):
 class ReleaseAdmin(PlaceholderAdmin, BaseAdmin):
 
     #list_display   = ('name', 'get_extra_artists',)
-    list_display   = ('name', 'releasetype', 'label', 'releasedate',)
+    list_display   = ('name', 'releasetype', 'label', 'slug', 'uuid',)
     search_fields = ['name', 'label__name',]
     list_filter = ('releasetype','release_country',)
     
     #inlines = [RelationsInline, MediaInline, ReleaseExtraartistsInline, DownloadreleaseInline, HardwarereleaseInline]
     inlines = [RelationsInline, MediaInline, ReleaseExtraartistsInline]
-    prepopulated_fields = {"slug": ("name",)}
+    #prepopulated_fields = {"slug": ("name",)}
+    readonly_fields = ['slug']
     
     """"""
     fieldsets = [
@@ -125,23 +127,25 @@ class MediaExtraartistsInline(admin.TabularInline):
     extra=1
 
 
+
          
 class ArtistAdmin(PlaceholderAdmin, BaseAdmin):
     
 
-    list_display   = ('name', 'listed', 'priority',)
+    list_display   = ('name', 'listed',)
     search_fields = ['name', 'media__name',]
-    list_filter = ('priority', 'listed')
+    list_filter = ('listed',)
     
     # inlines = [LabelInline]
+    
+    # RelationsInline, 
     inlines = [RelationsInline, ArtistProfessionsInline, ArtistMembersInline, ArtistParentsInline,]
     
-    prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ["folder",]
     
     """"""
     fieldsets = [
-        (None,               {'fields': ['name', 'slug', 'main_image', 'aliases', 'real_name', ('priority', 'listed', 'disable_link',), 'enable_comments', 'excerpt', 'folder', ]}),
+        (None,               {'fields': ['name', 'slug', 'main_image', 'aliases', 'real_name', ('listed', 'disable_link',), 'enable_comments', 'excerpt', 'folder', ]}),
         ('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
     ]
     
@@ -174,17 +178,17 @@ class MediaAdmin(BaseAdmin):
     
     list_display   = ('name', 'release', 'artist', 'mediatype', 'tracknumber', 'processed')
     search_fields = ['artist__name', 'release__name']
-    list_filter = ('artist__name','release__name', 'mediatype', 'license__name', 'processed')
+    list_filter = ('mediatype', 'license__name', 'processed')
     
     inlines = [MediaExtraartistsInline]
 
-
+    readonly_fields = ['slug']
     
     
     """"""
     fieldsets = [
         (None,  {'fields': 
-                 ['name', 'isrc', 'tracknumber', 'mediatype', 'release', 'artist', 'license', 'master', 'tags']
+                 ['name', 'slug', 'isrc', 'tracknumber', 'mediatype', 'release', 'artist', 'license', 'master']
                  }),
 
         ('Mixed content', {'fields': ['description'], 'classes': ['']}),

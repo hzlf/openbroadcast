@@ -70,23 +70,21 @@ from alibrary.models.artistmodels import *
 from alibrary.models.releasemodels import *
 from alibrary.models.playlistmodels import *
 
-
+from alibrary.util.signals import library_post_save
+from alibrary.util.slug import unique_slugify
 
 class Media(MigrationMixin):
     
-    name = models.CharField(max_length=200)
+    # core fields
+    uuid = UUIDField(primary_key=True)
+    name = models.CharField(max_length=400)
+    slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
-    slug = AutoSlugField(populate_from='name')
-    # slug = models.SlugField(max_length=100, unique=False, null=True, blank=True)
-    #uuid = models.CharField(max_length=36, unique=False, null=True, blank=True, editable=False)
-    uuid = UUIDField(null=True, blank=True)
+    
     isrc = models.CharField(max_length=12, null=True, blank=True, help_text="International Standard Recording Code")
-    
     master_path = models.CharField(max_length=2048, null=True, blank=True, help_text="Master Path", editable=False)
     
     # processed & lock flag (needed for models that have maintenance/init/save tasks)
-
-    
     PROCESSED_CHOICES = (
         (0, _('Waiting')),
         (1, _('Done')),
@@ -124,7 +122,7 @@ class Media(MigrationMixin):
     master = FilerAudioField(blank=True, null=True, related_name='media_master')
     
     # tagging
-    tags = TaggableManager(blank=True)
+    #tags = TaggableManager(blank=True)
     
     # manager
     objects = models.Manager()
@@ -787,18 +785,18 @@ class Media(MigrationMixin):
         log = logging.getLogger('alibrary.mediamodels.save')
         log.info('Media id: %s - Save' % (self.pk))
 
-        if not self.uuid:
-            self.uuid = str(uuid.uuid4())
-            log.info('Media id: %s - Created uuid: %s' % (self.pk, self.uuid))
         
         """
         check if master changed. if yes we need to reprocess the cached files
         """
-        if self.pk is not None:
-            orig = Media.objects.get(pk=self.pk)
+        
+        """
+        if self.uuid is not None:
+            orig = Media.objects.get(uuid=self.uuid)
             if orig.master != self.master:
-                log.info('Media id: %s - Master changed from "%s" to "%s"' % (self.pk, orig.master, self.master))
+                log.info('Media id: %s - Master changed from "%s" to "%s"' % (self.uuid, orig.master, self.master))
                 self.processed = 0
+        """
         
         try:
             cache_folder = self.folder
@@ -807,18 +805,24 @@ class Media(MigrationMixin):
             log.info('Media id: %s - cache folder does not exist' % (self.pk))
             cache_folder = None
         
-        folder_name = str(self.uuid)
+
+        """
         if not cache_folder:
             parent_folder, created = Folder.objects.get_or_create(name='cache')
             folder, created = Folder.objects.get_or_create(name=folder_name, parent=parent_folder)
             log.info('Media id: %s - cache folder set to: %s' % (self.pk, folder.name))
             self.folder = folder
+        """
             
         if self.master:
             log.info('Media id: %s - set master path to: %s' % (self.pk, self.master.path))
             self.master_path = self.master.path
                 
+        unique_slugify(self, self.name)
         super(Media, self).save(*args, **kwargs)
+
+# register
+post_save.connect(library_post_save, sender=Media)   
         
 # media post save
 def media_post_save(sender, **kwargs):
