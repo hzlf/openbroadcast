@@ -153,8 +153,17 @@ class Release(MigrationMixin):
     # tagging
     #tags = TaggableManager(blank=True)
     
-    tags = tagging.fields.TagField()
+    # tags = tagging.fields.TagField()
+    # basic methods for what tagging provides
     
+    #def _get_tags(self): 
+        #return Tag.objects.get_for_object(self) 
+
+    #def _set_tags(self, tag_list): 
+        #Tag.objects.update_tags(self, tag_list)
+         
+    #tags = property(_get_tags, _set_tags) 
+
     #ntags = tagging.managers.ModelTaggedItemManager()
 
     enable_comments = models.BooleanField(_('Enable Comments'), default=True)
@@ -417,10 +426,8 @@ class Release(MigrationMixin):
             
         super(Release, self).save(*args, **kwargs)
 
-try:
-    tagging.register(Release)
-except:
-    pass
+
+tagging.register(Release)
 
 
 class ReleaseExtraartists(models.Model):

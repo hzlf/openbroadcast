@@ -51,7 +51,7 @@ class LegacyImporter(object):
         Mapping new <> legacy
         """
         r.name = lr.name
-        # ... rest here
+        print u'%s' % r.name
         
         r.save()
         
@@ -65,8 +65,7 @@ class LegacyImporter(object):
             nt = Ntags.objects.using('legacy').get(id=ntr.ntag_id)
             print 'Tag Name: %s' % nt.name
 
-            
-            Tag.objects.add_tag(r, '"%s"' % nt.name)
+            Tag.objects.add_tag(r, u'"%s"' % nt.name)
             
             #r.tags.add_tag(nt.name)
             #r.tags.add(nt.name)
