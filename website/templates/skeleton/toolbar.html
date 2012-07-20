@@ -1,14 +1,29 @@
-{% load menu_tags %}
+{% load menu_tags i18n %}
 
 	<div id="toolbar">
 		<div class="navright">
 			<div class="right">
-				<a href="https://www.facebook.com/logout.php?next=http%3A%2F%2Fopenbroadcast.ch%2Fauth%2Flogout&amp;access_token=143733768986545%7C0e903068eaee101f60f4b58a6239245d">Logout</a>
+				<!-- account section -->
+				<ul id="nav" class="horizontal"> 
+			
+					{% if user.is_authenticated %}
+			        	<li><a href="{% url account_logout %}?next={{ request.get_full_path }}"><span>{% trans 'Signout' %}</span></a></li>
+			        	<li><a href="{% url account_email %}"><span>{% trans 'Account' %} [{{ user.username }}]</span></a></li>
+			        	{% if user.is_staff %}
+						<li><a href="/admin/"><span>{% trans 'Administration' %}</span></a></li>
+						{% endif %}
+					{% else %}
+			        	<li><a title="Login" href="{% url account_login %}?next={{ request.get_full_path }}" rel="modal:open"><span>{% trans 'Login' %}</span></a></li>
+						<li><a title="Login" href="{% url account_signup %}?next={{ request.get_full_path }}" rel="modal:open"><span>{% trans 'Sign Up' %}</span></a></li>
+			    	{% endif %}
+			    </ul>
+				<!-- // account section -->
+					
 			</div>
 		</div>
 		<div class="navleft">
 			<div style="float: left; margin-left: -10px; margin-right: 0px;">
-				<a href="https://www.openbroadcast.ch/" style="color: #777777; font-weight: bold;">open broadcast</a>
+				<a href="/" style="color: #777777; font-weight: bold;">open broadcast</a>
 			</div>
 			<ul class="left navigation-main">
 				{% show_menu 0 1 100 100 "menu/navigation_main.html" %}

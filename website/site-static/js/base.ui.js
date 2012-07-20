@@ -15,6 +15,267 @@ base.ui.use_effects = true;
 sm2 = function() {
 };
 
+
+$.cookie.defaults = {};
+
+UiStates = function() {
+	
+	var self = this; 
+	this.css_selector = '.ui-persistent';
+	this.cookie_name = 'ui_states';
+	this.values = new HashTable();
+	
+	// load states from cookie to hash-table 
+	this.load = function() {
+		
+		$.log('load states');
+		
+		if($.cookie(this.cookie_name)) {
+			self.values.items = JSON.parse($.cookie(this.cookie_name));
+		}
+		$.log(['(load) current states', self.values.items]);
+		
+		this.apply_states();
+	},
+	this.get_states = function(key) {
+		
+		$.log('get_states: ' + key);
+		
+		if(key !== undefined){
+			return self.values.getItem(key);
+		} else {
+			return false;
+		}
+		
+	},
+	this.apply_states = function(key) {
+		
+		$.log('apply_states: ' + key);
+		
+		
+		if(key !== undefined){
+				alert('fööck');
+		} else {
+			$(this.css_selector).each(function(i, el){
+				
+				var id = $(el).attr('id');
+				var state = self.values.getItem(id);
+				
+				// check if custom update rules apply for the element
+				if(base.ui.states_custom_update(id, state)) {
+					return;
+				}
+				
+				// else do the default actions..
+				if(state == 'expanded') {
+					$(el).show();				
+				};
+				if(state == 'hidden') {
+					$(el).hide();				
+				};
+				
+			});
+		}
+		
+
+
+	},
+	
+	// set specific state or loop through persistent items
+	this.set_states = function(key, value) {
+		
+		$.log('set_states: ' + key + ' - ' + value);
+		
+		if(key !== undefined && value !== undefined){
+			self.values.setItem(key, value);
+		} else {
+			$(this.css_selector).each(function(i, el){
+				self.values.setItem($(el).attr('id'), $(el).data('uistate'));
+			});
+		}
+		$.log(['(set_states) current states', self.values.items]);
+	},
+	// save states to cookie
+	this.save = function(){
+		
+		$.log('save');
+		// this.set_states();
+
+		$.cookie(this.cookie_name, JSON.stringify(self.values.items));
+		
+		$.log('post-save');
+	}
+}
+
+BaseUi = function(){
+	
+	var self = this;
+	
+	this.states = new UiStates();
+	
+	this.init = function() {
+		
+		$('.ui-persistent').watch('uistate', function(){
+			var state = $(this).data('uistate');
+			
+			$.log('watched:' + state);
+			
+			self.states.set_states($(this).attr('id'), state);
+			self.states.apply_states();
+
+      	});
+
+		
+		this.states.load();
+	},
+	this.unload = function() {
+		this.states.save();
+	}
+};
+
+
+
+
+
+base.ui = new BaseUi();
+
+
+
+base.ui.states_custom_update = function(id, state){
+	
+	var el = $('#' + id);
+	
+	if(id == 'tagcloud_inline') {
+
+		if(state == 'expanded') {
+			$('#tagcloud_inline_toggle').addClass('active');
+			el.css('display', 'block');
+		}
+		if(state == 'hidden') {
+			$('#tagcloud_inline_toggle').removeClass('active');
+			el.css('display', 'none');
+		}
+		
+		
+		return true;	
+	}
+
+	
+	if(id.substring(0, 9) == 'filterbox') {
+		
+		$.log('custom state-update: ' + 'filterbox');
+		if(state == 'expanded') {
+			el.addClass('boxon');
+			el.parent().addClass('boxon');
+			$('.boxcontent', el.parent()).show();
+		}
+		if(state == 'hidden') {
+			el.removeClass('boxon');
+			el.parent().removeClass('boxon');
+			$('.boxcontent', el.parent()).hide();
+		}
+		
+		return true;
+	}
+	
+	
+	return false;
+}
+
+
+function HashTable(obj)
+{
+    this.length = 0;
+    this.items = {};
+    for (var p in obj) {
+        if (obj.hasOwnProperty(p)) {
+            this.items[p] = obj[p];
+            this.length++;
+        }
+    }
+
+    this.setItem = function(key, value)
+    {
+        var previous = undefined;
+        if (this.hasItem(key)) {
+            previous = this.items[key];
+        }
+        else {
+            this.length++;
+        }
+        this.items[key] = value;
+        return previous;
+    }
+
+    this.getItem = function(key) {
+        return this.hasItem(key) ? this.items[key] : undefined;
+    }
+
+    this.hasItem = function(key)
+    {
+        return this.items.hasOwnProperty(key);
+    }
+   
+    this.removeItem = function(key)
+    {
+        if (this.hasItem(key)) {
+            previous = this.items[key];
+            this.length--;
+            delete this.items[key];
+            return previous;
+        }
+        else {
+            return undefined;
+        }
+    }
+
+    this.keys = function()
+    {
+        var keys = [];
+        for (var k in this.items) {
+            if (this.hasItem(k)) {
+                keys.push(k);
+            }
+        }
+        return keys;
+    }
+
+    this.values = function()
+    {
+        var values = [];
+        for (var k in this.items) {
+            if (this.hasItem(k)) {
+                values.push(this.items[k]);
+            }
+        }
+        return values;
+    }
+
+    this.each = function(fn) {
+        for (var k in this.items) {
+            if (this.hasItem(k)) {
+                fn(k, this.items[k]);
+            }
+        }
+    }
+
+    this.clear = function()
+    {
+        this.items = {}
+        this.length = 0;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 /* AJAX Indicator */
 base.ui.loading = function() {
 	$(document).ajaxStart(function() {
@@ -39,6 +300,17 @@ base.ui.refresh = function() {
 		$.taconite(data);
 	});
 };
+
+
+
+
+
+
+
+
+
+
+
 
 /*
  * global interface things
@@ -904,22 +1176,32 @@ base.ui.searchbar = function() {
 /* tagcloud (inline) */
 base.ui.tagcloud = function() {
 
-	$('a#tagcloud_inline_toggle').live('click', function(event) {
-		// extract clicked section
-			var display = $('.tagcloud.inline').css('display');
-
-			$('.tagcloud.inline').toggle(30);
-
-			if (display == 'none') {
-				base.ui.save_state('tagcloud', 1, false);
-				$(this).addClass('active');
-			} else {
-				base.ui.save_state('tagcloud', 0, false);
-				$(this).removeClass('active');
-			}
-
-			return false;
-		});
+	$('a#tagcloud_inline_toggle').live('click', function(e) {
+		
+		e.preventDefault();
+		
+		var display = $('#tagcloud_inline').css('display');
+		
+		if(display == 'none') {
+			$('#tagcloud_inline').data('uistate', 'expanded');
+		}
+		if(display == 'block') {
+			$('#tagcloud_inline').data('uistate', 'hidden');
+		}
+		
+		
+		/*
+		var state = $('#tagcloud_inline').data('uistate');
+		
+		if(state == 'hidden') {
+			$('#tagcloud_inline').data('uistate', 'expanded');
+		}
+		if(state == 'expanded') {
+			$('#tagcloud_inline').data('uistate', 'hidden');
+		}
+		*/
+		
+	});
 
 };
 
@@ -931,19 +1213,9 @@ base.ui.sidebar = function() {
 		var key = $(this).attr('id').substring(10);
 
 		if (!$(this).hasClass('boxon')) {
-			$('div#filterbox_holder-' + key).show();
-			$(this).addClass('boxon');
-			$(this).parent().addClass('boxon');
-
-			base.ui.save_state('filterbox-' + key, 1, false);
-
+			$(this).data('uistate', 'expanded');
 		} else {
-			$('div#filterbox_holder-' + key).hide();
-			$(this).removeClass('boxon');
-			$(this).parent().removeClass('boxon');
-
-			base.ui.save_state('filterbox-' + key, 0, false);
-
+			$(this).data('uistate', 'hidden');
 		}
 
 		return false;
@@ -2196,7 +2468,7 @@ $(document).ready( function() {
 
 
  */
-base.ui.state = {
+base.ui.state___ = {
 
 	options: {
 		layoutName:	'myLayout' // default name (optional)

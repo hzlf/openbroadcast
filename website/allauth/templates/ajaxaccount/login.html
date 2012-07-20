@@ -1,7 +1,7 @@
 {% extends "ajaxaccount/base.html" %}
 
 {% load i18n %}
-{% load uni_form_tags %}
+
 {% load account_tags allauth_tags %}
 
 {% block head_title %}{% trans "Sign In" %}{% endblock %}
@@ -46,7 +46,7 @@ below:{% endblocktrans %}</p>
     <form class="login uniForm" method="POST" action="{% url account_login %}">
         {% csrf_token %}
         <fieldset class="inlineLabels">
-            {{ form|as_uni_form }}
+            {{ form.as_p }}
             {% if redirect_field_value %}
                 <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
             {% endif %}

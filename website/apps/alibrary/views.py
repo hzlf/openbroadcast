@@ -20,6 +20,7 @@ from alibrary.forms import ReleaseForm
 
 from alibrary.filters import ReleaseFilter
 
+
 class ArtistListView(ListView):
     
     # context_object_name = "artist_list"
@@ -52,13 +53,13 @@ class ReleaseListView(PaginationMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(ReleaseListView, self).get_context_data(**kwargs)
         
-        #self.extra_context['filter'] = self.filter
+        self.extra_context['filter'] = self.filter
         #self.extra_context['release_list'] = self.filter
     
         # hard-coded for the moment
         self.extra_context['list_style'] = 's'
         
-        print self.request.GET
+        # print self.request.GET
         
         self.extra_context['get'] = self.request.GET
         
@@ -79,9 +80,23 @@ class ReleaseListView(PaginationMixin, ListView):
         if order_by:
             kwargs['order_by'] = get_object_or_404(Profession, name__iexact=profession)
         """
-        #self.filter = ReleaseFilter(self.request.GET, queryset=Release.objects.active().filter(**kwargs))
+        self.filter = ReleaseFilter(self.request.GET, queryset=Release.objects.active().filter(**kwargs))
+        
+        # print self.filter.qs
+        
+        return self.filter.qs
+        
+        # return ReleaseFilter(self.request.GET or None)
+        
+        
+        ro = Release.objects.active()
+        order_by = self.request.GET.get('order_by', None)
+        if order_by:
+            #kwargs = {order}
+            print 'GOT ORDER'
+            ro = ro.order_by('-name')
 
-        return Release.objects.active().filter(**kwargs)
+        return ro.filter(**kwargs)
 
 
 class MediaListView(ListView):

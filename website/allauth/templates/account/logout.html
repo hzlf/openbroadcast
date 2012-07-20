@@ -5,7 +5,15 @@
 {% block head_title %}{% trans "Signed Out" %}{% endblock %}
 
 {% block body %}
-<h1>{% trans "Signed Out" %}</h1>
 
-<p>{% trans "You have signed out." %}</p>
+
+<header class="xl-head subhead" id="overview">
+  <h1>{% trans "Signed Out" %}</h1>
+  <p>&nbsp;</p>
+</header>    
+
+<div class="alert alert-info">
+	{% trans "You have signed out." %}
+</div>
+
 {% endblock %}

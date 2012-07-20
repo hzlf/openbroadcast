@@ -35,12 +35,16 @@ class SpurlURLBuilder(object):
         for argument, value in self.args:
             self.handle_argument(argument, value)
 
-        self.set_sensible_defaults()
-
-        url = unicode(self.url)
-
-        if self.autoescape:
-            url = escape(url)
+        try:
+            self.set_sensible_defaults()
+    
+            url = unicode(self.url)
+    
+            if self.autoescape:
+                url = escape(url)
+        except Exception, e:
+            url = self.url
+            pass
 
         return url
 
@@ -108,6 +112,121 @@ class SpurlURLBuilder(object):
                 self.url = self.url.set_query_param(key, second)
             else:
                 self.url = self.url.set_query_param(key, first)
+
+    def handle_trigger_query(self, value):
+        query_to_trigger = self.prepare_value(value)
+        if isinstance(query_to_trigger, basestring):
+            query_to_trigger = QueryString(query_to_trigger).dict
+        current_query = self.url.query.dict
+        for key, value in query_to_trigger.items():
+            print "------------"
+            print "key: %s" % key
+            print "value: %s" % value
+            if isinstance(value, basestring):
+                value = value
+
+            if key in current_query and value in current_query[key]:
+                # unset
+                self.url = self.url.del_query_param(key)
+            else:
+                # set
+                self.url = self.url.set_query_param(key, value)
+
+    def handle_trigger_mquery(self, value):
+        
+        query_to_trigger = self.prepare_value(value)
+        if isinstance(query_to_trigger, basestring):
+            query_to_trigger = QueryString(query_to_trigger).dict
+        current_query = self.url.query.dict
+
+        for key, value in query_to_trigger.items():
+            
+            # exact match of query -> unset it
+            if key in current_query and query_to_trigger[key] == current_query[key]:
+
+                self.url = self.url.del_query_param(key)
+                return
+            
+            # check if current query has multiple items
+            try:
+                ext = current_query[key]
+                ext = ext.split(',')
+            except Exception, e:
+                ext = None
+            
+            if ext and len(ext) > 1:
+                
+                if key in current_query and value in ext:
+                    
+                    # we have a key-match, so remove it from the string
+                    ext = [x for x in ext if x != value]
+                    
+                else:
+                    
+                    # no key match, so add it to the string
+                    ext.append(value)
+
+                ext.sort()
+                
+                self.url = self.url.set_query_param(key, ",".join(ext))
+                
+                
+            elif ext and len(ext) == 1:
+                
+                # param already here > append
+                ext.append(value)
+                ext.sort()
+                
+                ext = list(set(ext))
+                
+                self.url = self.url.set_query_param(key, ",".join(ext))
+                
+                
+            else:
+            
+                if isinstance(value, basestring):
+                    value = value
+    
+                if key in current_query and value in current_query[key]:
+                    # unset
+                    pass
+                    #self.url = self.url.del_query_param(key)
+                else:
+                    # set
+                    self.url = self.url.set_query_param(key, value)
+
+    def handle_active_mquery(self, value):
+        
+
+        
+        active = None
+        
+        query_to_trigger = self.prepare_value(value)
+        if isinstance(query_to_trigger, basestring):
+            query_to_trigger = QueryString(query_to_trigger).dict
+        current_query = self.url.query.dict
+
+        for key, value in query_to_trigger.items():
+            
+            # exact match of query -> unset it
+            if key in current_query and query_to_trigger[key] == current_query[key]:
+                active = True
+            
+            # check if current query has multiple items
+            try:
+                ext = current_query[key]
+                ext = ext.split(',')
+            except Exception, e:
+                ext = None
+            
+            if ext and len(ext) > 1:
+
+                if key in current_query and value in ext:
+                    active = True
+                    
+        self.url = active
+
+
 
     def handle_scheme(self, value):
         self.url = self.url.with_scheme(value)
@@ -224,6 +343,7 @@ class SpurlNode(Node):
         self.filters = filters
 
     def render(self, context):
+
         builder = SpurlURLBuilder(self.args, context, self.tags, self.filters)
         url = builder.build()
 

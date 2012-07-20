@@ -132,7 +132,7 @@ class Release(MigrationMixin):
         ('compilation', _('Compilation')),
         ('other', _('Other')),
     )
-    releasetype = models.CharField(max_length=12, default='other', choices=RELEASETYPE_CHOICES)
+    releasetype = models.CharField(verbose_name="Release type", max_length=12, default='other', choices=RELEASETYPE_CHOICES)
     
     
     # relations

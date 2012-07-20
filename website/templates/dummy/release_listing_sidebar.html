@@ -1,3 +1,5 @@
+{% load spurl %}
+
 
 	<div id="menu_context" class="menu_context">
 		<div class="set">
@@ -54,185 +56,18 @@
 		</div>
 	</div>
 	<div class="filter_context">
-		<div class="box ">
-			<div class="boxtitle " id="filterbox-type">
-				<span class="noselection">Filter: Release type</span>
-				<!--
-				<span style="color: #888888;">(6)</span>
-				-->
-			</div>
-			<div style="" class="boxcontent" id="filterbox_holder-type">
-				<div class="boxitem plus">
-					<a id="filterbox_item-album" href="/content/library/releases?filter_type=album&amp;page=1" class="filterbox_item">Album</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-ep" href="/content/library/releases?filter_type=ep&amp;page=1" class="filterbox_item">EP</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-compilation" href="/content/library/releases?filter_type=compilation&amp;page=1" class="filterbox_item">Compilation</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-recording_set" href="/content/library/releases?filter_type=recording_set&amp;page=1" class="filterbox_item">Recorded DJ-Set/Liveset</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-recording_live" href="/content/library/releases?filter_type=recording_live&amp;page=1" class="filterbox_item">Recorded Concert</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-jingles" href="/content/library/releases?filter_type=jingles&amp;page=1" class="filterbox_item">Jingles</a>
-				</div>
-			</div>
-		</div>
-		<div class="box ">
-			<div class="boxtitle " id="filterbox-status">
-				<span class="noselection">Filter: Status</span>
-				<!--
-				<span style="color: #888888;">(4)</span>
-				-->
-			</div>
-			<div style="" class="boxcontent" id="filterbox_holder-status">
-				<div class="boxitem plus">
-					<a id="filterbox_item-official" href="/content/library/releases?filter_status=official&amp;page=1" class="filterbox_item">Official</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-promo" href="/content/library/releases?filter_status=promo&amp;page=1" class="filterbox_item">Promotional</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-bootleg" href="/content/library/releases?filter_status=bootleg&amp;page=1" class="filterbox_item">Bootleg</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-other" href="/content/library/releases?filter_status=other&amp;page=1" class="filterbox_item">Other</a>
-				</div>
-			</div>
-		</div>
-		<div class="box ">
-			<div class="boxtitle " id="filterbox-releasedate">
-				<span class="noselection">Filter: Release date</span>
-				<!--
-				<span style="color: #888888;">(4)</span>
-				-->
-			</div>
-			<div style="" class="boxcontent" id="filterbox_holder-releasedate">
-				<div class="boxitem plus">
-					<a id="filterbox_item-week438" href="/content/library/releases?filter_releasedate=week&amp;page=1" class="filterbox_item">This week</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-month806" href="/content/library/releases?filter_releasedate=month&amp;page=1" class="filterbox_item">This month</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-year277" href="/content/library/releases?filter_releasedate=year&amp;page=1" class="filterbox_item">This year</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-custom50" href="/content/library/releases?filter_releasedate=custom&amp;page=1" class="filterbox_item">Custom</a>
-					<select id="releasedate_custom_from" name="releasedate_custom_from" class="sleect range year">
-						<option value="0" selected="selected">----</option>
-						<option value="2012">2012</option>
-						<option value="2011">2011</option>
-						<option value="1901">1901</option>
-					</select>
-					-
-					<select id="releasedate_custom_to" name="releasedate_custom_to" class="sleect range year">
-						<option value="0" selected="selected">----</option>
-						<option value="2012">2012</option>
-						<option value="2011">2011</option>
-						<option value="2010">2010</option>
-					</select>
-				</div>
-			</div>
-		</div>
-		<div class="box ">
-			<div class="boxtitle " id="filterbox-country">
-				<span class="noselection">Filter: Country</span>
-			</div>
-			<div style="" class="boxcontent" id="filterbox_holder-country">
-				<div class="boxitem plus">
-					<a href="/content/library/releases?page=1" class="search">Select: </a>
-					<select id="filter_country" name="filter_country" class="select country">
-						<option value="ALL">All countries</option>
-						<option value="AR">Argentina</option>
-						<option value="AT">Austria</option>
-					</select>
-				</div>
-			</div>
-		</div>
-		<div class="box ">
-			<div class="boxtitle " id="filterbox-updated">
-				<span class="noselection">Filter: Modification date</span>
-				<!--
-				<span style="color: #888888;">(4)</span>
-				-->
-			</div>
-			<div style="" class="boxcontent" id="filterbox_holder-updated">
-				<div class="boxitem plus">
-					<a id="filterbox_item-week414080" href="/content/library/releases?filter_updated=week&amp;page=1" class="filterbox_item">This week</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-month386134" href="/content/library/releases?filter_updated=month&amp;page=1" class="filterbox_item">This month</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-year719996" href="/content/library/releases?filter_updated=year&amp;page=1" class="filterbox_item">This year</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-custom878406" href="/content/library/releases?filter_updated=custom&amp;page=1" class="filterbox_item">Custom</a>
-					<select id="updated_custom_from" name="updated_custom_from" class="sleect range year">
-						<option value="0" selected="selected">----</option>
-						<option value="2012">2012</option>
-						<option value="2011">2011</option>
-						<option value="2010">2010</option>
-						<option value="2009">2009</option>
-						<option value="2008">2008</option>
-					</select>
-					-
-					<select id="updated_custom_to" name="updated_custom_to" class="sleect range year">
-						<option value="0" selected="selected">----</option>
-						<option value="2012">2012</option>
-						<option value="2011">2011</option>
-						<option value="2010">2010</option>
-						<option value="2009">2009</option>
-						<option value="2008">2008</option>
-					</select>
-				</div>
-			</div>
-		</div>
-		<div class="box ">
-			<div class="boxtitle " id="filterbox-license">
-				<span class="noselection">Filter: License</span>
-			</div>
-			<div style="" class="boxcontent" id="filterbox_holder-license">
-				<div class="boxitem plus">
-					<a id="filterbox_item-unrestricted" href="/content/library/releases?filter_license=unrestricted&amp;page=1" class="filterbox_item">Unrestricted</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-7" href="/content/library/releases?filter_license=7&amp;page=1" class="filterbox_item">Namensnennung 2.5 Schweiz</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-6" href="/content/library/releases?filter_license=6&amp;page=1" class="filterbox_item">Namensnennung-Nicht Kommerziell 2.5 Schweiz</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-3" href="/content/library/releases?filter_license=3&amp;page=1" class="filterbox_item">Namensnennung-Nicht Kommerziell-Keine Bearbeitung 2.5 Schweiz</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-4" href="/content/library/releases?filter_license=4&amp;page=1" class="filterbox_item">Namensnennung-Nicht Kommerziell-Weitergabe unter gleichen Bedingungen 2.5 Schweiz</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-8" href="/content/library/releases?filter_license=8&amp;page=1" class="filterbox_item">Namensnennung-Keine Bearbeitung 2.5 Schweiz</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-5" href="/content/library/releases?filter_license=5&amp;page=1" class="filterbox_item">Namensnennung-Weitergabe unter gleichen Bedingungen 2.5 Schweiz</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-9" href="/content/library/releases?filter_license=9&amp;page=1" class="filterbox_item">No License (Public Domain)</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-1" href="/content/library/releases?filter_license=1&amp;page=1" class="filterbox_item">Im Handel erhältlich</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-2" href="/content/library/releases?filter_license=2&amp;page=1" class="filterbox_item">Besitze die Verwendungsrechte</a>
-				</div>
-				<div class="boxitem plus">
-					<a id="filterbox_item-10" href="/content/library/releases?filter_license=10&amp;page=1" class="filterbox_item">Promo Release</a>
-				</div>
-			</div>
-		</div>
+		
+		
+	
+		{% for item in filter.filterlist %}
+			{% include "alibrary/element/_filterbox.html" %}
+		{% endfor %}
+		
+		
+		
+		
+		
+		
 		<div class="box ">
 			<div class="boxtitle " id="filterbox-user">
 				<span class="noselection">Filter: User</span>

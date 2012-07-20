@@ -78,6 +78,10 @@
 			$(document).ready(function() {
 				/* js general init functions */
 				
+				
+				base.ui.init();
+				
+				
 				base.ui.skeleton();
 				base.ui.iface();
 				base.ui.loading();
@@ -92,6 +96,13 @@
 				base.ui.dialog();
 
 			});
+			
+			$(window).unload(function(){
+				
+				base.ui.unload();
+				
+			});
+			
 			//--><!]]>
 		</script>
 		<!-- end: js_init -->

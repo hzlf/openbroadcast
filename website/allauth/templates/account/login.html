@@ -1,8 +1,8 @@
 {% extends "account/base.html" %}
 
 {% load i18n %}
-{% load uni_form_tags %}
-{% load account_tags allauth_tags %}
+
+{% load account_tags allauth_tags crispy_forms_tags %}
 
 {% block head_title %}{% trans "Sign In" %}{% endblock %}
 
@@ -10,12 +10,11 @@
 
 
 
-{% block sidebar %}
+{% block sidebarx %}
 {% if allauth.socialaccount_enabled  %}
-<h1>{% trans "Sign In with an existing account" %}</h1>
+<h1>{% trans "Or Connect" %}</h1>
 <div class="socialaccount providers">
-
-	<ul class="horizontal">
+	<ul class="unstyled">
 	{% include "socialaccount/snippets/provider_list.html" %}
 	</ul>
 
@@ -37,7 +36,14 @@
 
 {% block body %}
     
-<h1>{% trans "Sign In" %}</h1>
+    
+<header class="xl-head subhead" id="overview">
+  <h1>{% trans "Sign In" %}</h1>
+  <!--
+  <p class="lead">Dozens of reusable components are built into Bootstrap to provide navigation, alerts, popovers, and much more.</p>
+  -->
+</header>    
+
 
 {% if not user.is_authenticated %}
 
@@ -50,39 +56,42 @@
 {% endif %}
 
 
+<div class="alert alert-info">
+	<h4 class="alert-heading">{% trans "No account yet?" %}</h4>
+	Feel free to <a href="{{ signup_url }}">{% trans "sign up here" %}</a>.
+</div>
 
 
-<p>{% blocktrans with site.name as site_name %}No account yet?
-<a href="{{ signup_url }}">Sign up here</a>{% endblocktrans %}</p>
 
-
-
+<!--
 <h2>{% trans 'Existing users can login here.' %}</h2>
-
+-->
 
 
 {% endif %}
 
-    <form class="login uniForm" method="POST" action="{% url account_login %}">
+    
+    {% if user.is_authenticated %}
+	<div class="alert">
+	  <a class="close" data-dismiss="alert"></a>
+	  {% include "account/snippets/already_logged_in.html" %}		
+	</div>
+    {% else %}
+    <form id="login_form" class="login form-horizontal" method="POST" action="{% url account_login %}">
         {% csrf_token %}
         <fieldset class="inlineLabels">
-            {{ form|as_uni_form }}
+            {{ form|crispy }}
             {% if redirect_field_value %}
                 <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
             {% endif %}
-            <div class="buttonHolder">
-    
-                <a class="button secondaryAction" href="{% url account_reset_password %}">{% trans "Forgot Password?" %}</a>
-
-                <button class="primaryAction" type="submit">{% trans "Sign In" %}</button>
-                
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">{% trans "Sign In" %}</button>
+                <a class="btn btn-secondary" href="{% url account_reset_password %}">{% trans "Forgot Password?" %}</a>
             </div>
         </fieldset>
     </form>
-    
-{% if user.is_authenticated %}
-{% include "account/snippets/already_logged_in.html" %}
-{% endif %}
+
+    {% endif %}
     
 
 {% fbconnect %}

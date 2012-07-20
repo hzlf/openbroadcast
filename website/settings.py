@@ -59,6 +59,7 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
     'django.template.loaders.eggs.Loader',
+    'django.template.loaders.app_directories.load_template_source',
 )
 
 MIDDLEWARE_CLASSES = (                
@@ -238,10 +239,12 @@ INSTALLED_APPS = (
     'django.contrib.comments',
     'django.contrib.staticfiles',
     'django.contrib.markup',
+    'django.contrib.sitemaps',
     
     # core apps
     'django_extensions',
     'django_jenkins',
+    'django_filters',
 
     'notification',
     'debug_toolbar',
@@ -295,6 +298,8 @@ INSTALLED_APPS = (
     'allauth.facebook',
 
     
+    
+    'crispy_forms',
 
     
     # custom apps/*
