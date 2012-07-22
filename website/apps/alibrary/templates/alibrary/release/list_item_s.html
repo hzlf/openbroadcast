@@ -5,10 +5,8 @@
 
 
 <div class="list_body_row selectable  published owner  view edit stream collect download" id="list_item_19287">
-	{% comment %}
-	<div class="list_body_item c1 image_center_bg" style="background-image: url({% thumbnail item.main_image 36x36 crop upscale subject_location=item.main_image.subject_location %});">
-	{% endcomment %}
-	<div class="list_body_item c1 image_center_bg" style="">
+
+	<div class="list_body_item c1 image_center_bg" {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 36x36 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
 		<ul>
 			<!-- Play link  -->
 			<li class="play">

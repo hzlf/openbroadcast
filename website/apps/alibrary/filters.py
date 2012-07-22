@@ -40,8 +40,7 @@ class ReleaseFilter(django_filters.FilterSet):
     release_country = CharListFilter(label="Country")
     class Meta:
         model = Release
-        fields = ['releasedate', 'releasetype', 'release_country',]
-        
+        fields = ['releasetype', 'release_country', 'main_format']
     
     @property
     def filterlist(self):
@@ -74,28 +73,6 @@ class ReleaseFilter(django_filters.FilterSet):
                 
             
             self._filterlist = flist
-            
-            """
-            Form =  type('%sForm' % self.__class__.__name__, (self._meta.form,), fields)
-            if self.is_bound:
-                self._filterlist = Form(self.data, prefix=self.form_prefix)
-            else:
-                self._filterlist = Form(prefix=self.form_prefix)
-            """
-            
-            
-        print 'FL!:',    
-        print self._filterlist
-                
-        #return self._filterlist
-        
-        """
-        items = [
-                 {'key': 'session',},
-                 {'key': 'whatever',},
-                 ]
-        
-        """
         
         return self._filterlist
     

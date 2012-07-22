@@ -1,0 +1,22 @@
+{% load spurl %}
+
+
+	<div style="padding: 2px 0px 15px; width: 730px; display: none;" id="tagcloud_inline" data-uistate="init" class="tagcloud inline ui-persistent">
+			
+	{% for tag in tagcloud %}
+	
+	{% spurl base=request.get_full_path active_mquery="tags={{ tag.pk }}" as is_active %}
+
+	
+	{% spurl base=request.get_full_path trigger_mquery="tags={{ tag.pk }}" as tag_url %}
+	
+	<a href="{{ tag_url }}" class="tag1{% if is_active %} on{% endif %}" style="">{{ tag }} | {{ tag.weight }} | {{ is_active }}</a>
+	
+	{% if forloop.last %}
+	<div class="clear"></div>
+	{% endif %}
+	
+	{% endfor %}
+		
+	
+	</div>

@@ -42,6 +42,8 @@ class SpurlURLBuilder(object):
     
             if self.autoescape:
                 url = escape(url)
+                url = url.replace('%20', '+')
+                url = url.replace('%2C', ',')
         except Exception, e:
             url = self.url
             pass

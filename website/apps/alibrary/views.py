@@ -20,6 +20,9 @@ from alibrary.forms import ReleaseForm
 
 from alibrary.filters import ReleaseFilter
 
+from tagging.models import Tag, TaggedItem
+from tagging.utils import calculate_cloud
+
 
 class ArtistListView(ListView):
     
@@ -54,6 +57,7 @@ class ReleaseListView(PaginationMixin, ListView):
         context = super(ReleaseListView, self).get_context_data(**kwargs)
         
         self.extra_context['filter'] = self.filter
+        self.extra_context['tagcloud'] = self.tagcloud
         #self.extra_context['release_list'] = self.filter
     
         # hard-coded for the moment
@@ -73,30 +77,51 @@ class ReleaseListView(PaginationMixin, ListView):
         # return render_to_response('my_app/template.html', {'filter': f})
 
         kwargs = {}
-        
-        # check for get variables
-        """
-        order_by = self.request.GET.get('order_by', None)
-        if order_by:
-            kwargs['order_by'] = get_object_or_404(Profession, name__iexact=profession)
-        """
-        self.filter = ReleaseFilter(self.request.GET, queryset=Release.objects.active().filter(**kwargs))
-        
-        # print self.filter.qs
-        
-        return self.filter.qs
-        
-        # return ReleaseFilter(self.request.GET or None)
-        
-        
-        ro = Release.objects.active()
-        order_by = self.request.GET.get('order_by', None)
-        if order_by:
-            #kwargs = {order}
-            print 'GOT ORDER'
-            ro = ro.order_by('-name')
 
-        return ro.filter(**kwargs)
+        self.tagcloud = None
+
+        # base queryset        
+        qs = Release.objects.all()
+        
+        # apply filters
+        self.filter = ReleaseFilter(self.request.GET, queryset=qs)
+        # self.filter = ReleaseFilter(self.request.GET, queryset=Release.objects.active().filter(**kwargs))
+        
+        qs = self.filter.qs
+        
+        
+        
+        
+        stags = self.request.GET.get('tags', None)
+        print "** STAGS:"
+        print stags
+        tstags = []
+        if stags:
+            stags = stags.split(',')
+            for stag in stags:
+                print int(stag)
+                tstags.append(int(stag))
+        
+        print "** TSTAGS:"
+        print tstags
+        
+        #stags = ('Techno', 'Electronic')
+        #stags = (4,)
+        if stags:
+            qs = Release.tagged.with_all(tstags, qs)
+        
+        # tagging / cloud generation
+        tagcloud = Tag.objects.usage_for_queryset(qs, counts=True)
+        print '** CLOUD: **'
+        print tagcloud
+        print '** END CLOUD **'
+        
+        self.tagcloud = calculate_cloud(tagcloud)
+        
+        print '** CALCULATED CLOUD'
+        print self.tagcloud
+        
+        return qs
 
 
 class MediaListView(ListView):

@@ -2,9 +2,11 @@
 Tagging utilities - from user tag input parsing to tag cloud
 calculation.
 """
+import logging
 import math
 import types
 
+from django.db import IntegrityError
 from django.db.models.query import QuerySet
 from django.utils.encoding import force_unicode
 from django.utils.translation import ugettext as _
@@ -14,6 +16,18 @@ try:
     set
 except NameError:
     from sets import Set as set
+
+def replace_synonyms(tag_list):
+    """In given tag list, search synonyms and replace them with original names."""
+    from tagging.models import Synonym
+
+    def search_synonym(name):
+        syn = Synonym.objects.filter(name=name).all()
+        return len(syn)==1 and syn[0].tag.name or name
+
+    words = list(set(search_synonym(tag) for tag in tag_list))
+    words.sort()
+    return words
 
 def parse_tag_input(input):
     """
@@ -32,9 +46,7 @@ def parse_tag_input(input):
     # input, we don't *do* a recall... I mean, we know we only need to
     # split on spaces.
     if u',' not in input and u'"' not in input:
-        words = list(set(split_strip(input, u' ')))
-        words.sort()
-        return words
+        return replace_synonyms(split_strip(input, u' '))
 
     words = []
     buffer = []
@@ -81,9 +93,7 @@ def parse_tag_input(input):
             delimiter = u' '
         for chunk in to_be_split:
             words.extend(split_strip(chunk, delimiter))
-    words = list(set(words))
-    words.sort()
-    return words
+    return replace_synonyms(words)
 
 def split_strip(input, delimiter=u','):
     """
@@ -112,7 +122,7 @@ def edit_string_for_tags(tags):
     names = []
     use_commas = False
     for tag in tags:
-        name = tag.name
+        name = getattr(tag, 'name', tag)
         if u',' in name:
             names.append('"%s"' % name)
             continue
@@ -179,6 +189,7 @@ def get_tag_list(tags):
                 contents.add('int')
         if len(contents) == 1:
             if 'string' in contents:
+                tags = replace_synonyms(tags)
                 return Tag.objects.filter(name__in=[force_unicode(tag) \
                                                     for tag in tags])
             elif 'tag' in contents:
@@ -259,6 +270,67 @@ def calculate_cloud(tags, steps=4, distribution=LOGARITHMIC):
             for i in range(steps):
                 if not font_set and tag_weight <= thresholds[i]:
                     tag.font_size = i + 1
-                    tag.weight = i + 1
                     font_set = True
     return tags
+
+
+
+def merge(to_tag, from_tag, ctype = None):
+    """ Merge items with given tags together.
+        If there are no any items with tag 'from_tag' and
+        other content types, then 'from_tag' becomes a synonym for 'to_tag'.
+    """
+    logger = logging.getLogger('tagging.utils')
+
+    to_tag = get_tag(to_tag)
+    from_tag = get_tag(from_tag)
+    logger.debug('merging tag "%s" to tag "%s"' % (from_tag.name, to_tag.name))
+
+    from_items = from_tag.items.all()
+    if ctype is not None:
+        from_items = from_items.filter(content_type = ctype)
+
+    to_items = to_tag.items.all()
+
+    if ctype is not None:
+        to_items = to_items.filter(content_type = ctype)
+
+    to_obj_ids = [item.object_id for item in to_items]
+
+    for item in from_items:
+        if item.object_id in to_obj_ids:
+            logger.debug('item "%s" already binded to tag "%s"' % (item, to_tag))
+            item.delete(update = False)
+        else:
+            item.tag = to_tag
+            item.save()
+            logger.debug('item "%s" merged' % item)
+
+        _update_objects_tags(item.object)
+
+    if from_tag.items.count() == 0:
+        from_tag.delete()
+        try:
+            to_tag.synonyms.create(name = from_tag.name)
+        except IntegrityError:
+            pass
+
+
+def _update_objects_tags(object):
+    """ Updates TagField's value in given object.
+    """
+    from tagging.models import Tag
+    from tagging.fields import TagField
+
+    if object is None:
+        return
+
+    object_tags = (tag.name or tag.name_any for tag in Tag.objects.get_for_object(object))
+    tags_as_string = edit_string_for_tags(object_tags)
+
+    for field in object._meta.fields:
+        if isinstance(field, TagField):
+            setattr(object, field.attname, tags_as_string)
+            object.save()
+            break
+

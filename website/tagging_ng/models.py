@@ -7,9 +7,13 @@ try:
 except NameError:
     from sets import Set as set
 
+import logging
+
+logger = logging.getLogger('tagging.models')
+
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
-from django.db import connection, models
+from django.db import connection, models, IntegrityError
 from django.db.models.query import QuerySet
 from django.utils.translation import ugettext_lazy as _
 
@@ -19,11 +23,17 @@ from tagging.utils import LOGARITHMIC
 
 qn = connection.ops.quote_name
 
+if settings.MULTILINGUAL_TAGS:
+    import multilingual
+    BaseManager = multilingual.Manager
+else:
+    BaseManager = models.Manager
+
 ############
 # Managers #
 ############
 
-class TagManager(models.Manager):
+class TagManager(BaseManager):
     def update_tags(self, obj, tag_names):
         """
         Update tags associated with an object.
@@ -43,7 +53,7 @@ class TagManager(models.Manager):
                                                object_id=obj.pk,
                                                tag__in=tags_for_removal).delete()
         # Add new tags
-        current_tag_names = [tag.name for tag in current_tags]
+        current_tag_names = [tag.name_any for tag in current_tags]
         for tag_name in updated_tag_names:
             if tag_name not in current_tag_names:
                 tag, created = self.get_or_create(name=tag_name)
@@ -85,7 +95,7 @@ class TagManager(models.Manager):
         model_table = qn(model._meta.db_table)
         model_pk = '%s.%s' % (model_table, qn(model._meta.pk.column))
         query = """
-        SELECT DISTINCT %(tag)s.id, %(tag)s.name%(count_sql)s
+        SELECT DISTINCT %(tag)s.id%(count_sql)s
         FROM
             %(tag)s
             INNER JOIN %(tagged_item)s
@@ -95,9 +105,8 @@ class TagManager(models.Manager):
             %%s
         WHERE %(tagged_item)s.content_type_id = %(content_type_id)s
             %%s
-        GROUP BY %(tag)s.id, %(tag)s.name
-        %%s
-        ORDER BY %(tag)s.name ASC""" % {
+        GROUP BY %(tag)s.id
+        %%s""" % {
             'tag': qn(self.model._meta.db_table),
             'count_sql': counts and (', COUNT(%s)' % model_pk) or '',
             'tagged_item': qn(TaggedItem._meta.db_table),
@@ -114,11 +123,13 @@ class TagManager(models.Manager):
         cursor = connection.cursor()
         cursor.execute(query % (extra_joins, extra_criteria, min_count_sql), params)
         tags = []
+        # TODO add ordering by name right here
         for row in cursor.fetchall():
-            t = self.model(*row[:2])
+            t = self.model.objects.get(pk = row[0])
             if counts:
-                t.count = row[2]
+                t.count = row[1]
             tags.append(t)
+        tags.sort()
         return tags
 
     def usage_for_model(self, model, counts=False, min_count=None, filters=None):
@@ -162,18 +173,8 @@ class TagManager(models.Manager):
         Passing a value for ``min_count`` implies ``counts=True``.
         """
 
-        if getattr(queryset.query, 'get_compiler', None):
-            # Django 1.2+
-            compiler = queryset.query.get_compiler(using='default')
-            extra_joins = ' '.join(compiler.get_from_clause()[0][1:])
-            where, params = queryset.query.where.as_sql(
-                compiler.quote_name_unless_alias, compiler.connection
-            )
-        else:
-            # Django pre-1.2
-            extra_joins = ' '.join(queryset.query.get_from_clause()[0][1:])
-            where, params = queryset.query.where.as_sql()
-
+        extra_joins = ' '.join(queryset.query.get_from_clause()[0][1:])
+        where, params = queryset.query.where.as_sql()
         if where:
             extra_criteria = 'AND %s' % where
         else:
@@ -198,7 +199,7 @@ class TagManager(models.Manager):
         tag_count = len(tags)
         tagged_item_table = qn(TaggedItem._meta.db_table)
         query = """
-        SELECT %(tag)s.id, %(tag)s.name%(count_sql)s
+        SELECT %(tag)s.id%(count_sql)s
         FROM %(tagged_item)s INNER JOIN %(tag)s ON %(tagged_item)s.tag_id = %(tag)s.id
         WHERE %(tagged_item)s.content_type_id = %(content_type_id)s
           AND %(tagged_item)s.object_id IN
@@ -212,9 +213,8 @@ class TagManager(models.Manager):
               HAVING COUNT(%(tagged_item)s.object_id) = %(tag_count)s
           )
           AND %(tag)s.id NOT IN (%(tag_id_placeholders)s)
-        GROUP BY %(tag)s.id, %(tag)s.name
-        %(min_count_sql)s
-        ORDER BY %(tag)s.name ASC""" % {
+        GROUP BY %(tag)s.id
+        %(min_count_sql)s""" % {
             'tag': qn(self.model._meta.db_table),
             'count_sql': counts and ', COUNT(%s.object_id)' % tagged_item_table or '',
             'tagged_item': tagged_item_table,
@@ -232,10 +232,11 @@ class TagManager(models.Manager):
         cursor.execute(query, params)
         related = []
         for row in cursor.fetchall():
-            tag = self.model(*row[:2])
+            tag = self.model.objects.get(pk = row[0])
             if counts is True:
-                tag.count = row[2]
+                tag.count = row[1]
             related.append(tag)
+        related.sort()
         return related
 
     def cloud_for_model(self, model, steps=4, distribution=LOGARITHMIC,
@@ -267,6 +268,100 @@ class TagManager(models.Manager):
                                          min_count=min_count))
         return calculate_cloud(tags, steps, distribution)
 
+    def process_rules(self, rules):
+        for line in rules.split('\n'):
+            self._process_line(line)
+        return True
+
+    def _process_line(self, line):
+        logger.debug('processing line "%s"' % line)
+
+        def join(tags):
+            self.join([tag[0] for tag in tags if tag])
+
+        if '==' in line:
+            names = [name.strip() for name in line.split('==')]
+
+            try:
+                tag = self.get(name=names[0])
+            except Tag.DoesNotExist:
+                return
+
+            for syn_name in names[1:]:
+                try:
+                    syn = Synonym(name=syn_name, tag=tag)
+                    syn.save()
+                except IntegrityError:
+                    pass
+
+            join([self.filter(name=name)[:1] for name in names])
+
+        elif '=' in line:
+            join([self.filter(name=name.strip())[:1] \
+                  for name in line.split('=')])
+
+        elif ':' in line:
+            parts = line.split(';')
+            if len(parts) > 0:
+                changed = False
+                head = [p.strip() for p in parts[0].split(':')][:2]
+                tag_from = head[0]
+                tag_to = (len(head)==2) and head[1] or head[0]
+
+                try:
+                    tag = self.get(name=tag_from)
+                except Tag.DoesNotExist:
+                    return
+
+                if tag.name != tag_to:
+                    tag.name = tag_to
+                    changed = True
+
+                names = [tuple(i.strip() for i in p.split(':')) for p in parts[1:]]
+                for name in names:
+                    if len(name) == 2 and getattr(tag, 'name_%s' % name[0], None) != name[1]:
+                        setattr(tag, 'name_%s' % name[0], name[1])
+                        changed = True
+
+                if changed:
+                    tag.save()
+
+    def dumpAsText(self):
+        tags = self.all()
+        return '\n'.join(filter(lambda x: x, \
+                [self.dumpSynonymsAsText(t) for t in tags] + \
+                [self.dumpTagAsText(t) for t in tags]))
+
+    def dumpTagAsText(self, tag):
+        parts = [tag.name, ]
+        for id, code in multilingual.languages.get_language_choices():
+            name = tag.get_translation(id, 'name').name
+            if name:
+                parts.append('%s: %s' % (code, name))
+
+        return '; '.join(parts)
+
+    def dumpSynonymsAsText(self, tag):
+        synonyms = tag.synonyms.all()
+        if len(synonyms) > 0:
+            return ' == '.join([tag.name, ] + [s.name for s in synonyms])
+        return ''
+
+    def join(self, query):
+        """This method joins multiple tags together."""
+        from tagging.utils import merge
+
+        logger.info('Joining %s' % ','.join([unicode(obj) for obj in query]))
+        tags = list(query)
+        if len(tags) < 2:
+            return
+
+        first = tags[0]
+        tags = tags[1:]
+        for t in tags:
+            merge(first, t)
+
+
 class TaggedItemManager(models.Manager):
     """
     FIXME There's currently no way to get the ``GROUP BY`` and ``HAVING``
@@ -291,11 +386,10 @@ class TaggedItemManager(models.Manager):
             # No existing tags were given
             queryset, model = get_queryset_and_model(queryset_or_model)
             return model._default_manager.none()
-# patched: http://code.google.com/p/django-tagging/issues/detail?id=230
-#        elif tag_count == 1:
-#            # Optimisation for single tag - fall through to the simpler
-#            # query below.
-#            tag = tags[0]
+        elif tag_count == 1:
+            # Optimisation for single tag - fall through to the simpler
+            # query below.
+            tag = tags[0]
         else:
             return self.get_intersection_by_model(queryset_or_model, tags)
 
@@ -458,17 +552,56 @@ class Tag(models.Model):
     """
     A tag.
     """
-    name = models.CharField(_('name'), max_length=50, unique=True, db_index=True)
+    if settings.MULTILINGUAL_TAGS:
+        class Translation(multilingual.Translation):
+            name = models.CharField(_('name'), max_length=50, unique=True, db_index=True)
+    else:
+        name = models.CharField(_('name'), max_length=50, unique=True, db_index=True)
 
     objects = TagManager()
 
     class Meta:
-        ordering = ('name',)
+        if not settings.MULTILINGUAL_TAGS:
+            ordering = ('name',)
         verbose_name = _('tag')
         verbose_name_plural = _('tags')
 
     def __unicode__(self):
-        return self.name
+        return self.name or 'tag-with-id: %d' % self.id
+
+    def __lt__(self, other):
+        return self.name < other.name
+
+    def delete(self, update = True):
+        if update:
+            self._updateLinkedObjects(remove_this = True)
+        return super(Tag, self).delete()
+
+    def save(self, *args, **kwargs):
+        result = super(Tag, self).save(*args, **kwargs)
+        self._updateLinkedObjects()
+        return result
+
+    def _updateLinkedObjects(self, remove_this = False):
+        """Updates TagField's for all objects with this tag."""
+        for item in TaggedItem.objects.filter(tag=self):
+            item._updateLinkedObjects(remove_this=remove_this)
+
+if settings.MULTILINGUAL_TAGS:
+    """Monkey-patching for translation getter,
+       to fallback to another translation."""
+
+    from multilingual.translation import getter_generator
+    _orig_name_getter = Tag.get_name
+    def _my_get_name(self, language_id = None, fallback = False):
+        value = _orig_name_getter(self, language_id, fallback)
+        if value is None and language_id is None:
+            #print 'BLAH BLAH for lang_id: %s' % language_id
+            value = _orig_name_getter(self, settings.FALLBACK_LANGUAGE, fallback)
+            #print 'New value for lang_id=%s is %s' % (settings.FALLBACK_LANGUAGE, value)
+        return value
+    _my_get_name.short_description = getattr(Tag.name, 'verbose_name', 'name')
+    setattr(Tag, 'get_name', _my_get_name)
 
 class TaggedItem(models.Model):
     """
@@ -489,3 +622,34 @@ class TaggedItem(models.Model):
 
     def __unicode__(self):
         return u'%s [%s]' % (self.object, self.tag)
+
+    def _updateLinkedObjects(self, remove_this = False):
+        from tagging.fields import TagField
+        object_tags = [ tag.name_any \
+                      for tag in Tag.objects.get_for_object(self.object) \
+                              if not remove_this or tag.id != self.tag_id ]
+        tags_as_string = ', '.join(object_tags)
+
+        for field in self.object._meta.fields:
+            if isinstance(field, TagField):
+                setattr(self.object, field.attname, tags_as_string)
+                self.object.save()
+                break
+
+    def delete(self, update = True):
+        if update:
+            self._updateLinkedObjects(remove_this=True)
+        return super(TaggedItem, self).delete()
+
+class Synonym(models.Model):
+    name = models.CharField(max_length=50, unique=True, db_index=True)
+    tag = models.ForeignKey(Tag, related_name='synonyms')
+
+    def __unicode__(self):
+        return u'%s, synonym for %s' % (self.name, self.tag)
+
+    class Meta:
+        verbose_name = _("Tag's synonym")
+        verbose_name_plural = _("Tags' synonyms")
+        ordering = ('name',)
+
