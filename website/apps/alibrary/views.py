@@ -227,9 +227,11 @@ def release_autocomplete(request):
             artists = []
             labels = []
             for media in release.media_release.filter(name__icontains=q).distinct():
-                medias.append(media)
+                if not media in medias:
+                    medias.append(media)
             for media in release.media_release.filter(artist__name__icontains=q).distinct():
-                artists.append(media.artist)
+                if not media.artist in artists:
+                    artists.append(media.artist)
                 
             if not len(artists) > 0:
                 artists = None

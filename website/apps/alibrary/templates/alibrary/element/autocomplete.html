@@ -19,6 +19,7 @@
 					{% for media in item.medias %}
 					<li>
 						{{ media.name|highlight:query }}
+						
 					</li>
 					{% if forloop.last %}
 						<div class="clear"></div>
@@ -32,6 +33,7 @@
 					{% for artist in item.artists %}
 					<li>
 						{{ artist.name|highlight:query }}
+						{% if not forloop.last %},&nbsp;{% endif %}
 					</li>
 					{% if forloop.last %}
 						<div class="clear"></div>
