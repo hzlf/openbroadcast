@@ -305,13 +305,6 @@ base.ui.refresh = function() {
 
 
 
-
-
-
-
-
-
-
 /*
  * global interface things
  */
@@ -324,6 +317,26 @@ base.ui.iface = function() {
 	if (window.console && console.firebug) {
 		console.warn('You should disable firebug, else performance can be very low!');
 	}
+	
+	
+
+
+	
+	$('.hoverable').live('mouseenter', function(e){
+		$(this).addClass('hover');
+	});
+	
+	$('.hoverable').live('mouseleave', function(e){
+		$(this).removeClass('hover');
+	});
+	
+	$('.linkable').live('click', function(e){
+		var href = $('a.link-main', this).attr('href');
+		window.location.href = href;
+	});
+	//$('.autocomplete.result').load('http://local.openbroadcast.ch:8000/en/content/library/releases/autocomplete/?q=second');
+	
+	
 	
 	
 	// Cange display depending on applicatinos focus
@@ -1103,46 +1116,30 @@ base.ui.toolbar = function() {
 
 base.ui.searchbar = function() {
 
-	/*
-	$("#searchbar_input").autocomplete(
-			base.vars.base_url + 'ui/autocomplete/' + base.vars.subset,
-			{
-				width : 320,
-				// max: 4,
-				selectFirst : false,
-				highlight : false,
-				scroll : true,
-				scrollHeight : 300,
-				formatItem : function(data, i, n, value) {
-					return "<img src='images/" + value.split("|")[1] + "'/> "
-							+ value.split("|")[0];
-				},
-				formatResult : function(data, value) {
-					return value.split("|")[0];
-				}
-			});
-	
-	$("#searchbar_input").result(function(event, data, formatted) {
-		if (data)
-			$(this).parent().next().find("input").val(data[1]);
-		alert(data[1]);
-	});
-	*/
 	
 	// Submit on 'ENTER'
-	$("#searchbar_input").live('keypress', function (e) {
+	$("#searchbar_input").live('keyup', function (e) {
+		
+		var q = $(this).val();
 
 		
 		if(e.keyCode == 13 || e.keyCode == 9) {
-			e.preventDefault();
-			var query = $(this).val();
-			var uri = util.uri_param_insert(window.location.href, 'search', query, true);
+			// e.preventDefault();
+			var uri = util.uri_param_insert(window.location.href, 'q', q, true);
 			uri = util.uri_param_insert(uri, 'page', 1, true);
 			window.location = uri;
 			return false;
+		} else {
+			if(q.length > 2){
+				$('#autocomplete_holder').load('/content/library/releases/autocomplete/?q=' + encodeURIComponent(q));
+			} else {
+				$('#autocomplete_holder').html('');
+			}
 		}
 		
 	});
+
+	
 	
 	$('a.tbtag.search').live('click', function(e) {
 		if($(e.target).is("input")) {

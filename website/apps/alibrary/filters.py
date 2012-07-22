@@ -38,9 +38,10 @@ class ReleaseFilter(django_filters.FilterSet):
     # releasedate = django_filters.DateFilter()
     releasetype = CharListFilter(label="Release type")
     release_country = CharListFilter(label="Country")
+    media_release__license__name = CharListFilter(label="License")
     class Meta:
         model = Release
-        fields = ['releasetype', 'release_country', 'main_format']
+        fields = ['releasetype', 'release_country', 'main_format', 'media_release__license__name',]
     
     @property
     def filterlist(self):

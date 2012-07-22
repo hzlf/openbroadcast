@@ -3,7 +3,7 @@ from django.views.generic.detail import SingleObjectTemplateResponseMixin
 from django.shortcuts import get_object_or_404, render_to_response
 
 from django import http
-from django.http import HttpResponseForbidden, Http404
+from django.http import HttpResponse, HttpResponseForbidden, Http404
 from django.utils import simplejson as json
 
 from django.template import RequestContext
@@ -22,6 +22,10 @@ from alibrary.filters import ReleaseFilter
 
 from tagging.models import Tag, TaggedItem
 from tagging.utils import calculate_cloud
+
+from django.db.models import Q
+
+from easy_thumbnails.files import get_thumbnailer
 
 
 class ArtistListView(ListView):
@@ -80,8 +84,15 @@ class ReleaseListView(PaginationMixin, ListView):
 
         self.tagcloud = None
 
+        q = self.request.GET.get('q', None)
+        
+        if q:
+            qs = Release.objects.filter(Q(name__startswith=q) | Q(media_release__artist__name__contains=q)).distinct()
+        else:
+            qs = Release.objects.all()
+
         # base queryset        
-        qs = Release.objects.all()
+        #qs = Release.objects.all()
         
         # apply filters
         self.filter = ReleaseFilter(self.request.GET, queryset=qs)
@@ -186,6 +197,43 @@ class ReleaseDetailView(DetailView):
         
         
         return context
+    
+    
+# autocompleter views
+
+def release_autocomplete(request):
+    
+    
+
+    q = request.GET.get('q', None)
+    
+    result = []
+    
+    if q and len(q) > 2:
+        releases = Release.objects.filter(Q(name__startswith=q) | Q(media_release__name__contains=q) | Q(media_release__artist__name__contains=q)).distinct()
+        for release in releases:
+            item = {}
+            item['release'] = release
+            medias = []
+            artists = []
+            for media in release.media_release.filter(name__contains=q):
+                medias.append(media)
+            for media in release.media_release.filter(artist__name__contains=q):
+                artists.append(media.artist)
+                
+            if not len(artists) > 0:
+                artists = None
+            if not len(medias) > 0:
+                medias = None
+
+            item['artists'] = artists
+            item['medias'] = medias
+            
+            result.append(item)
+        
+    
+    #return HttpResponse(json.dumps(list(result)))
+    return render_to_response("alibrary/element/autocomplete.html", { 'query': q, 'result': result }, context_instance=RequestContext(request))
     
     
 class MediaDetailView(DetailView):

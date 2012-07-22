@@ -54,7 +54,7 @@ urlpatterns = patterns('',
     
     # apps
     #(r'^blog/', include('articles.urls')),
-    (r'^', include('alibrary.urls')),
+    #(r'^', include('alibrary.urls')),
     (r'^player/', include('aplayer.urls')),
     
     # cms base
