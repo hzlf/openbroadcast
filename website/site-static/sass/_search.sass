@@ -6,10 +6,12 @@ div.autocomplete
     width: 100%
     background-color: whiteSmoke
     z-index: 1001
+    margin-top: 36px
 
     
     .result
-      padding: 10px 5px 5px
+      padding: 0
+      border: 1px solid #999
       
       h1, h2, h3
         font-size: 12px !important
@@ -18,17 +20,18 @@ div.autocomplete
         cursor: pointer
       
       .search
-        border-bottom: 1px solid #CCC
+        padding: 5px
+        
         h1
           margin-bottom: 0px !important
       
       .listing
         .item
-          border-bottom: 1px solid #CCC
+          border-top: 1px solid #CCC
           background-repeat: no-repeat
           background-position: top right
           
-          padding: 4px
+          padding: 5px
           min-height: 42px
           
           h2

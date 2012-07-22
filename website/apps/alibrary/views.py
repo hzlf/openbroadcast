@@ -87,10 +87,10 @@ class ReleaseListView(PaginationMixin, ListView):
         q = self.request.GET.get('q', None)
         
         if q:
-            qs = Release.objects.filter(Q(name__startswith=q)\
-            | Q(media_release__name__contains=q)\
-            | Q(media_release__artist__name__contains=q)\
-            | Q(label__name__contains=q))\
+            qs = Release.objects.filter(Q(name__istartswith=q)\
+            | Q(media_release__name__icontains=q)\
+            | Q(media_release__artist__name__icontains=q)\
+            | Q(label__name__icontains=q))\
             .distinct()
         else:
             qs = Release.objects.all()
@@ -214,10 +214,11 @@ def release_autocomplete(request):
     result = []
     
     if q and len(q) > 2:
-        releases = Release.objects.filter(Q(name__startswith=q)\
-            | Q(media_release__name__contains=q)\
-            | Q(media_release__artist__name__contains=q)\
-            | Q(label__name__contains=q))\
+        
+        releases = Release.objects.filter(Q(name__istartswith=q)\
+            | Q(media_release__name__icontains=q)\
+            | Q(media_release__artist__name__icontains=q)\
+            | Q(label__name__icontains=q))\
             .distinct()
         for release in releases:
             item = {}
@@ -225,9 +226,9 @@ def release_autocomplete(request):
             medias = []
             artists = []
             labels = []
-            for media in release.media_release.filter(name__contains=q).distinct():
+            for media in release.media_release.filter(name__icontains=q).distinct():
                 medias.append(media)
-            for media in release.media_release.filter(artist__name__contains=q).distinct():
+            for media in release.media_release.filter(artist__name__icontains=q).distinct():
                 artists.append(media.artist)
                 
             if not len(artists) > 0:
