@@ -1131,8 +1131,10 @@ base.ui.searchbar = function() {
 			return false;
 		} else {
 			if(q.length > 2){
+				$('#dim_content').css('display', 'block');
 				$('#autocomplete_holder').load('/content/library/releases/autocomplete/?q=' + encodeURIComponent(q));
 			} else {
+				$('#dim_content').css('display', 'none');
 				$('#autocomplete_holder').html('');
 			}
 		}

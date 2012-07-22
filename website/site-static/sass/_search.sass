@@ -5,10 +5,14 @@ div.autocomplete
     position: absolute
     width: 100%
     background-color: whiteSmoke
+    z-index: 1001
 
     
     .result
       padding: 10px 5px 5px
+      
+      h1, h2, h3
+        font-size: 12px !important
       
       .linkable
         cursor: pointer
@@ -16,28 +20,36 @@ div.autocomplete
       .search
         border-bottom: 1px solid #CCC
         h1
-          font-size: 16px
           margin-bottom: 0px !important
       
       .listing
-        h2
-          font-size: 16px
         .item
           border-bottom: 1px solid #CCC
           background-repeat: no-repeat
           background-position: top right
           
           padding: 4px
-          min-height: 72px
+          min-height: 42px
+          
+          h2
+            text-transform: uppercase
+            margin-bottom: 0px !important
+          
+          .related
+            h3
+              float: left
+              margin-right: 4px
+              text-transform: none
           
           em.highlight
-            background: #0b0
-            color: white
-            padding: 0 3px
+            background: #DDFFD9
+            color: #0b0
+            padding: 0 2px
+            font-style: normal
           
           &.hover
             background-color: #DDFFD9
-            color: #0b0
+            // color: #0b0
         
         
       

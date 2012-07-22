@@ -87,7 +87,11 @@ class ReleaseListView(PaginationMixin, ListView):
         q = self.request.GET.get('q', None)
         
         if q:
-            qs = Release.objects.filter(Q(name__startswith=q) | Q(media_release__artist__name__contains=q)).distinct()
+            qs = Release.objects.filter(Q(name__startswith=q)\
+            | Q(media_release__name__contains=q)\
+            | Q(media_release__artist__name__contains=q)\
+            | Q(label__name__contains=q))\
+            .distinct()
         else:
             qs = Release.objects.all()
 
@@ -210,24 +214,32 @@ def release_autocomplete(request):
     result = []
     
     if q and len(q) > 2:
-        releases = Release.objects.filter(Q(name__startswith=q) | Q(media_release__name__contains=q) | Q(media_release__artist__name__contains=q)).distinct()
+        releases = Release.objects.filter(Q(name__startswith=q)\
+            | Q(media_release__name__contains=q)\
+            | Q(media_release__artist__name__contains=q)\
+            | Q(label__name__contains=q))\
+            .distinct()
         for release in releases:
             item = {}
             item['release'] = release
             medias = []
             artists = []
-            for media in release.media_release.filter(name__contains=q):
+            labels = []
+            for media in release.media_release.filter(name__contains=q).distinct():
                 medias.append(media)
-            for media in release.media_release.filter(artist__name__contains=q):
+            for media in release.media_release.filter(artist__name__contains=q).distinct():
                 artists.append(media.artist)
                 
             if not len(artists) > 0:
                 artists = None
             if not len(medias) > 0:
                 medias = None
+            if not len(labels) > 0:
+                labels = None
 
             item['artists'] = artists
             item['medias'] = medias
+            item['labels'] = labels
             
             result.append(item)
         
