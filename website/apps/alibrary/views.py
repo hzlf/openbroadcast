@@ -28,6 +28,8 @@ from django.db.models import Q
 from easy_thumbnails.files import get_thumbnailer
 
 
+from lib.util import tagging_extra
+
 class ArtistListView(ListView):
     
     # context_object_name = "artist_list"
@@ -126,12 +128,12 @@ class ReleaseListView(PaginationMixin, ListView):
             qs = Release.tagged.with_all(tstags, qs)
         
         # tagging / cloud generation
-        tagcloud = Tag.objects.usage_for_queryset(qs, counts=True)
+        tagcloud = Tag.objects.usage_for_queryset(qs, counts=True, min_count=4)
         print '** CLOUD: **'
         print tagcloud
         print '** END CLOUD **'
         
-        self.tagcloud = calculate_cloud(tagcloud)
+        self.tagcloud = tagging_extra.calculate_cloud(tagcloud)
         
         print '** CALCULATED CLOUD'
         print self.tagcloud

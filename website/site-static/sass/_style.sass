@@ -1457,7 +1457,7 @@ div.locked
 
 
 
-/* Tagbar
+// Tagbar
 
 a#tagcloud_inline_toggle
   background-image: url(/static/img/base/tagcloud.open_close.png)
@@ -1467,7 +1467,7 @@ a#tagcloud_inline_toggle
   &.active
     background-position: right -16px
 
-/*
+
 .tagbar
   background: url(/static/img/prototype/forminput_bg.png)
   //padding:3px;
@@ -1524,7 +1524,7 @@ a#tagcloud_inline_toggle
     padding: 0px !important
 
 
-/* ---------- contentsearch ----------
+/**/
 
 .tagcloud
   a
@@ -1545,6 +1545,10 @@ a#tagcloud_inline_toggle
     background: transparent
     border: none
     text-transform: uppercase
+    
+    span
+      font-size: 80%
+      padding: 0 0 0 4px
 
 
 div.tagcloud.inline
@@ -1553,6 +1557,12 @@ div.tagcloud.inline
   margin-bottom: 14px
   padding-bottom: 2px !important
   overflow: hidden
+    
+  ul.tag-level
+    float: right
+    a
+      padding: 0
+      margin: 0
 
 .tagcloud.inline a
   &.on
@@ -1561,6 +1571,11 @@ div.tagcloud.inline
     text-decoration: none
     color: #ffffff
     background-color: $main-b
+    
+  &.tag-hidden
+    display: none
+      
+    
   
   &.tag1
     font-size: 88%

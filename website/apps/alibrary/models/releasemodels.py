@@ -64,6 +64,9 @@ from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
     
     
+from djangoratings.fields import RatingField
+ 
+    
 ################
 from alibrary.models.basemodels import *
 from alibrary.models.artistmodels import *
@@ -95,7 +98,7 @@ class Release(MigrationMixin):
     
     # core fields
     uuid = UUIDField(primary_key=False)
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, db_index=True)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
     
@@ -134,6 +137,9 @@ class Release(MigrationMixin):
     )
     releasetype = models.CharField(verbose_name="Release type", max_length=12, default='other', choices=RELEASETYPE_CHOICES)
     
+    
+    #rating
+    rating = RatingField(range=5)
     
     # relations
     label = models.ForeignKey(Label, blank=True, null=True, related_name='release_label', on_delete=models.SET_NULL)

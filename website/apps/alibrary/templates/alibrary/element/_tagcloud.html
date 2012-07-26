@@ -3,6 +3,22 @@
 
 	<div style="padding: 2px 0px 15px; width: 730px; display: none;" id="tagcloud_inline" data-uistate="init" class="tagcloud inline ui-persistent">
 			
+			
+
+	
+	<ul class="horizontal tag-level">
+		
+		<li><a class="toggle-level" data-level="1" href="#"> 1 </a></li>
+		<li><a class="toggle-level" data-level="2" href="#"> 2 </a></li>
+		<li><a class="toggle-level" data-level="3" href="#"> 3 </a></li>
+		<li><a class="toggle-level" data-level="4" href="#"> 4 </a></li>
+		<li><a class="toggle-level" data-level="5" href="#"> 5 </a></li>
+		<li><a class="toggle-level" data-level="6" href="#"> 6 </a></li>
+		
+	</ul>
+	
+	<div class="clear"></div>
+			
 	{% for tag in tagcloud %}
 	
 	{% spurl base=request.get_full_path active_mquery="tags={{ tag.pk }}" as is_active %}
@@ -10,13 +26,16 @@
 	
 	{% spurl base=request.get_full_path trigger_mquery="tags={{ tag.pk }}" as tag_url %}
 	
-	<a href="{{ tag_url }}" class="tag{{ tag.weight }}{% if is_active %} on{% endif %}" style="">{{ tag }}</a>
+	<a href="{{ tag_url }}" class="tag{{ tag.weight }} {% if tag.hide_level > 2 %}tag-hidden{% endif %} level{{ tag.hide_level }} {% if is_active %} on{% endif %}" style="">{{ tag }}<span>{{ tag.count }}</span></a>
 	
 	{% if forloop.last %}
+	<!--
 	<div class="clear"></div>
+	-->
 	{% endif %}
 	
 	{% endfor %}
 		
+	<div class="clear"></div>
 	
 	</div>

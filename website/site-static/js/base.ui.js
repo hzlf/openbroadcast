@@ -1174,6 +1174,8 @@ base.ui.searchbar = function() {
 
 /* tagcloud (inline) */
 base.ui.tagcloud = function() {
+	
+
 
 	$('a#tagcloud_inline_toggle').live('click', function(e) {
 		
@@ -1188,17 +1190,43 @@ base.ui.tagcloud = function() {
 			$('#tagcloud_inline').data('uistate', 'hidden');
 		}
 		
+	});
 		
-		/*
-		var state = $('#tagcloud_inline').data('uistate');
+	// tag-level chooser
+	total_count = 0;
+	$('#tagcloud_inline .toggle-level').each(function(i,e){
+		console.log('x:', i);
 		
-		if(state == 'hidden') {
-			$('#tagcloud_inline').data('uistate', 'expanded');
+		var level = $(this).data('level');
+		var count = $('a.level' + level, '#tagcloud_inline').length;
+		
+		total_count = total_count + count;
+		
+		if(count>0) {
+			$(this).html('&nbsp;' + total_count + '&nbsp;');
+		} else {
+			$(this).html('');
 		}
-		if(state == 'expanded') {
-			$('#tagcloud_inline').data('uistate', 'hidden');
+		
+		
+		
+	});
+	
+	
+	
+	$('.tag-level a', '#tagcloud_inline').live('click', function(e) {
+		e.preventDefault();
+		var level = $(this).data('level');
+		
+		for (i=1; i<= level; i++) {
+			console.log('show:', i);
+			$('a.level' + (i), '#tagcloud_inline').removeClass('tag-hidden');
 		}
-		*/
+		
+		for (i=6; i> level; i--) {
+			console.log('hide:', i);
+			$('a.level' + (i), '#tagcloud_inline').addClass('tag-hidden');
+		}
 		
 	});
 

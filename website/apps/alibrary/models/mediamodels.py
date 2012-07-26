@@ -77,7 +77,7 @@ class Media(MigrationMixin):
     
     # core fields
     uuid = UUIDField(primary_key=False)
-    name = models.CharField(max_length=400)
+    name = models.CharField(max_length=200, db_index=True)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
     

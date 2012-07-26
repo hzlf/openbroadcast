@@ -62,10 +62,13 @@ class LegacyImporter(object):
         # r.tags.clear()
         for ntr in ntrs:
             print 'Tag ID: %s' % ntr.ntag_id
-            nt = Ntags.objects.using('legacy').get(id=ntr.ntag_id)
-            print 'Tag Name: %s' % nt.name
-
-            Tag.objects.add_tag(r, u'"%s"' % nt.name)
+            try:
+                nt = Ntags.objects.using('legacy').get(id=ntr.ntag_id)
+                print 'Tag Name: %s' % nt.name
+                Tag.objects.add_tag(r, u'"%s"' % nt.name)
+            except Exception, e:
+                print e
+                pass
             
             #r.tags.add_tag(nt.name)
             #r.tags.add(nt.name)
@@ -155,7 +158,7 @@ class LegacyImporter(object):
         
         if(self.object_type == 'releases'):
             
-            lrs = Releases.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:10]
+            lrs = Releases.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:10000]
         
         
             for lr in lrs:
