@@ -33,7 +33,7 @@ from filer.fields.audio import FilerAudioField
 from filer.fields.file import FilerFileField
 
 # modules
-from taggit.managers import TaggableManager
+#from taggit.managers import TaggableManager
 from django_countries import CountryField
 from easy_thumbnails.files import get_thumbnailer
 

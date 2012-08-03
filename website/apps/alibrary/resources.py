@@ -187,6 +187,7 @@ def parse_media(media):
                            'file': media.get_stream_file('mp3', 'base'), 
                            #'media_id': media.id, 
                            'uri': '/tracks/' + media.uuid + '/stream_html5/',
+                           'uri': media.master.url,
                            'rtmp_host': 'rtmp://' + RTMP_HOST + ':' + RTMP_PORT + '/', 
                            'rtmp_app': RTMP_APP,
                            'uuid' : media.uuid,

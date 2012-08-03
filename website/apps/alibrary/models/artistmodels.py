@@ -38,7 +38,7 @@ from filer.fields.audio import FilerAudioField
 from filer.fields.file import FilerFileField
 
 # modules
-from taggit.managers import TaggableManager
+#from taggit.managers import TaggableManager
 from django_countries import CountryField
 from easy_thumbnails.files import get_thumbnailer
 
@@ -134,10 +134,11 @@ class Artist(MigrationMixin):
 
     @models.permalink
     def get_absolute_url(self):
+        """"""
         if self.disable_link:
             return None
         
-        return ('ArtistDetailView', None, {'slug': self.slug})
+        return ('ArtistDetailView', [self.slug])
     
     def get_membership(self):
 

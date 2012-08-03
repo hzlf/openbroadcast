@@ -1,0 +1,13 @@
+{% load truncate i18n %}
+
+{% if item %}
+
+	{% if item.get_absolute_url %}
+		<a href="{{ item.get_absolute_url }}">{{ item.name }}</a>
+	{% else %}
+		<span>{{ item.name }}</span>
+	{% endif %}
+
+{% else %}
+	<span class="not-set">{% trans "Not Set" %}</span>
+{% endif %}

@@ -12,11 +12,11 @@
 		
 		{% for d in item.ds %}
 		
-		{% spurl base=request.get_full_path active_mquery="{{ item.name }}={{ d }}" as is_active %}
+		{% spurl base=request.get_full_path active_mquery="{{ item.name }}={{ d.0 }}" as is_active %}
 
 		
 		<div class="boxitem {% if is_active %}minus{% else %}plus{% endif %}">
-			<a id="filterbox_item-{{ d }}" class="filterbox_item {% if is_active %}on{% endif %}" href="{% spurl base=request.get_full_path trigger_mquery="{{ item.name }}={{ d }}" %}" style="display: block;">{{ d }}</a>
+			<a id="filterbox_item-{{ d.0 }}" class="filterbox_item {% if is_active %}on{% endif %}" href="{% spurl base=request.get_full_path trigger_mquery="{{ item.name }}={{ d.0 }}" %}" style="display: block;">{{ d.0 }}<small> ({{ d.1 }})</small></a>
 		</div>
 		{% endfor %}
 

@@ -279,10 +279,10 @@ function HashTable(obj)
 /* AJAX Indicator */
 base.ui.loading = function() {
 	$(document).ajaxStart(function() {
-		$('div#toolbar_holder').addClass('active');
+		$('.navbar .container').addClass('active');
 		$('body').addClass('ajax_loading');
 	}).ajaxStop(function() {
-		$('div#toolbar_holder').removeClass('active');
+		$('.navbar .container').removeClass('active');
 		$('body').removeClass('ajax_loading');
 	});
 }
@@ -397,6 +397,7 @@ base.ui.iface = function() {
 	
 	
 	// popup handling, should be moved maybe later
+	/*
 	$('.playable.popup').live('click', function(e) {
 
 		e.preventDefault();
@@ -412,6 +413,7 @@ base.ui.iface = function() {
 
 		return false;
 	});
+	*/
 	
 	
 	// handling of 'downloadables' & resp. queues
@@ -1065,16 +1067,6 @@ base.ui.toolbar = function() {
 	$('.navigation-sub > li.selected').parent().css('display', 'block');
 	$('.navigation-sub > li.ancestor').parent().css('display', 'block');
 	
-	
-	
-
-	$('#toolbar_holder.logged_out').mouseenter(function() {
-		$('#elgg_toolbar').fadeIn(200);
-	});
-
-	$('#toolbar_holder.logged_out').mouseleave(function() {
-		$('#elgg_toolbar').fadeOut(500);
-	});
 
 
 
@@ -1195,17 +1187,19 @@ base.ui.tagcloud = function() {
 	// tag-level chooser
 	total_count = 0;
 	$('#tagcloud_inline .toggle-level').each(function(i,e){
-		console.log('x:', i);
+
 		
-		var level = $(this).data('level');
+		var level = $(this).attr('taglevel');
 		var count = $('a.level' + level, '#tagcloud_inline').length;
 		
 		total_count = total_count + count;
 		
+		console.log('count:', count , 'level:', level);
+		
 		if(count>0) {
 			$(this).html('&nbsp;' + total_count + '&nbsp;');
 		} else {
-			$(this).html('');
+			$(this).html('.');
 		}
 		
 		
@@ -1522,6 +1516,7 @@ base.ui.sidebar = function() {
 				}
 			});
 	// return function
+	/*
 	$('input.boxitem_user').result(function(event, data, formatted) {
 		// check for returned data
 			if (data) {
@@ -1560,6 +1555,7 @@ base.ui.sidebar = function() {
 
 			}
 		});
+		*/
 	
 	
 	
@@ -1743,9 +1739,10 @@ base.ui.sidebar = function() {
 	 * Count box children and display next to box title
 	 * TODO: Consider moving styles to sass later
 	 */
-	$('#splitpane-sidebar .box').each(function(i, el) {
+	$('.sidebar .box').each(function(i, el) {
 		
 		var list = $(this).find('.boxcontent');
+		
 
 		var count_available = $('> div', list).size();
 		var count_active = $('> div.minus', list).size();
@@ -1911,31 +1908,17 @@ base.ui.listview = function() {
 	/*
 	 * Items per page (list footer)
 	 */
+	/*
 	$('div.ipp a').live('click', function(event) {
 		
 		var ipp = $(this).attr('href').substring(1);
 		
 		base.ui.save_state('ipp', ipp, 'reset_page');
 		
-		/*
-		if (base.ui.save_state('ipp', ipp, false)) {
-			
-			aler('click');
-			window.location.reload();
-			
-			// Reset to first page (different view-styles have different offsets)
-			var uri = util.uri_param_insert(window.location.href, 'page', 1, true);
-			
-			alert(uri);
-			
-			window.location = uri;
-	
-		}
-		*/
 		
 		return false;
 	});
-	
+	*/
 	
 	
 	// Highlighter

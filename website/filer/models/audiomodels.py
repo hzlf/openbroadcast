@@ -25,6 +25,13 @@ class Audio(File):
     }
     file_type = 'Audio'
     
+    bits_per_sample = models.PositiveIntegerField(default=0)
+    sample_rate = models.PositiveIntegerField(default=0)
+    total_frames = models.PositiveIntegerField(default=0)
+    seconds_length = models.PositiveIntegerField(default=0)
+    
+    filetype = models.CharField(max_length=12,null=True, blank=True, help_text="File Type", editable=False)
+    
 
     # additional metadata
     # tracknumber = models.PositiveIntegerField(max_length=3, default=0)

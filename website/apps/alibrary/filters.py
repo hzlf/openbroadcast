@@ -6,6 +6,7 @@ from alibrary.models import Release
 from django.utils.datastructures import SortedDict
 ORDER_BY_FIELD = 'o'
 
+from django.db import models
 
 class CharListFilter(django_filters.Filter):
 
@@ -46,9 +47,7 @@ class ReleaseFilter(django_filters.FilterSet):
     
     @property
     def filterlist(self):
-        
-        print 'FFFLLL'
-        
+
         flist = []
         
         if not hasattr(self, '_filterlist'):
@@ -58,21 +57,23 @@ class ReleaseFilter(django_filters.FilterSet):
             fields[ORDER_BY_FIELD] = self.ordering_field
             """
             
+            print "QS"
+            print self.queryset
+            
             for name, filter_ in self.filters.iteritems():
-                ds = Release.objects.values_list(name, flat=True).distinct()
+
+                    
+                #ds = Release.objects.values_list(name, flat=True).distinct()
+                ds = self.queryset.values_list(name, flat=False).annotate(n=models.Count("pk")).distinct()
+                
+                print ds
                 
                 filter_.ds = ds
                 
-                flist.append(filter_)
-                
-                print 'Label:',
-                print filter_.label
-                
-                for d in ds:
-                    print self.__class__.__name__
-                    print d
-                    # items.append(d)
-                
+                if ds not in flist:
+                    
+                    flist.append(filter_)
+
             
             self._filterlist = flist
         

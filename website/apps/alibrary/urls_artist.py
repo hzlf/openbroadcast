@@ -2,7 +2,7 @@ from django.conf.urls.defaults import *
 
 # app imports
 from alibrary.models import Artist
-from alibrary.views import *
+from alibrary.views import ArtistDetailView, ArtistListView
 
 urlpatterns = patterns('',
       

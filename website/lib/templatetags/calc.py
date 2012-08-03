@@ -2,6 +2,8 @@ from django import template
 from django.conf import settings
 from django.template import Library, Node, Template, resolve_variable
 
+import time
+
 register = template.Library()
 
 @register.filter 
@@ -27,3 +29,10 @@ def halftuple(value):
 @register.filter 
 def widetuple(value):
     return '%sx%s' % (value, int(value) / 16 * 9) 
+
+@register.filter 
+def sec_to_time(value):
+    if value > 3600:
+        return time.strftime('%H:%M:%S', time.gmtime(value))
+    else:
+        return time.strftime('%M:%S', time.gmtime(value))

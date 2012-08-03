@@ -1,4 +1,4 @@
-from django.views.generic import DetailView, ListView, FormView
+from django.views.generic import DetailView, ListView, FormView, UpdateView
 from django.views.generic.detail import SingleObjectTemplateResponseMixin
 from django.shortcuts import get_object_or_404, render_to_response
 
@@ -16,7 +16,8 @@ from sendfile import sendfile
 
 from ashop.util.base import get_download_permissions
 
-from alibrary.forms import ReleaseForm
+#from alibrary.forms import ReleaseForm
+from alibrary.forms import *
 
 from alibrary.filters import ReleaseFilter
 
@@ -30,6 +31,11 @@ from easy_thumbnails.files import get_thumbnailer
 
 from lib.util import tagging_extra
 
+
+PAGINATE_BY = (12,24,36,120)
+PAGINATE_BY_DEFAULT = 12
+
+
 class ArtistListView(ListView):
     
     # context_object_name = "artist_list"
@@ -38,11 +44,7 @@ class ArtistListView(ListView):
     def get_queryset(self):
 
         kwargs = {}
-        
-        # check for get variables
-        profession = self.request.GET.get('profession', False)
-        if profession:
-            kwargs[ 'professions' ] = get_object_or_404(Profession, name__iexact=profession)
+
 
 
         return Artist.objects.listed().filter(**kwargs)
@@ -53,11 +55,26 @@ class ReleaseListView(PaginationMixin, ListView):
     #template_name = "alibrary/release_list.html"
     
     object = Release
-    paginate_by = 14
+    paginate_by = PAGINATE_BY_DEFAULT
+    
     
     model = Release
     
     extra_context = {}
+    
+    def get_paginate_by(self, queryset):
+        
+        ipp = self.request.GET.get('ipp', None)
+        if ipp:
+            try:
+                if int(ipp) in PAGINATE_BY:
+                    return int(ipp)
+            except Exception, e:
+                pass
+
+        
+        
+        return self.paginate_by
 
     def get_context_data(self, **kwargs):
         context = super(ReleaseListView, self).get_context_data(**kwargs)
@@ -74,6 +91,8 @@ class ReleaseListView(PaginationMixin, ListView):
         self.extra_context['get'] = self.request.GET
         
         context.update(self.extra_context)
+
+        
         
         return context
     
@@ -96,6 +115,14 @@ class ReleaseListView(PaginationMixin, ListView):
             .distinct()
         else:
             qs = Release.objects.all()
+            
+        artist_filter = self.request.GET.get('artist', None)
+        if artist_filter:
+            qs = qs.filter(media_release__artist__slug=artist_filter)
+            
+        label_filter = self.request.GET.get('label', None)
+        if label_filter:
+            qs = qs.filter(label__slug=label_filter)
 
         # base queryset        
         #qs = Release.objects.all()
@@ -110,33 +137,37 @@ class ReleaseListView(PaginationMixin, ListView):
         
         
         stags = self.request.GET.get('tags', None)
-        print "** STAGS:"
-        print stags
+        #print "** STAGS:"
+        #print stags
         tstags = []
         if stags:
             stags = stags.split(',')
             for stag in stags:
-                print int(stag)
+                #print int(stag)
                 tstags.append(int(stag))
         
-        print "** TSTAGS:"
-        print tstags
+        #print "** TSTAGS:"
+        #print tstags
         
         #stags = ('Techno', 'Electronic')
         #stags = (4,)
         if stags:
             qs = Release.tagged.with_all(tstags, qs)
+            
+            
+        # rebuild filter after applying tags
+        self.filter = ReleaseFilter(self.request.GET, queryset=qs)
         
         # tagging / cloud generation
-        tagcloud = Tag.objects.usage_for_queryset(qs, counts=True, min_count=4)
-        print '** CLOUD: **'
-        print tagcloud
-        print '** END CLOUD **'
+        tagcloud = Tag.objects.usage_for_queryset(qs, counts=True, min_count=2)
+        #print '** CLOUD: **'
+        #print tagcloud
+        #print '** END CLOUD **'
         
         self.tagcloud = tagging_extra.calculate_cloud(tagcloud)
         
-        print '** CALCULATED CLOUD'
-        print self.tagcloud
+        #print '** CALCULATED CLOUD'
+        #print self.tagcloud
         
         return qs
 
@@ -205,6 +236,40 @@ class ReleaseDetailView(DetailView):
         return context
     
     
+
+
+
+class ReleaseEditView(UpdateView):
+    model = Release
+    template_name = "alibrary/release_edit.html"
+    success_url = '#'
+    form_class = ReleaseForm
+
+    def get_context_data(self, **kwargs):
+        context = super(ReleaseEditView, self).get_context_data(**kwargs)
+        context['releasemedia_form'] = ReleasekMediaFormSet()
+        
+        return context
+    
+    
+    def form_valid(self, form):
+        context = self.get_context_data()
+        releasemedia_form = context['releasemedia_form']
+        
+        if releasemedia_form.is_valid():
+            self.object = form.save()
+            releasemedia_form.instance = self.object
+            releasemedia_form.save()
+
+            print "VALLIDIO"
+
+            return HttpResponseRedirect('#')
+        else:
+
+            print "NNNOOOTTT VALLIDIO"
+            return self.render_to_response(self.get_context_data(form=form))
+    
+    
 # autocompleter views
 
 def release_autocomplete(request):
@@ -263,17 +328,6 @@ class MediaDetailView(DetailView):
   
 
 
-
-
-class ReleaseEditView(FormView):
-    model = Release
-    template_name = "alibrary/release_edit.html"
-    form_class = ReleaseForm
-
-    def get_context_data(self, **kwargs):
-        context = super(ReleaseEditView, self).get_context_data(**kwargs)
-        context['form'] = self.form
-        return context
 
 
  

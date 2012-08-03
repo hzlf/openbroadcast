@@ -35,7 +35,7 @@ from filer.fields.audio import FilerAudioField
 from filer.fields.file import FilerFileField
 
 # modules
-from taggit.managers import TaggableManager
+#from taggit.managers import TaggableManager
 from django_countries import CountryField
 from easy_thumbnails.files import get_thumbnailer
 
@@ -74,7 +74,7 @@ class Playlist(models.Model):
     media = models.ManyToManyField('Media', through='PlaylistMedia', blank=True, null=True)
 
     # tagging
-    tags = TaggableManager(blank=True)
+    #tags = TaggableManager(blank=True)
     
     # manager
     objects = models.Manager()

@@ -1,6 +1,6 @@
 {% load compress cms_tags sekizai_tags %}
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" xmlns:og="http://ogp.me/ns#" xmlns:fb="http://www.facebook.com/2008/fbml">
+<!DOCTYPE html>
+<html lang="en">
 
 
 	{% include "base/_common_script.html" %}
@@ -20,24 +20,88 @@
 	
 	
 	<!-- start: body -->
+	<!--
 	<body id="body" class="base">
+	-->
+	<body  id="body" class="base" data-spy="scroll" data-target=".subnav" data-offset="50">
 		
 		<div id="dim_content" style="display: none;"></div>
-		
 		{% cms_toolbar %}
+		
+	    <div class="navbar navbar-fixed-top">
+	      <div class="navbar-inner">
+	        <div class="container">
+	        	<!-- toolbar -->
+				{% block toolbar %}{% endblock %}
+				<!--/ toolbar -->
+	        </div>
+	      </div>
+	    </div>
+	
+	    <div class="container main">
+	    	
+	    	
+	    	<header class="subhead" id="overview">
+	    		<div class="row">
+	    			
+	    			
+	    			<div class="span9">
+		  				{% block heading %}{% endblock %}
+		  				<div class="subnav">
+		  				{% block modnav %}{% endblock %}
+		  				</div>
+	    			</div>
+	    			
+	    			<div class="span3">
+						{% include "aplayer/_inline.html" %}
+	    			</div>
+	    			
+	    		</div>
+
+			</header>
+	    	
+	    	
+<section id="global">
+	<!--
+	<div class="page-header">
+		<h1>Global styles <small>for CSS reset, typography, and links</small></h1>
+	</div>
+	-->
+
+	<div class="row">
+		
+		
+		{% block main %}{% endblock %}
+		
+
+	
+	</div>
+	
+</section>
+	    	
+	    	
+	    	
+			<footer class="footer"  id="footer">
+			{% include "skeleton/footer.html" %}
+			</footer>
+	    	
+	    	
+	    </div>
+		
+		
+		
+		
 		<!-- start: wrapper_main -->
 		<div id="wrapper_main">
 			
-			<!-- toolbar -->
-			<div id="toolbar_holder" >
-			{% block toolbar %}{% endblock %}
-			</div>
-			<!--/ toolbar -->
+			
 			
 			<!-- main container -->
 			<div id="container">
 				<div class="hfixw" id="maincontent">
+				{% comment %}
 				{% block main %}{% endblock %}
+				{% endcomment %}
 				</div>
 			</div>
 			<!--/ main container -->
@@ -83,6 +147,8 @@
 				
 				
 				base.ui.init();
+				
+				aplayer.ui.init();
 				
 				
 				base.ui.skeleton();

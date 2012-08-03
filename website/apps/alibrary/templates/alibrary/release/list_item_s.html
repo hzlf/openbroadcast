@@ -1,4 +1,4 @@
-{% load thumbnail i18n truncate %}
+{% load thumbnail i18n truncate display_tags %}
 
 
 <!-- list item s -->
@@ -7,46 +7,52 @@
 <div class="list_body_row selectable  published owner  view edit stream collect download" id="list_item_19287">
 
 	<div class="list_body_item c1 image_center_bg" {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 36x36 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
-		<ul>
+		<ul class="unstyled">
 			<!-- Play link  -->
 			<li class="play">
-				<a href="/en/content/library/releases/19287-fieber-remixed/play.json#0#replace" title="Play" class="playable popup"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
+				
+				<a href="/api/releases/{{ item.uuid }}/#0#replace" title="Play" class="playable popup"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
+				
+				<!--<a class="icon-container play playable popup" href="/api/releases/e43282ba-8ef8-11e1-8c53-e92ad7b37e38/#0#replace">-->
+			
 			</li>
 		</ul>
 	</div>
 	<div class="list_body_item c2">
-		<ul>
+		<ul class="unstyled">
 			<li class="bold">
-				<a href="{{ item.get_absolute_url }}" title="{{ item.name }}">{{ item.name|truncate_chars_inner:24 }}</a>
+				<a href="{{ item.get_absolute_url }}" title="{{ item.name }}">{{ item.name|truncate_chars_inner:24 }}<span class="pull-right badge hot">Hot</span><span class="pull-right badge fresh">Fresh</span></a>
 			</li>
 			<li>
 				
 				{% for artist in item.get_artists %}
 				{% if artist.get_absolute_url %}
-				<a href="{{ artist.get_absolute_url }}">{{ artist.name|truncate_chars_inner:32 }}</a>{% if not forloop.last %},{% endif %}
+				<a href="{{ artist.get_absolute_url }}">{{ artist.name|truncate_chars_inner:32 }}</a>
+				&nbsp;<a href="?artist={{ artist.slug }}" title="Only show releases by {{ artist.name }}" style="vertical-align: top;"><span class="filter icon"></span></a>
+				{% if not forloop.last %},{% endif %}
 				{% else %}
 				<span>{{ artist.name|truncate_chars_inner:32 }}</span>{% if not forloop.last %},{% endif %}
 				{% endif %}
 				{% endfor %}
-				
-				<!--
-				<a href="/en/content/library/artists/12721-oliver-huntemann/releases.html" title="Oliver Huntemann">Oliver Huntemann</a>&nbsp;<a href="/content/library/releases?artist_ids=12721&amp;page=1" title="Only show releases by Oliver Huntemann" style="vertical-align: top;"><span class="filter icon"></span></a>
-				-->
+
 			</li>
 		</ul>
 	</div>
 	<div class="list_body_item c3">
-		<ul class="indicator">
-			<li class="indicator q3"><img src="/static/img/base/spacer.png" width="2" height="10" alt="Indicator" title="37 Degrees (Arnaud Rebotini&#039;s Blackstrobe Remix)" />
-			</li>
+		<ul class="unstyled indicator">
+
+			{% include "alibrary/element/_track_indicator.html" %}
+			
 		</ul>
 	</div>
 	<div class="list_body_item c4">
-		<ul>
+		<ul class="unstyled">
 			<li class="bold">
 				{% if item.label %}
 				
-				<a href="{{ item.label.get_absolute_url }}" title="{{ item.label.name }}">{{ item.label.name|truncate_chars_inner:24 }}</a>
+				<a href="{{ item.label.get_absolute_url }}" title="{{ item.label.name }}">{{ item.label.name|truncate_chars_inner:18 }}</a>
+				&nbsp;
+				<a href="?label={{ item.label.slug }}" title="Only show releases on {{ item.label.name }}" style="vertical-align: top;"><span class="filter icon"></span></a>
 
 				<!--
 				<a href="/en/content/library/labels/5867-confused-recordings/profile.html">Confused  … rdings</a>&nbsp;<a href="/content/library/releases?label_ids=5867&amp;page=1" title="Only show releases on Confused Recordings" style="vertical-align: top;"><span class="filter icon"></span></a>
@@ -56,30 +62,35 @@
 				{% endif %}
 			</li>
 			<li class="small">
-				CON 58
+				
+				{% if  item.catalognumber %}
+				{{ item.catalognumber }}
+				{% endif %}
 			</li>
 		</ul>
 	</div>
 	<div class="list_body_item c5 license restricted_commercial">
-		<a href="/en/content/library/licenses/1-restricted_commercial/inline.html" title="License details" class="dialog modal"><img src="/static/img/icons/transparent_16x16.png" width="78" height="24" alt="License" class="noborder" /></a>
+		<a href="/en/content/library/licenses/1-restricted_commercial/inline.html" title="License details" class="dialog todo-modal"><img src="/static/img/icons/transparent_16x16.png" width="78" height="24" alt="License" class="noborder" /></a>
 	</div>
 	<div class="list_body_item c6">
-		<ul>
+		<ul class="unstyled">
 			<li>
-				09.2006
+				&nbsp;{{ item.releasedate|date:"SHORT_DATE_FORMAT" }}
 			</li>
 			<li class="small">
-				Germany
+				{% if  item.release_country %}
+				{{ item.release_country }}
+				{% endif %}
 			</li>
 		</ul>
 	</div>
 	<div class="list_body_item c7">
-		<ul>
+		<ul class="unstyled">
 			<li>
-				Album
+				{{ item.get_releasetype_display }}
 			</li>
 			<li class="small">
-				Official
+				{{ item.get_releasestatus_display }}
 			</li>
 		</ul>
 	</div>
@@ -87,14 +98,14 @@
 		<!-- Actions sub-view  -->
 		<div class="wrapper">
 			<div class="right">
-				<ul>
+				<ul class="unstyled">
 					<li class="basket">
 						<a href="#release:19287:default" title="Add to Basket" class="collectable"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
 					</li>
 				</ul>
 			</div>
 			<div>
-				<ul>
+				<ul class="unstyled">
 					<li class="download">
 						<a href="#release:19287:mp3" title="Download Release" class="downloadable queue"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
 					</li>

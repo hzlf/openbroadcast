@@ -97,6 +97,24 @@ class SpurlURLBuilder(object):
             query_to_set = QueryString(query_to_set).dict
         self.url = self.url.set_query_params(**query_to_set)
 
+
+
+
+    def handle_active_query(self, value):
+        query_to_toggle = self.prepare_value(value)
+        if isinstance(query_to_toggle, basestring):
+            query_to_toggle = QueryString(query_to_toggle).dict
+        current_query = self.url.query.dict
+        for key, value in query_to_toggle.items():
+
+            if key in current_query and value in current_query[key]:
+                self.url = True
+            else:
+                self.url = False
+                
+                
+                
+
     def handle_set_query_from(self, value):
         url = URLObject(value)
         self.url = self.url.set_query_params(**url.query.dict)

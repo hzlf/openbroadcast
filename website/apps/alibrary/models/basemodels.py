@@ -37,7 +37,7 @@ from filer.fields.audio import FilerAudioField
 from filer.fields.file import FilerFileField
 
 # modules
-from taggit.managers import TaggableManager
+#from taggit.managers import TaggableManager
 from django_countries import CountryField
 from easy_thumbnails.files import get_thumbnailer
 
@@ -138,7 +138,7 @@ post_save.connect(library_post_save, sender=Label)
         
         
 
-class License(MPTTModel):
+class License(MPTTModel, MigrationMixin):
     
     name = models.CharField(max_length=200)
     

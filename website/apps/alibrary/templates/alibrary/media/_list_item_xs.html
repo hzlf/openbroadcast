@@ -1,0 +1,70 @@
+{% load calc i18n %}
+
+				<div class="list_body_row selectable  published " id="list_item_75206">
+					<!-- Play icon -->
+					<div class="list_body_item c1 action">
+						<ul>
+							<!-- Play link  -->
+							<li class="play">
+								<a href="http://openbroadcast.ch/en/content/library/releases/19253-little-broken-hearts-gurtenfestival-2012/play.json#0#replace" title="Play" class="playable popup"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Play"></a>
+							</li>
+						</ul>
+
+					</div>
+					<!-- Tracknumber -->
+					<div class="list_body_item c2">
+						{{ item.tracknumber }}
+					</div>
+					<!-- Track title -->
+					<div class="list_body_item c3 bold">
+						{% include "alibrary/element/_inline_link.html" %}
+
+						
+					</div>
+					<!-- Artist name -->
+					<div class="list_body_item c4">
+						{% with item=item.artist %}
+						{% include "alibrary/element/_inline_link.html" %}
+						{% endwith %}
+					</div>
+					<!-- Duration -->
+					<div class="list_body_item c5">
+						{{ item.duration|sec_to_time }}
+					</div>
+					<!-- Format / Bitrate -->
+					<div class="list_body_item c6">
+						
+						
+						{{ item.master.filetype|upper }} | {{ item.master.size|filesizeformat }}
+						<!--{{ item.master.sample_rate }} kbps-->
+					</div>
+					<!-- License -->
+					<div class="list_body_item c5 license restricted_commercial">
+						<div class="left license">
+							<a href="http://openbroadcast.ch/en/content/library/licenses/1-restricted_commercial/inline.html" title="License details" class="dialog disabled-modal"><img src="http://openbroadcast.ch//media/img/icons/transparent_16x16.png" width="48" height="24" alt="License" class="noborder"></a>
+						</div><div class="clear"></div>
+					</div>
+					<div class="list_body_item c8 action">
+						<!-- Actions sub-view  -->
+						<div class="wrapper">
+							<div class="right">
+								<ul>
+									<li class="basket">
+										<a href="#media:75206:default" title="Add to Basket" class="collectable"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Play"></a>
+									</li>
+								</ul>
+							</div>
+							<div>
+								<ul>
+									<li class="download">
+										<a href="#media:75206:mp3" title="Download Media" class="downloadable queue"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Play"></a>
+									</li>
+								</ul>
+							</div>
+							<div class="clear"></div>
+						</div>
+					</div>
+					
+					
+					
+				</div>

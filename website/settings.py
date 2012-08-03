@@ -300,7 +300,8 @@ INSTALLED_APPS = (
     
     
     'crispy_forms',
-    'djangoratings',
+    #'djangoratings',
+    #'agon_ratings',
 
     
     # custom apps/*
@@ -324,7 +325,7 @@ INSTALLED_APPS = (
     #'discount',
 
     'wikisyntax',
-    'taggit',
+    #'taggit',
     'tagging',
     'pure_pagination',
     #'taggit_templatetags',
@@ -355,7 +356,7 @@ PAGINATION_SETTINGS = {
 }
 
 FORMATS_MEDIA = {
-    'mp3': ['base', 'low'],    
+    'mp3': ['base',],    
 }
 
 """

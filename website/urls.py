@@ -31,6 +31,11 @@ urlpatterns = patterns('',
     
     (r'^dev/', include('dev.urls')), # shop main urls
     
+    url(r"^ratings/", include("agon_ratings.urls")),
+    
+    
+    url(r"^api/", include("alibrary.urls_api")),
+    
     # varnish / ESI
     # (r'^esi/', include('esi.urls')),
     

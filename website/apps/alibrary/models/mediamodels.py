@@ -36,7 +36,7 @@ from filer.fields.audio import FilerAudioField
 from filer.fields.file import FilerFileField
 
 # modules
-from taggit.managers import TaggableManager
+#from taggit.managers import TaggableManager
 from django_countries import CountryField
 from easy_thumbnails.files import get_thumbnailer
 
@@ -258,6 +258,12 @@ class Media(MigrationMixin):
         log.info('Media id: %s - src_path: %s' % (self.pk, src_path))
         log.info('Media id: %s - tmp_path: %s' % (self.pk, tmp_path))
         
+        
+        print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        print 'Media id: %s - dst_file: %s' % (self.pk, dst_file)
+        print 'Media id: %s - src_path: %s' % (self.pk, src_path)
+        print 'Media id: %s - tmp_path: %s' % (self.pk, tmp_path)
+        
         print
         print
         print
@@ -293,7 +299,7 @@ class Media(MigrationMixin):
         """
         try:
             print '*******************************************************'
-            print 'create %s-version from %s' % (format, self.master.path)
+            #print 'create %s-version from %s' % (format, self.master.path)
             print 'Tmp file at:',
             print tmp_path
             print 'Source file at:',
@@ -402,6 +408,10 @@ class Media(MigrationMixin):
         finaly create a django file object and attach it to the medias cache folder
         """
         try:
+            
+            print "** tmp_path"
+            print tmp_path
+            
             tmp_file = DjangoFile(open(tmp_path),name=dst_file)            
             file, created = File.objects.get_or_create(
                                             original_filename=tmp_file.name,
@@ -439,55 +449,6 @@ class Media(MigrationMixin):
         pass
     
     
-
-        
-        
-        
-
-
-    def convert_(self, filename, folder, format, variation):
-        
-        status = 0
-        
-        dst_file = filename
-        src_path = self.master.path    
-    
-        tmp_directory = tempfile.mkdtemp()
-        tmp_path = tmp_directory + '/' + dst_file
-    
-        """
-        remove all cached files, we don't want versions of them.
-        """
-        try:
-            old_files = File.objects.filter(original_filename=dst_file, folder=self.folder).all()
-            for old_file in old_files:
-                os.remove(old_file.path)
-                old_file.delete()
-                
-        except Exception, e:
-            print e
-            
-            
-
-        
-        """
-        create a converted version of the master, stored in temp location
-        """
-        try:
-            print 'temp file at:',
-            print tmp_path
-            print 'source file at:',
-            print src_path
-            
-            if format == 'mp3':
-                # TODO: make compression variable / configuration dependant
-                print 'conversion to mp3'
-                audiotools.open(src_path).convert(tmp_path, audiotools.MP3Audio, compression='7', progress=self.convert_progress)
-                return tmp_directory
-                
-        except Exception, e:
-            print e
-            return false
 
 
 

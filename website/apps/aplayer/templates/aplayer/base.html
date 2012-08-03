@@ -11,6 +11,8 @@
 
 {% render_block "css" %}
 
+{% render_block "js-head" %}
+
 {% render_block "js-pre" %}
 
 </head>
@@ -50,11 +52,11 @@
 			aplayer.vars.skin_url = '{{ STATIC_URL }}css/lib/jwplayer/ulysses.zip';
 			
 			
-			asite.vars.aplayer_width = 630;
-			asite.vars.aplayer_height = 630;
+			//asite.vars.aplayer_width = 630;
+			//asite.vars.aplayer_height = 630;
 			
 			// create interface
-			asite.ui.init();
+			// asite.ui.init();
 			
 			aplayer.base.init();
 			aplayer.ui.init();
@@ -64,7 +66,6 @@
 		//--><!]]>
 	</script>
 
-	
 	<!-- verry last scripts -->
 	{% render_block "js-post" %}
 

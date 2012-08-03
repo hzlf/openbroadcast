@@ -153,6 +153,8 @@ class Image(File):
             except Exception, e:
                 # swallow the the exception to avoid to bubble it up
                 # in the template {{ image.icons.48 }}
+                print "filer error"
+                print e
                 pass
         return _icons
 

@@ -159,7 +159,7 @@ class RelationsInline(GenericTabularInline):
 class ReleaseAdmin(PlaceholderAdmin, BaseAdmin):
 
     #list_display   = ('name', 'get_extra_artists',)
-    list_display   = ('name', 'releasetype', 'label', 'slug', 'uuid',)
+    list_display   = ('name', 'releasetype', 'label', 'slug', 'uuid', 'catalognumber',)
     search_fields = ['name', 'label__name',]
     list_filter = ('releasetype','release_country',)
     

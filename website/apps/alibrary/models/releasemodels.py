@@ -63,8 +63,7 @@ logger = logging.getLogger(__name__)
 from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
     
-    
-from djangoratings.fields import RatingField
+#from djangoratings.fields import RatingField
  
     
 ################
@@ -102,7 +101,10 @@ class Release(MigrationMixin):
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
     
-    release_country = models.CharField(max_length=200, blank=True, null=True)
+    #release_country = models.CharField(max_length=200, blank=True, null=True)
+    release_country = CountryField(blank=True, null=True)
+    
+    
     
     #uuid = models.CharField(max_length=36, unique=False, default=str(uuid.uuid4()), editable=True)
     uuid = UUIDField()
@@ -119,6 +121,19 @@ class Release(MigrationMixin):
     releasedate = models.DateField(blank=True, null=True)
     pressings = models.PositiveIntegerField(max_length=12, default=0)
     
+    totaltracks = models.IntegerField(null=True, blank=True)
+    asin = models.CharField(max_length=150, blank=True)
+    
+    RELEASESTATUS_CHOICES = (
+        (None, _('Not set')),
+        ('official', _('Official')),
+        ('promo', _('Promo')),
+        ('bootleg', _('Bootleg')),
+        ('other', _('Other')),
+    )
+    
+    releasestatus = models.CharField(max_length=60, blank=True, choices=RELEASESTATUS_CHOICES)
+    
     publish_date = models.DateTimeField(default=datetime.now, blank=True, null=True, help_text=_('If set this Release will not be published on the site before the given date.'))
 
     main_format = models.ForeignKey(Mediaformat, null=True, blank=True, on_delete=models.SET_NULL)
@@ -133,13 +148,16 @@ class Release(MigrationMixin):
         ('ep', _('EP')),
         ('album', _('Album')),
         ('compilation', _('Compilation')),
+        ('remix', _('Remix')),
+        ('live', _('Live')),
+        ('single', _('Single')),
         ('other', _('Other')),
     )
     releasetype = models.CharField(verbose_name="Release type", max_length=12, default='other', choices=RELEASETYPE_CHOICES)
     
     
     #rating
-    rating = RatingField(range=5)
+    #rating = RatingField(range=5)
     
     # relations
     label = models.ForeignKey(Label, blank=True, null=True, related_name='release_label', on_delete=models.SET_NULL)
@@ -189,7 +207,7 @@ class Release(MigrationMixin):
         app_label = 'alibrary'
         verbose_name = _('Release')
         verbose_name_plural = _('Releases')
-        ordering = ('-releasedate', )
+        #ordering = ('-releasedate', )
     
     
     def __unicode__(self):
@@ -222,6 +240,34 @@ class Release(MigrationMixin):
     def get_products(self):
         return self.releaseproduct.all()
     
+    def get_media_indicator(self):
+        
+        media = self.get_media()
+        
+        indicator = []
+        
+        
+        if self.totaltracks:
+            for i in range(self.totaltracks):
+                indicator.append(0)
+        
+            for m in media:
+                try:
+                    indicator[m.tracknumber -1 ] = 3
+                except Exception, e:
+                    pass
+            
+            
+            
+        else:
+                
+            for m in media:
+                indicator.append(2)
+        
+        return indicator
+            
+
+    
     def get_artists(self):
 
         artists = []
@@ -246,8 +292,13 @@ class Release(MigrationMixin):
         
         artists = list(set(artists))
         
-        #print "GET ARTISTS"
-        #print artists
+        if len(artists) > 1:
+            from alibrary.models import Artist
+            artists = Artist.objects.filter(name="Varous Artists")
+            
+        
+        print "GET ARTISTS"
+        print artists
         
         return artists
 

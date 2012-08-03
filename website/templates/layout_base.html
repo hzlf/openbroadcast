@@ -8,46 +8,49 @@
 	{% endblock %}
 
 
-	<div class="hfixw">
-		<div id="slider_top">
-			<div class="content"></div>
-		</div>
-	</div>
+
 
 
 	{% block main %}
 	
+	<!--
 	<div id="sitemessages"></div>
+	-->
+	
+	<div class="span9">
+		{% block tagcloud %}{% endblock %}
+		{% block searchbar %}{% endblock %}
+		{% block inner %}{% endblock %}
+	</div>
+		
+	<div class="span3 sidebar">
+		{% block sidebar %}{% endblock %}
+	</div>
+	
 
-	{% block heading %}{% endblock %}
-
-	{% block modnav %}{% endblock %}
-
+	<!--
 	<div id="content-holder">
 		<div class="left">
 
 			<div id="splitpane-content">
 
 				<div class="mp-list">
-					{% block tagcloud %}{% endblock %}
-					{% block searchbar %}{% endblock %}
-					{% block inner %}{% endblock %}
+
 				</div>
 				
 			</div>
 			<div id="footer" class="footer">
-				{% include "skeleton/footer.html" %}
+				
 			</div>
 		</div>
 
 		<div id="splitpane-sidebar">
-			<!--
-			{% show_menu 0 100 100 100 %}
-			-->
-			{% block sidebar %}{% endblock %}
+
+			
 		</div>
 
 	</div>
+	-->
 
 	{% endblock %}
 		

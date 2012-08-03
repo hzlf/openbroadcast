@@ -5,7 +5,7 @@
 	{% addtoblock "js-head" %}<script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/lib/jquery-1.7.1.min.js"><\/script>')</script>{% endaddtoblock %}
 
 	<!-- js-head, rendered in head :) block -->
-	{% addtoblock "js-head" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-1.5.2.min.js"></script>{% endaddtoblock %}
+	{% addtoblock "js-head" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-1.7.1.min.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-head" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-ui-1.8.10.custom.min.js"></script>{% endaddtoblock %}
 	
 	
@@ -49,7 +49,13 @@
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.highlight.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.watch.js"></script>{% endaddtoblock %}
 	
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.tmpl.js"></script>{% endaddtoblock %}
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jsrender.js"></script>{% endaddtoblock %}
+	
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/util.base.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/base.ui.js"></script>{% endaddtoblock %}
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/aplayer.base.js"></script>{% endaddtoblock %}
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/aplayer.ui.js"></script>{% endaddtoblock %}
 	
 	
 

@@ -1,10 +1,10 @@
 {% load menu_tags i18n %}
 
-	<div id="toolbar">
+	<div>
 		<div class="navright">
 			<div class="right">
 				<!-- account section -->
-				<ul id="nav" class="horizontal"> 
+				<ul id="nav" class="horizontal unstyled"> 
 			
 					{% if user.is_authenticated %}
 			        	<li><a href="{% url account_logout %}?next={{ request.get_full_path }}"><span>{% trans 'Signout' %}</span></a></li>
@@ -22,7 +22,7 @@
 			</div>
 		</div>
 		<div class="navleft">
-			<div style="float: left; margin-left: -10px; margin-right: 0px;">
+			<div class="logo" style="float: left;">
 				<a href="/" style="color: #777777; font-weight: bold;">open broadcast</a>
 			</div>
 			<ul class="left navigation-main">

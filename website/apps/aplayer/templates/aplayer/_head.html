@@ -1,4 +1,4 @@
-{% load uni_form_tags compress cms_tags %}
+{% load compress cms_tags %}
 
 	<title>{{ request.current_page.get_title }}</title>
 	
@@ -17,13 +17,13 @@
 	
 	<!-- compressed -->
 	{% compress css %}
+	{% endcompress %}
 	<link href="{{ STATIC_URL }}css/aplayer.css" media="screen, projection" rel="stylesheet" type="text/css" />
 	<!-- REMOVE FOR PRODUCTION! -->
 	<link href="{{ STATIC_URL }}css/in_progress.css" media="screen, projection" rel="stylesheet" type="text/css" />
-	{% endcompress %}
 	
 
-
+	
 
 	<!-- meta ----------------------------------------------------------------------------------------------->
 	<link rel="icon" type="image/png" href="{{ STATIC_URL }}img/base/favicon.png" />

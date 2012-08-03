@@ -6,6 +6,17 @@ $img-path: '/static/img/prototype/'
 
 $footer_fix-height: 20px
 
+
+.dl-horizontal
+  dt
+    float: left
+    clear: left
+    width: 120px
+    text-align: right
+
+  dd
+    margin-left: 130px
+
 #body
   font-size: 12px
   font-family: Arial, Helvetica, sans-serif
@@ -49,34 +60,39 @@ div#footer_fix
 
 html body
   overflow: auto
- 
 
-  div#wrapper_main
-    height: 100%
-    overflow: auto
- 
-  // make some space for the toolbar
+  
   #cms_toolbar-toggle
     top: 40px
+    
   &.toolbar-visible
     #cms_toolbar-toggle
       top: 0
-    div#wrapper_main
-      margin-top: 42px
+    .navbar-fixed-top
+      top: 43px
+    .container.main
+      margin-top: 103px
   
-
+  //#cms_toolbar-toggle
+  //  top: 40px
+  //&.toolbar-visible
+  //  #cms_toolbar-toggle
+  //    top: 0
+  //  div#wrapper_main
+  //    margin-top: 42px
   
-
-#main
-  text-align: center
-  padding: 7px 20px 0px 20px
-
-#container
-  text-align: center
-  padding: 7px 25px 0px 25px
+div.container.main
+  margin-top: 70px
 
 .topnav
   margin-bottom: 75px
+
+
+.subhead
+  .subnav
+    padding: 0 0 0 0
+
+
 
 img, div, p, table, td, tr
   vertical-align: top
@@ -93,7 +109,7 @@ img, div, p, table, td, tr
     margin: 150px 0px 10px 0px
     border: 8px solid #fff
 
-/* ----------- front ------------
+/* ----------- front ------------ */
 
 .ob-head
   padding: 10px 0px 10px 0px
@@ -211,12 +227,12 @@ table.front td
 
 
 
-/* ----------- container ------------
+/* ----------- container ------------ */
 
 #heading
   position: relative
   /* margin: 10px 250px 19px 0px */
-  margin: 10px 0px 19px 0px
+  // margin: 10px 0px 19px 0px
   .title
     font-size: 26px
     line-height: 28px
@@ -234,10 +250,13 @@ table.front td
 /* mod nav */
 
 #modnav
-  margin: 0px 250px 6px 0px
+  //margin: 0px 250px 6px 0px
+  border-bottom: 1px solid #999
+  ul
+    margin: 0
   li
-    list-style: none
-    float: left
+    //list-style: none
+    //float: left
   a
     color: #666
     text-decoration: none
@@ -251,11 +270,11 @@ table.front td
       color: $main-a
 
 #modnavright
-  float: right
-  margin-top: -24px
+  //float: right
+  //margin-top: -24px
   li
-    list-style: none
-    float: right
+    //list-style: none
+    //float: right
   a
     color: #666
     text-decoration: none
@@ -1129,34 +1148,16 @@ div
   border-top: 1px solid #aaa
   
 #footer
-  width: $width-inner_content
-  .col_1_4
-    /* correct styles (using cols)
-    width: ($width-inner_content / 4) - 8
-    border-left: 1px solid #DDDDDD
-    padding: 0 0 0 7px
-    ul
-      font-size: 92%
-      font-weight: normal
-      line-height: 130%
-      h5
-        font-weight: bold
-        font-size: 100%
-        margin: 0
-        padding: 0 0 3px 0
-  .col_1_4:first-child
-    border-left: none
+
   div.subline
-    margin: 25px 0 0 0
+    
     p
-      margin: 7px 0 0 0
       color: #A5A5A5
       font-size: 92%
       line-height: 130%
       span
         font-size: 92%
 		
-  /* style overrides / additions to display legacy pages (the "page-registry" shizzle)
   div.sitemap
     font-size: 92%
     line-height: 152%
@@ -1273,7 +1274,7 @@ div
 
 
 /* New icon styleing
-.icon-library
+.icon60-library
   background: url(/static/img/base/module.icon.library.png) no-repeat 0px 5px
 
 
