@@ -59,7 +59,8 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
     'django.template.loaders.eggs.Loader',
-    'django.template.loaders.app_directories.load_template_source',
+    #'django.template.loaders.app_directories.load_template_source', # depreceated
+    'django.template.loaders.app_directories.Loader',
 )
 
 MIDDLEWARE_CLASSES = (                
@@ -68,6 +69,10 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
 
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+
+    'django.middleware.transaction.TransactionMiddleware',
+    'reversion.middleware.RevisionMiddleware',
+    
     'django.contrib.messages.middleware.MessageMiddleware',
     #'pagination.middleware.PaginationMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
@@ -79,6 +84,8 @@ MIDDLEWARE_CLASSES = (
     # custom
     #'lib.middleware.ProfileMiddleware',
     #'lib.middleware.PrettifyMiddlewareBS',
+    
+    'arating.middleware.AratingIpMiddleware',
 )
 
 CACHE_BACKEND = 'locmem:///'
@@ -228,6 +235,10 @@ STATICFILES_FINDERS = (
 
 INSTALLED_APPS = (
                   
+    #'admin_tools.theming',
+    #'admin_tools.menu',
+    #'admin_tools.dashboard',
+    
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -262,6 +273,8 @@ INSTALLED_APPS = (
     
     
     'sendfile',
+    
+    'reversion',
     
     
     # cms plugins
@@ -308,6 +321,8 @@ INSTALLED_APPS = (
     'asite',
     'alibrary',
     'aplayer',
+    'arating',
+    #'secretballot',
     'genericrelations',
     'ashop',
     'ashop.addressmodel',
@@ -356,7 +371,7 @@ PAGINATION_SETTINGS = {
 }
 
 FORMATS_MEDIA = {
-    'mp3': ['base',],    
+    'mp3': ['base', 'low'],    
 }
 
 """

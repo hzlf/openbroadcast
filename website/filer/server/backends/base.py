@@ -5,9 +5,11 @@ import os
 
 
 class ServerBase(object):
-    def __init__(self, *args, **kwargs):
-        pass
+    """
+    Server classes define a way to serve a Django File object.
 
+    Warning: this API is EXPERIMENTAL and may change at any time.
+    """
     def get_mimetype(self, path):
         return mimetypes.guess_type(path)[0] or 'application/octet-stream'
 
@@ -24,12 +26,12 @@ class ServerBase(object):
         save_as = kwargs.get('save_as', None)
         if save_as == False:
             return
-        file = kwargs.get('file', None)
+        file_obj = kwargs.get('file_obj', None)
         filename = None
         if save_as:
             filename = save_as
         else:
-            filename = os.path.basename(file.path)
+            filename = os.path.basename(file_obj.path)
         response['Content-Disposition'] = smart_str(u'attachment; filename=%s' % filename)
 
     def size_header(self, response, **kwargs):

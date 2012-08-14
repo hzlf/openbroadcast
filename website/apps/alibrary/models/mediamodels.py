@@ -179,6 +179,11 @@ class Media(MigrationMixin):
     def get_stream_file(self, format, version):
         # TODO: improve...
         
+        if format == 'mp3' and version == 'base':
+            ext = os.path.splitext(self.master.path)[1][1:].strip() 
+            if ext == 'mp3':
+                return self.master
+        
         filename = str(version) + '.' + str(format)
         file = File.objects.get(original_filename=filename, folder=self.folder)
         
@@ -192,9 +197,12 @@ class Media(MigrationMixin):
         # TODO: improve...
         
         filename = str(version) + '.' + str(format)
-        file = File.objects.get(original_filename=filename, folder=self.folder)
-        
-        return file
+        try:
+            file = File.objects.filter(original_filename=filename, folder=self.folder)[0]
+            return file
+        except Exception, e:
+            print e
+            return None
     
     def get_waveform_image(self):
         # TODO: improve...
@@ -299,7 +307,7 @@ class Media(MigrationMixin):
         """
         try:
             print '*******************************************************'
-            #print 'create %s-version from %s' % (format, self.master.path)
+            print 'create %s-version from %s' % (format, self.master.path)
             print 'Tmp file at:',
             print tmp_path
             print 'Source file at:',
@@ -312,19 +320,35 @@ class Media(MigrationMixin):
             
             time.sleep(0.5)
             
+
+            
             if format == 'mp3':
                 # TODO: make compression variable / configuration dependant
                 
                 compression = '2'
+                skip_conversion = False
                 
+                print 'Version: %s' % version
+
                 if version == 'base':
+                    
+                    # skip conversino in case of mp3 - just use the original file
+                    ext = os.path.splitext(src_path)[1][1:].strip() 
+                    if ext == 'mp3':
+                        print 'skip conversion - mp3 > mp3'
+                        tmp_path = src_path
+                        skip_conversion = True
+                    
                     compression = '0'
                     
                 if version == 'low':
                     compression = '6'
                 
-                print 'conversion to mp3'
-                audiotools.open(src_path).convert(tmp_path, audiotools.MP3Audio, compression=compression, progress=self.convert_progress)
+                
+                
+                if not skip_conversion:
+                    print 'conversion to mp3'
+                    audiotools.open(src_path).convert(tmp_path, audiotools.MP3Audio, compression=compression, progress=self.convert_progress)
 
             
             if format == 'flac':
@@ -548,11 +572,9 @@ class Media(MigrationMixin):
     def generate_media_versions(self):
         
         print '-'
-        print '-'
         print "!!!! generate_media_versions:",
         print "SELF.PROCESSED:",
         print self.processed
-        print '-'
         print '-'
         
         if self.processed == 0:
@@ -614,21 +636,7 @@ class Media(MigrationMixin):
         print
         
         # call without '.delay' for straight developing 
-        
-        """
-        log.info('Media id: %s - Sending to Encoder: %s/%s' % (obj.pk, 'wav', 'base'))
-        obj.convert('wav', 'base')
-        
-        log.info('Media id: %s - Sending to Encoder: %s/%s' % (obj.pk, 'flac', 'base'))
-        obj.convert('flac', 'base') 
-        
-        log.info('Media id: %s - Sending to Encoder: %s/%s' % (obj.pk, 'mp3', 'base'))
-        obj.convert('mp3', 'base')
-        
-        log.info('Media id: %s - Sending to Encoder: %s/%s' % (obj.pk, 'mp3', 'low'))
-        obj.convert('mp3', 'low')
-        """
-        
+
         formats_media = FORMATS_MEDIA
         for source, versions in formats_media.iteritems():
             for version in versions:
@@ -750,14 +758,12 @@ class Media(MigrationMixin):
         """
         check if master changed. if yes we need to reprocess the cached files
         """
-        
-        """
+
         if self.uuid is not None:
             orig = Media.objects.get(uuid=self.uuid)
             if orig.master != self.master:
                 log.info('Media id: %s - Master changed from "%s" to "%s"' % (self.uuid, orig.master, self.master))
                 self.processed = 0
-        """
         
         try:
             cache_folder = self.folder
@@ -765,15 +771,7 @@ class Media(MigrationMixin):
             print e
             log.info('Media id: %s - cache folder does not exist' % (self.pk))
             cache_folder = None
-        
 
-        """
-        if not cache_folder:
-            parent_folder, created = Folder.objects.get_or_create(name='cache')
-            folder, created = Folder.objects.get_or_create(name=folder_name, parent=parent_folder)
-            log.info('Media id: %s - cache folder set to: %s' % (self.pk, folder.name))
-            self.folder = folder
-        """
             
         if self.master:
             log.info('Media id: %s - set master path to: %s' % (self.pk, self.master.path))

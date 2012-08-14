@@ -1,7 +1,9 @@
 #-*- coding: utf-8 -*-
+import inspect
 from django import forms
 from django.conf import settings as globalsettings
 from django.contrib.admin.widgets import ForeignKeyRawIdWidget
+from django.contrib.admin.sites import site
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -11,6 +13,8 @@ from django.utils.text import truncate_words
 from filer.models import File
 from filer.settings import FILER_STATICMEDIA_PREFIX
 
+import logging
+logger = logging.getLogger(__name__)
 
 class AdminFileWidget(ForeignKeyRawIdWidget):
     choices = None
@@ -23,11 +27,17 @@ class AdminFileWidget(ForeignKeyRawIdWidget):
         related_url = None
         if value:
             try:
-                file = File.objects.get(pk=value)
-                related_url = file.logical_folder.\
+                file_obj = File.objects.get(pk=value)
+                related_url = file_obj.logical_folder.\
                                 get_admin_directory_listing_url_path()
-            except Exception:
-                pass
+            except Exception,e:
+                # catch exception and manage it. We can re-raise it for debugging
+                # purposes and/or just logging it, provided user configured
+                # proper logging configuration
+                if filer_settings.FILER_ENABLE_LOGGING:
+                    logger.error('Error while rendering file widget: %s',e)
+                if filer_settings.FILER_DEBUG:
+                    raise e
         if not related_url:
             related_url = reverse('admin:filer-directory_listing-root')
         params = self.url_parameters()
@@ -54,7 +64,6 @@ class AdminFileWidget(ForeignKeyRawIdWidget):
             'span_id': css_id_description_txt,
             'object': obj,
             'lookup_name': name,
-            'admin_media_prefix': globalsettings.ADMIN_MEDIA_PREFIX,
             'filer_static_prefix': filer_static_prefix,
             'clear_id': '%s_clear' % css_id,
             'id': css_id,
@@ -88,7 +97,11 @@ class AdminFileFormField(forms.ModelChoiceField):
         self.max_value = None
         self.min_value = None
         other_widget = kwargs.pop('widget', None)
-        forms.Field.__init__(self, widget=self.widget(rel), *args, **kwargs)
+        if 'admin_site' in inspect.getargspec(self.widget.__init__)[0]: # Django 1.4
+            widget_instance = self.widget(rel, site)
+        else: # Django <= 1.3
+            widget_instance = self.widget(rel)
+        forms.Field.__init__(self, widget=widget_instance, *args, **kwargs)
 
     def widget_attrs(self, widget):
         widget.required = self.required

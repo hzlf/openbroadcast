@@ -7,6 +7,8 @@ from django.utils.translation import ugettext  as _
 from filer import settings
 from filer.admin.permissions import PrimitivePermissionAwareModelAdmin
 from filer.models import File
+from filer.views import (popup_param, selectfolder_param, popup_status,
+                         selectfolder_status)
 
 
 class FileAdminChangeFrom(forms.ModelForm):
@@ -21,6 +23,7 @@ class FileAdmin(PrimitivePermissionAwareModelAdmin):
     raw_id_fields = ('owner',)
     readonly_fields = ('sha1',)
 
+
     # save_as hack, because without save_as it is impossible to hide the
     # save_and_add_another if save_as is False. To show only save_and_continue
     # and save in the submit row we need save_as=True and in
@@ -28,6 +31,26 @@ class FileAdmin(PrimitivePermissionAwareModelAdmin):
     save_as = True
 
     form = FileAdminChangeFrom
+
+    @classmethod
+    def build_fieldsets(cls, extra_main_fields=(), extra_advanced_fields=(), extra_fieldsets=()):
+        fieldsets = (
+            (None, {
+                'fields': ('name', 'owner', 'description',) + extra_main_fields,
+            }),
+            (_('Advanced'), {
+                'fields': ('file', 'sha1',) + extra_advanced_fields,
+                'classes': ('collapse',),
+                }),
+            ) + extra_fieldsets
+        if settings.FILER_ENABLE_PERMISSIONS:
+            fieldsets = fieldsets + (
+                (None, {
+                    'fields': ('is_public',)
+                }),
+            )
+        return fieldsets
+
 
     def response_change(self, request, obj):
         """
@@ -37,7 +60,8 @@ class FileAdmin(PrimitivePermissionAwareModelAdmin):
         r = super(FileAdmin, self).response_change(request, obj)
         if r['Location']:
             # it was a successful save
-            if r['Location'] in ['../']:
+            if (r['Location'] in ['../'] or
+                r['Location'] == self._get_post_url(obj)):
                 # this means it was a save: redirect to the directory view
                 if obj.folder:
                     url = reverse('admin:filer-directory_listing',
@@ -45,6 +69,8 @@ class FileAdmin(PrimitivePermissionAwareModelAdmin):
                 else:
                     url = reverse(
                             'admin:filer-directory_listing-unfiled_images')
+                url = "%s%s%s" % (url,popup_param(request),
+                                  selectfolder_param(request,"&"))
                 return HttpResponseRedirect(url)
             else:
                 # this means it probably was a save_and_continue_editing
@@ -53,7 +79,9 @@ class FileAdmin(PrimitivePermissionAwareModelAdmin):
 
     def render_change_form(self, request, context, add=False, change=False,
                            form_url='', obj=None):
-        extra_context = {'show_delete': True}
+        extra_context = {'show_delete': True,
+                         'is_popup': popup_status(request),
+                         'select_folder': selectfolder_status(request),}
         context.update(extra_context)
         return super(FileAdmin, self).render_change_form(
                     request=request, context=context, add=False, change=False,
@@ -80,12 +108,17 @@ class FileAdmin(PrimitivePermissionAwareModelAdmin):
                     extra_context=extra_context)
 
         url = r.get("Location", None)
-        if url in ["../../../../", "../../"]:
+        # Check against filer_file_changelist as file deletion is always made by
+        # the base class
+        if (url in ["../../../../", "../../"] or
+            url == reverse("admin:filer_file_changelist")):
             if parent_folder:
                 url = reverse('admin:filer-directory_listing',
                                   kwargs={'folder_id': parent_folder.id})
             else:
                 url = reverse('admin:filer-directory_listing-unfiled_images')
+            url = "%s%s%s" % (url,popup_param(request),
+                              selectfolder_param(request,"&"))
             return HttpResponseRedirect(url)
         return r
 
@@ -99,26 +132,4 @@ class FileAdmin(PrimitivePermissionAwareModelAdmin):
             'delete': False,
         }
 
-if settings.FILER_ENABLE_PERMISSIONS:
-    FileAdmin.fieldsets = (
-        (None, {
-            'fields': ('name', 'owner', 'description')
-        }),
-        (None, {
-            'fields': ('is_public',)
-        }),
-        (_('Advanced'), {
-            'fields': ('file', 'sha1',),
-            'classes': ('collapse',),
-        }),
-    )
-else:
-    FileAdmin.fieldsets = (
-        (None, {
-            'fields': ('name', 'owner', 'description')
-        }),
-        (_('Advanced'), {
-            'fields': ('file', 'sha1'),
-            'classes': ('collapse',),
-        }),
-    )
+FileAdmin.fieldsets = FileAdmin.build_fieldsets()

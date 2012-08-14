@@ -1,5 +1,13 @@
 #-*- coding: utf-8 -*-
-from PIL import Image as PILImage
+import logging
+
+try:
+    from PIL import Image as PILImage
+except ImportError:
+    try:
+        import Image as PILImage
+    except ImportError:
+        raise ImportError("The Python Imaging Library was not found.")
 from datetime import datetime
 from django.core import urlresolvers
 from django.db import models
@@ -9,6 +17,8 @@ from filer.models.filemodels import File
 from filer.utils.filer_easy_thumbnails import FilerThumbnailer
 from filer.utils.pil_exif import get_exif_for_file
 import os
+
+logger = logging.getLogger("filer")
 
 class Image(File):
     SIDEBAR_IMAGE_WIDTH = 210
@@ -106,7 +116,7 @@ class Image(File):
     def has_add_children_permission(self, request):
         return self.has_generic_permission(request, 'add_children')
 
-    def has_generic_permission(self, request, type):
+    def has_generic_permission(self, request, permission_type):
         """
         Return true if the current user has permission on this
         image. Return the string 'ALL' if the user has all rights.
@@ -119,7 +129,7 @@ class Image(File):
         elif user == self.owner:
             return True
         elif self.folder:
-            return self.folder.has_generic_permission(request, type)
+            return self.folder.has_generic_permission(request, permission_type)
         else:
             return False
 
@@ -151,11 +161,13 @@ class Image(File):
                 thumb = self.file.get_thumbnail(thumbnail_options)
                 _icons[size] = thumb.url
             except Exception, e:
-                # swallow the the exception to avoid to bubble it up
-                # in the template {{ image.icons.48 }}
-                print "filer error"
-                print e
-                pass
+                # catch exception and manage it. We can re-raise it for debugging
+                # purposes and/or just logging it, provided user configured
+                # proper logging configuration
+                if filer_settings.FILER_ENABLE_LOGGING:
+                    logger.error('Error while generating icons: %s',e)
+                if filer_settings.FILER_DEBUG:
+                    raise e
         return _icons
 
     @property
@@ -166,10 +178,14 @@ class Image(File):
                 opts.update({'subject_location': self.subject_location})
                 thumb = self.file.get_thumbnail(opts)
                 _thumbnails[name] = thumb.url
-            except:
-                # swallow the exception to avoid it bubbling up
-                # to the template {{ image.icons.48 }}
-                pass
+            except Exception,e:
+                # catch exception and manage it. We can re-raise it for debugging
+                # purposes and/or just logging it, provided user configured
+                # proper logging configuration
+                if filer_settings.FILER_ENABLE_LOGGING:
+                    logger.error('Error while generating thumbnail: %s',e)
+                if filer_settings.FILER_DEBUG:
+                    raise e
         return _thumbnails
 
     @property

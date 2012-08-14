@@ -251,7 +251,7 @@ class ReleaseEditView(UpdateView):
         
         return context
     
-    
+    """
     def form_valid(self, form):
         context = self.get_context_data()
         releasemedia_form = context['releasemedia_form']
@@ -268,7 +268,7 @@ class ReleaseEditView(UpdateView):
 
             print "NNNOOOTTT VALLIDIO"
             return self.render_to_response(self.get_context_data(form=form))
-    
+    """
     
 # autocompleter views
 

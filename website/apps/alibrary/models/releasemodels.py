@@ -64,7 +64,8 @@ from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
     
 #from djangoratings.fields import RatingField
- 
+#from arating.fields import RatingField
+import arating
     
 ################
 from alibrary.models.basemodels import *
@@ -104,7 +105,7 @@ class Release(MigrationMixin):
     #release_country = models.CharField(max_length=200, blank=True, null=True)
     release_country = CountryField(blank=True, null=True)
     
-    
+    #rating = RatingField(range=4, offset=2, can_change_vote=True, allow_delete=True) # > pos/neg rateing
     
     #uuid = models.CharField(max_length=36, unique=False, default=str(uuid.uuid4()), editable=True)
     uuid = UUIDField()
@@ -462,6 +463,7 @@ class Release(MigrationMixin):
 
 
 tagging.register(Release)
+arating.enable_voting_on(Release)
 post_save.connect(library_post_save, sender=Release)  
 
 

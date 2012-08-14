@@ -1,6 +1,6 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail %}
+{% load truncate i18n thumbnail arating_tags %}
 
 {% block heading %} <!-- heading / icon (large one) -->
 <div id="heading">
@@ -106,7 +106,7 @@
 				</div>
 				
 				<div class="rating">
-
+					{% rating_for_object object %}
 				</div>
 				
 				

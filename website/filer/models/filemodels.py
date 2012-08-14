@@ -16,22 +16,22 @@ import os
 class FileManager(PolymorphicManager):
     def find_all_duplicates(self):
         r = {}
-        for file in self.all():
-            if file.sha1:
-                q = self.filter(sha1=file.sha1)
+        for file_obj in self.all():
+            if file_obj.sha1:
+                q = self.filter(sha1=file_obj.sha1)
                 if len(q) > 1:
-                    r[file.sha1] = q
+                    r[file_obj.sha1] = q
         return r
 
-    def find_duplicates(self, file):
-        return [i for i in self.exclude(pk=file.pk).filter(sha1=file.sha1)]
+    def find_duplicates(self, file_obj):
+        return [i for i in self.exclude(pk=file_obj.pk).filter(sha1=file_obj.sha1)]
 
 
 class File(PolymorphicModel, mixins.IconsMixin):
     file_type = 'File'
     _icon = "file"
     folder = models.ForeignKey(Folder, verbose_name=_('folder'), related_name='all_files',
-                               null=True, blank=True)
+        null=True, blank=True)
     file = MultiStorageFileField(_('file'), null=True, blank=True, max_length=255)
     _file_size = models.IntegerField(_('file size'), null=True, blank=True)
 
@@ -41,23 +41,23 @@ class File(PolymorphicModel, mixins.IconsMixin):
 
     original_filename = models.CharField(_('original filename'), max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, null=True, blank=True,
-                            verbose_name=_('name'))
+        verbose_name=_('name'))
     description = models.TextField(null=True, blank=True,
-                                   verbose_name=_('description'))
+        verbose_name=_('description'))
 
     owner = models.ForeignKey(auth_models.User,
-                              related_name='owned_%(class)ss',
-                              null=True, blank=True, verbose_name=_('owner'))
+        related_name='owned_%(class)ss',
+        null=True, blank=True, verbose_name=_('owner'))
 
     uploaded_at = models.DateTimeField(_('uploaded at'), auto_now_add=True)
     modified_at = models.DateTimeField(_('modified at'), auto_now=True)
 
     is_public = models.BooleanField(
-                    default=filer_settings.FILER_IS_PUBLIC_DEFAULT,
-                    verbose_name=_('Permissions disabled'),
-                    help_text=_('Disable any permission checking for this ' +\
-                                'file. File will be publicly accessible ' +\
-                                'to anyone.'))
+        default=filer_settings.FILER_IS_PUBLIC_DEFAULT,
+        verbose_name=_('Permissions disabled'),
+        help_text=_('Disable any permission checking for this ' +\
+                    'file. File will be publicly accessible ' +\
+                    'to anyone.'))
 
     objects = FileManager()
 
@@ -70,14 +70,12 @@ class File(PolymorphicModel, mixins.IconsMixin):
         self._old_is_public = self.is_public
 
     def _move_file(self):
-        
-        
         """
         Move the file from src to dst.
         """
         src_file_name = self.file.name
         dst_file_name = self._meta.get_field('file').generate_filename(
-                                                self, self.original_filename)
+            self, self.original_filename)
 
         if self.is_public:
             src_storage = self.file.storages['private']
@@ -97,7 +95,7 @@ class File(PolymorphicModel, mixins.IconsMixin):
         src_file = src_storage.open(src_file_name)
         src_file.open()
         self.file = dst_storage.save(dst_file_name,
-                                     ContentFile(src_file.read()))
+            ContentFile(src_file.read()))
         src_storage.delete(src_file_name)
 
     def _copy_file(self, destination, overwrite=False):
@@ -125,6 +123,8 @@ class File(PolymorphicModel, mixins.IconsMixin):
         self.file.seek(0)
         sha.update(self.file.read())
         self.sha1 = sha.hexdigest()
+        # to make sure later operations can read the whole file
+        self.file.seek(0)
 
     def save(self, *args, **kwargs):
         # check if this is a subclass of "File" or not and set
@@ -137,22 +137,30 @@ class File(PolymorphicModel, mixins.IconsMixin):
         elif issubclass(self.__class__, File):
             self._file_type_plugin_name = self.__class__.__name__
         # cache the file size
+        # TODO: only do this if needed (depending on the storage backend the whole file will be downloaded)
         try:
             self._file_size = self.file.size
-            print 'Size: ',
-            print self.file.size
-        except Exception, e:
-            print e
+        except:
             pass
         if self._old_is_public != self.is_public and self.pk:
             self._move_file()
             self._old_is_public = self.is_public
+        # generate SHA1 hash
+        # TODO: only do this if needed (depending on the storage backend the whole file will be downloaded)
         try:
             self.generate_sha1()
         except Exception, e:
-            print e
             pass
         super(File, self).save(*args, **kwargs)
+    save.alters_data = True
+
+    def delete(self, *args, **kwargs):
+        # Delete the model before the file
+        super(File, self).delete(*args, **kwargs)
+        # Delete the file if there are no other Files referencing it.
+        if not File.objects.filter(file=self.file.name, is_public=self.is_public).exists():
+            self.file.delete(False)
+    delete.alters_data = True
 
     @property
     def label(self):
@@ -175,7 +183,7 @@ class File(PolymorphicModel, mixins.IconsMixin):
     def has_add_children_permission(self, request):
         return self.has_generic_permission(request, 'add_children')
 
-    def has_generic_permission(self, request, type):
+    def has_generic_permission(self, request, permission_type):
         """
         Return true if the current user has permission on this
         image. Return the string 'ALL' if the user has all rights.
@@ -188,7 +196,7 @@ class File(PolymorphicModel, mixins.IconsMixin):
         elif user == self.owner:
             return True
         elif self.folder:
-            return self.folder.has_generic_permission(request, type)
+            return self.folder.has_generic_permission(request, permission_type)
         else:
             return False
 
@@ -205,6 +213,16 @@ class File(PolymorphicModel, mixins.IconsMixin):
                                     self._meta.module_name,),
             args=(self.pk,)
         )
+
+    @property
+    def file_ptr(self):
+        """
+        Evil hack to get around the cascade delete problem with django_polymorphic.
+        Prevents ``AttributeError: 'File' object has no attribute 'file_ptr'``.
+        This is only a workaround for one level of subclassing. The hierarchy of
+        object in the admin delete view is wrong, but at least it works.
+        """
+        return self
 
     @property
     def url(self):

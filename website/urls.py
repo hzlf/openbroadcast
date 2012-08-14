@@ -26,12 +26,16 @@ urlpatterns = patterns('',
 
     # admin
     #url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    url(r'^admin_tools/', include('admin_tools.urls')),
     url(r"^admin/", include(admin.site.urls)),
+    
     
     
     (r'^dev/', include('dev.urls')), # shop main urls
     
     url(r"^ratings/", include("agon_ratings.urls")),
+    
+    url(r"^vote/", include('arating.urls')),
     
     
     url(r"^api/", include("alibrary.urls_api")),
@@ -63,7 +67,7 @@ urlpatterns = patterns('',
     (r'^player/', include('aplayer.urls')),
     
     # cms base
-    (r'^', include('cms.urls')),
+    url(r'^', include('cms.urls')),
 
 )
 

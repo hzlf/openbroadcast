@@ -15,6 +15,8 @@ from django.utils.safestring import mark_safe
 from django.shortcuts import render_to_response
 from django.template import RequestContext, loader
 
+import reversion
+
 def merge_selected(modeladmin,request,queryset): #This is an admin/
     import copy
     model = queryset.model
@@ -83,7 +85,7 @@ def merge_selected(modeladmin,request,queryset): #This is an admin/
 merge_selected.short_description = "Merge selected records"
 
 
-class BaseAdmin(admin.ModelAdmin):
+class BaseAdmin(reversion.VersionAdmin, admin.ModelAdmin):
     
     search_fields = ['name']
     save_on_top = True
