@@ -10,3 +10,8 @@
 {% block cms_sidebar %}
 	{% placeholder "aux" or %}There is no sidebar...{% endplaceholder %}
 {% endblock %}
+
+
+{% block footer %}
+	{% placeholder "footer" inherit or %}{% show_placeholder "footer" "base" %}{% endplaceholder %}
+{% endblock %}

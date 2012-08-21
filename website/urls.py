@@ -44,6 +44,8 @@ urlpatterns = patterns('',
     # (r'^esi/', include('esi.urls')),
     
     (r'^accounts/', include('allauth.urls')),
+    (r'^accounts/notification/', include('notification.urls')),
+    
     
     # filer (protected)
     (r'^', include('filer.server.urls')),

@@ -39,11 +39,16 @@
 						<!--{{ item.master.sample_rate }} kbps-->
 					</div>
 					<!-- License -->
-					<div class="list_body_item c5 license restricted_commercial">
+					
+					<div class="list_body_item c5 license {% if item.license %}{{ item.license.key }}{% endif %}">
 						<div class="left license">
-							<a href="http://openbroadcast.ch/en/content/library/licenses/1-restricted_commercial/inline.html" title="License details" class="dialog disabled-modal"><img src="http://openbroadcast.ch//media/img/icons/transparent_16x16.png" width="48" height="24" alt="License" class="noborder"></a>
+						{% if item.license %}
+							<a href="{{ item.license.get_absolute_url }}" title="License details" class="dialog disabled-modal"><img src="/static/img/icons/transparent_16x16.png" width="48" height="24" alt="License" class="noborder"></a>
+						{% endif %}
 						</div><div class="clear"></div>
 					</div>
+
+					
 					<div class="list_body_item c8 action">
 						<!-- Actions sub-view  -->
 						<div class="wrapper">

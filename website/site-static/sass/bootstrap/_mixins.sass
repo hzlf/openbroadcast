@@ -126,6 +126,11 @@
 // -------------------------
 =gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, $columns)
   width: $gridColumnWidth * $columns + $gridGutterWidth * ($columns - 1)
+  
+=gridSystem-columns-padded($gridGutterWidth, $gridColumnWidth, $gridRowWidth, $columns, $padding)
+  width: $gridColumnWidth * $columns + $gridGutterWidth * ($columns - 1) - (2 * $padding)
+  padding-left: $padding
+  padding-right: $padding
 
 =gridSystem-offset($gridColumnWidth, $gridGutterWidth, $columns)
   margin-left: $gridColumnWidth * $columns + $gridGutterWidth * ($columns - 1) + $gridGutterWidth * 2
@@ -143,25 +148,36 @@
   // Find all .span# classes within .row and give them the necessary properties for grid columns (supported by all browsers back to IE7, thanks $dhg)
   [class*="span"]
     +gridSystem-gridColumn($gridGutterWidth)
+    &.padded-v
+      padding-top: $basePadding
+      padding-bottom: $basePadding
   // Default columns
   .span1
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 1)
   .span2
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 2)
+    &.padded-h
+      +gridSystem-columns-padded($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 2, $basePadding) 
   .span3
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 3)
   .span4
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 4)
+    &.padded-h
+      +gridSystem-columns-padded($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 4, $basePadding) 
   .span5
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 5)
   .span6
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 6)
   .span7
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 7)
+    &.padded-h
+      +gridSystem-columns-padded($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 7, $basePadding) 
   .span8
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 8)
   .span9
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 9)
+    &.padded-h
+      +gridSystem-columns-padded($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 9, $basePadding) 
   .span10
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 10)
   .span11
@@ -169,6 +185,8 @@
   .span12,
   .container
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 12)
+    &.padded-h
+      +gridSystem-columns-padded($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 12, $basePadding) 
   // Offset column options
   .offset1
     +gridSystem-offset($gridColumnWidth, $gridGutterWidth, 1)

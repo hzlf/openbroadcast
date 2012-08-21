@@ -1,4 +1,4 @@
-{% load thumbnail i18n truncate display_tags %}
+{% load thumbnail i18n truncate display_tags arating_tags spurl %}
 
 
 <!-- list item s -->
@@ -21,14 +21,22 @@
 	<div class="list_body_item c2">
 		<ul class="unstyled">
 			<li class="bold">
-				<a href="{{ item.get_absolute_url }}" title="{{ item.name }}">{{ item.name|truncate_chars_inner:24 }}<span class="pull-right badge hot">Hot</span><span class="pull-right badge fresh">Fresh</span></a>
+				<!--
+				<a href="{{ item.get_absolute_url }}" title="{{ item.name }}">{{ item.name|truncate_chars_inner:24 }}<span class="pull-right badge hot">Hot</span><span class="pull-right badge fresh">Fresh</span>{% topflop_for_object item %}</a>
+				-->
+				<a href="{{ item.get_absolute_url }}" title="{{ item.name }}">
+					{{ item.name|truncate_chars_inner:24 }}
+					{% topflop_for_object item %}
+				</a>
 			</li>
 			<li>
 				
 				{% for artist in item.get_artists %}
 				{% if artist.get_absolute_url %}
 				<a href="{{ artist.get_absolute_url }}">{{ artist.name|truncate_chars_inner:32 }}</a>
-				&nbsp;<a href="?artist={{ artist.slug }}" title="Only show releases by {{ artist.name }}" style="vertical-align: top;"><span class="filter icon"></span></a>
+				&nbsp;
+				<!--<a href="?artist={{ artist.slug }}" title="Only show releases by {{ artist.name }}" style="vertical-align: top;"><span class="filter icon"></span></a>-->
+				<a href="{% spurl base=request.get_full_path remove_query_param="page" set_query="artist={{ artist.slug }}" %}" title="{% trans "Only show releases by" %} {{ artist.name }}" style="vertical-align: top;"><span class="filter icon"></span></a>
 				{% if not forloop.last %},{% endif %}
 				{% else %}
 				<span>{{ artist.name|truncate_chars_inner:32 }}</span>{% if not forloop.last %},{% endif %}
@@ -69,8 +77,10 @@
 			</li>
 		</ul>
 	</div>
-	<div class="list_body_item c5 license restricted_commercial">
-		<a href="/en/content/library/licenses/1-restricted_commercial/inline.html" title="License details" class="dialog todo-modal"><img src="/static/img/icons/transparent_16x16.png" width="78" height="24" alt="License" class="noborder" /></a>
+	<div class="list_body_item c5 license {% if item.get_license %}{{ item.get_license.key }}{% endif %}">
+		{% if item.get_license %}
+				<a href="{{ item.get_license.get_absolute_url }}" title="License details" class="dialog todo-modal"><img src="/static/img/icons/transparent_16x16.png" width="78" height="24" alt="License" class="noborder" /></a>
+		{% endif %}
 	</div>
 	<div class="list_body_item c6">
 		<ul class="unstyled">

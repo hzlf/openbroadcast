@@ -46,6 +46,8 @@ django-avatar
 django-tagging==0.3.1
 #django-tagging-ng==0.3.3
 
+-e git+https://github.com/rdegges/django-clear-cache.git#egg=clear_cache
+
 
 URLObject
 
@@ -58,6 +60,8 @@ django-crispy-forms
 django-notification
 django-sendfile>=0.3.0
 django-multilingual-ng>=0.1.21
+
+-e git://github.com/ojii/django-multilingual-ng.git#egg=django-multilingual-ng
 
 # CMS related & plugins
 markdown

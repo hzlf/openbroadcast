@@ -8,12 +8,13 @@ from alibrary.models import ArtistProfessions, MediaExtraartists, ReleaseExtraar
 from django.contrib.contenttypes.generic import *
 
 
-
 from ashop.models import *
 
 from django.utils.safestring import mark_safe
 from django.shortcuts import render_to_response
 from django.template import RequestContext, loader
+
+from multilingual.admin import MultilingualModelAdmin
 
 import reversion
 
@@ -168,13 +169,13 @@ class ReleaseAdmin(PlaceholderAdmin, BaseAdmin):
     #inlines = [RelationsInline, MediaInline, ReleaseExtraartistsInline, DownloadreleaseInline, HardwarereleaseInline]
     inlines = [RelationsInline, MediaInline, ReleaseExtraartistsInline]
     #prepopulated_fields = {"slug": ("name",)}
-    readonly_fields = ['slug']
+    readonly_fields = ['slug', 'license']
     
     actions = [merge_selected]
     
     """"""
     fieldsets = [
-        (None,               {'fields': ['name', 'slug', ('main_image', 'cover_image',), ('label', 'catalognumber'), ('releasedate', 'release_country'), ('releasetype', 'pressings'), 'publish_date', 'enable_comments', 'main_format', 'excerpt']}),
+        (None,               {'fields': ['name', 'slug', ('main_image', 'cover_image',), ('label', 'catalognumber'), ('releasedate', 'release_country', 'license'), ('releasetype', 'pressings'), 'publish_date', 'enable_comments', 'main_format', 'excerpt']}),
         ('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
         #('Test', {'fields' : ['tags']})
     ]
@@ -226,8 +227,12 @@ class ArtistAdmin(PlaceholderAdmin, BaseAdmin):
     
 admin.site.register(Artist, ArtistAdmin)
       
-class LicenseAdmin(BaseAdmin):
-    pass
+class LicenseAdmin(reversion.VersionAdmin, MultilingualModelAdmin):
+    
+    inline_instances = ('name_translated', 'restricted', 'parent',)
+    
+    list_display   = ('name', 'key', 'slug',)
+    search_fields = ('name',)
     
 admin.site.register(License, LicenseAdmin)
       

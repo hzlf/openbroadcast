@@ -10,7 +10,7 @@ from django.template import RequestContext
 
 from pure_pagination.mixins import PaginationMixin
 
-from alibrary.models import Artist, Label, Release, Profession, Media
+from alibrary.models import Artist, Label, Release, Profession, Media, License
 
 from sendfile import sendfile
 
@@ -80,6 +80,7 @@ class ReleaseListView(PaginationMixin, ListView):
         context = super(ReleaseListView, self).get_context_data(**kwargs)
         
         self.extra_context['filter'] = self.filter
+        self.extra_context['relation_filter'] = self.relation_filter
         self.extra_context['tagcloud'] = self.tagcloud
         #self.extra_context['release_list'] = self.filter
     
@@ -116,13 +117,29 @@ class ReleaseListView(PaginationMixin, ListView):
         else:
             qs = Release.objects.all()
             
+            
+            
+        # special relation filters
+        self.relation_filter = []
+        
         artist_filter = self.request.GET.get('artist', None)
         if artist_filter:
-            qs = qs.filter(media_release__artist__slug=artist_filter)
+            qs = qs.filter(media_release__artist__slug=artist_filter).distinct()
+            # add relation filter
+            fa = Artist.objects.filter(slug=artist_filter)[0]
+            f = {'item_type': 'artist' , 'item': fa, 'label': _('Artist')}
+            self.relation_filter.append(f)
             
         label_filter = self.request.GET.get('label', None)
         if label_filter:
-            qs = qs.filter(label__slug=label_filter)
+            qs = qs.filter(label__slug=label_filter).distinct()
+            # add relation filter
+            fa = Label.objects.filter(slug=label_filter)[0]
+            f = {'item_type': 'label' , 'item': fa, 'label': _('Label')}
+            self.relation_filter.append(f)
+            
+            
+            
 
         # base queryset        
         #qs = Release.objects.all()
@@ -329,7 +346,10 @@ class MediaDetailView(DetailView):
 
 
 
+class LicenseDetailView(DetailView):
 
+    context_object_name = "license"
+    model = License
  
 
 

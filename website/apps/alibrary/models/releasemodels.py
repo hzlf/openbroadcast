@@ -101,6 +101,7 @@ class Release(MigrationMixin):
     name = models.CharField(max_length=200, db_index=True)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
+    license = models.ForeignKey(License, blank=True, null=True, related_name='release_license')
     
     #release_country = models.CharField(max_length=200, blank=True, null=True)
     release_country = CountryField(blank=True, null=True)
@@ -267,6 +268,19 @@ class Release(MigrationMixin):
         
         return indicator
             
+            
+    def get_license(self):        
+        
+        licenses = License.objects.filter(media_license__in=self.get_media()).distinct()
+        
+        license = None
+        
+        if licenses.count() == 1:
+            license = licenses[0]
+        if licenses.count() > 1:
+            license, created = License.objects.get_or_create(name="Multiple")
+            
+        return license
 
     
     def get_artists(self):
@@ -297,10 +311,7 @@ class Release(MigrationMixin):
             from alibrary.models import Artist
             artists = Artist.objects.filter(name="Varous Artists")
             
-        
-        print "GET ARTISTS"
-        print artists
-        
+
         return artists
 
     def get_extra_artists(self):
@@ -458,6 +469,12 @@ class Release(MigrationMixin):
         self.clear_cache_file()
         
         unique_slugify(self, self.name)
+        
+        """
+        Looks for common license
+        """
+        
+
         
         super(Release, self).save(*args, **kwargs)
 

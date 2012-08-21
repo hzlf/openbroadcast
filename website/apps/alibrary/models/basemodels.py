@@ -43,6 +43,8 @@ from easy_thumbnails.files import get_thumbnailer
 
 # model extensions
 from mptt.models import MPTTModel, TreeForeignKey, TreeManyToManyField 
+from multilingual.translation import TranslationModel
+from multilingual.manager import MultilingualManager
 
 # django-extensions (http://packages.python.org/django-extensions/)
 from django_extensions.db.fields import UUIDField, AutoSlugField
@@ -145,12 +147,19 @@ class License(MPTTModel, MigrationMixin):
     slug = models.SlugField(max_length=100, unique=False)
     uuid = models.CharField(max_length=36, unique=False, default=str(uuid.uuid4()), editable=False)
     
+    key = models.CharField(verbose_name=_("License key"), help_text=_("used e.g. for the icon-names"), max_length=36, blank=True, null=True)
+    
     link = models.URLField(null=True, blank=True)
     
     restricted = models.NullBooleanField(null=True, blank=True)
     
-    excerpt = models.TextField(blank=True, null=True)  
-    license_text = models.TextField(blank=True, null=True) 
+
+    class Translation(TranslationModel):
+        
+        name_translated = models.CharField(max_length=200)
+        excerpt = models.TextField(blank=True, null=True)  
+        license_text = models.TextField(blank=True, null=True) 
+    
     
     # auto-update
     created = models.DateField(auto_now_add=True, editable=False)
@@ -160,7 +169,7 @@ class License(MPTTModel, MigrationMixin):
     parent = TreeForeignKey('self', null=True, blank=True, related_name='license_children')
     
     # manager
-    objects = models.Manager()
+    objects = MultilingualManager()
 
     # meta
     class Meta:
@@ -174,6 +183,10 @@ class License(MPTTModel, MigrationMixin):
     
     def __unicode__(self):
         return self.name
+    
+    @models.permalink
+    def get_absolute_url(self):
+        return ('LicenseDetailView', [self.slug])
 
 class ProfessionManager(models.Manager):
 

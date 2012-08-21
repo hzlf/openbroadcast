@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 
 # app imports
-from alibrary.models import Release, Artist
+from alibrary.models import Release, Artist, License
 from alibrary.views import *
 
 urlpatterns = patterns('',
@@ -11,5 +11,7 @@ urlpatterns = patterns('',
       
     url(r'^artists/$', ArtistListView.as_view(), name='ArtistListlView'),              
     url(r'^artists/(?P<slug>[-\w]+)/$', ArtistDetailView.as_view(), name='ArtistDetailView'),
+              
+    url(r'^licenses/(?P<slug>[-\w]+)/$', LicenseDetailView.as_view(), name='LicenseDetailView'),
 
 )

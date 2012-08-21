@@ -24,10 +24,11 @@
 	<body id="body" class="base">
 	-->
 	<body  id="body" class="base" data-spy="scroll" data-target=".subnav" data-offset="50">
-		
+		{% cms_toolbar %}
 		<div id="dim_content" style="display: none;"></div>
 
-		{% cms_toolbar %}
+
+		
 
 		
 	    <div class="navbar navbar-fixed-top">
@@ -69,6 +70,21 @@
 		<h1>Global styles <small>for CSS reset, typography, and links</small></h1>
 	</div>
 	-->
+	
+
+	{% if messages %}
+	<div class="row">
+		<div class="span9 messages">
+			{% for message in messages %}
+			<div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+				{{ message }}
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+	{% endif %}
+	
+	
 
 	<div class="row">
 		
@@ -84,7 +100,19 @@
 	    	
 	    	
 			<footer class="footer"  id="footer">
-			{% include "skeleton/footer.html" %}
+				
+				<div class="row">
+					<div class="span9">
+						{% show_placeholder "footer" "base" %}
+					</div>
+				</div>
+				<div class="row">
+					<div class="span19 subline">
+						{% include "skeleton/footer.html" %}
+					</div>
+				</div>
+				
+			
 			</footer>
 	    	
 	    	

@@ -55,15 +55,17 @@ USE_L10N = True
 SECRET_KEY = '0r6%7gip5tmez*vygfv+u14h@4lbt^8e2^26o#5_f_#b7%cm)u'
 
 TEMPLATE_LOADERS = (    
-    # 'django.template.loaders.filesystem.load_template_source', # depreceated
+    # mobile
+    'django_mobile.loader.Loader',
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
     'django.template.loaders.eggs.Loader',
-    #'django.template.loaders.app_directories.load_template_source', # depreceated
     'django.template.loaders.app_directories.Loader',
 )
 
-MIDDLEWARE_CLASSES = (                
+MIDDLEWARE_CLASSES = (
+    'django.middleware.cache.UpdateCacheMiddleware',
+                             
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -81,14 +83,22 @@ MIDDLEWARE_CLASSES = (
     'cms.middleware.page.CurrentPageMiddleware',
     'cms.middleware.user.CurrentUserMiddleware',
     'cms.middleware.toolbar.ToolbarMiddleware',
+    
+    # mobile [just testing]
+    'django_mobile.middleware.MobileDetectionMiddleware',
+    'django_mobile.middleware.SetFlavourMiddleware',
     # custom
     #'lib.middleware.ProfileMiddleware',
     #'lib.middleware.PrettifyMiddlewareBS',
     
     'arating.middleware.AratingIpMiddleware',
+    
+    'django.middleware.cache.FetchFromCacheMiddleware',
+    
 )
 
 CACHE_BACKEND = 'locmem:///'
+CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
@@ -106,6 +116,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'sekizai.context_processors.sekizai',
     # multilingual
     'multilingual.context_processors.multilingual',
+    
+    # mobile
+    'django_mobile.context_processors.flavour',
     
     # authentication
     'allauth.context_processors.allauth',
@@ -201,6 +214,7 @@ CMS_CACHE_DURATIONS = {
     'content': 1,
 }
 
+
 CMS_VIMEO_DEFAULT_WIDTH = 630
 CMS_VIMEO_DEFAULT_HEIGHT = 360
 
@@ -244,6 +258,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
+    'django.contrib.syndication',
     'django.contrib.humanize',
     'django.contrib.webdesign',
     'django.contrib.admin',
@@ -276,9 +291,13 @@ INSTALLED_APPS = (
     
     'reversion',
     
+    'clear_cache',
+    
     
     # cms plugins
     'cms.plugins.text',
+    'cms.plugins.link',
+    'cms.plugins.inherit',
     #'cmsplugin_filer_folder',
     #'cmsplugin_filer_image',
     #'cmsplugin_youtube',
@@ -315,6 +334,7 @@ INSTALLED_APPS = (
     'crispy_forms',
     #'djangoratings',
     #'agon_ratings',
+    'django_mobile',
 
     
     # custom apps/*

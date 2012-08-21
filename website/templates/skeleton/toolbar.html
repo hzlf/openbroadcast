@@ -12,6 +12,9 @@
 			        	{% if user.is_staff %}
 						<li><a href="/admin/"><span>{% trans 'Administration' %}</span></a></li>
 						{% endif %}
+						{% if notice_unseen_count > 0 %}
+						<li><a href="#">{% trans 'Messages' %}: {{ notice_unseen_count }}</a></li>
+						{% endif %}
 					{% else %}
 			        	<li><a title="Login" href="{% url account_login %}?next={{ request.get_full_path }}" rel="modal:open"><span>{% trans 'Login' %}</span></a></li>
 						<li><a title="Login" href="{% url account_signup %}?next={{ request.get_full_path }}" rel="modal:open"><span>{% trans 'Sign Up' %}</span></a></li>

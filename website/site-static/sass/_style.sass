@@ -255,19 +255,20 @@ table.front td
   ul
     margin: 0
   li
+    height: 22px
     //list-style: none
     //float: left
-  a
-    color: #666
-    text-decoration: none
-    padding: 0px 7px 0px 7px
-    border-right: 1px solid #999
-    &.on
-      color: $main-a
+    a
+      //color: #666
       text-decoration: none
       padding: 0px 7px 0px 7px
-    &:hover
-      color: $main-a
+      border-right: 1px solid #999
+      &.on, &.selected
+        color: $main-a
+        text-decoration: none
+        padding: 0px 7px 0px 7px
+      &:hover
+        color: $main-a
 
 #modnavright
   //float: right
@@ -1024,7 +1025,7 @@ h4
   color: #666
 
 .selected
-  text-decoration: underline
+  // text-decoration: underline
 
 .cl
   //background:#e4f3e5;

@@ -61,20 +61,15 @@ class ReleaseFilter(django_filters.FilterSet):
             print self.queryset
             
             for name, filter_ in self.filters.iteritems():
-
                     
                 #ds = Release.objects.values_list(name, flat=True).distinct()
-                ds = self.queryset.values_list(name, flat=False).annotate(n=models.Count("pk")).distinct()
+                ds = self.queryset.values_list(name, flat=False).annotate(n=models.Count("pk", distinct=True)).distinct()
                 
-                print ds
+                filter_.entries = ds
                 
-                filter_.ds = ds
-                
-                if ds not in flist:
-                    
+                if ds not in flist:                    
                     flist.append(filter_)
 
-            
             self._filterlist = flist
         
         return self._filterlist
