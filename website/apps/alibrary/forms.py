@@ -8,10 +8,15 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, MultiField, Div, HTML, Field
 from crispy_forms.bootstrap import FormActions
 
+
+
 from alibrary.models import Release, Media, Relation
 
+import selectable.forms as selectable
+from alibrary.lookups import *
+
 class ReleaseForm(ModelForm):
-    pass
+
     class Meta:
         model = Release
         fields = ('name','label','releasetype','release_country','catalognumber',)
@@ -41,5 +46,45 @@ class ReleaseForm(ModelForm):
             )
         )
         super(ReleaseForm, self).__init__(*args, **kwargs)
+        
+        
+    name = forms.CharField(widget=selectable.AutoCompleteWidget(ReleaseNameLookup), required=True)
+    
+    
+    
+    label = forms.CharField(widget=selectable.AutoCompleteSelectWidget(ReleaseLabelLookup, allow_new=True), required=True)
+    
+
+    def clean(self, *args, **kwargs):
+          
+        cd = super(ReleaseForm, self).clean()
+        
+        print cd
+        
+        print '::: LABEL :::'
+        print cd['label']
+        
+        # label id
+        label_id = cd['label'][2]
+        
+        print 'id',
+        print label_id
+        
+        # mapping
+        cd['label'], created = Label.objects.get_or_create(pk=label_id)
+
+        return cd
+
+    """ """
+    def save(self, *args, **kwargs):
+        return super(ReleaseForm, self).save(*args, **kwargs)
+   
+    
+    
+    
+    
+    
+    
+
 
 ReleasekMediaFormSet = inlineformset_factory(Release, Media, extra=2)

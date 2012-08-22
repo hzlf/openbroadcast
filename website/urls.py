@@ -2,6 +2,7 @@ from django.conf.urls.defaults import *
 from django.conf import settings
 from django.views.generic.simple import direct_to_template
 
+
 # pinax
 #from pinax.apps.account.openid_consumer import PinaxConsumer
 handler500 = "pinax.views.server_error"
@@ -16,7 +17,6 @@ sitemaps = {
     'releases': ReleaseSitemap,
     'pages': CMSSitemap,
 }
-
 
 admin.autodiscover()
 
@@ -39,6 +39,8 @@ urlpatterns = patterns('',
     
     
     url(r"^api/", include("alibrary.urls_api")),
+
+    url(r'^selectable/', include('selectable.urls')),
     
     # varnish / ESI
     # (r'^esi/', include('esi.urls')),

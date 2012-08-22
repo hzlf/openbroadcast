@@ -266,6 +266,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.markup',
     'django.contrib.sitemaps',
+
+    'staticfiles',
     
     # core apps
     'django_extensions',
@@ -307,6 +309,7 @@ INSTALLED_APPS = (
 
     'multilingual',
     'disqus',
+    'selectable',
     
     # asset and media handling
     'sekizai',

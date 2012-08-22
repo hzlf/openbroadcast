@@ -18,7 +18,7 @@ class LibraryMenu(CMSAttachMenu):
         """
         node = NavigationNode(
             _('Releases'),
-            reverse('ReleaseListView', args=[]),
+            reverse('alibrary-release-list', args=[]),
             123
         )
         nodes.append(node)
@@ -50,7 +50,7 @@ class ReleaseMenu(CMSAttachMenu):
             try:
                 node = NavigationNode(
                     release.name,
-                    reverse('ReleaseDetailView', args=[release.slug]),
+                    reverse('alibrary-release-detail', args=[release.slug]),
                     release.pk
                 )
                 nodes.append(node)
@@ -77,7 +77,7 @@ class ArtistMenu(CMSAttachMenu):
             try:
                 node = NavigationNode(
                     artist.name,
-                    reverse('ArtistDetailView', args=[artist.slug]),
+                    reverse('alibrary-artist-detail', args=[artist.slug]),
                     artist.pk
                 )
                 nodes.append(node)

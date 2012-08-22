@@ -6,7 +6,7 @@ from alibrary.views import ArtistDetailView, ArtistListView
 
 urlpatterns = patterns('',
       
-    url(r'^$', ArtistListView.as_view(), name='ArtistListlView'),              
-    url(r'^(?P<slug>[-\w]+)/$', ArtistDetailView.as_view(), name='ArtistDetailView'),
+    url(r'^$', ArtistListView.as_view(), name='alibrary-artist-list'),              
+    url(r'^(?P<slug>[-\w]+)/$', ArtistDetailView.as_view(), name='alibrary-artist-detail'),
 
 )

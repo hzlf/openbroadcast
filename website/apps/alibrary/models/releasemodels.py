@@ -232,9 +232,11 @@ class Release(MigrationMixin):
 
     @models.permalink
     def get_absolute_url(self):
-        # TODO: Make right
-        # return '/releases/' + self.slug + '/'
-        return ('ReleaseDetailView', [self.slug])
+        return ('alibrary-release-detail', [self.slug])
+
+    @models.permalink
+    def get_edit_url(self):
+        return ('alibrary-release-edit', [self.pk])
     
     def get_media(self):
         return Media.objects.filter(release=self).select_related()

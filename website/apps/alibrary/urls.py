@@ -23,12 +23,7 @@ urlpatterns = patterns('',
     
     url(r'^crossdomain.xml$', direct_to_template, {'template': 'lib/crossdomain.xml', 'mimetype': 'application/xml'}),
     url(r'^crossdomain.xml/$', direct_to_template, {'template': 'lib/crossdomain.xml', 'mimetype': 'application/xml'}),
-                       
-    
-    # artists
-    #(r'^artists/', include('alibrary.urls_artist')),
-    #(r'^artists/$', ArtistListView.as_view()),              
-    #url(r'^artists/(?P<slug>[-\w]+)/$', ArtistDetailView.as_view(), name='ArtistDetailView'),
+
 
     
     

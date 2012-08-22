@@ -138,7 +138,7 @@ class Artist(MigrationMixin):
         if self.disable_link:
             return None
         
-        return ('ArtistDetailView', [self.slug])
+        return ('alibrary-artist-detail', [self.slug])
     
     def get_membership(self):
 
