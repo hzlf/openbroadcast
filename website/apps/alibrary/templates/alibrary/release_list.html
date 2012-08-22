@@ -27,37 +27,30 @@
 
 <div class="searchbar">
 	<div class="tagbar">
-		<!-- indicators TODO: move to include -->
 
-		{% for filter in relation_filter %}
-		<!--
-		<h1>{{ filter.label }} | {{ filter.item }}</h1>
-		-->
-		
-		<a href="{% spurl base=request.get_full_path remove_query_param="page" remove_query_param=filter.item_type %}" class="lfilter">
-			<div>
-				{{ filter.label }}: {{ filter.item }}<img border="0" src="/static/img/prototype/tag_remove.png">
-			</div>
-		</a>
-		
-		
-		{% endfor %}
 
+		{% include "alibrary/searchbar/_relation_filter.html" %}
 
 		{% include "alibrary/searchbar/_filterlist.html" %}
-
-
-
-
-		
 		
 		<!-- search field -->
 		<div style="float: left;">
 			<input type="text" id="searchbar_input" name="searchbar_input" value="&lt; Search &gt;" class="blur" />
 		</div>
-		<div style="float: right; padding: 4px 3px 0px;">
-			<img class="search_clear" src="/static/img/prototype/i_clearsearch.png" alt="Clear" />
+		
+		
+		<!--
+		<a class="pull-right" href="{{ request.path }}">cs</a>
+		-->
+		<!-- TODO: rework! -->
+		<div style="padding: 4px 3px 0px;" class="pull-right">
+			{% if request.path != request.get_full_path %}
+			<a class="pull-right clear-search" href="{{ request.path }}" title="{% trans "Clear Search" %}">
+				<img class="search_clear" src="/static/img/prototype/i_clearsearch.png" alt="Clear search" />
+			</a>
+			{% endif %}
 		</div>
+		
 		<div class="clear"></div>
 	</div>
 </div>

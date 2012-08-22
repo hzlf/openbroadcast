@@ -12,7 +12,7 @@ urlpatterns = patterns('',
     
     url(r'^(?P<slug>[-\w]+)/$', ReleaseDetailView.as_view(), name='ReleaseDetailView'),
     
-    url(r'^(?P<slug>[-\w]+)/edit/$', ReleaseEditView.as_view(), name='ReleaseEditlView'),
+    url(r'^(?P<slug>[-\w]+)/edit/$', ReleaseEditView.as_view(), name='alibrary-release-edit-view'),
 
     
 

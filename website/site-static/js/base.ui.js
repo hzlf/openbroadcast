@@ -1154,11 +1154,7 @@ base.ui.searchbar = function() {
 	// Remove hint on focus
 	
 	$("#searchbar_input").on_focus_input();
-	
-	
-	$('.searchbar .search_clear').live('click', function(event) {
-		window.location = window.location.href.split("?")[0];
-	});
+
 	
 	
 

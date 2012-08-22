@@ -51,18 +51,10 @@ class ReleaseFilter(django_filters.FilterSet):
         flist = []
         
         if not hasattr(self, '_filterlist'):
-            
-            """
-            fields = SortedDict([(name, filter_.label) for name, filter_ in self.filters.iteritems()])
-            fields[ORDER_BY_FIELD] = self.ordering_field
-            """
-            
-            print "QS"
-            print self.queryset
+
             
             for name, filter_ in self.filters.iteritems():
                     
-                #ds = Release.objects.values_list(name, flat=True).distinct()
                 ds = self.queryset.values_list(name, flat=False).annotate(n=models.Count("pk", distinct=True)).distinct()
                 
                 filter_.entries = ds

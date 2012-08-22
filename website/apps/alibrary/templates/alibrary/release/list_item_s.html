@@ -60,11 +60,9 @@
 				
 				<a href="{{ item.label.get_absolute_url }}" title="{{ item.label.name }}">{{ item.label.name|truncate_chars_inner:18 }}</a>
 				&nbsp;
-				<a href="?label={{ item.label.slug }}" title="Only show releases on {{ item.label.name }}" style="vertical-align: top;"><span class="filter icon"></span></a>
+				<a href="{% spurl base=request.get_full_path remove_query_param="page" set_query="label={{ item.label.slug }}" %}" title="{% trans "Only show releases on" %} {{ item.label.name }}" style="vertical-align: top;"><span class="filter icon"></span></a>
 
-				<!--
-				<a href="/en/content/library/labels/5867-confused-recordings/profile.html">Confused  … rdings</a>&nbsp;<a href="/content/library/releases?label_ids=5867&amp;page=1" title="Only show releases on Confused Recordings" style="vertical-align: top;"><span class="filter icon"></span></a>
-				-->
+
 				{% else %}
 				&nbsp;
 				{% endif %}

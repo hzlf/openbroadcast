@@ -29,21 +29,7 @@ urlpatterns = patterns('',
     #(r'^artists/', include('alibrary.urls_artist')),
     #(r'^artists/$', ArtistListView.as_view()),              
     #url(r'^artists/(?P<slug>[-\w]+)/$', ArtistDetailView.as_view(), name='ArtistDetailView'),
-    
-    # releases
-    #(r'^releases/', include('alibrary.urls_release')),
-    #url(r'^releases/$', ReleaseListView.as_view(), name='ReleaseListlView'),
-    #url(r'^releases/(?P<slug>[-\w]+)/$', ReleaseDetailView.as_view(), name='ReleaseDetailView'),
 
-    
-    # form-test
-    
-    
-    #url(r'^releases/(?P<slug>[-\w]+)/edit/$', ReleaseEditView.as_view(), name='ReleaseEditView'),
-    #(r'^releases/(?P<slug>[-\w]+)/xml/$', ReleaseDetailView.as_view(
-    #    template_name="alibrary/xml/dummy.xml",
-    #)),
-    #(r'^releases/(?P<slug>[-\w]+)/json/$', JSONReleaseDetailView.as_view()),
     
     
     # media                   

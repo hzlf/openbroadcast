@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <div id="menu_context" class="menu_context">
 	<div class="set">
 		<ul class="unstyled">
@@ -5,7 +7,7 @@
 			<!-- Menu element / Action -->
 			
 			<li class="link ">
-				<span class="left icon"> <a href="edit" title="Upload Content">Edit</a> </span>
+				<span class="left icon"><a href="edit" title="{% trans "Edit" %}">{% trans "Edit" %}</a></span>
 				<span class="opt"></span>
 				<span class="clear"></span>
 			</li>
