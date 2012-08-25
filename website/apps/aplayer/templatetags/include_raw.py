@@ -1,5 +1,7 @@
 from django import template
-from django.template.loaders.app_directories import load_template_source
+#from django.template.loaders.app_directories import load_template_source
+
+from django.template.loaders.app_directories import Loader
  
 register = template.Library()
  
@@ -15,7 +17,9 @@ def do_include_raw(parser, token):
     if template_name[0] in ('"', "'") and template_name[-1] == template_name[0]:
         template_name = template_name[1:-1]
  
-    source, path = load_template_source(template_name)
+    #source, path = load_template_source(template_name)
+    source, path= Loader().load_template_source(template_name)
+    
  
     return template.TextNode(source)
 register.tag("include_raw", do_include_raw)
