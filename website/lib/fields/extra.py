@@ -39,10 +39,14 @@ class MarkdownTextField (TextField):
         super(MarkdownTextField, self).contribute_to_class(cls, name)
 
     def pre_save (self, model_instance, add):
-        value = getattr(model_instance, self.attname)
-        html = markdown(value, safe_mode=self._markdown_safe)
-        setattr(model_instance, self._html_field, html)
-        return value
+        try:
+            value = getattr(model_instance, self.attname)
+            html = markdown(value, safe_mode=self._markdown_safe)
+            setattr(model_instance, self._html_field, html)
+            return value
+        except Exception, e:
+            print e
+            return ""
 
     def __unicode__ (self):
         return self.attname
