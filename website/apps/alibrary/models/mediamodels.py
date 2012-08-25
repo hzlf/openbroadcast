@@ -760,10 +760,16 @@ class Media(MigrationMixin):
         """
 
         if self.uuid is not None:
-            orig = Media.objects.get(uuid=self.uuid)
-            if orig.master != self.master:
-                log.info('Media id: %s - Master changed from "%s" to "%s"' % (self.uuid, orig.master, self.master))
-                self.processed = 0
+            
+            try:
+                orig = Media.objects.get(uuid=self.uuid)
+                if orig.master != self.master:
+                    log.info('Media id: %s - Master changed from "%s" to "%s"' % (self.uuid, orig.master, self.master))
+                    self.processed = 0
+            except Exception, e:
+                print e
+                pass
+            
         
         try:
             cache_folder = self.folder

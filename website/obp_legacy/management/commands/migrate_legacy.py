@@ -234,7 +234,7 @@ class LegacyImporter(object):
                 m.license = lic
             
             # save (& send to process queue...) :)
-            # m.save()
+            m.save()
                 
                 
             # get master file / audio
@@ -298,7 +298,7 @@ class LegacyImporter(object):
                     
                     m.master = master
                     
-            #m.save()
+            m.save()
             
             
             # get track artist
