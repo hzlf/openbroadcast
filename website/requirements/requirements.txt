@@ -54,6 +54,8 @@ django-tagging==0.3.1
 # api clients
 discogs-client==1.1.1
 
+django-floppyforms>=1.0
+
 
 URLObject
 
@@ -65,9 +67,12 @@ django-crispy-forms
 
 django-notification
 django-sendfile>=0.3.0
-django-multilingual-ng>=0.1.21
+# django-multilingual-ng>=0.1.21
 
 -e git://github.com/ojii/django-multilingual-ng.git#egg=django-multilingual-ng
+
+django-floppyforms>=0.4.1
+
 
 # CMS related & plugins
 markdown

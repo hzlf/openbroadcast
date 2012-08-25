@@ -396,7 +396,8 @@ class LegacyImporter(object):
                 
                 try:
                     self.import_release(lr)
-                except:
+                except Exception, e:
+                    print e
                     pass
                 
                 #print lr.id

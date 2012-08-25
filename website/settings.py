@@ -271,7 +271,7 @@ INSTALLED_APPS = (
     'django.contrib.markup',
     'django.contrib.sitemaps',
 
-    'staticfiles',
+    #'staticfiles',
     
     # core apps
     'django_extensions',
