@@ -1,6 +1,6 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags %}
+{% load truncate i18n thumbnail arating_tags wiki_tags %}
 
 {% block heading %} <!-- heading / icon (large one) -->
 <div id="heading">
@@ -48,17 +48,22 @@
 			</div>
 		</div>
 
-		<div class="notes expandable close">
-			<div class="header">
-				<span>Notes</span>
-			</div>
-			<div class="description markdown">
-				<p>
-					Gatefold cover, includes a poster and a card for a digital download of the album. Pressed on 180G white vinyl.
-				</p>
-			</div>
-		</div>
 	</div>
+	
+	
+	<section class="description">
+		
+		<div class="page-header padded-h">
+			<h2>{% trans "Description" %}</h2>
+		</div>
+		
+		<div class="description markdown padded-h">
+			{% wikify object.description %}
+		</div>
+		
+	</section>
+	
+	
 </div>
 
 {% endblock %}

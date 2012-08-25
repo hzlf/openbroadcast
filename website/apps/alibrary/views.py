@@ -3,8 +3,9 @@ from django.views.generic.detail import SingleObjectTemplateResponseMixin
 from django.shortcuts import get_object_or_404, render_to_response
 
 from django import http
-from django.http import HttpResponse, HttpResponseForbidden, Http404
+from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect
 from django.utils import simplejson as json
+
 
 from django.template import RequestContext
 
@@ -261,33 +262,96 @@ class ReleaseEditView(UpdateView):
     template_name = "alibrary/release_edit.html"
     success_url = '#'
     form_class = ReleaseForm
+    
+    def __init__(self, *args, **kwargs):
+        #self.user = self.request.user
+        
+        self.user = User.objects.get(pk=1)
+        
+        super(ReleaseEditView, self).__init__(*args, **kwargs)
+        
+    def get_initial(self):
+        self.initial.update({ 'user': self.request.user })
+        return self.initial
+        
 
     def get_context_data(self, **kwargs):
+        
         context = super(ReleaseEditView, self).get_context_data(**kwargs)
-        context['releasemedia_form'] = ReleasekMediaFormSet()
+        
+        context['releasemedia_form'] = ReleaseMediaFormSet(instance=self.object)
+        context['relation_form'] = ReleaseRelationFormSet(instance=self.object)
+        
+        context['user'] = self.request.user
+        context['request'] = self.request
         
         return context
     
-    
 
-    """
+
+    """"""
     def form_valid(self, form):
         context = self.get_context_data()
+        # get the inline forms
         releasemedia_form = context['releasemedia_form']
+        relation_form = context['relation_form']
         
-        if releasemedia_form.is_valid():
-            self.object = form.save()
-            releasemedia_form.instance = self.object
-            releasemedia_form.save()
+        print 'validation:'
+
+        # validation
+        if form.is_valid():
+            print 'form valid'
+            # temporary instance to validate inline forms against
+            tmp = form.save(commit=False)
+        
+            releasemedia_form = ReleaseMediaFormSet(self.request.POST, instance=tmp)
+            print "releasemedia_form valid?",
+            print releasemedia_form.is_valid()
+        
+        
+            relation_form = ReleaseRelationFormSet(self.request.POST, instance=tmp)
+            print "relation_form.cleaned_data:",
+            print relation_form.is_valid()
+            print relation_form.errors
+        
+            if relation_form.is_valid():
+
+                
+                relation_form.save()
+        
+        
+            
+        
+            if releasemedia_form.is_valid():
+                print "releasemedia_form.cleaned_data:",
+                print releasemedia_form.cleaned_data
+                
+                for te in releasemedia_form.cleaned_data:
+                    print te['artist']
+                    if not te['artist'].pk:
+                        print "SAVE ARTIST"
+                        te['artist'].save()
+                
+                
+                releasemedia_form.save()
+
+                form.save()
+                form.save_m2m()
+            else:
+                print releasemedia_form.errors
+                
 
             print "VALLIDIO"
 
             return HttpResponseRedirect('#')
         else:
-
+            print releasemedia_form.errors
+            
+            
+            
             print "NNNOOOTTT VALLIDIO"
-            return self.render_to_response(self.get_context_data(form=form))
-    """
+            return self.render_to_response(self.get_context_data(form=form, releasemedia_form=releasemedia_form))
+    
     
 # autocompleter views
 

@@ -78,6 +78,7 @@ FORCE_CATALOGNUMBER = False
 # shop
 #from ashop.models import Hardwarerelease, Downloadrelease
 
+from lib.fields import extra
 
 
 
@@ -142,6 +143,8 @@ class Release(MigrationMixin):
     
     # 
     excerpt = models.TextField(blank=True, null=True)
+    description = extra.MarkdownTextField(blank=True, null=True)
+
     
     # cms field
     placeholder_1 = PlaceholderField('placeholder_1')
@@ -210,6 +213,12 @@ class Release(MigrationMixin):
         verbose_name = _('Release')
         verbose_name_plural = _('Releases')
         #ordering = ('-releasedate', )
+        
+        permissions = (
+            ('view_release', 'View Release'),
+            ('edit_release', 'Edit Release'),
+            ('admin_release', 'Edit Release (extended)'),
+        )
     
     
     def __unicode__(self):

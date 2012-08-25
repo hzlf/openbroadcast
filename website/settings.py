@@ -133,6 +133,10 @@ TEMPLATE_DIRS = (
 )
 
 
+FILE_UPLOAD_HANDLERS = (
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+)
+
 """
 CMS related settings (template/placeholder setup etc)
 """
@@ -295,6 +299,8 @@ INSTALLED_APPS = (
     
     'clear_cache',
     
+    'eav',
+    
     
     # cms plugins
     'cms.plugins.text',
@@ -335,6 +341,7 @@ INSTALLED_APPS = (
     
     
     'crispy_forms',
+    'floppyforms',
     #'djangoratings',
     #'agon_ratings',
     'django_mobile',
@@ -455,6 +462,7 @@ Accounts
 AUTHENTICATION_BACKENDS = (
     # userena
     'allauth.account.auth_backends.AuthenticationBackend',
+    # guardian
     'guardian.backends.ObjectPermissionBackend',
     # base
     'django.contrib.auth.backends.ModelBackend',

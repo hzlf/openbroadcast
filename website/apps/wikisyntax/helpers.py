@@ -7,7 +7,10 @@ from django.utils.safestring import mark_safe
 
 def wikisafe_markdown(value):
 	from django.contrib.markup.templatetags.markup import markdown
-	return mark_safe(markdown(value.replace('[[','LBRACK666').replace(']]','RBRACK666')).replace('LBRACK666','[[').replace('RBRACK666',']]'))
+	try:
+		return mark_safe(markdown(value.replace('[[','LBRACK666').replace(']]','RBRACK666')).replace('LBRACK666','[[').replace('RBRACK666',']]'))
+	except Exception, e:
+		return value
 
 class WikiException(Exception): # Raised when a particular string is not found in any of the models.
 	pass

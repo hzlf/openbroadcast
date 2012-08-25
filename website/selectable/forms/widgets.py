@@ -8,6 +8,7 @@ from django.utils.safestring import mark_safe
 
 __all__ = (
     'AutoCompleteWidget',
+    'AutoCompleteFKWidget',
     'AutoCompleteSelectWidget',
     'AutoComboboxWidget',
     'AutoComboboxSelectWidget',
@@ -59,6 +60,54 @@ class SelectableMultiWidget(forms.MultiWidget):
 
     def update_query_parameters(self, qs_dict):
         self.widgets[0].update_query_parameters(qs_dict)
+
+
+class AutoCompleteFKWidget(forms.MultiWidget, SelectableMediaMixin):
+
+    def __init__(self, lookup_class, *args, **kwargs):
+        self.lookup_class = lookup_class
+        self.allow_new = kwargs.pop('allow_new', False)
+        self.qs = kwargs.pop('query_params', {})
+        self.limit = kwargs.pop('limit', None)
+        query_params = kwargs.pop('query_params', {})
+        #super(AutoCompleteFKWidget, self).__init__(*args, **kwargs)
+        widgets = [
+            AutoCompleteWidget(
+                lookup_class, allow_new=self.allow_new,
+                limit=self.limit, query_params=query_params
+            ),
+            forms.HiddenInput(attrs={u'data-selectable-type': 'hidden'})
+        ]
+        super(AutoCompleteFKWidget, self).__init__(widgets, *args, **kwargs)
+
+    def update_query_parameters(self, qs_dict):
+        self.qs.update(qs_dict)
+
+    def decompress(self, value):
+        if value:
+            lookup = self.lookup_class()
+            model = getattr(self.lookup_class, 'model', None)
+            if model and isinstance(value, model):
+                item = value
+                value = lookup.get_item_id(item)
+            else:
+                item = lookup.get_item(value)
+            item_value = lookup.get_item_value(item)
+            return [item_value, value]
+        return [None, None]
+
+    def build_attrs(self, extra_attrs=None, **kwargs):
+        attrs = super(AutoCompleteFKWidget, self).build_attrs(extra_attrs, **kwargs)
+        url = self.lookup_class.url()
+        if self.limit and 'limit' not in self.qs:
+            self.qs['limit'] = self.limit
+        if self.qs:
+            url = '%s?%s' % (url, urlencode(self.qs))
+        
+        attrs[u'data-selectable-url'] = url
+        attrs[u'data-selectable-type'] = 'text'
+        attrs[u'data-selectable-allow-new'] = str(self.allow_new).lower()
+        return attrs
 
 
 class AutoCompleteSelectWidget(SelectableMultiWidget, SelectableMediaMixin):

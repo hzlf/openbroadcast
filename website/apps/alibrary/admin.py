@@ -3,10 +3,11 @@ from cms.admin.placeholderadmin import PlaceholderAdmin
 
 from alibrary.models import Label, Release, Artist, License, Media, Profession, Playlist, Format, Relation, Mediaformat
 #from alibrary.models import ArtistProfessions, MediaExtraartists, PlaylistMedia
-from alibrary.models import ArtistProfessions, MediaExtraartists, ReleaseExtraartists, PlaylistMedia, ReleaseRelations
+from alibrary.models import ArtistProfessions, MediaExtraartists, ReleaseExtraartists, PlaylistMedia, ReleaseRelations, APILookup
 
 from django.contrib.contenttypes.generic import *
 
+from guardian.admin import GuardedModelAdmin
 
 from ashop.models import *
 
@@ -86,7 +87,7 @@ def merge_selected(modeladmin,request,queryset): #This is an admin/
 merge_selected.short_description = "Merge selected records"
 
 
-class BaseAdmin(reversion.VersionAdmin, admin.ModelAdmin):
+class BaseAdmin(reversion.VersionAdmin, GuardedModelAdmin):
     
     search_fields = ['name']
     save_on_top = True
@@ -159,7 +160,8 @@ class RelationsInline(GenericTabularInline):
     readonly_fields = ['service']
 
     
-class ReleaseAdmin(PlaceholderAdmin, BaseAdmin):
+#class ReleaseAdmin(PlaceholderAdmin, BaseAdmin):
+class ReleaseAdmin(BaseAdmin):
 
     #list_display   = ('name', 'get_extra_artists',)
     list_display   = ('name', 'releasetype', 'label', 'slug', 'uuid', 'catalognumber',)
@@ -175,8 +177,8 @@ class ReleaseAdmin(PlaceholderAdmin, BaseAdmin):
     
     """"""
     fieldsets = [
-        (None,               {'fields': ['name', 'slug', ('main_image', 'cover_image',), ('label', 'catalognumber'), ('releasedate', 'release_country', 'license'), ('releasetype', 'pressings'), 'publish_date', 'enable_comments', 'main_format', 'excerpt']}),
-        ('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
+        (None,               {'fields': ['name', 'slug', ('main_image', 'cover_image',), ('label', 'catalognumber'), ('releasedate', 'release_country', 'license'), ('releasetype', 'pressings'), 'publish_date', 'enable_comments', 'main_format', 'excerpt', 'description']}),
+        #('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
         #('Test', {'fields' : ['tags']})
     ]
     
@@ -296,6 +298,10 @@ class MediaformatAdmin(BaseAdmin):
     pass
     
 admin.site.register(Mediaformat, MediaformatAdmin)
+
+
+
+admin.site.register(APILookup)
 
 
 

@@ -18,6 +18,7 @@
 	{% addtoblock "css" %}<!--<link type="text/css" href="{{ STATIC_URL }}css/lib/jquery-ui-1.8.23.custom.css" rel="stylesheet" />-->{% endaddtoblock %}
 	
 	{% addtoblock "css" %}<link type="text/css" href="{{ STATIC_URL }}selectable/css/dj.selectable.css" rel="stylesheet" />{% endaddtoblock %}
+	{% addtoblock "css" %}<link type="text/css" href="{{ STATIC_URL }}css/lib/wmd.css" rel="stylesheet" />{% endaddtoblock %}
 	
 	
 	
@@ -63,6 +64,10 @@
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jsrender.js"></script>{% endaddtoblock %}
 	
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/bootstrap-tooltip.js"></script>{% endaddtoblock %}
+	
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/pagedown/Markdown.Converter.js"></script>{% endaddtoblock %}
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/pagedown/Markdown.Sanitizer.js"></script>{% endaddtoblock %}
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/pagedown/Markdown.Editor.js"></script>{% endaddtoblock %}
 	
 	
 	

@@ -5,5 +5,6 @@ from alibrary.models.releasemodels import *
 from alibrary.models.mediamodels import *
 from alibrary.models.playlistmodels import *
 from alibrary.models.formatmodels import *
+from alibrary.models.lookupmodels import *
 
 from alibrary.models.refactoring import *

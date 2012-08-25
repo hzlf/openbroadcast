@@ -21,6 +21,14 @@
 {% block inner %}
 <div class="item_detail" style="">
 
+	<!--
+	<script type="text/javascript" src="/static/admin/js/core.js"></script>
+	<link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/admin/css/global.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/admin/css/widgets.css"/>
+	-->
+
 	<section>
 		<div class="row iteminfo release">
 			{% include "alibrary/release/_detail_info.html" %}
@@ -32,9 +40,37 @@
 	<div class="clear"></div>
 
 	<div class="item_inner">
+		
+		
 		<form class=" form-horizontal" method="post" id="id_feedback_form_asd" enctype="multipart/form-data">
-			{% crispy form %}
 
+
+
+			{{ form.management_form }}
+			{{ relation_form.management_form }}
+			{{ releasemedia_form.management_form }}
+			
+			
+			{% crispy form %}
+			
+
+
+			<fieldset>
+				<legend>Tracklist</legend>
+			</fieldset>
+			
+			{% crispy releasemedia_form %}
+
+
+
+			<fieldset>
+				<legend>Relations<span class="pull-right">Help</span></legend>
+			</fieldset>
+			
+			{% crispy relation_form %}
+
+
+			<!--
 			{{ releasemedia_form.management_form }}
 			{% for form in releasemedia_form %}
 			{{ form.id }}
@@ -46,7 +82,7 @@
 				{{ form.name.errors }}
 			</div>
 			{% endfor %}
-
+			-->
 		</form>
 
 	</div>

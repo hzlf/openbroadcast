@@ -32,6 +32,7 @@ django-sekizai>=0.6.1
 html5lib>=0.9.0
 
 django-reversion==1.6.2
+django-staticfiles==1.2.1
 
 django-polymorphic==0.2
 django-compressor>=1.1.2
@@ -47,6 +48,11 @@ django-tagging==0.3.1
 #django-tagging-ng==0.3.3
 
 -e git+https://github.com/rdegges/django-clear-cache.git#egg=clear_cache
+
+-e git+git://github.com/mvpdev/django-eav.git#egg=django-eav
+
+# api clients
+discogs-client==1.1.1
 
 
 URLObject

@@ -79,7 +79,9 @@
             input = this.element;
             $(input).removeClass('ui-state-error');
             if (item) {
+            	console.log(item);
                 if (self.allowMultiple) {
+                	console.log('allowMultiple');
                     $(input).val("");
                     $(input).data("autocomplete").term = "";
                     if ($(self.hiddenMultipleSelector + '[value=' + item.id + ']').length === 0) {
@@ -95,8 +97,10 @@
                         return false;
                     }
                 } else {
+                	console.log('NOT: allowMultiple');
                     $(input).val(item.value);
                     var ui = {item: item};
+                    // var ui = item;
                     if (typeof(event) == 'undefined' || event.type != "autocompleteselect") {
                         $(input).trigger('autocompleteselect', [ui ]);
                     }

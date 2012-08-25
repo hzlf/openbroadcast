@@ -101,7 +101,7 @@ class Media(MigrationMixin):
         ('mix', _('DJ-Mix')),
         ('other', _('Other')),
     )
-    mediatype = models.CharField(max_length=12, default='track', choices=MEDIATYPE_CHOICES)
+    mediatype = models.CharField(verbose_name=_('Type'), max_length=12, default='track', choices=MEDIATYPE_CHOICES)
     
     description = models.TextField(verbose_name="Extra Description / Tracklist", blank=True, null=True)
     
