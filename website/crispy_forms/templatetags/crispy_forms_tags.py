@@ -13,6 +13,8 @@ from crispy_forms_filters import *
 
 TEMPLATE_PACK = getattr(settings, 'CRISPY_TEMPLATE_PACK', 'bootstrap')
 
+from time import gmtime, strftime
+
 
 class ForLoopSimulator(object):
     """
@@ -79,6 +81,10 @@ class BasicNode(template.Node):
         """
         # Nodes are not thread safe in multithreaded environments
         # https://docs.djangoproject.com/en/dev/howto/custom-template-tags/#thread-safety-considerations
+        
+        #print "%s get-render: start" % strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
+        print "get-render: start"
+        
         if self not in context.render_context:
             context.render_context[self] = (
                 template.Variable(self.form),
@@ -86,7 +92,11 @@ class BasicNode(template.Node):
             )
         form, helper = context.render_context[self]
 
+        print
+        print "form pre-resolve"
         actual_form = form.resolve(context)
+        print "form post-resolve"
+        
         if self.helper is not None:
             helper = helper.resolve(context)
         else:
@@ -94,19 +104,34 @@ class BasicNode(template.Node):
             # This allows us to have simplified tag syntax: {% crispy form %}
             helper = FormHelper() if not hasattr(actual_form, 'helper') else actual_form.helper
 
+
+        
+
         # We get the response dictionary
         is_formset = isinstance(actual_form, BaseFormSet)
         response_dict = self.get_response_dict(helper, context, is_formset)
         node_context = context.__copy__()
         node_context.update(response_dict)
 
+        
+
         # If we have a helper's layout we use it, for the form or the formset's forms
         if helper and helper.layout:
             if not is_formset:
+                
+                print "Not a Formset -> return actual Form"
+                
                 actual_form.form_html = helper.render_layout(actual_form, node_context)
             else:
+                
+                print 'Starting Simulated For-loop'
+                 
                 forloop = ForLoopSimulator(actual_form)
+                
+                
+                
                 for form in actual_form.forms:
+                    
                     node_context.update({'forloop': forloop})
                     form.form_html = helper.render_layout(form, node_context)
                     forloop.iterate()
@@ -116,6 +141,8 @@ class BasicNode(template.Node):
         else:
             response_dict.update({'form': actual_form})
 
+
+        print "get-render: done - > return"
         return Context(response_dict)
 
     def get_response_dict(self, helper, context, is_formset):
@@ -169,7 +196,10 @@ whole_uni_form_template = get_template('%s/whole_uni_form.html' % TEMPLATE_PACK)
 
 class CrispyFormNode(BasicNode):
     def render(self, context):
+        
+        print "CRISPY: start render"
         c = self.get_render(context)
+        print "CRISPY: got render"
 
         if c['is_formset']:
             if settings.DEBUG:
@@ -182,6 +212,8 @@ class CrispyFormNode(BasicNode):
             else:
                 template = whole_uni_form_template
 
+
+        print "CRISPY: end render"
         return template.render(c)
 
 

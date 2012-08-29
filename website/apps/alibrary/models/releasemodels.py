@@ -81,6 +81,11 @@ FORCE_CATALOGNUMBER = False
 from lib.fields import extra
 
 
+LOOKUP_PROVIDERS = (
+    ('discogs', _('Discogs')),
+    ('musicbrainz', _('Musicbrainz')),
+)
+
 
 
 class ReleaseManager(models.Manager):
@@ -182,10 +187,23 @@ class Release(MigrationMixin):
     # relations a.k.a. links
     relations = generic.GenericRelation(Relation)
     
-    # tagging
-    #tags = TaggableManager(blank=True)
+    # tagging (d_tags = "display tags")
+    d_tags = tagging.fields.TagField(verbose_name="Tags", blank=True, null=True)
     
-    # tags = tagging.fields.TagField()
+    """
+    def _get_tags(self):
+        return tagging.models.Tag.objects.get_for_object(self)
+    
+    def _set_tags(self, tag_list):
+        tagging.models.Tag.objects.update_tags(self, tag_list)
+    
+    tags = property(_get_tags, _set_tags)
+    """
+    
+    # tagging (d_tags = "display tags")
+    #d_tags = TaggableManager(blank=True)
+    
+    #tags = tagging.fields.TagField()
     # basic methods for what tagging provides
     
     #def _get_tags(self): 
@@ -238,6 +256,20 @@ class Release(MigrationMixin):
             pass
 
         return False
+    
+    def get_lookup_providers(self):
+        
+        providers = []
+        for key, name in LOOKUP_PROVIDERS:
+            relations = self.relations.filter(service=key)
+            relation = None
+            if relations.count() == 1:
+                relation = relations[0]
+                
+            providers.append({'key': key, 'name': name, 'relation': relation})
+
+        return providers
+    
 
     @models.permalink
     def get_absolute_url(self):
@@ -485,12 +517,25 @@ class Release(MigrationMixin):
         Looks for common license
         """
         
+        # update d_tags
+        t_tags = ''
+        for tag in self.tags:
+            t_tags += '%s, ' % tag    
+        
+        self.tags = t_tags;
+        self.d_tags = t_tags;
+        
 
         
         super(Release, self).save(*args, **kwargs)
 
+try:
+    tagging.register(Release)
+except:
+    pass
 
-tagging.register(Release)
+
+#tagging.register(Release)
 arating.enable_voting_on(Release)
 post_save.connect(library_post_save, sender=Release)  
 

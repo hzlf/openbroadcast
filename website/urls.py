@@ -20,6 +20,9 @@ sitemaps = {
 
 admin.autodiscover()
 
+from dajaxice.core import dajaxice_autodiscover, dajaxice_config
+dajaxice_autodiscover()
+
 
 
 urlpatterns = patterns('',
@@ -36,11 +39,14 @@ urlpatterns = patterns('',
     url(r"^ratings/", include("agon_ratings.urls")),
     
     url(r"^vote/", include('arating.urls')),
+    url(r'^ac_tagging/', include('ac_tagging.urls')),
     
     
     url(r"^api/", include("alibrary.urls_api")),
 
     url(r'^selectable/', include('selectable.urls')),
+    
+    url(dajaxice_config.dajaxice_url, include('dajaxice.urls')),
     
     # varnish / ESI
     # (r'^esi/', include('esi.urls')),

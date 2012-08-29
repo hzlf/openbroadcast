@@ -179,7 +179,7 @@ class ReleaseAdmin(BaseAdmin):
     fieldsets = [
         (None,               {'fields': ['name', 'slug', ('main_image', 'cover_image',), ('label', 'catalognumber'), ('releasedate', 'release_country', 'license'), ('releasetype', 'pressings'), 'publish_date', 'enable_comments', 'main_format', 'excerpt', 'description']}),
         #('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
-        #('Test', {'fields' : ['tags']})
+        #('Test', {'fields' : ['d_tags']})
     ]
     
 admin.site.register(Release, ReleaseAdmin)

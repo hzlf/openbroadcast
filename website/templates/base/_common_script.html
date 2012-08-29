@@ -19,6 +19,7 @@
 	
 	{% addtoblock "css" %}<link type="text/css" href="{{ STATIC_URL }}selectable/css/dj.selectable.css" rel="stylesheet" />{% endaddtoblock %}
 
+
 	
 	
 	
@@ -59,6 +60,7 @@
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.pulse.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.highlight.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.watch.js"></script>{% endaddtoblock %}
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.scrollfollow.js"></script>{% endaddtoblock %}
 	
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.tmpl.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jsrender.js"></script>{% endaddtoblock %}
@@ -70,11 +72,17 @@
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/pagedown/Markdown.Editor.js"></script>{% endaddtoblock %}
 	
 	
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}ac_tagging/js/jquery.tag-it.js"></script>{% endaddtoblock %}
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}ac_tagging/js/ac_tagging.js"></script>{% endaddtoblock %}
+	
 	
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/apps/arating.js"></script>{% endaddtoblock %}
 	
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/util.base.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/base.ui.js"></script>{% endaddtoblock %}
+	
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/edit.js"></script>{% endaddtoblock %}
+	
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/aplayer.base.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/aplayer.ui.js"></script>{% endaddtoblock %}
 	

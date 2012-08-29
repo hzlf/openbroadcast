@@ -256,7 +256,7 @@ class Relation(models.Model):
     url = models.URLField(max_length=512)
 
     content_type = models.ForeignKey(ContentType)
-    # object_id = models.PositiveIntegerField()
+    #object_id = models.PositiveIntegerField()
     object_id = UUIDField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')
 
@@ -292,6 +292,7 @@ class Relation(models.Model):
         verbose_name = _('Relation')
         verbose_name_plural = _('Relations')
         ordering = ('url', )
+        unique_together = ('service', 'content_type', 'object_id')
     
     def __unicode__(self):
         return self.url

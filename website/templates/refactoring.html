@@ -86,14 +86,12 @@
 	
 	
 
-	<div class="row">
-		
-		
-		{% block main %}{% endblock %}
+	<!-- col&co handling inside block -->
+	{% block main %}{% endblock %}
 		
 
 	
-	</div>
+	
 	
 </section>
 	    	
@@ -193,6 +191,9 @@
 				base.ui.load_state();
 				base.ui.tracklist();
 				base.ui.dialog();
+				
+				// TODO: move to edit views later on..
+				edit.ui.init();
 
 			});
 			

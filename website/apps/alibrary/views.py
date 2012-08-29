@@ -301,6 +301,9 @@ class ReleaseEditView(UpdateView):
         # validation
         if form.is_valid():
             print 'form valid'
+            
+            self.object.tags = form.cleaned_data['d_tags']
+            
             # temporary instance to validate inline forms against
             tmp = form.save(commit=False)
         

@@ -24,6 +24,10 @@ from settings import *
 import eav
 from eav.models import Attribute
 
+from jsonfield import JSONField
+
+from urlparse import urlparse
+
 
 # logging
 import logging
@@ -39,11 +43,14 @@ class APILookup(models.Model):
     PROVIDER_CHOICES = (
         (None, _('Not Set')),
         ('discogs', _('Discogs')),
+        ('musicbrainz', _('Musicbrainz')),
     )
     provider = models.CharField(max_length=50, default=None, choices=PROVIDER_CHOICES)
     
     uri = models.URLField(blank=True, null=True)
     ressource_id = models.CharField(max_length=500, null=True, blank=True)
+    
+    api_data = JSONField(null=True, blank=True);
     
 
     PROCESSED_CHOICES = (
@@ -55,6 +62,7 @@ class APILookup(models.Model):
     
     
     content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')
 
 
@@ -81,15 +89,58 @@ class APILookup(models.Model):
 
         super(APILookup, self).save(*args, **kwargs)
         
+        
+    """
+    Generic Wrapper - distributes to corresponding method
+    """
     def get_from_api(self):
+        print "get_from_api"
+        print self.provider
+        
+        
+
         
         if self.provider == 'discogs':
-            self.get_from_discogs()
+            
+            
+            
+            if self.api_data:
+                pass
+                #return self.api_data
+            
+            return self.get_from_discogs()
         
         
     def get_from_discogs(self):
         
         print 'get from discogs'
+        
+        # discogs api needs ressource id (not url)
+        
+        self.uri = self.content_object.relations.filter(service='discogs')[0].url
+        
+        print 'uri'
+        print self.uri
+        print 'uri'
+        
+        
+        print 'url: %s' % self.uri
+        print 'ressource_id: %s' % self.ressource_id
+        
+        if not self.ressource_id:
+            pass
+        try:
+            ri = urlparse(self.uri).path
+            ri = ri.split('/')
+            ri = ri[-1:]
+            ri = int(ri[0])
+            
+            self.ressource_id = ri
+            
+        except Exception, e:
+            self.ressource_id = None
+            print e
+            
         
         import discogs_client as discogs
         discogs.user_agent = 'ANORGDiscogsAPIClient/0.0.1 +http://anorg.net'
@@ -100,7 +151,12 @@ class APILookup(models.Model):
         #d_releasde = d_master.key_release
         
         # get discog's key-release from ressource id
-        d_release = discogs.Release(self.ressource_id).master.key_release
+        d_release = discogs.Release(self.ressource_id)
+        
+        try:
+            d_release = d_release.master.key_release
+        except Exception, e:
+            print e
         
         """ release:
          |  artists
@@ -111,19 +167,43 @@ class APILookup(models.Model):
          |  tracklist
         """
         
-        for k in d_release.data:
-            print 'k: %s - v:%s' % (k, d_release.data[k])
-            attribute, created = Attribute.objects.get_or_create(name=k, datatype=Attribute.TYPE_TEXT)
-            setattr(self.eav, k, d_release.data[k])
+        #for k in d_release.data:
+        #    print 'k: %s - v:%s' % (k, d_release.data[k])
+        #    attribute, created = Attribute.objects.get_or_create(name=k, datatype=Attribute.TYPE_TEXT)
+        #    setattr(self.eav, k, d_release.data[k])
             
-        self.save()
+        #self.save()
 
+        res = {}
+        for k in d_release.data:
+            # print 'k: %s - v:%s' % (k, d_release.data[k])
+            
+            # kind of ugly data mapping
+            mk = k
+            if k == 'title':
+                mk = 'name'
+            if k == 'notes':
+                mk = 'description'
+            if k == 'released':
+                mk = 'releasedate'
+            if k == 'country':
+                mk = 'release_country'
+                
+            if k == 'labels':
+                labels = d_release.data[k]
+                label = labels[0]
+                
+                res['label'] = label['name']
+            
+            res[mk] = d_release.data[k]
         
+        self.api_data = res
+        self.save()
         
-        pass
+        return res
     
         
 
  
-eav.register(APILookup)
+#eav.register(APILookup)
         

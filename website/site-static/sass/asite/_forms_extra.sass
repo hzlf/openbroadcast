@@ -66,8 +66,17 @@ form.form-horizontal
       margin-left: 0px
       
   > .formRow
-    border-bottom: 1px solid #ccc
-    margin-bottom: 18px
+    margin-bottom: 9px
+    margin-top: 9px
+    padding-top: 9px
+    
+    margin-left: 5px
+    
+    &:nth-child(odd)
+      background: #fafafa
+    
+    > .formColumn
+      //border-bottom: 1px solid #ccc
     
 
 form.form-horizontal
@@ -78,18 +87,143 @@ form.form-horizontal
         float: left
         
       .field-lookup-holder
+        float: right
         margin: 0 0 0 30px
-        background-color: green
+        background-color: #efefef
+        
+        border: 1px solid #efefef
+        
+        max-width: 220px
+        
+        display: none
+        padding: 0px 4px 0px 24px
         
 
+        background-image: url(/static/img/icons/forms/compare.png)
+        background-position: 4px center 
+        background-repeat: no-repeat
+        
+        &.hover
+          border: 1px solid #999
+          cursor: pointer
+        
+        
+        // border: 1px solid #ccc
+        color: #5a5a5a
+        
+        &.lookup-match
+          
+          // border-color: #0b0
+          background-color: #ddffd9
+        &.lookup-diff
+          background-color: #fff4d9
+
+          
+form.form-horizontal
+  &.form-compact
+    //background: yellow
+    
+    
+    fieldset
+      padding: 0 0 0 7px
+    
+    fieldset
+      background-color: #fcfcfc
+    legend
+      padding: 4px 0
+      line-height: 14px
+      background-color: #fafafa
+    
+    legend
+      //display: none
+      margin-bottom: 7px
+      font-size: 100%
+      font-weight: bold
+      border-bottom: none
+    
+    legend + .control-group
+      margin-bottom: 4px 
+      margin-top: 4px 
+    
+    .control-group
+      margin-bottom: 2px      
 
 
 
+body
+  &.api_lookup-progress
+    opacity: 0.2
 
 
+// lookup form / providers
 
 
+.lookup.provider
 
+  &.listing
+    &.fixed
+      position: fixed
+      width: 260px
+      top: 120px
+
+  .item
+    padding: 2px 2px 0px 2px
+    background-color: #efefef
+
+    &.available
+      background-color: #DDFFD9
+    
+    &.hover
+      background-color: red
+
+ul.links.external
+
+  li.name
+    margin-left: 12px
+  
+  li.action
+    margin-left: 12px
+
+  li.icon
+    height: 16px
+    width: 16px
+    display: block
+    background-image: url(/static/img/base/listview.iconset.links_external.png)
+    &:hover
+      background-position: 0 -16px
+    /* individual links (icon sprite)
+    &.discogs
+      background-position: 0 0
+      &.available
+        background-position: 0 16px
+    &.wikipedia
+      background-position: -16px 0
+      &:hover
+        background-position: -16px 16px
+    &.lastfm
+      background-position: -32px 0
+      &:hover
+        background-position: -32px 16px
+    &.musicbrainz
+      background-position: -48px 0
+      &:hover
+        background-position: -48px 16px
+    &.soundcloud
+      background-position: -64px 0
+      &:hover
+        background-position: -64px 16px
+    &.facebook
+      background-position: -80px 0
+      &:hover
+        background-position: -80px 16px
+    &.youtube
+      background-position: -96px 0
+      &:hover
+        background-position: -96px 16px
+    &.myspace
+      background-position: -112px 0
+      &:hover
+        background-position: -112px 16px
 
 
 

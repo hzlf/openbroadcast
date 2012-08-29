@@ -33,7 +33,7 @@ class ReleaseForm(ModelForm):
 
     class Meta:
         model = Release
-        fields = ('name','label','releasetype','release_country','catalognumber','description', 'main_image', 'releasedate')
+        fields = ('name','label','releasetype','release_country','catalognumber','description', 'main_image', 'releasedate', 'd_tags')
         
 
     def __init__(self, *args, **kwargs):
@@ -91,10 +91,10 @@ class ReleaseForm(ModelForm):
         
         catalog_layout = Fieldset(
                 _('Label/Catalog'),
-                Field('label', css_class='input-xlarge'),
-                Field('catalognumber', css_class='input-xlarge'),
-                Field('release_country', css_class='input-xlarge'),
-                Field('releasedate', css_class='input-xlarge'),
+                LookupField('label', css_class='input-xlarge'),
+                LookupField('catalognumber', css_class='input-xlarge'),
+                LookupField('release_country', css_class='input-xlarge'),
+                LookupField('releasedate', css_class='input-xlarge'),
         )
         
 
@@ -102,14 +102,21 @@ class ReleaseForm(ModelForm):
         
         image_layout = Fieldset(
                 'Meta',
-                Field('description', css_class='input-xxlarge'),
+                LookupField('description', css_class='input-xxlarge'),
                 'main_image',
-                #Field('relations', css_class='input-xxlarge'),
+        )
+        
+        tagging_layout = Fieldset(
+                'Tags',
+                'd_tags',
+                #HTML('<p>tagging help</p>'),
         )
         
         action_layout = FormActions(
-                Submit('save', 'save', css_class="btn-primary pull-right ajax_submit"),
-                Reset('reset', 'reset', css_class="btn-secondary pull-right"),
+                HTML('<button type="submit" name="save-i-classicon-arrow-upi" value="save" class="btn btn-primary pull-right ajax_submit" id="submit-id-save-i-classicon-arrow-upi"><i class="icon-ok icon-white"></i> Save</button>'),            
+                HTML('<button type="reset" name="reset" value="reset" class="reset resetButton btn btn-secondary pull-right" id="reset-id-reset"><i class="icon-trash"></i> Cancel</button>'),
+                #Submit('save <i class="icon-arrow-up"></i>', 'save', css_class="btn-primary pull-right ajax_submit"),
+                #Reset('reset', 'reset', css_class="btn btn-secondary pull-right"),
         )
         
         
@@ -122,9 +129,11 @@ class ReleaseForm(ModelForm):
         
             
         layout = Layout(
+                        action_layout,
                         base_layout,
                         artist_layout,
                         image_layout,
+                        tagging_layout,
                         catalog_layout,
                         action_layout,
                         )
@@ -137,8 +146,11 @@ class ReleaseForm(ModelForm):
         
 
 
+    from lib.widgets.widgets import AdvancedFileInput
+    #main_image = forms.Field(widget=AdvancedFileInput(preview='/my/image.png'), required=False)
     
-    main_image = forms.Field(widget=forms.FileInput(), required=False)
+    from django.forms.widgets import FileInput
+    main_image = forms.Field(widget=FileInput(), required=False)
     
     
     
@@ -146,6 +158,11 @@ class ReleaseForm(ModelForm):
     
     from floppyforms.widgets import DateInput
     releasedate = forms.DateField(required=False,)
+    
+    from tagging.forms import TagField
+    from ac_tagging.widgets import TagAutocompleteTagIt
+    
+    d_tags = TagField(widget=TagAutocompleteTagIt(max_tags=9), required=False, label=_('Tags'), help_text=_("Tags - Autocomplete enabled"))
     
         
     name = forms.CharField(widget=selectable.AutoCompleteWidget(ReleaseNameLookup), required=True)
@@ -155,7 +172,7 @@ class ReleaseForm(ModelForm):
     
     # license = selectable.AutoCompleteSelectField(LicenseLookup, allow_new=True, required=False)
     
-    description = forms.CharField(widget=PagedownWidget())   
+    description = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")   
 
     
 
@@ -175,9 +192,9 @@ class ReleaseForm(ModelForm):
             print "IMAGE SAFIX!!"
             try:
                 ui = cd['main_image']
-                dj_file = DjangoFile(open(ui.temporary_file_path()), name='cover')
+                dj_file = DjangoFile(open(ui.temporary_file_path()), name='cover.jpg')
                 cd['main_image'], created = Image.objects.get_or_create(
-                                    original_filename='cover_%s' % self.instance.pk,
+                                    original_filename='cover_%s.jpg' % self.instance.pk,
                                     file=dj_file,
                                     folder=self.instance.folder,
                                     is_public=True)
@@ -201,6 +218,110 @@ class ReleaseForm(ModelForm):
     
  
   
+  
+  
+class BaseReleaseMediaFormSet__(BaseInlineFormSet): 
+
+
+    def __init__(self, *args, **kwargs):
+
+        self.instance = kwargs['instance']
+
+        super(BaseReleaseMediaFormSet, self).__init__(*args, **kwargs)
+        
+        self.helper = FormHelper()
+        self.helper.form_id = "id_releasemediainline_form_%s" % 'asd'
+        self.helper.form_class = 'form-horizontal'
+        self.helper.form_method = 'post'
+        self.helper.form_action = ''
+        self.helper.form_tag = False
+        
+        
+        """
+        base_layout = Fieldset(
+                '',
+                Field('name', css_class='input-xlarge'),
+                Field('artist', css_class='input-xlarge'),
+                Field('isrc', css_class='input-xlarge'),
+                
+                Row(
+                    Column(Field('tracknumber', css_class='input-small'), css_class='span2'),
+                    Column(Field('mediatype', css_class='input-small'), css_class='span1'),
+                    Column(Field('license', css_class='input-small'), css_class='span1'),
+                    
+                    
+                    #Field('release_country', css_class='span9 input-small'),
+                    css_class='controls controls-row'
+                ),
+                css_class='releasemedia-formset',
+        )
+        """
+        
+        base_layout = Row(
+            #Fieldset(
+                Column(
+                       Field('tracknumber', css_class='input-small'),
+                       Field('mediatype', css_class='input-small'),
+                       Field('license', css_class='input-small'),
+                       css_class='span2'
+                       ),
+                Column(
+                       #Fieldset(
+                                Field('name', css_class='input-xlarge'),
+                                Field('artist', css_class='input-xlarge'),
+                                Field('isrc', css_class='input-xlarge'),
+                                #Row(
+                                #    Column(
+                                #           Field('license', css_class='input-small'),
+                                #           css_class='span2 unpadded'
+                                #           ),
+                                #    Column(
+                                #           Field('mediatype', css_class='input-small'),
+                                #           css_class='span2'
+                                #           ),
+                                #    ),
+                       #),
+                       css_class='span5'
+                       ),
+                css_class='releasemedia-row row',      
+            #)
+        )
+        
+        
+        base_layout = Div(
+                          Div(
+                              Field('tracknumber'),
+                              Field('mediatype'),
+                              Field('license'),
+                              ),
+                          Div(
+                              Field('name'),
+                              Field('artist'),
+                              Field('isrc'),
+                              ),
+                          )
+        
+        """"""
+        self.helper.layout = Layout(
+                    Fieldset(
+                    'Form',
+                    #'tracknumber',
+                    #'mediatype',
+                    #'license',
+                    'name',
+                    'artist',
+                    'isrc',
+                              Field('tracknumber'),
+                              Field('mediatype'),
+                              Field('license'),
+                              #Field('name'),
+                              #Field('artist'),
+                              #Field('isrc'),
+                    ),)
+        
+        #self.helper.add_layout(t_layout)
+  
+        #self.helper.add_layout(base_layout)
   
   
 class BaseReleaseMediaFormSet(BaseInlineFormSet): 
@@ -321,6 +442,7 @@ class BaseReleaseMediaForm(ModelForm):
   
     
 
+#ReleaseMediaFormSet = inlineformset_factory(Release, Media, form=BaseReleaseMediaForm, formset=BaseReleaseMediaFormSet, can_delete=False, extra=0, fields=('name', 'tracknumber', 'isrc', 'artist', 'license', 'mediatype',))
 ReleaseMediaFormSet = inlineformset_factory(Release, Media, form=BaseReleaseMediaForm, formset=BaseReleaseMediaFormSet, can_delete=False, extra=0, fields=('name', 'tracknumber', 'isrc', 'artist', 'license', 'mediatype',))
 
 ReleaseRelationFormSet = generic_inlineformset_factory(Relation, extra=1, exclude=('service', 'action',))

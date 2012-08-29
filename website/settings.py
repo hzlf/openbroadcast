@@ -56,11 +56,11 @@ SECRET_KEY = '0r6%7gip5tmez*vygfv+u14h@4lbt^8e2^26o#5_f_#b7%cm)u'
 
 TEMPLATE_LOADERS = (    
     # mobile
-    'django_mobile.loader.Loader',
+    #'django_mobile.loader.Loader',
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-    'django.template.loaders.eggs.Loader',
-    'django.template.loaders.app_directories.Loader',
+    #'django.template.loaders.eggs.Loader',
+    #'django.template.loaders.app_directories.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -246,6 +246,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     # other finders..
     'compressor.finders.CompressorFinder',
+    'dajaxice.finders.DajaxiceFinder',
 )
 
 
@@ -300,6 +301,10 @@ INSTALLED_APPS = (
     'clear_cache',
     
     'eav',
+    
+    # dajax
+    'dajaxice',
+    'dajax',
     
     
     # cms plugins
@@ -372,6 +377,7 @@ INSTALLED_APPS = (
     'wikisyntax',
     #'taggit',
     'tagging',
+    'ac_tagging',
     'pure_pagination',
     #'taggit_templatetags',
     
