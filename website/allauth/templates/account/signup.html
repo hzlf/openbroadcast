@@ -59,7 +59,20 @@
     
 
 	<form class="form-horizontal" id="signup_form" method="post" action="{% url account_signup %}">
-	  {% crispy form %}
+		
+		{% csrf_token %}
+		<fieldset class="inlineLabels">
+	  		{{ form|crispy }}
+	  
+            {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+            {% endif %}
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">{% trans "Sign Up" %}</button>
+                <a class="btn btn-secondary" href="{% url account_reset_password %}">{% trans "Forgot Password?" %}</a>
+            </div>
+	  </fieldset>
+	  
 	</form>
 
 	<div class="dim">
