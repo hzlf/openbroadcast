@@ -33,22 +33,14 @@
   -->
 </header>
 
-	
-
-    
-    
 	{% if extra == "login_reason" %}
 	{% include "account/snippets/login_reason.html" %}
 	{% endif %}
-    
 
 	<div class="alert alert-info">
 		<h4 class="alert-heading">{% trans "Already have an account?" %}</h4>
 		Then please <a href="{{ login_url }}">{% trans "sign in here" %}</a>.
 	</div>
-
-
-
 
     {% if user.is_authenticated %}
 	<div class="alert">
