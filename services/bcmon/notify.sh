@@ -4,5 +4,5 @@
 # needed here to keep dirs/configs clean   #
 # and maybe to set user-rights             #
 ############################################
-cd ../
+#cd ../
 /srv/bcmon/bin/python bcmon_notify.py "$1" "$2" "$3" &

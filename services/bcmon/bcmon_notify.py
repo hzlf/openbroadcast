@@ -148,31 +148,39 @@ class Notify:
         print
 
         # Notify the API
+        try:
+            api = slumber.API("http://localhost:8000/api/v1/", auth=("root", "root"))        
+            created = api.playout.post({"title": options.title})
+            print created
         
-        api = slumber.API("http://localhost:8000/api/v1/", auth=("root", "root"))
+            # id for later use..
+            id = created['id']
         
-        created = api.playout.post({"title": options.title})
-        
-        print created
-        
-        # id for later use..
-        id = created['id']
-        
-        print id
+            print id
+        except Exception, e:
+            print e
         
         # wait a bit befor recording
+        print 'sleeping for 5 secs'
         time.sleep(5)
         
         tn = telnetlib.Telnet('127.0.0.1', 1234)
 
         tn.write("ml0rec.start")
         tn.write("\n")
-        
+        tn.write("exit\n")
+
+
+
+        print 'sleeping for 20 secs'
+        time.sleep(20)
+
+        tn = telnetlib.Telnet('127.0.0.1', 1234)        
         tn.write("ml0rec.stop")
         tn.write("\n")
         
         
-        
+        print 'close telnet'
         tn.write("exit\n")
         
         
