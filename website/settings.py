@@ -258,6 +258,9 @@ INSTALLED_APPS = (
     #'admin_tools.menu',
     #'admin_tools.dashboard',
     
+    #'admintools_bootstrap',
+    'admin_tools',
+    
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -343,7 +346,7 @@ INSTALLED_APPS = (
     'allauth.openid',
     'allauth.facebook',
 
-    
+    'tastypie',
     
     'crispy_forms',
     'floppyforms',
@@ -357,6 +360,8 @@ INSTALLED_APPS = (
     'alibrary',
     'aplayer',
     'arating',
+    
+    'bcmon',
     #'secretballot',
     'genericrelations',
     'ashop',
