@@ -1,0 +1,13 @@
+#####################################
+# Icecast Config
+#####################################
+
+# finally the output | mp3
+clock(id="clock_icecast",
+  output.icecast(%mp3,
+    host = icecast_host, port = icecast_port,
+    password = icecast_pass, mount = 'pypo_master.mp3',
+    fallible = true,
+    restart = true,
+    restart_delay = 5,
+    buffer(source)))

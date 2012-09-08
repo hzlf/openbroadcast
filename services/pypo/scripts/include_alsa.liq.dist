@@ -1,0 +1,16 @@
+#####################################
+# ALSA Config
+#####################################
+
+set("audio.converter.samplerate.libsamplerate.quality","best")
+
+set("frame.channels",2)
+set("frame.size",1764)
+set("frame.samplerate",44100)
+
+#set("alsa.periods",128)
+set("alsa.period_size",1024)
+set("alsa.bufsize",8192)
+
+
+output.alsa(source, device="default")

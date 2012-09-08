@@ -8,6 +8,7 @@ l0 = mksafe(l0)
 l0 = rewrite_metadata(insert_missing=true,[("channel","obp")],l0)
 l0 = on_metadata(id='ml0',notify, l0)
 output.dummy(l0)
+l0sample = output.file.wav(id='ml0rec',start=false,'../samples/l0sample.wav', l0)
 
 #l1 = input.http(id="inl1",poll_delay=5.,autostart=true,'http://mp3.radiox.ch/standard.mp3')
 #l1 = mksafe(l1)

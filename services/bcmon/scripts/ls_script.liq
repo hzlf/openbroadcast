@@ -41,7 +41,7 @@ def notify(m)
   
   command = "./notify.sh --metadata --channel=#{m['channel']} --title=#{title}"
   print(command)
-  system(command)
+  #system(command)
   
 end
 

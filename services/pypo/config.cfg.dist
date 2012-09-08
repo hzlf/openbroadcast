@@ -1,0 +1,50 @@
+############################################
+# pypo - configuration         test        #
+############################################
+
+############################################
+# Directories / Hosts                      #
+# _include_ trailing slash !!              #
+############################################
+cache_dir = '/storage/pypo/cache/'
+file_dir = '/storage/pypo/files/'
+archive_dir = '/storage/pypo/archive/'
+tmp_dir = '/var/tmp/obp/'
+
+
+############################################
+# API path & co                            #
+############################################
+base_url = 'http://test.local.obp.ch/'
+obp_api_key = 'AAA-BBB-CCC-EEE'
+
+export_path = 'api/pypo/export_range/' # YYYY-MM-DD-hh-mm will be added in script, exports json
+
+############################################
+# Liquidsoap settings                      #
+############################################
+ls_host = '127.0.0.1'
+ls_port = '1234'
+
+############################################
+# DLS Server settings                      #
+############################################
+dls_host = '172.17.xxx.xxx' #(SMC Cisco router)
+dls_port = 4000
+dls_user = 'OPENBRO+'
+dls_pass = 'xxxxxxxx'
+
+
+############################################
+# pypo preferences                         #
+############################################
+prepare_ahead = 72 #in hours
+cache_for = 6 #how long to hold the cache, in hours
+
+poll_interval = 10 # in seconds
+push_interval = 1 # in seconds
+
+# 'pre' or 'otf'. 'pre' cues while pplaylist preparation
+# while 'otf' (on the fly) cues while loading into ls  
+# (needs the post_processor patch)
+cue_style = 'pre'

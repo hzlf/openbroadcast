@@ -31,7 +31,7 @@ class PlayoutResource(ModelResource):
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
         resource_name = 'playout'
-        excludes = ['id', 'updated',]
+        excludes = ['updated',]
         authentication = BasicAuthentication()
         authorization = Authorization()
         filtering = {

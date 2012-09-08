@@ -32,6 +32,7 @@ import logging.config
 import urllib
 import urllib2
 import string
+import telnetlib
 
 import slumber
 
@@ -151,6 +152,31 @@ class Notify:
         api = slumber.API("http://localhost:8000/api/v1/", auth=("root", "root"))
         
         created = api.playout.post({"title": options.title})
+        
+        print created
+        
+        # id for later use..
+        id = created['id']
+        
+        print id
+        
+        # wait a bit befor recording
+        time.sleep(5)
+        
+        tn = telnetlib.Telnet('127.0.0.1', 1234)
+
+        tn.write("ml0rec.start")
+        tn.write("\n")
+        
+        tn.write("ml0rec.stop")
+        tn.write("\n")
+        
+        
+        
+        tn.write("exit\n")
+        
+        
+        
         
         
         """
