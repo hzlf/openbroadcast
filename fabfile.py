@@ -93,7 +93,8 @@ def deploy():
         virtualenv and requirements
         """
         try:
-            run('virtualenv --no-site-packages /srv/%s' % env.site_id)
+            pass
+            # run('virtualenv --no-site-packages /srv/%s' % env.site_id)
         except Exception, e:
             print e
 
