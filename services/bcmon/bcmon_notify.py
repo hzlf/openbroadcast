@@ -60,6 +60,7 @@ parser = OptionParser(usage=usage)
 #options
 
 parser.add_option("-m", "--metadata", help="Tell daddy what is playing right now", default=False, action="store_true", dest="metadata")
+parser.add_option("-t", "--testing", help="Testing...", default=False, action="store_true", dest="testing")
 parser.add_option("-C", "--channel", help="Tell daddy what is playing right now", metavar="channel")
 parser.add_option("-T", "--title", help="Tell daddy what is playing right now", metavar="title")
 
@@ -137,6 +138,22 @@ class Notify:
         self.api_client = ApiClient(API_URL, self.api_key, None)
 
 
+    def testing(self, options):
+        print "testing..."
+        
+        api = slumber.API("http://openbroadcast.node05.daj.anorg.net/api/v1/", auth=("bcmon", "bcmon"))  
+        
+        # initial post
+        post = api.playout.post({'title': 'my file'})
+        print post
+    
+        # do some seconds of recording, then
+        time.sleep(10)
+        
+        # put recorded sample
+        put = api.playout(post["id"]).put({'title': 'my file with sample', 'sample': open('samples/l0sample.wav')})    
+        print put
+    
     
     def metadata(self, options):
         logger = logging.getLogger("monitoring")
@@ -226,6 +243,12 @@ run = True
 while run == True:
     
     logger = logging.getLogger("bcmon notify")
+            
+    if options.testing:
+        try: n.testing(options)
+        except Exception, e:
+            print e
+        sys.exit()  
             
     if options.metadata:
         try: n.metadata(options)

@@ -30,6 +30,8 @@ class Playout(BaseModel):
     
     status = models.PositiveIntegerField(default=0, choices=STATUS_CHOICES)
     
+    sample = models.FileField(upload_to="media/samples/", null=True, blank=True)
+    
     # meta
     class Meta:
         app_label = 'bcmon'
