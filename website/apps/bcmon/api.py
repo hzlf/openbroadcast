@@ -15,7 +15,7 @@ class ChannelResource(ModelResource):
     class Meta:
         queryset = Channel.objects.all()
         resource_name = 'channel'
-        excludes = ['id', 'updated',]
+        excludes = ['updated',]
         # excludes = ['email', 'password', 'is_superuser', 'is_active', 'is_staff', 'id']
         filtering = {
             'name': ['exact', ],
@@ -42,9 +42,8 @@ class PlayoutResource(ModelResource):
     """"""
     def obj_create(self, bundle, request, **kwargs):
         
-        if 'channel' in bundle.data:
-            channel = Channel.objects.filter(slug=bundle.data['channel'])[0]
-            bundle.data['channel'] = {'pk':channel.pk}
+        if 'channel' in bundle.data:            
+            bundle.data['channel'] = {'pk': int(bundle.data['channel'])}
 
         return super(PlayoutResource, self).obj_create(bundle, request, **kwargs)
     

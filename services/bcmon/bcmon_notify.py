@@ -139,10 +139,11 @@ class Notify:
     def metadata(self, options):
         
         # dev
-        # API_ENDPOINT = 'http://localhost:8000/api/v1/'
-        # API_AUTH = ("root", "root")
+        #API_ENDPOINT = 'http://localhost:8000/api/v1/'
+        #API_AUTH = ("root", "root")
+        
+        api = slumber.API(API_ENDPOINT, auth=API_AUTH) 
 
-        exclude_list = 'jingle,dummy'
 
         print 'Channel:',
         print options.channel
@@ -150,22 +151,31 @@ class Notify:
         print options.title
         print
         
-        if not options.title:
-            print 'no title set.. exit'
-        
+        if not options.title or len(options.title) < 2:
+            print 'No title set or title too short... > Exit'
             sys.exit()
             
-        exclude_list = exclude_list.split(',')
-        for e in exclude_list:
-            if e.lower() in options.title.lower():
-                print 'excluded, as contains: %s' % e
-                sys.exit()
+        # get channel data from API
+        channel = api.channel(int(options.channel)).get()
+        
+        channel_id = channel['id']        
+        exclude_list = channel['exclude_list']
+        
+        if len(exclude_list) > 3:
+
+            exclude_list = exclude_list.split(',')
+            for e in exclude_list:
+                #print '*%s*' % e.strip()
+                if e.strip().lower() in options.title.lower():
+                    print 'Excluded, as contains: %s' % e
+                    sys.exit()
+    
 
         
 
         # Notify the API
         
-        api = slumber.API(API_ENDPOINT, auth=API_AUTH)  
+         
         
         # initial post
         post = api.playout.post({'title': options.title, 'channel': options.channel})
@@ -176,8 +186,9 @@ class Notify:
         print 'sleeping for %s secs' % REC_OFFSET
         time.sleep(REC_OFFSET)
         
+        """"""
         tn = telnetlib.Telnet('127.0.0.1', 1234)
-        tn.write("ml0rec.start")
+        tn.write("l%srec.start" % channel_id)
         tn.write("\n")
         tn.write("exit\n")
         
@@ -189,97 +200,24 @@ class Notify:
             sys.stdout.flush()
         print 
         
-        
+        """"""
         tn = telnetlib.Telnet('127.0.0.1', 1234)        
-        tn.write("ml0rec.stop")
+        tn.write("l%srec.stop" % channel_id)
         tn.write("\n")
         tn.write("exit\n")
         
         
         print "*** RECORDING DONE ***"
         
-        sample_path = 'samples/' + 'l0sample.wav'
+        sample_path = 'samples/l%ssample.wav' % channel_id
 
-        print 'putting sample...'
+        print 'Putting sample: %s' % sample_path
         # put recorded sample
         put = api.playout(post["id"]).put({'status': 2, 'sample': open(sample_path)})    
         print put
         
         sys.exit()    
     
-    def old__metadata(self, options):
-        logger = logging.getLogger("monitoring")
-
-        print 'Channel:',
-        print options.channel
-        print 'String:', 
-        print options.title
-        print
-
-        # Notify the API
-        try:
-            api = slumber.API("http://localhost:8000/api/v1/", auth=("root", "root"))        
-            created = api.playout.post({"title": options.title})
-            print created
-        
-            # id for later use..
-            id = created['id']
-        
-            print id
-        except Exception, e:
-            print e
-        
-        # wait a bit befor recording
-        print 'sleeping for 5 secs'
-        time.sleep(5)
-        
-        tn = telnetlib.Telnet('127.0.0.1', 1234)
-
-        tn.write("ml0rec.start")
-        tn.write("\n")
-        tn.write("exit\n")
-
-
-
-        print 'sleeping for 20 secs'
-        time.sleep(20)
-
-        tn = telnetlib.Telnet('127.0.0.1', 1234)        
-        tn.write("ml0rec.stop")
-        tn.write("\n")
-        
-        
-        print 'close telnet'
-        tn.write("exit\n")
-        
-        
-        
-        
-        
-        """
-        try:
-            if len(options.title) > 0:
-                logger.info("%s: %s", options.channel, options.title)
-                
-                try:
-                    print 'API CONTACT'
-
-                    self.api_client.metadata_change(options.channel, options.title)
-                    
-                except Exception, e:
-                    print e    
-                
-            else:
-                print 'string to short - metadata error'
-
-        except Exception, e:
-            print e
-       """
-        
-        sys.exit()  
-
-        
-
      
             
 

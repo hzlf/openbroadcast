@@ -114,11 +114,13 @@ post_save.connect(playout_post_save, sender=Playout)
 
 class Channel(BaseModel):
 
-    name = models.CharField(max_length=256, null=False, blank=True)
+    name = models.CharField(max_length=256, null=True, blank=True)
     slug = AutoSlugField(populate_from='name')
     
-    stream_url = models.CharField(max_length=256, null=False, blank=True)
-    title_format = models.CharField(max_length=256, null=False, blank=True)
+    stream_url = models.CharField(max_length=256, null=True, blank=True)
+    title_format = models.CharField(max_length=256, null=True, blank=True)
+    
+    exclude_list = models.TextField(blank=True, null=True)
     
     class Meta:
         app_label = 'bcmon'
