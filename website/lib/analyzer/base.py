@@ -48,6 +48,8 @@ class Analyze:
         
         res = requests.get('http://developer.echonest.com/api/v4/song/identify', params=payload)
         
+        print res.content
+        
         return res.content
 
 

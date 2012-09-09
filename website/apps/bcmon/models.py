@@ -46,7 +46,8 @@ class Playout(BaseModel):
     STATUS_CHOICES = (
         (0, _('Waiting')),
         (1, _('Done')),
-        (2, _('Error')),
+        (2, _('Ready')),
+        (3, _('Error')),
     )
     
     status = models.PositiveIntegerField(default=0, choices=STATUS_CHOICES)
@@ -84,10 +85,11 @@ class Playout(BaseModel):
     
     def save(self, *args, **kwargs):
 
-        if self.sample and not self.analyzer_data:
+        if self.sample and self.status == 2:
             
             try:
                 self.analyzer_data = self.analyze()
+                self.status = 1
                 
             except Exception, e:
                 print e
