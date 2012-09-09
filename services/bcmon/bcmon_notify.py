@@ -55,6 +55,8 @@ API_AUTH = ("bcmon", "bcmon")
 REC_OFFSET = 10
 REC_DURATION = 50
 
+CHANNELS_FILE = 'include_stations.liq'
+
 
 #set up command-line options
 parser = OptionParser()
@@ -139,7 +141,7 @@ class Notify:
         
     def channels(self, options):
         
-        text_file = open("dummy.liq", "w")
+        text_file = open(CHANNELS_FILE, "w")
         
         API_ENDPOINT = 'http://localhost:8000/api/v1/'
         API_AUTH = ("root", "root")
