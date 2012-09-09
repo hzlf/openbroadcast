@@ -139,8 +139,8 @@ class Notify:
     def metadata(self, options):
         
         # dev
-        API_ENDPOINT = 'http://localhost:8000/api/v1/'
-        API_AUTH = ("root", "root")
+        # API_ENDPOINT = 'http://localhost:8000/api/v1/'
+        # API_AUTH = ("root", "root")
 
         exclude_list = 'jingle,dummy'
 
@@ -175,12 +175,12 @@ class Notify:
         # wait a bit befor recording
         print 'sleeping for %s secs' % REC_OFFSET
         time.sleep(REC_OFFSET)
-        """
+        
         tn = telnetlib.Telnet('127.0.0.1', 1234)
         tn.write("ml0rec.start")
         tn.write("\n")
         tn.write("exit\n")
-        """
+        
 
         print 'recording for %s secs' % REC_DURATION
         for i in range(REC_DURATION):
@@ -189,12 +189,12 @@ class Notify:
             sys.stdout.flush()
         print 
         
-        """
+        
         tn = telnetlib.Telnet('127.0.0.1', 1234)        
         tn.write("ml0rec.stop")
         tn.write("\n")
         tn.write("exit\n")
-        """
+        
         
         print "*** RECORDING DONE ***"
         
