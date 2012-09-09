@@ -42,10 +42,10 @@ class PlayoutResource(ModelResource):
     """"""
     def obj_create(self, bundle, request, **kwargs):
         
-        # print request
-        
-        # bundle.data['channel'] = {'name': request.channel}
-        #if 'room_id' in bundle.data:
-        #    bundle.data['room'] = {'pk': bundle.data['room_id']}
+        if 'channel' in bundle.data:
+            channel = Channel.objects.filter(slug=bundle.data['channel'])[0]
+            bundle.data['channel'] = {'pk':channel.pk}
+
         return super(PlayoutResource, self).obj_create(bundle, request, **kwargs)
+    
     

@@ -11,8 +11,8 @@ from lib.admin.actions import export_as_csv_action
 
 class PlayoutAdmin(admin.ModelAdmin):    
     
-    list_display = ('title', 'created', 'channel',)
-    list_filter = ('channel',)
+    list_display = ('title', 'created', 'channel', 'status',)
+    list_filter = ('channel', 'status',)
     
     readonly_fields = ('created', 'updated', 'uuid', )
 
@@ -21,11 +21,17 @@ class PlayoutAdmin(admin.ModelAdmin):
     inlines = []
     
     actions = [export_as_csv_action("CSV Export", fields=['title', 'created', 'channel'])]
-    actions = [export_as_csv_action("CSV Export ALL",)]
+    
+class ChannelAdmin(admin.ModelAdmin):    
+    
+    list_display = ('name', 'slug', 'stream_url', )
+    
+    readonly_fields = ('created', 'updated', 'uuid', 'slug', )
+
 
 
 admin.site.register(Playout, PlayoutAdmin)
-admin.site.register(Channel)
+admin.site.register(Channel, ChannelAdmin)
 
 
 

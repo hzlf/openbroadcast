@@ -52,6 +52,9 @@ API_MIN_VERSION = 20110201 # required obp version
 API_ENDPOINT = 'http://openbroadcast.ch.node05.daj.anorg.net/api/v1/'
 API_AUTH = ("bcmon", "bcmon")
 
+REC_OFFSET = 10
+REC_DURATION = 50
+
 
 #set up command-line options
 parser = OptionParser()
@@ -95,43 +98,16 @@ class Global:
         
     def selfcheck(self):
         
-        self.api_key = API_KEY
-        self.api_client = ApiClient(API_URL, self.api_key, None)
-        
         if os.geteuid() == 0:
             print '#################################################'
             print "DON'T BE ROOT PLEASE!                            "
             print '#################################################'
             #sys.exit(1)
         
-        api_version, max_upload = self.api_client.get_version()
-        
-        if api_version == 0:
-            print '#################################################'
-            print 'Unable to get API version. Plattform running?'
-            print '#################################################'
-            print
-            sys.exit()
-         
-        elif api_version < API_MIN_VERSION:
-            print 'API version: ' + str(api_version)
-            print 'API min-version: ' + str(API_MIN_VERSION)
-            print 'pyar not compatible with this API-Version'
-            print
-            sys.exit()
-         
-        else:
-            print 'API: ' + str(API_BASE)
-            print 'API-version: ' + str(api_version)
-            #print 'OBP min-version: ' + str(API_MIN_VERSION)
-            #print 'pyar is compatible with this API-Version'
-            print
             
          
 
 class Notify:
-    
-    print 'N'
     
     def __init__(self):
 
@@ -161,38 +137,64 @@ class Notify:
         
         
     def metadata(self, options):
+        
+        # dev
+        API_ENDPOINT = 'http://localhost:8000/api/v1/'
+        API_AUTH = ("root", "root")
+
+        exclude_list = 'jingle,dummy'
 
         print 'Channel:',
         print options.channel
         print 'String:', 
         print options.title
         print
+        
+        if not options.title:
+            print 'no title set.. exit'
+        
+            sys.exit()
+            
+        exclude_list = exclude_list.split(',')
+        for e in exclude_list:
+            if e.lower() in options.title.lower():
+                print 'excluded, as contains: %s' % e
+                sys.exit()
+
+        
 
         # Notify the API
         
         api = slumber.API(API_ENDPOINT, auth=API_AUTH)  
         
         # initial post
-        post = api.playout.post({'title': options.title})
+        post = api.playout.post({'title': options.title, 'channel': options.channel})
         print post
         
-        # wait a bit befor recording
-        print 'sleeping for 5 secs'
-        time.sleep(5)
         
+        # wait a bit befor recording
+        print 'sleeping for %s secs' % REC_OFFSET
+        time.sleep(REC_OFFSET)
+        """
         tn = telnetlib.Telnet('127.0.0.1', 1234)
         tn.write("ml0rec.start")
         tn.write("\n")
         tn.write("exit\n")
+        """
 
-
-        print 'recording for 50 secs'
-        time.sleep(50)
-
+        print 'recording for %s secs' % REC_DURATION
+        for i in range(REC_DURATION):
+            time.sleep(1)
+            print "%s " % (REC_DURATION - i),
+            sys.stdout.flush()
+        print 
+        
+        """
         tn = telnetlib.Telnet('127.0.0.1', 1234)        
         tn.write("ml0rec.stop")
         tn.write("\n")
         tn.write("exit\n")
+        """
         
         print "*** RECORDING DONE ***"
         
@@ -200,7 +202,7 @@ class Notify:
 
         print 'putting sample...'
         # put recorded sample
-        put = api.playout(post["id"]).put({'sample': open(sample_path)})    
+        put = api.playout(post["id"]).put({'status': 2, 'sample': open(sample_path)})    
         print put
         
         sys.exit()    

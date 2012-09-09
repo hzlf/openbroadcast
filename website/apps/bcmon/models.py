@@ -2,6 +2,7 @@ import os
 import datetime
 
 from django.db import models
+from django.db.models.signals import post_save
 
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
@@ -62,7 +63,7 @@ class Playout(BaseModel):
         app_label = 'bcmon'
         verbose_name = _('Playout')
         verbose_name_plural = _('Playouts')
-        ordering = ('title', )
+        ordering = ('-created', )
 
     def __unicode__(self):
         return "%s" % self.title
@@ -85,17 +86,30 @@ class Playout(BaseModel):
     
     def save(self, *args, **kwargs):
 
-        if self.sample and self.status == 2:
-            
-            try:
-                self.analyzer_data = self.analyze()
-                self.status = 1
-                
-            except Exception, e:
-                print e
-                pass
-
         super(Playout, self).save(*args, **kwargs)
+   
+   
+def playout_post_save(sender, **kwargs):
+    
+    obj = kwargs['instance']
+    
+    if obj.sample and obj.status == '2':
+        
+        print 'ready for fingerprinting...'
+        
+        try:
+            obj.analyzer_data = obj.analyze()
+            obj.status = 1
+            obj.save()
+            
+        except Exception, e:
+            print e
+            pass
+
+    
+    
+ 
+post_save.connect(playout_post_save, sender=Playout)    
 
 
 class Channel(BaseModel):
