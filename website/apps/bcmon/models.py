@@ -44,6 +44,9 @@ class Playout(BaseModel):
     title = models.CharField(max_length=256, null=False, blank=True)
     channel = models.ForeignKey('Channel', null=True, blank=True, on_delete=models.SET_NULL)
     
+    time_start = models.DateTimeField(null=True, blank=True)
+    time_end = models.DateTimeField(null=True, blank=True)
+    
     STATUS_CHOICES = (
         (0, _('Waiting')),
         (1, _('Done')),
@@ -85,6 +88,20 @@ class Playout(BaseModel):
         return res
     
     def save(self, *args, **kwargs):
+        
+        if not self.id:
+            self.time_start = datetime.datetime.today()
+            
+
+        # set time_end for previous entry
+        try:
+            lp = Playout.objects.filter(channel=self.channel, time_end=None).order_by('-created')[0]
+            lp.time_end = self.time_start
+            lp.save()
+                
+        except Exception, e:
+            print e
+            pass
 
         super(Playout, self).save(*args, **kwargs)
    
@@ -92,6 +109,8 @@ class Playout(BaseModel):
 def playout_post_save(sender, **kwargs):
     
     obj = kwargs['instance']
+    
+    
     
     if obj.sample and obj.status == '2':
         
@@ -116,6 +135,8 @@ class Channel(BaseModel):
 
     name = models.CharField(max_length=256, null=True, blank=True)
     slug = AutoSlugField(populate_from='name')
+    
+    
     
     stream_url = models.CharField(max_length=256, null=True, blank=True)
     title_format = models.CharField(max_length=256, null=True, blank=True)
