@@ -1,3 +1,6 @@
+import os
+import datetime
+
 from django.db import models
 
 from django.contrib.auth.models import User
@@ -5,6 +8,24 @@ from django.utils.translation import ugettext as _
 
 from cms.models import CMSPlugin
 from django_extensions.db.fields import *
+from django_extensions.db.fields.json import JSONField
+
+def filename_by_uuid(instance, filename):
+    filename, extension = os.path.splitext(filename)
+    path = "media/samples/"
+    
+    # plain
+    filename = instance.uuid + extension
+    
+    # splitted
+    #filename = instance.uuid.replace('-', '/') + extension
+    
+    # timestamped
+    filename = datetime.datetime.now().strftime("%Y/%m/%d/") + filename
+    
+    return os.path.join(path, filename)
+
+
 
 class BaseModel(models.Model):
     
@@ -30,7 +51,10 @@ class Playout(BaseModel):
     
     status = models.PositiveIntegerField(default=0, choices=STATUS_CHOICES)
     
-    sample = models.FileField(upload_to="media/samples/", null=True, blank=True)
+    #sample = models.FileField(upload_to="media/samples/", null=True, blank=True)
+    sample = models.FileField(upload_to=filename_by_uuid, null=True, blank=True)
+    
+    analyzer_data = JSONField(blank=True, null=True)
     
     # meta
     class Meta:
@@ -45,6 +69,31 @@ class Playout(BaseModel):
     @models.permalink
     def get_absolute_url(self):
         return ('bcmon-playout-detail', [self.pk])
+    
+    
+    def analyze(self):
+        
+        from lib.analyzer.base import Analyze
+        
+        a = Analyze()
+        
+        code, version = a.enmfp_from_path(self.sample.path)
+        res = a.get_by_enmfp(code, version)
+        
+        return res
+    
+    def save(self, *args, **kwargs):
+
+        if self.sample and not self.analyzer_data:
+            
+            try:
+                self.analyzer_data = self.analyze()
+                
+            except Exception, e:
+                print e
+                pass
+
+        super(Playout, self).save(*args, **kwargs)
 
 
 class Channel(BaseModel):

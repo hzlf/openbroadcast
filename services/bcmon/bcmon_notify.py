@@ -141,15 +141,16 @@ class Notify:
     def testing(self, options):
         print "testing..."
         
-        api = slumber.API("http://openbroadcast.node05.daj.anorg.net/api/v1/", auth=("bcmon", "bcmon"))  
+        api = slumber.API("http://openbroadcast.ch.node05.daj.anorg.net/api/v1/", auth=("bcmon", "bcmon"))  
         
         # initial post
         post = api.playout.post({'title': 'my file'})
         print post
     
         # do some seconds of recording, then
-        time.sleep(10)
+        time.sleep(1)
         
+        print 'putting sample...'
         # put recorded sample
         put = api.playout(post["id"]).put({'title': 'my file with sample', 'sample': open('samples/l0sample.wav')})    
         print put
