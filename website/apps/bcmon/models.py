@@ -143,6 +143,8 @@ class Channel(BaseModel):
     
     exclude_list = models.TextField(blank=True, null=True)
     
+    enable_monitoring = models.BooleanField(default=True)
+    
     class Meta:
         app_label = 'bcmon'
         verbose_name = _('Channel')

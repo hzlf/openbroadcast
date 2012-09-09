@@ -69,6 +69,7 @@ parser.add_option("-m", "--metadata", help="Tell daddy what is playing right now
 parser.add_option("-t", "--testing", help="Testing...", default=False, action="store_true", dest="testing")
 parser.add_option("-C", "--channel", help="Tell daddy what is playing right now", metavar="channel")
 parser.add_option("-T", "--title", help="Tell daddy what is playing right now", metavar="title")
+parser.add_option("-c", "--channels", help="Update channels file", default=False, action="store_true", dest="channels")
 
 # parse options
 (options, args) = parser.parse_args()
@@ -134,6 +135,44 @@ class Notify:
         # put recorded sample
         put = api.playout(post["id"]).put({'sample': open('samples/cos.mp3')})    
         print put
+        
+        
+    def channels(self, options):
+        
+        text_file = open("dummy.liq", "w")
+        
+        API_ENDPOINT = 'http://localhost:8000/api/v1/'
+        API_AUTH = ("root", "root")
+        
+        api = slumber.API(API_ENDPOINT, auth=API_AUTH)
+        channels = api.channel.get()
+        
+        # print channels
+        
+        for channel in channels['objects']:
+
+            if channel['enable_monitoring']:
+            
+                channel_id = channel['id']
+                stream_url = channel['stream_url']
+                channel_name = channel['name']
+                
+                text_file.write("# Channel: %s \n" % channel_name)
+                text_file.write("l%s = input.http(id='inl%s',poll_delay=5.,autostart=true,'%s')\n" % (channel_id, channel_id, stream_url))
+                text_file.write("l%s = mksafe(l%s)\n" % (channel_id, channel_id))
+                text_file.write("l%s = rewrite_metadata(insert_missing=true,[(\"channel\",\"%s\")],l%s)\n" % (channel_id, channel_id, channel_id))
+                text_file.write("output.dummy(l%s)\n" % (channel_id))
+                text_file.write("l%ssample = output.file.wav(id='l%srec',start=false,'samples/l%ssample.wav', l%s)\n" % (channel_id, channel_id, channel_id, channel_id))
+                text_file.write("\n\n\n")
+
+            
+        
+        
+        
+        text_file.close()
+        
+        print 'doine'
+        
         
         
     def metadata(self, options):
@@ -236,6 +275,12 @@ while run == True:
             
     if options.testing:
         try: n.testing(options)
+        except Exception, e:
+            print e
+        sys.exit()  
+            
+    if options.channels:
+        try: n.channels(options)
         except Exception, e:
             print e
         sys.exit()  
