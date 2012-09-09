@@ -9,8 +9,6 @@ import json
 
 from settings import ENMFP_CODEGEN_BIN, ECHONEST_API_KEY
 
-
-
 class Analyze:
     
     def enmfp_from_path(self, path):
@@ -54,9 +52,9 @@ class Analyze:
 
 
 
-a = Analyze()
-code, version = a.enmfp_from_path(sys.argv[1])
-res = a.get_by_enmfp(code, version)
+#a = Analyze()
+#code, version = a.enmfp_from_path(sys.argv[1])
+#res = a.get_by_enmfp(code, version)
 
 
 
