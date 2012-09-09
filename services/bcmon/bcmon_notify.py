@@ -143,9 +143,6 @@ class Notify:
         
         text_file = open(CHANNELS_FILE, "w")
         
-        API_ENDPOINT = 'http://localhost:8000/api/v1/'
-        API_AUTH = ("root", "root")
-        
         api = slumber.API(API_ENDPOINT, auth=API_AUTH)
         channels = api.channel.get()
         
