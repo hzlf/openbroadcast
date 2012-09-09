@@ -188,7 +188,7 @@ class Notify:
         
         """"""
         tn = telnetlib.Telnet('127.0.0.1', 1234)
-        tn.write("l%srec.start" % channel_id)
+        tn.write(("l%srec.start" % channel_id).encode('latin-1'))
         tn.write("\n")
         tn.write("exit\n")
         
@@ -202,7 +202,7 @@ class Notify:
         
         """"""
         tn = telnetlib.Telnet('127.0.0.1', 1234)        
-        tn.write("l%srec.stop" % channel_id)
+        tn.write(("l%srec.stop" % channel_id).encode('latin-1'))
         tn.write("\n")
         tn.write("exit\n")
         
