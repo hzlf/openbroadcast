@@ -160,8 +160,8 @@ class Notify:
                 text_file.write("l%s = input.http(id='inl%s',poll_delay=5.,autostart=true,'%s')\n" % (channel_id, channel_id, stream_url))
                 text_file.write("l%s = mksafe(l%s)\n" % (channel_id, channel_id))
                 text_file.write("l%s = rewrite_metadata(insert_missing=true,[(\"channel\",\"%s\")],l%s)\n" % (channel_id, channel_id, channel_id))
-                text_file.write("output.dummy(l%s)\n" % (channel_id))
                 text_file.write("l%s = on_metadata(id='ml%s',notify, l%s)\n" % (channel_id, channel_id, channel_id))
+                text_file.write("output.dummy(l%s)\n" % (channel_id))
                 text_file.write("l%ssample = output.file.wav(id='l%srec',start=false,'samples/l%ssample.wav', l%s)\n" % (channel_id, channel_id, channel_id, channel_id))
                 text_file.write("\n\n\n")
 
