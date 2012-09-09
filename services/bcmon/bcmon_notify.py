@@ -49,6 +49,9 @@ from api import *
 BCMON_VERSION = '0.1'
 API_MIN_VERSION = 20110201 # required obp version
 
+API_ENDPOINT = 'http://openbroadcast.ch.node05.daj.anorg.net/api/v1/'
+API_AUTH = ("bcmon", "bcmon")
+
 
 #set up command-line options
 parser = OptionParser()
@@ -139,9 +142,10 @@ class Notify:
 
 
     def testing(self, options):
+        
         print "testing..."
         
-        api = slumber.API("http://openbroadcast.ch.node05.daj.anorg.net/api/v1/", auth=("bcmon", "bcmon"))  
+        api = slumber.API(API_ENDPOINT, auth=API_AUTH)  
         
         # initial post
         post = api.playout.post({'title': 'my file'})
@@ -152,11 +156,56 @@ class Notify:
         
         print 'putting sample...'
         # put recorded sample
-        put = api.playout(post["id"]).put({'title': 'my file with sample', 'sample': open('samples/l0sample.wav')})    
+        put = api.playout(post["id"]).put({'sample': open('samples/cos.mp3')})    
         print put
-    
-    
+        
+        
     def metadata(self, options):
+
+        print 'Channel:',
+        print options.channel
+        print 'String:', 
+        print options.title
+        print
+
+        # Notify the API
+        
+        api = slumber.API(API_ENDPOINT, auth=API_AUTH)  
+        
+        # initial post
+        post = api.playout.post({'title': options.title})
+        print post
+        
+        # wait a bit befor recording
+        print 'sleeping for 5 secs'
+        time.sleep(5)
+        
+        tn = telnetlib.Telnet('127.0.0.1', 1234)
+        tn.write("ml0rec.start")
+        tn.write("\n")
+        tn.write("exit\n")
+
+
+        print 'sleeping for 50 secs'
+        time.sleep(50)
+
+        tn = telnetlib.Telnet('127.0.0.1', 1234)        
+        tn.write("ml0rec.stop")
+        tn.write("\n")
+        tn.write("exit\n")
+        
+        print "*** RECORDING DONE ***"
+        
+        sample_path = 'samples/' + 'l0sample.wav'
+
+        print 'putting sample...'
+        # put recorded sample
+        put = api.playout(post["id"]).put({'sample': open(sample_path)})    
+        print put
+        
+    
+    
+    def old__metadata(self, options):
         logger = logging.getLogger("monitoring")
 
         print 'Channel:',
