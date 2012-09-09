@@ -186,7 +186,7 @@ class Notify:
         tn.write("exit\n")
 
 
-        print 'sleeping for 50 secs'
+        print 'recording for 50 secs'
         time.sleep(50)
 
         tn = telnetlib.Telnet('127.0.0.1', 1234)        
@@ -203,7 +203,7 @@ class Notify:
         put = api.playout(post["id"]).put({'sample': open(sample_path)})    
         print put
         
-    
+        sys.exit()    
     
     def old__metadata(self, options):
         logger = logging.getLogger("monitoring")
