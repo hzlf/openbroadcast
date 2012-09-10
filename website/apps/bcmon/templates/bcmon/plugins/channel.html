@@ -72,6 +72,20 @@
 						<dd>
 							{{ song.score }} | {{ song.message }}
 						</dd>
+						
+						<dt>Search on:</dt>
+						<dd>
+							
+							<a href="http://musicbrainz.org/taglookup?tag-lookup.duration=&page=1&tag-lookup.tracknum=&tag-lookup.filename=&tag-lookup.track={{ song.title }}&tag-lookup.puid=&tag-lookup.release=&tag-lookup.artist={{ song.artist_name }}">
+								Musicbrainz
+							</a>
+							
+						</dd>
+						
+						<!--
+						http://www.musicbrainz.org/ws/2/recording/?query=artist:%22Dudley%20Perkins%22%20AND%20recordingaccent:%22Flowers%22
+						-->
+						
 						{% endfor %}
 					</dl> 
 					
