@@ -431,6 +431,7 @@ FACEBOOK_EXTENDED_PERMISSIONS = ['email', 'publish_stream']
 # analyzer
 ECHONEST_API_KEY = 'DC7YKF3VYN7R0LG1M'
 ENMFP_CODEGEN_BIN = PROJECT_DIR + '/lib/analyzer/bin/codegen.Darwin'
+ECHOPRINT_CODEGEN_BIN = 'echoprint-codegen'
 
 
 """

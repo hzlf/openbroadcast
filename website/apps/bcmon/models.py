@@ -70,6 +70,8 @@ class Playout(BaseModel):
     
     analyzer_data = JSONField(blank=True, null=True)
     enmfp = JSONField(blank=True, null=True)
+    echoprint_data = JSONField(blank=True, null=True)
+    echoprintfp = JSONField(blank=True, null=True)
     
     # meta
     class Meta:
@@ -114,6 +116,16 @@ class Playout(BaseModel):
         
         return res
     
+    def echoprint(self):
+        
+        from lib.analyzer.echoprint import Echoprint
+        e = Echoprint()
+        code, version, duration, echoprint = e.echoprint_from_path(self.sample.path)
+        res = e.get_by_echoprintfp(code, version)
+        
+        self.echoprintfp = echoprint
+        return res
+    
     def save(self, *args, **kwargs):
         
         if not self.id:
@@ -124,17 +136,6 @@ class Playout(BaseModel):
 
 
         self.extract_meta()
-
-        """        
-        try:
-            lp = Playout.objects.filter(channel=self.channel, time_end=None).order_by('-created')[0]
-            lp.time_end = self.time_start
-            lp.save()
-                
-        except Exception, e:
-            print e
-            pass
-        """
         super(Playout, self).save(*args, **kwargs)
    
    
@@ -155,13 +156,24 @@ def playout_post_save(sender, **kwargs):
         pass
     
     
-    if obj.sample and obj.status == '2':
+    if (obj.sample and obj.status == '2') or (obj.sample and obj.status == 2):
         
         print 'ready for fingerprinting...'
         
         try:
             obj.analyzer_data = obj.analyze()
             obj.status = 1
+            obj.save()
+            
+        except Exception, e:
+            print e
+            pass
+        
+        try:
+            res = obj.echoprint()
+            
+            obj.echoprint_data = {'track_id': res['track_id'], 'score': res['score']}
+            
             obj.save()
             
         except Exception, e:

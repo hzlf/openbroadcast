@@ -14,7 +14,7 @@ class PlayoutAdmin(admin.ModelAdmin):
     list_display = ('title', 'time_start', 'time_end', 'channel', 'status', 'score',)
     list_filter = ('channel', 'status', 'score',)
     
-    readonly_fields = ('created', 'updated', 'uuid', 'enmfp', 'analyzer_data', 'score', 'time_start', 'time_end')
+    readonly_fields = ('created', 'updated', 'uuid', 'enmfp', 'analyzer_data', 'echoprintfp', 'echoprint_data', 'score', 'time_start', 'time_end')
 
     date_hierarchy = 'created'
     
