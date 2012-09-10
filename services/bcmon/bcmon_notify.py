@@ -179,9 +179,9 @@ class Notify:
     def metadata(self, options):
         
         # dev
-        if options.dev:
-            API_ENDPOINT = 'http://localhost:8000/api/v1/'
-            API_AUTH = ("root", "root")
+        #if options.dev:
+        #    API_ENDPOINT = 'http://localhost:8000/api/v1/'
+        #    API_AUTH = ("root", "root")
         
         do_record = True
         
@@ -302,6 +302,7 @@ while run == True:
         sys.exit()  
             
     if options.metadata:
+        n.metadata(options)
         try: n.metadata(options)
         except Exception, e:
             print e
