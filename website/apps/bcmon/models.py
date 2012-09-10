@@ -88,16 +88,11 @@ class Playout(BaseModel):
     def extract_meta(self):
         title_format = self.channel.title_format
         title_format = r"%s" % title_format
-        print 'Title format:',
-        print title_format
-        print self.title
 
         try:
             pattern = re.compile(title_format, re.UNICODE)
             s = self.title
             m = pattern.search(s)
-            print m.group('artist')
-            print m.group('track')
             self.meta_name = m.group('track').strip()
             self.meta_artist = m.group('artist').strip()
             
