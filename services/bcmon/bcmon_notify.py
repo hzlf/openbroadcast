@@ -25,6 +25,7 @@ import os
 import traceback
 from optparse import OptionParser
 import sys
+import subprocess
 import time
 import datetime
 import logging
@@ -265,10 +266,21 @@ class Notify:
         print "*** RECORDING DONE ***"
         
         sample_path = 'samples/l%ssample.wav' % channel_id
+        sample_path_mp3 = 'samples/l%ssample.mp3' % channel_id
+        
+        # lame it..
+        p = subprocess.Popen([
+            'lame', sample_path, sample_path_mp3,
+        ], stdout=subprocess.PIPE)
+        stdout = p.communicate() 
+        d = stdout[0]
+        
+        print d
+        
 
         print 'Putting sample: %s' % sample_path
         # put recorded sample
-        put = api.playout(post["id"]).put({'status': 2, 'sample': open(sample_path)})    
+        put = api.playout(post["id"]).put({'status': 2, 'sample': open(sample_path_mp3)})    
         print put
         
         sys.exit()    
