@@ -30,7 +30,7 @@ class Analyze:
             print e
             pass
         
-        return code, version
+        return code, version, d
     
     def get_by_enmfp(self, code, version):
         

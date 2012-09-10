@@ -72,6 +72,7 @@ parser.add_option("-t", "--testing", help="Testing...", default=False, action="s
 parser.add_option("-C", "--channel", help="Tell daddy what is playing right now", metavar="channel")
 parser.add_option("-T", "--title", help="Tell daddy what is playing right now", metavar="title")
 parser.add_option("-c", "--channels", help="Update channels file", default=False, action="store_true", dest="channels")
+parser.add_option("-d", "--dev", help="Development mode, use dev config", default=False, action="store_true", dest="dev")
 
 # parse options
 (options, args) = parser.parse_args()
@@ -178,8 +179,11 @@ class Notify:
     def metadata(self, options):
         
         # dev
-        #API_ENDPOINT = 'http://localhost:8000/api/v1/'
-        #API_AUTH = ("root", "root")
+        if options.dev:
+            API_ENDPOINT = 'http://localhost:8000/api/v1/'
+            API_AUTH = ("root", "root")
+        
+        do_record = True
         
         api = slumber.API(API_ENDPOINT, auth=API_AUTH) 
 
@@ -199,6 +203,7 @@ class Notify:
         
         channel_id = channel['id']        
         exclude_list = channel['exclude_list']
+        title_only_list = channel['title_only_list']
         
         if len(exclude_list) > 3:
 
@@ -208,12 +213,23 @@ class Notify:
                 if e.strip().lower() in options.title.lower():
                     print 'Excluded, as contains: %s' % e
                     sys.exit()
+        
+        if len(title_only_list) > 3:
+
+            title_only_list = title_only_list.split(',')
+            for t in title_only_list:
+                #print '*%s*' % t.strip()
+                if t.strip().lower() in options.title.lower():
+                    print 'Title only, as contains: %s' % t
+                    do_record = False
     
 
         
 
         # Notify the API
-        
+        if not do_record:
+            post = api.playout.post({'title': options.title, 'channel': options.channel, 'status': 1})
+            sys.exit()
          
         
         # initial post

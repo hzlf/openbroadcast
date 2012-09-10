@@ -60,6 +60,7 @@ class Playout(BaseModel):
     sample = models.FileField(upload_to=filename_by_uuid, null=True, blank=True)
     
     analyzer_data = JSONField(blank=True, null=True)
+    enmfp = models.TextField(blank=True, null=True)
     
     # meta
     class Meta:
@@ -82,8 +83,10 @@ class Playout(BaseModel):
         
         a = Analyze()
         
-        code, version = a.enmfp_from_path(self.sample.path)
+        code, version, enmfp = a.enmfp_from_path(self.sample.path)
         res = a.get_by_enmfp(code, version)
+        
+        self.enmfp = enmfp
         
         return res
     
@@ -94,6 +97,11 @@ class Playout(BaseModel):
             
 
         # set time_end for previous entry
+
+
+
+
+        """        
         try:
             lp = Playout.objects.filter(channel=self.channel, time_end=None).order_by('-created')[0]
             lp.time_end = self.time_start
@@ -102,7 +110,7 @@ class Playout(BaseModel):
         except Exception, e:
             print e
             pass
-
+        """
         super(Playout, self).save(*args, **kwargs)
    
    
@@ -110,6 +118,17 @@ def playout_post_save(sender, **kwargs):
     
     obj = kwargs['instance']
     
+    
+    try:
+        lps = Playout.objects.filter(channel=obj.channel, time_end=None, status=1).order_by('-created')[1:]
+        for lp in lps:
+            if lp != obj:
+                print lp
+                lp.time_end = obj.time_start
+                lp.save()
+    except Exception, e:
+        print e
+        pass
     
     
     if obj.sample and obj.status == '2':
@@ -141,7 +160,8 @@ class Channel(BaseModel):
     stream_url = models.CharField(max_length=256, null=True, blank=True)
     title_format = models.CharField(max_length=256, null=True, blank=True)
     
-    exclude_list = models.TextField(blank=True, null=True)
+    exclude_list = models.TextField(blank=True, null=True, help_text=_('Comma separated, keywords that should completely be ignored.'))
+    title_only_list = models.TextField(blank=True, null=True, help_text=_('Comma separated, only track titles but don\' analyze.'))
     
     enable_monitoring = models.BooleanField(default=True)
     
