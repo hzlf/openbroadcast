@@ -1,7 +1,7 @@
 <section class="plugin channel">
 	<h2>{{ object }} <small>{{ object.slug }}</small></h2>
 
-	<dl>
+	<dl class="dl-horizontal">
 		<dt>
 			Stream url:
 		</dt>
@@ -31,11 +31,9 @@
 			<tbody>
 
 				{% for item in playouts %}
-
 				<tr>
-					
 					{% if item.meta_name and item.meta_artist %}
-					<td><i class="icon-ok-sign"></i></td>
+					<td rowspan="2"><i class="icon-ok-sign"></i></td>
 					<td>{{ item.meta_name }}</td>
 					<td>{{ item.meta_artist }}</td>
 					{% else %}
@@ -44,7 +42,41 @@
 					{% endif %}
 
 					<td>{{ item.time_start }}</td>
-					<td><span class="badge badge-warning">{{ item.score }}</span></td>
+					<td rowspan="2"><span class="badge badge-warning">{{ item.score }}</span></td>
+				</tr>
+				<tr>
+					<td colspan="3">
+					<dl class="dl-horizontal">
+						{% for song in item.analyzer_data.response.songs %}
+						<dt>
+							Matched Title:
+						</dt>
+						<dd>
+							{{ song.title }} | 
+							<a href="http://developer.echonest.com/api/v4/song/profile?api_key=DC7YKF3VYN7R0LG1M&id={{ song.id }}&bucket=id:discogs&bucket=id:musicbrainz&bucket=id:spotify-WW&format=json">
+								{{ song.id }}
+							</a>
+						</dd>
+						<dt>
+							Matched Artist:
+						</dt>
+						<dd>
+							{{ song.artist_name }} | 
+							<a href="http://developer.echonest.com/api/v4/artist/profile?api_key=DC7YKF3VYN7R0LG1M&id={{ song.artist_id }}&bucket=id:discogs&bucket=id:musicbrainz&bucket=id:spotify-WW&format=json">
+								{{ song.artist_id }}
+							</a>
+						</dd>
+						<dt>
+							Info:
+						</dt>
+						<dd>
+							{{ song.score }} | {{ song.message }}
+						</dd>
+						{% endfor %}
+					</dl> 
+					
+
+					</td>
 				</tr>
 				{% endfor %}
 
