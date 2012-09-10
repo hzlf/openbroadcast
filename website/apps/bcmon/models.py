@@ -1,5 +1,9 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import os
 import datetime
+import re
 
 from django.db import models
 from django.db.models.signals import post_save
@@ -41,8 +45,11 @@ class BaseModel(models.Model):
 
 class Playout(BaseModel):
 
-    title = models.CharField(max_length=256, null=False, blank=True)
+    title = models.CharField(max_length=512, null=False, blank=True)
     channel = models.ForeignKey('Channel', null=True, blank=True, on_delete=models.SET_NULL)
+    
+    meta_name = models.CharField(max_length=512, null=False, blank=True)
+    meta_artist = models.CharField(max_length=512, null=False, blank=True)
     
     time_start = models.DateTimeField(null=True, blank=True)
     time_end = models.DateTimeField(null=True, blank=True)
@@ -56,11 +63,13 @@ class Playout(BaseModel):
     
     status = models.PositiveIntegerField(default=0, choices=STATUS_CHOICES)
     
+    score = models.PositiveIntegerField(default=0)
+    
     #sample = models.FileField(upload_to="media/samples/", null=True, blank=True)
     sample = models.FileField(upload_to=filename_by_uuid, null=True, blank=True)
     
     analyzer_data = JSONField(blank=True, null=True)
-    enmfp = models.TextField(blank=True, null=True)
+    enmfp = JSONField(blank=True, null=True)
     
     # meta
     class Meta:
@@ -76,6 +85,26 @@ class Playout(BaseModel):
     def get_absolute_url(self):
         return ('bcmon-playout-detail', [self.pk])
     
+    def extract_meta(self):
+        title_format = self.channel.title_format
+        title_format = r"%s" % title_format
+        print 'Title format:',
+        print title_format
+        print self.title
+
+        try:
+            pattern = re.compile(title_format, re.UNICODE)
+            s = self.title
+            m = pattern.search(s)
+            print m.group('artist')
+            print m.group('track')
+            self.meta_name = m.group('track').strip()
+            self.meta_artist = m.group('artist').strip()
+            
+            
+        except Exception, e:
+            print e
+            pass
     
     def analyze(self):
         
@@ -99,7 +128,7 @@ class Playout(BaseModel):
         # set time_end for previous entry
 
 
-
+        self.extract_meta()
 
         """        
         try:
@@ -158,7 +187,7 @@ class Channel(BaseModel):
     
     
     stream_url = models.CharField(max_length=256, null=True, blank=True)
-    title_format = models.CharField(max_length=256, null=True, blank=True)
+    title_format = models.CharField(max_length=256, null=True, blank=True, help_text='Regex to match title against. eg "(?P<artist>[\w\s\d +"*ç%&/(),.-;:_]+?)-(?P<track>[\w\s\d +"*ç%&/(),.-;:_]+?)$" to recognize formats like "The Prodigy  (feat. Whomever) - Remix 3000" - (incl. unicode)')
     
     exclude_list = models.TextField(blank=True, null=True, help_text=_('Comma separated, keywords that should completely be ignored.'))
     title_only_list = models.TextField(blank=True, null=True, help_text=_('Comma separated, only track titles but don\' analyze.'))
@@ -177,3 +206,10 @@ class Channel(BaseModel):
     @models.permalink
     def get_absolute_url(self):
         return ('bcbon-channel-detail', [self.pk])
+    
+    
+    
+class ChannelPlugin(CMSPlugin):    
+    channel = models.ForeignKey(Channel, related_name='plugins')
+    def __unicode__(self):
+        return "%s" % self.channel.name

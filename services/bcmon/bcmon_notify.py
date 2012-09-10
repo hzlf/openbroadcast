@@ -278,7 +278,7 @@ class Notify:
         print d
         
 
-        print 'Putting sample: %s' % sample_path
+        print 'Putting sample: %s' % sample_path_mp3
         # put recorded sample
         put = api.playout(post["id"]).put({'status': 2, 'sample': open(sample_path_mp3)})    
         print put

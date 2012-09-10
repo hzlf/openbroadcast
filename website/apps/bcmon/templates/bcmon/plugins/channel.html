@@ -1,0 +1,56 @@
+<section class="plugin channel">
+	<h2>{{ object }} <small>{{ object.slug }}</small></h2>
+
+	<dl>
+		<dt>
+			Stream url:
+		</dt>
+		<dd>
+			{{ object.stream_url }}
+		</dd>
+		<dt>
+			Title format:
+		</dt>
+		<dd>
+			{{ object.title_format }}
+		</dd>
+	</dl>
+
+	<div class="playouts">
+
+		<table class="table table-condensed">
+			<thead>
+				<tr>
+					<th></th>
+					<th>Track</th>
+					<th>Artist</th>
+					<th>Airtime</th>
+					<th>Score</th>
+				</tr>
+			</thead>
+			<tbody>
+
+				{% for item in playouts %}
+
+				<tr>
+					
+					{% if item.meta_name and item.meta_artist %}
+					<td><i class="icon-ok-sign"></i></td>
+					<td>{{ item.meta_name }}</td>
+					<td>{{ item.meta_artist }}</td>
+					{% else %}
+					<td><i class="icon-question-sign"></i></td>
+					<td colspan="2" class="warning">{{ item.title }}</td>
+					{% endif %}
+
+					<td>{{ item.time_start }}</td>
+					<td><span class="badge badge-warning">{{ item.score }}</span></td>
+				</tr>
+				{% endfor %}
+
+			</tbody>
+		</table>
+
+	</div>
+
+</section>
