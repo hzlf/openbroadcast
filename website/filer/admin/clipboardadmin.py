@@ -79,11 +79,18 @@ class ClipboardAdmin(admin.ModelAdmin):
                 clipboard_item = ClipboardItem(
                                     clipboard=clipboard, file=file_obj)
                 clipboard_item.save()
-                json_response = {
-                    'thumbnail': file_obj.icons['32'],
-                    'alt_text': '',
-                    'label': unicode(file_obj),
-                }
+                try:
+                    json_response = {
+                        'thumbnail': file_obj.icons['32'],
+                        'alt_text': '',
+                        'label': unicode(file_obj),
+                    }
+                except Exception, e:
+                    json_response = {
+                        'thumbnail': None,
+                        'alt_text': '',
+                        'label': unicode(file_obj),
+                    }
                 return HttpResponse(simplejson.dumps(json_response),
                                     mimetype=mimetype)
             else:

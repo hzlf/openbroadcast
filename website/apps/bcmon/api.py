@@ -4,7 +4,7 @@ from django.db.models import Count
 from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
-from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS
+from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
 
 from bcmon.models import *
 
@@ -47,4 +47,67 @@ class PlayoutResource(ModelResource):
 
         return super(PlayoutResource, self).obj_create(bundle, request, **kwargs)
     
+    
+    
+    
+    
+    
+class FPObject(object):
+
+    def __init__(self, initial=None):
+        self.__dict__['_data'] = {}
+
+        if hasattr(initial, 'items'):
+            self.__dict__['_data'] = initial
+
+    def __getattr__(self, name):
+        return self._data.get(name, None)
+
+    def __setattr__(self, name, value):
+        self.__dict__['_data'][name] = value
+
+    def to_dict(self):
+        return self._data
+    
+    
+    
+class FPResource(Resource):
+    
+    uuid = fields.CharField(attribute='uuid', null=True)
+    user_uuid = fields.CharField(attribute='user_uuid', null=True)
+    
+    class Meta:
+        resource_name = 'identify'
+        object_class = FPObject
+        allowed_methods = ['get',]
+        authentication = BasicAuthentication()
+        authorization = Authorization()
+        
+    def detail_uri_kwargs(self, bundle_or_obj):
+        kwargs = {}
+
+        if isinstance(bundle_or_obj, Bundle):
+            kwargs['pk'] = bundle_or_obj.obj.uuid
+        else:
+            kwargs['pk'] = bundle_or_obj.uuid
+
+        return kwargs
+
+    def get_object_list(self, request):
+
+        results = []
+        
+        q = request.GET.get('q', None)
+        
+        if q:
+            new_obj = FPObject()
+            new_obj.uuid = 'UID-ID-IIIDDD'
+            results.append(new_obj)
+
+        
+        return results
+
+    def obj_get_list(self, request=None, **kwargs):
+        # Filtering disabled for brevity...
+        return self.get_object_list(request)
     

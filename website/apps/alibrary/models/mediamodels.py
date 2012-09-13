@@ -4,6 +4,10 @@ import uuid
 import shutil
 import sys
 import time
+import subprocess
+import sys
+import struct
+import json
 
 # django
 from django.db import models
@@ -57,7 +61,8 @@ from mptt.models import MPTTModel, TreeForeignKey, TreeManyToManyField
 # audio processing / waveform
 from lib.audioprocessing.processing import create_wave_images, AudioProcessingException
 
-
+# echoprint
+from echoprint.API import fp
 
 # logging
 import logging
@@ -91,6 +96,16 @@ class Media(MigrationMixin):
         (2, _('Error')),
     )
     processed = models.PositiveIntegerField(max_length=2, default=0, choices=PROCESSED_CHOICES)
+    
+    ECHOPRINT_STATUS_CHOICES = (
+        (0, _('Init')),
+        (1, _('Assigned')),
+        (2, _('Error')),
+    )
+    echoprint_status = models.PositiveIntegerField(max_length=2, default=0, choices=ECHOPRINT_STATUS_CHOICES)
+    
+    
+    
     lock = models.PositiveIntegerField(max_length=1, default=0, editable=False)
     
     tracknumber = models.PositiveIntegerField(max_length=12, default=0)
@@ -128,8 +143,8 @@ class Media(MigrationMixin):
     objects = models.Manager()
     
     # auto-update
-    created = models.DateField(auto_now_add=True, editable=False)
-    updated = models.DateField(auto_now=True, editable=False)
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+    updated = models.DateTimeField(auto_now=True, editable=False)
 
     # meta
     class Meta:
@@ -652,6 +667,8 @@ class Media(MigrationMixin):
             c = obj.get_cache_file('mp3', 'base')
             print c
             
+            print 'PROCESSING DONE'
+            
             obj.processed = 1;
             obj.save();
             
@@ -747,6 +764,88 @@ class Media(MigrationMixin):
         except Exception, e:
             print e
         return cache_file
+    
+    
+    """
+    creates an echoprint fp and post it to the 
+    identification server
+    """
+    def update_echoprint(self):
+        
+        from settings import ECHOPRINT_CODEGEN_BIN
+        
+        
+        ecb = ECHOPRINT_CODEGEN_BIN
+        ecb = 'echoprint-codegen'
+        
+        path = self.get_master_path()
+        
+        #path = self.master_path
+        
+        print 'path: %s' % path
+        
+        p = subprocess.Popen([
+            ecb, path,
+        ], stdout=subprocess.PIPE)
+        stdout = p.communicate()        
+        d = json.loads(stdout[0])
+        
+        print d
+        
+        try:
+            code = d[0]['code']
+            version = d[0]['metadata']['version']
+            duration = d[0]['metadata']['duration']
+        except Exception, e:
+            print e
+            code = None
+            version = None
+            duration = None
+            
+            
+        if code:
+            print 'delete fingerprint on server id: %s' % self.id 
+            fp.delete("%s" % self.id)
+            
+            print 'post new fingerprint:'
+            
+            
+            id = self.updated.isoformat('T')[:-7]
+            
+            
+            code = fp.decode_code_string(code)
+            
+            nfp = {
+                    "track_id": "%s" % self.id,
+                    "fp": code,
+                    #"artist": "%s" % self.artist.id,
+                    #"release": "%s" % self.artist.id,
+                    "track": "%s" % self.uuid,
+                    "length": duration,
+                    "codever": "%s" % version,
+                    "source": "%s" % "NRGFP",
+                    "import_date": "%sZ" % id
+                    }
+            
+            
+            res = fp.ingest(nfp, split=False)
+
+            print 'getting code by id (check)'
+            
+            if fp.fp_code_for_track_id("%s" % self.id):
+                print "ALL RIGHT!!! FP INSERTED!!"
+                self.echoprint_status = 1
+                
+            else:
+                self.echoprint_status = 2
+                
+            self.save()
+                
+
+
+            #print code
+        
+        
         
         
     def save(self, *args, **kwargs):
@@ -801,6 +900,11 @@ def media_post_save(sender, **kwargs):
         log.info('Media id: %s - Re-Process' % (obj.pk))
         pass
         obj.generate_media_versions()
+        
+    if obj.processed == 1 and obj.echoprint_status == 0:
+        print "do echoprint geeration"
+        obj.update_echoprint()
+        
 
 # register
 post_save.connect(media_post_save, sender=Media)    

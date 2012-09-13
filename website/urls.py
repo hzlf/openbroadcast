@@ -45,7 +45,7 @@ urlpatterns = patterns('',
     url(r"^api/", include("alibrary.urls_api")),
     
     
-    url(r'^api/', include('bcmon.urls_api')),
+    url(r'^api/', include('urls_api')),
     
 
     url(r'^selectable/', include('selectable.urls')),

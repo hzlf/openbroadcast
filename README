@@ -1,0 +1,23 @@
+# start local development servers
+
+
+# django
+source ~/srv/openbroadcast.ch-upgrade/bin/activate
+cd ~/code/openbroadcast.ch/website/
+./manage.py runserver_plus 0.0.0.0:8000
+
+# rabbitmq
+sudo rabbitmq-server
+
+# celeryd
+source ~/srv/openbroadcast.ch-upgrade/bin/activate
+cd ~/code/openbroadcast.ch/website/
+./manage.py celeryd
+
+
+# tokyo-tyrant
+sudo ttservctl start
+
+# solr
+cd ~/srv/echoprint-server/solr
+./run.sh

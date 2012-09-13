@@ -1,3 +1,14 @@
+
+					
+<script type="text/JavaScript">
+<!--
+function prefresh(t) {
+	setTimeout("location.reload(true);",t);
+}
+prefresh(10000);
+//   -->
+</script>
+
 <section class="plugin channel">
 	<h2>{{ object }} <small>{{ object.slug }}</small></h2>
 
@@ -33,17 +44,22 @@
 				{% for item in playouts %}
 				<tr>
 					{% if item.meta_name and item.meta_artist %}
-					<td rowspan="2"><i class="icon-ok-sign"></i></td>
+					<td rowspan="1"><i class="icon-ok-sign"></i></td>
 					<td>{{ item.meta_name }}</td>
 					<td>{{ item.meta_artist }}</td>
 					{% else %}
+					
+					
 					<td><i class="icon-question-sign"></i></td>
-					<td colspan="2" class="warning">{{ item.title }}</td>
+					<td colspan="2" class="warning">{{ item.dummy_result }}</td>
 					{% endif %}
 
 					<td>{{ item.time_start }}</td>
-					<td rowspan="2"><span class="badge badge-warning">{{ item.score }}</span></td>
+					<td rowspan="1"><span class="badge badge-warning">{{ item.score }}</span></td>
 				</tr>
+				
+				
+				<!--
 				<tr>
 					<td colspan="3">
 					<dl class="dl-horizontal">
@@ -82,9 +98,7 @@
 							
 						</dd>
 						
-						<!--
-						http://www.musicbrainz.org/ws/2/recording/?query=artist:%22Dudley%20Perkins%22%20AND%20recordingaccent:%22Flowers%22
-						-->
+
 						
 						{% endfor %}
 					</dl> 
@@ -92,6 +106,8 @@
 
 					</td>
 				</tr>
+				-->				
+				
 				{% endfor %}
 
 			</tbody>

@@ -58,6 +58,9 @@ class Image(File):
       # doing for me was obscuring errors...
       # --Dave Butler <croepha@gmail.com>
       iext = os.path.splitext(iname)[1].lower()
+      
+      print 'IEXT:'
+      print iext
       return iext in ['.jpg', '.jpeg', '.png', '.gif']
 
     def save(self, *args, **kwargs):

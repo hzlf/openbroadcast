@@ -15,6 +15,10 @@ from cms.models import CMSPlugin
 from django_extensions.db.fields import *
 from django_extensions.db.fields.json import JSONField
 
+from alibrary.models import Media
+
+from echoprint.API import fp
+
 def filename_by_uuid(instance, filename):
     filename, extension = os.path.splitext(filename)
     path = "media/samples/"
@@ -51,6 +55,9 @@ class Playout(BaseModel):
     meta_name = models.CharField(max_length=512, null=False, blank=True)
     meta_artist = models.CharField(max_length=512, null=False, blank=True)
     
+    
+    dummy_result = models.CharField(max_length=512, null=False, blank=True)
+    
     time_start = models.DateTimeField(null=True, blank=True)
     time_end = models.DateTimeField(null=True, blank=True)
     
@@ -59,6 +66,7 @@ class Playout(BaseModel):
         (1, _('Done')),
         (2, _('Ready')),
         (3, _('Error')),
+        (4, _('Echoprint directly (no sample)')),
     )
     
     status = models.PositiveIntegerField(default=0, choices=STATUS_CHOICES)
@@ -179,6 +187,66 @@ def playout_post_save(sender, **kwargs):
         except Exception, e:
             print e
             pass
+        
+    if obj.status == '4' or obj.status == 4:
+        print 'pre fingerprinted entry'
+        code = obj.echoprintfp['code']
+        res = fp.best_match_for_query(code_string=code)
+        
+        print res.match()
+        if res.match():
+        
+            print res.message()
+            print res.score
+            print res.TRID
+            
+            obj.dummy_result = res.TRID
+            
+            if res.TRID:
+                try:
+                    id = int(res.TRID)
+                    m = Media.objects.get(pk=id)
+                    print m
+                    
+                    obj.dummy_result = "%s : !! %s" % (m.name, res.score)
+                    
+                    obj.score = res.score
+                    
+                    
+                except Exception, e:
+                    print e
+                    pass
+            
+        else:
+            print 
+            print    
+            print "####### TRYING FOR LOOSE MATCHES..."
+    
+            code = fp.decode_code_string(code)
+            res = fp.query_fp(code)
+            
+            print res.results
+            
+            print 'choosen:'
+            print res.results[0]
+            
+            id = res.results[0]['track_id']
+            score = res.results[0]['score']
+            m = Media.objects.get(pk=id)
+            print m
+            
+            obj.dummy_result = "%s : %s" % (m.name, score)
+            obj.score = score
+            
+            print
+            print
+        
+
+            
+        
+        obj.status = 1;
+        obj.save()
+        print res
 
     
     
@@ -191,7 +259,13 @@ class Channel(BaseModel):
     name = models.CharField(max_length=256, null=True, blank=True)
     slug = AutoSlugField(populate_from='name')
     
+
     
+    TYPE_CHOICES = (
+        ('stream', _('Stream')),
+        ('djmon', _('DJ-Monitor')),
+    )
+    type = models.CharField(verbose_name=_('Type'), max_length=12, default='stream', choices=TYPE_CHOICES)
     
     stream_url = models.CharField(max_length=256, null=True, blank=True)
     title_format = models.CharField(max_length=256, null=True, blank=True, help_text='Regex to match title against. eg "(?P<artist>[\w\s\d +"*ç%&/(),.-;:_]+?)-(?P<track>[\w\s\d +"*ç%&/(),.-;:_]+?)$" to recognize formats like "The Prodigy  (feat. Whomever) - Remix 3000" - (incl. unicode)')

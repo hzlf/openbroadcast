@@ -276,7 +276,7 @@ class MediaAdmin(BaseAdmin):
         ('Mixed content', {'fields': ['description'], 'classes': ['']}),
         ('Advanced options [Know what you are doing!!!!!!!!]', {
             'classes': ('collapse',),
-            'fields': ('processed',)
+            'fields': ('processed','echoprint_status',)
         }),
     ]
     

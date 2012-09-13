@@ -11,7 +11,7 @@ from lib.admin.actions import export_as_csv_action
 
 class PlayoutAdmin(admin.ModelAdmin):    
     
-    list_display = ('title', 'time_start', 'time_end', 'channel', 'status', 'score',)
+    list_display = ('title', 'time_start', 'time_end', 'channel', 'status', 'score', 'dummy_result',)
     list_filter = ('channel', 'status', 'score',)
     
     readonly_fields = ('created', 'updated', 'uuid', 'enmfp', 'analyzer_data', 'echoprintfp', 'echoprint_data', 'score', 'time_start', 'time_end')

@@ -152,7 +152,7 @@ class Notify:
         
         for channel in channels['objects']:
 
-            if channel['enable_monitoring']:
+            if channel['enable_monitoring'] and channel['type'] == 'stream':
             
                 channel_id = channel['id']
                 stream_url = channel['stream_url']
