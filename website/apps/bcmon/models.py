@@ -235,7 +235,12 @@ def playout_post_save(sender, **kwargs):
             m = Media.objects.get(pk=id)
             print m
             
-            obj.dummy_result = "%s : %s" % (m.name, score)
+            if score > 50:
+            
+                obj.dummy_result = "%s : %s" % (m.name, score)
+            else:
+                obj.dummy_result = "%s : %s" % ('hm.. unable to get match...', score)
+                
             obj.score = score
             
             print
