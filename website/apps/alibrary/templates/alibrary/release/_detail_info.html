@@ -39,6 +39,8 @@
 			<div class="license {% if object.get_license %}{{ object.get_license.key }}{% endif %}">
 				{% if object.get_license %}
 				<a rel="tooltip" href="{{ object.get_license.get_absolute_url }}" title="License details" class="dialog disabled-modal"><img src="/static/img/icons/transparent_16x16.png" width="78" height="24" alt="License" class="noborder"></a>
+				{% else %}
+				&nbsp;
 				{% endif %}
 			</div>
 		</dd>
@@ -62,16 +64,39 @@
 			{% trans "Release date" %}:
 		</dt>
 		<dd>
+			{% if object.releasedate %}
 			{{ object.releasedate|date:"SHORT_DATE_FORMAT" }}
+			{% else %}
+			{% trans "Unknown" %}
+			{% endif %}
+		</dd>
+
+		<dt>
+			{% trans "History" %}:
+		</dt>
+		<dd>
+			
+			{% if object.owner %}
+			<span class="key">{% trans "Uploaded by" %}:</span> <span class="value"><a href="{{ object.owner.get_absolute_url }}">{{ object.owner }}</a></span> |
+			{% endif %}
+			
+			{% if object.publisher %}
+			<span class="key">{% trans "Published by" %}:</span> <span class="value"><a href="#">{{ object.publisher }}</a></span> |
+			{% endif %}
+			
+			{% if object.get_last_revision %}
+			<span class="key">{% trans "Last edit by" %}:</span> <span class="value"><a href="{{ object.get_last_revision.user.get_profile.get_absolute_url }}">{{ object.get_last_revision.user }}</a></span>
+			{% endif %}
+			&nbsp;
 		</dd>
 
 		<dt>
 			{% trans "Stats" %}:
 		</dt>
 		<dd>
-			{% with item=object.label %}
-			{% include "alibrary/element/_inline_link.html" %}
-			{% endwith %}
+			<span class="value">3</span> <span class="key">{% trans "Airplays" %}</span> /
+			<span class="value">173</span> <span class="key">{% trans "Plays" %}</span> /
+			<span class="value">28</span> <span class="key">{% trans "Downloads" %}</span>
 		</dd>
 
 		{% if object.tags %}
@@ -94,6 +119,8 @@
 	<div class="image">
 		{% if object.main_image %}
 		<a href="{% thumbnail object.main_image 800x800 crop upscale %}" class="zoomable cboxElement"> <img src="{% thumbnail object.main_image 172x172 crop upscale subject_location=object.main_image.subject_location %}" alt="Cover" /> </a>
+		{% else %}
+		<p>[[ IMAGE ]]</p>
 		{% endif %}
 	</div>
 

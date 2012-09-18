@@ -3,20 +3,40 @@
 
 .wmd-panel
   margin-left: 0
-  /* width: 610px;
+  width: 80%
+  textarea
+    width: 100%
+    min-width: 272px
 
 .wmd-button-row
   margin-left: 0 !important
 
-.wmd-input
-  background-color: white
-  width: 270px
-  height: 100px
-
 .wmd-button-row
   display: none
 
+
 .wmd-preview
+  width: 80%
+  min-width: 267px
+  padding: 5px
+  margin-top: 20px
+  background-color: #F3F3F3
+  +markdown()
+
+
+
+
+
+
+
+
+
+.wmd-input__orig
+  background-color: white
+  width: 270px
+  height: 100px
+  
+.wmd-preview__orig
   margin-top: 15px
   padding: 0 10px
   font-size: 100%
@@ -163,11 +183,3 @@
   td
     vertical-align: top
 
-/**
- * Add some CSS to overwrite the Django admin CSS for pretty markdown
- * Adapted from: https://raw.github.com/clownfart/Markdown-CSS/master/markdown.css
- *
-
-/* Code inline
-
-/* Block code

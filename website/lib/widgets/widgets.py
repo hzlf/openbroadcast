@@ -1,9 +1,21 @@
 from django.utils.html import escape, conditional_escape
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
-from django.forms.widgets import ClearableFileInput, CheckboxInput
+from django.forms.widgets import ClearableFileInput, CheckboxInput, HiddenInput, Widget
+
 
 from filer.models import File, Image
+
+
+
+class ReadOnlyIconField(Widget):
+    
+    def render(self, name, value, attrs=None):
+        
+        if not value:
+            value = 'unknown'
+
+        return mark_safe('<ul class="links external"><li class="icon external %s"></li></ul>' % value)
 
 class AdvancedFileInput(ClearableFileInput):
 

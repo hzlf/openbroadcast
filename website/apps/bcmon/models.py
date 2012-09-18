@@ -17,7 +17,7 @@ from django_extensions.db.fields.json import JSONField
 
 from alibrary.models import Media
 
-from echoprint.API import fp
+from ep.API import fp
 
 def filename_by_uuid(instance, filename):
     filename, extension = os.path.splitext(filename)

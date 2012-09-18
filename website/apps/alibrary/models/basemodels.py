@@ -61,6 +61,8 @@ from alibrary.models import *
 from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
 
+
+
 class MigrationMixin(models.Model):
     
     legacy_id = models.IntegerField(null=True, blank=True, editable=False)
@@ -320,6 +322,9 @@ class Relation(models.Model):
                    
         if self.url.find('bandcamp.com') != -1:
             self.service = 'bandcamp'
+            
+        # find already assigned services and delete them
+        reld = Relation.objects.filter(service=self.service, content_type=self.content_type, object_id=self.object_id).delete()
 
         super(Relation, self).save(*args, **kwargs)
     

@@ -115,7 +115,7 @@ class LabelInline(admin.TabularInline):
 
 class MediaInline(admin.TabularInline):
     model = Media
-    exclude = ['description',]
+    exclude = ['description','slug','processed','echoprint_status','conversion_status',]
     extra = 1
     
 class LabelAdmin(PlaceholderAdmin, BaseAdmin):
@@ -179,7 +179,7 @@ class ReleaseAdmin(BaseAdmin):
     fieldsets = [
         (None,               {'fields': ['name', 'slug', ('main_image', 'cover_image',), ('label', 'catalognumber'), ('releasedate', 'release_country', 'license'), ('releasetype', 'pressings'), 'publish_date', 'enable_comments', 'main_format', 'excerpt', 'description']}),
         #('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
-        #('Test', {'fields' : ['d_tags']})
+        ('Users', {'fields' : ['owner', 'publisher']})
     ]
     
 admin.site.register(Release, ReleaseAdmin)
@@ -258,25 +258,29 @@ admin.site.register(Profession, ProfessionAdmin)
     
 class MediaAdmin(BaseAdmin):
     
-    list_display   = ('name', 'release', 'artist', 'mediatype', 'tracknumber', 'processed')
+    list_display   = ('name', 'release_link', 'artist', 'mediatype', 'tracknumber', 'processed', 'echoprint_status', 'conversion_status')
     search_fields = ['artist__name', 'release__name']
-    list_filter = ('mediatype', 'license__name', 'processed')
+    list_filter = ('mediatype', 'license__name', 'processed', 'echoprint_status', 'conversion_status')
     
     inlines = [MediaExtraartistsInline]
 
-    readonly_fields = ['slug']
+    readonly_fields = ['slug', 'folder', 'uuid', 'base_format', 'base_filesize', 'base_duration','base_samplerate', 'base_bitrate', 'release_link']
     
     
     """"""
     fieldsets = [
         (None,  {'fields': 
-                 ['name', 'slug', 'isrc', 'tracknumber', 'mediatype', 'release', 'artist', 'license', 'master']
+                 ['name', 'slug', 'isrc', 'uuid', 'tracknumber', 'mediatype', ('release', 'release_link'), 'artist', 'license',]
+                 }),
+                 
+        ('Storage related',  {
+                'fields': ['master', 'folder', ('base_format', 'base_filesize', 'base_duration',), ('base_samplerate', 'base_bitrate')]
                  }),
 
         ('Mixed content', {'fields': ['description'], 'classes': ['']}),
         ('Advanced options [Know what you are doing!!!!!!!!]', {
-            'classes': ('collapse',),
-            'fields': ('processed','echoprint_status',)
+            'classes': ('uncollapse',),
+            'fields': ('processed','echoprint_status','conversion_status',)
         }),
     ]
     

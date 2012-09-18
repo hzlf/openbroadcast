@@ -21,49 +21,98 @@
 
 	<section>
 		<div class="row iteminfo release">
-		{% include "alibrary/release/_detail_info.html" %}
+			{% include "alibrary/release/_detail_info.html" %}
 		</div>
 	</section>
 
 	<div class="item_menu" id="item_menu">
-		<ul class="">
-			<li class="on">
-				<a class="on" href="#">Tracklist</a>
+		<ul class="nav nav-tabs">
+			<li class="active">
+				<a href="#tracklist" data-toggle="tab">{% trans "Tracklist" %}</a>
 			</li>
-			<li class="">
-				<a class="" href="#">Tracklist</a>
+			<li>
+				<a href="#history" data-toggle="tab">{% trans "History" %}</a>
 			</li>
 		</ul>
 	</div>
+
 	<div class="clear"></div>
 
-	<div class="item_inner">
-		<div class="listview container medias inner s">
-			<div class="list_header"></div>
+	<section class="tabbed item_inner">
 
-			<div class="list_body">
-				{% for item in object.get_media %}
-				{% include "alibrary/media/_list_item_xs.html" %}
-				{% endfor %}
+		<div class="tab-content">
+
+			<div class="tab-pane active" id="tracklist">
+
+				<div class="listview container medias inner s">
+
+					<div class="list_header"></div>
+
+					<div class="list_body">
+						{% for item in object.get_media %}
+						{% include "alibrary/media/_list_item_xs.html" %}
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane" id="history">
+
+				<br /><br />
+				
+
+				
+				
+				
+				
+				<!--
+				<table class="table table-condensed history">
+
+					<thead>
+						<tr>
+							<th>User</th>
+							<th>Time</th>
+							<th>Comment</th>
+						</tr>
+					</thead>
+					<tbody>
+
+						{% for r in object.get_versions.all %}
+						<tr>
+							<td><a href="{{ r.revision.user.get_profile.get_absolute_url }}">{{ r.revision.user }}</a></td>
+							<td>{{ r.revision.date_created }}</td>
+							<td>{{ r.revision.comment }}</td>
+
+						</tr>
+
+						{% endfor %}
+
+					</tbody>
+				</table>
+				-->
+
+			</div>
+
+			<div class="tab-pane" id="broadcasts">
+				...
 			</div>
 		</div>
 
-	</div>
-	
-	
+	</section>
+
 	<section class="description">
-		
+
+		<!--
 		<div class="page-header padded-h">
-			<h2>{% trans "Description" %}</h2>
+		<h2>{% trans "Description" %}</h2>
 		</div>
-		
+		-->
 		<div class="description markdown padded-h">
 			{% wikify object.description %}
 		</div>
-		
+
 	</section>
-	
-	
+
 </div>
 
 {% endblock %}

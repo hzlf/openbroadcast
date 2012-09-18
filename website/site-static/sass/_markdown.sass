@@ -1,22 +1,36 @@
-div.markdown
+@mixin markdown
+
   h1
-    color: #333333
-    font-size: 160%
+    color: $gray
+    font-size: $baseFontSizeH3
+    line-height: $baseLineHeightH3
     margin-top: 10px !important
     margin-bottom: 7px !important
 
   h2, h3, h4, h5, h6
-    font-size: 140%
-    color: #5a5a5a
+    color: $gray
+    font-size: $baseFontSizeH4
+    line-height: $baseLineHeightH4
     margin-top: 7px !important
     margin-bottom: 2px !important
 	
   ul
-    list-style-type: circle
-    list-style-position: inside
+    list-style-type: disc
+    list-style-position: outside
+  ul, ol
+    margin-left: 18px
+    
+  li
+    color: $textColor
 	
   hr
-    color: #5a5a5a
-    background-color: #a5a5a5
+    color: $textColor
+    background-color: $textColor
     height: 1px
     border: none
+    
+  p, span, pre
+    color: $textColor
+    font-size: $baseFontSize
+    font-family: $baseFontFamily
+    line-height: $baseLineHeight

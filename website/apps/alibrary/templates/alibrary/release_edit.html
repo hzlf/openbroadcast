@@ -6,8 +6,7 @@
 
 {% block heading %} <!-- heading / icon (large one) -->
 {% addtoblock "js-post" %}{% dajaxice_js_import %}{% endaddtoblock %}
-{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}dajax/jquery.dajax.core.js"></script>
-{% endaddtoblock %}
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}dajax/jquery.dajax.core.js"></script>{% endaddtoblock %}
 <div id="heading">
 	{% include "skeleton/heading.html" %}
 </div>
@@ -48,26 +47,42 @@
 
 		{{ form.management_form }}
 		{{ relation_form.management_form }}
+		{{ releasemedia_form.management_form }}
+
+		{% crispy action_form %}
 
 		{% crispy form %}
+		
+		
+
+		<fieldset>
+			<legend>
+				Relations<span class="pull-right">Help</span>
+			</legend>
+		
+
+		{% crispy relation_form %}
+		
+		</fieldset>
+		
+		{% crispy action_form %}
+		
 
 		<fieldset>
 			<legend>
 				Tracklist
 			</legend>
 		</fieldset>
-
+		
+		
+		{% crispy release_bulkedit_form %}
+		
 		{% crispy releasemedia_form %}
-		{#  releasemedia_form|crispy #}
 
-		<fieldset>
-			<legend>
-				Relations<span class="pull-right">Help</span>
-			</legend>
-		</fieldset>
-
-		{# crispy relation_form #}
-		{{ relation_form|crispy }}
+		
+		
+		{% crispy action_form %}
+		
 
 	</form>
 

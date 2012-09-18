@@ -1,6 +1,6 @@
 from selectable.base import ModelLookup
 from selectable.registry import registry
-
+from django.utils.safestring import mark_safe
 from alibrary.models import *
 
 
@@ -59,12 +59,7 @@ class LicenseLookup(ModelLookup):
     search_fields = ['name__icontains',]
 
     def get_item_label(self, item):
-        # Display for choice listings
-        return u"%s (%s)" % (item.name, item.restricted)
-
-    #def get_item_id(self, item):
-        #return u"%s" % item.name
-    
+        return mark_safe(u'%s (%s) <span class="%s">%s</span>' % (item.name, item.restricted, item.key, item.key))
     
     
 registry.register(LicenseLookup)

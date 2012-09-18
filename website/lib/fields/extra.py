@@ -1,6 +1,5 @@
-from django.db.models import TextField
+from django.db.models import TextField, FileField
 from markdown import markdown
-from django.db.models import FileField
 from django.forms import forms
 from django.template.defaultfilters import filesizeformat
 from django.utils.translation import ugettext_lazy as _
@@ -8,6 +7,19 @@ from django.utils.translation import ugettext_lazy as _
 from south.modelsinspector import add_introspection_rules
 add_introspection_rules([], ["^lib\.fields\.extra\.MarkdownTextField"])
 add_introspection_rules([], ["^lib\.fields\.extra\.ContentTypeRestrictedFileField"])
+
+
+#from django.utils.html import conditional_escape, format_html, format_html_join
+from django.forms.widgets import ClearableFileInput
+
+class ExtraClearableFileInput(ClearableFileInput):
+    initial_text = _('Currently')
+    input_text = _('Change')
+    clear_checkbox_label = _('Clear')
+
+    template_with_initial = '<ul><li>%(initial)s</li><li>%(clear_template)s</li><li>%(input_text)s: %(input)s</li></ul>'
+    template_with_clear = '%(clear)s <label for="%(clear_checkbox_id)s">%(clear_checkbox_label)s</label>'
+    
 
 class MarkdownTextField (TextField):
     """

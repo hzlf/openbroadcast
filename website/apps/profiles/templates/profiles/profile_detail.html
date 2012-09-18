@@ -1,0 +1,101 @@
+{% extends "layout_base.html" %}
+
+{% load truncate i18n thumbnail arating_tags wiki_tags sekizai_tags activity_tags %}
+
+{% block heading %}
+<!-- heading / icon (large one) -->
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/bootstrap-tab.js"></script>
+{% endaddtoblock %}
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.history.js"></script>{% endaddtoblock %}
+
+<div id="heading">
+	{% include "skeleton/heading.html" %}
+</div>
+<!-- heading / icon (large one) -->
+{% endblock %}
+
+{% block modnav %} <!-- start: intra-module navigation -->
+<div id="modnav">
+	{% include "skeleton/modnav.html" %}
+</div>
+<!-- end: intra-module navigation -->
+{% endblock %}
+
+{% block inner %}
+<div class="item_detail" style="">
+
+	<section>
+		<div class="row iteminfo release">
+			{% include "profiles/profile/_detail_info.html" %}
+		</div>
+	</section>
+
+	<div class="item_menu" id="item_menu">
+		<ul class="nav nav-tabs">
+			<li class="active">
+				<a href="#profile" data-toggle="tab">{% trans "Profile" %}</a>
+			</li>
+			<li>
+				<a href="#activities" data-toggle="tab">{% trans "Activities" %}</a>
+			</li>
+			<li>
+				<a href="#broadcasts" data-toggle="tab">{% trans "Broadcasts" %}</a>
+			</li>
+		</ul>
+	</div>
+
+	<div class="clear"></div>
+
+	<section class="description tabs">
+
+		<div class="tab-content">
+
+			<div class="tab-pane active" id="profile">
+				<div class="description markdown padded-h">
+					{% wikify object.description %}
+				</div>
+			</div>
+			<div class="tab-pane" id="activities">
+				<table class="table table-condensed striped action">
+					<tbody>
+
+						{% for action in user_stream %}
+						<tr>
+							<td>#</td>
+							
+							<td>{% display_action action %}</td>
+							
+							<!--
+							<td> {% if action.action_object %}
+							{{ action.action_object.classname }} <a href="{{ action.action_object.get_absolute_url }}">{{ action.action_object }}</a> {% trans "was" %}
+							{% endif %}
+							{{ action.verb }}
+
+							{% if action.actor %}
+							{% trans "by" %} <a href="{{ action.actor.get_profile.get_absolute_url }}">{% firstof action.actor.get_full_name action.actor %}</a> {% endif %} </td>
+							-->
+							<td><span class="pull-right">{{ action.timestamp|timesince }} {% trans "ago" %}</span></td>
+						</tr>
+
+						{% endfor %}
+
+					</tbody>
+				</table>
+
+			</div>
+
+			<div class="tab-pane" id="broadcasts">
+				...
+			</div>
+		</div>
+
+	</section>
+
+</div>
+
+{% endblock %}
+
+{% block sidebar %}
+{% include "profiles/profile/sidebar/_detail.html" %}
+{% endblock %}
+

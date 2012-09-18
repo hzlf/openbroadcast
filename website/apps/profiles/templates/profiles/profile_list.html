@@ -1,0 +1,166 @@
+{% extends "layout_base.html" %}
+{% load spurl cache i18n truncate cache %}
+
+{% block heading %}
+<!-- heading / icon (large one) -->
+<div id="heading">
+	{% include "skeleton/heading.html" %}
+</div>
+<!-- heading / icon (large one) -->
+{% endblock %}
+
+{% block modnav %}
+<!-- start: intra-module navigation -->
+<div id="modnav">
+	{% include "skeleton/modnav.html" %}
+</div>
+<!-- end: intra-module navigation -->
+{% endblock %}
+
+{% block tagcloud %}
+
+{% include "alibrary/element/_tagcloud.html" %}
+
+{% endblock %}
+
+{% block searchbar %}
+
+<div class="searchbar">
+	<div class="tagbar">
+
+
+		{% include "alibrary/searchbar/_relation_filter.html" %}
+
+		{% include "alibrary/searchbar/_filterlist.html" %}
+		
+		<!-- search field -->
+		<div style="float: left;">
+			<input type="text" id="searchbar_input" name="searchbar_input" value="&lt; Search &gt;" class="blur" />
+		</div>
+		
+		
+		<!--
+		<a class="pull-right" href="{{ request.path }}">cs</a>
+		-->
+		<!-- TODO: rework! -->
+		<div style="padding: 4px 3px 0px;" class="pull-right">
+			{% if request.path != request.get_full_path %}
+			<a class="pull-right clear-search" href="{{ request.path }}" title="{% trans "Clear Search" %}">
+				<img class="search_clear" src="/static/img/prototype/i_clearsearch.png" alt="Clear search" />
+			</a>
+			{% endif %}
+		</div>
+		
+		<div class="clear"></div>
+	</div>
+</div>
+
+<div id="autocomplete_holder" class="autocomplete holder"></div>
+
+{% endblock %}
+
+{% block inner %}
+
+<div class="listhead">
+	<div style="float: right;">
+		{% include "element/_pagination.html" %}
+	</div>
+</div>
+<!-- end: listing header / paginator -->
+
+<!-- start: listing output -->
+<div class="listview container releases {{ list_style }}">
+
+	<!--
+	<div class="list_header">
+		<div class="list_header_item c1">
+			&nbsp;
+		</div>
+		<div class="list_header_item c2 sortable {% if get.order_by == "name" %}active{% endif %} {{ get.direction }}">
+			<a href="{% spurl base=request.get_full_path set_query="order_by=name" toggle_query="direction=ascending,descending" %}" style="display: block;">Name</a>
+		</div>
+		<div class="list_header_item c3">
+			Tracks
+		</div>
+		<div class="list_header_item c4">
+			Label
+		</div>
+		<div class="list_header_item c5">
+			License
+		</div>
+		<div class="list_header_item c6 sortable {% if get.order_by == "releasedate" %}active{% endif %} {{ get.direction }}">
+			<a href="{% spurl base=request.get_full_path set_query="order_by=releasedate" toggle_query="direction=ascending,descending" %}" style="display: block;">Released</a>
+		</div>
+		<div class="list_header_item c7">
+			Type
+		</div>
+		<div class="list_header_item c8">
+			&nbsp;
+		</div>
+	</div>
+	-->
+
+
+	<div class="list_body">
+		
+		
+		
+	<div class="row-fluid">
+		{% for item in profile_list %}
+		  <div class="span3">
+			{% include "profiles/profile/_list_item_m.html" %}
+		  </div>
+	   {% if forloop.last %}
+	     </div>
+	   {% else %}
+	     {% if forloop.counter|divisibleby:"4" %}
+	      </div>
+	      <div class="row-fluid">
+	     {% endif %}
+	   {% endif %}
+	{% endfor %}
+	</div>
+			
+		
+		
+
+	</div>
+</div>
+
+<!-- start: listing footer -->
+<div class="listview footer">
+	<div class="right ipp">
+
+		<ul class="unstyled horizontal">
+			{% spurl base=request.get_full_path active_query="ipp=12" as is_active %}
+			<li>
+				<a class="{% if is_active %}active{% endif %}" href="{% spurl base=request.get_full_path set_query="ipp=12" %}">12</a>
+			</li>
+			{% spurl base=request.get_full_path active_query="ipp=24" as is_active %}
+			<li>
+				<a class="{% if is_active %}active{% endif %}" href="{% spurl base=request.get_full_path set_query="ipp=24" %}">24</a>
+			</li>
+			{% spurl base=request.get_full_path active_query="ipp=36" as is_active %}
+			<li>
+				<a class="{% if is_active %}active{% endif %}" href="{% spurl base=request.get_full_path set_query="ipp=36" %}">36</a>
+			</li>
+		</ul>
+
+	</div>
+	
+	<!--
+	<div id="control_selection" class="left control_selection">
+		<span>Selection:</span>
+		<a href="#selection:invert" class="action">Invert</a>&nbsp;<a href="#selection:all" class="action">All</a>&nbsp;<a href="#selection:clear" class="action">None</a>
+	</div>
+	-->
+	<div class="clear">&nbsp;</div>
+</div>
+<!-- end: listing footer -->
+
+{% endblock %}
+
+{% block sidebar %}
+{# include "profiles/profile/sidebar/_list.html" #}
+{% endblock %}
+

@@ -117,6 +117,8 @@ class APILookup(models.Model):
         
         # discogs api needs ressource id (not url)
         
+        print self.content_object
+        
         self.uri = self.content_object.relations.filter(service='discogs')[0].url
         
         print 'uri'

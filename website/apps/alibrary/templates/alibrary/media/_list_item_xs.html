@@ -29,13 +29,13 @@
 					</div>
 					<!-- Duration -->
 					<div class="list_body_item c5">
-						{{ item.duration|sec_to_time }}
+						{{ item.base_duration|sec_to_time }}
 					</div>
 					<!-- Format / Bitrate -->
 					<div class="list_body_item c6">
 						
 						
-						{{ item.master.filetype|upper }} | {{ item.master.size|filesizeformat }}
+						{{ item.base_format|upper }} | {{ item.base_filesize|filesizeformat }}
 						<!--{{ item.master.sample_rate }} kbps-->
 					</div>
 					<!-- License -->
