@@ -51,7 +51,7 @@ from django_countries import CountryField
 from easy_thumbnails.files import get_thumbnailer
 
 import tagging
-
+import reversion 
 
 # settings
 from settings import TEMP_DIR
@@ -62,9 +62,7 @@ logger = logging.getLogger(__name__)
 
 from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
-    
-#from djangoratings.fields import RatingField
-#from arating.fields import RatingField
+
 import arating
     
 ################
@@ -109,12 +107,8 @@ class Release(MigrationMixin):
     
     license = models.ForeignKey(License, blank=True, null=True, related_name='release_license')
     
-    #release_country = models.CharField(max_length=200, blank=True, null=True)
     release_country = CountryField(blank=True, null=True)
     
-    #rating = RatingField(range=4, offset=2, can_change_vote=True, allow_delete=True) # > pos/neg rateing
-    
-    #uuid = models.CharField(max_length=36, unique=False, default=str(uuid.uuid4()), editable=True)
     uuid = UUIDField()
     
     main_image = FilerImageField(null=True, blank=True, related_name="release_main_image", rel='')
@@ -163,19 +157,36 @@ class Release(MigrationMixin):
         ('single', _('Single')),
         ('other', _('Other')),
     )
+    
+    RELEASETYPE_CHOICES = (
+        (_('General'), (
+                ('ep', _('EP')),
+                ('album', _('Album')),
+                ('compilation', _('Compilation')),
+                ('single', _('Single')),
+            )
+        ),
+        (_('Recording'), (
+                ('remix', _('Remix')),
+                ('live', _('Live')),
+            )
+        ),
+        ('other', _('Other')),
+        ('unknown', _('Unknown')),
+    )
+    
     releasetype = models.CharField(verbose_name="Release type", max_length=12, default='other', choices=RELEASETYPE_CHOICES)
-    
-    
-    #rating
-    #rating = RatingField(range=5)
+
     
     # relations
     label = models.ForeignKey(Label, blank=True, null=True, related_name='release_label', on_delete=models.SET_NULL)
     folder = models.ForeignKey(Folder, blank=True, null=True, related_name='release_folder', on_delete=models.SET_NULL)
-    
-    # product
-    # product = models.OneToOneField(Baseproduct, blank=True, null=True, related_name='release_product', on_delete=models.SET_NULL)
-    
+
+
+    # user relations
+    owner = models.ForeignKey(User, blank=True, null=True, related_name="release_owner", on_delete=models.SET_NULL)
+    publisher = models.ForeignKey(User, blank=True, null=True, related_name="release_publisher", on_delete=models.SET_NULL)
+
     # extra-artists
     extra_artists = models.ManyToManyField('Artist', through='ReleaseExtraartists', blank=True, null=True)
     def get_extra_artists(self):
@@ -190,32 +201,6 @@ class Release(MigrationMixin):
     # tagging (d_tags = "display tags")
     d_tags = tagging.fields.TagField(verbose_name="Tags", blank=True, null=True)
     
-    """
-    def _get_tags(self):
-        return tagging.models.Tag.objects.get_for_object(self)
-    
-    def _set_tags(self, tag_list):
-        tagging.models.Tag.objects.update_tags(self, tag_list)
-    
-    tags = property(_get_tags, _set_tags)
-    """
-    
-    # tagging (d_tags = "display tags")
-    #d_tags = TaggableManager(blank=True)
-    
-    #tags = tagging.fields.TagField()
-    # basic methods for what tagging provides
-    
-    #def _get_tags(self): 
-        #return Tag.objects.get_for_object(self) 
-
-    #def _set_tags(self, tag_list): 
-        #Tag.objects.update_tags(self, tag_list)
-         
-    #tags = property(_get_tags, _set_tags) 
-
-    #ntags = tagging.managers.ModelTaggedItemManager()
-
     enable_comments = models.BooleanField(_('Enable Comments'), default=True)
     
     # manager
@@ -241,6 +226,36 @@ class Release(MigrationMixin):
     
     def __unicode__(self):
         return self.name
+    
+    @property
+    def classname(self):
+        return self.__class__.__name__
+    
+    def get_versions(self):
+       
+        try:
+            return reversion.get_for_object(self)
+        except:
+            return None
+        
+    
+    def get_last_revision(self):
+        try:
+            return reversion.get_unique_for_object(self)[0].revision
+        except:
+            return None
+        
+    def get_last_editor(self):
+        
+        latest_revision = self.get_last_revision()
+        
+        if latest_revision:
+            return latest_revision.user
+        
+        else:
+            return None
+        
+        
     
     def is_active(self):
         
@@ -540,6 +555,13 @@ arating.enable_voting_on(Release)
 post_save.connect(library_post_save, sender=Release)  
 
 
+from actstream import action
+def action_handler(sender, instance, created, **kwargs):
+    action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
+
+post_save.connect(action_handler, sender=Release)
+
+
 class ReleaseExtraartists(models.Model):
     artist = models.ForeignKey('Artist', related_name='release_extraartist_artist')
     release = models.ForeignKey('Release', related_name='release_extraartist_release')
@@ -557,16 +579,6 @@ class ReleaseRelations(models.Model):
         app_label = 'alibrary'
         verbose_name = _('Relation')
         verbose_name_plural = _('Relations')
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         
 
         

@@ -20,10 +20,17 @@ from django.core.urlresolvers import reverse
 
 from django.http import HttpResponse # needed for absolute url
 
+
+from settings import MEDIA_ROOT
+
+# TODO: only import needed settings
 from settings import *
 
+
+
 # django-extensions (http://packages.python.org/django-extensions/)
-from django_extensions.db.fields import UUIDField, AutoSlugField
+from django_extensions.db.fields import AutoSlugField
+from lib.fields.uuidfield import UUIDField as RUUIDField
 
 # cms
 from cms.models import CMSPlugin, Page
@@ -38,6 +45,9 @@ from filer.models.imagemodels import *
 from filer.fields.image import FilerImageField
 from filer.fields.audio import FilerAudioField
 from filer.fields.file import FilerFileField
+
+# private_files
+from private_files import PrivateFileField
 
 # modules
 #from taggit.managers import TaggableManager
@@ -62,7 +72,7 @@ from mptt.models import MPTTModel, TreeForeignKey, TreeManyToManyField
 from lib.audioprocessing.processing import create_wave_images, AudioProcessingException
 
 # echoprint
-from echoprint.API import fp
+from ep.API import fp
 
 # logging
 import logging
@@ -78,16 +88,40 @@ from alibrary.models.playlistmodels import *
 from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
 
+
+
+
+
+
+
+
+
+def clean_filename(filename):
+    import unicodedata
+    import string
+    valid_chars = "-_.%s%s" % (string.ascii_letters, string.digits)
+    cleaned = unicodedata.normalize('NFKD', filename).encode('ASCII', 'ignore')
+    return ''.join(c for c in cleaned if c in valid_chars)
+
+def masterpath_by_uuid(instance, filename):
+    filename, extension = os.path.splitext(filename)
+    folder = "private/%s/" % (instance.uuid.replace('-', '/'))
+    #filename = instance.uuid.replace('-', '/') + extension
+    filename = u'master'
+    return os.path.join(folder, "%s%s" % (clean_filename(filename).lower(), extension.lower()))
+
+
+
+
 class Media(MigrationMixin):
     
     # core fields
-    uuid = UUIDField(primary_key=False)
+    uuid = RUUIDField(primary_key=False)
     name = models.CharField(max_length=200, db_index=True)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
     
-    isrc = models.CharField(max_length=12, null=True, blank=True, help_text="International Standard Recording Code")
-    master_path = models.CharField(max_length=2048, null=True, blank=True, help_text="Master Path", editable=False)
+    isrc = models.CharField(verbose_name='ISRC', max_length=12, null=True, blank=True)
     
     # processed & lock flag (needed for models that have maintenance/init/save tasks)
     PROCESSED_CHOICES = (
@@ -103,6 +137,13 @@ class Media(MigrationMixin):
         (2, _('Error')),
     )
     echoprint_status = models.PositiveIntegerField(max_length=2, default=0, choices=ECHOPRINT_STATUS_CHOICES)
+        
+    CONVERSION_STATUS_CHOICES = (
+        (0, _('Init')),
+        (1, _('Completed')),
+        (2, _('Error')),
+    )
+    conversion_status = models.PositiveIntegerField(max_length=2, default=0, choices=CONVERSION_STATUS_CHOICES)
     
     
     
@@ -125,7 +166,6 @@ class Media(MigrationMixin):
     # relations
     release = models.ForeignKey('Release', blank=True, null=True, related_name='media_release', on_delete=models.SET_NULL)
     artist = models.ForeignKey('Artist', blank=True, null=True, related_name='media_artist')
-    folder = models.ForeignKey(Folder, blank=True, null=True, related_name='media_folder', editable=False, on_delete=models.SET_NULL)
     
     # extra-artists
     # TODO: Fix this - guess should relate to Artist instead of Profession
@@ -133,8 +173,21 @@ class Media(MigrationMixin):
     
     license = models.ForeignKey(License, blank=True, null=True, related_name='media_license')
     
-    # link to 'real' file
-    master = FilerAudioField(blank=True, null=True, related_name='media_master')
+    # File related (old)
+    #master = FilerAudioField(blank=True, null=True, related_name='media_master')
+    #master_path = models.CharField(max_length=2048, null=True, blank=True, help_text="Master Path", editable=False)
+    #folder = models.ForeignKey(Folder, blank=True, null=True, related_name='media_folder', editable=False, on_delete=models.SET_NULL)
+    
+    # File related (new)
+    master = models.FileField(max_length=1024, upload_to=masterpath_by_uuid, blank=True, null=True)
+    folder = models.CharField(max_length=1024, null=True, blank=True, editable=False)
+    
+    # File Data
+    base_format = models.CharField(verbose_name=_('Format'), max_length=12, blank=True, null=True)
+    base_filesize = models.PositiveIntegerField(verbose_name=_('Filesize'), blank=True, null=True)
+    base_duration = models.FloatField(verbose_name=_('Duration'), blank=True, null=True)
+    base_samplerate = models.PositiveIntegerField(verbose_name=_('Samplerate'), blank=True, null=True)
+    base_bitrate = models.PositiveIntegerField(verbose_name=_('Bitrate'), blank=True, null=True)
     
     # tagging
     #tags = TaggableManager(blank=True)
@@ -146,7 +199,7 @@ class Media(MigrationMixin):
     created = models.DateTimeField(auto_now_add=True, editable=False)
     updated = models.DateTimeField(auto_now=True, editable=False)
 
-    # meta
+
     class Meta:
         app_label = 'alibrary'
         verbose_name = _('Track')
@@ -160,6 +213,14 @@ class Media(MigrationMixin):
     def get_absolute_url(self):
         # TODO: Make right
         return '/tracks/' + self.slug + '/'
+    
+    def release_link(self):
+        if self.release:
+            return '<a href="%s">%s</a>' % (reverse("admin:alibrary_release_change", args=(self.release.id,)), self.release.name)
+        return None
+    
+    release_link.allow_tags = True
+    release_link.short_description = "Edit" 
     
     def get_playlink(self):
         return '/api/tracks/%s/#0#replace' % self.uuid
@@ -181,8 +242,22 @@ class Media(MigrationMixin):
     
     
     def get_master_path(self):
-        
         return self.master.path
+    
+    # full absolute path
+    def get_folder_path(self, subfolder=None):
+        
+        if not self.folder:
+            return None
+        
+        if subfolder:
+            folder = "%s/%s%s/" % (MEDIA_ROOT, self.folder, subfolder)
+            if not os.path.isdir(folder):
+                os.mkdir(folder, 0755)
+                
+            return folder
+                    
+        return "%s/%s" % (MEDIA_ROOT, self.folder)
     
     """
     gets the 'real' file, eg flac-master, stream-preview etc.
@@ -209,15 +284,15 @@ class Media(MigrationMixin):
         return self.get_stream_file('mp3', 'base')
     
     def get_cache_file(self, format, version):
-        # TODO: improve...
         
         filename = str(version) + '.' + str(format)
-        try:
-            file = File.objects.filter(original_filename=filename, folder=self.folder)[0]
-            return file
-        except Exception, e:
-            print e
+        
+        full_path = "%s%s" % (self.get_folder_path('cache'), filename)
+        
+        if not os.path.isfile(full_path):
             return None
+        
+        return full_path
     
     def get_waveform_image(self):
         # TODO: improve...
@@ -245,7 +320,7 @@ class Media(MigrationMixin):
     """
     def get_audiofile(self):
         try:
-            return audiotools.open(self.master_path)
+            return audiotools.open(self.get_master_path())
         except Exception, e:
             print e
             return None
@@ -272,7 +347,7 @@ class Media(MigrationMixin):
         
         dst_file = str(version) + '.' + str(format)
         #src_path = self.master.path
-        src_path = self.master_path
+        src_path = self.get_master_path()
     
         tmp_directory = tempfile.mkdtemp()
         tmp_path = tmp_directory + '/' + dst_file
@@ -282,29 +357,13 @@ class Media(MigrationMixin):
         log.info('Media id: %s - tmp_path: %s' % (self.pk, tmp_path))
         
         
+        """
         print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         print 'Media id: %s - dst_file: %s' % (self.pk, dst_file)
         print 'Media id: %s - src_path: %s' % (self.pk, src_path)
         print 'Media id: %s - tmp_path: %s' % (self.pk, tmp_path)
-        
-        print
-        print
-        print
-        print '##########################################################'
-        time.sleep(0.5)
-        print 'self',
-        print self
-        
-        print 'self.master',
-        print self.master
-        
-        print 'self.master_path',
-        print self.master_path
-        time.sleep(0.5)
-        print '##########################################################'
-        print
-        print
-        print
+        """
+
     
         """
         get duration
@@ -320,143 +379,69 @@ class Media(MigrationMixin):
         """
         create a converted version of the master, stored in temp location
         """
-        try:
-            print '*******************************************************'
-            print 'create %s-version from %s' % (format, self.master.path)
-            print 'Tmp file at:',
-            print tmp_path
-            print 'Source file at:',
-            print src_path
-            print 'Destination file at:',
-            print dst_file
-            print '-'
-            
-            print 'sleeping 0.5 secs...'
-            
-            time.sleep(0.5)
-            
+        #try:
+        print '*******************************************************'
+        print 'Tmp file at: %s' % tmp_path
+        print 'Source file at: %s' % src_path
+        print 'Destination file at: %s' % dst_file
+        print '*******************************************************'
 
-            
-            if format == 'mp3':
-                # TODO: make compression variable / configuration dependant
-                
-                compression = '2'
-                skip_conversion = False
-                
-                print 'Version: %s' % version
 
-                if version == 'base':
-                    
-                    # skip conversino in case of mp3 - just use the original file
-                    ext = os.path.splitext(src_path)[1][1:].strip() 
-                    if ext == 'mp3':
-                        print 'skip conversion - mp3 > mp3'
-                        tmp_path = src_path
-                        skip_conversion = True
-                    
-                    compression = '0'
-                    
-                if version == 'low':
-                    compression = '6'
-                
-                
-                
-                if not skip_conversion:
-                    print 'conversion to mp3'
-                    audiotools.open(src_path).convert(tmp_path, audiotools.MP3Audio, compression=compression, progress=self.convert_progress)
+        if format == 'mp3':
+            # TODO: make compression variable / configuration dependant
+            
+            compression = '2'
+            skip_conversion = False
+            
+            print 'Version: %s' % version
 
-            
-            if format == 'flac':
-                # TODO: make compression variable / configuration dependant
-                print 'conversion to flac'
-                audiotools.open(src_path).convert(tmp_path, audiotools.FlacAudio, progress=self.convert_progress)
-            
-            if format == 'wav':
-                print 'conversion to wav'
+            if version == 'base':
                 
-                print 'pre audiotools'
-                try:
-                    print 'audiotools.open',
-                    print 'src_path:',
-                    print src_path
-                    print 'tmp_path:',
-                    print tmp_path
-                    
-                    audiotools.open(src_path).convert(tmp_path, audiotools.WaveAudio, progress=self.convert_progress)
-                except Exception, e:
-                    print 'error converting to WAV: ', 
-                    print e
-                print 'post audiotools'
+                # skip conversino in case of mp3 - just use the original file
+                ext = os.path.splitext(src_path)[1][1:].strip() 
+                if ext == 'mp3':
+                    print 'skip conversion - mp3 > mp3'
+                    tmp_path = src_path
+                    skip_conversion = True
+                
+                compression = '0'
+                
+            if version == 'low':
+                compression = '6'
             
-                # waveform
-                wav_path = str(tmp_path)
-                img_w = str(tmp_path) + '_w' + '.png' 
-                img_s = str(tmp_path) + '_s' +'.png' 
+            
+            
+            if not skip_conversion:
+                print '> AUDIOTOOLS: conversion to mp3'
+                audiotools.open(src_path).convert(tmp_path, audiotools.MP3Audio, compression=compression, progress=self.convert_progress)
+
         
-                args = (wav_path, img_w, img_s, 1800, 301, 2048, self.progress_callback)
-                
-                print '----------------------------------'
-                print 'WAVEGRAPHER!!!'
-                print '----------------------------------'
-                try:
-                    print 'trying to create waveform image:',
-                    print img_w
-                    create_wave_images(*args)
-                    print 'create_wave_images - done'
-                except Exception, e:
-                    print "Error running wav2png: ", e
-                    
-                try: 
-                    # file.Image.objects.get(original_filename='waveform.png', folder=self.folder)
-                    # os.remove(file.path)
-                    # file.delete()
-                    # delete all images in cache folder
-                    for img in self.folder.files.instance_of(Image):
-                        os.remove(img.path)
-                        img.delete()
-                                  
-                except Exception, e:
-                    print 'unable to delete:',
-                    print e
-                    
-                try:
-                    print 'trying to attach:',
-                    print img_w
-                    wav_file = DjangoFile(open(img_w),name='waveform.png')            
-                    file, created = Image.objects.get_or_create(
-                                                    original_filename='waveform.png',
-                                                    file=wav_file,
-                                                    folder=self.folder,
-                                                    is_public=True)
-                except Exception, e:
-                    print 'error creating waveform image :( - ', 
-                    print e
+        if format == 'flac':
+            # TODO: make compression variable / configuration dependant
+            print '> AUDIOTOOLS: conversion to flac'
+            audiotools.open(src_path).convert(tmp_path, audiotools.FlacAudio, progress=self.convert_progress)
 
-            
-            
-            converted = True
-            
-            print '*******************************************************'
-            
-        except Exception, e:
-            print 'conversion issue:',
-            print e
-            
-            
+        
+        converted = True
+        
+        print '* END OF CONVERSION *******************************************'
+        
         """
         finaly create a django file object and attach it to the medias cache folder
         """
         try:
             
-            print "** tmp_path"
-            print tmp_path
+            dst_final = self.get_folder_path('cache')
             
-            tmp_file = DjangoFile(open(tmp_path),name=dst_file)            
-            file, created = File.objects.get_or_create(
-                                            original_filename=tmp_file.name,
-                                            file=tmp_file,
-                                            folder=self.folder,
-                                            is_public=False)
+            print "Final Source: %s" % tmp_path
+            print "Final Destination: %s" % dst_final + dst_file
+            
+
+            shutil.copy2(tmp_path, dst_final + dst_file)
+            
+            #tmp_file = DjangoFile(open(tmp_path), name=dst_file)
+
+
             status = 1
         
         except Exception, e:
@@ -469,12 +454,11 @@ class Media(MigrationMixin):
         cleanup temp-files
         """
         try:
-            #shutil.rmtree(tmp_directory)
+            shutil.rmtree(tmp_directory)
             pass
         except Exception, e:
             print e
-        
-        # self.save()
+
         
         return status
         
@@ -565,8 +549,10 @@ class Media(MigrationMixin):
     TODO: unify calls
     """
     def convert_progress(self, x, y):
-        # pass
-        print 'conversion: %s' % (x * 100 / y)
+        p = (x * 100 / y)
+        if (p%10) == 0:
+            print p
+
         
     def progress_callback(self, percentage):
         pass
@@ -585,100 +571,64 @@ class Media(MigrationMixin):
     
     
     def generate_media_versions(self):
+        time.sleep(2)
+        log = logging.getLogger('alibrary.mediamodels.generate_media_versions')
+        self.generate_media_versions_task.delay(self)
         
-        print '-'
-        print "!!!! generate_media_versions:",
-        print "SELF.PROCESSED:",
-        print self.processed
-        print '-'
-        
-        if self.processed == 0:
-            self.generate_media_versions_task.delay(self)
-        else:
-            print 'processed not 0'
-            pass
-    
     """
     format conversion & co. takes the master and processes versions as configured
     """
     @task
     def generate_media_versions_task(obj):
         
-        print '-'
-        print '-'
-        print "!!!! generate_media_versions_task:",
-        print "OBJ.PROCESSED:",
-        print obj.processed
-        print '-'
-        print '-'
-
         log = logging.getLogger('alibrary.mediamodels.generate_media_versions_task')
         
-        log.info('Media id: %s - Generate Versions' % (obj.pk))
-        log.debug('sleeping some secs... waiting for db transaction to be complete')
+        log.info('Start conversion for Media: %s' % (obj.pk))
+        print 'Start conversion for Media: %s' % (obj.pk)
         
         print 
-        print '**********************************************************'
-    
-        print 'sleeping some secs.. waiting for db transaction to be complete'
-    
-        time.sleep(4)
-    
-        try:
-            old_files = File.objects.filter(folder=obj.folder).all()
-            for old_file in old_files:
-                print 'cache-folder: %s' % obj.folder 
-                print 'delete: %s | %s' % (old_file, old_file.path)
-                os.remove(old_file.path)
-                log.info('Delete from cache: %s' % (old_file.path))
-                old_file.delete()
-                
-        except Exception, e:
-            log.warning('Delete from cache: %s' % (e))
-            print e
-    
-        """
-        Skip errors # TODO: find a way to retry/reprocess
-        ignored a.t.m.
-        """
-        #if not obj.processed == 2: 
-        #    pass
+        print '************************************************************'
+        print 'Delete files from cache folder'
+        folder = obj.get_folder_path('cache')
+        for file in os.listdir(folder):
+            file_path = os.path.join(folder, file)
+            try:
+                print 'Unlinking: %s' % file_path
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception, e:
+                print e
         
-        print '**********************************************************'
         
-        print
-        print 'sending jobs to encoder-queue'
+        
+        print 'Sleeping 2 secs.. To be sure the transaction is completed.'
+        time.sleep(2)
         print
         
-        # call without '.delay' for straight developing 
 
         formats_media = FORMATS_MEDIA
+        
         for source, versions in formats_media.iteritems():
             for version in versions:
+                print 'Media id: %s - Sending to Encoder: %s/%s' % (obj.pk, source, version)
                 log.info('Media id: %s - Sending to Encoder: %s/%s' % (obj.pk, source, version))
-                obj.convert(source, version)
-        
+                try:
+                    obj.convert(source, version)
+                except Exception, e:
+                    print e
+                    pass
+
         
         # check if everything went fine (= if cache files available)
-        
-        print "Theoretically done... Let's check the result."
-        
-        try:
-            c = obj.get_cache_file('mp3', 'base')
-            print c
-            
-            print 'PROCESSING DONE'
-            
-            obj.processed = 1;
+
+        c = obj.get_cache_file('mp3', 'base')
+        if c:
+            print c            
+            obj.conversion_status = 1;
             obj.save();
-            
-            
-        except Exception, e:
-            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-            print e
-            obj.processed = 2;
+        else:
+            obj.conversion_status = 2;
             obj.save();
-            
 
         
         print "* EOL"
@@ -771,6 +721,10 @@ class Media(MigrationMixin):
     identification server
     """
     def update_echoprint(self):
+        self.update_echoprint_task.delay(self)
+        
+    @task()
+    def update_echoprint_task(obj):
         
         from settings import ECHOPRINT_CODEGEN_BIN
         
@@ -778,9 +732,9 @@ class Media(MigrationMixin):
         ecb = ECHOPRINT_CODEGEN_BIN
         ecb = 'echoprint-codegen'
         
-        path = self.get_master_path()
+        path = obj.get_master_path()
         
-        #path = self.master_path
+        #path = obj.master_path
         
         print 'path: %s' % path
         
@@ -790,7 +744,7 @@ class Media(MigrationMixin):
         stdout = p.communicate()        
         d = json.loads(stdout[0])
         
-        print d
+        # print d
         
         try:
             code = d[0]['code']
@@ -801,70 +755,79 @@ class Media(MigrationMixin):
             code = None
             version = None
             duration = None
+            status = 2
             
             
         if code:
-            print 'delete fingerprint on server id: %s' % self.id 
-            fp.delete("%s" % self.id)
             
-            print 'post new fingerprint:'
+            try:
             
-            
-            id = self.updated.isoformat('T')[:-7]
-            
-            
-            code = fp.decode_code_string(code)
-            
-            nfp = {
-                    "track_id": "%s" % self.id,
-                    "fp": code,
-                    #"artist": "%s" % self.artist.id,
-                    #"release": "%s" % self.artist.id,
-                    "track": "%s" % self.uuid,
-                    "length": duration,
-                    "codever": "%s" % version,
-                    "source": "%s" % "NRGFP",
-                    "import_date": "%sZ" % id
-                    }
-            
-            
-            res = fp.ingest(nfp, split=False)
-
-            print 'getting code by id (check)'
-            
-            if fp.fp_code_for_track_id("%s" % self.id):
-                print "ALL RIGHT!!! FP INSERTED!!"
-                self.echoprint_status = 1
+                print 'delete fingerprint on server id: %s' % obj.id 
+                fp.delete("%s" % obj.id)
                 
-            else:
-                self.echoprint_status = 2
+                print 'post new fingerprint:'
                 
-            self.save()
                 
+                id = obj.updated.isoformat('T')[:-7]
+                
+                
+                code = fp.decode_code_string(code)
+                
+                nfp = {
+                        "track_id": "%s" % obj.id,
+                        "fp": code,
+                        #"artist": "%s" % obj.artist.id,
+                        #"release": "%s" % obj.artist.id,
+                        "track": "%s" % obj.uuid,
+                        "length": duration,
+                        "codever": "%s" % version,
+                        "source": "%s" % "NRGFP",
+                        "import_date": "%sZ" % id
+                        }
+                
+                
+                res = fp.ingest(nfp, split=False)
+    
+                print 'getting code by id (check)'
+    
+                
+                if fp.fp_code_for_track_id("%s" % obj.id):
+                    print "ALL RIGHT!!! FP INSERTED!!"
+                    status = 1
+                    
+                else:
+                    status = 2
+                    
+            except Exception, e:
+                print e
+                status = 2
+                
+        obj.echoprint_status = status
+        obj.save()
 
-
-            #print code
-        
-        
-        
         
     def save(self, *args, **kwargs):
         
         log = logging.getLogger('alibrary.mediamodels.save')
         log.info('Media id: %s - Save' % (self.pk))
 
-        
+        print 'UUID: %s' % self.uuid
+    
         """
         check if master changed. if yes we need to reprocess the cached files
         """
 
         if self.uuid is not None:
-            
+
             try:
-                orig = Media.objects.get(uuid=self.uuid)
+                #orig = Media.objects.get(uuid=self.uuid)
+                orig = Media.objects.filter(uuid=self.uuid)[0]
                 if orig.master != self.master:
                     log.info('Media id: %s - Master changed from "%s" to "%s"' % (self.uuid, orig.master, self.master))
                     self.processed = 0
+                    self.conversion_status = 0
+                    self.echoprint_status = 0
+
             except Exception, e:
                 print e
                 pass
@@ -878,32 +841,70 @@ class Media(MigrationMixin):
             cache_folder = None
 
             
-        if self.master:
+        if self.master and self.processed != 1:
             log.info('Media id: %s - set master path to: %s' % (self.pk, self.master.path))
-            self.master_path = self.master.path
+            iext = None
+            try:
+                iext = os.path.splitext(self.master.path)[1].lower()
+                iext = iext[1:]
+                audiofile = audiotools.open(self.master.path)
+                
+                base_format = iext
+                base_bitrate = audiofile.bits_per_sample()
+                base_samplerate = audiofile.sample_rate()
+                base_filesize = os.path.getsize(self.master.path)
+                base_duration = audiofile.seconds_length()
+                
+                self.processed = 1
+            except Exception, e:
+                print e
+                base_bitrate = None
+                base_samplerate = None
+                base_filesize = None
+                base_duration = None
+                self.processed = 2
+                
+            self.base_format = iext
+            self.base_bitrate = base_bitrate
+            self.base_samplerate = base_samplerate
+            self.base_filesize = base_filesize
+            self.base_duration = base_duration
+                
                 
         unique_slugify(self, self.name)
         super(Media, self).save(*args, **kwargs)
 
 # register
-post_save.connect(library_post_save, sender=Media)   
+# post_save.connect(library_post_save, sender=Media)   
         
 # media post save
 def media_post_save(sender, **kwargs):
+    
     log = logging.getLogger('alibrary.mediamodels.media_post_save')
     obj = kwargs['instance']
+
+    # save the folder path
+    if not obj.folder and obj.master:
+        folder = "private/%s/" % (obj.uuid.replace('-', '/'))
+        log.info('Adding folder: %s' % (folder))
+        obj.folder = folder
+        obj.save()
+
     
-    print "media_post_save - PROCESSED?:",
-    print obj.processed
+    log.info('Media id: %s - Processed state: %s' % (obj.pk, obj.processed))
     
-    if obj.processed == 0:
+
+    
+    
+    
+    if obj.master and obj.echoprint_status == 0:
+        log.info('Media id: %s - Echoprint' % (obj.pk))
+        obj.update_echoprint()
+    
+    if obj.master and obj.conversion_status == 0 and obj.echoprint_status != 0:
         log.info('Media id: %s - Re-Process' % (obj.pk))
-        pass
         obj.generate_media_versions()
         
-    if obj.processed == 1 and obj.echoprint_status == 0:
-        print "do echoprint geeration"
-        obj.update_echoprint()
         
 
 # register
@@ -935,6 +936,8 @@ class MediaPlugin(CMSPlugin):
     # meta
     class Meta:
         app_label = 'alibrary'
+
+
 
 
 

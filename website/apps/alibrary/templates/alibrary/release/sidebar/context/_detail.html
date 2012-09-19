@@ -1,4 +1,4 @@
-{% load i18n guardian_tags %}
+{% load i18n guardian_tags activity_tags ctype %}
 
 {% get_obj_perms request.user for object as "object_perms" %}
 
@@ -26,6 +26,25 @@
 			{% if perms.alibrary.change_release %}
 			<li class="link ">
 				<span class="left icon"><a href="{{ object.get_edit_url }}" title="{% trans "Edit" %}">{% trans "Edit" %}</a></span>
+				<span class="opt"></span>
+				<span class="clear"></span>
+			</li>
+			{% endif %}
+			
+
+			{% if user.is_authenticated %}
+			<li class="action">
+				<span class="left icon">
+					
+					<a href="{% follow_url object %}?next={{ request.get_full_path }}">
+					    {% if request.user|is_following:object %}
+					        {% trans "Stop following" %} {{ object|ct_name_by_object }}
+					    {% else %}
+					        {% trans "Follow" %} {{ object|ct_name_by_object }}
+					    {% endif %}
+					</a>
+					
+				</span>
 				<span class="opt"></span>
 				<span class="clear"></span>
 			</li>

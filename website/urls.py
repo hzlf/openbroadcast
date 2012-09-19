@@ -32,10 +32,14 @@ urlpatterns = patterns('',
     url(r'^admin_tools/', include('admin_tools.urls')),
     url(r"^admin/", include(admin.site.urls)),
     
+    #url(r"^profiles/", include("profiles.urls")),
+    
     
     
     (r'^dev/', include('dev.urls')), # shop main urls
     
+    #url(r'^private_files/', include('private_files.urls')),
+    #url(r'^activity/', include('actstream.urls')),
     url(r"^ratings/", include("agon_ratings.urls")),
     
     url(r"^vote/", include('arating.urls')),

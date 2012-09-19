@@ -57,6 +57,7 @@ form.form-horizontal
   // Move over buttons in .form-actions to align with .controls
   .form-actions
     padding-left: 160px
+    border-top: none
     
   .span2
     .controls
@@ -77,7 +78,19 @@ form.form-horizontal
     
     > .formColumn
       //border-bottom: 1px solid #ccc
+      
+    &.relation-row
+      padding: 0 0 0 0
+      margin-top: 0
+      margin-bottom: 0
+      .controls
+        // margin-left: 40px
+        
+    &.releasemedia-row
+      margin-left: 0px
     
+    
+form.form_horizontal
 
 form.form-horizontal
   .controls
@@ -125,14 +138,22 @@ form.form-horizontal
     
     
     fieldset
-      padding: 0 0 0 7px
+      // padding: 0 0 0 7px
+      padding: 0 0 0 0
     
     fieldset
-      background-color: #fcfcfc
-    legend
-      padding: 4px 0
-      line-height: 14px
       background-color: #fafafa
+      
+      margin-top: 20px
+      
+      .control-group
+        padding-left: 7px
+      
+    legend
+      width: 816px
+      padding: 6px 7px
+      line-height: 14px
+      background-color: #f2f2f2
     
     legend
       //display: none
@@ -175,6 +196,13 @@ body
     
     &.hover
       background-color: red
+      
+      
+// bulk apply form
+div.bulk_edit
+  padding: 20px
+  background: #DDFFD9
+
 
 ul.links.external
 
@@ -192,6 +220,9 @@ ul.links.external
     &:hover
       background-position: 0 -16px
     /* individual links (icon sprite)
+    &.unknown
+      background-image: none
+
     &.discogs
       background-position: 0 0
       &.available
@@ -226,8 +257,120 @@ ul.links.external
         background-position: -112px 16px
 
 
+// clearable file/image input
+form.form-horizontal
+  .input-image, .input-file
+    .control-group
+      .control-label
+        // color: green
+      .controls
+        ul
+          margin-left: 0
+          list-style-type: none
+          li input[type="checkbox"] 
+            float: left
+            margin-right: 10px
 
 
 
+// inline notes, hints, info etc
+form.form-horizontal
+  
+  fieldset
+  
+    div.notes-inline
+      color: $grayDark
+      padding: 5px 10px
+      margin-bottom: 10px
+      h1, h2, h3
+        color: $grayDark
+        font-weight: bold
+        font-size: $baseFontSize
+        line-height: $baseLineHeight
+      p
+        color: $grayDark
+        width: 80%
+        
+      // type dependent
+      &.notes-info
+        background-color: $infoBackground
+        color: $infoText
+        h1, h2, h3
+          color: $infoText
+        p
+          color: $infoText
+          
+      &.notes-warning
+        background-color: $warningBackground
+        color: $warningText
+        h1, h2, h3
+          color: $warningText
+        p
+          color: $warningText
+          
+      &.notes-error
+        background-color: $errorBackground
+        color: $errorText
+        h1, h2, h3
+          color: $errorText
+        p
+          color: $errorText
+          
+      &.notes-success
+        background-color: $successBackground
+        color: $successText
+        h1, h2, h3
+          color: $successText
+        p
+          color: $successText
+      
+      
 
+
+// hackish here, think about integration
+
+form
+  div.form-help
+    padding-bottom: 7px
+    h4
+      font-size: 100%
+      text-transform: none
+    p
+      color: #a5a5a5
+
+.ui-combo-button
+  border: 1px solid green
+  background: white
+  margin-left: 4px
+  height: 20px
+  width: 16px
+
+ul.selectable-deck
+  width: 296px
+  margin: 10px 0 4px 0
+  background-color: transparent !important
+  
+  > li
+  
+    .selectable-deck-remove
+      background: green
+      .ui-button-text
+        display: block
+        width: 16px
+        height: 16px
+    
+
+.control-group
+  &.error
+    // background: red
+    label
+      color: $errorText
+    input
+      color: #999
+      border-color: $errorText
+      background-color: $errorBackground
+    span.help-inline
+      > strong
+        color: $errorText
+        font-weight: normal
 

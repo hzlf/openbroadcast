@@ -2,7 +2,8 @@
 
 
 .item_detail section
-  background-color: #F5F5F5
+  &:first-child
+    background-color: #F5F5F5
 
 .iteminfo
   padding: 0
@@ -84,7 +85,9 @@
 .item_menu
   padding: 0px
   margin: 0px
-  border-bottom: 1px solid #bbb
+  // UNBORDERING
+  //border-bottom: 1px solid #bbb
+  //border-bottom: 1px solid #fff
   background-color: #F5F5F5
   height: auto
   float: left
@@ -99,12 +102,14 @@
     width: 100%
     float: left
     bottom: -1px
-    margin-left: 10px
+    margin-left: 0px
   li
     float: left
     margin: 0
     padding: 0
+    // UNBORDERING
     border: 1px solid #bbb
+    border: none
     padding: 0px
     margin: 0 0 0 5px
     &.spacer
@@ -112,16 +117,23 @@
       border-top: 1px solid #F5F5F5
       border-bottom: 1px solid #bbb
       padding: 5px
-    &.on
+    &.on, &.active
       border-bottom: 1px solid #fff
+      a
+        //border-bottom: #fff
+        background-color: #fff
+        color: $main-a
+        
     a
       background: none repeat scroll 0 0 #e1e1e1
       color: #666666
       display: block
       margin: 0
       text-decoration: none
-      padding: 5px
-      &.on
+      // UNBORDERING
+      padding: 5px 10px
+      padding: 2px 10px
+      &.on, &.active
         border-bottom: #fff
         background-color: #fff
         color: $main-a
@@ -151,3 +163,14 @@ div.item_inner
 
       p
         margin-bottom: 14px
+
+
+div.item_detail
+  section.description
+    background-color: transparent
+    margin-top: 20px
+    .markdown
+      // +markdown()
+
+  
+  

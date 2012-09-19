@@ -279,6 +279,10 @@ class ReleaseEditView(UpdateView):
         
         context = super(ReleaseEditView, self).get_context_data(**kwargs)
         
+        # 
+        context['release_bulkedit_form'] = ReleaseBulkeditForm()
+        context['action_form'] = ActionForm()
+        
         context['releasemedia_form'] = ReleaseMediaFormSet(instance=self.object)
         context['relation_form'] = ReleaseRelationFormSet(instance=self.object)
         

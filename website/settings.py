@@ -295,6 +295,10 @@ INSTALLED_APPS = (
     'django_countries',
     'guardian',
     'filer',
+    'private_files',
+    
+    'profiles',
+    #'django_hgroups',
     
     
     'sendfile',
@@ -302,6 +306,10 @@ INSTALLED_APPS = (
     'reversion',
     
     'clear_cache',
+    
+    'actstream',
+    
+    'ace_editor',
     
     'eav',
     
@@ -412,7 +420,8 @@ PAGINATION_SETTINGS = {
 }
 
 FORMATS_MEDIA = {
-    'mp3': ['base', 'low'],    
+    #'mp3': ['base', 'low'],
+    'mp3': ['base',],    
 }
 
 """
@@ -440,6 +449,9 @@ Filer related settings
 FILER_IS_PUBLIC_DEFAULT = True
 FILER_ENABLE_PERMISSIONS = True
 FILER_STATICMEDIA_PREFIX = '/static/filer/'
+
+# private files settings, not for "filer" app
+FILE_PROTECTION_METHOD = 'basic'
 
 THUMBNAIL_PROCESSORS = (
     'easy_thumbnails.processors.colorspace',
@@ -504,6 +516,14 @@ ACCOUNT_USERNAME_REQUIRED=True
 SOCIALACCOUNT_QUERY_EMAIL=ACCOUNT_EMAIL_REQUIRED
 SOCIALACCOUNT_AUTO_SIGNUP=True
 EMAIL_CONFIRMATION_DAYS=5
+
+
+# profiles & co
+ABSOLUTE_URL_OVERRIDES = {
+    "auth.user": lambda o: "/network/profiles/%s/" % o.username,
+}
+AUTH_PROFILE_MODULE = "profiles.Profile"
+
 
 
 """
@@ -648,6 +668,17 @@ WYM_CONTAINERS = ",\n".join([
     "{'name': 'H4', 'title': 'Heading_4', 'css': 'wym_containers_h4'}",
     "{'name': 'BLOCKQUOTE', 'title': 'Blockquote', 'css': 'wym_containers_blockquote'}",
 ])
+
+
+ACTSTREAM_SETTINGS = {
+    'MODELS': ('auth.user', 'auth.group', 'alibrary.release',),
+    #'MANAGER': 'myapp.streams.MyActionManager',
+    'FETCH_RELATIONS': True,
+    'USE_PREFETCH': True,
+    'USE_JSONFIELD': True,
+    'GFK_FETCH_DEPTH': 1,
+}
+
 
 
 

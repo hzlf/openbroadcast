@@ -8,7 +8,7 @@ from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
 
 from alibrary.models import Media
 
-from echoprint.API import fp
+from ep.API import fp
 
 
 class MediaResource(ModelResource):
