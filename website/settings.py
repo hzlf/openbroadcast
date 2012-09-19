@@ -309,6 +309,8 @@ INSTALLED_APPS = (
     
     'actstream',
     
+    'ace_editor',
+    
     'eav',
     
     # dajax

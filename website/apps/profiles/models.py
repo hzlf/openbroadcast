@@ -68,6 +68,10 @@ class Profile(models.Model):
     iban = models.CharField(_('IBAN'), null=True, blank=True, max_length=100)
     paypal = models.EmailField(_('Paypal'), null=True, blank=True, max_length=200)
     
+    # relations
+    expertise = models.ManyToManyField('Expertise', verbose_name=_('Fields of expertise'), null=True, blank=True)
+    
+    
     # tagging (d_tags = "display tags")
     d_tags = tagging.fields.TagField(verbose_name="Tags", blank=True, null=True)
 
@@ -189,3 +193,39 @@ class Link(models.Model):
 
     def __unicode__(self):
         return u"%s" % self.title
+    
+    
+    
+    
+    
+    
+    
+class Expertise(models.Model):
+    
+    name = models.CharField(max_length=512)
+    
+    class Meta:
+        app_label = 'profiles'
+        verbose_name = _('Expertise')
+        verbose_name_plural = _('Expertise')
+        # ordering = ('name', )
+        
+    def __unicode__(self):
+        return u"%s" % self.name
+        
+"""
+class UserExpertise(models.Model):
+    profile = models.ForeignKey(Profile)
+    expertise = models.ForeignKey(Expertise)
+"""
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        

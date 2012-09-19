@@ -199,7 +199,7 @@ class Media(MigrationMixin):
     created = models.DateTimeField(auto_now_add=True, editable=False)
     updated = models.DateTimeField(auto_now=True, editable=False)
 
-    # meta
+
     class Meta:
         app_label = 'alibrary'
         verbose_name = _('Track')

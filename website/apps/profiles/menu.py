@@ -34,7 +34,7 @@ class ProfileMenu(CMSAttachMenu):
         
         node = NavigationNode(
             _('Edit my Profile'),
-            reverse('profile_edit'),
+            reverse('profiles-profile-edit'),
             121
         )
         nodes.append(node)

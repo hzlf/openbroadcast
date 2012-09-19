@@ -15,7 +15,7 @@ from pagedown.widgets import PagedownWidget
 from tagging.forms import TagField
 from ac_tagging.widgets import TagAutocompleteTagIt
 
-from lib.fields.extra import ExtraClearableFileInput
+from lib.fields.extra import ExtraClearableFileInput, PreviewImageInput, AdvancedFileInput
 
 from profiles.models import *
 
@@ -42,8 +42,10 @@ class ProfileForm(ModelForm):
         exclude = ('user', )
 
         widgets = {
-            'image': ExtraClearableFileInput(),
+            'image': AdvancedFileInput(image_width=76),
+            'expertise': forms.CheckboxSelectMultiple(),
         }
+        
         
         
     def __init__(self, *args, **kwargs):
@@ -51,7 +53,7 @@ class ProfileForm(ModelForm):
         
         self.helper = FormHelper()
         self.helper.form_tag = False
-        layout_profile = Layout(
+        profile_layout = Layout(
             Fieldset(
                 _('Personal Information'),
                 Field('gender', css_class='input-xlarge'),
@@ -63,7 +65,7 @@ class ProfileForm(ModelForm):
                 )
             )
         )
-        layout_contact = Layout(
+        contact_layout = Layout(
 
             Fieldset(
                 _('Contact'),
@@ -82,7 +84,7 @@ class ProfileForm(ModelForm):
                 Field('country', css_class='input-xlarge'),
             )
         )
-        layout_account = Layout(
+        account_layout = Layout(
 
             Fieldset(
                 _('Accounts'),
@@ -94,6 +96,14 @@ class ProfileForm(ModelForm):
                 Field('paypal', css_class='input-xlarge'),
             )
         )
+        skills_layout = Layout(
+
+            Fieldset(
+                _('Skills & Knowledge'),
+                Field('expertise', css_class='input-xlarge'),
+
+            )
+        )
         
         tagging_layout = Fieldset(
                 'Tags',
@@ -102,10 +112,11 @@ class ProfileForm(ModelForm):
         
 
         layout = Layout(
-                        layout_profile,
-                        layout_contact,
+                        profile_layout,
+                        contact_layout,
                         tagging_layout,
-                        layout_account,
+                        skills_layout,
+                        account_layout,
                         )
 
         self.helper.add_layout(layout)
@@ -114,8 +125,8 @@ class ProfileForm(ModelForm):
     from floppyforms.widgets import DateInput
     birth_date = forms.DateField(widget=DateInput(), required=False,)
     description = forms.CharField(widget=PagedownWidget(), required=False, help_text=_('Markdown enabled'))
-    d_tags = TagField(widget=TagAutocompleteTagIt(max_tags=9), required=False, label=_('Tags'))  
-
+    d_tags = TagField(widget=TagAutocompleteTagIt(max_tags=9), required=False, label=_('Tags'))
+    
         
     def clean_user(self):
         return self.instance.user
