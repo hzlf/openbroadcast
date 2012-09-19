@@ -308,8 +308,7 @@ INSTALLED_APPS = (
     'clear_cache',
     
     'actstream',
-    
-    'ace_editor',
+
     
     'eav',
     

@@ -87,7 +87,7 @@ def profile_edit(request, template_name='profiles/profile_form.html'):
             link_formset.save()
             service_formset.save()
             #return HttpResponseRedirect(reverse('profile_detail', kwargs={'username': request.user.username}))
-            return HttpResponseRedirect(reverse('profile_edit'))
+            return HttpResponseRedirect(reverse('profiles-profile-edit'))
         else:
             context = {
                 'object': profile,
