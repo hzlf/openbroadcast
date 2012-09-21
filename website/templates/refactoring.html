@@ -1,10 +1,9 @@
 {% load compress cms_tags sekizai_tags %}
 <!DOCTYPE html>
 <html lang="en">
-
-
+{% spaceless %}
 	{% include "base/_common_script.html" %}
-
+{% endspaceless %}
 	<head>
 	{% include "_head.html" %}
 
@@ -17,7 +16,7 @@
 	<!-- webfonts -->
 	{# include "lib/monotype.html" #}
 	</head>
-	
+
 	
 	<!-- start: body -->
 	<!--
@@ -26,7 +25,7 @@
 	<body  id="body" class="base" data-spy="scroll" data-target=".subnav" data-offset="50">
 		{% cms_toolbar %}
 		<div id="dim_content" style="display: none;"></div>
-
+		
 
 		
 
@@ -63,7 +62,7 @@
 
 			</header>
 	    	
-	    	
+
 <section id="global">
 	<!--
 	<div class="page-header">
@@ -94,7 +93,7 @@
 	
 	
 </section>
-	    	
+    	
 	    	
 	    	
 			<footer class="footer"  id="footer">
@@ -149,7 +148,7 @@
 		</div>
 		<!-- end: dialog/ui -->
 		<!-- start: js_footer -->
-		
+			
 		
 		<!-- js-head -->
 		{% render_block "js-head" %}
@@ -230,6 +229,7 @@
 
 		</script>
 		<script type="text/javascript">
+		/*
 			window.fbAsyncInit = function() {
 				FB.init({
 					appId : '143733768986545',
@@ -248,7 +248,7 @@
 				e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
 				document.getElementById('fb-root').appendChild(e);
 			}());
-
+		*/
 		</script>
 	</body>
 </html>

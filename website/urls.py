@@ -34,7 +34,7 @@ urlpatterns = patterns('',
     
     #url(r"^profiles/", include("profiles.urls")),
     
-    
+    url(r'uploader/', include('multiuploader.urls')),
     
     (r'^dev/', include('dev.urls')), # shop main urls
     

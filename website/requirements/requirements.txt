@@ -88,7 +88,7 @@ django-sendfile>=0.3.0
 
 -e git://github.com/ojii/django-multilingual-ng.git#egg=django-multilingual-ng
 
-
+-e git+git://github.com/enginous/mutagen.git#egg=Mutagen
 
 # CMS related & plugins
 markdown
@@ -111,8 +111,11 @@ vobject>=0.8.1c
 chardet>=1.0.1
 textile
 easy-thumbnails==1.0-alpha-21
+python-magic
+
 
 # audio processing
+pyacoustid
 numpy
 -e git://github.com/hzlf/python-audio-tools.git#egg=python-audio-tools
 docutils>=0.8.1

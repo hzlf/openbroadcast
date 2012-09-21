@@ -177,7 +177,7 @@ class ReleaseListView(PaginationMixin, ListView):
         self.filter = ReleaseFilter(self.request.GET, queryset=qs)
         
         # tagging / cloud generation
-        tagcloud = Tag.objects.usage_for_queryset(qs, counts=True, min_count=2)
+        tagcloud = Tag.objects.usage_for_queryset(qs, counts=True, min_count=0)
         #print '** CLOUD: **'
         #print tagcloud
         #print '** END CLOUD **'

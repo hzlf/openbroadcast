@@ -31,7 +31,7 @@ COMPRESS_OFFLINE = False
 COMPRESS_ENABLED = False
 
 
-LANGUAGES = [('en', 'en'), ('de', 'de')]
+LANGUAGES = [('en', 'en'), ('de', 'de'), ('fr', 'fr')]
 DEFAULT_LANGUAGE = 0
 
 DATABASES = {    
@@ -366,6 +366,8 @@ INSTALLED_APPS = (
     'asite',
     'alibrary',
     'aplayer',
+    'importer',
+    'multiuploader',
     'arating',
     
     'bcmon',
