@@ -277,6 +277,9 @@ INSTALLED_APPS = (
 
     #'staticfiles',
     
+    # server
+    'gunicorn',
+    
     # core apps
     'django_extensions',
     'django_jenkins',
@@ -502,7 +505,7 @@ ANONYMOUS_USER_ID = -1
 
 
 LOGIN_REDIRECT_URL = '/accounts/%(username)s/'
-LOGIN_URL = '/accounts/signin/'
+LOGIN_URL = '/accounts/login/'
 LOGOUT_URL = '/accounts/signout/'
 LOGIN_REDIRECT_URL = "/"
 
@@ -668,6 +671,11 @@ WYM_CONTAINERS = ",\n".join([
     "{'name': 'H3', 'title': 'Heading_3', 'css': 'wym_containers_h3'}",
     "{'name': 'H4', 'title': 'Heading_4', 'css': 'wym_containers_h4'}",
     "{'name': 'BLOCKQUOTE', 'title': 'Blockquote', 'css': 'wym_containers_blockquote'}",
+])
+
+WYM_CLASSES = ",\n".join([
+    "{'name': 'date', 'title': 'PARA: Date', 'expr': 'p'}",
+    "{'name': 'hidden-note', 'title': 'PARA: Hidden note', 'expr': 'p[@class!=\"important\"]'}",
 ])
 
 

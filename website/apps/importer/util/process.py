@@ -8,6 +8,8 @@ import requests
 from xml.etree import ElementTree as ET
 import simplejson
 
+import musicbrainzngs
+
 from lib.util import pesterfish
 
 
@@ -208,13 +210,18 @@ class Process(object):
         data = acoustid.match(AC_API_KEY, file.path)
         
         res = []
-        
+        i = 0
         for d in data:
+            selected = False
+            if i == 0:
+                selected = True
             t = {
                  'score': d[0],
                  'id': d[1],
+                 'selected': selected,
                  }
             res.append(t)
+            i += 1
             
         return res
             
@@ -233,6 +240,70 @@ class Process(object):
         #print tree
         #print pesterfish.to_pesterfish(tree)
         
+        
+    def get_musicbrainz(self, obj):
+
+        results = []
+        
+        musicbrainzngs.set_useragent("NRG Processor", "0.01", "http://anorg.net/")
+        includes = ['releases', "artist-rels", "label-rels", "recording-rels", "release-rels","release-group-rels", "url-rels", "work-rels"]
+        
+        
+        for e in obj.results_acoustid:
+            media_id = e['id']
+        
+            # media_id = '9ca385f4-4082-494a-974a-b1a8aa997838'
+            result = musicbrainzngs.get_recording_by_id(id=media_id, includes=includes)
+            results.append(result)
+            
+        results = self.complete_musicbrainz(results)    
+        
+        return results
+    
+    
+    def complete_musicbrainz(self, results):
+        
+        completed_results = []
+        
+        for r in results:
+            print
+            print 'RESULT'
+            
+            
+            releases = []
+            
+            recording = r['recording']
+            for release in recording['release-list']:
+                
+                print release['id']
+                
+                release = musicbrainzngs.get_release_by_id(id=release['id'], includes=['url-rels', 'work-rels', 'release-groups'])
+                
+                print 'RELEASE!:::::::::::::::::::::::::::::::::::::::::::::::::'
+                print release
+                
+                relations = []
+                
+                for relation in release['release']['url-relation-list']:
+                    print "Relation: target: %s - url: %s" % (relation['type'], relation['target'])
+                    relations.append(relation)
+                
+                release['relations'] = relations
+                    
+                releases.append(release)
+                
+            
+            r['release-list'] = releases 
+            #r['releases'] = releases 
+            
+            completed_results.append(r)
+            
+                    
+        return completed_results
+        
+
+        
+
         
         
         

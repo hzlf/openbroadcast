@@ -75,6 +75,8 @@ class Import(BaseModel):
     )
     type = models.CharField(max_length="10", default='web', choices=TYPE_CHOICES)
     
+    notes = models.TextField(blank=True, null=True, help_text=_('Optionally, just add some notes to this import if desired.'))
+    
     
 
     def __unicode__(self):
@@ -105,6 +107,7 @@ class ImportFile(BaseModel):
     
     mimetype = models.CharField(max_length=100, blank=True, null=True)
     
+    messages = JSONField(blank=True, null=True, default=None)
     
     """
     Result sets. Not stored in foreign model - as they are rather fix.
@@ -114,11 +117,11 @@ class ImportFile(BaseModel):
     results_tag = JSONField(blank=True, null=True)
     results_tag_status = models.PositiveIntegerField(verbose_name=_('Result Tags (ID3 & co)'), default=0, choices=GENERIC_STATUS_CHOICES)
     
-    results_musicbrainz = JSONField(blank=True, null=True)
-    results_discogs_status = models.PositiveIntegerField(verbose_name=_('Result Musicbrainz'), default=0, choices=GENERIC_STATUS_CHOICES)
-    
     results_acoustid = JSONField(blank=True, null=True)
     results_acoustid_status = models.PositiveIntegerField(verbose_name=_('Result Musicbrainz'), default=0, choices=GENERIC_STATUS_CHOICES)
+    
+    results_musicbrainz = JSONField(blank=True, null=True)
+    results_discogs_status = models.PositiveIntegerField(verbose_name=_('Result Musicbrainz'), default=0, choices=GENERIC_STATUS_CHOICES)
     
     results_discogs = JSONField(blank=True, null=True)
     results_discogs_status = models.PositiveIntegerField(verbose_name=_('Result Discogs'), default=0, choices=GENERIC_STATUS_CHOICES)
@@ -131,6 +134,8 @@ class ImportFile(BaseModel):
         (1, _('Done')),
         (2, _('Ready')),
         (3, _('Progress')),
+        (4, _('Warning')),
+        (5, _('Duplicate')),
         (99, _('Error')),
         (11, _('Other')),
     )
@@ -175,6 +180,11 @@ class ImportFile(BaseModel):
         
         obj.results_acoustid = processor.get_aid(obj.file)
         obj.save()
+        
+        
+        
+        obj.results_musicbrainz = processor.get_musicbrainz(obj)
+        obj.save()
 
         
         
@@ -189,6 +199,9 @@ class ImportFile(BaseModel):
     
     
     def save(self, *args, **kwargs):
+        
+        msg = {'key': 'save', 'content': 'object saved'}
+        #self.messages.update(msg);
 
         if not self.filename:
             self.filename = self.file.name

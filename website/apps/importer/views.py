@@ -4,7 +4,7 @@ from django.views.generic.detail import SingleObjectTemplateResponseMixin, Templ
 from  django.views.generic.edit import FormMixin, ProcessFormView
 from django.shortcuts import get_object_or_404, render_to_response
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.core.files.uploadedfile import UploadedFile
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -26,7 +26,7 @@ class ImportListView(ListView):
 
 
 
-class ImportCreateView(ProcessFormView, FormMixin, TemplateResponseMixin):
+class __nomod__ImportCreateView(ProcessFormView, FormMixin, TemplateResponseMixin):
     
     model = Import
     
@@ -48,11 +48,30 @@ class ImportCreateView(ProcessFormView, FormMixin, TemplateResponseMixin):
         else:
             return self.form_invalid(form, **kwargs)
 
+"""
+Model version, adding some extra fields to the import session
+"""
+class ImportCreateView(CreateView):
+    
+    model = Import
+    
+    template_name = 'importer/import_create.html'
+    form_class = ImportCreateModelForm
+    #success_url = lazy(reverse, str)("feedback-feedback-list")
+    
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+        obj.save()
+        return HttpResponseRedirect(obj.get_absolute_url())
+
 
 class ImportUpdateView(UpdateView):
     
     model = Import
-    
+    template_name = 'importer/import_form_jquery.html'
+    #template_name = 'importer/import_form_backbone.html'
+    #template_name = 'importer/import_form_rework.html'
     def get_queryset(self):
         kwargs = {}
         return Import.objects.filter(user=self.request.user)

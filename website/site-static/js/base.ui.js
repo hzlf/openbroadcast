@@ -319,7 +319,7 @@ base.ui.iface = function() {
 	}
 	
 	
-
+	$('a.tooltipable').tooltip()
 
 	
 	$('.hoverable').live('mouseenter', function(e){
@@ -1480,78 +1480,7 @@ base.ui.sidebar = function() {
 	});
 	 */
 	
-	
 
-	
-	
-	
-	/*
-	 * sidebar / userfilter | auto-complete
-	 */
-	// clear on focus
-	/*
-	$('input.boxitem_user').focus(function() {
-		$(this).val('');
-	});
-	*/
-	
-	// autocomplete function
-	$('input.boxitem_user').autocomplete(
-			base.vars.base_url + 'ui/autocomplete/' + 'users', {
-				width : 140,
-				max : 10,
-				selectFirst : false,
-				highlight : false,
-				scroll : true,
-				scrollHeight : 300,
-				formatItem : function(data, i, n, value) {
-					return "<span>" + value.split("|")[0] + "</span> ";
-				},
-				formatResult : function(data, value) {
-					return value.split("|")[0];
-				}
-			});
-	// return function
-	/*
-	$('input.boxitem_user').result(function(event, data, formatted) {
-		// check for returned data
-			if (data) {
-				// parse return (format: 'username' | 'user_id' \r\n)
-				$(this).parent().next().find("input").val(data[1]);
-				var item_id = data[1];
-
-				var key = 'user_user_id';
-				var rel = base.vars.context + '_' + base.vars.section + '_'
-						+ base.vars.subset;
-				var url = base.vars.base_url + 'ajax/filter_set_value';
-				var value = item_id;
-
-				// check if active
-				// maybe there is a shortcut, '.closest()' somehow did not work
-				// for me
-				var active = $(this).parent().parent().find('a.filterbox_item').hasClass('on');
-				var action = false;
-				if (active) {
-					action = 'reload';
-				}
-
-				var data = {
-					'key' : key,
-					'rel' : rel,
-					'value' : value,
-					'action' : action
-				};
-
-				
-				var uri = util.uri_param_insert(window.location.href, 'filter_user', value, true);
-				uri = util.uri_param_insert(uri, 'page', 1, true);
-				window.location = uri;				
-				
-				return false;
-
-			}
-		});
-		*/
 	
 	
 	

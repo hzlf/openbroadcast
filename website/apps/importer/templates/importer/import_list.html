@@ -77,7 +77,13 @@
 				
 			</td>
 			
-			<td>{% blocktrans with created=object.created|timesince %}{{ created }} ago{% endblocktrans %}</td>
+			<td>
+				{% if object.notes %}
+					<a href="{{ object.get_absolute_url }}" rel="tooltip" class="tooltipable" title="{{ object.notes }}">{% blocktrans with created=object.created|timesince %}{{ created }} ago{% endblocktrans %}</a>
+				{% else %}
+					{% blocktrans with created=object.created|timesince %}{{ created }} ago{% endblocktrans %}	
+				{% endif %}
+			</td>
 			<td>{{ object.get_type_display }}</td>
 			
 			

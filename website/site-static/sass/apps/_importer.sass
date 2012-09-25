@@ -1,5 +1,17 @@
 
+
+
+i.icon-id3
+  background-image: url(/static/img/icons/metadata.providers/id3v2.png)
+  background-position: 0 0
+  width: 22px
+  height: 22px
+
+
 section.importer-importfiles
+
+
+
 
   // base
   .listing
@@ -43,6 +55,18 @@ section.importer-importfiles
         padding: 5px 0
         border-bottom: 1px solid $grayLighter
         
+        &.provider-tag
+          input[type='checkbox']
+            display: none
+            
+        .subset
+          display: block
+            
+        &.selected
+          background-color: $successBackground
+          .subset
+            display: block
+          
         ul
           margin: 0
           > li
@@ -52,6 +76,8 @@ section.importer-importfiles
               padding: 0 5px 0 0
               width: 50px
             &.value
+            
+        
             
             
             
