@@ -112,58 +112,29 @@
 	
 
 	{% for (var i=0, result; result=o.results_musicbrainz[i]; i++) { %}
-	<div class="row-fluid result-set musicbrainz-tag {% if (result.selected) { %}selected{% } %}">
+	<div class="row-fluid result-set musicbrainz-tag mb_id-{%=result.mb_id%}">
 
 		<div class="span1">
 			<i class="icon icon-id3"></i>
 		</div>
 
-		<div class="span11">
+		<div class="span8">
 
-				<a href="http://musicbrainz.org/ws/2/recording/{%=result.recording.id%}?inc=artist-credits+releases+isrcs+label-rels+url-rels">{%=result.recording.id%}</a>
+				<h5><a href="http://musicbrainz.org/recording/{%=result.media.mb_id%}">{%=result.media.name%}</a> by <a href="http://musicbrainz.org/artist/{%=result.artist.mb_id%}">{%=result.artist.name%}</a></h5>
+				
 
-			<div class="clearfix"></div>
-			
-			<div class="subset subset-releases">
-				
-				{% for (var i=0, release; release=result['release-list'][i]; i++) { %}
-				<div class="subset-release">
-					<ul class="unstyled">
-						
-						<li>
-							<span class="key">Title: </span>
-							<span class="value">{%=release.release.title%}</span>
-						</li>
-						
-						<li>
-							<span class="key">Date: </span>
-							<span class="value">{%=release.release.date%}</span>
-						</li>
-						
-						<li>
-							<span class="key">Country: </span>
-							<span class="value">{%=release.release.country%}</span>
-						</li>
-						
-						<li>
-							<span class="key">Status: </span>
-							<span class="value">{%=release.release.status%}</span>
-						</li>
-						
-						<li>
-							<span class="key">ID: </span>
-							<span class="value">{%=release.release.id%}</span>
-						</li>
-						
-						
-						
-						
-					</ul>
-					
-				</div>
-				
-				{% } %}
-			</div>
+				<a href="http://musicbrainz.org/release/{%=result.mb_id%}">{%=result.name%}</a> 
+				<ul>
+					<li>{%=result.country%} - {%=result.releasedate%}</li>
+					<li>{%=result.label.name%} - {%=result.label.catalognumber%}</li>
+				</ul>
+
+		</div>
+
+		<div class="span3">
+
+			<img src="{%=result.relations.discogs_image%}" width="75" height="75" />
+
 		</div>
 	</div>
 	{% } %}

@@ -9,6 +9,7 @@ from xml.etree import ElementTree as ET
 import simplejson
 
 import musicbrainzngs
+import discogs_client as discogs
 
 from lib.util import pesterfish
 
@@ -224,48 +225,367 @@ class Process(object):
             i += 1
             
         return res
-            
-            
-        """
-        http://musicbrainz.org/ws/2/recording/3ba40ab9-fcfa-450c-8318-e0de8247948c?inc=artist-credits%2Breleases
-        """
+
         
-        #r = requests.get('http://musicbrainz.org/ws/2/recording/3ba40ab9-fcfa-450c-8318-e0de8247948c?inc=artist-credits%2Breleases')
-        
-        #print r.text
-        
-        #tree = ET.fromstring(r.text)
-        
-        
-        #print tree
-        #print pesterfish.to_pesterfish(tree)
-        
-        
+    """
+    get all 'recordings' from musicbrainz
+    """
     def get_musicbrainz(self, obj):
 
         results = []
         
         musicbrainzngs.set_useragent("NRG Processor", "0.01", "http://anorg.net/")
-        includes = ['releases', "artist-rels", "label-rels", "recording-rels", "release-rels","release-group-rels", "url-rels", "work-rels"]
-        
+        includes = ['releases','artists']
         
         for e in obj.results_acoustid:
             media_id = e['id']
-        
-            # media_id = '9ca385f4-4082-494a-974a-b1a8aa997838'
+
             result = musicbrainzngs.get_recording_by_id(id=media_id, includes=includes)
             results.append(result)
             
+        # pass results to have them filled up
         results = self.complete_musicbrainz(results)    
         
         return results
     
     
+    
+    
     def complete_musicbrainz(self, results):
+    
+        release_group_ids = []
+        
+        rgs = []
+        
+        master_releases = []
+    
+        # get all release-group-ids
+        i = 0
+        for r in results:
+
+            if i > 3:
+                break
+            i+=1
+            
+            for release in r['recording']['release-list']:
+                
+                mb_release = musicbrainzngs.get_release_by_id(id=release['id'], includes=['release-groups'])
+                release_group_id = mb_release['release']['release-group']['id']
+                
+                            
+                res = {}
+                res['release_group_id'] = release_group_id
+                res['recording'] = r
+                
+                
+                if release_group_id not in release_group_ids:
+                    release_group_ids.append(release_group_id)
+                
+                if res not in rgs:
+                    rgs.append(res)
+            
+            
+            
+            
+        #for id in release_group_ids:
+        for rg in rgs:
+            
+            id = rg['release_group_id']
+            r = rg['recording']
+            
+            
+            result = musicbrainzngs.get_release_group_by_id(id=id, includes=['releases'])
+            
+            releases = result['release-group']['release-list']
+            
+            try:
+                sorted_releases = sorted(releases, key=lambda k: k['date']) 
+            except Exception, e:
+                print "SORTING ERROR"
+                print e
+            
+            # sorted_releases.reverse()
+            
+            first_release = sorted_releases[0]
+            
+            print 'releases:'
+            print releases
+            
+            print 'first release'
+            print first_release
+            
+            # look up details for the first release
+            result = musicbrainzngs.get_release_by_id(id=first_release['id'], includes=['labels', 'url-rels',])
+
+            res = {}
+            res['release'] = result['release']
+            res['recording'] = r
+            master_releases.append(res)
+            
+            
+            
+        master_releases = self.format_master_releases(master_releases)
+            
+        print
+        print
+        print "MASTER RELEASES"
+        print master_releases
+        print
+        print
+        
+        
+        
+        return master_releases
+    
+    
+    """
+    pre-apply some formatting & structure to provide straighter trmplateing
+    """
+    def format_master_releases(self, res):
+        
+        
+        
+        releases = []
+        
+        for re in res:
+            
+            release = re['release']
+            recording = re['recording']
+            
+            print release
+            
+            print 'recording:'
+            print recording
+            
+            r = {}
+            
+            r['mb_id'] = None
+            r['name'] = None
+            r['releasedate'] = None
+            r['asin'] = None
+            r['barcode'] = None
+            r['status'] = None
+            r['country'] = None
+
+            # mapping
+            try:
+                r['mb_id'] = release['id']
+            except:
+                pass
+            
+            try:
+                r['name'] = release['title']
+            except:
+                pass
+            
+            try:
+                r['releasedate'] = release['date']
+            except:
+                pass
+            
+            try:
+                r['asin'] = release['asin']
+            except:
+                pass
+            
+            try:
+                r['barcode'] = release['barcode']
+            except:
+                pass
+            
+            try:
+                r['status'] = release['status']
+            except:
+                pass
+            
+            try:
+                r['country'] = release['country']
+            except:
+                pass
+            
+            
+            # track mapping
+            m = {}
+            m['mb_id'] = None
+            m['name'] = None
+            m['duration'] = None
+        
+            try:
+                m['mb_id'] = recording['recording']['id']
+            except:
+                pass
+
+            try:
+                m['name'] = recording['recording']['title']
+            except:
+                pass
+            
+            try:
+                m['duration'] = recording['recording']['length']
+            except:
+                pass
+            
+            
+            r['media'] = m
+            
+            # artist mapping
+            a = {}
+            a['mb_id'] = None
+            a['name'] = None
+            
+            try:
+                artist = recording['recording']['artist-credit'][0]['artist']
+                print artist
+                
+                try:
+                    a['mb_id'] = artist['id']
+                except:
+                    pass
+                
+                try:
+                    a['name'] = artist['name']
+                except:
+                    pass
+            except:
+                pass
+            
+            
+            r['artist'] = a
+            
+            
+            # label related mapping
+            l = {}
+            l['mb_id'] = None
+            l['name'] = 'Unknown'
+            l['code'] = None
+            l['catalognumber'] = None
+            
+            try:
+                label = release['label-info-list'][0]['label']
+                print label
+                
+                try:
+                    l['mb_id'] = label['id']
+                except:
+                    pass
+                
+                try:
+                    l['name'] = label['name']
+                except:
+                    pass
+                
+                try:
+                    l['code'] = label['label-code']
+                except:
+                    pass
+                
+                try:
+                    l['catalognumber'] = release['label-info-list'][0]['catalog-number']
+                except:
+                    pass
+                
+            except Exception, e:
+                print e
+                pass
+            
+            
+            
+            r['label'] = l
+            
+            
+            # relation mapping
+            rel = {}
+            rel['discogs_url'] = None
+            rel['discogs_image'] = None
+            
+            try:
+                relations = release['url-relation-list']
+                print
+                print 'RELATIONS'
+                print relations
+                print
+                print
+                try:
+                    
+                    for relation in relations:
+                        if relation['type'] == 'discogs':
+                            rel['discogs_url'] = relation['target']
+                            rel['discogs_image'] = self.discogs_image_by_url(relation['target'])
+                            
+                    
+                except Exception, e:
+                    print e
+                    pass
+                
+            except Exception, e:
+                print e
+                pass
+            
+            r['relations'] = rel
+
+            
+
+            if r not in releases:
+                releases.append(r)
+        
+        
+        return releases
+    
+    
+    def discogs_image_by_url(self, url):
+        
+        image = None
+        
+        discogs.user_agent = "NRG Processor 0.01 http://anorg.net/"
+        
+        try:
+            id = url.split('/')
+            id = id[-1]
+            
+            print 'DISCOGS ID: %s' % id
+            
+            release = discogs.Release(int(id))
+            
+            #i = release.data['images']
+            
+            print release
+            
+            imgs = release.data['images']
+            
+            #images = i
+            
+            for img in imgs:
+                if img['type'] == 'primary':
+                    image = img['uri150']
+            
+            
+             
+            
+        except Exception, e:
+            print 'discogs_images_by_url error'
+            print e
+            pass
+        
+        print image
+        
+        return image
+    
+    
+    
+    def complete_musicbrainz__(self, results):
         
         completed_results = []
         
+        i = 0
+        
         for r in results:
+            
+            if i > 3:
+                #pass
+                break
+            
+            i+=1
+            
             print
             print 'RESULT'
             
@@ -275,26 +595,33 @@ class Process(object):
             recording = r['recording']
             for release in recording['release-list']:
                 
-                print release['id']
+                #print release['id']
                 
-                release = musicbrainzngs.get_release_by_id(id=release['id'], includes=['url-rels', 'work-rels', 'release-groups'])
+                release = musicbrainzngs.get_release_by_id(id=release['id'], includes=['url-rels', 'release-groups'])
                 
-                print 'RELEASE!:::::::::::::::::::::::::::::::::::::::::::::::::'
-                print release
+                #print 'RELEASE!:::::::::::::::::::::::::::::::::::::::::::::::::'
+                #print release
                 
                 relations = []
                 
-                for relation in release['release']['url-relation-list']:
-                    print "Relation: target: %s - url: %s" % (relation['type'], relation['target'])
-                    relations.append(relation)
+                try:
+                    for relation in release['release']['url-relation-list']:
+                        #print "Relation: target: %s - url: %s" % (relation['type'], relation['target'])
+                        relations.append(relation)
+                        
+                except Exception, e:
+                    #print e
+                    pass
                 
                 release['relations'] = relations
                     
                 releases.append(release)
                 
+
+            # order releases by date
+            releases = self.mb_order_by_releasedate(releases)
             
             r['release-list'] = releases 
-            #r['releases'] = releases 
             
             completed_results.append(r)
             
@@ -302,6 +629,18 @@ class Process(object):
         return completed_results
         
 
+    def mb_order_by_releasedate(self, releases):
+        
+        print
+        print
+        print "mb_order_by_releasedate"
+        print
+        
+        for release in releases:
+            print release
+        
+        
+        return releases
         
 
         

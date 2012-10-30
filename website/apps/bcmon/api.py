@@ -24,7 +24,7 @@ class ChannelResource(ModelResource):
 class PlayoutResource(ModelResource):
     
     #channel = fields.ForeignKey(ChannelResource, 'channel', null=True, full=True)
-    channel = fields.ForeignKey(ChannelResource, 'channel', null=True, full=False)
+    channel = fields.ForeignKey(ChannelResource, 'channel', null=True, full=True)
 
     class Meta:
         queryset = Playout.objects.all()

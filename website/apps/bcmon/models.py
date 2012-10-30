@@ -191,7 +191,9 @@ def playout_post_save(sender, **kwargs):
     if obj.status == '4' or obj.status == 4:
         print 'pre fingerprinted entry'
         code = obj.echoprintfp['code']
+        print 'pre q'
         res = fp.best_match_for_query(code_string=code)
+        print 'post q'
         
         print res.match()
         if res.match():
@@ -210,6 +212,13 @@ def playout_post_save(sender, **kwargs):
                     
                     obj.dummy_result = "%s : !! %s" % (m.name, res.score)
                     
+                    
+                    # other dummy
+                    try:
+                        obj.dummy_result = "%s:::%s" % (m.name, m.artist.name)
+                    except:
+                        obj.dummy_result = "%s:::%s" % (m.name, 'Unknown')
+                    
                     obj.score = res.score
                     
                     
@@ -222,26 +231,38 @@ def playout_post_save(sender, **kwargs):
             print    
             print "####### TRYING FOR LOOSE MATCHES..."
     
-            code = fp.decode_code_string(code)
-            res = fp.query_fp(code)
-            
-            print res.results
-            
-            print 'choosen:'
-            print res.results[0]
-            
-            id = res.results[0]['track_id']
-            score = res.results[0]['score']
-            m = Media.objects.get(pk=id)
-            print m
-            
-            if score > 50:
-            
-                obj.dummy_result = "%s : %s" % (m.name, score)
-            else:
-                obj.dummy_result = "%s : %s" % ('hm.. unable to get match...', score)
+            try:
+                code = fp.decode_code_string(code)
+                res = fp.query_fp(code)
                 
-            obj.score = score
+                print res.results
+                
+                print 'choosen:'
+                print res.results[0]
+                
+                id = res.results[0]['track_id']
+                score = res.results[0]['score']
+                m = Media.objects.get(pk=id)
+                print m
+                
+                if score > 50:
+                
+                    obj.dummy_result = "%s : %s" % (m.name, score)
+
+                    try:
+                        obj.dummy_result = "%s:::%s" % (m.name, m.artist.name)
+                    except:
+                        obj.dummy_result = "%s:::%s" % (m.name, 'Unknown')
+                    
+                    
+                else:
+                    obj.dummy_result = "%s:::%s" % ('No Match', '')
+                    
+                obj.score = score
+                
+            except Exception, e:
+                print e
+                pass
             
             print
             print

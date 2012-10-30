@@ -24,6 +24,7 @@ class ImportFileResource(ModelResource):
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
         resource_name = 'importfile'
+        # excludes = ['type','results_musicbrainz']
         excludes = ['type',]
         authentication = Authentication()
         authorization = Authorization()

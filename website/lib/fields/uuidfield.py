@@ -4,7 +4,7 @@ from django.db.models import CharField
 import uuid
 
 UUID_BASE_ID = 'fff0'
-UUID_BASE_VERSION = 5
+UUID_BASE_VERSION = 1
 UUID_BASE_NAME = 'anorg.net'
 UUID_BASE_NAMESPACE = uuid.NAMESPACE_DNS
     
@@ -67,8 +67,8 @@ class UUIDField(CharField):
             raise UUIDVersionError("UUID version %s is not valid." % self.version)
 
 
-        if UUID_BASE_ID:
-            res = "%s%s" % (UUID_BASE_ID, str(res)[4:])
+        #if UUID_BASE_ID:
+        #    res = "%s%s" % (UUID_BASE_ID, str(res)[4:])
         
         return res
         

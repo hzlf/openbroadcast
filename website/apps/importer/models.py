@@ -124,7 +124,7 @@ class ImportFile(BaseModel):
     results_discogs_status = models.PositiveIntegerField(verbose_name=_('Result Musicbrainz'), default=0, choices=GENERIC_STATUS_CHOICES)
     
     results_discogs = JSONField(blank=True, null=True)
-    results_discogs_status = models.PositiveIntegerField(verbose_name=_('Result Discogs'), default=0, choices=GENERIC_STATUS_CHOICES)
+    #results_discogs_status = models.PositiveIntegerField(verbose_name=_('Result Discogs'), default=0, choices=GENERIC_STATUS_CHOICES)
     
     
     
@@ -174,16 +174,21 @@ class ImportFile(BaseModel):
         obj.results_tag = metadata
         print "DONE!!!"
         print metadata
+        print 
+        print
         obj.status = 3
+        obj.results_tag_status = True
         obj.save()
         
         
         obj.results_acoustid = processor.get_aid(obj.file)
+        obj.results_acoustid_status = True
         obj.save()
         
         
         
         obj.results_musicbrainz = processor.get_musicbrainz(obj)
+        obj.results_discogs_status = True
         obj.save()
 
         

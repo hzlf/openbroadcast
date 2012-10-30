@@ -59,7 +59,7 @@ prefresh(10000);
 				</tr>
 				
 				
-				<!--
+				{% if object.type == "stream" %}
 				<tr>
 					<td colspan="3">
 					<dl class="dl-horizontal">
@@ -106,7 +106,7 @@ prefresh(10000);
 
 					</td>
 				</tr>
-				-->				
+				{% endif %}			
 				
 				{% endfor %}
 
