@@ -224,6 +224,16 @@ class Process(object):
             res.append(t)
             i += 1
             
+
+        
+        print
+        print '### ACOUSTID LOOKUP ###'
+        
+        print res
+        
+        print
+        print
+            
         return res
 
         
@@ -235,6 +245,8 @@ class Process(object):
         results = []
         
         musicbrainzngs.set_useragent("NRG Processor", "0.01", "http://anorg.net/")
+        musicbrainzngs.set_hostname("172.16.82.130:5000")
+        musicbrainzngs.set_rate_limit(False)
         includes = ['releases','artists']
         
         for e in obj.results_acoustid:

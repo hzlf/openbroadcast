@@ -1,11 +1,11 @@
-{% extends "base/generic.html" %}
+{% extends "layout_edit.html" %}
 
 {% load i18n sekizai_tags verbatim dajaxice_templatetags straight_include mustache %}
 
 {% block object_type %}import{% endblock %}
 
-{% block list_inner %}
 
+{% block heading %} <!-- heading / icon (large one) -->
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}importer/js/lib/tmpl.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}importer/js/lib/fileupload/jquery.iframe-transport.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}importer/js/lib/fileupload/jquery.fileupload.js"></script>{% endaddtoblock %}
@@ -13,8 +13,53 @@
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}importer/js/lib/fileupload/jquery.fileupload-ui.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}importer/js/lib/fileupload/locale.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}importer/js/lib/fileupload/main.js"></script>{% endaddtoblock %}
+<div id="heading">
+	{% include "skeleton/heading.html" %}
+</div>
+<!-- heading / icon (large one) -->
+{% endblock %}
+
+{% block modnav %} <!-- start: intra-module navigation -->
+<div id="modnav">
+	{% include "skeleton/modnav.html" %}
+</div>
+<!-- end: intra-module navigation -->
+{% endblock %}
+
+{% block inner %}
+<div class="item_detail" style="">
+
+	<section>
+		<div class="row">
+			<div>&nbsp;</div>
+		</div>
+	</section>
+
+	<div class="clear"></div>
+
+</div>
+{% endblock %}
 
 
+{% block sidebar %}
+<div id="menu_context" class="menu_context">
+	<div class="set">
+		<ul class="unstyled">
+			
+			<li class="link ">
+				<span class="left icon"> <a href="{% url importer-import-list %}" title="{% trans "Back to Detail-View" %}">{% trans "Back to Imports" %}</a> </span>
+				<span class="opt"></span>
+				<span class="clear"></span>
+			</li>
+
+
+		</ul>
+	</div>
+</div>
+{% endblock %}
+
+
+{% block form %}
 
 {% addtoblock "js-head" %}
 <script type="text/javascript">
@@ -76,6 +121,9 @@ $(document).ready(function() {
 </script>
 {% endaddtoblock %}
 
+
+<div class="item_inner">
+
 <section>
 	
 	<div class="page-header">
@@ -123,7 +171,7 @@ $(document).ready(function() {
 
 </section>
 
-
+</div>
 
 <script id="template-upload" type="text/x-tmpl">
 {% straight_include "importer/template-upload.html" %}
@@ -139,5 +187,16 @@ $(document).ready(function() {
 {% straight_include "importer/template-import.html" %}
 </script>
 
+<!-- The template to handle the musicbrainz results -->
+<script id="template-result-musicbrainz" type="text/x-tmpl">
+{% straight_include "importer/template-result-musicbrainz.html" %}
+</script>
 
+
+{% endblock %}
+
+{% block form_sidebar %}
+<div class="sidebar form-sidebar holder">
+	{% include "importer/form_import/_form_sidebar.html" %}
+</div>
 {% endblock %}

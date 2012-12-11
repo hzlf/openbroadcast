@@ -259,6 +259,7 @@ INSTALLED_APPS = (
     #'admin_tools.dashboard',
     
     #'admintools_bootstrap',
+    'admin_style',
     'admin_tools',
     
     'django.contrib.auth',

@@ -1,0 +1,56 @@
+{% load i18n %}
+
+<div id="import_summary" class="import summary listing">
+
+	<div class="page-header">
+		<h2>{% trans "Overview" %} <small>{% trans "Current Import" %}</small></h2>
+	</div>
+
+	<div class="summary item done hoverable {% if provider.relation %}available{% endif %}">
+		<h4>{% trans "Import completed" %}</h4>
+		<div class="row-fluid ">
+			<div class="span3">
+				<span class="num-files">#</span> {% trans "files" %}
+			</div>
+			<div class="span9">
+			</div>
+		</div>
+	</div>
+
+	<div class="summary item ready hoverable {% if provider.relation %}available{% endif %}">
+		<h4>{% trans "Ready to import" %}</h4>
+		<div class="row-fluid ">
+			<div class="span3">
+				<span class="num-files">#</span> {% trans "files" %}
+			</div>
+			<div class="span9">
+				<button class=" pull-right btn btn-mini btn-primary" type="button">{% trans "Import all" %}</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="summary item warning hoverable {% if provider.relation %}available{% endif %}">
+		<h4>{% trans "Information needed" %}</h4>
+		<div class="row-fluid ">
+			<div class="span3">
+				<span class="num-files">#</span> {% trans "files" %}
+			</div>
+			<div class="span9">
+				<button class=" pull-right btn btn-mini btn-primary" type="button">{% trans "Import all" %}</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="summary item error hoverable {% if provider.relation %}available{% endif %}">
+		<h4>{% trans "Errors" %}</h4>
+		<div class="row-fluid ">
+			<div class="span3">
+				<span class="num-files">#</span> {% trans "files" %}
+			</div>
+			<div class="span9">
+				<button class=" pull-right btn btn-mini btn-primary" type="button">{% trans "Import all" %}</button>
+			</div>
+		</div>
+	</div>
+
+</div>

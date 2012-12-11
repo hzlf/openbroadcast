@@ -24,6 +24,7 @@ ImporterUi = function() {
 	this.fileupload_options = false
 
 	this.current_data = new Array;
+	this.musicbrainz_data = new Array;
 
 	this.is_ie6 = $.browser == 'msie' && $.browser.version < 7;
 
@@ -52,6 +53,16 @@ ImporterUi = function() {
 			// run update
 			self.update_import_files();
 		});
+		
+		// list items
+		$('#result_holder .result-set').live('click', function(e){
+			$('.result-set', $(this).parents('.importfile')).removeClass('selected');
+			$(this).addClass('selected');
+			
+			self.apply_best_match();
+			
+		});
+		
 	};
 
 	/*
@@ -65,7 +76,7 @@ ImporterUi = function() {
 	};
 
 	this.run_interval = function() {
-		console.log('interval: ' + self.interval_loops);
+		//console.log('interval: ' + self.interval_loops);
 		self.interval_loops += 1;
 
 		// Put functions needed in interval here
@@ -82,14 +93,83 @@ ImporterUi = function() {
 	};
 	this.update_import_files_callback = function(data) {
 		self.update_list_display(data.files);
-		self.update_best_match(data.files);
+		self.update_summary_display(data.files);
+		try {
+			self.update_best_match(data.files);
+			self.apply_best_match(data.files);
+		} catch(err) {
+			// console.log(err);
+		}
+		
+		
+	};
+	
+	this.update_summary_display = function(data) {
+		var container = $('#import_summary');
+		var status_map = new Array;
+		status_map[0] = 'init';
+		status_map[1] = 'done';
+		status_map[2] = 'ready';
+		status_map[3] = 'working';
+		status_map[4] = 'warning';
+		status_map[5] = 'duplicate';
+		status_map[99] = 'error';
+
+		var count_ready = 0
+
+		for (var i in data) {
+			var item = data[i];
+
+			if (item.status == 3) {
+				count_ready++;
+			}
+		}
+		$('.item.ready .num-files', container).html(count_ready);
+		//console.log('count_ready:', count_ready);
+	
+	};
+
+
+	this.apply_best_match = function(data) {
+	
+		var holder = $('#result_holder');
+		
+		$('.importfile', holder).each(function(i, item) {
+			
+			//console.log(i);
+			//console.log(item);
+			
+			var selected = $('.result-set.musicbrainz-tag.selected', item)
+			
+			console.log('media-id', $('.media-id', selected).val());
+			console.log('release-id', $('.release-id', selected).val());
+			console.log('artist-id', $('.artist-id', selected).val());
+			
+			var result_form = $('.form-result', item);
+			// ids
+			$('.mb-track-id', result_form).val($('.media-id', selected).val())
+			$('.mb-artist-id', result_form).val($('.artist-id', selected).val())
+			$('.mb-release-id', result_form).val($('.release-id', selected).val())
+			
+			// other data
+			$('.releasedate', result_form).val($('.releasedate', selected).val())
+			$('.catalognumber', result_form).val($('.catalognumber', selected).val())
+			$('.release', result_form).val($('.release', selected).val())
+			$('.artist', result_form).val($('.artist', selected).val())
+			$('.name', result_form).val($('.name', selected).val())
+			
+			// selected.hide(20000);
+
+			
+		});
+	
 	};
 
 	this.update_best_match = function(data) {
 
 		var active_releases = new Array;
 
-		console.log('update_best_match');
+		//console.log('update_best_match');
 
 		// populate calculation array
 		for (var i in data) {
@@ -110,7 +190,7 @@ ImporterUi = function() {
 
 						for (var k in item.results_musicbrainz) {
 							var res = item.results_musicbrainz[k]
-							console.log(res);
+							//console.log(res);
 
 							if (res['mb_id'] in active_releases) {
 								active_releases[res['mb_id']] += 1;
@@ -126,45 +206,50 @@ ImporterUi = function() {
 
 		active_releases = sortObject(active_releases);
 
-		console.log(active_releases.reverse()[0]['key']);
+		// console.log(active_releases.reverse());
+		
+		var hits = active_releases.reverse().slice()
+		var top_hit = active_releases[0]['key'];
+
+		//console.log(hits);
+		//console.log(top_hit);
 
 		// set selection state
+		
 		for (var i in data) {
 			var item = data[i];
 			var target_result = $('#importfile_result_' + item.id);
 
-			// $('.result-set.musicbrainz-tag', target_result).removeClass('selected');
-
+			$('.result-set.musicbrainz-tag', target_result).removeClass('selected');
+			
 			if (item.status > 0) {
 				
-				console.log('item');
-
-				try {
-					item.results_musicbrainz = JSON.parse(item.results_musicbrainz);
-				} catch(err) {
-					//console.log(err);
-				}
+				//console.log(item.results_musicbrainz);
 
 				if (item.id in self.current_data) {
 
 					if (item.results_musicbrainz) {
 
+						//console.log('ok');	
+						
 						for (var k in item.results_musicbrainz) {
 							var res = item.results_musicbrainz[k]
-							console.log(res['mb_id']);
+							//console.log(res['mb_id']);
 
-							if (res['mb_id'] == active_releases.reverse()[0]['key']) {
-								console.log('top-match');
+							if (res['mb_id'] == top_hit) {
+								// console.log('top-match');
 								$('.result-set.musicbrainz-tag.mb_id-' + res['mb_id'], target_result).addClass('selected');
 							} else {
 								
-								console.log('NOOOOOOO-match');
+								//console.log('NOOOOOOO-match');
 								
 							}
 
 						}
 					}
 				}
+
+
 
 			}
 		}
@@ -207,6 +292,7 @@ ImporterUi = function() {
 
 				if (item.id in self.current_data) {
 					self.current_data[item.id] = item;
+					console.log('item already present');
 				} else {
 
 					var result = tmpl("template-import", item);
@@ -214,11 +300,14 @@ ImporterUi = function() {
 					$('#result_holder').prepend(result);
 
 					self.current_data[item.id] = item;
-					target_result = $('#importfile_result_' + item.id);
 				}
+				
+				target_result = $('#importfile_result_' + item.id);
 
 				// Applying gathered results
 				if (item.results_tag) {
+					
+					//console.log(item.results_tag)
 
 					// building the target
 					target_set = $('.provider-tag', target_result);
@@ -240,15 +329,35 @@ ImporterUi = function() {
 					}
 				}
 
-				if (item.results_musicbrainz) {
+				if (item.results_musicbrainz && item.results_musicbrainz.length > 0) {
+
+
 
 					// building the target
-					target_set = $('.provider-tag', target_result);
+					target_set = $('.musicbrainz-tag-holder', target_result);
 
+					if (item.id in self.musicbrainz_data) {
+						console.log('results_musicbrainz already present');
+					} else {
+						console.log('results_musicbrainz NOT present');
+						self.musicbrainz_data[item.id] = item.results_musicbrainz;
+						
+	
+						var res = tmpl("template-result-musicbrainz", item);
+						target_set.html(res);
+						
+					}
+
+					
+					
+					
+					/*
 					for (var k in item.results_musicbrainz) {
+						console.log(k);
 						var res = item.results_musicbrainz[k]
 						$('.holder-' + k + ' .value', target_set).html(res);
 					}
+					*/						
 
 				}
 

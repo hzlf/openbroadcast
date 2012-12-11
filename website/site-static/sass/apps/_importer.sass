@@ -1,17 +1,22 @@
 
 
+i.icon-padded
+  padding-left: 5px
+  margin-left: 5px
 
 i.icon-id3
   background-image: url(/static/img/icons/metadata.providers/id3v2.png)
   background-position: 0 0
   width: 22px
   height: 22px
+i.icon-musicbrainz
+  background-image: url(/static/img/icons/metadata.providers/musicbrainz.png)
+  background-position: 0 0
+  width: 22px
+  height: 22px
 
 
 section.importer-importfiles
-
-
-
 
   // base
   .listing
@@ -61,6 +66,10 @@ section.importer-importfiles
             
         .subset
           display: block
+          
+        &.hover
+          background-color: lighten($successBackground, 5%)
+          cursor: pointer
             
         &.selected
           background-color: $successBackground
@@ -86,11 +95,38 @@ section.importer-importfiles
             
       div.result-actions
         padding: 5px 20px 5px 0px
+
+  // form overrides
+  .listing
+    .form-horizontal
+      .control-group
+        margin-bottom: 0
+      .input-minitext
+        font-size: 10px
       
       
   
 
 
+// sidebar
+.import.summary
 
+  &.listing
+    &.fixed
+      position: fixed
+      width: 260px
+      top: 120px
 
+  .item
+    padding: 2px 2px 0px 2px
+    background-color: #efefef
+
+    &.done
+      background-color: #DDFFD9
+
+    &.ready
+      background-color: #DDFFD9
+    
+    &.hover
+      background-color: red
 
