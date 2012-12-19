@@ -45,6 +45,51 @@ section.importer-importfiles
       &.success
         background-color: $successBackground
         color: $successText
+    
+      &.duplicate
+        background-color: #fffeac
+        color: #5a5a5a
+        div.status-imported
+          display: block
+        div.status-duplicate
+          display: block
+        div.result-actions
+          display: none
+        div.result-set
+          display: none
+    
+      &.done
+        background-color: $successBackground
+        color: #5a5a5a
+        div.status-imported
+          display: block
+
+          
+      &.queued
+        background-color: #d8f9ff
+        color: #5a5a5a
+        div.status-queue
+          display: block
+        
+      // status elements
+      div.status
+        display: none
+        
+      div.status-imported
+        .information
+          min-height: 80px
+        .image img
+          margin-right: 10px
+          width: 70px
+          height: 70px
+        
+      div.status-queue
+        .information
+          min-height: 80px
+        .image img
+          margin-right: 10px
+          width: 70px
+          height: 70px
       
       
       h3
@@ -68,11 +113,16 @@ section.importer-importfiles
           display: block
           
         &.hover
-          background-color: lighten($successBackground, 5%)
+          background-color: lighten($successBackground, 7%)
           cursor: pointer
             
-        &.selected
+        &.choosen
           background-color: $successBackground
+          .subset
+            display: block
+            
+        &.selected
+          background-color: lighten($successBackground, 5%)
           .subset
             display: block
           
@@ -92,9 +142,16 @@ section.importer-importfiles
             
             
             
-            
+      // action form
       div.result-actions
-        padding: 5px 20px 5px 0px
+        padding: 5px 20px 5px 10px
+        // temporary
+        h4
+          display: none
+        .base
+          padding-top: 10px
+        .musicbrainz
+          display: none
 
   // form overrides
   .listing
@@ -105,8 +162,14 @@ section.importer-importfiles
         font-size: 10px
       
       
-  
-
+// temporary
+i.ajax-loader
+  display: block
+  height: 32px
+  width: 32px
+  margin: 15px 32px 0 0
+  &.c3CA3B9
+    background-image: url(/static/img/icons/loader/loader.3CA3B9.gif)
 
 // sidebar
 .import.summary

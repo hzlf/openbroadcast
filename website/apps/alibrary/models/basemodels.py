@@ -105,6 +105,9 @@ class Label(MPTTModel, MigrationMixin):
     parent = TreeForeignKey('self', null=True, blank=True, related_name='label_children')
     folder = models.ForeignKey(Folder, blank=True, null=True, related_name='label_folder')
     
+    # relations a.k.a. links
+    relations = generic.GenericRelation('Relation')
+    
     # manager
     objects = models.Manager()
 

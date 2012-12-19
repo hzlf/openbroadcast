@@ -8,7 +8,7 @@ from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
 
 from importer.models import Import, ImportFile
 
-
+from alibrary.api import MediaResource
 
 
 # file = request.FILES[u'files[]']
@@ -18,6 +18,8 @@ from importer.models import Import, ImportFile
 class ImportFileResource(ModelResource):
     
     import_session = fields.ForeignKey('importer.api.ImportResource', 'import_session', null=True, full=False)
+    
+    media = fields.ForeignKey('alibrary.api.MediaResource', 'media', null=True, full=True)
 
     class Meta:
         queryset = ImportFile.objects.all()
@@ -41,6 +43,11 @@ class ImportFileResource(ModelResource):
         """
         try:
             import_id = request.GET['import_session']
+
+
+            print "####################################"
+            print request.FILES[u'files[]']
+
 
             imp = Import.objects.get(pk=import_id)
             bundle.data['import_session'] = imp

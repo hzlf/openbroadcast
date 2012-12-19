@@ -7,12 +7,12 @@ cd ~/code/openbroadcast.ch/website/
 ./manage.py runserver_plus 0.0.0.0:8000
 
 # rabbitmq
-sudo rabbitmq-server
+sudo rabbitmq-server -detached
 
 # celeryd
 source ~/srv/openbroadcast.ch-upgrade/bin/activate
 cd ~/code/openbroadcast.ch/website/
-./manage.py celeryd
+./manage.py celeryd -c 1 --purge
 
 
 # tokyo-tyrant
@@ -21,3 +21,8 @@ sudo ttservctl start
 # solr
 cd ~/srv/echoprint-server/solr
 ./run.sh
+
+# musicbrainz (local instance, vmware)
+ssh 172.16.82.130 -l musicbrainz
+cd
+./run_server.sh --listen 0.0.0.0:5000

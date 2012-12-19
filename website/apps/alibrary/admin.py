@@ -118,23 +118,6 @@ class MediaInline(admin.TabularInline):
     exclude = ['description','slug','processed','echoprint_status','conversion_status',]
     extra = 1
     
-class LabelAdmin(PlaceholderAdmin, BaseAdmin):
-    
-    # inlines = [LabelInline]
-    #prepopulated_fields = {"slug": ("name",)}
-    readonly_fields = ['slug']
-    
-    """"""
-    fieldsets = [
-        (None,               {'fields': ['name', 'slug']}),
-        
-        ('Relations', {'fields': ['parent'], 'classes': ['']}),
-        
-        ('Other content', {'fields': ['first_placeholder'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
-    ]
-    
-admin.site.register(Label, LabelAdmin)
-    
 class FormatAdmin(BaseAdmin):
     
     list_display   = ('format', 'version', 'default_price')
@@ -262,7 +245,7 @@ class MediaAdmin(BaseAdmin):
     search_fields = ['artist__name', 'release__name']
     list_filter = ('mediatype', 'license__name', 'processed', 'echoprint_status', 'conversion_status')
     
-    inlines = [MediaExtraartistsInline]
+    inlines = [RelationsInline, MediaExtraartistsInline]
 
     readonly_fields = ['slug', 'folder', 'uuid', 'base_format', 'base_filesize', 'base_duration','base_samplerate', 'base_bitrate', 'release_link']
     
@@ -286,6 +269,25 @@ class MediaAdmin(BaseAdmin):
     
     
 admin.site.register(Media, MediaAdmin)
+    
+class LabelAdmin(PlaceholderAdmin, BaseAdmin):
+    
+    # inlines = [LabelInline]
+    #prepopulated_fields = {"slug": ("name",)}
+    readonly_fields = ['slug']
+    
+    inlines = [RelationsInline]
+    
+    """"""
+    fieldsets = [
+        (None,               {'fields': ['name', 'slug']}),
+        
+        ('Relations', {'fields': ['parent'], 'classes': ['']}),
+        
+        ('Other content', {'fields': ['first_placeholder'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
+    ]
+    
+admin.site.register(Label, LabelAdmin)
 
 
     

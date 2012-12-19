@@ -167,6 +167,9 @@ class Media(MigrationMixin):
     release = models.ForeignKey('Release', blank=True, null=True, related_name='media_release', on_delete=models.SET_NULL)
     artist = models.ForeignKey('Artist', blank=True, null=True, related_name='media_artist')
     
+    # relations a.k.a. links
+    relations = generic.GenericRelation(Relation)
+    
     # extra-artists
     # TODO: Fix this - guess should relate to Artist instead of Profession
     extra_artists = models.ManyToManyField(Profession, through='MediaExtraartists', blank=True, null=True)
@@ -213,6 +216,15 @@ class Media(MigrationMixin):
     def get_absolute_url(self):
         # TODO: Make right
         return '/tracks/' + self.slug + '/'
+    
+
+
+    def get_api_url(self):
+        return reverse('api_dispatch_detail', kwargs={  
+            'api_name': 'v1',  
+            'resource_name': 'track',  
+            'pk': self.pk  
+        }) + '?format=json'
     
     def release_link(self):
         if self.release:
@@ -721,7 +733,8 @@ class Media(MigrationMixin):
     identification server
     """
     def update_echoprint(self):
-        self.update_echoprint_task.delay(self)
+        #self.update_echoprint_task.delay(self)
+        self.update_echoprint_task(self)
         
     @task()
     def update_echoprint_task(obj):
@@ -766,11 +779,8 @@ class Media(MigrationMixin):
                 fp.delete("%s" % obj.id)
                 
                 print 'post new fingerprint:'
-                
-                
+                code_pre = code
                 id = obj.updated.isoformat('T')[:-7]
-                
-                
                 code = fp.decode_code_string(code)
                 
                 nfp = {
@@ -785,8 +795,10 @@ class Media(MigrationMixin):
                         "import_date": "%sZ" % id
                         }
                 
+                print nfp
                 
-                res = fp.ingest(nfp, split=False)
+                
+                res = fp.ingest(nfp, split=False, do_commit=True)
     
                 print 'getting code by id (check)'
     
@@ -797,6 +809,18 @@ class Media(MigrationMixin):
                     
                 else:
                     status = 2
+                    
+                    
+                    
+                res = fp.best_match_for_query(code_string=code_pre)
+                print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+                print res.score
+                print res.match()
+                print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+                    
+                
+                    
+                    
                     
             except Exception, e:
                 print e
@@ -811,13 +835,15 @@ class Media(MigrationMixin):
         log = logging.getLogger('alibrary.mediamodels.save')
         log.info('Media id: %s - Save' % (self.pk))
 
-        print 'UUID: %s' % self.uuid
+        
     
         """
         check if master changed. if yes we need to reprocess the cached files
         """
 
         if self.uuid is not None:
+            
+            print 'UUID: %s' % self.uuid
 
             try:
                 #orig = Media.objects.get(uuid=self.uuid)
@@ -829,7 +855,9 @@ class Media(MigrationMixin):
                     self.echoprint_status = 0
 
             except Exception, e:
+                print 'ERR'
                 print e
+                print 'ERR'
                 pass
             
         

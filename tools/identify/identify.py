@@ -7,7 +7,7 @@ import slumber
 
 import json
 
-API_ENDPOINT = 'http://localhost:8000/api/v1/'
+API_ENDPOINT = 'http://local.openbroadcast.ch:8000/api/v1/'
 API_AUTH = ("root", "root")
 
 
@@ -64,7 +64,7 @@ path = filename
 print 'path: %s' % path
 
 p = subprocess.Popen([
-    ecb, path,
+    ecb, path, '30', '40',
 ], stdout=subprocess.PIPE)
 stdout = p.communicate()        
 d = json.loads(stdout[0])
@@ -79,7 +79,10 @@ code = d[0]['code']
 
 api = slumber.API(API_ENDPOINT, auth=API_AUTH)
 
-tracks = api.track.get(code=code)
+tracks = api.track.get(code=code, format='json')
+
+
+
 if len(tracks['objects']) < 1:
     print '\nsorry - no match\n'
 for track in tracks['objects']:

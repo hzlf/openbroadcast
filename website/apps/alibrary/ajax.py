@@ -22,22 +22,27 @@ def api_lookup(request, *args, **kwargs):
     
     print provider  
     
-    if item_type == 'release':
-        r = Release.objects.get(pk=item_id)
-        ctype = ContentType.objects.get_for_model(r)        
-        al, created = APILookup.objects.get_or_create(content_type=ctype, object_id=r.id, provider=provider)
+    try:
+        if item_type == 'release':
+            r = Release.objects.get(pk=item_id)
+            ctype = ContentType.objects.get_for_model(r)        
+            al, created = APILookup.objects.get_or_create(content_type=ctype, object_id=r.id, provider=provider)
+            
+            print 'created:',
+            print created
         
-        print 'created:',
-        print created
+        
+        #al = APILookup.objects.all()[0]
+        
+        data = al.get_from_api()
+         
+        
+        # js = serializers.get_serializer("json")()
+        #data = js.serialize(data, ensure_ascii=False)
+        data = simplejson.dumps(data)
+        
+        
+        return data
     
-    
-    al = APILookup.objects.all()[0]
-    data = al.get_from_api()
-     
-    
-    # js = serializers.get_serializer("json")()
-    #data = js.serialize(data, ensure_ascii=False)
-    data = simplejson.dumps(data)
-    
-    
-    return data
+    except:
+        return None

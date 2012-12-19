@@ -13,6 +13,11 @@ import discogs_client as discogs
 
 from lib.util import pesterfish
 
+from base import discogs_image_by_url 
+
+import logging
+log = logging.getLogger(__name__)
+
 
 AC_API_KEY = 'ZHKcJyyV'
 
@@ -49,6 +54,54 @@ METADATA_SET = {
                 }
 
 class Process(object):
+
+
+    def __init__(self):
+        log = logging.getLogger('util.process.Process.__init__')
+
+        musicbrainzngs.set_useragent("NRG Processor", "0.01", "http://anorg.net/")
+        musicbrainzngs.set_hostname("172.16.82.130:5000")
+        musicbrainzngs.set_rate_limit(False)
+    
+    
+    
+    def get_echoprint(self, file):
+        from ep.API import fp
+        from lib.analyzer.echoprint import Echoprint
+        e = Echoprint()
+        code, version, duration, echoprint = e.echoprint_from_path(file.path, offset=10, duration=100)
+        
+        
+        # print code
+        # code = fp.decode_code_string(code)
+
+        try:
+            res = fp.best_match_for_query(code_string=code)
+            
+            print 'ECHOPRINT!!!!!!!!!!'
+            
+            print 'TRID'
+            print res.TRID
+            print 'END TRID'
+            
+            if res.match():
+            
+                print res.message()
+                print res.match()
+                print res.score
+                print res.TRID
+                #ids = [int(res.TRID),]
+                
+                return int(res.TRID)
+            
+        except Exception, e:
+            print e
+            pass
+            
+            
+        print 'ECHOPRINT!!!!!!!!!!'
+        return None
+    
     
     def extract_metadata(self, file):
         enc = locale.getpreferredencoding()
@@ -243,17 +296,17 @@ class Process(object):
     def get_musicbrainz(self, obj):
 
         results = []
-        
-        musicbrainzngs.set_useragent("NRG Processor", "0.01", "http://anorg.net/")
-        musicbrainzngs.set_hostname("172.16.82.130:5000")
-        musicbrainzngs.set_rate_limit(False)
+
         includes = ['releases','artists']
         
         for e in obj.results_acoustid:
             media_id = e['id']
 
-            result = musicbrainzngs.get_recording_by_id(id=media_id, includes=includes)
-            results.append(result)
+            try:
+                result = musicbrainzngs.get_recording_by_id(id=media_id, includes=includes)
+                results.append(result)
+            except Exception, e:
+                pass
             
         # pass results to have them filled up
         results = self.complete_musicbrainz(results)    
@@ -314,6 +367,7 @@ class Process(object):
                 sorted_releases = sorted(releases, key=lambda k: k['date']) 
             except Exception, e:
                 print "SORTING ERROR"
+                sorted_releases = releases
                 print e
             
             # sorted_releases.reverse()
@@ -522,7 +576,7 @@ class Process(object):
                     for relation in relations:
                         if relation['type'] == 'discogs':
                             rel['discogs_url'] = relation['target']
-                            rel['discogs_image'] = self.discogs_image_by_url(relation['target'])
+                            rel['discogs_image'] = discogs_image_by_url(relation['target'], 'uri150')
                             
                     
                 except Exception, e:
@@ -544,43 +598,7 @@ class Process(object):
         return releases
     
     
-    def discogs_image_by_url(self, url):
-        
-        image = None
-        
-        discogs.user_agent = "NRG Processor 0.01 http://anorg.net/"
-        
-        try:
-            id = url.split('/')
-            id = id[-1]
-            
-            print 'DISCOGS ID: %s' % id
-            
-            release = discogs.Release(int(id))
-            
-            #i = release.data['images']
-            
-            print release
-            
-            imgs = release.data['images']
-            
-            #images = i
-            
-            for img in imgs:
-                if img['type'] == 'primary':
-                    image = img['uri150']
-            
-            
-             
-            
-        except Exception, e:
-            print 'discogs_images_by_url error'
-            print e
-            pass
-        
-        print image
-        
-        return image
+
     
     
     

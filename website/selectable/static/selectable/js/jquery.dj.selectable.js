@@ -206,7 +206,8 @@
                 $(input).data('page', null);
                 ul.zIndex(this.element.zIndex() + 1);
                 this._renderMenu(ul, items);
-                this.menu.deactivate();
+                // TODO: removed this to jq-ui incompatibility - observe!
+                // this.menu.deactivate();
                 this.menu.refresh();
                 // size and position menu
                 ul.show();

@@ -20,7 +20,7 @@ class ImportFileAdmin(admin.ModelAdmin):
     
     list_display = ('created', 'filename', 'status',)
     list_filter = ('status', 'import_session__user',)    
-    readonly_fields = ('created', 'updated', 'mimetype', 'import_session', 'results_tag', 'results_musicbrainz', 'results_discogs',)
+    readonly_fields = ('created', 'updated', 'mimetype', 'import_session', 'results_tag', 'import_tag', 'results_musicbrainz', 'results_discogs',)
     date_hierarchy = 'created'
 
 admin.site.register(Import, ImportAdmin)

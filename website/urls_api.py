@@ -3,7 +3,7 @@ from django.conf.urls.defaults import *
 
 from tastypie.api import Api
 from bcmon.api import PlayoutResource, ChannelResource
-from alibrary.api import MediaResource
+from alibrary.api import MediaResource, ReleaseResource
 from importer.api import ImportResource, ImportFileResource
 
 api = Api(api_name='v1')

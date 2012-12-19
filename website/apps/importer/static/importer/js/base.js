@@ -16,7 +16,7 @@ ImporterUi = function() {
 	this.field_prefix = 'id_';
 	this.interval = false;
 	this.interval_loops = 0;
-	this.interval_duration = 10000;
+	this.interval_duration = 5000;
 	this.api_url = false;
 
 	// attach fu here
@@ -56,10 +56,114 @@ ImporterUi = function() {
 		
 		// list items
 		$('#result_holder .result-set').live('click', function(e){
+			
+			/*
 			$('.result-set', $(this).parents('.importfile')).removeClass('selected');
 			$(this).addClass('selected');
+			*/
+			$('.result-set', $(this).parents('.importfile')).removeClass('selected choosen');
+			$(this).addClass('choosen');
 			
 			self.apply_best_match();
+			
+		});
+		
+		// item actions
+		var actions = $('#result_holder .importfile.item .result-actions');
+		
+		
+		$('.delete-importfile', actions).live('click', function(e){
+			
+			var parent = $(this).parents('.importfile');
+			parent_id = parent.attr('id').split('_')[2];
+			
+			var item = self.current_data[parent_id];
+			
+			$.ajax({
+				type: "DELETE",
+				url: item.resource_uri,
+				dataType: "application/json",
+				contentType: 'application/json',
+  				processData:  false,
+				// data: JSON.stringify(data),
+				success: function(data) {
+					// console.log(data);
+					// form_result.hide();
+				},
+				complete: function(jqXHR) {
+					if(jqXHR.status == 204) {
+						parent.hide(200);
+					}
+
+				}
+			});
+			
+		});
+		
+		
+		$('.start-import', actions).live('click', function(e){
+			
+			var parent = $(this).parents('.importfile');
+			parent_id = parent.attr('id').split('_')[2];
+			
+			var item = self.current_data[parent_id];
+			console.log(item.resource_uri);
+			
+			var form_result = $('.form-result', parent);
+			
+			
+			
+			var import_tag = {
+				name: $('input.name', form_result).val(), 
+				release: $('input.release', form_result).val(), 
+				releasedate: $('input.releasedate', form_result).val(), 
+				artist: $('input.artist', form_result).val(), 
+				tracknumber: $('input.tracknumber', form_result).val(), 
+				
+				mb_track_id: $('input.mb-track-id', form_result).val(), 
+				mb_artist_id: $('input.mb-artist-id', form_result).val(), 
+				mb_release_id: $('input.mb-release-id', form_result).val(), 
+			}
+			
+			if(! (import_tag.name && import_tag.artist)) {
+				alert('Missing fields!!');
+				return;
+			}
+			
+			var data = { 
+				status: 6, 
+				import_tag: import_tag 
+				};
+			
+			console.log(data);
+			console.log(JSON.stringify(data));
+			
+			
+			parent.removeClass('working');
+			parent.addClass('queued');
+			
+			$('.result-set', parent).hide(100);
+			$('.result-actions', parent).hide(200);
+			
+			
+			$.ajax({
+				type: "PUT",
+				url: item.resource_uri,
+				dataType: "application/json",
+				contentType: 'application/json',
+  				processData:  false,
+				data: JSON.stringify(data),
+				success: function(data) {
+					console.log(data);
+					form_result.hide();
+					
+				}
+			});
+			
+						
+			
+
+			
 			
 		});
 		
@@ -113,6 +217,7 @@ ImporterUi = function() {
 		status_map[3] = 'working';
 		status_map[4] = 'warning';
 		status_map[5] = 'duplicate';
+		status_map[6] = 'queued';
 		status_map[99] = 'error';
 
 		var count_ready = 0
@@ -139,7 +244,7 @@ ImporterUi = function() {
 			//console.log(i);
 			//console.log(item);
 			
-			var selected = $('.result-set.musicbrainz-tag.selected', item)
+			var selected = $('.result-set.musicbrainz-tag.selected, .result-set.musicbrainz-tag.choosen', item)
 			
 			console.log('media-id', $('.media-id', selected).val());
 			console.log('release-id', $('.release-id', selected).val());
@@ -222,36 +327,46 @@ ImporterUi = function() {
 
 			$('.result-set.musicbrainz-tag', target_result).removeClass('selected');
 			
-			if (item.status > 0) {
-				
-				//console.log(item.results_musicbrainz);
-
-				if (item.id in self.current_data) {
-
-					if (item.results_musicbrainz) {
-
-						//console.log('ok');	
-						
-						for (var k in item.results_musicbrainz) {
-							var res = item.results_musicbrainz[k]
-							//console.log(res['mb_id']);
-
-							if (res['mb_id'] == top_hit) {
-								// console.log('top-match');
-								$('.result-set.musicbrainz-tag.mb_id-' + res['mb_id'], target_result).addClass('selected');
-							} else {
-								
-								//console.log('NOOOOOOO-match');
-								
+			// check if manually choosen
+			if(!$('.result-set.musicbrainz-tag', target_result).hasClass('choosen')) {
+			
+			
+				if (item.status > 0) {
+					
+					//console.log(item.results_musicbrainz);
+	
+					if (item.id in self.current_data) {
+	
+						if (item.results_musicbrainz) {
+	
+							//console.log('ok');	
+							
+							for (var k in item.results_musicbrainz) {
+								var res = item.results_musicbrainz[k]
+								//console.log(res['mb_id']);
+	
+								if (res['mb_id'] == top_hit) {
+									// console.log('top-match');
+									$('.result-set.musicbrainz-tag.mb_id-' + res['mb_id'], target_result).addClass('selected');
+								} else {
+									//console.log('NOOOOOOO-match');
+								}
+	
 							}
-
 						}
 					}
+	
 				}
-
-
-
+			
+				
 			}
+
+			
+			
+			
+			
+			
+			
 		}
 
 	};
@@ -268,6 +383,7 @@ ImporterUi = function() {
 		status_map[3] = 'working';
 		status_map[4] = 'warning';
 		status_map[5] = 'duplicate';
+		status_map[6] = 'queued';
 		status_map[99] = 'error';
 
 		for (var i in data) {
@@ -297,12 +413,12 @@ ImporterUi = function() {
 
 					var result = tmpl("template-import", item);
 
-					$('#result_holder').prepend(result);
+					$('#result_holder').append(result);
 
 					self.current_data[item.id] = item;
 				}
 				
-				target_result = $('#importfile_result_' + item.id);
+				var target_result = $('#importfile_result_' + item.id);
 
 				// Applying gathered results
 				if (item.results_tag) {
@@ -329,6 +445,19 @@ ImporterUi = function() {
 					}
 				}
 
+				if (item.media) {
+
+					target_set = $('.status-imported', target_result);
+					
+					var res = tmpl("template-result-imported", item.media);
+					target_set.html(res);
+					
+				}
+
+
+
+
+
 				if (item.results_musicbrainz && item.results_musicbrainz.length > 0) {
 
 
@@ -342,10 +471,8 @@ ImporterUi = function() {
 						console.log('results_musicbrainz NOT present');
 						self.musicbrainz_data[item.id] = item.results_musicbrainz;
 						
-	
 						var res = tmpl("template-result-musicbrainz", item);
 						target_set.html(res);
-						
 					}
 
 					
@@ -363,9 +490,17 @@ ImporterUi = function() {
 
 				// Done - Hide selection forms & co
 				if (item.status == 1) {
+					
+					target_result.removeClass('queued');
 
-					$('.result-set', target_result).hide(100);
-					$('.result-actions', target_result).hide(200);
+					$('.result-set', target_result).hide();
+					$('.result-actions', target_result).hide();
+
+				}
+				if (item.status == 6) {
+
+					$('.result-set', target_result).hide();
+					$('.result-actions', target_result).hide();
 
 				}
 

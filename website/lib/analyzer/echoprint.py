@@ -37,12 +37,12 @@ class Echoprint:
         
         return code, version, duration, d
     
-    def echoprint_from_path(self, path):
+    def echoprint_from_path(self, path, offset=10, duration=25):
         
         print ECHOPRINT_CODEGEN_BIN
         
         p = subprocess.Popen([
-            ECHOPRINT_CODEGEN_BIN, path, '10', '35'
+            ECHOPRINT_CODEGEN_BIN, path, '%s' % offset, '%s' % (offset + duration)
         ], stdout=subprocess.PIPE)
         stdout = p.communicate()        
         d = json.loads(stdout[0])
@@ -61,7 +61,9 @@ class Echoprint:
     
     def get_by_echoprintfp(self, code, version):
 
-        res = requests.get("http://localhost:8080/query?fp_code=%s" % code)
+        print code
+
+        res = requests.get("http://localhost:8000/query?fp_code=%s" % code)
         
         print res
 

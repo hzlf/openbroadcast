@@ -6,15 +6,64 @@ from tastypie.authentication import *
 from tastypie.authorization import *
 from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
 
-from alibrary.models import Media
+from alibrary.models import Media, Release, Artist, Label
+
+from easy_thumbnails.files import get_thumbnailer
 
 from ep.API import fp
 
+
+class ReleaseResource(ModelResource):
+
+    class Meta:
+        queryset = Release.objects.all()
+        list_allowed_methods = ['get',]
+        detail_allowed_methods = ['get',]
+        resource_name = 'release'
+        excludes = ['updated',]
+        include_absolute_url = True
+        authentication = BasicAuthentication()
+        authorization = Authorization()
+        filtering = {
+            #'channel': ALL_WITH_RELATIONS,
+            'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
+        }
+
+    def dehydrate(self, bundle):
+        
+        print bundle.obj
+        if(bundle.obj.main_image):
+            opt = dict(size=(70, 70), crop=True, bw=False, quality=80)
+            main_image = image = get_thumbnailer(bundle.obj.main_image).get_thumbnail(opt)
+            bundle.data['main_image'] = main_image.url
+
+        
+        return bundle
+        
+class ArtistResource(ModelResource):
+
+
+    class Meta:
+        queryset = Artist.objects.all()
+        list_allowed_methods = ['get',]
+        detail_allowed_methods = ['get',]
+        resource_name = 'artist'
+        excludes = ['updated',]
+        include_absolute_url = True
+        authentication = BasicAuthentication()
+        authorization = Authorization()
+        filtering = {
+            #'channel': ALL_WITH_RELATIONS,
+            'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
+        }
 
 class MediaResource(ModelResource):
     
     #channel = fields.ForeignKey(ChannelResource, 'channel', null=True, full=True)
     # channel = fields.ForeignKey(ChannelResource, 'channel', null=True, full=False)
+    
+    release = fields.ForeignKey(ReleaseResource, 'release', null=True, full=True)
+    artist = fields.ForeignKey(ArtistResource, 'artist', null=True, full=True)
     
     message = fields.CharField(attribute='message', null=True)
 
@@ -27,7 +76,7 @@ class MediaResource(ModelResource):
         resource_name = 'track'
         excludes = ['updated',]
         include_absolute_url = True
-        authentication = BasicAuthentication()
+        authentication = Authentication()
         authorization = Authorization()
         filtering = {
             #'channel': ALL_WITH_RELATIONS,
@@ -67,7 +116,8 @@ class MediaResource(ModelResource):
         
 
     
-    
+
+
     
 
     
