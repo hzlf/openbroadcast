@@ -142,8 +142,9 @@ def deploy():
         
         try:
             with cd(env.path + '/src/website/site-static/'):
+                pass
                 #run('rm -R css/*')
-                run('/var/lib/gems/1.8/gems/compass-0.11.7/bin/compass compile -c config-production.rb')
+                #run('/var/lib/gems/1.8/gems/compass-0.11.7/bin/compass compile -c config-production.rb')
         except Exception, e:
             print e        
         
