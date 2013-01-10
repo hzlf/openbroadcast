@@ -1,10 +1,11 @@
 from django.template import RequestContext
-from django.views.generic import DetailView, ListView, FormView, UpdateView, CreateView
+from django.views.generic import DetailView, ListView, FormView, UpdateView, CreateView, DeleteView
+
 from django.views.generic.detail import SingleObjectTemplateResponseMixin, TemplateResponseMixin
 from  django.views.generic.edit import FormMixin, ProcessFormView
 from django.shortcuts import get_object_or_404, render_to_response
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden
 from django.core.files.uploadedfile import UploadedFile
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -13,8 +14,30 @@ from django.utils.functional import lazy
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import simplejson
 
+from django import http
+from django.utils import simplejson as json
+
 from importer.models import *
 from importer.forms import *
+
+
+
+class JSONResponseMixin(object):
+    
+    def render_to_response(self, context):
+        "Returns a JSON response containing 'context' as payload"
+        return self.get_json_response(self.convert_context_to_json(context))
+
+    def get_json_response(self, content, **httpresponse_kwargs):
+        "Construct an `HttpResponse` object."
+        return http.HttpResponse(content,
+                                 content_type='application/json',
+                                 **httpresponse_kwargs)
+
+    def convert_context_to_json(self, context):
+        
+        return json.dumps(context['result'])
+
 
 class ImportListView(ListView):
     
@@ -23,6 +46,46 @@ class ImportListView(ListView):
     def get_queryset(self):
         kwargs = {}
         return Import.objects.filter(user=self.request.user)
+    
+
+
+class ImportDeleteView(DeleteView):
+    
+    model = Import
+    success_url = lazy(reverse, str)("importer-import-list")
+    
+    def get_queryset(self):
+        kwargs = {}
+        return Import.objects.filter(user=self.request.user)
+
+
+
+
+"""
+NOT WORKING!!
+"""
+class ImportModifyView(JSONResponseMixin, UpdateView):
+    
+    model = Import
+  
+    def get_queryset(self):
+        kwargs = {}
+        return Import.objects.filter(user=self.request.user)
+    
+    def get(self, cls, **kwargs):
+        cls.object = cls.get_object()
+        kwargs.update({"object": cls.object})
+        return cls, kwargs
+    
+    def render_to_response(self, context):
+    # Look for a 'format=json' GET argument
+        meta = self.request.META
+        if meta.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest' or "json" in meta.get("CONTENT_TYPE") or 1 == 1:
+            context['result'] = {'status' : True }
+            
+            return JSONResponseMixin.render_to_response(self, context)
+        else:
+            return HttpResponseForbidden()
 
 
 
@@ -147,3 +210,16 @@ def multiuploader(request, import_id):
     else:
         mimetype = 'text/plain'
     return HttpResponse(response_data, mimetype=mimetype)
+
+
+
+
+
+
+
+
+
+
+
+
+

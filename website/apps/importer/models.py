@@ -30,7 +30,7 @@ from celery.task import task
 import logging
 log = logging.getLogger(__name__)
 
-USE_CELERYD = False    
+USE_CELERYD = True    
         
 GENERIC_STATUS_CHOICES = (
     (0, _('Init')),
@@ -111,12 +111,47 @@ class Import(BaseModel):
     def get_absolute_url(self):
         return ('importer-import-update', [str(self.pk)])
 
+    @models.permalink
+    def get_delete_url(self):
+        return ('importer-import-delete', [str(self.pk)])
+    
+    
+    def get_stats(self):
+        stats = {}
+        stats['init'] = self.files.filter(status=0)
+        stats['done'] = self.files.filter(status=1)
+        stats['ready'] = self.files.filter(status=2)
+        stats['working'] = self.files.filter(status=3)
+        stats['warning'] = self.files.filter(status=4)
+        stats['duplicate'] = self.files.filter(status=5)
+        stats['queued'] = self.files.filter(status=6)
+        stats['importing'] = self.files.filter(status=6)
+        stats['error'] = self.files.filter(status=99)
+        
+        return stats
+        
 
     def get_api_url(self):
         url = reverse('api_dispatch_list', kwargs={'resource_name': 'import', 'api_name': 'v1'})
         return url
-
     
+    def save(self, *args, **kwargs):
+        
+        """
+        stats = self.get_stats()
+        
+        if stats['done'].count() == self.files.count():
+            self.status = 1
+        
+        if stats['done'].count() + stats['duplicate'].count() == self.files.count():
+            self.status = 1
+        
+        if stats['error'].count() > 0:
+            self.status = 99
+        """   
+        
+        super(Import, self).save(*args, **kwargs)
+ 
     
 class ImportFile(BaseModel):
 
@@ -166,7 +201,7 @@ class ImportFile(BaseModel):
         (0, _('Init')),
         (1, _('Done')),
         (2, _('Ready')),
-        (3, _('Progress')),
+        (3, _('Working')),
         (4, _('Warning')),
         (5, _('Duplicate')),
         (6, _('Queued')),
@@ -236,6 +271,10 @@ class ImportFile(BaseModel):
     
             obj.results_musicbrainz = processor.get_musicbrainz(obj)
             obj.results_discogs_status = True
+            obj.save()
+            
+            obj.status = 2
+            obj.results_tag_status = True
             obj.save()
     
     

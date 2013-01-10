@@ -101,73 +101,109 @@ ImporterUi = function() {
 		});
 		
 		
+		
+		
 		$('.start-import', actions).live('click', function(e){
 			
 			var parent = $(this).parents('.importfile');
 			parent_id = parent.attr('id').split('_')[2];
 			
-			var item = self.current_data[parent_id];
-			console.log(item.resource_uri);
-			
-			var form_result = $('.form-result', parent);
-			
-			
-			
-			var import_tag = {
-				name: $('input.name', form_result).val(), 
-				release: $('input.release', form_result).val(), 
-				releasedate: $('input.releasedate', form_result).val(), 
-				artist: $('input.artist', form_result).val(), 
-				tracknumber: $('input.tracknumber', form_result).val(), 
-				
-				mb_track_id: $('input.mb-track-id', form_result).val(), 
-				mb_artist_id: $('input.mb-artist-id', form_result).val(), 
-				mb_release_id: $('input.mb-release-id', form_result).val(), 
-			}
-			
-			if(! (import_tag.name && import_tag.artist)) {
-				alert('Missing fields!!');
-				return;
-			}
-			
-			var data = { 
-				status: 6, 
-				import_tag: import_tag 
-				};
-			
-			console.log(data);
-			console.log(JSON.stringify(data));
-			
-			
-			parent.removeClass('working');
-			parent.addClass('queued');
-			
-			$('.result-set', parent).hide(100);
-			$('.result-actions', parent).hide(200);
-			
-			
-			$.ajax({
-				type: "PUT",
-				url: item.resource_uri,
-				dataType: "application/json",
-				contentType: 'application/json',
-  				processData:  false,
-				data: JSON.stringify(data),
-				success: function(data) {
-					console.log(data);
-					form_result.hide();
-					
-				}
-			});
-			
-						
-			
+			self.import_by_id(parent_id);
 
+		});
+		
+		
+		$('.start-import-all', $('#import_summary')).live('click', function(e){
+			$('.importfile.ready').each(function(i, el) {
+				id = $(this).attr('id').split('_')[2];			
+				self.import_by_id(id);
+			});
+		});
+		
+		
+		/* summary actions */
+		var container = $('#import_summary');
+		$(container).on('click', 'a.toggle', function(e){
+			e.preventDefault();
+			var cls = $(this).data('toggle');
+			
+			if($(this).data('toggle-active') == 0) {
+				
+				$('i', this).removeClass('icon-angle-down');
+				$('i', this).addClass('icon-angle-up');
+				
+				$('.importfile.' + cls).show(100);
+				$(this).data('toggle-active', 1);
+			} else {
+				
+				$('i', this).removeClass('icon-angle-up');
+				$('i', this).addClass('icon-angle-down');
+				
+				$('.importfile.' + cls).hide(300);
+				$(this).data('toggle-active', 0);
+			}
+			
 			
 			
 		});
+	};
+
+
+
+	this.import_by_id = function(id) {
+		console.log('id: ' + id);
+		
+		var item = self.current_data[id];
+		var el = $('#importfile_result_' + id)
+		var form_result = $('.form-result', el);
+
+		var import_tag = {
+			name: $('input.name', form_result).val(), 
+			release: $('input.release', form_result).val(), 
+			releasedate: $('input.releasedate', form_result).val(), 
+			artist: $('input.artist', form_result).val(), 
+			tracknumber: $('input.tracknumber', form_result).val(), 
+			
+			mb_track_id: $('input.mb-track-id', form_result).val(), 
+			mb_artist_id: $('input.mb-artist-id', form_result).val(), 
+			mb_release_id: $('input.mb-release-id', form_result).val(), 
+		}
+		
+		if(! (import_tag.name && import_tag.artist)) {
+			alert('Missing fields!!');
+			return;
+		}
+		
+		var data = { 
+			status: 6, 
+			import_tag: import_tag 
+			};
+		
+
+		el.removeClass('working');
+		el.addClass('queued');
+		
+		$('.result-set', el).hide(100);
+		$('.result-actions', el).hide(200);
+		
+		/**/
+		$.ajax({
+			type: "PUT",
+			url: item.resource_uri,
+			dataType: "application/json",
+			contentType: 'application/json',
+			processData:  false,
+			data: JSON.stringify(data),
+			success: function(data) {
+				console.log(data);
+				form_result.hide();
+				
+			}
+		});
+		
 		
 	};
+
 
 	/*
 	 * Methods for import editing
@@ -218,18 +254,45 @@ ImporterUi = function() {
 		status_map[4] = 'warning';
 		status_map[5] = 'duplicate';
 		status_map[6] = 'queued';
+		status_map[7] = 'importing';
 		status_map[99] = 'error';
 
-		var count_ready = 0
+		var count_init = 0;
+		var count_done = 0;
+		var count_ready = 0;
+		var count_working = 0;
+		var count_warning = 0;
+		var count_duplicate = 0;
+		var count_error = 0;
 
 		for (var i in data) {
 			var item = data[i];
 
-			if (item.status == 3) {
+			if (item.status == 1) {
+				count_done++;
+			}
+			if (item.status == 2) {
 				count_ready++;
 			}
+			if (item.status == 3) {
+				count_working++;
+			}
+			if (item.status == 4) {
+				count_warning++;
+			}
+			if (item.status == 5) {
+				count_duplicate++;
+			}
+			if (item.status == 99) {
+				count_error++;
+			}
 		}
+		$('.item.done .num-files', container).html(count_done);
 		$('.item.ready .num-files', container).html(count_ready);
+		$('.item.working .num-files', container).html(count_working);
+		$('.item.warning .num-files', container).html(count_warning);
+		$('.item.duplicate .num-files', container).html(count_duplicate);
+		$('.item.error .num-files', container).html(count_error);
 		//console.log('count_ready:', count_ready);
 	
 	};
@@ -391,7 +454,7 @@ ImporterUi = function() {
 			var item = data[i];
 			var target_result = $('#importfile_result_' + item.id);
 
-			if (item.status > 0) {
+			if (item.status > -1) { // to check..
 
 				// sorry for this... don't know how to directly provide json from JSONField
 				try {

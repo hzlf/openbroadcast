@@ -25,11 +25,12 @@ aplayer.states_last = aplayer.states_last || false;
 aplayer.vars.states = { current: 0, next: false, prev: false};
 
 // polling interval
-aplayer.vars.len_interval = 200;
+aplayer.vars.len_interval = 2000;
 
 aplayer.vars.debug = true;
-aplayer.vars.mode = 'rtmp';
-//aplayer.vars.mode = 'html5';
+// aplayer.vars.stream_mode = 'rtmp';
+aplayer.vars.stream_mode = 'html5';
+
 
 
 /*********************************************************************************
@@ -629,8 +630,10 @@ aplayer.base.controls = function(args) {
 			console.log(stream);
 		}
 		
+		console.log('play via: ' + aplayer.vars.stream_mode);
 		
-		if(aplayer.vars.mode == 'rtmp') {
+		
+		if(aplayer.vars.stream_mode == 'rtmp') {
 			var pl = { 'file': stream.file, 
 		            	'streamer': stream.rtmp_host + stream.rtmp_app + '/',
 		            	'title': stream.media_name,
@@ -647,7 +650,7 @@ aplayer.base.controls = function(args) {
 		}
 		
 		
-	    if (aplayer.vars.mode = 'html5') {
+	    if (aplayer.vars.stream_mode == 'html5') {
 			var pl = {  'file': stream.uri, 
 		            	'title': stream.media_name,
 		            	'mediaid': stream.uuid,

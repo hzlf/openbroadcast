@@ -1,9 +1,11 @@
-		<div class="span1"><i class="icon icon-padded icon-"></i></div>
+		<div class="span1">
+			&nbsp;
+		</div>
 		
 		<div class="span8 information">
 			
 			<ul class="unstyled">
-				<li><strong><a href="{%=encodeURI(o.name)%}">{%=o.name%}</a></strong></li>
+				<li><strong><a href="{%=encodeURI(o.absolute_url)%}">{%=o.name%}</a></strong></li>
 				{% if (o.release) { %}
 				    <li><a href="{%=encodeURI(o.release.absolute_url)%}">{%=o.release.name%}</a></li>
 				{% } else { %}

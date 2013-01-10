@@ -41,7 +41,7 @@
 		<tr>
 			<th>{% trans "Status" %}</th>
 			<th>{% trans "Created" %}</th>
-			<th>{% trans "Type" %}</th>
+			<!--<th>{% trans "Type" %}</th>-->
 			<th>{% trans "Stats" %}</th>
 			<th>{% trans "Actions" %}</th>
 		</tr>
@@ -50,7 +50,7 @@
 	<tbody>
 
 		{% for object in object_list %}
-		<tr class="{{ object.get_status_display|lower }}">
+		<tr class="item {{ object.get_status_display|lower }}">
 			<td>
 
 				{% if object.status == 0 %}
@@ -84,12 +84,60 @@
 					{% blocktrans with created=object.created|timesince %}{{ created }} ago{% endblocktrans %}	
 				{% endif %}
 			</td>
+			
+			<!--
 			<td>{{ object.get_type_display }}</td>
+			-->
 			
-			
-			<td>				
-				<span>{% trans "Files" %}: </span>
-				<span>{{ object.files.count }} </span>
+			<td>
+				
+				{% with stats=object.get_stats %}
+				
+				
+				<ul class="unstyled horizontal">
+					
+					<li style="width: 124px;">
+						{% trans "Total Files" %}: {{ object.files.count }} 
+					</li>
+					
+					{% if stats.ready.count > 0 %}
+					<li style="width: 44px;" rel="tooltip" class="tooltipable" title="{{ stats.ready.count }} {% trans "files ready for import" %}" >
+						<i class="icon-check-empty"></i> 
+						{{ stats.ready.count }}
+					</li>
+					{% endif %}
+					
+					{% if stats.done.count > 0 %}
+					<li style="width: 44px;" rel="tooltip" class="tooltipable" title="{{ stats.done.count }} {% trans "files completed" %}" >
+						<i class="icon-check"></i> 
+						{{ stats.done.count }}
+					</li>
+					{% endif %}
+					
+					{% if stats.duplicate.count > 0 %}
+					<li style="width: 44px;" rel="tooltip" class="tooltipable" title="{{ stats.duplicate.count }} {% trans "duplicates" %}" >
+						<i class="icon-copy"></i> 
+						{{ stats.duplicate.count }}
+					</li>
+					{% endif %}
+					
+					{% if stats.queued.count > 0 %}
+					<li style="width: 44px;" rel="tooltip" class="tooltipable" title="{{ stats.queued.count }} {% trans "in queue" %}" >
+						<i class="icon-tasks"></i> 
+						{{ stats.queued.count }}
+					</li>
+					{% endif %}
+					
+					{% if stats.error.count > 0 %}
+					<li style="width: 44px;" rel="tooltip" class="tooltipable" title="{{ stats.error.count }} {% trans "files with errors" %}" >
+						<i class="icon-warning-sign"></i> 
+						{{ stats.error.count }}
+					</li>
+					{% endif %}
+
+				</ul>
+				
+				{% endwith %}
 				
 				<!--
 				<span>{% trans "Imported" %}</span>
@@ -102,7 +150,7 @@
 			<td class="">
 				
 			<div class="btn-group pull-right">
-				<button class="btn btn-mini btn-prrimary">
+				<button class="btn btn-mini btn-prrimary" data-toggle="dropdown">
 					{% trans "Actions" %}
 				</button>
 				<button class="btn btn-mini  btn-prrimary dropdown-toggle" data-toggle="dropdown">
@@ -110,18 +158,20 @@
 				</button>
 				<ul class="dropdown-menu">
 					<li>
-						<a href="{{ object.get_absolute_url }}">{% trans "Details" %}</a>
+						<a href="{{ object.get_absolute_url }}"><i class="icon-edit"></i> {% trans "Details" %}</a>
 					</li>
 					<li>
-						<a href="#">Another action</a>
+						<a href="#"><i class="icon-cloud-upload"></i> {% trans "Archive" %}</a>
 					</li>
 					<li>
-						<a href="#">Something else here</a>
+						<a class="transform-post reload" href="{{ object.get_delete_url }}"><i class="icon-trash"></i> {% trans "Delete" %}</a>
 					</li>
+					<!--
 					<li class="divider"></li>
 					<li>
 						<a href="#">Separated link</a>
 					</li>
+					-->
 				</ul>
 			</div>
 			</td>
@@ -134,4 +184,8 @@
 
 </table>
 
+{% endblock %}
+
+{% block sidebar %}
+{% include "importer/_import_list_sidebar.html" %}
 {% endblock %}

@@ -1,12 +1,12 @@
-{% load calc i18n %}
+{% load calc i18n arating_tags %}
 
-				<div class="list_body_row selectable  published " id="list_item_75206">
+				<div class="list_body_row selectable item published {{ item.uuid }}" id="list_item_75206">
 					<!-- Play icon -->
 					<div class="list_body_item c1 action">
 						<ul>
 							<!-- Play link  -->
 							<li class="play">
-								<a href="http://openbroadcast.ch/en/content/library/releases/19253-little-broken-hearts-gurtenfestival-2012/play.json#0#replace" title="Play" class="playable popup"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Play"></a>
+								<a href="{{ item.release.get_api_url }}#5#replace" title="Play" class="playable popup"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Play"></a>
 							</li>
 						</ul>
 
@@ -41,6 +41,13 @@
 					<!-- License -->
 					
 					<div class="list_body_item c5 license {% if item.license %}{{ item.license.key }}{% endif %}">
+						
+						<!--
+						<div class="rating">
+							{# rating_for_object item #}
+						</div>	
+						-->
+						
 						<div class="left license">
 						{% if item.license %}
 							<a href="{{ item.license.get_absolute_url }}" title="License details" class="dialog disabled-modal"><img src="/static/img/icons/transparent_16x16.png" width="48" height="24" alt="License" class="noborder"></a>

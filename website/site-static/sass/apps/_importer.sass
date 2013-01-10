@@ -16,6 +16,8 @@ i.icon-musicbrainz
   height: 22px
 
 
+$duplicateBackground: #fffeac
+
 section.importer-importfiles
 
   // base
@@ -26,9 +28,31 @@ section.importer-importfiles
       background: $grayLightest
       margin-bottom: $basePadding
       
+      
+      .icon-holder
+        padding-top: 12px
+
+        i
+          font-size: 30px
+          color: green
+      
+      
       &.waiting
         opacity: 0.5
         cursor: wait
+        
+
+    
+      &.init
+        opacity: 0.5
+        cursor: wait
+        .icon-blank:before
+          content: "\f017" // icon-time
+        div.result-actions
+          display: none
+        div.result-set
+          display: none
+        
       
       &.info
         background-color: $infoBackground
@@ -46,9 +70,29 @@ section.importer-importfiles
         background-color: $successBackground
         color: $successText
     
+      &.ready
+        //background-color: #ff00ff
+        //color: #5a5a5a
+        .icon-blank:before
+          content: "\f096" // icon-refresh
+    
+      &.working
+        //background-color: #ff00ff
+        //color: #5a5a5a
+        .icon-blank:before
+          content: "\f021" // icon-refresh
+
+        div.result-actions
+          display: none
+        div.result-set
+          display: block
+    
       &.duplicate
-        background-color: #fffeac
+        background-color: $duplicateBackground
         color: #5a5a5a
+        .icon-blank:before
+          content: "\f0c5" // icon-check
+            
         div.status-imported
           display: block
         div.status-duplicate
@@ -61,6 +105,9 @@ section.importer-importfiles
       &.done
         background-color: $successBackground
         color: #5a5a5a
+        .icon-blank:before
+          content: "\f046" // icon-copy
+            
         div.status-imported
           display: block
 
@@ -181,15 +228,26 @@ i.ajax-loader
       top: 120px
 
   .item
-    padding: 2px 2px 0px 2px
-    background-color: #efefef
+    padding: 4px 4px 4px 4px
+    margin: 5px 0 5px 0
+    border-bottom: 1px solid #efefef
+    //background-color: #efefef
 
-    &.done
-      background-color: #DDFFD9
+    a.toggle
+      color: #333
+      &:hover
+        text-decoration: none
 
-    &.ready
-      background-color: #DDFFD9
     
+
     &.hover
-      background-color: red
+      &.done
+        background-color: #DDFFD9
+        
+      &.duplicate
+        background-color: $duplicateBackground
+  
+      &.ready
+        background-color: #DDFFD9
+
 

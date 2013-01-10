@@ -2,7 +2,7 @@ from cms.app_base import CMSApp
 from cms.apphook_pool import apphook_pool
 from django.utils.translation import ugettext_lazy as _
 
-from alibrary.menu import ReleaseMenu, ArtistMenu, LibraryMenu
+from alibrary.menu import ReleaseMenu, ArtistMenu, LibraryMenu, MediaMenu
 
 class ReleaseApp(CMSApp):
     
@@ -20,6 +20,15 @@ class ArtistApp(CMSApp):
     menus = [ArtistMenu]
 
 apphook_pool.register(ArtistApp)
+
+
+class MediaApp(CMSApp):
+    
+    name = _("Media App")
+    urls = ["alibrary.urls_media"]
+    menus = [MediaMenu]
+
+apphook_pool.register(MediaApp)
 
 
 class LibraryApp(CMSApp):

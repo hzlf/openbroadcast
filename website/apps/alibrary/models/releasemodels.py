@@ -216,7 +216,7 @@ class Release(MigrationMixin):
         app_label = 'alibrary'
         verbose_name = _('Release')
         verbose_name_plural = _('Releases')
-        #ordering = ('-releasedate', )
+        ordering = ('-created', )
         
         permissions = (
             ('view_release', 'View Release'),
@@ -294,6 +294,14 @@ class Release(MigrationMixin):
     @models.permalink
     def get_edit_url(self):
         return ('alibrary-release-edit', [self.pk])
+    
+    def get_api_url(self):
+        return reverse('api_dispatch_detail', kwargs={  
+            'api_name': 'v1',  
+            'resource_name': 'release',  
+            'pk': self.pk  
+        }) + ''
+    
     
     def get_media(self):
         return Media.objects.filter(release=self).select_related()

@@ -14,30 +14,36 @@ from ep.API import fp
 
 
 class ReleaseResource(ModelResource):
+    
+    media = fields.ToManyField('alibrary.api.MediaResource', 'media_release', null=True, full=True, max_depth=3)
 
     class Meta:
-        queryset = Release.objects.all()
+        queryset = Release.objects.exclude(main_image=None).order_by('-created')
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         resource_name = 'release'
         excludes = ['updated',]
         include_absolute_url = True
-        authentication = BasicAuthentication()
+        #authentication = BasicAuthentication()
+        #authorization = Authorization()
+        #authentication = ApiKeyAuthentication()
+        authentication =  MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
         authorization = Authorization()
         filtering = {
             #'channel': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
         }
+        
 
     def dehydrate(self, bundle):
         
-        print bundle.obj
         if(bundle.obj.main_image):
             opt = dict(size=(70, 70), crop=True, bw=False, quality=80)
             main_image = image = get_thumbnailer(bundle.obj.main_image).get_thumbnail(opt)
             bundle.data['main_image'] = main_image.url
+            
+            bundle.data['artist'] = bundle.obj.get_artists();
 
-        
         return bundle
         
 class ArtistResource(ModelResource):
@@ -62,7 +68,7 @@ class MediaResource(ModelResource):
     #channel = fields.ForeignKey(ChannelResource, 'channel', null=True, full=True)
     # channel = fields.ForeignKey(ChannelResource, 'channel', null=True, full=False)
     
-    release = fields.ForeignKey(ReleaseResource, 'release', null=True, full=True)
+    release = fields.ForeignKey(ReleaseResource, 'release', null=True, full=True, max_depth=2)
     artist = fields.ForeignKey(ArtistResource, 'artist', null=True, full=True)
     
     message = fields.CharField(attribute='message', null=True)
@@ -74,7 +80,7 @@ class MediaResource(ModelResource):
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         resource_name = 'track'
-        excludes = ['updated',]
+        excludes = ['updated', 'release__media']
         include_absolute_url = True
         authentication = Authentication()
         authorization = Authorization()
@@ -82,8 +88,31 @@ class MediaResource(ModelResource):
             #'channel': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
         }
+
+
+    """
+    Add streaming information
+    """
+    def dehydrate(self, bundle):
+        
+        obj = bundle.obj
+
+        bundle.data['stream'] = {
+                                 'rtmp_app': 'ch-openbroadcast',
+                                 'rtmp_host': 'rtmp://local.openbroadcast.ch:1935/',
+                                 'file': obj.master, 
+                                 'uuid': obj.uuid,
+                                 'uri': obj.master.url,
+                                 }
+
+        return bundle
         
 
+
+    """
+    Filters
+    Enable querying by fingerprint
+    """
     def build_filters(self, filters=None):
         if filters is None:
             filters = {}

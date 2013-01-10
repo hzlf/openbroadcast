@@ -88,7 +88,7 @@ from alibrary.models.playlistmodels import *
 from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
 
-
+import arating
 
 
 
@@ -213,18 +213,22 @@ class Media(MigrationMixin):
     def __unicode__(self):
         return self.name
 
-    def get_absolute_url(self):
-        # TODO: Make right
-        return '/tracks/' + self.slug + '/'
     
+    @models.permalink
+    def get_absolute_url(self):
+        return ('alibrary-media-detail', [self.slug])
 
+    @models.permalink
+    def get_edit_url(self):
+        return ('alibrary-media-edit', [self.pk])
+    
 
     def get_api_url(self):
         return reverse('api_dispatch_detail', kwargs={  
             'api_name': 'v1',  
             'resource_name': 'track',  
             'pk': self.pk  
-        }) + '?format=json'
+        }) + ''
     
     def release_link(self):
         if self.release:
@@ -904,6 +908,9 @@ class Media(MigrationMixin):
 
 # register
 # post_save.connect(library_post_save, sender=Media)   
+        
+        
+arating.enable_voting_on(Media)
         
 # media post save
 def media_post_save(sender, **kwargs):

@@ -4,7 +4,7 @@
 # django
 source ~/srv/openbroadcast.ch-upgrade/bin/activate
 cd ~/code/openbroadcast.ch/website/
-./manage.py runserver_plus 0.0.0.0:8000
+./manage.py runserver_plus 0.0.0.0:8080
 
 # rabbitmq
 sudo rabbitmq-server -detached
@@ -16,6 +16,7 @@ cd ~/code/openbroadcast.ch/website/
 
 
 # tokyo-tyrant
+sudo rm /var/ttserver/pid # in case not cleaned
 sudo ttservctl start
 
 # solr

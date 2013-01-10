@@ -65,6 +65,18 @@ menu_pool.register_menu(ReleaseMenu)
 
 
 
+class MediaMenu(CMSAttachMenu):
+    
+    name = _("Media/Track Menu")
+    
+    def get_nodes(self, request):
+        nodes = []
+        return nodes
+    
+menu_pool.register_menu(MediaMenu)
+
+
+
 
 class ArtistMenu(CMSAttachMenu):
     

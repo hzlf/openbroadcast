@@ -319,7 +319,7 @@ base.ui.iface = function() {
 	}
 	
 	
-	$('a.tooltipable').tooltip()
+	$('.tooltipable').tooltip()
 
 	
 	$('.hoverable').live('mouseenter', function(e){
@@ -337,6 +337,16 @@ base.ui.iface = function() {
 	//$('.autocomplete.result').load('http://local.openbroadcast.ch:8000/en/content/library/releases/autocomplete/?q=second');
 	
 	
+	
+	$('a.transform-post.reload').live('click', function(e){
+	
+		e.preventDefault();
+		var href = $(this).attr('href');
+		$.post(href, function(d) {});
+		
+		$(this).parents('.item').hide(300);
+		
+	});
 	
 	
 	// Cange display depending on applicatinos focus
@@ -1124,7 +1134,7 @@ base.ui.searchbar = function() {
 		} else {
 			if(q.length > 2){
 				$('#dim_content').css('display', 'block');
-				$('#autocomplete_holder').load('/content/library/releases/autocomplete/?q=' + encodeURIComponent(q));
+				$('#autocomplete_holder').load('/de/inhalt/library/releases/autocomplete/?q=' + encodeURIComponent(q));
 			} else {
 				$('#dim_content').css('display', 'none');
 				$('#autocomplete_holder').html('');
@@ -2301,56 +2311,6 @@ base.ui.ajax = function(url, data) {
 };
 
 
-
-/*
- * Utility functions
- */
-util = function() {};
-util.uri_param_insert = function(sourceUrl, parameterName, parameterValue, replaceDuplicates) {
-	
-    if ((sourceUrl == null) || (sourceUrl.length == 0)) sourceUrl = document.location.href;
-    var urlParts = sourceUrl.split("?");
-    var newQueryString = "";
-    if (urlParts.length > 1)
-    {
-        var parameters = urlParts[1].split("&");
-        for (var i=0; (i < parameters.length); i++)
-        {
-                var parameterParts = parameters[i].split("=");
-                if (!(replaceDuplicates && parameterParts[0] == parameterName))
-                {
-                        if (newQueryString == "")
-                                newQueryString = "?";
-                        else
-                                newQueryString += "&";
-                        newQueryString += parameterParts[0] + "=" + parameterParts[1];
-                }
-        }
-    }
-    if (newQueryString == "")
-        newQueryString = "?";
-    else
-        newQueryString += "&";
-    newQueryString += parameterName + "=" + parameterValue;
-
-    return urlParts[0] + newQueryString;
-};
-
-
-util.string_random = function(length) {
-	
-    var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz'.split('');
-    
-    if (! length) {
-        length = Math.floor(Math.random() * chars.length);
-    }
-    
-    var str = '';
-    for (var i = 0; i < length; i++) {
-        str += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return str;
-};
 
 
 $.fn.serializeObject = function()

@@ -76,6 +76,13 @@
 		</ul>
 	</div>
 	<div class="list_body_item c5 license {% if item.get_license %}{{ item.get_license.key }}{% endif %}">
+		
+		<!--
+		<div class="rating">
+			{# rating_for_object item #}
+		</div>	
+		-->
+		
 		{% if item.get_license %}
 				<a href="{{ item.get_license.get_absolute_url }}" title="License details" class="dialog todo-modal"><img src="/static/img/icons/transparent_16x16.png" width="78" height="24" alt="License" class="noborder" /></a>
 		{% endif %}
@@ -93,6 +100,9 @@
 		</ul>
 	</div>
 	<div class="list_body_item c7">
+		
+
+		
 		<ul class="unstyled">
 			<li>
 				{{ item.get_releasetype_display }}

@@ -17,7 +17,6 @@ aplayer.ui.use_effects = true;
  * global initialisation
  *********************************************************************************/
 aplayer.ui.init = function() {
-
 	aplayer.ui.bind();
 };
 
@@ -227,8 +226,12 @@ aplayer.ui.update = function(aplayer) {
 	
 
 	// var playlist_container = $('div.listing.extended');
-	$('div.item.playlist').not('div.item.playlist.' + media.uuid).removeClass('active');
-	$('div.item.playlist.' + media.uuid).addClass('active');
+	// $('div.item.playlist').not('div.item.playlist.' + media.uuid).removeClass('active');
+	// $('div.item.playlist.' + media.uuid).addClass('active');
+	
+	// modification
+	$('div.listview.medias .item').not('div.item.playlist.' + media.uuid).removeClass('active playing');
+	$('div.listview.medias .item.' + media.uuid).addClass('active playing');
 
 	// playhead
 	var active_playhead = $('div.item.' + media.uuid + ' ' + 'div.indicator');
@@ -470,7 +473,7 @@ aplayer.ui.playhead = function(base_width) {
 	// moving the handler (red bar) - simple as "pos == %"
 	$('.playhead .handler').live('mousemove', function(e) {
 
-		var pos = asite.ui.get_position(e);
+		var pos = util.get_position(e);
 		
 		// console.log(pos['x'], 'pos move');
 		
@@ -490,7 +493,7 @@ aplayer.ui.playhead = function(base_width) {
 		//console.log(outer_width, 'outer_width');
 		//console.log(base_width, 'base_width');
 
-		var pos = asite.ui.get_position(e);
+		var pos = util.get_position(e);
 		
 		//console.log(pos['x'], 'pos click');
 		
@@ -516,7 +519,7 @@ aplayer.ui.playhead = function(base_width) {
 		outer_width = $(this).parents('.playhead').css('width').slice(0, -2);
 		base_width = outer_width;
 
-		var pos = asite.ui.get_position(e);
+		var pos = util.get_position(e);
 		var x_percent = pos['x'] / (base_width) * 100;
 
 		// console.log(x_rel);
