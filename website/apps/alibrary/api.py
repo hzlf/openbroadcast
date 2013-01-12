@@ -96,14 +96,19 @@ class MediaResource(ModelResource):
     def dehydrate(self, bundle):
         
         obj = bundle.obj
-
-        bundle.data['stream'] = {
-                                 'rtmp_app': 'ch-openbroadcast',
-                                 'rtmp_host': 'rtmp://local.openbroadcast.ch:1935/',
-                                 'file': obj.master, 
-                                 'uuid': obj.uuid,
-                                 'uri': obj.master.url,
-                                 }
+        
+        if obj.master:
+            stream = {
+                     'rtmp_app': 'ch-openbroadcast',
+                     'rtmp_host': 'rtmp://local.openbroadcast.ch:1935/',
+                     'file': obj.master, 
+                     'uuid': obj.uuid,
+                     'uri': obj.master.url,
+                     }
+        else:
+            stream = None
+        
+        bundle.data['stream'] = stream
 
         return bundle
         
