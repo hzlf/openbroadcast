@@ -120,6 +120,10 @@ def deploy():
         except Exception, e:
             print e
             
+        """
+        additional supervisor configs
+        """
+            
         try:
             run('rm %s/%s' % (env.nginx, env.site_id))
             run('ln -s %s/src/conf/%s.nginx.conf %s/%s' % (env.path, env.site_id, env.nginx, env.site_id))
@@ -162,6 +166,9 @@ def deploy():
             run('supervisorctl restart %s' % env.site_id)
             # restart gunicorn celeryd-worker
             run('supervisorctl restart worker.%s' % env.site_id)
+            # restart other supervisor services
+            run('supervisorctl restart echoprint.%s' % env.site_id)
+            run('supervisorctl restart ttserver.%s' % env.site_id)
             
             run('supervisorctl status')
         except Exception, e:
