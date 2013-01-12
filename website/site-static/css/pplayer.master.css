@@ -2,49 +2,32 @@
 /* master.sass */
 /* Master stylesheet */
 /* vars.sass */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_control\.sass}line{font-family:\000031}}
 .left {
-  float: left;
-}
+  float: left; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_control\.sass}line{font-family:\000034}}
 .right {
-  float: right;
-}
+  float: right; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_control\.sass}line{font-family:\000037}}
 .clear {
-  clear: both;
-}
+  clear: both; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_control\.sass}line{font-family:\0000311}}
 ul.horizontal li {
-  float: left;
-}
+  float: left; }
 
 /* vars.sass */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_control\.sass}line{font-family:\000031}}
 .left {
-  float: left;
-}
+  float: left; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_control\.sass}line{font-family:\000034}}
 .right {
-  float: right;
-}
+  float: right; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_control\.sass}line{font-family:\000037}}
 .clear {
-  clear: both;
-}
+  clear: both; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_control\.sass}line{font-family:\0000311}}
 ul.horizontal li {
-  float: left;
-}
+  float: left; }
 
 /* CSS Document */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\000039}}
 body {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
@@ -53,150 +36,104 @@ body {
   border: 0;
   padding: 0;
   background: white;
-  overflow: hidden;
-}
+  overflow: hidden; }
 
 /* for internet explorer */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000321}}
 * html body {
-  padding: 40px 0 0 0;
-}
+  padding: 40px 0 0 0; }
 
 /* AJAX loader */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000326}}
 body.file.ajax_loading {
-  background-color: #dfdfdf;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000328}}
-body.file.ajax_loading .loading {
-  display: block !important;
-  z-index: 1000;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000334}}
-body.file.ajax_loading .loading.dim {
-  background-color: black;
-  opacity: 0.2;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000337}}
-body.file.ajax_loading .loading.throbber {
-  z-index: 101;
-  background-image: url(/static/img/base/throbber.large.green.gif);
-  background-position: center center;
-  background-repeat: no-repeat;
-}
+  background-color: #dfdfdf; }
+  body.file.ajax_loading .loading {
+    display: block !important;
+    z-index: 1000;
+    width: 100%;
+    height: 100%;
+    position: absolute; }
+    body.file.ajax_loading .loading.dim {
+      background-color: black;
+      opacity: 0.2; }
+    body.file.ajax_loading .loading.throbber {
+      z-index: 101;
+      background-image: url(/static/img/base/throbber.large.green.gif);
+      background-position: center center;
+      background-repeat: no-repeat; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000344}}
 body.stream.ajax_loading .loading {
   display: block !important;
   z-index: 1000;
   width: 100%;
   height: 100%;
-  position: absolute;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000350}}
-body.stream.ajax_loading .loading.throbber {
-  z-index: 101;
-  /*background-image: url(/static/img/base/throbber.large.green.gif) */
-  background-position: center center;
-  background-repeat: no-repeat;
-}
+  position: absolute; }
+  body.stream.ajax_loading .loading.throbber {
+    z-index: 101;
+    /*background-image: url(/static/img/base/throbber.large.green.gif) */
+    background-position: center center;
+    background-repeat: no-repeat; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000357}}
 a {
   color: #6633cc;
   text-decoration: none;
-  cursor: pointer;
-}
+  cursor: pointer; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000362}}
 img {
-  border: 0px solid;
-}
+  border: 0px solid; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000366}}
 #content {
   left: 0;
   width: 100%;
   border-top: 1px solid #bbbbbb;
-  height: 390px;
-}
+  height: 390px; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000372}}
 body.file #content {
-  overflow: auto;
-}
+  overflow: auto; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000376}}
 body.stream #content {
   overflow: hidden;
-  background-color: #dddddd;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000381}}
-body.stream #content .info .images img {
-  width: 101% !important;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000385}}
+  background-color: #dddddd; }
+  body.stream #content .info .images img {
+    width: 101% !important; }
 body.stream #sounddisplay .d-position, body.stream #sounddisplay .d-duration {
-  display: none !important;
-}
+  display: none !important; }
 
 /* topnav */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000394}}
 #tabbar {
   background: #777777;
-  height: 22px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\0000397}}
-#tabbar ul {
-  margin: 0px;
-  padding: 0px;
-  list-style: none;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003101}}
-#tabbar li {
-  float: left;
-  margin: 0px;
-  padding: 2px 10px 1px 22px;
-  background-color: #777777;
-  border: 0px solid #999999;
-  border-right: 1px solid #666666;
-  border-bottom: 1px solid #888888;
-  border-top: 1px solid #777777;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003110}}
-#tabbar li a {
-  border-bottom: 0px solid !important;
-  color: #333333;
-  text-decoration: none;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003114}}
-#tabbar li.active {
-  background-color: #d9d9d9;
-  border-bottom: 1px solid #999999;
-  border-top: 1px solid #dddddd;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003118}}
-#tabbar li.active a {
-  color: black;
-}
+  height: 22px; }
+  #tabbar ul {
+    margin: 0px;
+    padding: 0px;
+    list-style: none; }
+  #tabbar li {
+    float: left;
+    margin: 0px;
+    padding: 2px 10px 1px 22px;
+    background-color: #777777;
+    border: 0px solid #999999;
+    border-right: 1px solid #666666;
+    border-bottom: 1px solid #888888;
+    border-top: 1px solid #777777; }
+    #tabbar li a {
+      border-bottom: 0px solid !important;
+      color: #333333;
+      text-decoration: none; }
+    #tabbar li.active {
+      background-color: #d9d9d9;
+      border-bottom: 1px solid #999999;
+      border-top: 1px solid #dddddd; }
+      #tabbar li.active a {
+        color: black; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003126}}
 .tracktitle {
   font-size: 12px;
   font-weight: bold;
   padding: 10px 0px 2px 1px;
-  color: #333333;
-}
+  color: #333333; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003132}}
 .list {
-  background: white;
-}
+  background: white; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003135}}
 .listitem {
   padding: 7px 12px 5px 38px;
   border-bottom: 1px solid #cccccc;
@@ -204,19 +141,13 @@ body.stream #sounddisplay .d-position, body.stream #sounddisplay .d-duration {
   cursor: pointer;
   color: #333333;
   font-size: 12px;
-  line-height: 12px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003143}}
-.listitem a {
-  color: #999999;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003145}}
-.listitem a:hover {
-  color: #333333;
-  text-decoration: underline;
-}
+  line-height: 12px; }
+  .listitem a {
+    color: #999999; }
+    .listitem a:hover {
+      color: #333333;
+      text-decoration: underline; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003149}}
 .trackinfo {
   position: relative;
   top: 13px;
@@ -225,82 +156,54 @@ body.stream #sounddisplay .d-position, body.stream #sounddisplay .d-duration {
   color: #666666;
   margin: 2px 0px 2px 0px;
   height: 12px;
-  overflow: hidden;
-}
+  overflow: hidden; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003159}}
 .on {
-  background: #dafed4;
-}
+  background: #dafed4; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003162}}
 .action {
-  background: #fffedc;
-}
+  background: #fffedc; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003166}}
 #player .header {
   border-top: 1px solid #eeeeee;
   /*border-bottom: 1px solid #bbb */
   padding: 10px;
-  background: #dddddd;
-}
+  background: #dddddd; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003173}}
 .listitem {
   position: relative;
   padding-left: 38px;
   background: white url(/static/img/prototype/list_play_button2_s.png) no-repeat 10px 6px;
-  padding-bottom: 12px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003174}}
-.listitem:hover {
-  background: #eee6ff url(/static/img/prototype/list_but.png) no-repeat 10px 6px;
-  color: black;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003177}}
-.listitem.action:hover {
-  background: #fffedc;
-  color: black;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003180}}
-.listitem .list-title {
-  position: absolute;
-  /*margin-right:80px; this is now handled with textTruncate */
-  overflow: hidden;
-  height: 17px;
-  font-weight: bold;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003186}}
-.listitem .list-right {
-  float: right;
-  padding-left: 20px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003189}}
-.listitem span {
-  color: #777777;
-  padding-left: 5px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003196}}
-.listitem:hover {
-  background: #eee6ff url(/static/img/prototype/list_play_button2_s.png) no-repeat 10px 6px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003198}}
-.listitem:hover .list-right {
-  color: black;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003200}}
-.listitem.play {
-  background: #dcffdc url(/static/img/prototype/list_play_on.png) no-repeat 10px 6px;
-  color: black;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003203}}
-.listitem.play:hover {
-  background: #dcffdc url(/static/img/prototype/list_play_on.png) no-repeat 10px 6px;
-  color: black;
-}
+  padding-bottom: 12px; }
+  .listitem:hover {
+    background: #eee6ff url(/static/img/prototype/list_but.png) no-repeat 10px 6px;
+    color: black; }
+  .listitem.action:hover {
+    background: #fffedc;
+    color: black; }
+  .listitem .list-title {
+    position: absolute;
+    /*margin-right:80px; this is now handled with textTruncate */
+    overflow: hidden;
+    height: 17px;
+    font-weight: bold; }
+  .listitem .list-right {
+    float: right;
+    padding-left: 20px; }
+  .listitem span {
+    color: #777777;
+    padding-left: 5px; }
+  .listitem:hover {
+    background: #eee6ff url(/static/img/prototype/list_play_button2_s.png) no-repeat 10px 6px; }
+    .listitem:hover .list-right {
+      color: black; }
+  .listitem.play {
+    background: #dcffdc url(/static/img/prototype/list_play_on.png) no-repeat 10px 6px;
+    color: black; }
+    .listitem.play:hover {
+      background: #dcffdc url(/static/img/prototype/list_play_on.png) no-repeat 10px 6px;
+      color: black; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003211}}
 #sounddisplay {
   border: 1px solid #888888;
   border-bottom: 1px solid white;
@@ -308,156 +211,101 @@ body.stream #sounddisplay .d-position, body.stream #sounddisplay .d-duration {
   background: #e4ffe4;
   padding: 5px 7px 7px 7px;
   margin-bottom: 8px;
-  line-height: 14px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003219}}
-#sounddisplay .d-position {
-  float: left;
-  font-weight: bold;
-  padding-top: 10px;
-  font-size: 11px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003224}}
-#sounddisplay .d-duration {
-  float: right;
-  font-weight: bold;
-  padding-top: 10px;
-  font-size: 11px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003229}}
-#sounddisplay .progress-holder {
-  height: 7px;
-  padding: 5px 0px 5px 0px;
-  margin: 7px 37px 0px 37px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003233}}
-#sounddisplay .progress {
-  position: relative;
-  height: 7px;
-  border: 1px solid #666666;
-  cursor: pointer;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003238}}
-#sounddisplay .loader {
-  position: absolute;
-  height: 7px;
-  background: #c3ebc3;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003242}}
-#sounddisplay .position {
-  position: absolute;
-  height: 7px;
-  width: 1px;
-  background: url(/static/img/prototype/bar_bg.png);
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003247}}
-#sounddisplay .position .time {
-  display: none;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003250}}
-#sounddisplay .handler {
-  position: absolute;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003252}}
-#sounddisplay .media-name-cont {
-  height: 15px;
-  overflow: hidden;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003255}}
-#sounddisplay .media-name {
-  font-weight: bold;
-  padding-bottom: 1px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003258}}
-#sounddisplay .media-release, #sounddisplay .media-artist {
-  color: #798f71;
-  height: 15px;
-  overflow: hidden;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003262}}
-#sounddisplay .cue_in, #sounddisplay .cue_out {
-  position: absolute;
-  height: 7px;
-  width: 1px;
-  background: #63735e;
-}
+  line-height: 14px; }
+  #sounddisplay .d-position {
+    float: left;
+    font-weight: bold;
+    padding-top: 10px;
+    font-size: 11px; }
+  #sounddisplay .d-duration {
+    float: right;
+    font-weight: bold;
+    padding-top: 10px;
+    font-size: 11px; }
+  #sounddisplay .progress-holder {
+    height: 7px;
+    padding: 5px 0px 5px 0px;
+    margin: 7px 37px 0px 37px; }
+  #sounddisplay .progress {
+    position: relative;
+    height: 7px;
+    border: 1px solid #666666;
+    cursor: pointer; }
+  #sounddisplay .loader {
+    position: absolute;
+    height: 7px;
+    background: #c3ebc3; }
+  #sounddisplay .position {
+    position: absolute;
+    height: 7px;
+    width: 1px;
+    background: url(/static/img/prototype/bar_bg.png); }
+    #sounddisplay .position .time {
+      display: none; }
+  #sounddisplay .handler {
+    position: absolute; }
+  #sounddisplay .media-name-cont {
+    height: 15px;
+    overflow: hidden; }
+  #sounddisplay .media-name {
+    font-weight: bold;
+    padding-bottom: 1px; }
+  #sounddisplay .media-release, #sounddisplay .media-artist {
+    color: #798f71;
+    height: 15px;
+    overflow: hidden; }
+  #sounddisplay .cue_in, #sounddisplay .cue_out {
+    position: absolute;
+    height: 7px;
+    width: 1px;
+    background: #63735e; }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003269}}
 body.paused #sounddisplay {
-  background: #efefef;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003271}}
-body.paused #sounddisplay .time, body.paused #sounddisplay .d-position, body.paused #sounddisplay .d-duration {
-  text-decoration: blink;
-}
+  background: #efefef; }
+  body.paused #sounddisplay .time, body.paused #sounddisplay .d-position, body.paused #sounddisplay .d-duration {
+    text-decoration: blink; }
 
 /* buttons */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003276}}
 div.control .button {
   cursor: pointer;
-  background-repeat: no-repeat;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003279}}
-div.control .button.play {
-  background-image: url(/static/img/prototype/f_paused_on.png);
-  width: 50px;
-  height: 45px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003283}}
-div.control .button.play.paused {
-  background-image: url(/static/img/prototype/f_play_on.png);
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003286}}
-div.control .button.next {
-  background-image: url(/static/img/prototype/f_next.png);
-  width: 40px;
-  height: 45px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003290}}
-div.control .button.next.active {
-  background-image: url(/static/img/prototype/f_next_on.png);
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003293}}
-div.control .button.prev {
-  background-image: url(/static/img/prototype/f_prev.png);
-  width: 40px;
-  height: 45px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003297}}
-div.control .button.prev.active {
-  background-image: url(/static/img/prototype/f_prev_on.png);
-}
+  background-repeat: no-repeat; }
+  div.control .button.play {
+    background-image: url(/static/img/prototype/f_paused_on.png);
+    width: 50px;
+    height: 45px; }
+    div.control .button.play.paused {
+      background-image: url(/static/img/prototype/f_play_on.png); }
+  div.control .button.next {
+    background-image: url(/static/img/prototype/f_next.png);
+    width: 40px;
+    height: 45px; }
+    div.control .button.next.active {
+      background-image: url(/static/img/prototype/f_next_on.png); }
+  div.control .button.prev {
+    background-image: url(/static/img/prototype/f_prev.png);
+    width: 40px;
+    height: 45px; }
+    div.control .button.prev.active {
+      background-image: url(/static/img/prototype/f_prev_on.png); }
 
 /* Overrides if waveform available */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003306}}
 body.waveform #content, body.waveform #playlist {
-  top: 163px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003310}}
+  top: 163px; }
 body.waveform #sounddisplay .d-position, body.waveform #sounddisplay .d-duration {
-  display: none;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003313}}
+  display: none; }
 body.waveform #sounddisplay .progress-holder {
   height: 20px;
-  margin: 7px 0px 0;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003316}}
+  margin: 7px 0px 0; }
 body.waveform #sounddisplay .progress {
   width: 326px;
   height: 20px;
-  border: none;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003321}}
+  border: none; }
 body.waveform #sounddisplay .position {
   position: absolute;
   top: 0px;
   height: 20px;
   width: 1px;
   border-right: 1px solid #dd0000;
-  background-image: none;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_pplayer\.style\.sass}line{font-family:\00003328}}
-body.waveform #sounddisplay .position .time {
-  display: inline;
-}
+  background-image: none; }
+  body.waveform #sounddisplay .position .time {
+    display: inline; }
