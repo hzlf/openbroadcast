@@ -86,6 +86,7 @@ $.fn.serializeObject = function() {
 /*
  * AJAX CSRF handling
  */
+
 $(document).ajaxSend(function(event, xhr, settings) {
 	function getCookie(name) {
 		var cookieValue = null;

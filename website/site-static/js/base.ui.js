@@ -942,7 +942,8 @@ base.ui.iface = function() {
 		
 		return false;
 	});
-	
+
+/*	
 	$('div.slideout.base').tabSlideOut({
 	    tabHandle: '.handle',
 	    pathToTabImage: '/media/img/base/slideout.feedback.png',
@@ -954,7 +955,7 @@ base.ui.iface = function() {
 	    topPos: '173px',
 	    fixedPosition: true
 	});
-	
+*/
 	
 	
 	/*
@@ -962,9 +963,11 @@ base.ui.iface = function() {
 	 * they will live here for the moment.
 	 */
 	
+	/*
 	if(base.vars.context == 'content' && base.vars.section == 'downloads') {
 		setTimeout("base.ui.downloads_update()", 15000);
 	}
+	*/
 	
 };
 

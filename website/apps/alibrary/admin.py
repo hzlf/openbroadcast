@@ -247,7 +247,7 @@ class MediaAdmin(BaseAdmin):
     
     inlines = [RelationsInline, MediaExtraartistsInline]
 
-    readonly_fields = ['slug', 'folder', 'uuid', 'base_format', 'base_filesize', 'base_duration','base_samplerate', 'base_bitrate', 'release_link']
+    readonly_fields = ['slug', 'folder', 'uuid', 'base_format', 'base_filesize', 'base_duration','base_samplerate', 'base_bitrate', 'release_link', 'master_sha1']
     
     
     """"""
@@ -257,7 +257,7 @@ class MediaAdmin(BaseAdmin):
                  }),
                  
         ('Storage related',  {
-                'fields': ['master', 'folder', ('base_format', 'base_filesize', 'base_duration',), ('base_samplerate', 'base_bitrate')]
+                'fields': ['master', 'master_sha1', 'folder', ('base_format', 'base_filesize', 'base_duration',), ('base_samplerate', 'base_bitrate')]
                  }),
 
         ('Mixed content', {'fields': ['description'], 'classes': ['']}),

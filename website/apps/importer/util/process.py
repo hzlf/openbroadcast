@@ -12,6 +12,7 @@ import musicbrainzngs
 import discogs_client as discogs
 
 from lib.util import pesterfish
+from lib.util.sha1 import sha1_by_file
 
 from base import discogs_image_by_url 
 
@@ -65,7 +66,19 @@ class Process(object):
     
     
     
-    def get_echoprint(self, file):
+    def id_by_sha1(self, file):
+        sha1 = sha1_by_file(file)
+        print 'SHA1: %s' % sha1
+        try:
+            print '********************'
+            print '* Duplicate by SHA1'
+            print '********************'
+            return Media.objects.filter(master_sha1=sha1)[0].pk
+        except:
+            return None
+    
+    
+    def id_by_echoprint(self, file):
         from ep.API import fp
         from lib.analyzer.echoprint import Echoprint
         e = Echoprint()

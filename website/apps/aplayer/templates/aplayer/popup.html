@@ -1,84 +1,136 @@
 {% extends "aplayer/base.html" %}
 
-{% load sekizai_tags compress include_raw i18n %}
+{% load sekizai_tags compress include_raw i18n straight_include %}
 
 {% block extras %}
 
 {% compress js %}{% endcompress %}
 {% addtoblock "js" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jwplayer/jwplayer-5.9.js"></script>{% endaddtoblock %}
 
-
-
 {% addtoblock "js" %}
-	<script type="text/javascript">
-		$(document).ready(function() {
-			$('.footer').live('hover', function(e) {
-				$(this).addClass("hover");
-			});
-			$('.footer').live('mouseleave', function(e) {
-				$(this).removeClass("hover");
-			});
+<script type="text/javascript">
+	$(document).ready(function() {
+		$('.footer').live('hover', function(e) {
+			$(this).addClass("hover");
 		});
-	</script>
+		$('.footer').live('mouseleave', function(e) {
+			$(this).removeClass("hover");
+		});
+	}); 
+</script>
 {% endaddtoblock %}
 
 {% addtoblock "css" %}
 <style type="text/css">
 
+      html,
+      body {
+        height: 100%;
+        /* The html and body elements cannot have any padding or margin. */
+      }
+
+      /* Wrapper for page content to push down footer */
+      #wrap {
+        min-height: 100%;
+        height: auto !important;
+        height: 100%;
+        /* Negative indent footer by it's height */
+        margin: 0 auto -60px;
+      }
+
+      /* Set the fixed height of the footer here */
+      #push,
+      #footer {
+        height: 60px;
+      }
+      #footer {
+
+      }
 
 </style>
 {% endaddtoblock %}
 
 {% endblock %}
 
-{% block inner %} <!-- include unparsed template for js rendering -->
-<script id="tpl_media" type="text/x-jquery-tmpl">
+{% block inner %}
+<!-- include unparsed template for js rendering -->
+<!-- TODO: maybe refactor to icanhaze -->
+<script id="tpl_screen" type="text/html">
+	{% include_raw "aplayer/tpl_screen.html" %}
+	{# straight_include "aplayer/tpl_screen.html" #}
+</script>
+<script id="tpl_media" type="text/html">
 	{% include_raw "aplayer/tpl_media.html" %}
 </script>
-<script id="tpl_screen" type="text/x-jquery-tmpl">
-	{% include_raw "aplayer/tpl_screen.html" %}
-</script>
-<div id="popup_root">
-	<div class="header aplayer">
-		<div class="wrapper">
-			<!-- controls and display, ui part. -->
-			<div class="container screen controls" id="aplayer_screen">
-				<!-- CONTENT INSERTED FROM TPL_SCREEN -->
-			</div>
+<div id="wrap">
+<div class="navbar navbar-inverse navbar-fixed-top">
+	<div class="navbar-inner">
+
+		<a class="brand" href="#">&nbsp;<img src="{{ STATIC_URL }}img/icons/favicon.gif" /></a>
+
+		<div class="nav-collapse collapse">
+			<ul class="nav">
+				<li class="active">
+					<a href="#">{% trans "Media Library" %}</a>
+				</li>
+				<li class="">
+					<a href="#">{% trans "Livestream" %}</a>
+				</li>
+			</ul>
 		</div>
+
 	</div>
-	<div class="inner aplayer">
-		<div class="wrapper">
-			<!-- the playlist holder -->
-			<div class="listing extended playlist" id="aplayer_playlist">
-				<!-- CONTENT INSERTED FROM TPL_MEDIA -->
-			</div>
-			<!-- here sits the flash part of the player... -->
-			<div class="controls" id="aplayer_controls" style="" >
-				<div id="aplayer_container" style="height: 1px; width: 1px"></div>
-			</div>
-		</div>
-	</div>
-	<div class="footer">
-		<div class="wrapper" style="color: #5a5a5a; overflow: auto;">
-		</div>
-	</div>
-	
-	<div class="ovaerlay aplayer" id="overlay_container">
-		<div class="wrapper">
-			<h1>{% trans "Please wait" %}</h1>
-			<h2>{% trans "Loading the player could take some seconds..." %}</h2>
-			
-			<p>If you see this thext for more than a few seconds, chances are high that something went wrong.</p>
-			<p>So please just close this popup-window and try to click play again.</p>
-			<!--
-			<p class="message error">ERROR LOADING PLAYER - Sorry for this...</p>
-			-->
-			<div class="console"></div>
-		</div>
-	</div>
-	
-	<div class="ajax-indicator" id="ajax_indicator">&nbsp;</div>
-	
 </div>
+
+<div class="container">
+
+	<section class="screen controls" id="aplayer_screen">
+		<!-- CONTENT INSERTED FROM TPL_SCREEN -->
+	</section>
+
+	<section class="screen playlist" id="aplayer_playlist">
+		<!-- CONTENT INSERTED FROM TPL_MEDIA -->
+	</section>
+
+</div>
+
+</div>
+
+<footer class="footer">
+	<div class="container">
+		
+		<p style="display: none;">
+			<small>
+				{% trans "'Spacebar': toggle play/pause" %}
+				{% trans "'Left/Right': play next/prev'" %}
+			</small>
+		</p>
+		<!--
+		<div class="wrapper" style="color: #5a5a5a; overflow: auto;"></div>
+		-->
+	</div>
+</footer>
+
+<!-- here sits the flash part of the player... -->
+<div class="controls" id="aplayer_controls" style="height: 1px; width: 1px; overflow: hidden; position: fixed; right: 0;" >
+	<div id="aplayer_container" style="height: 1px; width: 1px"></div>
+</div>
+
+<!--
+<div class="ovaerlay aplayer" id="overlay_container">
+<div class="wrapper">
+<h1>{% trans "Please wait" %}</h1>
+<h2>{% trans "Loading the player could take some seconds..." %}</h2>
+
+<p>
+If you see this thext for more than a few seconds, chances are high that something went wrong.
+</p>
+<p>
+So please just close this popup-window and try to click play again.
+</p>
+<div class="console"></div>
+</div>
+</div>
+-->
+
 {% endblock %}

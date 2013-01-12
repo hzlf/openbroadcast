@@ -18,7 +18,8 @@
 </head>
 
 <!--body -->
-<body class="popup aplayer">
+<body class="popup aplayer" data-spy="scroll">
+	
 
 	{% block inner %}
 	{% endblock %}
@@ -57,6 +58,9 @@
 			
 			// create interface
 			// asite.ui.init();
+			
+			base.ui.init();
+			base.ui.iface();
 			
 			aplayer.base.init();
 			aplayer.ui.init();

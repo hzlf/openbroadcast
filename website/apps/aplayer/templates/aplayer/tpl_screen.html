@@ -1,62 +1,81 @@
-
-
-			<div id="" class="left container information">
-
-				<div class="wrapper">
-					<h1>{{=name}}</h1>
-					<h2><a class="parent_link" href="{{=artist.permalink}}">{{=artist.name}}</a></h2>
-					
-				</div>
+<div class="row-fluid aplayer-information">
+	<div class="span8 information">
+		<div class="padded-x padded-y">
+			<h2>
+				<a class="parent_link" href="{{object.release.absolute_url}}">{{ object.release.name }}</a>
 				
+				{{#object.release.releasedate}}
+				<small> {{ object.release.releasedate }}</small>
+				{{/object.release.releasedate}}
 				
-				<div class="controls">
-					
-					<!-- NOTE: same structure as eg in aplayer_inline.html -->
-					<div class="left icon-container">
-						<ul class="horizontal">
-							
-							<li class="icon-container prev">
-								<a href="#prev" title="Previous">
-									<span class="icon"></span>
-									<span class="text expandable">Previous</span>
-								</a>
-							</li>
-							
-							<li class="icon-container pause">
-								<a href="#pause" title="Stop">
-									<span class="icon"></span>
-									<span class="text expandable">Pause</span>
-								</a>
-							</li>
-							
-							<li class="icon-container play">
-								<a href="#play" title="Play">
-									<span class="icon"></span>
-									<span class="text expandable">Play</span>
-								</a>
-							</li>
-							
-							<li class="icon-container next">
-								<a href="#next" title="Next">
-									<span class="icon"></span>
-									<span class="text expandable">Next</span>
-								</a>
-							</li>
-							
-			
-						</ul>
-					</div>
-					
-				</div>
+				<!--
+				{{#object.release.catalognumber}}
+				<small> {{ object.release.catalognumber }}</small>
+				{{/object.release.catalognumber}}
+				
+				{{#object.release.label}}
+				{{ object.release.label.name }}
+				{{/object.release.label}}
+				-->
+			</h2>
+			<h1>{{ object.name }}</h1>
+			<h2><a class="parent_link" href="{{object.artist.absolute_url}}">{{ object.artist.name }}</a></h2>
+		</div>
+	</div>
 
-			</div>
+	<div class="span4 image">
+		<div class="padded-x padded-y">
+
+			{{#object.images}}
+			<img class=" pull-right" id="" src="{{.}}">
+			{{/object.images}}
+
+		</div>
+	</div>
+
+</div>
+
+<div class="row-fluid aplayer-progress" id="progress_bar">
+	<!--
+	<div class="time time-current">
+		<span>00:00</span>
+	</div>
+	-->
+	<div class="indicator">
+		<div class="wrapper">
+			<div class="inner">&nbsp;</div>
+		</div>
+	</div>
+	<!--
+	<div class="time time-total">
+		<span>00:00</span>
+	</div>
+	-->
+
+	<div class="clear"></div>
+</div>
+
+<div class="row-fluid aplayer-controls">
+	<div class="span6">
+		<ul class="horizontal unstyled">
+
+			<li>
+				<a href="#prev" title="Previous"> <i class="icon-step-backward"></i> </a>
+			</li>
 			
-			<div id="" class="right container image">
-				<div class="wrapper">
-					{{#each images }}
-					<img id="artist_image_{{=$itemNumber}}" src="{{=m}}" />
-					{{/each}}	
-				</div>
-			</div>
+			<li class="hidden-while-paused">
+				<a href="#pause" title="Stop"> <i class="icon-pause"></i> </a>
+			</li>
+			<li class="hidden-while-playing hidden-while-buffering">
+				<a href="#play" title="Play"> <i class="icon-play"></i> </a>
+			</li>
 			
-			<div class="clear"></div>
+			<li>
+				<a href="#next" title="Next"> <i class="icon-step-forward"></i> </a>
+			</li>
+
+		</ul>
+	</div>
+
+</div>
+

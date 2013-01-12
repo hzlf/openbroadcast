@@ -19,9 +19,9 @@
 	{% compress css %}
 	{% endcompress %}
 	<link href="{{ STATIC_URL }}css/aplayer.css" media="screen, projection" rel="stylesheet" type="text/css" />
-	<!-- REMOVE FOR PRODUCTION! -->
+	<!-- REMOVE FOR PRODUCTION!
 	<link href="{{ STATIC_URL }}css/in_progress.css" media="screen, projection" rel="stylesheet" type="text/css" />
-	
+	 -->
 
 	
 
@@ -33,8 +33,9 @@
 
 	<!-- scripts -------------------------------------------------------------------------------------------->
 	<!-- common includes -->
-	{% include "base/_common_script.html" %}
+	{% include "aplayer/_common_script.html" %}
 
 	
 	<!-- webfonts -->
-	{% include "lib/monotype.html" %}
+	{# include "lib/monotype.html" #}
+	

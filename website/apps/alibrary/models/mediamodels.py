@@ -71,6 +71,9 @@ from mptt.models import MPTTModel, TreeForeignKey, TreeManyToManyField
 # audio processing / waveform
 from lib.audioprocessing.processing import create_wave_images, AudioProcessingException
 
+# hash
+from lib.util.sha1 import sha1_by_file
+
 # echoprint
 from ep.API import fp
 
@@ -183,6 +186,9 @@ class Media(MigrationMixin):
     
     # File related (new)
     master = models.FileField(max_length=1024, upload_to=masterpath_by_uuid, blank=True, null=True)
+    master_sha1 = models.CharField(max_length=64, db_index=True, blank=True, null=True)
+    
+    
     folder = models.CharField(max_length=1024, null=True, blank=True, editable=False)
     
     # File Data
@@ -244,6 +250,12 @@ class Media(MigrationMixin):
     
     def get_download_permissions(self):
         pass
+    
+
+
+    def generate_sha1(self):
+        return sha1_by_file(self.master)
+    
     
     
     
@@ -901,6 +913,13 @@ class Media(MigrationMixin):
             self.base_samplerate = base_samplerate
             self.base_filesize = base_filesize
             self.base_duration = base_duration
+            
+        
+        
+        if self.master:
+            self.master_sha1 = self.generate_sha1()
+        else:
+            self.master_sha1 = None
                 
                 
         unique_slugify(self, self.name)

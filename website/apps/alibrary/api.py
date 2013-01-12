@@ -69,7 +69,7 @@ class MediaResource(ModelResource):
     # channel = fields.ForeignKey(ChannelResource, 'channel', null=True, full=False)
     
     release = fields.ForeignKey(ReleaseResource, 'release', null=True, full=True, max_depth=2)
-    artist = fields.ForeignKey(ArtistResource, 'artist', null=True, full=True)
+    artist = fields.ForeignKey(ArtistResource, 'artist', null=True, full=True, max_depth=2)
     
     message = fields.CharField(attribute='message', null=True)
 

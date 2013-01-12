@@ -126,8 +126,23 @@ aplayer.ui.bind = function() {
   		}
 	});
 	
+	
+	
+	$('.item.playlist').live('click', function(e){
+		
+		var uuid = $(this).attr('id');
+		var index = aplayer.vars.uuid_map[uuid]
+		
+		var args = {
+			action: 'play',
+			index: index
+		}
+		
+		aplayer.base.controls(args)
+	});
+	
 
-	aplayer.ui.bind_controls($("div.controls li > a", '.aplayer'));
+	aplayer.ui.bind_controls($("div.aplayer-controls li > a", '.aplayer'));
 
 	
 
@@ -146,13 +161,24 @@ aplayer.ui.rebind = function() {
 	
 	// waveform scaleing
 	$(document).bind('keydown.modal', function(event) {
+
+		switch(event.which)
+		{
+			case 32:
+				aplayer.base.controls({action: 'pause' });
+				break;
+			case 39:
+				if(aplayer.states.next) {
+					aplayer.base.controls({action: 'play', index: aplayer.states.next });
+				}
+				break;
+			case 37:
+				if(aplayer.states.prev !== false) {
+					aplayer.base.controls({action: 'play', index: aplayer.states.prev });
+				}
+				break;
+		}
 		
-		if(event.which == 189) {
-			aplayer.ui.scale_waveform('down');
-		}
-		if(event.which == 187) {
-			aplayer.ui.scale_waveform('up');
-		}
 	});
 	
 };
@@ -184,18 +210,45 @@ aplayer.ui.bind_controls = function(obj) {
   		
   		if(action == 'next') {
 			if(aplayer.states.next) {
-				// aplayer.base.controls('play', aplayer.states.next);
 				aplayer.base.controls({action: 'play', index: aplayer.states.next });
 			}
   		}
   		
   		if(action == 'prev') {
 			if(aplayer.states.prev !== false) { // note: in js 0 == false > true
-				// aplayer.base.controls('play', aplayer.states.prev);
 				aplayer.base.controls({action: 'play', index: aplayer.states.prev });
 			}
   		}
 
+	});
+	
+	
+	
+	
+	// progress bar click / seek
+	$('.indicator .wrapper', 'body.popup #progress_bar').live('click', function(e) {
+		
+		outer_width = $(this).css('width').slice(0, -2);
+		base_width = outer_width;
+
+		var pos = util.get_position(e);		
+		var x_percent = pos['x'] / (base_width) * 100;
+		var uuid = $(this).parents('.item').attr('id');
+
+		// trigger control
+		var args = {
+			action: 'seek',
+			position: x_percent,
+			uuid: uuid 
+		}
+		aplayer.base.controls(args);
+
+	});
+	
+	// moving the handler
+	$('.indicator .wrapper', 'body.popup #progress_bar').live('mousemove', function(e) {
+		var pos = util.get_position(e);
+		$(this).css('background-position', pos['x'] + 'px' + ' 0px');
 	});
 	
 	
@@ -226,10 +279,10 @@ aplayer.ui.update = function(aplayer) {
 	
 
 	// var playlist_container = $('div.listing.extended');
-	// $('div.item.playlist').not('div.item.playlist.' + media.uuid).removeClass('active');
-	// $('div.item.playlist.' + media.uuid).addClass('active');
+	$('div.item.playlist').not('div.item.playlist.' + media.uuid).removeClass('active playing');
+	$('div.item.playlist.' + media.uuid).addClass('active playing');
 	
-	// modification
+	// modification for alternate layout
 	$('div.listview.medias .item').not('div.item.playlist.' + media.uuid).removeClass('active playing');
 	$('div.listview.medias .item.' + media.uuid).addClass('active playing');
 
@@ -271,26 +324,32 @@ aplayer.ui.update = function(aplayer) {
 	// main window
 	//if(this.type == 'main') {
 
-		// inline player
-		var container = $('div.aplayer.inline');
-		// var container = $('div.container.screen');
+	// inline player
+	var container = $('div.aplayer.inline');	
+	if(container) {
 		
-		if(container) {
-			
-			
-			
-			
-			$('li.current', container).html(util.format_time(aplayer.states.position));
-			$('li.total', container).html(util.format_time(aplayer.states.duration));
-			
-			$('.media_name a', container).html(media.name);
-			$('.media_name a', container).attr('href', media.release_url);
-			$('.artist_name a', container).html(media.artist.name);
-			$('.artist_name a', container).attr('href', media.artist.permalink);
-		}
-		if(container) {
-			$('.indicator', container).css('width', aplayer.states.position_rel + '%');
-		}
+		$('li.current', container).html(util.format_time(aplayer.states.position));
+		$('li.total', container).html(util.format_time(aplayer.states.duration));
+		
+		$('.media_name a', container).html(media.name);
+		$('.media_name a', container).attr('href', media.release_url);
+		$('.artist_name a', container).html(media.artist.name);
+		$('.artist_name a', container).attr('href', media.artist.permalink);
+		
+		$('.indicator', container).css('width', aplayer.states.position_rel + '%');
+		
+	}
+
+	var container_screen = $('#progress_bar');
+	if(container_screen) {
+		$('div.time-current > span', container_screen).html(util.format_time(aplayer.states.position));
+		$('div.time-total > span', container_screen).html(util.format_time(aplayer.states.duration));
+		$('.indicator .inner', container_screen).css('width', aplayer.states.position_rel + '%');
+		// playlist inline progress
+		$('.indicator .inner', '.item.playlist.playing').css('width', aplayer.states.position_rel + '%');
+	}
+
+		
 	//}
 	
 	// popup window
@@ -311,60 +370,32 @@ aplayer.ui.update = function(aplayer) {
  *********************************************************************************/
 aplayer.ui.screen_display = function(index) {
 	
-	var item = aplayer.vars.playlist[index];		
-
-	// little hackish
+	var item = aplayer.vars.playlist[index];
+	
+	
+	item.images = []
 	try {
-		var artist_url = item.artist.url;
-	}
-	catch(err) {
-		var artist_url = false;
-	};
+		item.images.push(item.release.main_image);
+	} catch(err) {};
 	
-	
-	item.images = aplayer.vars.result.images;
-	
-	
-	// if artist_url (API) present fetch details
-	if(artist_url) {
-		// console.log(artist_url, 'artist_url');
-		$.getJSON(artist_url + "?format=json", function(data) {
-			
-			data.images = aplayer.vars.result.images;
-			// inject artist data
-			item.artist = data;
-			// render screen template
-			$( "#aplayer_screen" ).html(
-				$( "#tpl_screen" ).render( item )
-			);
-			/*
-			$('.container.image .wrapper').cycle({
-				fx: 'fade' // choose your transition type, ex: fade, scrollUp, shuffle, etc...
-			});
-			*/
-		});
-	
-	} else {
-		// if not render directly
-		// render screen template
-		$( "#aplayer_screen" ).html(
-			$( "#tpl_screen" ).render( item )
-		);
-	}
+	var html = ich.tpl_screen({object: item});
+	$( "#aplayer_screen" ).html(html);
 };
 
 
 
 /*********************************************************************************
- * Updates the info-screen. (If available gets additional data from API)
+ * Updates the playlist-screen.
  * (renders the tpl_media.html template)
  *********************************************************************************/
 aplayer.ui.playlist_display = function(aplayer, target) {
 
+	target.html('');
+
 	var media_listing = new Array();
 	
 	for (x in aplayer.vars.playlist) {
-		media = aplayer.vars.playlist[x];
+		var media = aplayer.vars.playlist[x];
 		
 		var media_name = 'unknown';
 		var artist_name = 'unknown';
@@ -381,13 +412,13 @@ aplayer.ui.playlist_display = function(aplayer, target) {
 			name: media.name,
 		};
 		
+		media.formated_duration = util.format_time(Number(media.duration / 1000))
+
+		var html = ich.tpl_media({'media': media});
+		target.append(html);
+		
 	};
-	
-	// render playlist template
-	target.html(
-		$( "#tpl_media" ).render( media_listing )
-	);
-	
+
 };
 
 

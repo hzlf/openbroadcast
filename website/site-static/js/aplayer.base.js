@@ -25,7 +25,7 @@ aplayer.states_last = aplayer.states_last || false;
 aplayer.vars.states = { current: 0, next: false, prev: false};
 
 // polling interval
-aplayer.vars.len_interval = 2000;
+aplayer.vars.len_interval = 500;
 
 aplayer.vars.debug = true;
 // aplayer.vars.stream_mode = 'rtmp';
@@ -557,8 +557,10 @@ aplayer.base.on_play = function(index, uuid) {
 };
 
 aplayer.base.on_complete = function() {
+	
 	if(aplayer.states.next) {
-		aplayer.controls('play', aplayer.states.next);
+		aplayer.base.controls({action: 'play', index: aplayer.states.next });
+		// aplayer.controls('play', aplayer.states.next);
 	}
 };
 

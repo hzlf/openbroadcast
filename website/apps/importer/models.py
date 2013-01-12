@@ -236,9 +236,13 @@ class ImportFile(BaseModel):
         
         processor = Process()
         
+        # duplicate check by sha1
+        media_id = processor.id_by_sha1(obj.file)
         
+        # duplicate check by echoprint
+        if not media_id:
+            media_id = processor.id_by_echoprint(obj.file)
         
-        media_id = processor.get_echoprint(obj.file)
         metadata = processor.extract_metadata(obj.file)
         
         if media_id:
