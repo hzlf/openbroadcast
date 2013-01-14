@@ -2,6 +2,8 @@ from mutagen import File as MutagenFile
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3
 
+from django.conf import settings
+
 import os
 import string
 import unicodedata
@@ -30,6 +32,9 @@ import logging
 log = logging.getLogger(__name__)
 
 
+MUSICBRAINZ_HOST = getattr(settings, 'MUSICBRAINZ_HOST', None)
+MUSICBRAINZ_RATE_LIMIT = getattr(settings, 'MUSICBRAINZ_RATE_LIMIT', True)
+
 def clean_filename(filename):
     import unicodedata
     import string
@@ -51,8 +56,10 @@ class Importer(object):
         log = logging.getLogger('util.importer.Importer.__init__')
 
         musicbrainzngs.set_useragent("NRG Processor", "0.01", "http://anorg.net/")
-        musicbrainzngs.set_hostname("172.16.82.130:5000")
-        musicbrainzngs.set_rate_limit(False)
+        musicbrainzngs.set_rate_limit(MUSICBRAINZ_RATE_LIMIT)
+        
+        if MUSICBRAINZ_HOST:
+            musicbrainzngs.set_hostname(MUSICBRAINZ_HOST)
         
 
     def run(self, obj):

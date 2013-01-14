@@ -1,6 +1,9 @@
 from mutagen import File as MutagenFile
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3
+
+from django.conf import settings
+
 import locale
 import acoustid
 import requests
@@ -20,7 +23,10 @@ import logging
 log = logging.getLogger(__name__)
 
 
-AC_API_KEY = 'ZHKcJyyV'
+AC_API_KEY = getattr(settings, 'AC_API_KEY', 'ZHKcJyyV')
+MUSICBRAINZ_HOST = getattr(settings, 'MUSICBRAINZ_HOST', None)
+MUSICBRAINZ_RATE_LIMIT = getattr(settings, 'MUSICBRAINZ_RATE_LIMIT', True)
+
 
 METADATA_SET = {
                 # media
@@ -61,9 +67,10 @@ class Process(object):
         log = logging.getLogger('util.process.Process.__init__')
 
         musicbrainzngs.set_useragent("NRG Processor", "0.01", "http://anorg.net/")
-        musicbrainzngs.set_hostname("172.16.82.130:5000")
-        musicbrainzngs.set_rate_limit(False)
-    
+        musicbrainzngs.set_rate_limit(MUSICBRAINZ_RATE_LIMIT)
+        
+        if MUSICBRAINZ_HOST:
+            musicbrainzngs.set_hostname(MUSICBRAINZ_HOST)
     
     
     def id_by_sha1(self, file):

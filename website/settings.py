@@ -403,6 +403,9 @@ INSTALLED_APPS = (
     
     # helpers
     'dev',
+    
+    # monitoring
+    #'kitsune',
 )
 
 
@@ -447,6 +450,8 @@ ECHONEST_API_KEY = 'DC7YKF3VYN7R0LG1M'
 ENMFP_CODEGEN_BIN = PROJECT_DIR + '/lib/analyzer/bin/codegen.Darwin'
 ECHOPRINT_CODEGEN_BIN = 'echoprint-codegen'
 
+MUSICBRAINZ_HOST = 'mb.anorg.net'
+MUSICBRAINZ_RATE_LIMIT = False
 
 """
 Filer related settings
@@ -618,6 +623,11 @@ RTMP_HOST = '127.0.0.2'
 RTMP_APP = 'alibrary'
 RTMP_PORT = '1935'
 
+"""
+mb server
+"""
+MUSICBRAINZ_HOST = '172.16.82.130:5000'
+MUSICBRAINZ_RATE_LIMIT = False
 
 # media conversion
 """
