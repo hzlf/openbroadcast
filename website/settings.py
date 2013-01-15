@@ -450,8 +450,6 @@ ECHONEST_API_KEY = 'DC7YKF3VYN7R0LG1M'
 ENMFP_CODEGEN_BIN = PROJECT_DIR + '/lib/analyzer/bin/codegen.Darwin'
 ECHOPRINT_CODEGEN_BIN = 'echoprint-codegen'
 
-MUSICBRAINZ_HOST = 'mb.anorg.net'
-MUSICBRAINZ_RATE_LIMIT = False
 
 """
 Filer related settings
@@ -582,7 +580,7 @@ PRETTIFY = True
 
 
 DISQUS_API_KEY = 'hLRbAlPsBN6G11HyeNX4qMWiebrLZeVzLpUUimq82jsthcFBohQFMTAwS1iCBjie'
-DISQUS_WEBSITE_SHORTNAME = 'hulahoneys'
+DISQUS_WEBSITE_SHORTNAME = 'obp-dev'
 
 
 
@@ -626,7 +624,7 @@ RTMP_PORT = '1935'
 """
 mb server
 """
-MUSICBRAINZ_HOST = '172.16.82.130:5000'
+MUSICBRAINZ_HOST = 'mb.anorg.net'
 MUSICBRAINZ_RATE_LIMIT = False
 
 # media conversion

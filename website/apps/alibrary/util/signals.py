@@ -6,6 +6,7 @@ def library_post_save(sender, **kwargs):
 
     obj = kwargs['instance']
     
+    print 'library_post_save signal:'
     print 'label:',
     print obj._meta.app_label
     print obj._meta.object_name.lower()

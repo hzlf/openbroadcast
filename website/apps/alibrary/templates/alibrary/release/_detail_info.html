@@ -28,6 +28,28 @@
 			{% endwith %}
 		</dd>
 
+		<dt>
+			{% trans "Release date" %}:
+		</dt>
+		<dd>
+			{% if object.releasedate %}
+			{{ object.releasedate|date:"SHORT_DATE_FORMAT" }}
+			{% else %}
+			{% trans "Unknown" %}
+			{% endif %}
+		</dd>
+
+		<dt>
+			{% trans "Catalog Number" %}:
+		</dt>
+		<dd>
+			{% if object.catalognumber %}
+			{{ object.catalognumber }}
+			{% else %}
+			{% trans "Unknown" %}
+			{% endif %}
+		</dd>
+
 	</dl>
 
 	<dl class="dl-horizontal license">
@@ -52,24 +74,18 @@
 		<dt>
 			{% trans "Show on" %}:
 		</dt>
-		<dd>
-			<a href="http://www.discogs.com/release/3572034" title="Show on Discogs" class="external discogs"><img src="http://openbroadcast.ch//media/img/base/spacer.png" alt="Discogs" style="width: 16px; height: 16px;"></a>
+		<dd class="horizontal">
+			{% for relation in object.relations.specific %}
+			<a href="{{ relation.url }}" title="Show on {{ relation.get_service_display }}" class="external {{ relation.service }}"><img src="/static/img/base/spacer.png" alt="{{ relation.get_service_display }}" style="width: 16px; height: 16px;"></a>
+			{% endfor %}
+			<div class="clear"></div>
 		</dd>
+		
+
 
 	</dl>
 
 	<dl class="dl-horizontal sub">
-
-		<dt>
-			{% trans "Release date" %}:
-		</dt>
-		<dd>
-			{% if object.releasedate %}
-			{{ object.releasedate|date:"SHORT_DATE_FORMAT" }}
-			{% else %}
-			{% trans "Unknown" %}
-			{% endif %}
-		</dd>
 
 		<dt>
 			{% trans "History" %}:
@@ -94,8 +110,8 @@
 			{% trans "Stats" %}:
 		</dt>
 		<dd>
-			<span class="value">3</span> <span class="key">{% trans "Airplays" %}</span> /
-			<span class="value">173</span> <span class="key">{% trans "Plays" %}</span> /
+			<span class="value">3</span> <span class="key">{% trans "Airplays" %}</span> |
+			<span class="value">173</span> <span class="key">{% trans "Plays" %}</span> |
 			<span class="value">28</span> <span class="key">{% trans "Downloads" %}</span>
 		</dd>
 
@@ -120,7 +136,7 @@
 		{% if object.main_image %}
 		<a href="{% thumbnail object.main_image 800x800 crop upscale %}" class="zoomable cboxElement"> <img src="{% thumbnail object.main_image 172x172 crop upscale subject_location=object.main_image.subject_location %}" alt="Cover" /> </a>
 		{% else %}
-		<p>[[ IMAGE ]]</p>
+		<img src="/static/img/base/defaults/listview.release.xl.png" alt="{% trans "No cover available" %}" />
 		{% endif %}
 	</div>
 

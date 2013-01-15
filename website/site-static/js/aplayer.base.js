@@ -225,7 +225,7 @@ aplayer.base.set_playlist = function(result) {
 	playlist = result.media;
 	
 	// TODO: is this neccessary?
-	playlist.sort();
+	// playlist.sort();
 
 	aplayer.vars.playlist = aplayer.vars.playlist || [];
 	

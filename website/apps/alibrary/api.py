@@ -18,7 +18,8 @@ class ReleaseResource(ModelResource):
     media = fields.ToManyField('alibrary.api.MediaResource', 'media_release', null=True, full=True, max_depth=3)
 
     class Meta:
-        queryset = Release.objects.exclude(main_image=None).order_by('-created')
+        #queryset = Release.objects.exclude(main_image=None).order_by('-created')
+        queryset = Release.objects.order_by('-created').all()
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         resource_name = 'release'
@@ -39,8 +40,11 @@ class ReleaseResource(ModelResource):
         
         if(bundle.obj.main_image):
             opt = dict(size=(70, 70), crop=True, bw=False, quality=80)
-            main_image = image = get_thumbnailer(bundle.obj.main_image).get_thumbnail(opt)
-            bundle.data['main_image'] = main_image.url
+            try:
+                main_image = image = get_thumbnailer(bundle.obj.main_image).get_thumbnail(opt)
+                bundle.data['main_image'] = main_image.url
+            except:
+                pass
             
             bundle.data['artist'] = bundle.obj.get_artists();
 
@@ -74,7 +78,7 @@ class MediaResource(ModelResource):
     message = fields.CharField(attribute='message', null=True)
 
     class Meta:
-        queryset = Media.objects.all()
+        queryset = Media.objects.order_by('tracknumber').all()
         #list_allowed_methods = ['get', 'post']
         #detail_allowed_methods = ['get', 'post', 'put', 'delete']
         list_allowed_methods = ['get',]

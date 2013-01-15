@@ -1,6 +1,6 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags wiki_tags %}
+{% load truncate i18n thumbnail arating_tags wiki_tags disqus_tags %}
 
 {% block heading %} <!-- heading / icon (large one) -->
 <div id="heading">
@@ -17,6 +17,9 @@
 {% endblock %}
 
 {% block inner %}
+
+
+
 <div class="item_detail" style="">
 
 	<section>
@@ -104,7 +107,16 @@
 
 	</section>
 
+	
+	<section class="comments disqus">
+	{% disqus_show_comments %}
+	</section>
+
+
 </div>
+
+
+
 
 {% endblock %}
 

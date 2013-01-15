@@ -9,6 +9,8 @@ env.warn_only = True
 env.supervisor = '/etc/supervisord'
 env.nginx = '/etc/nginx/sites-enabled'
 
+env.skip_requirements = False
+
 def clean():
     local("find . -name '*.DS_Store' -type f -delete")
     local("find . -name '*.pyc' -type f -delete")
@@ -33,11 +35,15 @@ def openbroadcast_ch():
     env.path = '/var/www/openbroadcast.ch'
     env.storage = '/storage/www_data/openbroadcast.ch'
     env.user = 'root'
+
     
     
 def build_ci():
     local('wget %s' % ('http://ci.lab.anorg.net/job/ch-openbroadcast/build?token=BUILD'))
     
+
+def skip_req():
+    env.skip_requirements = True
 
 def deploy():
     """
@@ -98,7 +104,10 @@ def deploy():
         except Exception, e:
             print e
 
-        run('pip -E /srv/%s install -r %s' % (env.site_id, 'src/website/requirements/requirements.txt'))
+            
+            
+        if not env.skip_requirements:
+            run('pip -E /srv/%s install -r %s' % (env.site_id, 'src/website/requirements/requirements.txt'))
         
             
         """

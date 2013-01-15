@@ -79,8 +79,8 @@ class Importer(object):
         r = None
         if it['mb_release_id']:
             lrs = lookup.release_by_mb_id(it['mb_release_id'])
-            print 'LRS!:'
-            print lrs
+            #print 'LRS!:'
+            #print lrs
             if lrs.count() > 0:
                 r = lrs[0]
             
@@ -99,11 +99,33 @@ class Importer(object):
         try:
             if r:
                 m.release = r 
+                
         except Exception, e:
             print e
         
         
-        
+        # TODO: move
+        if m.release and it['mb_release_id']:
+            print 'Trying to get tracknumber'
+            includes = ["recordings",]
+            mb_result = musicbrainzngs.get_release_by_id(id=it['mb_release_id'], includes=includes)
+            
+            tnumber = None
+            
+            try:
+                for t in mb_result['release']['medium-list'][0]['track-list']:
+                    print '*******************'
+                    print t['recording']['id']
+                    print t['number']
+                    
+                    if t['recording']['id'] == it['mb_track_id']:
+                        print 'NUMBER ASSIGNED!!! %s' % t['number']
+                        m.tracknumber = int(t['number'])
+                    
+            except Exception, e:
+                print e
+                
+            
         
         
         
