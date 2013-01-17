@@ -87,6 +87,9 @@ MIDDLEWARE_CLASSES = (
     # mobile [just testing]
     'django_mobile.middleware.MobileDetectionMiddleware',
     'django_mobile.middleware.SetFlavourMiddleware',
+    
+    # xs
+    'lib.middleware.xs_sharing.XsSharingMiddleware',
     # custom
     #'lib.middleware.ProfileMiddleware',
     #'lib.middleware.PrettifyMiddlewareBS',

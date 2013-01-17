@@ -6,6 +6,8 @@ from tastypie.authentication import *
 from tastypie.authorization import *
 from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
 
+from tastypie.cache import SimpleCache
+
 from alibrary.models import Media, Release, Artist, Label
 
 from easy_thumbnails.files import get_thumbnailer
@@ -16,6 +18,9 @@ from ep.API import fp
 class ReleaseResource(ModelResource):
     
     media = fields.ToManyField('alibrary.api.MediaResource', 'media_release', null=True, full=True, max_depth=3)
+    label = fields.ForeignKey('alibrary.api.LabelResource', 'label', null=True, full=True, max_depth=2)
+
+
 
     class Meta:
         #queryset = Release.objects.exclude(main_image=None).order_by('-created')
@@ -34,6 +39,7 @@ class ReleaseResource(ModelResource):
             #'channel': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
         }
+        #cache = SimpleCache(timeout=120)
         
 
     def dehydrate(self, bundle):
@@ -50,8 +56,23 @@ class ReleaseResource(ModelResource):
 
         return bundle
         
-class ArtistResource(ModelResource):
+class LabelResource(ModelResource):
 
+    class Meta:
+        queryset = Label.objects.all()
+        list_allowed_methods = ['get',]
+        detail_allowed_methods = ['get',]
+        resource_name = 'label'
+        excludes = ['updated',]
+        #include_absolute_url = True
+        authentication = BasicAuthentication()
+        authorization = Authorization()
+        filtering = {
+            #'channel': ALL_WITH_RELATIONS,
+            'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
+        }
+        
+class ArtistResource(ModelResource):
 
     class Meta:
         queryset = Artist.objects.all()
