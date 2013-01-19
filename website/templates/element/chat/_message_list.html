@@ -1,0 +1,92 @@
+{% load sekizai_tags verbatim %}
+
+
+
+{% addtoblock "js-post" %}
+
+<script src="{{ STATIC_URL }}js/lib/ICanHaz.js"></script>
+
+
+<script src="http://node05.daj.anorg.net:8088/socket.io/socket.io.js"></script>
+
+		
+		<script id="tpl_chat_message" type="text/html">
+			{% verbatim %}
+	        <li class="talk {{ object.me }}">
+	            <img src="{{ media_url }}{{ object.image }}" />
+	            <span class="who">{{ object.user }}<span class="timestamp">{{ timestamp }}</span></span>
+	            <span class="message">{{ object.comment }}</small>
+	        </li>
+	        {% endverbatim %}
+        </script>
+
+<script>
+	
+SocketApp = function(base_app) {
+
+	var self = this;
+	this.base_app = base_app;
+
+	this.socket
+	//this.socket_url = 'http://localhost:8888/';
+	this.socket_url = 'http://node05.daj.anorg.net:8088/'
+
+	this.init = function() {
+		console.log('SocketApp: init');
+		setTimeout(function(){self.connect()},500);
+	};
+	
+	this.connect = function() {
+		
+		console.log('SocketApp: connect');
+		
+		// console.log(self.localSettings.user.username);
+		
+		try {
+			self.socket = io.connect(self.socket_url);
+			console.log('socket connection ok')
+
+			self.socket.on('chat', function(data) {
+				console.log('news from socket');
+
+				// data = JSON.parse(data);
+
+				console.log(data);
+				
+
+				var html = ich.tpl_chat_message({
+					object : data,
+					media_url: self.media_url,
+				});
+
+				if(data.route == '/api/v1/release/1963/') {
+					console.log('my channel!!')
+				};
+
+				$('.chat ul').prepend(html);
+				
+				$('.chat ul').children().slice(99, 1000).fadeOut(500);
+				$('.chat ul').children().slice(100, 1000).remove();
+
+			});
+
+		} catch(err) {
+			console.log(err.message);
+		}
+	};
+
+	this.bindings = function() {
+
+	};
+}; 	
+	
+var sa = new SocketApp;
+sa.init();
+	
+</script>
+{% endaddtoblock %}
+<section  class="chat">
+	<ul></ul>
+</section>
+
+

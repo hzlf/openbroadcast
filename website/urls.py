@@ -51,6 +51,9 @@ urlpatterns = patterns('',
     
     url(r'^api/', include('urls_api')),
     
+    
+    url(r'^comments/', include('fluent_comments.urls')),
+    
 
     url(r'^selectable/', include('selectable.urls')),
     

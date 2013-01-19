@@ -1,6 +1,6 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags wiki_tags disqus_tags %}
+{% load truncate i18n thumbnail arating_tags wiki_tags disqus_tags comments %}
 
 {% block heading %} <!-- heading / icon (large one) -->
 <div id="heading">
@@ -107,12 +107,23 @@
 
 	</section>
 
+
+	<!-- comment testing -->
+	<section class="comments on-site">
+	{% render_comment_form for object %}
+	
+	<!-- TODO: maybe move to template tag.. but not too much of advantage... -->
+	{% with router=object_api_url %}
+	{% include "element/chat/_message_list.html" %}
+	{% endwith %}
+	
+	{% render_comment_list for object %}
+	</section>
 	
 	<section class="comments disqus">
 	{% disqus_show_comments %}
 	</section>
-
-
+	
 </div>
 
 

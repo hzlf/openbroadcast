@@ -3,7 +3,16 @@
 @import "vars"
 @import "mixins"
 
-/* AJAX loading indicator
+
+// faded bg
+div.navbar-fixed-top
+  // background-color: green
+  height: 70px
+  //+background-image(linear-gradient(top, #fff 0%, #fff 90%, transparent 100%))
+  //background: white
+  background-image: url(/static/img/base/navbar.gradient.png)
+  background-repeat: repeat-x
+// AJAX loading indicator
 div.navbar
   div.container
     height: 33px

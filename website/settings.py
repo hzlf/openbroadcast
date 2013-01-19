@@ -254,6 +254,8 @@ STATICFILES_FINDERS = (
 
 
 
+COMMENTS_APP = 'fluent_comments'
+FLUENT_COMMENTS_EXCLUDE_FIELDS = ['email', 'name', 'url', ]
 
 INSTALLED_APPS = (
                   
@@ -274,6 +276,11 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.webdesign',
     'django.contrib.admin',
+    
+    
+    #'threadedcomments',
+    'fluent_comments',
+    
     'django.contrib.comments',
     'django.contrib.staticfiles',
     'django.contrib.markup',
@@ -374,8 +381,13 @@ INSTALLED_APPS = (
     'alibrary',
     'aplayer',
     'importer',
+    'exporter',
+    'abcast',
     'multiuploader',
     'arating',
+    
+    
+    
     
     'bcmon',
     #'secretballot',

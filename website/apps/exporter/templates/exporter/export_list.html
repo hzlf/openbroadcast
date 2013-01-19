@@ -1,0 +1,99 @@
+{% extends "base/listing.html" %}
+
+{% load i18n webdesign sekizai_tags include_raw %}
+
+{% block object_type %}export{% endblock %}
+
+
+{% block heading %} <!-- heading / icon (large one) -->
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/ICanHaz.js"></script>{% endaddtoblock %}
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}exporter/js/base.js"></script>{% endaddtoblock %}
+
+{% addtoblock "js-post" %}
+<script type="text/javascript">
+
+$(document).ready(function() {
+	
+	
+	$(function () {
+		
+		var exporter = exporter || {};
+		exporter.base = exporter.base || {};
+		exporter.ui = exporter.ui || {};
+
+		exporter.ui = new ExporterUi();
+		exporter.ui.api_url = "{% url api_dispatch_list resource_name='export' api_name='v1'%}{{ object.id }}";
+
+	   
+	   exporter.ui.init();
+	
+
+	
+	});
+});
+</script>
+
+<script id="tpl_export" type="text/html">
+	{% include_raw "exporter/tpl_export.html" %}
+</script>
+
+{% endaddtoblock %}
+
+<div id="heading">
+	{% include "skeleton/heading.html" %}
+</div>
+<!-- heading / icon (large one) -->
+{% endblock %}
+
+
+{% block pre_list %}
+<section>
+	
+	<div class="page-header">
+		<h2>{% trans "Exports" %} <small>{% trans "Start a new import session or handle existing ones" %}</small></h2>
+	</div>
+	<div>
+		<p>{% lorem 40 w %}.</p>
+		<p>{% lorem 9 w %}.</p>
+	</div>
+	
+	<!--
+	<div>
+		<a class="btn btn-primary btn" href="">
+			<i class="icon-music icon-white"></i>
+			<span> {% trans "Start Exporting" %}</span>
+		</a>
+	</div>
+	-->
+	
+</section>
+{% endblock %}
+
+{% block list_inner %}
+
+<table class="table table-condensed table-striped">
+	
+
+	<thead>
+		<tr>
+			<th>&nbsp;</th>
+			<th>{% trans "Name" %}</th>
+			<th>{% trans "Queue Time" %}</th>
+			<th>{% trans "Last Download" %}</th>
+			<th>{% trans "Size" %}</th>
+			<th>{% trans "Link" %}</th>
+			<th>{% trans "Actions" %}</th>
+		</tr>
+	</thead>
+
+	<tbody id="export_list_holder">
+	<!-- CONTENT INSERTED FROM TPL_EXPORT -->
+	</tbody>
+
+</table>
+
+{% endblock %}
+
+{% block sidebar %}
+{% include "exporter/_export_list_sidebar.html" %}
+{% endblock %}

@@ -1,0 +1,64 @@
+/*
+ * Exporter styles
+ */
+
+div.listview.export
+
+  [class^="visible-while-"], [class*=" visible-while-"]
+    display: none
+    
+  .item
+  
+    &.init
+      i.visible-while-init
+        display: inline-block
+        
+    &.done
+      td
+        background-color: $successBackground
+      i.visible-while-done
+        display: inline-block
+        color: $successText
+        
+    &.ready
+      i.visible-while-ready
+        display: inline-block
+  
+    &.progress
+      i.visible-while-progress
+        display: inline-block
+  
+    &.error
+      td
+        background-color: $errorBackground
+      i.visible-while-error
+        display: inline-block
+        color: $errorText
+        
+
+
+
+
+// experiment
+.icon-pulse
+  -webkit-animation: pulsate-b 1s
+  -webkit-animation-iteration-count: infinite 
+  opacity: 1.0
+
+@-webkit-keyframes pulsate-b
+  0% 
+    opacity: 1.0
+  50% 
+    opacity: 0.2
+  100%
+    opacity: 1.0
+
+@-webkit-keyframes pulsate-a
+  0% 
+    -webkit-transform: scale(0.1, 0.1)
+    opacity: 0.0
+  50% 
+    opacity: 1.0
+  100%
+    webkit-transform: scale(1.2, 1.2)
+    opacity: 0.0
