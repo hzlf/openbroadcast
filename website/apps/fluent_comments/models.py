@@ -32,10 +32,13 @@ def on_comment_posted(sender, comment, request, **kwargs):
                'image': get_thumbnailer(comment.user.profile_set.all()[0].image).get_thumbnail(opt).url,
                #'image': comment.user.profile_set.all()[0].image.url,
                'comment': comment.comment,
-               'route': comment.content_object.get_api_url()
+               'route': comment.content_object.get_api_url(),
+               'type': 'message'
                #'timestamp': comment.submit_date
                }
-    rs.publish('socketio_news', json.dumps(message))
+    
+    print 'routing chat message'
+    rs.publish('push_chat', json.dumps(message))
     
     
     

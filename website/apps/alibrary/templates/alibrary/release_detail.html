@@ -110,10 +110,14 @@
 
 	<!-- comment testing -->
 	<section class="comments on-site">
-	{% render_comment_form for object %}
+	{% if user.is_authenticated %}
+		{% render_comment_form for object %}
+	{% else %}
+		<p>Login to caht.</p>
+	{% endif %}
 	
-	<!-- TODO: maybe move to template tag.. but not too much of advantage... -->
-	{% with router=object_api_url %}
+	<!-- TODO: maybe move to template tag.. just testing here... -->
+	{% with router=object.get_api_url %}
 	{% include "element/chat/_message_list.html" %}
 	{% endwith %}
 	
@@ -121,7 +125,7 @@
 	</section>
 	
 	<section class="comments disqus">
-	{% disqus_show_comments %}
+	{# disqus_show_comments #}
 	</section>
 	
 </div>

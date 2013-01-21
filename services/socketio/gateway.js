@@ -1,7 +1,7 @@
 var io = require('socket.io').listen(8888);
 var redis = require('redis').createClient();
 
-redis.psubscribe('socketio_*');
+redis.psubscribe('push_*');
 
 /*
 redis.on('pmessage', function(pattern, channel, key){
@@ -13,22 +13,16 @@ io.sockets.on('connection', function (socket) {
 	
 	console.log('io.sockets.on connection');
 	
-	redis.on('pmessage', function(pattern, channel, key){
-		console.log('redis.on pmessage');
+	redis.on('pmessage', function(pattern, channel, data){
 		
-		key = JSON.parse(key);
+		data = JSON.parse(data);
 		
+		// console.log(channel, data);		
+		console.log('i-pattern:', pattern);
+		console.log('i-route:', data.route);
 		
-		console.log(channel, key);
-		
-		console.log('i-route:', key.route);
-		
-		// socket.emit(key.route, key);
-		
-		
-		socket.emit('chat', key);
-		
-		// socket.emmit('socketio_news', key);
+		socket.emit('push', data);
+
 	})
 	
 	
