@@ -41,11 +41,46 @@
 		<span>00:00</span>
 	</div>
 	-->
+	
+	<!--
 	<div class="indicator {{#object.waveform_image}}has-waveform{{/object.waveform_image}}" {{#object.waveform_image}}style="background-image: url({{object.waveform_image}});"{{/object.waveform_image}}>
 		<div class="wrapper">
 			<div class="inner">&nbsp;</div>
 		</div>
 	</div>
+	-->
+	
+	<!-- main wrapper -->
+	<div class="indicator playhead hoverable">
+		
+		<!-- background layer (for hover/active/etc ? ) -->
+		<div class="background">
+			
+			<!-- holder for indicator (animated transparent png-24 bg.image) -->
+			<div class="indicator">
+				
+				<!-- holder for handler (animated transparent png-24 bg.image) -->
+				<div class="handler">
+					
+					<!-- actual waveform (transparent inner) -->
+					<div class="waveform">
+						
+						<img data-href="{{object.waveform_image}}" src="{{object.waveform_image}}" style="width: 100%; height: 100%" /></img>
+						
+					</div>
+					
+				</div>
+				
+			</div>
+			
+		</div>
+	
+	
+	
+	
+	
+	
+	
 	<!--
 	<div class="time time-total">
 		<span>00:00</span>

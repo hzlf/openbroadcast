@@ -287,7 +287,10 @@ aplayer.ui.update = function(aplayer) {
 	$('div.listview.medias .item.' + media.uuid).addClass('active playing');
 
 	// playhead
-	var active_playhead = $('div.item.' + media.uuid + ' ' + 'div.indicator');
+	//var active_playhead = $('div.item.' + media.uuid + ' ' + 'div.indicator');
+	
+	var container = $('div.aplayer.inline');
+	var active_playhead =  $('.playhead .indicator', container_screen);
 	
 	if(active_playhead.html()) {
 		outer_width = active_playhead.css('width');
@@ -344,7 +347,10 @@ aplayer.ui.update = function(aplayer) {
 	if(container_screen) {
 		$('div.time-current > span', container_screen).html(util.format_time(aplayer.states.position));
 		$('div.time-total > span', container_screen).html(util.format_time(aplayer.states.duration));
-		$('.indicator .inner', container_screen).css('width', aplayer.states.position_rel + '%');
+		
+		// $('.indicator .inner', container_screen).css('width', aplayer.states.position_rel + '%');
+		//$('.playhead .indicator', container_screen).css('width', aplayer.states.position_rel + '%');
+		
 		// playlist inline progress
 		$('.indicator .inner', '.item.playlist.playing').css('width', aplayer.states.position_rel + '%');
 	}

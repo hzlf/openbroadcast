@@ -14061,34 +14061,49 @@ body.popup .screen.playlist .item .indicator .wrapper .inner {
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\00003216}}
 body.popup #progress_bar {
-  margin-top: 20px;
-  height: 48px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\00003219}}
-body.popup #progress_bar > div {
-  float: left;
+  margin: 20px 0;
+  height: 32px;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\00003223}}
+body.popup #progress_bar div.playhead .background {
+  background: #00bb00;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\00003226}}
+body.popup #progress_bar div.playhead .indicator {
+  background-image: url(/static/aplayer/img/playhead.indicator.png);
+  background-repeat: repeat-y;
+  background-position: 30px 0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\00003232}}
+body.popup #progress_bar div.playhead .handler {
+  background-image: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\00003236}}
+body.popup #progress_bar div.playhead.hover .handler {
+  background-image: url(/static/aplayer/img/playhead.handler.png);
+  background-repeat: no-repeat;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\00003244}}
 body.popup #progress_bar > div.time-current {
   padding: 0 0 0 10px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\00003226}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\00003247}}
 body.popup #progress_bar > div.indicator {
   width: 100%;
   margin: 0 0px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\00003230}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\00003251}}
 body.popup #progress_bar > div.indicator.has-waveform {
   background-size: 100% 100%;
   background-color: #00bb00;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\00003235}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\00003256}}
 body.popup #progress_bar > div.indicator .wrapper {
   height: 36px;
   border: 1px solid #efefef;
   overflow: hidden;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\00003241}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\00003262}}
 body.popup #progress_bar > div.indicator .wrapper .inner {
   height: 36px;
   width: 0%;

@@ -214,11 +214,32 @@ body.popup
       
       
   #progress_bar
-    margin-top: 20px
-    height: 48px
+    margin: 20px 0
+    height: 32px
+    
+    
+    div.playhead
+    
+      .background
+        background: #00bb00
+        
+      .indicator
+        background-image: url(#{$static-url}aplayer/img/playhead.indicator.png)
+        background-repeat: repeat-y
+        background-position: 30px 0
+        
+      
+      .handler
+        background-image: none
+      
+      &.hover
+        .handler
+          background-image: url(#{$static-url}aplayer/img/playhead.handler.png)
+          background-repeat: no-repeat
+    
+    
     > div
-      float: left
-      // background: red
+
       
       &.time-current
         padding: 0 0 0 10px
