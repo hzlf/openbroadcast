@@ -20,8 +20,6 @@ class ReleaseResource(ModelResource):
     media = fields.ToManyField('alibrary.api.MediaResource', 'media_release', null=True, full=True, max_depth=3)
     label = fields.ForeignKey('alibrary.api.LabelResource', 'label', null=True, full=True, max_depth=2)
 
-
-
     class Meta:
         #queryset = Release.objects.exclude(main_image=None).order_by('-created')
         queryset = Release.objects.order_by('-created').all()
@@ -137,7 +135,10 @@ class MediaResource(ModelResource):
         bundle.data['stream'] = stream
             
         try:
-            waveform_image = bundle.obj.get_cache_file('png', 'waveform')
+            # waveform_image = bundle.obj.get_cache_file('png', 'waveform')
+            
+            waveform_image = bundle.obj.get_waveform_image()
+            
             if waveform_image:
                 bundle.data['waveform_image'] = bundle.obj.get_waveform_url()
             else:

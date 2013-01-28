@@ -328,12 +328,19 @@ class Media(MigrationMixin):
         return full_path
     
     def get_waveform_image(self):
-        # TODO: improve...
-        try:
-            file = Image.objects.filter(original_filename='waveform.png', folder=self.folder).order_by('-uploaded_at')[0]
-            return file
-        except Exception, e:
-            return None
+        
+        waveform_image = self.get_cache_file('png', 'waveform')
+        
+        if not waveform_image:
+            try:
+                self.create_waveform_image()
+                waveform_image = self.get_cache_file('png', 'waveform')
+            except:
+                waveform_image = None
+            
+        return waveform_image
+        
+
         
     def get_duration(self):
     
