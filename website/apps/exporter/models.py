@@ -5,6 +5,8 @@ import os
 import time
 import datetime
 import re
+import shutil
+import urllib
 
 from django.db import models
 from django.db.models.signals import post_save
@@ -21,12 +23,14 @@ from django.contrib.contenttypes import generic
 
 from django.core.urlresolvers import reverse
 
+
 from django_extensions.db.fields.json import JSONField
 
 from zipfile import ZipFile
 
-from alibrary.models import Release, Media, Artist, Relation
+from django.utils.hashcompat import sha_constructor
 
+from alibrary.models import Release, Media, Artist, Relation
 
 from util.process import Process
 
@@ -42,6 +46,7 @@ GENERIC_STATUS_CHOICES = (
     (1, _('Done')),
     (2, _('Ready')),
     (3, _('Progress')),
+    (4, _('Downloaded')),
     (99, _('Error')),
     (11, _('Other')),
 )
@@ -60,7 +65,7 @@ def create_download_path(instance, filename):
     filename, extension = os.path.splitext(filename)
     valid_chars = "-_.%s%s" % (string.ascii_letters, string.digits)
     cleaned_filename = unicodedata.normalize('NFKD', filename).encode('ASCII', 'ignore')    
-    folder = "export/%s/" % time.strftime("%Y%m%d%H%M%S", time.gmtime())
+    folder = "export/processed/%s-%s/" % (time.strftime("%Y%m%d%H%M%S", time.gmtime()) ,instance.uuid)
     return os.path.join(folder, "%s%s" % (cleaned_filename.lower(), extension.lower()))
 
 
@@ -74,13 +79,18 @@ def create_export_path():
     return os.path.join(folder, "%s%s" % (cleaned_filename.lower(), extension.lower()))
 
 
-def create_archive_path(instance): 
-    path = "export/%s/%s/" % (time.strftime("%Y%m%d%H%M%S", time.gmtime()), instance.uuid)
-    path_full = os.path.join(PROJECT_DIR, 'media' ,path)
+def create_archive_dir(instance): 
+    path = "export/cache/%s-%s/" % (time.strftime("%Y%m%d%H%M%S", time.gmtime()), instance.uuid)
+    path_full = os.path.join(PROJECT_DIR, 'media',path)
     
-    os.makedirs(path_full)
+    # debug:
+    path_full = os.path.join(PROJECT_DIR, 'media' , 'export/debug/')
+    try:
+        os.makedirs(os.path.join(path_full, 'cache/'))
+    except OSError, e:
+        pass # file exists
     
-    print 'path_full: %s' % path_full
+    print 'archive dir: %s' % path_full
     
     return path_full
 
@@ -100,20 +110,28 @@ class BaseModel(models.Model):
         
 class Export(BaseModel):
 
+    FORMAT_CHOICES = (
+        ('mp3', _('MP3')),
+        ('flac', _('Flac')),
+    )
+
     class Meta:
         app_label = 'exporter'
         verbose_name = _('Export')
         verbose_name_plural = _('Exports')
-        ordering = ('-created', )
+        ordering = ('created', )
     
     user = models.ForeignKey(User, blank=True, null=True, related_name="exports", on_delete=models.SET_NULL)
     status = models.PositiveIntegerField(default=0, choices=GENERIC_STATUS_CHOICES)
         
-    size = models.IntegerField(default=0,blank=True, null=True)
+
+    filesize = models.IntegerField(default=0,blank=True, null=True)
 
     filename = models.CharField(max_length=256, blank=True, null=True)
     file = models.FileField(upload_to=create_download_path, blank=True, null=True)
+    fileformat = models.CharField(max_length=4, default='mp3', choices=FORMAT_CHOICES)
     
+    token = models.CharField(max_length=256, blank=True, null=True)
     
     downloaded = models.DateTimeField(blank=True, null=True)
         
@@ -136,12 +154,23 @@ class Export(BaseModel):
     @models.permalink
     def get_delete_url(self):
         return ('exporter-export-delete', [str(self.pk)])
+
     
+    @models.permalink
+    def get_download_url(self):
+
+        return ('exporter-export-download', (), {'uuid': self.uuid, 'token': self.token})
+        #return ('exporter-export-download', [self.uuid])
+
     def get_api_url(self):
         url = reverse('api_dispatch_list', kwargs={'resource_name': 'export', 'api_name': 'v1'})
         return url
     
     def save(self, *args, **kwargs):
+        
+        if not self.token:
+            self.token = sha_constructor('asd' + self.uuid).hexdigest()
+        
         super(Export, self).save(*args, **kwargs)
         
 
@@ -149,6 +178,14 @@ class Export(BaseModel):
     def get_delete_url(self):
         #return ('exporter-upload-delete', [str(self.pk)])
         return ''
+    
+    def set_downloaded(self):
+        self.downloaded = datetime.datetime.now()
+        self.status = 4
+        self.save()
+        
+        return None
+        
     
     
     def process(self):
@@ -163,13 +200,18 @@ class Export(BaseModel):
     @task
     def process_task(obj):
         
-        from settings import PROJECT_DIR
+        process = Process()
         
-        archive_dir = create_archive_path(obj)
+        log = logging.getLogger('exporter.models.process_task')
         
-        archive_path = os.path.join(archive_dir, 'archive.zip')
+        archive_dir = create_archive_dir(obj)
+        archive_cache_dir = os.path.join(archive_dir, 'cache/')
+        archive_path = os.path.join(archive_dir, 'archive') # .zip appended by 'make_archive'
+        #archive_file = ZipFile(archive_path, "w")
         
-        archive_file = ZipFile(archive_path, "w")
+        log.debug('archive_dir: %s' % (archive_dir))
+        log.debug('archive_cache_dir: %s' % (archive_cache_dir))
+        log.debug('archive_path: %s' % (archive_path))
         
         # do shizzle
         for item in obj.export_items.all():
@@ -182,35 +224,71 @@ class Export(BaseModel):
                 
                 t_item = item.content_object
                 
+                filename_format = '%s - %s - %s.%s'
+                
                 print 'GOT RELEAZE!'
                 
                 for media in t_item.media_release.all():
                     print 'Media: %s' % media.name
                 
-                    archive_file.write(media.master.path, '%s.mp3' % media.name )
+                    if obj.fileformat == 'mp3':
+                
+                        filename = filename_format % (media.tracknumber, media.name, media.artist.name, 'mp3')
+                        filepath = os.path.join(archive_cache_dir, filename)
+                        
+                        shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
+                        process.incect_metadata(filepath, media)
+                
+                    # just dummy - not possible...
+                    if obj.fileformat == 'flac':
+                
+                        filename = filename_format % (media.tracknumber, media.name, media.artist.name, 'mp3')
+                        filepath = os.path.join(archive_cache_dir, filename)
+                        
+                        shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
+                        process.incect_metadata(filepath, media)
                     
                 if t_item.main_image:
-                    archive_file.write(t_item.main_image.path, 'cover.jpg')
+                    pass
+                    #archive_file.write(t_item.main_image.path, 'cover.jpg')
                     
                     
                 
             
             print
             
+        shutil.make_archive(archive_path, 'zip', archive_cache_dir)
+            
         
-        #obj.file = DjangoFile(open(archive_path), u'archive.zip')
-        obj.file = archive_file
+        obj.file = DjangoFile(open(archive_path + '.zip'), u'archive.zip')
+        obj.filesize = os.path.getsize(archive_path + '.zip')
 
             
+        # get filesize
+        obj.filename = generate_export_filename(obj.export_items)
+        #obj.filename = 'asdasdas'
         
         # update status
         obj.status = 1;
         obj.save()
         
+        # clean archive dir
+        #shutil.rmtree(archive_dir)
     
 
         
- 
+def generate_export_filename(qs_export_items):
+    
+    filename = _('unknown')
+    if qs_export_items.count() == 1:
+        item = qs_export_items.all()[0]
+        if item.content_type.name.lower() == 'release':
+            filename = item.content_object.name.encode('ascii', 'ignore')
+        
+    if qs_export_items.count() > 1:
+        filename = _('multiple-items')
+        
+    return filename
 
 
         
@@ -247,8 +325,8 @@ class ExportItem(BaseModel):
         verbose_name_plural = _('Export Items')
         ordering = ('-created', )
     
-    filename = models.CharField(max_length=256, blank=True, null=True)
-    file = models.FileField(upload_to=create_download_path, blank=True, null=True)
+    #filename = models.CharField(max_length=256, blank=True, null=True)
+    #file = models.FileField(upload_to=create_download_path, blank=True, null=True)
 
     export_session = models.ForeignKey(Export, verbose_name=_('Export'), null=True, related_name='export_items')
     status = models.PositiveIntegerField(default=0, choices=GENERIC_STATUS_CHOICES)
@@ -260,7 +338,7 @@ class ExportItem(BaseModel):
 
     
     def __unicode__(self):
-        return self.filename
+        return '%s - %s' % (self.pk, self.status)
 
     #@models.permalink
     def get_delete_url(self):
@@ -286,29 +364,21 @@ class ExportItem(BaseModel):
 
     
     def save(self, *args, **kwargs):
-        
-        msg = {'key': 'save', 'content': 'object saved'}
-        #self.messages.update(msg);
 
-        if not self.filename:
-            self.filename = self.file.name
+        #if not self.filename:
+        #    self.filename = self.file.name
 
-        super(ExportItem, self).save(*args, **kwargs) # Call the "real" save() method.
+        super(ExportItem, self).save(*args, **kwargs)
 
         
 def post_save_exportitem(sender, **kwargs):
     obj = kwargs['instance']
-    if not obj.mimetype:
-        mime = magic.Magic(mime=True)
-        obj.mimetype = mime.from_file(obj.file.path.encode('ascii', 'ignore'))
-        obj.save()
-        
+
+
+    """        
     if obj.status == 0:
         obj.process()
-        
-    if obj.status == 6:
-        #pass
-        obj.do_import()
+    """
       
 #post_save.connect(post_save_exportitem, sender=ExportItem)      
   

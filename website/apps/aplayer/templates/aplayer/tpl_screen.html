@@ -41,7 +41,7 @@
 		<span>00:00</span>
 	</div>
 	-->
-	<div class="indicator">
+	<div class="indicator {{#object.waveform_image}}has-waveform{{/object.waveform_image}}" {{#object.waveform_image}}style="background-image: url({{object.waveform_image}});"{{/object.waveform_image}}>
 		<div class="wrapper">
 			<div class="inner">&nbsp;</div>
 		</div>

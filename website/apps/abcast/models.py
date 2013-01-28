@@ -15,6 +15,8 @@ from cms.models import CMSPlugin
 from django_extensions.db.fields import *
 from django_extensions.db.fields.json import JSONField
 
+from django.core.urlresolvers import reverse
+
 # filer
 from filer.fields.image import FilerImageField
 from filer.fields.file import FilerFileField
@@ -97,6 +99,13 @@ class Channel(BaseModel):
     @models.permalink
     def get_absolute_url(self):
         return ('abcast-channel-detail', [self.pk])
+    
+    def get_api_url(self):
+        return reverse('api_dispatch_detail', kwargs={  
+            'api_name': 'v1',  
+            'resource_name': 'track',  
+            'pk': self.pk  
+        }) + ''
     
     
     

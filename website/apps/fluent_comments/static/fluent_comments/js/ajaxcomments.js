@@ -17,6 +17,21 @@
             // Submit if return is hit, or any button other then preview is hit.
             commentform.find(':input').focus(setActiveInput).mousedown(setActiveInput);
             commentform.submit(onCommentFormSubmit);
+            
+            // submit on enter
+            $('.textarea', commentform).on('keypress', function(e) {
+            	
+            	if(e.keyCode==13){
+            		// e.preventDefault();
+            		if(! e.shiftKey){
+            			e.target = commentform;
+            			onCommentFormSubmit(e);
+            		};
+            	};
+            	
+            });
+
+            
         }
 
 
@@ -56,6 +71,7 @@
 
     function onCommentFormSubmit(event)
     {
+
         event.preventDefault();  // only after ajax call worked.
         var form = event.target;
         var preview = (active_input == 'preview');

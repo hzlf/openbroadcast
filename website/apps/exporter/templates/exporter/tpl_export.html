@@ -2,7 +2,8 @@
 	<td>
 	
 		<i class="icon-refresh icon-spin visible-while-init"></i>
-		<i class="icon-ok-sign visible-while-done"></i>
+		<i class="icon-download-alt visible-while-done"></i>
+		<i class="icon-ok-sign visible-while-downloaded"></i>
 		<i class="icon-film visible-while-ready"></i>
 		<i class="icon-tasks visible-while-progress"></i>
 		<i class="icon-warning-sign icon-pulse visible-while-error"></i>
@@ -10,12 +11,15 @@
 	</td>
 	
 	
-	<td>{{ object.type }}</td>
-	<td>{{ object.created }}</td>
-	<td>{{ object.downloaded }}</td>
+	<td>{{ object.filename }}</td>
+	<td>{{ object.formatted_created }}</td>
+	<td>{{ object.formatted_downloaded }}</td>
 
-	<td>{{ object.size }}</td>
-	<td></td>
+	<td>{{ object.formatted_filesize }}</td>
+	<td class="action download">
+		<a class="" data-url="{{ object.download_url }}"><i class="icon-download"></i> Download</a>
+		
+		</td>
 	<td>
 		
 		

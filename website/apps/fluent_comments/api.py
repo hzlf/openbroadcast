@@ -19,27 +19,35 @@ from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
 from alibrary.models import Release
 from alibrary.api import ReleaseResource
 
+from abcast.models import Channel
+from abcast.api import ChannelResource
+
+from django.contrib.sites.models import Site 
+
 """
 class ReleaseResource(ModelResource):
     class Meta:
         queryset = Release.objects.all()
 """
+
+class SiteResource(ModelResource):
+    class Meta:
+        queryset = Site.objects.all()
      
 class CommentResource(ModelResource):
     
-    # label = fields.ForeignKey('alibrary.api.LabelResource', 'label', null=True, full=True, max_depth=2)
+    site = fields.ForeignKey('fluent_comments.api.SiteResource', 'site', null=False, full=False)
 
-    """
-    content_object = GenericForeignKeyField({
-        Note: NoteResource,
-        Quote: QuoteResource
-    }, 'content_object')
-    """
     
-    content_object = GenericForeignKeyField(to={Release: ReleaseResource}, attribute='content_object', null=True, full=False)
     
+    co_to = {
+             Release: ReleaseResource,
+             Channel: ChannelResource,
+             }
+    
+    content_object = GenericForeignKeyField(to=co_to, attribute='content_object', null=False, full=False)
     """
-    curl --dump-header - -H "Content-Type: application/json" -X POST --data '{"comment":"sdfsdfsdf", "content_object": "/de/api/v1/release/1963/"}' http://localhost:8081/api/v1/comment/
+    curl --dump-header - -H "Content-Type: application/json" -X POST --data '{"comment":"sdfsdfsdf", "content_object": "/de/api/v1/release/1963/"}' http://localhost:8080/api/v1/comment/
     """
     
     class Meta:
@@ -49,7 +57,7 @@ class CommentResource(ModelResource):
         resource_name = 'comment'
         excludes = ['ip_address', 'user_email', 'user_url', 'object_pk']
         #include_absolute_url = True
-        authentication =  Authentication()
+        authentication =  MultiAuthentication(ApiKeyAuthentication(), Authentication())
         authorization = Authorization()
         filtering = {
             #'channel': ALL_WITH_RELATIONS,
@@ -57,19 +65,57 @@ class CommentResource(ModelResource):
         }
         #cache = SimpleCache(timeout=120)
         
+    def obj_create(self, bundle, request, **kwargs):
+        
+                 
+        bundle.data['site'] = Site.objects.all()[0]
+        
+        
+        print request.user
+        
+        bundle.data['user'] = request.user
+        
+        print Site.objects.all()[0]
+        
+        self.save_related(bundle)
+        
+        print bundle.data
+        
+        #print request
+        
 
-"""
+        
+        
+        
+        bundle = super(CommentResource, self).obj_create(bundle, request)
+  
+        print "OBJ"
+        print request.user
+        print 'E OBJ'      
+        
+        
+        from django.contrib.comments import signals
+        
+        """"""
+        signals.comment_was_posted.send(
+            sender  = bundle.obj.__class__,
+            comment = bundle.obj,
+            request = request,
+        )
+        
+        
+        
+        return bundle
+        
+        # return super(CommentResource, self).obj_create(bundle, request, **kwargs)
+
+
+    """
     def dehydrate(self, bundle):
         
-        if(bundle.obj.main_image):
-            opt = dict(size=(70, 70), crop=True, bw=False, quality=80)
-            try:
-                main_image = get_thumbnailer(bundle.obj.main_image).get_thumbnail(opt)
-                bundle.data['main_image'] = main_image.url
-            except:
-                pass
-
+        bundle.data['comment'] = 'session'
         return bundle
-"""
+    """
+
 
     

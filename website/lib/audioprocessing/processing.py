@@ -324,6 +324,11 @@ class WaveformImage(object):
                         (255,255,255, 0),
                      ]
         elif palette == 4:
+            background_color = (245, 245, 245, 245)
+            colors = [
+                        (255,255,255, 0),
+                     ]
+        elif palette == 5:
             background_color = (213, 217, 221)
             colors = map( partial(desaturate, amount=0.8), [self.color_from_value(value/29.0) for value in range(0,30)])
 
@@ -508,7 +513,7 @@ def create_wave_images(input_filename, output_filename_w, output_filename_s, ima
     processor = AudioProcessor(input_filename, fft_size, numpy.hanning)
     samples_per_pixel = processor.audio_file.nframes / float(image_width)
 
-    waveform = WaveformImage(image_width, image_height, palette=3)
+    waveform = WaveformImage(image_width, image_height, palette=4)
     spectrogram = SpectrogramImage(image_width, image_height, fft_size)
 
     for x in range(image_width):

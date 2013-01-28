@@ -36,7 +36,7 @@ urlpatterns = patterns('',
     url(r'^tracks/(?P<slug>[-\w]+)/download/(?P<format>[a-z0-9]+)/(?P<version>[a-z0-9]+)/$', 'alibrary.views.media_download', name='media-zip-view'),
     
     # html5 stream
-    url(r'^tracks/(?P<uuid>[-\w]+)/stream_html5/$', 'alibrary.views.stream_html5', name='media-stream_html5'),
+    url(r'^tracks/(?P<uuid>[-\w]+)/stream_html5/$', 'alibrary.views.stream_html5', name='alibrary-media-stream_html5'),
     
     
     # playlist urls (for embedding)

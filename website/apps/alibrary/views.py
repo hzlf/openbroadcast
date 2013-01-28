@@ -33,6 +33,9 @@ from easy_thumbnails.files import get_thumbnailer
 from lib.util import tagging_extra
 
 
+from settings import STATIC_ROOT
+
+
 PAGINATE_BY = (12,24,36,120)
 PAGINATE_BY_DEFAULT = 12
 
@@ -553,7 +556,21 @@ def stream_html5(request, uuid):
     if not stream_permission:
         raise Http403
     
-    return sendfile(request, media.get_default_stream_file().path)
+    return sendfile(request, media.get_cache_file('mp3', 'base'))
+
+
+def waveform(request, uuid):
+    
+    media = get_object_or_404(Media, uuid=uuid)
+
+    if media.get_cache_file('png', 'waveform'):
+        waveform_file = media.get_cache_file('png', 'waveform')
+    else:
+        waveform_file = os.path.join(STATIC_ROOT, 'img/base/defaults/waveform.png')
+        
+    print waveform_file
+
+    return sendfile(request, waveform_file)
 
 
 

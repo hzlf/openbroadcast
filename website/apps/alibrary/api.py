@@ -129,11 +129,21 @@ class MediaResource(ModelResource):
                      'file': obj.master, 
                      'uuid': obj.uuid,
                      'uri': obj.master.url,
+                     #'uri': obj.get_stream_url(),
                      }
         else:
             stream = None
         
         bundle.data['stream'] = stream
+            
+        try:
+            waveform_image = bundle.obj.get_cache_file('png', 'waveform')
+            if waveform_image:
+                bundle.data['waveform_image'] = bundle.obj.get_waveform_url()
+            else:
+                bundle.data['waveform_image'] = None
+        except:
+            bundle.data['waveform_image'] = None
 
         return bundle
         

@@ -120,7 +120,9 @@ body.popup
       height: 80px
       
     .aplayer-progress
-      height: 18px
+      //height: 18px
+      
+      
       
     .aplayer-controls
       // background: yellow
@@ -201,6 +203,7 @@ body.popup
         height: 1px
         overflow: hidden
         width: 100%
+          
         .wrapper
           background: #efefef
           padding: 0 !important
@@ -212,6 +215,7 @@ body.popup
       
   #progress_bar
     margin-top: 20px
+    height: 48px
     > div
       float: left
       // background: red
@@ -221,15 +225,25 @@ body.popup
         
       &.indicator
         width: 100%
+        margin: 0 0px
+
+        &.has-waveform
+          background-size: 100% 100%
+          background-color: #00bb00
+        
+        
         .wrapper
-          height: 12px
-          margin: 0 10px
+          height: 36px
+          
           border: 1px solid #efefef
           overflow: hidden
-          background: $white
+          // background: $white
           .inner
+            height: 36px
             width: 0%
+            // float: right
             background: #ddffd9
+            opacity: 0.5
             border-right: 1px solid #00bb00
     
   

@@ -6,16 +6,20 @@
 
 <script src="{{ STATIC_URL }}js/lib/ICanHaz.js"></script>
 
-
+<!--
 <script src="http://dev.openbroadcast.ch:8888/socket.io/socket.io.js"></script>
+-->
+<script src="http://localhost:8888/socket.io/socket.io.js"></script>
 
 		
 		<script id="tpl_chat_message" type="text/html">
 			{% verbatim %}
-	        <li class="talk {{ object.me }}">
+	        <li class="item comment {{ object.me }}">
 	            <img src="{{ media_url }}{{ object.image }}" />
-	            <span class="who">{{ object.user }}<span class="timestamp">{{ timestamp }}</span></span>
-	            <span class="message">{{ object.comment }}</small>
+	            <p>
+		            <strong class="pull-right">{{ object.user }}<span class="timestamp">{{ timestamp }}</span></strong>
+		            <span class="message">{{{ object.comment_html }}}</small>
+	            </p>
 	        </li>
 	        {% endverbatim %}
         </script>
@@ -24,8 +28,11 @@
 			{% verbatim %}
 	        <li class="item media {{ object.uuid }}">
 	            <img src="{{ media_url }}{{ object.release.main_image }}" />
-	            <span class="who">{{ object.name }}<span class="timestamp">{{ object.timestamp }}</span></span>
-	            <span class="message">{{ object.artist.name }} | {{ object.release.name }}</small>
+	            <p>
+		            <strong>{{ object.name }}<span class="timestamp">{{ object.timestamp }}</span></strong>
+		            <br />
+		            <span class="message"><a href="{{ object.artist.absolute_url }}">{{ object.artist.name }}</a> | <a href="{{ object.release.absolute_url }}">{{ object.release.name }}</a></small>
+	            </p>
 	        </li>
 	        {% endverbatim %}
         </script>
@@ -38,8 +45,8 @@ SocketApp = function(base_app) {
 	this.base_app = base_app;
 
 	this.socket
-	//this.socket_url = 'http://localhost:8888/';
-	this.socket_url = 'http://dev.openbroadcast.ch:8888/'
+	this.socket_url = 'http://localhost:8888/';
+	// this.socket_url = 'http://dev.openbroadcast.ch:8888/'
 
 	this.init = function() {
 		console.log('SocketApp: init');
@@ -88,10 +95,10 @@ SocketApp = function(base_app) {
 				}
 
 
-				$('.chat ul').prepend(html);
+				$('section.listing ul').prepend(html);
 				
-				$('.chat ul').children().slice(9, 1000).fadeOut(500);
-				$('.chat ul').children().slice(10, 1000).remove();
+				$('section.listing ul').children().slice(9, 1000).fadeOut(500);
+				$('section.listing ul').children().slice(10, 1000).remove();
 
 			});
 
@@ -110,9 +117,8 @@ sa.init();
 	
 </script>
 {% endaddtoblock %}
-<section  class="chat">
-	{{ router }}
-	<ul></ul>
+<section class="listing">
+	<ul class="unstyled"></ul>
 </section>
 
 

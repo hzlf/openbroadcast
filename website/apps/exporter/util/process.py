@@ -4,6 +4,10 @@ from mutagen.id3 import ID3
 
 from django.conf import settings
 
+from audiotools import AudioFile, MP3Audio, M4AAudio, FlacAudio, WaveAudio, MetaData
+import audiotools
+from easy_thumbnails.files import get_thumbnailer
+
 import logging
 log = logging.getLogger(__name__)
 
@@ -14,3 +18,84 @@ class Process(object):
         log = logging.getLogger('util.process.Process.__init__')
 
 
+
+    def incect_metadata(self, path, media):
+        
+        log = logging.getLogger('util.process.Process.incect_metadata')
+        log.debug('incect metadata to: %s' % (path))
+        log.debug('source: %s' % (media))
+        
+        
+        """
+        audiotools.MetaData
+        """
+        meta = MetaData()
+        
+        
+        """
+        prepare metadata object
+        """
+        # track-level metadata
+        meta.track_name = media.name
+        meta.track_number = media.tracknumber
+        meta.media = 'DIGITAL'
+        meta.isrc = media.isrc
+        meta.genre = 2
+    
+        
+        # release-level metadata
+        if media.release:
+            meta.album_name = media.release.name
+            meta.catalog = media.release.catalognumber
+            meta.track_total = len(media.release.media_release.all())
+            
+            if media.release.releasedate:
+                try:
+                    meta.year = str(media.release.releasedate.year)
+                    meta.date = str(media.release.releasedate)
+                    
+                except Exception, e:
+                    print e
+            
+            try:
+                
+                cover_image = media.release.cover_image if media.release.cover_image else media.release.main_image
+                
+                if meta.supports_images() and cover_image:
+                    for i in meta.images():
+                        meta.delete_image(i)
+                        
+                    opt = dict(size=(200, 200), crop=True, bw=False, quality=80)
+                    image = get_thumbnailer(cover_image).get_thumbnail(opt)
+                    meta.add_image(get_raw_image(image.path, 0))
+                    
+            except Exception, e:
+                print e
+                
+            
+        # artist-level metadata
+        if media.artist:
+            meta.artist_name = media.artist.name
+                    
+        # label-level metadata
+        if media.release.label:
+            pass
+        
+        
+        audiotools.open(path).set_metadata(meta)
+        
+        return
+
+
+
+
+
+def get_raw_image(filename, type):
+    try:
+        f = open(filename, 'rb')
+        data = f.read()
+        f.close()
+
+        return audiotools.Image.new(data, u'', type)
+    except IOError:
+        raise audiotools.InvalidImage(_(u"Unable to open file"))

@@ -15,6 +15,9 @@ import string
 import random
 import time
 
+import markdown
+import re
+
 from easy_thumbnails.files import get_thumbnailer
 
 
@@ -22,16 +25,20 @@ from easy_thumbnails.files import get_thumbnailer
 def on_comment_posted(sender, comment, request, **kwargs):
     
     
+    print "RUSER!!!!"
+    print request.user
+    
     """
     notify the push api!
     """
     rs = redis.StrictRedis()
     opt = dict(size=(70, 70), crop=True, bw=True, quality=80)
     message = {
-               'user': comment.user.username,
-               'image': get_thumbnailer(comment.user.profile_set.all()[0].image).get_thumbnail(opt).url,
+               'user': request.user.username,
+               'image': get_thumbnailer(request.user.profile_set.all()[0].image).get_thumbnail(opt).url,
                #'image': comment.user.profile_set.all()[0].image.url,
                'comment': comment.comment,
+               'comment_html': re.sub('<[^<]+?>', '', comment.comment).replace('\n','<br>\n'),
                'route': comment.content_object.get_api_url(),
                'type': 'message'
                #'timestamp': comment.submit_date
@@ -53,6 +60,8 @@ def on_comment_posted(sender, comment, request, **kwargs):
     # so the notification feature works regardless of a manual moderator.register() call in the project.
     if not appsettings.FLUENT_COMMENTS_USE_EMAIL_NOTIFICATION:
         return
+    
+    return
 
     recipient_list = [manager_tuple[1] for manager_tuple in settings.MANAGERS]
     site = get_current_site(request)

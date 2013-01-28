@@ -4,7 +4,7 @@
 <!-- list item s -->
 
 
-<div class="list_body_row selectable  published owner  view edit stream collect download" id="list_item_19287">
+<div class="list_body_row selectable item published owner view edit stream collect download" id="list_item_{{ item.pk }}">
 
 	<div class="list_body_item c1 image_center_bg" {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 36x36 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
 		<ul class="unstyled">
@@ -124,7 +124,7 @@
 			<div>
 				<ul class="unstyled">
 					<li class="download">
-						<a href="#release:19287:mp3" title="Download Release" class="downloadable queue"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
+						<a href="#release:{{ item.pk }}:mp3" title="Download Release" class="downloadable queue"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
 					</li>
 				</ul>
 			</div>

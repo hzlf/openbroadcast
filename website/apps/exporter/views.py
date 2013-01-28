@@ -17,9 +17,15 @@ from django.utils import simplejson
 from django import http
 from django.utils import simplejson as json
 
+from sendfile import sendfile
+import urllib
+from django_crypto import DecodeAES
+
 from exporter.models import *
 from exporter.forms import *
 
+import logging
+log = logging.getLogger(__name__)
 
 
 class JSONResponseMixin(object):
@@ -142,82 +148,35 @@ class ExportUpdateView(UpdateView):
     
     
 @login_required
-@csrf_exempt
-def multiuploader(request, import_id):
-    """
-    Main Multiuploader module.
-    Parses data from jQuery plugin and makes database changes.
-    """
-    result = []
+def export_download(request, uuid, token):
     
-    if request.method == 'POST':
-        if request.FILES == None:
-            return HttpResponseBadRequest('Must have files attached!')
-
-
-        print 'MUPLOAD'
-        print 'ID: %s' % import_id
-
-        #getting file data for farther manipulations
-        file = request.FILES[u'files[]']
-        wrapped_file = UploadedFile(file)
-        filename = wrapped_file.name
-        file_size = wrapped_file.file.size
-
-        import_session = Export.objects.get(pk=import_id)
-
-        import_file = ExportItem()
-        import_file.import_session = import_session
-        import_file.filename=str(filename)
-        import_file.file=file
-        import_file.save()
-
-        thumb_url = '' # does not exist, as audio only
-        
-        #settings imports
-        try:
-            file_delete_url = settings.MULTI_FILE_DELETE_URL+'/'
-            file_url = settings.MULTI_IMAGE_URL+'/'+image.key_data+'/'
-        except AttributeError:
-            file_delete_url = 'multi_delete/'
-            file_url = 'multi_image/'+import_file.filename+'/'
-
-        #generating json response array
-        result.append({"name":import_file.filename, 
-                       "size":import_file.file.size, 
-                       "url":import_file.file.url, 
-                        "id":'%s' % import_file.pk, 
-                       "thumbnail_url": '',
-                       "delete_url": import_file.get_delete_url(), 
-                       "delete_type":"POST",})
-
-    else:
-        
-        import_files = ExportItem.objects.filter(status=0)
-        for import_file in import_files:
-            result.append({"name":import_file.filename, 
-                           "size":import_file.file.size, 
-                           "url":import_file.file.url, 
-                           "id":'%s' % import_file.pk, 
-                           "thumbnail_url": '',
-                           "delete_url": import_file.get_delete_url(), 
-                           "delete_type":"POST",})
+    log = logging.getLogger('exporter.views.export_download')
+    log.info('Download Request by: %s' % (request.user.username))
     
 
-    response_data = simplejson.dumps(result)
-    if "application/json" in request.META['HTTP_ACCEPT_ENCODING']:
-        mimetype = 'application/json'
-    else:
-        mimetype = 'text/plain'
-    return HttpResponse(response_data, mimetype=mimetype)
+        
+    export = get_object_or_404(Export, uuid=uuid)
+    #version = 'base' 
 
+    print 'EXPORT: %s' % export
 
+    download_permission = False
+    
+    if request.user == export.user and token == export.token:
+        download_permission = True
+    
+    if not download_permission:
+        return HttpResponseForbidden('forbidden')
 
+        
+    #filename = '%02d %s - %s' % (media.tracknumber, media.name.encode('ascii', 'ignore'), media.artist.name.encode('ascii', 'ignore'))
+    
+    filename = '%s.%s' % (export.filename, 'zip')
+    
 
-
-
-
-
+    export.set_downloaded()
+    
+    return sendfile(request, export.file.path, attachment=True, attachment_filename=filename)
 
 
 

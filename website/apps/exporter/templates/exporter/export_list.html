@@ -50,21 +50,21 @@ $(document).ready(function() {
 <section>
 	
 	<div class="page-header">
-		<h2>{% trans "Exports" %} <small>{% trans "Start a new import session or handle existing ones" %}</small></h2>
+		<h2>{% trans "Your Downloads" %} <small>{% trans "Please note that listed items older than 10 days will get removed automatically." %}</small></h2>
 	</div>
 	<div>
-		<p>{% lorem 40 w %}.</p>
-		<p>{% lorem 9 w %}.</p>
+		<p>{% trans "Below you can find items you have marked for download. The corresponding files are being processed in the background – this can take a (short) while. " %}</p>
+		<p>{% trans "As soon as a download item is ready, the \"Download\" link turns active and you can start to download it by clicking on the link." %}</p>
 	</div>
 	
-	<!--
-	<div>
-		<a class="btn btn-primary btn" href="">
-			<i class="icon-music icon-white"></i>
-			<span> {% trans "Start Exporting" %}</span>
+	<!-- Notification enabler -->
+	<div class="util notify enable" style="display: none;">
+		<a class="btn btn-secondary btn" href="#">
+			<i class="icon-tasks icon-white"></i>
+			<span> {% trans "Enable Desktop Notifications" %}</span>
 		</a>
 	</div>
-	-->
+	
 	
 </section>
 {% endblock %}

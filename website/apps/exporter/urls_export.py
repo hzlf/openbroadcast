@@ -9,5 +9,7 @@ urlpatterns = patterns('exporter.views',
     
     url(r'^delete/(?P<pk>\d+)/$', login_required(ExportDeleteView.as_view()), name='exporter-export-delete'),
     url(r'^modify/(?P<pk>\d+)/$', login_required(ExportModifyView.as_view()), name='exporter-export-modify'),
+    
+    url(r'^download/(?P<uuid>[^//]+)/(?P<token>[^//]+)/$', export_download, name='exporter-export-download'),
 
 )

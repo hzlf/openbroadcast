@@ -53,6 +53,9 @@ USE_I18N = True
 USE_L10N = True
 
 SECRET_KEY = '0r6%7gip5tmez*vygfv+u14h@4lbt^8e2^26o#5_f_#b7%cm)u'
+CRYPTO_SECRET = 'JHRhwLiOsyMyL1JA'
+AES_SECRET_PASSWORD = 'JHRhwLiOsyMyL1JA'
+AES_BLOCK_SIZE = 32
 
 TEMPLATE_LOADERS = (    
     # mobile

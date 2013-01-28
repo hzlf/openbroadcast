@@ -44,7 +44,8 @@ class Pusher(object):
         
         print m.get_api_url()
         
-        r = requests.get('http://dev.openbroadcast.ch/de%s?format=json' %  m.get_api_url())
+        #r = requests.get('http://dev.openbroadcast.ch/de%s?format=json' %  m.get_api_url())
+        r = requests.get('http://localhost:8080/de%s?format=json' %  m.get_api_url())
         #print r.json
         
         

@@ -6,13 +6,13 @@ from exporter.models import *
 class ExportExportItemInline(admin.TabularInline):
     model = ExportItem
     extra = 0
-    readonly_fields = ('filename',)
+    #readonly_fields = ('filename',)
 
 class ExportAdmin(admin.ModelAdmin):  
 
-    list_display = ('created', 'user', 'status', 'type',)
+    list_display = ('created', 'user', 'status', 'type', 'fileformat')
     list_filter = ('status', 'user',)    
-    readonly_fields = ('created', 'updated',)
+    readonly_fields = ('created', 'updated', 'token',)
     date_hierarchy = 'created'
     inlines = [ExportExportItemInline]
     

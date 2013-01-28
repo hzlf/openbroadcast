@@ -178,6 +178,7 @@ def deploy():
             # restart other supervisor services
             run('supervisorctl restart echoprint.%s' % env.site_id)
             run('supervisorctl restart ttserver.%s' % env.site_id)
+            run('supervisorctl restart socketio.%s' % env.site_id)
             
             run('supervisorctl status')
         except Exception, e:

@@ -44,9 +44,30 @@ ExporterUi = function() {
 
 		
 		// list items
-		$('#result_holder .result-set').live('click', function(e){
+		$('.action.download > a', self.dom_element).live('click', function(e){
+			e.preventDefault();
+			
+			if($(this).parents('.item').hasClass('done')) {
+				var url = $(this).data('url');
+				// alert(url);
+				// $.get(url);
+				window.location.href = url;
+			};
+			
+			if($(this).parents('.item').hasClass('downloaded')) {
+				
+				// alert('already downloaded');
+				var dialog = {
+					title: 'Error',
+					text: 'Already downloaded.',
+				}
+				util.dialog.show(dialog);
+				
+			};
 			
 		});
+		
+		
 
 	};
 
@@ -88,6 +109,7 @@ ExporterUi = function() {
 		status_map[1] = 'done';
 		status_map[2] = 'ready';
 		status_map[3] = 'progress';
+		status_map[4] = 'downloaded';
 		status_map[99] = 'error';
 
 		for (var i in data.objects) {
@@ -119,7 +141,7 @@ ExporterUi = function() {
 
 					var html = ich.tpl_export({object: item});
 					html.attr('data-last_status', item.status);
-					self.dom_element.append(html);
+					self.dom_element.prepend(html);
 
 					self.current_data[item.id] = item;
 				}

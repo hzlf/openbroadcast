@@ -20,9 +20,6 @@ from django.core.urlresolvers import reverse
 
 from django.http import HttpResponse # needed for absolute url
 
-
-from settings import MEDIA_ROOT
-
 # TODO: only import needed settings
 from settings import *
 
@@ -227,6 +224,14 @@ class Media(MigrationMixin):
     @models.permalink
     def get_edit_url(self):
         return ('alibrary-media-edit', [self.pk])
+    
+    @models.permalink
+    def get_stream_url(self):
+        return ('alibrary-media-stream_html5', [self.uuid])
+    
+    @models.permalink
+    def get_waveform_url(self):
+        return ('alibrary-media-waveform', [self.uuid])
     
 
     def get_api_url(self):
@@ -501,7 +506,30 @@ class Media(MigrationMixin):
     
     
 
+    def create_waveform_image(self):
 
+        tmp_directory = tempfile.mkdtemp()
+
+        src_path = self.master.path;
+        tmp_path = os.path.join(tmp_directory, 'tmp.wav')
+        dst_path = os.path.join(self.get_folder_path('cache'), 'waveform.png')
+        
+        print 'create waveform'
+        print 'src_path: %s' % src_path
+        print 'tmp_path: %s' % tmp_path
+        print 'dst_path: %s' % dst_path
+        
+        audiotools.open(src_path).convert(tmp_path, audiotools.WaveAudio)
+        
+        args = (tmp_path, dst_path, None, 1800, 301, 2048)
+        create_wave_images(*args)
+        
+        try:
+            shutil.rmtree(tmp_directory)
+        except Exception, e:
+            print e
+            
+        return
 
  
        
@@ -682,7 +710,6 @@ class Media(MigrationMixin):
         meta.track_number = self.tracknumber
         meta.media = 'DIGITAL'
         meta.isrc = self.isrc
-        
         
 
             

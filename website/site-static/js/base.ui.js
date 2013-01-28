@@ -54,7 +54,7 @@ UiStates = function() {
 		
 		
 		if(key !== undefined){
-				alert('fööck');
+				alert('not implemented');
 		} else {
 			$(this.css_selector).each(function(i, el){
 				
@@ -132,9 +132,6 @@ BaseUi = function(){
 		this.states.save();
 	}
 };
-
-
-
 
 
 base.ui = new BaseUi();
@@ -302,6 +299,106 @@ base.ui.refresh = function() {
 };
 
 
+/* TODO: Move somewhere */
+ExporterApp = (function() {
+	
+	var self = this;
+	this.api_url = '/api/v1/export/'
+	
+	this.queue = function(items, redirect) {
+		
+		var objects;
+		var export_session;
+
+		// try to get an open (status 0) export		
+		jQuery.ajax({
+			url: self.api_url + '?status=0',
+			success: function(data) {
+				objects = data.objects;
+			},
+			async: false
+		});
+		
+		
+		// if none available: > create
+		if(objects.length < 1) {
+			jQuery.ajax({
+				url: self.api_url,
+				type: 'POST',
+				data: JSON.stringify({filename: 'sessionasd'}),
+				dataType: "json",
+				contentType: "application/json",
+				processData:  false,
+				success: function(data) {
+					console.log(data);
+					export_session = data;
+				},
+				async: false
+			});
+		} else {
+			export_session = objects[0];
+		}
+		
+		console.log('export session:', export_session);
+		
+		// add export-items
+		for (i in items) {
+			var item = items[i];
+			
+			console.log('exporter item:', item);
+			
+			var data = {
+				export_session: {'pk': export_session.id },
+				item: item
+			}
+			
+			jQuery.ajax({
+				url: '/api/v1/exportitem/',
+				type: 'POST',
+				data: JSON.stringify(data),
+				dataType: "json",
+				contentType: "application/json",
+				processData:  false,
+				success: function(data) {
+					console.log(data);
+					// export_session = data;
+				},
+				async: false
+			});
+			
+			
+		}
+		
+		// run the queue
+		jQuery.ajax({
+			url: export_session.resource_uri,
+			type: 'PUT',
+			data: JSON.stringify({status: 2}),
+			dataType: "json",
+			contentType: "application/json",
+			processData:  false,
+			success: function(data) {
+				console.log('queue:', data);
+				export_session = data;
+				if(redirect){
+					window.location.href = export_session.download_url;
+				}
+			},
+			async: true // this is the processing one - could take some time.
+		});
+		
+		
+		base.ui.ui_message('Download queued', 10000);
+		
+		
+		
+	};
+	
+	this.run = function(items) {
+		
+	};
+	
+});
 
 
 
@@ -338,6 +435,7 @@ base.ui.iface = function() {
 	
 	
 	
+	// translate link to post (eg delete items)
 	$('a.transform-post.reload').live('click', function(e){
 	
 		e.preventDefault();
@@ -405,30 +503,14 @@ base.ui.iface = function() {
 
 	
 	
-	
-	// popup handling, should be moved maybe later
-	/*
-	$('.playable.popup').live('click', function(e) {
-
-		e.preventDefault();
-		
-		var action = $(this).attr('href').split('#');
-
-		var uri = action[0];
-		var offset = action[1];
-		var mode = action[2];
-		var token = 'xx-yy-zz';
-
-		base.ui.play_popup(uri, token, offset, mode);
-
-		return false;
-	});
-	*/
+	base.ui.exporter = new ExporterApp;
 	
 	
 	// handling of 'downloadables' & resp. queues
 	// for single elements (through href/class)
-	$('.downloadable.queue').live('click', function() {
+	$('.downloadable.queue').live('click', function(e) {
+
+		e.preventDefault();
 
 		// href is eg: "#release:324:flac"
 		var action = $(this).attr('href').substr(1).split(':');
@@ -446,20 +528,17 @@ base.ui.iface = function() {
 		
 		items = new Array;
 		items.push({item_type: item_type, item_id: item_id, format: format});
-
-		// Request url
-		var url = base.vars.base_url + 'archiver/queue';
 		
-		// Request data
+		// Request data (legacy)
 		var data = {
 			items : items
 		};
 
-		// AJAX Call
-		base.ui.ajax(url, data);
-		
-		// Disable click action
-		return false;
+		base.ui.exporter.queue(items, false);
+
+		// AJAX Call (legacy)
+		// base.ui.ajax(url, data);
+
 		
 	});
 	
@@ -469,6 +548,7 @@ base.ui.iface = function() {
 	$('.action.selection_download a').live('click', function(e) {
 		
 		var item_type = $(this).attr('href').substring(1);
+		// item_type = 'release';
 		
 		items = new Array;
 		$('.list_body_row.selection').each(function(index) {
@@ -489,8 +569,10 @@ base.ui.iface = function() {
 			items : items
 		};
 
+		base.ui.exporter.queue(items, false);
+
 		// AJAX Call
-		base.ui.ajax(url, data);
+		// base.ui.ajax(url, data);
 		
 
 		return false;

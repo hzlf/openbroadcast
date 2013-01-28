@@ -8,18 +8,26 @@ from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
 
 from exporter.models import Export, ExportItem
 
-from alibrary.api import MediaResource
+from alibrary.api import ReleaseResource, ArtistResource
+from alibrary.models import Release, Artist
+
+from django.template import defaultfilters as dj_filters
+from django.utils import formats
 
 
-# file = request.FILES[u'files[]']
-
+from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
 
 
 class ExportItemResource(ModelResource):
     
-    import_session = fields.ForeignKey('exporter.api.ExportResource', 'import_session', null=True, full=False)
+    export_session = fields.ForeignKey('exporter.api.ExportResource', 'export_session', null=True, full=False)
     
-    media = fields.ForeignKey('alibrary.api.MediaResource', 'media', null=True, full=True)
+    co_to = {
+             Release: ReleaseResource,
+             Artist: ArtistResource,
+             }
+    
+    content_object = GenericForeignKeyField(to=co_to, attribute='content_object', null=False, full=False)
 
     class Meta:
         queryset = ExportItem.objects.all()
@@ -27,8 +35,8 @@ class ExportItemResource(ModelResource):
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
         resource_name = 'exportitem'
         # excludes = ['type','results_musicbrainz']
-        excludes = ['type',]
-        authentication = Authentication()
+        #excludes = ['id',]
+        authentication =  MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
         authorization = Authorization()
         always_return_data = True
         filtering = {
@@ -36,33 +44,29 @@ class ExportItemResource(ModelResource):
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
         }
         
+    
+
+    def apply_authorization_limits(self, request, object_list):
+        return object_list.filter(export_session__user=request.user)
 
     def obj_create(self, bundle, request, **kwargs):
-        """
-        Little switch to play with jquery fileupload
-        """
-        try:
-            import_id = request.GET['import_session']
-
-
-            print "####################################"
-            print request.FILES[u'files[]']
-
-
-            imp = Export.objects.get(pk=import_id)
-            bundle.data['import_session'] = imp
-            bundle.data['file'] = request.FILES[u'files[]']
+        
+        
+        item = bundle.data['item']
+        print bundle.data['item']['item_id']
+        
+        # dummy
+        if item['item_type'] == 'release':
+            co = Release.objects.get(pk=int(item['item_id']))
             
-            
-        except Exception, e:
-            print e
-            
+        bundle.data['content_object'] = co
+        
         return super(ExportItemResource, self).obj_create(bundle, request, **kwargs)
 
 
 class ExportResource(ModelResource):
     
-    files = fields.ToManyField('exporter.api.ExportItemResource', 'files', full=True, null=True)
+    items = fields.ToManyField('exporter.api.ExportItemResource', 'export_items', full=False, null=True)
 
     class Meta:
         queryset = Export.objects.all()
@@ -73,13 +77,39 @@ class ExportResource(ModelResource):
         resource_name = 'export'
         excludes = ['updated',]
         include_absolute_url = True
-        authentication = Authentication()
+        authentication =  MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
         authorization = Authorization()
         always_return_data = True
         filtering = {
             #'channel': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
+            'status': ['exact',],
         }
+        
+    def obj_create(self, bundle, request=None, **kwargs):
+        return super(ExportResource, self).obj_create(bundle, request, user=request.user)
+        
+
+    def dehydrate(self, bundle):
+        bundle.data['download_url'] = bundle.obj.get_download_url();
+        
+        # pre-format some values
+        try:
+            formatted_created = formats.date_format(bundle.obj.created, "SHORT_DATETIME_FORMAT")
+        except:
+            formatted_created = None
+            
+        try:
+            formatted_downloaded = formats.date_format(bundle.obj.downloaded, "SHORT_DATETIME_FORMAT")
+        except:
+            formatted_downloaded = None
+            
+        
+        bundle.data['formatted_created']  = formatted_created
+        bundle.data['formatted_downloaded']  = formatted_downloaded
+        bundle.data['formatted_filesize']  = dj_filters.filesizeformat(bundle.obj.filesize)
+        
+        return bundle
         
     def save_related(self, obj):
         return True
