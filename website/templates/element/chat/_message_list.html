@@ -6,11 +6,11 @@
 
 <script src="{{ STATIC_URL }}js/lib/ICanHaz.js"></script>
 
-
-<script src="http://dev.openbroadcast.ch:8888/socket.io/socket.io.js"></script>
 <!--
-<script src="http://localhost:8888/socket.io/socket.io.js"></script>
+<script src="http://dev.openbroadcast.ch:8888/socket.io/socket.io.js"></script>
 -->
+<script src="http://localhost:8888/socket.io/socket.io.js"></script>
+
 		
 		<script id="tpl_chat_message" type="text/html">
 			{% verbatim %}
@@ -45,8 +45,8 @@ SocketApp = function(base_app) {
 	this.base_app = base_app;
 
 	this.socket
-	//this.socket_url = 'http://localhost:8888/';
-	this.socket_url = 'http://dev.openbroadcast.ch:8888/'
+	this.socket_url = 'http://localhost:8888/';
+	//this.socket_url = 'http://dev.openbroadcast.ch:8888/'
 
 	this.init = function() {
 		console.log('SocketApp: init');
