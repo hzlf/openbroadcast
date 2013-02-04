@@ -1,0 +1,116 @@
+{% load sekizai_tags verbatim i18n %}
+
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/playlist.js"></script>{% endaddtoblock %}
+{% addtoblock "js-post" %}
+<script>
+	$(function(){
+
+		var alibrary = alibrary || {};
+		alibrary.playlist = new PlaylistUi();;
+		alibrary.playlist.api_url = "{% url api_dispatch_list resource_name='playlist' api_name='v1'%}{{ object.id }}";
+		alibrary.playlist.init();
+		
+	});
+</script>
+
+<!-- moustache templates -->
+{% verbatim %}
+<script id="tpl_playlists_inline" type="text/html">
+	
+	<div id="playlist_holder_{{ object.id }}" class="playlist_holder " data-updated="{{ object.updated }}">
+
+		<div class="header">
+
+			<div class="right">
+				<a href="#393" title="Remove" class="action delete"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Remove"></a>
+			</div>
+
+			<div class="right">
+				<a href="#393" title="Edit name" class="action edit"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Edit name"></a>
+			</div>
+
+			<div class="right">
+				<a href="#playlist:393:mp3" title="Download" class="action downloadable queue"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Edit name"></a>
+			</div>
+
+			<div class="left name">
+				{{ object.name }}
+				<input type="hidden" name="name_legacy" value="session">
+			</div>
+			<div class="clear"></div>
+		</div>
+
+		<div class="panel">
+
+			<div class="edit">
+				<div class="hint">
+					Enter the new name for the basket
+				</div>
+				<div class="input">
+					<input type="text" id="playlist_edit_name_393" name="playlist_edit_name" value="session">
+				</div>
+			</div>
+
+			<div class="convert">
+				<a href="#">Convert to playlist</a>
+			</div>
+			<div class="duration">
+				{{ object.duration }}
+			</div>
+		</div>
+
+		<div class="list">
+			
+			{{#object.media}}
+			
+			<div class="list_item">
+				<div class="right">
+					<a href="#393:3884" title="Remove" class="action delete"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Remove"></a>
+				</div>
+				<div class="left">
+					<a href="http://openbroadcast.ch/en/content/library/playlists/393-session/play.json#0#replace" title="Play" class="action play playable popup"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Play"></a>
+				</div>
+				<div class="left title">
+					<a href="http://openbroadcast.ch/en/content/library/media/3884-mobilize/detail.html" title="Mobilize">{{ media.name }}</a>
+				</div>
+				<div class="clear"></div>
+			</div>
+			
+			{{/object.media}}
+		</div>
+
+	</div>
+			
+</script>
+{% endverbatim %}
+
+
+{% endaddtoblock %}
+
+
+
+
+
+<div id="">
+	<div class="playlist basket expandable open">
+
+		<div class="header">
+			<span>Playlist Basket</span>
+			<span style="float: right;"> <span style="color: rgb(153, 153, 153);" class="opt">1</span> </span>
+		</div>
+
+		<!-- Wrapper, can hold multiple lists  -->
+		<div id="sidebar_playlist_holder" class="wrapper"></div>
+
+		<!-- Selector to choose default playlist -->
+
+		<div class="settings">
+			<div class="create">
+				<span>New Basket:</span>
+				<input type="text" name="playlist_basket_create" value="" class="create">
+				<a href="#" class="action">Go</a>
+			</div>
+		</div>
+
+	</div>
+</div>

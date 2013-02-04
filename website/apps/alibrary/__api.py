@@ -8,7 +8,7 @@ from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
 
 from tastypie.cache import SimpleCache
 
-from alibrary.models import Media, Release, Artist, Label
+from alibrary.models import Media, Release, Artist, Label, Playlist, PlaylistMedia
 
 from easy_thumbnails.files import get_thumbnailer
 
@@ -53,6 +53,61 @@ class ReleaseResource(ModelResource):
             bundle.data['artist'] = bundle.obj.get_artists();
 
         return bundle
+
+
+
+class PlaylistMediaResource(ModelResource):
+    
+    #playlist = fields.ForeignKey('alibrary.api.PlaylistResource', 'playlist', null=True, full=True)
+    media = fields.ToOneField('alibrary.api.MediaResource', 'playlist_media', null=True, full=True)
+
+    class Meta:
+        queryset = PlaylistMedia.objects.all()
+
+class PlaylistResource(ModelResource):
+    
+    media = fields.ToManyField('alibrary.api.PlaylistMediaResource', 'media', null=True, full=True, max_depth=30)
+    # label = fields.ForeignKey('alibrary.api.LabelResource', 'label', null=True, full=True, max_depth=2)
+
+    #media = fields.ToManyField('alibrary.api.PlaylistMediaResource',
+    #        attribute=lambda bundle: bundle.obj.media, full=True)
+
+
+    class Meta:
+        queryset = Playlist.objects.order_by('-created').all()
+        list_allowed_methods = ['get',]
+        detail_allowed_methods = ['get',]
+        resource_name = 'playlist'
+        excludes = ['updated',]
+        #include_absolute_url = True
+        authentication =  MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
+        authorization = Authorization()
+        filtering = {
+            #'channel': ALL_WITH_RELATIONS,
+            'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
+        }
+        #cache = SimpleCache(timeout=120)
+        
+
+    def dehydrate(self, bundle):
+        
+        """
+        if(bundle.obj.main_image):
+            
+            opt = dict(size=(70, 70), crop=True, bw=False, quality=80)
+            try:
+                main_image = image = get_thumbnailer(bundle.obj.main_image).get_thumbnail(opt)
+                bundle.data['main_image'] = main_image.url
+            except:
+                pass
+        """
+
+        return bundle
+    
+    
+    
+    
+    
         
 class LabelResource(ModelResource):
 

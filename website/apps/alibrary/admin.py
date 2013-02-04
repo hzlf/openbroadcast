@@ -296,6 +296,10 @@ class PlaylistmediaInline(admin.TabularInline):
     extra=1
         
 class PlaylistAdmin(BaseAdmin):
+    
+    list_display   = ('name', 'user', 'type', 'duration',)
+    list_filter = ('type', )
+
     inlines = [PlaylistmediaInline]  
     
 admin.site.register(Playlist, PlaylistAdmin)

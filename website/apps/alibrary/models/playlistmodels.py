@@ -61,12 +61,13 @@ class Playlist(models.Model):
     #uuid = models.CharField(max_length=36, unique=False, default=str(uuid.uuid4()), editable=False)
     uuid = UUIDField()
     
-    PLAYLISTTYPE_CHOICES = (
+    TYPE_CHOICES = (
         ('compilation', _('Compilation')),
         ('wishlist', _('Wishlist')),
+        ('basket', _('Basket')),
         ('other', _('Other')),
     )
-    playlisttype = models.CharField(max_length=12, default='other', choices=PLAYLISTTYPE_CHOICES)
+    type = models.CharField(max_length=12, default='other', null=True, choices=TYPE_CHOICES)
     
     
     # relations
@@ -76,12 +77,15 @@ class Playlist(models.Model):
     # tagging
     #tags = TaggableManager(blank=True)
     
+    # updated/calculated on save
+    duration = models.IntegerField(max_length=12, null=True, default=0)
+    
     # manager
     objects = models.Manager()
     
     # auto-update
-    created = models.DateField(auto_now_add=True, editable=False)
-    updated = models.DateField(auto_now=True, editable=False)
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+    updated = models.DateTimeField(auto_now=True, editable=False)
 
     # meta
     class Meta:
@@ -95,14 +99,31 @@ class Playlist(models.Model):
         return self.name
         
     def save(self, *args, **kwargs):
+        
+        duration = 0
+        try:
+            for media in self.media.all():
+                duration += media.duration
+        except:
+            pass
+        
+        self.duration = duration
+        
         # self.user = request.user  
         super(Playlist, self).save(*args, **kwargs)
     
 
 class PlaylistMedia(models.Model):
-    playlist = models.ForeignKey('Playlist', related_name='playlist_playlist')
-    media = models.ForeignKey('Media', related_name='playlist_media')
+    #playlist = models.ForeignKey('Playlist', related_name='playlist_playlist')
+    #media = models.ForeignKey('Media', related_name='playlist_media')
+    playlist = models.ForeignKey('Playlist')
+    media = models.ForeignKey('Media')
     created = models.DateField(auto_now_add=True, editable=False)
     position = models.PositiveIntegerField(max_length=12, default=0)
+    # 
+    cue_in = models.PositiveIntegerField(max_length=12, default=0)
+    cue_out = models.PositiveIntegerField(max_length=12, default=0)
+    fade_in = models.PositiveIntegerField(max_length=12, default=0)
+    fade_out = models.PositiveIntegerField(max_length=12, default=0)
     class Meta:
         app_label = 'alibrary'

@@ -38,3 +38,9 @@ def format_cuelinks(m):
     return str
 
 
+
+@register.inclusion_tag('alibrary/templatetags/playlists_inline.html', takes_context=True)
+def playlists_inline(context):
+    #context.update({'foo': '...'})
+    return context
+

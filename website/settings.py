@@ -639,6 +639,9 @@ RTMP_HOST = '127.0.0.2'
 RTMP_APP = 'alibrary'
 RTMP_PORT = '1935'
 
+ICECAST_HOST = '127.0.0.2'
+ICECAST_PORT = '8000'
+
 """
 mb server
 """

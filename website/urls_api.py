@@ -4,7 +4,7 @@ from django.conf.urls.defaults import *
 from tastypie.api import Api
 from bcmon.api import PlayoutResource as BcmonPlayoutResource
 from bcmon.api import ChannelResource as BcmonChannelResource
-from alibrary.api import MediaResource, ReleaseResource, ArtistResource
+from alibrary.api import MediaResource, ReleaseResource, ArtistResource, LabelResource, PlaylistResource
 from importer.api import ImportResource, ImportFileResource
 from exporter.api import ExportResource, ExportItemResource
 from abcast.api import StationResource, ChannelResource
@@ -21,6 +21,8 @@ api.register(BcmonChannelResource())
 api.register(MediaResource())
 api.register(ReleaseResource())
 api.register(ArtistResource())
+api.register(LabelResource())
+api.register(PlaylistResource())
 
 # importer
 api.register(ImportResource())
