@@ -83,7 +83,7 @@ class BasicNode(template.Node):
         # https://docs.djangoproject.com/en/dev/howto/custom-template-tags/#thread-safety-considerations
         
         #print "%s get-render: start" % strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
-        print "get-render: start"
+        #print "get-render: start"
         
         if self not in context.render_context:
             context.render_context[self] = (
@@ -92,10 +92,10 @@ class BasicNode(template.Node):
             )
         form, helper = context.render_context[self]
 
-        print
-        print "form pre-resolve"
+        #print
+        #print "form pre-resolve"
         actual_form = form.resolve(context)
-        print "form post-resolve"
+        #print "form post-resolve"
         
         if self.helper is not None:
             helper = helper.resolve(context)
@@ -119,12 +119,12 @@ class BasicNode(template.Node):
         if helper and helper.layout:
             if not is_formset:
                 
-                print "Not a Formset -> return actual Form"
+                #print "Not a Formset -> return actual Form"
                 
                 actual_form.form_html = helper.render_layout(actual_form, node_context)
             else:
                 
-                print 'Starting Simulated For-loop'
+                #print 'Starting Simulated For-loop'
                  
                 forloop = ForLoopSimulator(actual_form)
                 
@@ -142,7 +142,7 @@ class BasicNode(template.Node):
             response_dict.update({'form': actual_form})
 
 
-        print "get-render: done - > return"
+        #print "get-render: done - > return"
         return Context(response_dict)
 
     def get_response_dict(self, helper, context, is_formset):
@@ -197,9 +197,9 @@ whole_uni_form_template = get_template('%s/whole_uni_form.html' % TEMPLATE_PACK)
 class CrispyFormNode(BasicNode):
     def render(self, context):
         
-        print "CRISPY: start render"
+        #print "CRISPY: start render"
         c = self.get_render(context)
-        print "CRISPY: got render"
+        #print "CRISPY: got render"
 
         if c['is_formset']:
             if settings.DEBUG:
@@ -213,7 +213,7 @@ class CrispyFormNode(BasicNode):
                 template = whole_uni_form_template
 
 
-        print "CRISPY: end render"
+        #print "CRISPY: end render"
         return template.render(c)
 
 

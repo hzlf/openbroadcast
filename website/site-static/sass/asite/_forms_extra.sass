@@ -374,3 +374,75 @@ ul.selectable-deck
         color: $errorText
         font-weight: normal
 
+
+
+
+
+
+// Playlist editing
+form.form-playlist
+  // target duration
+  div.target-duration div.controls
+    label
+      float: left
+      width: 30px
+      padding: 0 0 0 20px
+      &.selected
+        background-color: yellow
+      input
+        padding: 0
+        display: none
+  // target duration
+  div.dayparts div.controls
+  
+    ul
+      padding: 4px 0px 0
+      
+      li
+        margin: 0 2px 2px 0
+        padding: 1px 4px 0 4px
+        height: 18px
+        border: 1px solid #ccc
+        
+        &:hover
+          border-color: #555
+        
+        &.selected
+          background-color: #D4F3DA !important
+          border-color: #555
+          &:hover
+            border-color: #ccc
+          
+        &:nth-child(2)
+          background-color: #FBD1FF
+        &:nth-child(3)
+          background-color: #FFD8BF
+        &:nth-child(4)
+          background-color: #FFF9BF
+        &:nth-child(5)
+          background-color: #CCFFBF
+        &:nth-child(6)
+          background-color: #BFFFEB
+        &:nth-child(7)
+          background-color: #BFE9FF
+        &:nth-child(8)
+          background-color: #BFC7FF
+        
+      li.title
+        color: #5a5a5a
+        // font-weight: bold
+        border: none
+        background-color: $white
+        border: 1px solid #ccc
+        text-align: center 
+  
+    label
+      //float: left
+      //width: 30px
+      //padding: 0 0 0 20px
+      input
+        //padding: 0
+        //display: none
+    
+
+

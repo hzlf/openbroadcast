@@ -245,6 +245,49 @@ class Mediaformat(models.Model):
         return self.name
     
     
+    
+class DaypartManager(models.Manager):
+    
+    def active(self):
+        return self.get_query_set().filter(active=True)
+       
+class Daypart(models.Model):
+    
+    
+    active = models.BooleanField(default=True)
+    
+    DAY_CHOICES = (
+        (0, _('Mon')),
+        (1, _('Tue')),
+        (2, _('Wed')),
+        (3, _('Thu')),
+        (4, _('Fri')),
+        (5, _('Sat')),
+        (6, _('Sun')),
+    )
+    day = models.PositiveIntegerField(max_length=1, default=0, null=True, choices=DAY_CHOICES)
+    time_start = models.TimeField()
+    time_end = models.TimeField()
+    
+    
+    
+    # manager
+    objects = DaypartManager()
+
+    # meta
+    class Meta:
+        app_label = 'alibrary'
+        verbose_name = _('Daypart')
+        verbose_name_plural = _('Dayparts')
+        ordering = ('day', 'time_start' )
+    
+    def __unicode__(self):
+        return "%s | %s - %s" % (self.get_day_display(), self.time_start, self.time_end)
+    
+    def playlist_count(self):
+        return self.daypart_plalists.count()
+    
+    
 
 class RelationManager(models.Manager):
 

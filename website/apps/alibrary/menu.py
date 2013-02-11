@@ -103,6 +103,17 @@ class ArtistMenu(CMSAttachMenu):
 menu_pool.register_menu(ArtistMenu)
 
 
+class PlaylistMenu(CMSAttachMenu):
+    
+    name = _("Playlist Menu")
+    
+    def get_nodes(self, request):
+        nodes = []
+        return nodes
+    
+menu_pool.register_menu(PlaylistMenu)
+
+
 
 
 

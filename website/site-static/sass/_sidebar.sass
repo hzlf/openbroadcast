@@ -85,14 +85,22 @@ div.row .sidebar
     border-right: 1px solid white
     border-top: 1px solid #CCCCCC
     border-bottom: 1px solid #CCCCCC
-    &.open
+    
+    background-image: none
+
+    div.wrapper, div.settings
+      display: none
+    
+    
+    &.expanded
       border: 1px solid #CCCCCC
       background-color: #F5F5F5
       padding: 0 2px 2px 2px
-      div.wrapper
+      div.wrapper, div.settings
         display: block
 		
       div.header
+        padding-right: 4px
         background-image: url("/static/img/prototype/box_handler_on.png")
 		
     &.close
@@ -105,7 +113,7 @@ div.row .sidebar
       background-image: url("/static/img/prototype/box_handler.png")
       background-repeat: no-repeat
       color: #333333
-      padding: 3px 0 2px 19px
+      padding: 3px 6px 2px 19px
       border-bottom: none
       /*background-color: #ff00ff*/
 
@@ -210,11 +218,22 @@ div.row .sidebar
                 background-image: url(/static/img/base/sidebar.item.play.png)
                 background-color: #d6def7
     
+    
+    
     div.settings
       color: #333333
       padding: 3px 0 2px 7px
       border-bottom: none
       /*background-color: #ff00ff*/
+     
+     
+      form
+        margin-bottom: 4px
+        .controls.pull-right
+          padding-right: 10px
+        input.full-width
+          width: 236px
+     
       div span
         width: 90px
         display: block

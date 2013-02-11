@@ -1,7 +1,7 @@
 from django.contrib import admin
 from cms.admin.placeholderadmin import PlaceholderAdmin
 
-from alibrary.models import Label, Release, Artist, License, Media, Profession, Playlist, Format, Relation, Mediaformat
+from alibrary.models import Label, Release, Artist, License, Media, Profession, Playlist, Format, Relation, Mediaformat, Daypart
 #from alibrary.models import ArtistProfessions, MediaExtraartists, PlaylistMedia
 from alibrary.models import ArtistProfessions, MediaExtraartists, ReleaseExtraartists, PlaylistMedia, ReleaseRelations, APILookup
 
@@ -300,7 +300,14 @@ class PlaylistAdmin(BaseAdmin):
     list_display   = ('name', 'user', 'type', 'duration',)
     list_filter = ('type', )
 
-    inlines = [PlaylistmediaInline]  
+    inlines = [PlaylistmediaInline] 
+        
+class DaypartAdmin(BaseAdmin):
+    
+    list_display   = ('day', 'time_start', 'time_end', 'active', 'playlist_count',)
+    list_filter = ('day', 'active',)
+
+
     
 admin.site.register(Playlist, PlaylistAdmin)
         
@@ -314,6 +321,8 @@ admin.site.register(Mediaformat, MediaformatAdmin)
 admin.site.register(APILookup)
 
 
+
+admin.site.register(Daypart, DaypartAdmin)
 
 
 

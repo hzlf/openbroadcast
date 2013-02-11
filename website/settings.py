@@ -710,7 +710,7 @@ WYM_CLASSES = ",\n".join([
 
 
 ACTSTREAM_SETTINGS = {
-    'MODELS': ('auth.user', 'auth.group', 'alibrary.release',),
+    'MODELS': ('auth.user', 'auth.group', 'alibrary.release', 'alibrary.playlist',),
     #'MANAGER': 'myapp.streams.MyActionManager',
     'FETCH_RELATIONS': True,
     'USE_PREFETCH': True,

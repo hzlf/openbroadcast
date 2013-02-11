@@ -7,7 +7,7 @@
 
 		var alibrary = alibrary || {};
 		alibrary.playlist = new PlaylistUi();;
-		alibrary.playlist.api_url = "{% url api_dispatch_list resource_name='playlist' api_name='v1'%}{{ object.id }}";
+		alibrary.playlist.api_url = "{% url api_dispatch_list resource_name='playlist' api_name='v1'%}";
 		alibrary.playlist.init();
 		
 	});
@@ -17,25 +17,24 @@
 {% verbatim %}
 <script id="tpl_playlists_inline" type="text/html">
 	
-	<div id="playlist_holder_{{ object.id }}" class="playlist_holder " data-updated="{{ object.updated }}">
+	<div id="playlist_holder_{{ object.id }}" data-object_id="{{ object.id }}" class="playlist_holder " data-updated="{{ object.updated }}">
 
 		<div class="header">
 
 			<div class="right">
-				<a href="#393" title="Remove" class="action delete"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Remove"></a>
+				<a href="#393" title="Remove" data-action="delete" class="action delete"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Remove"></a>
 			</div>
 
 			<div class="right">
-				<a href="#393" title="Edit name" class="action edit"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Edit name"></a>
+				<a href="#393" title="Edit name" data-action="edit" class="action edit"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Edit name"></a>
 			</div>
 
 			<div class="right">
-				<a href="#playlist:393:mp3" title="Download" class="action downloadable queue"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Edit name"></a>
+				<a href="#playlist:393:mp3" title="Download" data-action="download" class="action downloadable queue"><img src="http://openbroadcast.ch//media/img/base/spacer.png" width="16" height="16" alt="Edit name"></a>
 			</div>
 
 			<div class="left name">
 				{{ object.name }}
-				<input type="hidden" name="name_legacy" value="session">
 			</div>
 			<div class="clear"></div>
 		</div>
@@ -47,12 +46,13 @@
 					Enter the new name for the basket
 				</div>
 				<div class="input">
-					<input type="text" id="playlist_edit_name_393" name="playlist_edit_name" value="session">
+					<input type="text" id="playlist_edit_name_{{ object.id }}" name="playlist_edit_name" value="{{ object.name }}">
 				</div>
 			</div>
 
 			<div class="convert">
-				<a href="#">Convert to playlist</a>
+				<a href="{{ object.edit_url }}">Convert</a>
+				<a href="{{ object.absolute_url }}">Detail</a>
 			</div>
 			<div class="duration">
 				{{ object.duration }}
@@ -77,6 +77,7 @@
 			</div>
 			
 			{{/object.media}}
+			
 		</div>
 
 	</div>
@@ -91,26 +92,48 @@
 
 
 
-<div id="">
-	<div class="playlist basket expandable open">
+<div id="inline_playlist_container" class="">
+	
+	<div class="playlist basket ui-persistent open" data-uistate="init" id="playlist_basket">
 
 		<div class="header">
-			<span>Playlist Basket</span>
+			<span>{% trans "Playlist Basket" %}</span>
 			<span style="float: right;"> <span style="color: rgb(153, 153, 153);" class="opt">1</span> </span>
 		</div>
 
 		<!-- Wrapper, can hold multiple lists  -->
-		<div id="sidebar_playlist_holder" class="wrapper"></div>
+		<div id="inline_playlist_holder" class="wrapper"></div>
 
 		<!-- Selector to choose default playlist -->
 
 		<div class="settings">
-			<div class="create">
-				<span>New Basket:</span>
-				<input type="text" name="playlist_basket_create" value="" class="create">
-				<a href="#" class="action">Go</a>
-			</div>
+		
+				
+			<form class="form-inline create">
+				
+			  <div class="control-group">
+			    <label class="control-label" for="">{% trans "Default Basket" %}:</label>
+			    <div class="controls">
+			      <input type="text" class="full-width name" placeholder="{% trans "Basket Name" %}:">
+			    </div>
+			  </div>
+			  
+			  <div class="control-group">
+			    <label class="control-label" for="">{% trans "New Basket" %}:</label>
+			    <div class="controls">
+			      <input type="text" class="full-width name" placeholder="{% trans "Basket Name" %}:">
+			    </div>
+			  </div>
+			  <div class="control-group">
+			    <div class="controls pull-right">
+			      <button type="submit" class="btn btn-primary btn-mini">{% trans "Go" %}</button>
+			    </div>
+			  </div>
+			  <div class="clearfix"></div>
+			</form>
+
 		</div>
 
 	</div>
+	
 </div>

@@ -11,7 +11,7 @@ from django.template import RequestContext
 
 from pure_pagination.mixins import PaginationMixin
 
-from alibrary.models import Artist, Label, Release, Profession, Media, License
+from alibrary.models import Artist, Label, Release, Profession, Media, License, Playlist
 
 from sendfile import sendfile
 
@@ -46,12 +46,9 @@ class ArtistListView(ListView):
     # template_name = "alibrary/artist_list.html"
     
     def get_queryset(self):
-
         kwargs = {}
-
-
-
         return Artist.objects.listed().filter(**kwargs)
+    
     
 class ReleaseListView(PaginationMixin, ListView):
     
@@ -221,45 +218,12 @@ class ReleaseDetailView(DetailView):
     def render_to_response(self, context):
         return super(ReleaseDetailView, self).render_to_response(context, mimetype="text/html")
         
-        
-
-    
     def get_context_data(self, **kwargs):
-        
-        #mimetype="application/xhtml+xml",
+
         context = super(ReleaseDetailView, self).get_context_data(**kwargs)
-
-        # context['products'] = context['release'].releaseproduct.all() # obsolete - handled via release.get_products()
-
-        # static here for the moment
-        format = 'mp3'
-        version = 'base'
-
-        downloads = []
-        order = None
-        """
-        #for product in context['release'].releaseproduct.filter(downloadrelease__active=True): # choose to sell digital releases separately
-        for product in context['release'].releaseproduct.filter(active=True): # users who purchase hardware can download the software part as well
-
-            if get_download_permissions(self.request, product, format, version):
-                downloads.append(product)
-
-        print downloads
-        """
-        
-        images = []
-
-        context['downloads'] = downloads
-        context['images'] = images
-        #context['all_items'] = Release.objects.all()
-        
-        
         return context
     
     
-
-
-
 class ReleaseEditView(UpdateView):
     model = Release
     template_name = "alibrary/release_edit.html"
@@ -324,14 +288,9 @@ class ReleaseEditView(UpdateView):
             print relation_form.is_valid()
             print relation_form.errors
         
-            if relation_form.is_valid():
-
-                
+            if relation_form.is_valid():                
                 relation_form.save()
-        
-        
-            
-        
+
             if releasemedia_form.is_valid():
                 print "releasemedia_form.cleaned_data:",
                 print releasemedia_form.cleaned_data
@@ -349,22 +308,80 @@ class ReleaseEditView(UpdateView):
                 form.save_m2m()
             else:
                 print releasemedia_form.errors
-                
-
-            print "VALLIDIO"
 
             return HttpResponseRedirect('#')
         else:
-            print releasemedia_form.errors
-            
-            
-            
-            print "NNNOOOTTT VALLIDIO"
             return self.render_to_response(self.get_context_data(form=form, releasemedia_form=releasemedia_form))
+
+
+"""
+Playlist Views
+"""
+class PlaylistDetailView(DetailView):
+
+    context_object_name = "playlist"
+    model = Playlist
     
+    def render_to_response(self, context):
+        return super(PlaylistDetailView, self).render_to_response(context, mimetype="text/html")
+        
+    def get_context_data(self, **kwargs):
+
+        context = super(PlaylistDetailView, self).get_context_data(**kwargs)
+        return context
+    
+    
+class PlaylistEditView(UpdateView):
+    
+    model = Playlist
+    template_name = "alibrary/playlist_edit.html"
+    success_url = '#'
+    form_class = PlaylistForm
+    
+    def __init__(self, *args, **kwargs):
+        super(PlaylistEditView, self).__init__(*args, **kwargs)
+        
+    def get_initial(self):
+        self.initial.update({ 'user': self.request.user })
+        return self.initial
+        
+
+    def get_context_data(self, **kwargs):
+        
+        context = super(PlaylistEditView, self).get_context_data(**kwargs)
+        
+        context['action_form'] = ActionForm()        
+        context['releasemedia_form'] = ReleaseMediaFormSet(instance=self.object)
+        
+        context['user'] = self.request.user
+        context['request'] = self.request
+        
+        return context
+    
+    def form_valid(self, form):
+        context = self.get_context_data()        
+        print 'validation:'
+        
+        # validation
+        if form.is_valid():
+            print 'form valid'
+            
+            self.object.tags = form.cleaned_data['d_tags']
+            
+            # temporary instance to validate inline forms against
+            tmp = form.save(commit=False)
+            
+            form.save()
+            form.save_m2m()
+            
+
+            return HttpResponseRedirect('#')
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+    
+
     
 # autocompleter views
-
 def release_autocomplete(request):
     
     
@@ -588,3 +605,25 @@ def release_playlist(request, slug, format, version):
 
     return render_to_response('alibrary/xml/rss_playlist.xml', { 'object': object }, context_instance=RequestContext(request))
     # return render_to_response('alibrary/xml/rss_playlist.xml', data, mimetype="application/xhtml+xml")
+    
+
+    
+def playlist_collect(request, pk):
+    playlist = get_object_or_404(Playlist, pk=pk)
+
+    ids = request.POST.get('ids', None)
+
+    if ids:
+        
+        ids = ids.split(',')
+        playlist.add_media_by_ids(ids)
+    
+    content = {'session': 'OK!'}
+    
+    return http.HttpResponse(json.dumps(content), content_type='application/json')
+    
+    
+    
+    
+    
+    
