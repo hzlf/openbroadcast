@@ -85,7 +85,18 @@
 			</div>
 
 			<div class="tab-pane" id="broadcasts">
-				...
+				
+				<div class="listview container playlist s">
+
+					<div class="list_body">
+					{% for item in broadcasts %}
+						{% include "alibrary/playlist/list_item_s.html" %}
+					{% endfor %}
+					</div>
+				</div>
+				
+				
+
 			</div>
 		</div>
 

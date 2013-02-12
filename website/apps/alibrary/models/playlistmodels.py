@@ -80,10 +80,21 @@ class Playlist(models.Model):
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     uuid = UUIDField()
     
+    STATUS_CHOICES = (
+        (0, _('Init')),
+        (1, _('Ready')),
+        (2, _('In progress')),
+        (3, _('Scheduled')),
+        (3, _('Descheduled')),
+        (99, _('Error')),
+        (11, _('Other')),
+    )
+    status = models.PositiveIntegerField(default=0, choices=STATUS_CHOICES)
+    
     TYPE_CHOICES = (
-        ('compilation', _('Compilation')),
-        ('wishlist', _('Wishlist')),
         ('basket', _('Basket')),
+        ('playlist', _('Playlist')),
+        ('broadcast', _('Broadcast')),
         ('other', _('Other')),
     )
     type = models.CharField(max_length=12, default='other', null=True, choices=TYPE_CHOICES)
@@ -126,6 +137,12 @@ class Playlist(models.Model):
         verbose_name = _('Playlist')
         verbose_name_plural = _('Playlists')
         ordering = ('name', )
+        
+        permissions = (
+            ('view_playlist', 'View Playlist'),
+            ('edit_playlist', 'Edit Playlist'),
+            ('admin_playlist', 'Edit Playlist (extended)'),
+        )
     
     
     def __unicode__(self):
@@ -174,8 +191,11 @@ class Playlist(models.Model):
         duration = 0
         try:
             for media in self.media.all():
-                duration += media.duration
-        except:
+                media.get_duration()
+                if media.duration:
+                    duration += media.duration
+        except Exception, e:
+            print e
             pass
         
         self.duration = duration

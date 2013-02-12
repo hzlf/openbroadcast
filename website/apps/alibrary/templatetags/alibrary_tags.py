@@ -7,6 +7,8 @@ from classytags.arguments import Argument
 from django.utils.safestring import mark_safe
 import re
 
+from alibrary.models import Daypart
+
 register = template.Library()
 
 @register.filter
@@ -42,5 +44,10 @@ def format_cuelinks(m):
 @register.inclusion_tag('alibrary/templatetags/playlists_inline.html', takes_context=True)
 def playlists_inline(context):
     #context.update({'foo': '...'})
+    return context
+
+@register.inclusion_tag('alibrary/templatetags/dayparts_inline.html', takes_context=True)
+def dayparts_inline(context, object):
+    context.update({'object': object})
     return context
 

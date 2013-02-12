@@ -443,6 +443,58 @@ form.form-playlist
       input
         //padding: 0
         //display: none
+        
+// also in playlist form [but outside from-tag]
+.listview.editable.media
+
+  // background: green !important
+  margin: 20px 0
+  
+  .list_header
+      
+    .row-fluid
+      background-color: #fff
+      border-bottom: 1px solid #efefef !important
+      > div
+        padding: 5px
+        margin: 1px 0
+    
+  
+  .item
+  
+  
+    border-bottom: 1px solid #efefef !important
+  
+    &.drop-placeholder
+      height: 60px
+      width: 100%
+      background-color: green !important
+      
+    &.ui-sortable-helper
+      opacity: 0.9
+      > div
+        background: yellow !important
+      
+    .row-fluid
+      background-color: #fff 
+      > div
+        padding: 5px
+        margin: 1px 0
+        
+    .waveform
+      width: 100%
+      height: 40px
+        
+    .fade-cue
+      input
+        font-size: 12px
+        max-width: 50px
+        height: 16px
+        margin-right: 4px
+        background-color: transparent
+        border: 1px dotted #bbb
+        text-align: right
+        padding: 1px 2px
     
 
 

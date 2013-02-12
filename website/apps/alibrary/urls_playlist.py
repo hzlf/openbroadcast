@@ -5,7 +5,8 @@ from alibrary.models import Playlist
 from alibrary.views import *
 urlpatterns = patterns('',
 
-    #url(r'^$', PlaylistListView.as_view(), name='alibrary-playlist-list'),
+    url(r'^$', PlaylistListView.as_view(), name='alibrary-playlist-list'),
+    url(r'^create/$', PlaylistCreateView.as_view(), name='alibrary-playlist-create'),
     url(r'^(?P<slug>[-\w]+)/$', PlaylistDetailView.as_view(), name='alibrary-playlist-detail'),
     url(r'^(?P<pk>\d+)/edit/$', PlaylistEditView.as_view(), name='alibrary-playlist-edit'),
     

@@ -16,6 +16,8 @@ from profiles.forms import *
 
 from actstream.models import *
 
+from alibrary.models import Playlist
+
 
 def profile_list(request):
     return list_detail.object_list(
@@ -51,6 +53,7 @@ class ProfileDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = kwargs
         context_object_name = self.get_context_object_name(self.object)
+        context['broadcasts'] = Playlist.objects.filter(user=self.object.user)
         if context_object_name:
             context[context_object_name] = self.object
             context['user_stream'] = actor_stream(self.object.user)

@@ -1,0 +1,174 @@
+{% extends "layout_base.html" %}
+{% load spurl cache i18n truncate cache %}
+
+{% block heading %}
+<!-- heading / icon (large one) -->
+<div id="heading">
+	{% include "skeleton/heading.html" %}
+</div>
+<!-- heading / icon (large one) -->
+{% endblock %}
+
+{% block modnav %}
+<!-- start: intra-module navigation -->
+<div id="modnav">
+	{% include "skeleton/modnav.html" %}
+</div>
+<!-- end: intra-module navigation -->
+{% endblock %}
+
+{% block tagcloud %}
+
+{% include "alibrary/element/_tagcloud.html" %}
+
+{% endblock %}
+
+{% block searchbar %}
+
+<div class="searchbar">
+	<div class="tagbar">
+
+
+		{% include "alibrary/searchbar/_relation_filter.html" %}
+
+		{% include "alibrary/searchbar/_filterlist.html" %}
+		
+		<!-- search field -->
+		<div style="float: left;">
+			<input type="text" id="searchbar_input" name="searchbar_input" value="&lt; Search &gt;" class="blur" />
+		</div>
+		
+		
+		<!--
+		<a class="pull-right" href="{{ request.path }}">cs</a>
+		-->
+		<!-- TODO: rework! -->
+		<div style="padding: 4px 3px 0px;" class="pull-right">
+			{% if request.path != request.get_full_path %}
+			<a class="pull-right clear-search" href="{{ request.path }}" title="{% trans "Clear Search" %}">
+				<img class="search_clear" src="/static/img/prototype/i_clearsearch.png" alt="Clear search" />
+			</a>
+			{% endif %}
+		</div>
+		
+		<div class="clear"></div>
+	</div>
+</div>
+
+<div id="autocomplete_holder" class="autocomplete holder"></div>
+
+{% endblock %}
+
+{% block inner %}
+
+<div class="listhead">
+	<div style="float: right;">
+
+		{% include "element/_pagination.html" %}
+
+	</div>
+
+	<div class="wrapper list_style">
+		<div>
+			<ul class="unstyled">
+				<li class="left">
+					<a href="#" title="Set Style" class="action list_style s {% if list_style == "s" %}active{% endif %}"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Disply Type" /></a>
+				</li>
+				<li class="left">
+					<a href="#" title="Set Style" class="action list_style m {% if list_style == "m" %}active{% endif %}"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Disply Type" /></a>
+				</li>
+				<li class="left">
+					<a href="#" title="Set Style" class="action list_style l {% if list_style == "l" %}active{% endif %}"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Disply Type" /></a>
+				</li><li class="clear"></li>
+			</ul>
+		</div>
+	</div>
+
+</div>
+<!-- end: listing header / paginator -->
+
+<!-- start: listing output -->
+<div class="listview container playlist {{ list_style }}">
+
+	<div class="list_header">
+		<div class="list_header_item c1">
+			&nbsp;
+		</div>
+		<div class="list_header_item c2 sortable {% if get.order_by == "name" %}active{% endif %} {{ get.direction }}">
+			<a href="{% spurl base=request.get_full_path set_query="order_by=name" toggle_query="direction=ascending,descending" %}" style="display: block;">Name</a>
+		</div>
+		<div class="list_header_item c3">
+			Author
+		</div>
+		<div class="list_header_item c4">
+			Duration
+		</div>
+		<div class="list_header_item c5">
+			Created
+		</div>
+		<!--
+		<div class="list_header_item c6 sortable {% if get.order_by == "releasedate" %}active{% endif %} {{ get.direction }}">
+			<a href="{% spurl base=request.get_full_path set_query="order_by=releasedate" toggle_query="direction=ascending,descending" %}" style="display: block;">Released</a>
+		</div>
+		-->
+		<div class="list_header_item c7">
+			Status
+		</div>
+		<div class="list_header_item c8">
+			&nbsp;
+		</div>
+	</div>
+
+	<div class="list_body">
+		{% for item in playlist_list %}
+		{% include "alibrary/playlist/list_item_s.html" %}
+		{% endfor %}
+	</div>
+</div>
+
+<!-- start: listing footer -->
+<div class="listview footer">
+	<div class="right ipp">
+
+		<ul class="unstyled horizontal">
+
+			{% spurl base=request.get_full_path active_query="ipp=12" as is_active %}
+			<li>
+				<a class="{% if is_active %}active{% endif %}" href="{% spurl base=request.get_full_path set_query="ipp=12" %}">12</a>
+			</li>
+
+			{% spurl base=request.get_full_path active_query="ipp=24" as is_active %}
+			<li>
+				<a class="{% if is_active %}active{% endif %}" href="{% spurl base=request.get_full_path set_query="ipp=24" %}">24</a>
+			</li>
+
+			{% spurl base=request.get_full_path active_query="ipp=36" as is_active %}
+			<li>
+				<a class="{% if is_active %}active{% endif %}" href="{% spurl base=request.get_full_path set_query="ipp=36" %}">36</a>
+			</li>
+
+		</ul>
+
+		<!--
+		<a href="#12" class="active">12</a>
+		<a href="#24">24</a>
+		<a href="#36">36</a>
+		-->
+
+	</div>
+	<div id="control_selection" class="left control_selection">
+		<span>{% trans "Selection" %}:</span>
+		<a href="#selection:invert" class="action">{% trans "Invert" %}</a>&nbsp;<a href="#selection:all" class="action">All</a>&nbsp;<a href="#selection:clear" class="action">{% trans "None" %}</a>
+	</div>
+	<div class="clear">
+		&nbsp;
+	</div>
+</div>
+<!-- end: listing footer -->
+
+{% endblock %}
+
+{% block sidebar %}
+{% include "alibrary/release/sidebar/_list.html" %}
+{% endblock %}
+

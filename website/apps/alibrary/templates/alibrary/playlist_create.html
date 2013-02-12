@@ -29,26 +29,6 @@
 		$('.dayparts input').live('click', function(e){
 			$(this).parents('li').toggleClass('selected');
 		});
-		
-		
-		$( "div.list_body" ).sortable(
-			{
-				placeholder: "item drop-placeholder",
-				axis: "y",
-				cursor: "move",
-				cursorAt: { left: 5 },
-				delay: 150,
-			}
-		);
-		$( "div.list_body" ).disableSelection();
-		
-		$( "div.list_body" ).on( "sortupdate", function( e, ui ) {
-			
-			console.log(e);
-			console.log(ui);
-			
-		} );
-		
 	});
 </script>
 {% endaddtoblock %}
@@ -71,7 +51,8 @@
 
 	<section>
 		<div class="row iteminfo release">
-			{% include "alibrary/playlist/_detail_info.html" %}
+			{# include "alibrary/playlist/_detail_info.html" #}
+			<h1>&nbsp;</h1>
 		</div>
 	</section>
 
@@ -88,92 +69,47 @@
 
 {% block form %}
 <div class="item_inner">
-	
-	<div class="item_menu" id="item_menu">
-		<ul class="nav nav-tabs">
-			<li class="active">
-				<a href="#metadata" data-toggle="tab">{% trans "Medtadata" %}</a>
-			</li>
-			<li>
-				<a href="#tracklist" data-toggle="tab">{% trans "Tracklist" %}</a>
-			</li>
 
-		</ul>
-	</div>
-	
-	<div class="clear"></div>
-	
-	<section class="tabs">
+	<form class="form-horizontal form-compact form-playlist" method="post" id="" enctype="multipart/form-data">
+
+		{{ form.management_form }}
+		{{ releasemedia_form.management_form }}
+
+		{% crispy action_form %}
+
+		{% crispy form %}
 		
-		<div class="tab-content">
-
-			<div class="tab-pane active" id="metadata">
-				
-				<form class="form-horizontal form-compact form-playlist" method="post" id="" enctype="multipart/form-data">
-			
-					{{ form.management_form }}
-					{{ releasemedia_form.management_form }}
-					{# crispy action_form #}
-					{% crispy form %}
-					{# crispy action_form #}
-					{# crispy permission_form #}
-					{% crispy action_form %}
-					
-				</form>
-				
-			</div>
-
-			<div class="tab-pane" id="tracklist">
-				
-				<div class="listview editable container media inner s">
-
-					<div class="list_header">
-											
-						<div class="row-fluid">
-							
-							<div class="span1">
-								pos
-							</div>
-							
-							<div class="span4">
-								Track
-							</div>
-							
-							<div class="span1">
-								Duration
-							</div>
-							
-							<div class="span2 fade-cue">
-								Fade
-							</div>
-							
-							<div class="span2 fade-cue">
-								Cue
-							</div>
-							
-						</div>
-						
-					</div>
-
-					<div class="list_body">
-						{% for item in object.playlistmedia_set.all %}
-						{% include "alibrary/playlist/media/_list_item_edit.html" %}
-						{% endfor %}
-					</div>
-				</div>
-				
-			</div>
-			
-			
-			
-		</div>
 		
-	</section>
+		
+		{# crispy action_form #}
+		
+		
 		
 
+		
+		
 
-	
+		<!--
+		<fieldset>
+			<legend>
+				Tracklist
+			</legend>
+		</fieldset>
+		-->
+		
+		{# crispy permission_form #}
+		
+		
+		
+		
+		
 
+		
+		
+		{% crispy action_form %}
+		
+
+	</form>
 
 </div>
 {% endblock %}
@@ -181,7 +117,7 @@
 {% block form_sidebar %}
 <div class="sidebar form-sidebar holder">
 	{% with providers=object.get_lookup_providers%}
-	{% include "alibrary/playlist/sidebar/_edit_transform.html" %}
+	{% include "alibrary/form_lookup/_providers.html" %}
 	{% endwith %}
 </div>
 {% endblock %}

@@ -1,4 +1,4 @@
-{% load truncate i18n thumbnail arating_tags %}
+{% load truncate i18n thumbnail arating_tags alibrary_tags calc %}
 <div class="span7 padded-h container_content">
 
 	<div class="page-header">
@@ -48,7 +48,7 @@
 			{% trans "Target Duration" %}:
 		</dt>
 		<dd>
-			{{ object.target_duration }}
+			{{ object.target_duration|divide:60 }}
 			&nbsp;
 		</dd>
 
@@ -57,7 +57,7 @@
 			{% trans "Broadcast Dayparts" %}:
 		</dt>
 		<dd>
-			{{ object.target_duration }}
+			{% dayparts_inline object %}
 			&nbsp;
 		</dd>
 

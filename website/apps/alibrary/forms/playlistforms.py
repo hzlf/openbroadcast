@@ -142,9 +142,12 @@ class PlaylistForm(ModelForm):
         
 
     def __init__(self, *args, **kwargs):
-
-        self.user = kwargs['initial']['user']
-        self.instance = kwargs['instance']
+        
+        try:
+            self.user = kwargs['initial']['user']
+            self.instance = kwargs['instance']
+        except:
+            pass
         
         super(PlaylistForm, self).__init__(*args, **kwargs)
 

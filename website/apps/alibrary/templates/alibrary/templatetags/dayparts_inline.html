@@ -1,0 +1,15 @@
+{% for daypart in object.dayparts.all %}
+
+<span>
+	{{ daypart.get_day_display }}
+	{{ daypart.time_start|date:"H:i" }} - 
+	{{ daypart.time_end|date:"H:i"  }}
+	{% if not forloop.last %}
+	|
+	{% endif %}
+</span>
+
+
+{% endfor %}
+
+
