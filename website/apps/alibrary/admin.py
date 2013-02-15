@@ -1,9 +1,11 @@
 from django.contrib import admin
 from cms.admin.placeholderadmin import PlaceholderAdmin
 
+"""
 from alibrary.models import Label, Release, Artist, License, Media, Profession, Playlist, Format, Relation, Mediaformat, Daypart
-#from alibrary.models import ArtistProfessions, MediaExtraartists, PlaylistMedia
-from alibrary.models import ArtistProfessions, MediaExtraartists, ReleaseExtraartists, PlaylistMedia, ReleaseRelations, APILookup
+from alibrary.models import ArtistProfessions, MediaExtraartists, ReleaseExtraartists, PlaylistMedia, ReleaseRelations, APILookup, PlaylistItemPlaylist, PlaylistItem
+"""
+from alibrary.models import *
 
 from django.contrib.contenttypes.generic import *
 
@@ -294,13 +296,22 @@ admin.site.register(Label, LabelAdmin)
 class PlaylistmediaInline(admin.TabularInline):
     model = PlaylistMedia
     extra=1
+    
+class PlaylistItemInline(GenericTabularInline):
+    model = PlaylistItem
+    extra=1
+    
+class PlaylistItemPlaylistInline(admin.TabularInline):
+    model = PlaylistItemPlaylist
+    inlines = [PlaylistItemInline,] 
+    extra=1
         
 class PlaylistAdmin(BaseAdmin):
     
     list_display   = ('name', 'user', 'type', 'duration',)
     list_filter = ('type', )
 
-    inlines = [PlaylistmediaInline] 
+    inlines = [PlaylistmediaInline, PlaylistItemPlaylistInline] 
         
 class DaypartAdmin(BaseAdmin):
     
@@ -310,6 +321,10 @@ class DaypartAdmin(BaseAdmin):
 
     
 admin.site.register(Playlist, PlaylistAdmin)
+admin.site.register(Daypart, DaypartAdmin)
+admin.site.register(PlaylistItem)
+
+
         
 class MediaformatAdmin(BaseAdmin):
     pass
@@ -321,8 +336,6 @@ admin.site.register(Mediaformat, MediaformatAdmin)
 admin.site.register(APILookup)
 
 
-
-admin.site.register(Daypart, DaypartAdmin)
 
 
 

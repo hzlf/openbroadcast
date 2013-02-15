@@ -31,23 +31,6 @@
 		});
 		
 		
-		$( "div.list_body" ).sortable(
-			{
-				placeholder: "item drop-placeholder",
-				axis: "y",
-				cursor: "move",
-				cursorAt: { left: 5 },
-				delay: 150,
-			}
-		);
-		$( "div.list_body" ).disableSelection();
-		
-		$( "div.list_body" ).on( "sortupdate", function( e, ui ) {
-			
-			console.log(e);
-			console.log(ui);
-			
-		} );
 		
 	});
 </script>
@@ -95,7 +78,7 @@
 				<a href="#metadata" data-toggle="tab">{% trans "Medtadata" %}</a>
 			</li>
 			<li>
-				<a href="#tracklist" data-toggle="tab">{% trans "Tracklist" %}</a>
+				<a href="#tracklist_editor" data-toggle="tab">{% trans "Tracklist Editor" %}</a>
 			</li>
 
 		</ul>
@@ -123,45 +106,9 @@
 				
 			</div>
 
-			<div class="tab-pane" id="tracklist">
-				
-				<div class="listview editable container media inner s">
-
-					<div class="list_header">
-											
-						<div class="row-fluid">
-							
-							<div class="span1">
-								pos
-							</div>
-							
-							<div class="span4">
-								Track
-							</div>
-							
-							<div class="span1">
-								Duration
-							</div>
-							
-							<div class="span2 fade-cue">
-								Fade
-							</div>
-							
-							<div class="span2 fade-cue">
-								Cue
-							</div>
-							
-						</div>
-						
-					</div>
-
-					<div class="list_body">
-						{% for item in object.playlistmedia_set.all %}
-						{% include "alibrary/playlist/media/_list_item_edit.html" %}
-						{% endfor %}
-					</div>
-				</div>
-				
+			<div class="tab-pane" id="tracklist_editor">
+				<!-- Editor Include -->
+				{% include "alibrary/playlist/_tracklist_editor.html" %}
 			</div>
 			
 			

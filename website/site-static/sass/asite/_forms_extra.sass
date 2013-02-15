@@ -460,20 +460,20 @@ form.form-playlist
         margin: 1px 0
     
   
-  .item
+  .item, .summary
   
   
     border-bottom: 1px solid #efefef !important
   
     &.drop-placeholder
-      height: 60px
+      height: 80px
       width: 100%
-      background-color: green !important
+      background-color: #ddffd9 !important
       
     &.ui-sortable-helper
-      opacity: 0.9
+      opacity: 0.8
       > div
-        background: yellow !important
+        background: #f3f0fb !important
       
     .row-fluid
       background-color: #fff 
@@ -486,15 +486,26 @@ form.form-playlist
       height: 40px
         
     .fade-cue
+      .row-fluid > div
+        text-align: right
+        padding: 0 0 0 0
+        margin-left: 4px
+        input
+          margin: 0
+          
+        span
+          text-align: right
+          color: #5a5a5a
+          padding-right: 2px
       input
-        font-size: 12px
-        max-width: 50px
-        height: 16px
+        font-size: 11px
+        width: 60px
+        height: 14px
         margin-right: 4px
         background-color: transparent
         border: 1px dotted #bbb
         text-align: right
-        padding: 1px 2px
+        padding: 1px 2px 1px 0
     
 
 

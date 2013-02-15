@@ -12,5 +12,6 @@ urlpatterns = patterns('',
     
     # API-like urls [responding JSON]
     url(r'^(?P<pk>\d+)/collect/$', 'alibrary.views.playlist_collect', name='alibrary-playlist-collect'),
+    #url(r'^(?P<pk>\d+)/collect/$', 'alibrary.views.playlist_collect', name='alibrary-playlist-collect-old'),
 
 )

@@ -203,6 +203,22 @@ def playlist_collect(request, pk):
     playlist = get_object_or_404(Playlist, pk=pk)
 
     ids = request.POST.get('ids', None)
+    ct = request.POST.get('ct', None)
+
+    if ids:
+        
+        ids = ids.split(',')
+        playlist.add_items_by_ids(ids, ct)
+    
+    content = {'session': 'OK!'}
+    
+    return http.HttpResponse(json.dumps(content), content_type='application/json')        
+        
+    
+def playlist_collect__old(request, pk):
+    playlist = get_object_or_404(Playlist, pk=pk)
+
+    ids = request.POST.get('ids', None)
 
     if ids:
         

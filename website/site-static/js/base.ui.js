@@ -496,7 +496,8 @@ CollectorApp = (function() {
 	this.collect = function(items) {
 
 			var data = {
-				ids: items.join(',')
+				ids: items.join(','), 
+				ct: 'media'
 			}
 
 			// TODO: make dynamic

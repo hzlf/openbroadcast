@@ -6,5 +6,7 @@
 
 {% include "alibrary/release/sidebar/_filter.html" %}
 
-{% include "alibrary/sidebar/_playlist.html" %}
 
+{% if user.is_authenticated %}
+{% include "alibrary/sidebar/_playlist.html" %}
+{% endif %}

@@ -1,0 +1,180 @@
+{% load sekizai_tags thumbnail i18n truncate verbatim %}
+
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/lib/jquery.inputmask.js"></script>{% endaddtoblock %}
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/lib/jquery.inputmask.extensions.js"></script>{% endaddtoblock %}
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/lib/jquery.inputmask.numeric.extensions.js"></script>{% endaddtoblock %}
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/playlist.editor.js"></script>{% endaddtoblock %}
+{% addtoblock "js-post" %}
+<script>
+	$(function(){
+
+		var alibrary = alibrary || {};
+		alibrary.playlist_editor = new PlaylistEditor();;
+		alibrary.playlist_editor.api_url = "{{ object.get_api_url }}";
+		alibrary.playlist_editor.init();
+		
+	});
+</script>
+
+<!-- moustache templates -->
+{% verbatim %}
+<script id="tpl_playlists_editor_media" type="text/html">
+	
+<div class="list_body_row item editable {{ object.uuid }}" data-updated="{{ object.updated }}" data-resource_uri="{{ object.resource_uri }}" data-uuid="{{ object.uuid }}" id="playlist_item_{{ object.id }}">
+
+	<div class="row-fluid">
+		
+		<div class="span1">
+			{{ object.position }}
+		</div>
+		
+		<div class="span3">
+			<ul class="unstyled">
+				<li class="bold">
+					<a href="{{ object.item.content_object.absolute_url }}" title="{{ object.item.content_object.name }}">
+						{{ object.item.content_object.name }}
+					</a>
+				</li>
+				<li class="small">
+					<span>
+						<a href="{{ object.item.content_object.artist.absolute_url }}" title="{{ object.item.content_object.artist.name }}">
+							{{ object.item.content_object.artist.name }}
+						</a>
+					</span>
+					|
+					<span>
+						<a href="{{ object.item.content_object.release.absolute_url }}" title="{{ object.item.content_object.release.name }}">
+							{{ object.item.content_object.release.name }}
+						</a>
+					</span>
+				</li>
+			</ul>
+		</div>
+		
+		<div class="span1">
+			{{ object.item.content_object.duration }}
+		</div>
+		
+		<div class="span3 fade-cue">
+			
+			<div class="row-fluid">
+				
+				<div class="span5">
+					<input class="fade_in" type="text" value="{{ object.fade_in }}" />
+					<span>00:00:000</span>
+				</div>
+				<div class="span5">
+					<input class="fade_out" type="text" value="{{ object.fade_out }}" />
+					<span>00:00:000</span>
+				</div>
+				
+			</div>
+			
+		</div>
+		
+		<div class="span3 fade-cue">
+			
+			<div class="row-fluid">
+				
+				<div class="span5">
+					<input class="cue_in" type="text" value="{{ object.cue_in }}" />
+					<span>00:00:000</span>
+				</div>
+				<div class="span5">
+					<input class="cue_out" type="text" value="{{ object.cue_out }}" />
+					<span>00:00:000</span>
+				</div>
+				
+			</div>
+			
+		</div>
+		
+	</div>
+
+	
+</div>
+</script>
+{% endverbatim %}
+{% verbatim %}
+<script id="tpl_playlists_editor_summary" type="text/html">	
+
+<div class="summary">
+
+	<div class="row-fluid">
+		
+		<div class="span1">
+		a
+		</div>
+		
+		<div class="span3">
+		{{ object.name }}
+		</div>
+		
+		<div class="span1">
+			<span>{{ durations.total_duration }}</span>
+			<span>{{ durations.target_duration }}</span>
+			<span>{{ durations.difference }}</span>
+		</div>
+		
+		<div class="span3">
+
+			
+		</div>		
+		<div class="span3">
+
+			
+		</div>
+		
+	</div>
+	
+</div>
+
+</script>
+{% endverbatim %}
+
+{% endaddtoblock %}
+
+<div id="playlist_editor" class="listview editable container media inner s">
+
+
+	<h1>{{ object.get_api_url }}</h1>
+
+	<div class="list_header">
+
+		<div class="row-fluid">
+
+			<div class="span1">
+				{% trans "Pos" %}
+			</div>
+
+			<div class="span3">
+				{% trans "Track" %}
+			</div>
+
+			<div class="span1">
+				{% trans "Duration" %}
+			</div>
+
+			<div class="span3 fade-cue">
+				{% trans "Fades" %}
+			</div>
+
+			<div class="span3 fade-cue">
+				{% trans "Cues" %}
+			</div>
+
+		</div>
+
+	</div>
+
+
+	<div id="playlist_editor_list" class="list_body">
+	<!-- loaded via ich -->
+	</div>
+
+	<div id="playlist_editor_summary" class="list_footer">
+	<!-- loaded via ich -->
+	</div>
+	
+	
+</div>

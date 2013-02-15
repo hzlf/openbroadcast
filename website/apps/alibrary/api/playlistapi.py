@@ -6,9 +6,49 @@ from tastypie.authorization import *
 from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
 from tastypie.cache import SimpleCache
 
+from alibrary.api import ReleaseResource, MediaResource
+from alibrary.models import Release, Artist
+from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
+
 from easy_thumbnails.files import get_thumbnailer
 
-from alibrary.models import Playlist, PlaylistMedia, Media
+from alibrary.models import Playlist, PlaylistMedia, Media, PlaylistItemPlaylist, PlaylistItem
+
+
+class PlaylistItemResource(ModelResource):
+
+    #media = fields.ToOneField('alibrary.api.MediaResource', 'media', null=True, full=True)
+    
+    co_to = {
+             Release: ReleaseResource,
+             Media: MediaResource,
+             }
+    
+    content_object = GenericForeignKeyField(to=co_to, attribute='content_object', null=False, full=True)
+    
+    class Meta:
+        queryset = PlaylistItem.objects.all()
+        #resource_name = 'playlistitem'
+        excludes = ['id',]
+        
+    def dehydrate(self, bundle):
+        bundle.data['content_type'] = '%s' % bundle.obj.content_object.__class__.__name__.lower();
+        return bundle
+
+
+class PlaylistItemPlaylistResource(ModelResource):
+
+    item = fields.ToOneField('alibrary.api.PlaylistItemResource', 'item', null=True, full=True)
+    class Meta:
+        queryset = PlaylistItemPlaylist.objects.all()
+        resource_name = 'playlistitem'
+        list_allowed_methods = ['get','post']
+        detail_allowed_methods = ['put', 'post', 'patch', 'get']
+        always_return_data = True
+        authentication =  MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
+        authorization = Authorization()
+        # ID NEEDED!
+        #excludes = ['id',]
 
 
 class PlaylistMediaResource(ModelResource):
@@ -23,6 +63,10 @@ class PlaylistResource(ModelResource):
     media = fields.ToManyField('alibrary.api.PlaylistMediaResource',
             attribute=lambda bundle: bundle.obj.media.through.objects.filter(
                 playlist=bundle.obj).order_by('position') or bundle.obj.media, null=True, full=True, max_depth=3)
+
+    items = fields.ToManyField('alibrary.api.PlaylistItemPlaylistResource',
+            attribute=lambda bundle: bundle.obj.items.through.objects.filter(
+                playlist=bundle.obj).order_by('position') or bundle.obj.items, null=True, full=True, max_depth=5)
 
 
     class Meta:

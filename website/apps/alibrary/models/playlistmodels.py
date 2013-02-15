@@ -13,6 +13,8 @@ from django.utils.translation import ugettext as _
 from django.core.files import File as DjangoFile
 from django.core.urlresolvers import reverse
 
+from django.contrib.contenttypes.models import ContentType
+
 from django.http import HttpResponse # needed for absolute url
 
 from settings import *
@@ -105,6 +107,8 @@ class Playlist(models.Model):
     # relations
     user = models.ForeignKey(User, null=True, blank=True, default = None)
     media = models.ManyToManyField('Media', through='PlaylistMedia', blank=True, null=True)
+    
+    items = models.ManyToManyField('PlaylistItem', through='PlaylistItemPlaylist', blank=True, null=True)
 
 
     # tagging (d_tags = "display tags")
@@ -166,6 +170,53 @@ class Playlist(models.Model):
         
 
 
+    def add_items_by_ids(self, ids, ct):
+        
+        from alibrary.models.mediamodels import Media
+        
+        log = logging.getLogger('alibrary.playlistmodels.add_items_by_ids')
+        log.debug('Media ids: %s' % (ids))
+        log.debug('Content Type: %s' % (ct))
+        
+        """
+        ct = ContentType.objects.get(model=ct)
+        print ct
+        """
+
+        for id in ids:
+            id = int(id)
+            
+            if ct == 'media':
+                m = Media.objects.get(pk=id)
+                
+            i = PlaylistItem(content_object=m)
+            i.save()    
+                
+            pi = PlaylistItemPlaylist(item=i, playlist=self, position=self.items.count())
+            pi.save()
+
+            print pi
+            
+            self.save()
+        
+        
+        """
+        for id in ids:
+            id = int(id)
+            
+            m = Media.objects.get(pk=id)
+            pm = PlaylistMedia(media=m, playlist=self, position=self.media.count())
+            pm.save()
+
+            print id
+            print pm
+            
+            self.save()
+        """
+
+    """
+    old method - for non-generic playlists
+    """
     def add_media_by_ids(self, ids):
         
         from alibrary.models.mediamodels import Media
@@ -232,9 +283,32 @@ post_save.connect(playlist_post_save, sender=Playlist)
 class PlaylistMedia(models.Model):
     #playlist = models.ForeignKey('Playlist', related_name='playlist_playlist')
     #media = models.ForeignKey('Media', related_name='playlist_media')
+    
+    uuid = UUIDField()
+    
     playlist = models.ForeignKey('Playlist')
     media = models.ForeignKey('Media')
-    created = models.DateField(auto_now_add=True, editable=False)
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+    updated = models.DateTimeField(auto_now=True, editable=False)
+    position = models.PositiveIntegerField(max_length=12, default=0)
+    # 
+    cue_in = models.PositiveIntegerField(max_length=12, default=0)
+    cue_out = models.PositiveIntegerField(max_length=12, default=0)
+    fade_in = models.PositiveIntegerField(max_length=12, default=0)
+    fade_out = models.PositiveIntegerField(max_length=12, default=0)
+    class Meta:
+        app_label = 'alibrary'
+    
+
+
+class PlaylistItemPlaylist(models.Model):
+    playlist = models.ForeignKey('Playlist')
+    item = models.ForeignKey('PlaylistItem')
+
+    uuid = UUIDField()
+    
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+    updated = models.DateTimeField(auto_now=True, editable=False)
     position = models.PositiveIntegerField(max_length=12, default=0)
     # 
     cue_in = models.PositiveIntegerField(max_length=12, default=0)
@@ -245,5 +319,26 @@ class PlaylistMedia(models.Model):
         app_label = 'alibrary'
         
         
+ 
+class PlaylistItem(models.Model):
+    
+    uuid = UUIDField()
+
+    class Meta:
+        app_label = 'alibrary'
+        verbose_name = _('Playlist Item')
+        verbose_name_plural = _('Playlist Items')
+        #ordering = ('-created', )
         
-        
+    ct_limit = models.Q(app_label = 'alibrary', model = 'media') | models.Q(app_label = 'alibrary', model = 'release')
+    
+    content_type = models.ForeignKey(ContentType, limit_choices_to = ct_limit)
+    object_id = models.PositiveIntegerField()
+    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    
+    def __unicode__(self):
+        return '%s' % (self.pk)
+    
+    def save(self, *args, **kwargs):
+        super(PlaylistItem, self).save(*args, **kwargs)         
+  
