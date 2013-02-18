@@ -1,6 +1,7 @@
 {% load sekizai_tags thumbnail i18n truncate verbatim %}
 
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/lib/raphael-min.js"></script>{% endaddtoblock %}
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/lib/soundmanager2/soundmanager2.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/lib/jquery.inputmask.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/lib/jquery.inputmask.extensions.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/lib/jquery.inputmask.numeric.extensions.js"></script>{% endaddtoblock %}
@@ -12,8 +13,21 @@
 		var alibrary = alibrary || {};
 		alibrary.playlist_editor = new PlaylistEditor();;
 		alibrary.playlist_editor.api_url = "{{ object.get_api_url }}";
-		alibrary.playlist_editor.init();
-		
+		// alibrary.playlist_editor.init();
+
+		soundManager.setup({
+			url: '{{ STATIC_URL }}alibrary/js/lib/soundmanager2/swf/',
+			flashVersion: 9,
+			useFlashBlock: false,
+			useFastPolling: true,
+			useHighPerformance: true,
+			flashPollingInterval: 1,
+			html5PollingInterval: 1,
+			onready: function() {
+				alibrary.playlist_editor.init();
+			}
+		});
+ 
 	});
 </script>
 
@@ -21,13 +35,27 @@
 {% verbatim %}
 <script id="tpl_playlists_editor_media" type="text/html">
 	
-<div class="list_body_row item hoverable editable {{ object.uuid }}" data-updated="{{ object.updated }}" data-resource_uri="{{ object.resource_uri }}" data-uuid="{{ object.uuid }}" id="playlist_item_{{ object.id }}">
+<div class="list_body_row item hoverable editable {{ object.uuid }}" data-updated="{{ object.updated }}" data-resource_uri="{{ object.resource_uri }}" data-uuid="{{ object.uuid }}" data-id="{{ object.id }}" id="playlist_item_{{ object.id }}">
 
 	<div class="row-fluid base">
 		
-		<div class="span1">
+		<div class="span1 actions">
+			
+			<!--
 			<span class="pos">{{ object.position }}</span>
 			<span class="pos_new">?</span>
+			-->
+			
+			<ul class="unstyled">
+				<li>
+					<a href="#" data-action="play">
+						<i class=" icon-play icon-large"></i>
+					</a>
+					<a href="#" data-action="pause">
+						<i class=" icon-pause icon-large"></i>
+					</a>
+				</li>
+			</ul>
 		</div>
 		
 		<div class="span3">
@@ -69,6 +97,10 @@
 					<input class="fade_out" type="text" value="{{ object.fade_out }}" />
 					<span>00:00:000</span>
 				</div>
+				<div class="span1">
+					<input class="fade_cross" type="text" value="{{ object.fade_cross }}" />
+					<span>00:00:000</span>
+				</div>
 				
 			</div>
 			
@@ -91,23 +123,25 @@
 			
 		</div>
 		
+		<div class="span1 actions">
+			
+			<ul class="unstyled">
+				<li>
+				<a href="#" data-action="delete">
+					<i class=" icon-trash"></i>
+				</a>
+				</li>
+			</ul>
+			
+		</div>
+		
 	</div>
 	
 	
 	<div class="row-fluid playhead">
 		<div class="span12">
-			
-			
+						
 			<div class="waveform" id="playlist_item_waveform_{{ object.id }}"></div>
-			
-			<!--
-			<div class="waveform" id="playlist_item_waveform_{{ object.id }}" style="background-image: url({{ object.item.content_object.waveform_image }})">
-				<div class="envelope">x</div>
-			</div>
-			-->
-			<!--<div class="envelope">
-				<div class="waveform" style="background-image: url({{ object.item.content_object.waveform_image }})">
-			</div>-->
 			
 		</div>
 		

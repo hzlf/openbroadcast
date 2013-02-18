@@ -298,6 +298,7 @@ class PlaylistMedia(models.Model):
     cue_out = models.PositiveIntegerField(max_length=12, default=0)
     fade_in = models.PositiveIntegerField(max_length=12, default=0)
     fade_out = models.PositiveIntegerField(max_length=12, default=0)
+    fade_cross = models.PositiveIntegerField(max_length=12, default=0)
     class Meta:
         app_label = 'alibrary'
     
@@ -317,6 +318,7 @@ class PlaylistItemPlaylist(models.Model):
     cue_out = models.PositiveIntegerField(max_length=12, default=0)
     fade_in = models.PositiveIntegerField(max_length=12, default=0)
     fade_out = models.PositiveIntegerField(max_length=12, default=0)
+    fade_cross = models.PositiveIntegerField(max_length=12, default=0)
     class Meta:
         app_label = 'alibrary'
         

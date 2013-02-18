@@ -45,7 +45,7 @@ class PlaylistItemPlaylistResource(ModelResource):
         queryset = PlaylistItemPlaylist.objects.all()
         resource_name = 'playlistitem'
         list_allowed_methods = ['get','post']
-        detail_allowed_methods = ['put', 'post', 'patch', 'get']
+        detail_allowed_methods = ['put', 'post', 'patch', 'get', 'delete']
         always_return_data = True
         authentication =  MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
         authorization = Authorization()
