@@ -1,11 +1,13 @@
 {% load i18n %}
 
-<div id="lookup_providers" class="import summary listing">
+<div id="playlist_transform" class="playlist-edit transform listing">
 	
 	<div class="page-header">
 		<h2>{% trans "Transform" %} <small>Playlist <> Broadcast</small></h2>
+		<p>In order to save a broadcast-ready playlist some criterias have to be correct.</p>
 	</div>
 	
+	<!--
 	<div class="summary item notice">
 		<h4><i class="icon-info-sign"></i> {% trans "Transform" %}</h4>
 		<div class="row-fluid ">
@@ -14,15 +16,22 @@
 			</div>
 		</div>
 	</div>
+	-->
 	
-	<div class="summary item ready">
+	<div class="summary item target-duration">
 		<h4><i class="icon-check"></i> {% trans "Target Duration" %}</h4>
+		<div class="row-fluid information">
+			<div class="span12">
+				<p>Please specify the best Broadcast Dayparts</p>
+			</div>
+
+		</div>
 	</div>
 
 	
-	<div class="summary item ready">
+	<div class="summary item dayparts">
 		<h4><i class="icon-warning-sign"></i> {% trans "Broadcast Dayparts" %}</h4>
-		<div class="row-fluid ">
+		<div class="row-fluid information">
 			<div class="span12">
 				<p>Please specify the best Broadcast Dayparts</p>
 			</div>

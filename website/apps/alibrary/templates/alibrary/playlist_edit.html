@@ -126,10 +126,19 @@
 {% endblock %}
 
 {% block form_sidebar %}
+
+<!-- dummy -->
+
+<div class="jingles">
+	<ul id="jingle_list">
+		<li>Jingle 1</li>
+		<li>Jingle 2</li>
+	</ul>
+	
+</div>
+
 <div class="sidebar form-sidebar holder">
-	{% with providers=object.get_lookup_providers%}
 	{% include "alibrary/playlist/sidebar/_edit_transform.html" %}
-	{% endwith %}
 </div>
 {% endblock %}
 

@@ -324,7 +324,7 @@ class WaveformImage(object):
                         (255,255,255, 0),
                      ]
         elif palette == 4:
-            background_color = (245, 245, 245, 245)
+            background_color = (245, 245, 245, 255)
             colors = [
                         (255,255,255, 0),
                      ]

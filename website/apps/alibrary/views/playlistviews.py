@@ -215,6 +215,27 @@ def playlist_collect(request, pk):
     return http.HttpResponse(json.dumps(content), content_type='application/json')        
         
     
+def playlist_reorder(request, pk):
+    
+    playlist = get_object_or_404(Playlist, pk=pk)
+
+    order = request.POST.get('order', None)
+
+    if order:
+        order = order.split(',')
+        playlist.reorder_items_by_uuids(order)
+        
+    print order
+    
+    content = {
+               'session': 'OK!',
+               'order': order,
+               'pk': playlist.pk
+    }
+    
+    return http.HttpResponse(json.dumps(content), content_type='application/json')        
+        
+    
 def playlist_collect__old(request, pk):
     playlist = get_object_or_404(Playlist, pk=pk)
 

@@ -308,8 +308,10 @@ class PlaylistItemPlaylistInline(admin.TabularInline):
         
 class PlaylistAdmin(BaseAdmin):
     
-    list_display   = ('name', 'user', 'type', 'duration',)
+    list_display   = ('name', 'user', 'type', 'duration', 'is_current',)
     list_filter = ('type', )
+    
+    readonly_fields = ['slug', 'is_current',]
 
     inlines = [PlaylistmediaInline, PlaylistItemPlaylistInline] 
         

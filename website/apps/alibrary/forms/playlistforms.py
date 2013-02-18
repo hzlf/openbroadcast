@@ -225,8 +225,8 @@ class PlaylistForm(ModelForm):
     description = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")   
 
     #dayparts = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple, queryset=Daypart.objects.active())
-    dayparts = forms.ModelMultipleChoiceField(widget=DaypartWidget(), queryset=Daypart.objects.active())
-    target_duration = forms.ChoiceField(widget=forms.RadioSelect, choices=TARGET_DURATION_CHOICES)
+    dayparts = forms.ModelMultipleChoiceField(widget=DaypartWidget(), queryset=Daypart.objects.active(), required=False)
+    target_duration = forms.ChoiceField(widget=forms.RadioSelect, choices=TARGET_DURATION_CHOICES, required=False)
 
     def clean(self, *args, **kwargs):
         cd = super(PlaylistForm, self).clean()

@@ -126,6 +126,10 @@ class Playlist(models.Model):
     dayparts = models.ManyToManyField(Daypart, null=True, blank=True, related_name='daypart_plalists')
     
     
+    # is currently selected as default?
+    is_current = models.BooleanField(_('Currently selected as default?'), default=False)
+    
+    
     description = extra.MarkdownTextField(blank=True, null=True)
     
     # manager
@@ -161,6 +165,10 @@ class Playlist(models.Model):
     def get_edit_url(self):
         return ('alibrary-playlist-edit', [self.pk])
     
+    @models.permalink
+    def get_reorder_url(self):
+        return ('alibrary-playlist-reorder', [self.pk])
+    
     def get_api_url(self):
         return reverse('api_dispatch_detail', kwargs={  
             'api_name': 'v1',  
@@ -177,11 +185,6 @@ class Playlist(models.Model):
         log = logging.getLogger('alibrary.playlistmodels.add_items_by_ids')
         log.debug('Media ids: %s' % (ids))
         log.debug('Content Type: %s' % (ct))
-        
-        """
-        ct = ContentType.objects.get(model=ct)
-        print ct
-        """
 
         for id in ids:
             id = int(id)
@@ -194,25 +197,24 @@ class Playlist(models.Model):
                 
             pi = PlaylistItemPlaylist(item=i, playlist=self, position=self.items.count())
             pi.save()
-
-            print pi
             
             self.save()
-        
-        
-        """
-        for id in ids:
-            id = int(id)
-            
-            m = Media.objects.get(pk=id)
-            pm = PlaylistMedia(media=m, playlist=self, position=self.media.count())
-            pm.save()
 
-            print id
-            print pm
+    def reorder_items_by_uuids(self, uuids):
+        
+        i = 0
+        
+        for uuid in uuids:
+            print '%s - %s' % (i, uuid)
             
-            self.save()
-        """
+            pi = PlaylistItemPlaylist.objects.get(uuid=uuid)
+            pi.position = i
+            pi.save()
+            
+            i += 1
+            
+        self.save()
+
 
     """
     old method - for non-generic playlists

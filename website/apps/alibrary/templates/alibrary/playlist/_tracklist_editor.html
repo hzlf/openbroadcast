@@ -1,5 +1,6 @@
 {% load sekizai_tags thumbnail i18n truncate verbatim %}
 
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/lib/raphael-min.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/lib/jquery.inputmask.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/lib/jquery.inputmask.extensions.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/lib/jquery.inputmask.numeric.extensions.js"></script>{% endaddtoblock %}
@@ -20,12 +21,13 @@
 {% verbatim %}
 <script id="tpl_playlists_editor_media" type="text/html">
 	
-<div class="list_body_row item editable {{ object.uuid }}" data-updated="{{ object.updated }}" data-resource_uri="{{ object.resource_uri }}" data-uuid="{{ object.uuid }}" id="playlist_item_{{ object.id }}">
+<div class="list_body_row item hoverable editable {{ object.uuid }}" data-updated="{{ object.updated }}" data-resource_uri="{{ object.resource_uri }}" data-uuid="{{ object.uuid }}" id="playlist_item_{{ object.id }}">
 
-	<div class="row-fluid">
+	<div class="row-fluid base">
 		
 		<div class="span1">
-			{{ object.position }}
+			<span class="pos">{{ object.position }}</span>
+			<span class="pos_new">?</span>
 		</div>
 		
 		<div class="span3">
@@ -90,6 +92,26 @@
 		</div>
 		
 	</div>
+	
+	
+	<div class="row-fluid playhead">
+		<div class="span12">
+			
+			
+			<div class="waveform" id="playlist_item_waveform_{{ object.id }}"></div>
+			
+			<!--
+			<div class="waveform" id="playlist_item_waveform_{{ object.id }}" style="background-image: url({{ object.item.content_object.waveform_image }})">
+				<div class="envelope">x</div>
+			</div>
+			-->
+			<!--<div class="envelope">
+				<div class="waveform" style="background-image: url({{ object.item.content_object.waveform_image }})">
+			</div>-->
+			
+		</div>
+		
+	</div>
 
 	
 </div>
@@ -98,22 +120,49 @@
 {% verbatim %}
 <script id="tpl_playlists_editor_summary" type="text/html">	
 
-<div class="summary">
+<div class="summary {{ #durations.error }}error{{ /durations.error }}">
 
 	<div class="row-fluid">
 		
 		<div class="span1">
-		a
+		
 		</div>
 		
 		<div class="span3">
-		{{ object.name }}
+			
+			<ul class="unstyled">
+				<li>
+					<span class="strong duration-total">Total:</span>
+				</li>
+				
+				{{ #durations.error }}
+				<li>
+					<span class="duration-target">Target:</span>
+				</li>
+				<li>
+					<span class="duration-difference">Difference:</span>
+				</li>
+				{{ /durations.error }}
+			</ul>
+			
 		</div>
 		
 		<div class="span1">
-			<span>{{ durations.total_duration }}</span>
-			<span>{{ durations.target_duration }}</span>
-			<span>{{ durations.difference }}</span>
+			
+			<ul class="unstyled">
+				<li>
+					<span class="strong duration-total">{{ durations.total }}</span>
+				</li>
+				{{ #durations.error }}
+				<li>
+					<span class="duration-target">{{ durations.target }}</span>
+				</li>
+				<li>
+					<span class="duration-difference">{{ durations.difference }}</span>
+				</li>
+				{{ /durations.error }}
+			</ul>
+			
 		</div>
 		
 		<div class="span3">
@@ -136,8 +185,6 @@
 
 <div id="playlist_editor" class="listview editable container media inner s">
 
-
-	<h1>{{ object.get_api_url }}</h1>
 
 	<div class="list_header">
 

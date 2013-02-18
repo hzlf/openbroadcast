@@ -460,13 +460,25 @@ form.form-playlist
         margin: 1px 0
     
   
-  .item, .summary
+  .item
   
+  
+    
   
     border-bottom: 1px solid #efefef !important
+    
+    
+    // display: block
+    height: 100px
+    
+    > div
+      background-color: #efefef
+  
+    &.hover
+      //background-color: #efefef
   
     &.drop-placeholder
-      height: 80px
+      height: 130px
       width: 100%
       background-color: #ddffd9 !important
       
@@ -475,11 +487,36 @@ form.form-playlist
       > div
         background: #f3f0fb !important
       
-    .row-fluid
-      background-color: #fff 
+    .row-fluid.base
+      //background-color: #fff 
       > div
         padding: 5px
         margin: 1px 0
+      
+    .row-fluid.playhead
+      > div
+        // padding: 5px
+      .waveform
+        background-color: #a5a5a5
+        background-size: 100% 30px
+        height: 30px
+      .envelope
+        opacity: 0.6
+        border-bottom: 30px solid transparent
+        border-left: 30px solid #efefef
+        border-right: 70px solid #efefef
+        height: 0
+        // width: 423px
+        
+    &.hover    
+      .row-fluid.playhead
+        .waveform
+          // background-color: #ddffd9
+        .envelope
+          opacity: 0.5
+          border-bottom-color: #ddffd9
+          border-left-color: transparent
+          border-right-color: transparent
         
     .waveform
       width: 100%
@@ -507,5 +544,80 @@ form.form-playlist
         text-align: right
         padding: 1px 2px 1px 0
     
+    
+  
+  .summary
+  
+    &.error
+      background-color: $warningBackground
+  
+  
+    border-top: 1px solid #efefef !important
+      
+    .row-fluid
+      //background-color: #fff 
+      > div
+        padding: 5px
+        margin: 1px 0
 
+        
+    span
+      text-align: right
+      color: #5a5a5a
+      padding-right: 2px
+      
+      &.duration-total
+        font-weight: bold
+        // color: green
+      
+      &.duration-difference
+        color: red
+
+    
+
+// sidebar
+.playlist-edit.transform
+
+  &.listing
+    &.fixed
+      position: fixed
+      width: 260px
+      top: 120px
+
+  .item
+    padding: 4px 4px 4px 4px
+    margin: 5px 0 5px 0
+    border-bottom: 1px solid #efefef
+    //background-color: #efefef
+
+    a.toggle
+      color: #333
+      &:hover
+        text-decoration: none
+
+
+    .information
+      display: none
+  
+    &.warning
+      background-color: $warningBackground
+      color: $warningText
+      .information
+        display: block
+  
+    &.success
+      background-color: $successBackground
+      color: $successText
+
+    
+
+    &.hover
+      &.done
+        background-color: #DDFFD9
+        
+      &.duplicate
+        // background-color: $duplicateBackground
+  
+      &.ready
+        background-color: #DDFFD9
 

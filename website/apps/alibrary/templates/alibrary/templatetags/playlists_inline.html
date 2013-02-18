@@ -103,6 +103,22 @@
 {% endverbatim %}
 
 
+{% verbatim %}
+<script id="tpl_playlists_inline_selector" type="text/html">
+
+	
+<select name="playlists" id="playlists_inline_selector">
+	{{#objects}}
+	<option value="{{ resource_uri }}" {{#is_current}}selected="selected"{{/is_current}}>{{ name }}</option>
+	{{/objects}}
+  
+</select>
+	
+	
+</script>
+{% endverbatim %}
+
+
 {% endaddtoblock %}
 
 
@@ -118,38 +134,46 @@
 			<span style="float: right;"> <span style="color: rgb(153, 153, 153);" class="opt">1</span> </span>
 		</div>
 
-		<!-- Wrapper, can hold multiple lists  -->
-		<div id="inline_playlist_holder" class="wrapper"></div>
-
 		<!-- Selector to choose default playlist -->
 
 		<div class="settings">
 		
 				
 			<form class="form-inline create">
-				
-			  <div class="control-group">
-			    <label class="control-label" for="">{% trans "Default Basket" %}:</label>
-			    <div class="controls">
-			      <input type="text" class="full-width name" placeholder="{% trans "Basket Name" %}:">
-			    </div>
-			  </div>
 			  
 			  <div class="control-group">
+			  	<!--
 			    <label class="control-label" for="">{% trans "New Basket" %}:</label>
+			   -->
+			   
 			    <div class="controls">
-			      <input type="text" class="full-width name" placeholder="{% trans "Basket Name" %}:">
+			      <input type="text" class="full-width name" placeholder="{% trans "Newe Basket" %}">
 			    </div>
 			  </div>
 			  <div class="control-group">
 			    <div class="controls pull-right">
-			      <button type="submit" class="btn btn-primary btn-mini">{% trans "Go" %}</button>
+			      <button type="submit" class="btn btn-primary btn-mini"><i class="icon-ok-sign"></i></button>
+			    </div>
+			  </div>
+				
+			  <div class="control-group">
+			    <label><i class="icon-tasks"></i></label>
+			    <div class="controls playlist-selector">
+			    	
+			    	
+			    	
 			    </div>
 			  </div>
 			  <div class="clearfix"></div>
 			</form>
 
 		</div>
+
+
+
+		<!-- Wrapper, can hold multiple lists  -->
+		<div id="inline_playlist_holder" class="wrapper"></div>
+
 
 	</div>
 	

@@ -10,14 +10,15 @@ PlaylistUi = function() {
 
 	this.interval = false;
 	this.interval_loops = 0;
-	this.interval_duration = 5000;
+	this.interval_duration = 20000;
 	// this.interval_duration = false;
 	this.api_url = false;
 	
 	this.inline_dom_id = 'inline_playlist_holder';
 	this.inline_dom_element;
 	
-	this.current_data = new Array;
+	this.current_data;
+	this.current_items = new Array;
 
 	this.init = function() {
 		
@@ -137,6 +138,29 @@ PlaylistUi = function() {
 			e.preventDefault();
 
 		});
+
+		// selector
+		
+		$('#playlists_inline_selector').live('change', function(e){
+			e.preventDefault();
+			
+			var resource_uri = $(this).val();
+
+			$('.playlist_holder', self.inline_dom_element).hide(500);
+
+			$.ajax({
+				url: resource_uri + 'set-current/',
+				type: 'GET',
+				dataType: "json",
+				contentType: "application/json",
+				processData:  false,
+				success: function(data) {
+					self.run_interval();
+				},
+				async: false
+			});
+			
+		});
 		
 		
 
@@ -207,7 +231,11 @@ PlaylistUi = function() {
 	};
 	
 	this.update_playlists_callback = function(data) {
+
 		self.update_playlist_display(data);
+		self.update_playlist_selector(data);
+		
+		this.current_data = data;
 	};
 	
 	this.update_playlist_display = function(data) {
@@ -231,11 +259,11 @@ PlaylistUi = function() {
 			
 			console.log(item);
 
-			//if (item.status > -1) {
-			if (true) {
+			// filter out current playlist
+			if (item.is_current) {
 
-				if (item.id in self.current_data) {
-					self.current_data[item.id] = item;
+				if (item.id in self.current_items) {
+					self.current_items[item.id] = item;
 					console.log('item already present');
 
 					if(item.updated != target_element.attr('data-updated')) {
@@ -253,12 +281,79 @@ PlaylistUi = function() {
 					html.attr('data-last_status', item.status);
 					self.inline_dom_element.append(html);
 
-					self.current_data[item.id] = item;
+					self.current_items[item.id] = item;
 				}
+			} else {
+				// remove item if not the current one
+				target_element.hide(200)
 			}
+		}
+	};
+	
+	this.update_playlist_selector = function(data) {
+		
+		console.log(this.current_data, data)
+
+		
+		if( ! Object.equals(this.current_data, data)) {
+			console.log('data changed');
+
+			var html = ich.tpl_playlists_inline_selector(data);
+			$('.playlist-selector', self.inline_dom_element.parent()).html(html);
+
+		} else {
+			console.log('data unchanged');
 		}
 	};
 
 
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Object.equals = function( x, y ) {
+  if ( x === y ) return true;
+    // if both x and y are null or undefined and exactly the same
+
+  if ( ! ( x instanceof Object ) || ! ( y instanceof Object ) ) return false;
+    // if they are not strictly equal, they both need to be Objects
+
+  if ( x.constructor !== y.constructor ) return false;
+    // they must have the exact same prototype chain, the closest we can do is
+    // test there constructor.
+
+  for ( var p in x ) {
+    if ( ! x.hasOwnProperty( p ) ) continue;
+      // other properties were tested using x.constructor === y.constructor
+
+    if ( ! y.hasOwnProperty( p ) ) return false;
+      // allows to compare x[ p ] and y[ p ] when set to undefined
+
+    if ( x[ p ] === y[ p ] ) continue;
+      // if they have the same strict value or identity then they are equal
+
+    if ( typeof( x[ p ] ) !== "object" ) return false;
+      // Numbers, Strings, Functions, Booleans must be strictly equal
+
+    if ( ! Object.equals( x[ p ],  y[ p ] ) ) return false;
+      // Objects and Arrays must be tested recursively
+  }
+
+  for ( p in y ) {
+    if ( y.hasOwnProperty( p ) && ! x.hasOwnProperty( p ) ) return false;
+      // allows x[ p ] to be set to undefined
+  }
+  return true;
+}
