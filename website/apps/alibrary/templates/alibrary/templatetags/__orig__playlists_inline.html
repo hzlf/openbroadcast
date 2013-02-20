@@ -89,10 +89,10 @@
 {% verbatim %}
 <script id="tpl_playlists_inline_selector" type="text/html">
 
-<label>Active</label>
+	
 <select name="playlists" id="playlists_inline_selector">
 	{{#objects}}
-	<option value="{{ resource_uri }}" {{#is_current}}selected="selected"{{/is_current}}>{{ name }} [{{ items.length }}]</option>
+	<option value="{{ resource_uri }}" {{#is_current}}selected="selected"{{/is_current}}>{{ name }}</option>
 	{{/objects}}
   
 </select>
@@ -125,6 +125,7 @@
 			<form class="form-inline select">
 
 				<div class="control-group">
+					<!--<label><i class="icon-tasks"></i></label>-->
 					<div class="controls playlist-selector">
 						<!-- content via ich -->
 					</div>
@@ -143,7 +144,7 @@
 			<form class="form-inline create">
 				<div class="control-group">
 					<div class="controls">
-						<input type="text" name="name" class="name" placeholder="{% trans "Newe Basket" %}">
+						<input type="text" class="full-width name" placeholder="{% trans "Newe Basket" %}">
 						<button type="submit" class="btn btn-primary btn-mini">
 							<i class="icon-ok-sign"></i>
 						</button>

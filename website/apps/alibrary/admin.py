@@ -243,7 +243,7 @@ admin.site.register(Profession, ProfessionAdmin)
     
 class MediaAdmin(BaseAdmin):
     
-    list_display   = ('name', 'release_link', 'artist', 'mediatype', 'tracknumber', 'processed', 'echoprint_status', 'conversion_status')
+    list_display   = ('name', 'release_link', 'artist', 'mediatype', 'tracknumber', 'duration', 'processed', 'echoprint_status', 'conversion_status')
     search_fields = ['artist__name', 'release__name']
     list_filter = ('mediatype', 'license__name', 'processed', 'echoprint_status', 'conversion_status')
     
@@ -311,9 +311,9 @@ class PlaylistAdmin(BaseAdmin):
     list_display   = ('name', 'user', 'type', 'duration', 'is_current',)
     list_filter = ('type', )
     
-    readonly_fields = ['slug', 'is_current',]
+    #readonly_fields = ['slug', 'is_current',]
 
-    inlines = [PlaylistmediaInline, PlaylistItemPlaylistInline] 
+    inlines = [PlaylistItemPlaylistInline] 
         
 class DaypartAdmin(BaseAdmin):
     

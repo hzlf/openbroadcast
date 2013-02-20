@@ -18,14 +18,15 @@
 		soundManager.setup({
 			url: '{{ STATIC_URL }}alibrary/js/lib/soundmanager2/swf/',
 			flashVersion: 9,
-			useFlashBlock: false,
-			useFastPolling: true,
+			useFlashBlock: true,
+			//useFastPolling: true,
 			useHighPerformance: true,
-			flashPollingInterval: 1,
-			html5PollingInterval: 1,
+			flashPollingInterval: 50,
+			html5PollingInterval: 100,
 			onready: function() {
 				alibrary.playlist_editor.init();
-			}
+			},
+			// useFavIcon: true
 		});
  
 	});
@@ -48,10 +49,13 @@
 			
 			<ul class="unstyled">
 				<li>
-					<a href="#" data-action="play">
+					<a href="#" data-action="stop" class="visible-while-playing">
+						<i class=" icon-stop icon-large"></i>
+					</a>
+					<a href="#" data-action="play" class="hidden-while-playing">
 						<i class=" icon-play icon-large"></i>
 					</a>
-					<a href="#" data-action="pause">
+					<a href="#" data-action="pause" class="">
 						<i class=" icon-pause icon-large"></i>
 					</a>
 				</li>
@@ -81,40 +85,51 @@
 			</ul>
 		</div>
 		
-		<div class="span1">
+		<div class="span1 fade-cue">
+			<!--
 			{{ object.item.content_object.duration }}
-		</div>
-		
-		<div class="span3 fade-cue">
-			
-			<div class="row-fluid">
-				
-				<div class="span5">
-					<input class="fade_in" type="text" value="{{ object.fade_in }}" />
-					<span>00:00:000</span>
-				</div>
-				<div class="span5">
-					<input class="fade_out" type="text" value="{{ object.fade_out }}" />
-					<span>00:00:000</span>
-				</div>
-				<div class="span1">
+			-->
+			<div class="row-fluid pull-right">
+
+				<div class="span6" style="margin-left: 0">
 					<input class="fade_cross" type="text" value="{{ object.fade_cross }}" />
 					<span>00:00:000</span>
 				</div>
 				
+			</div>
+		</div>
+		
+		<div class="span3 fade-cue">
+			
+			<div class="row-fluid pull-right">
+				
+				<div class="span6" style="margin-left: 0">
+					<input class="fade_in" type="text" value="{{ object.fade_in }}" />
+					<span>00:00:000</span>
+				</div>
+				<div class="span6" style="margin-left: 0">
+					<input class="fade_out" type="text" value="{{ object.fade_out }}" />
+					<span>00:00:000</span>
+				</div>
+				<!--
+				<div class="span1">
+					<input class="fade_cross" type="text" value="{{ object.fade_cross }}" />
+					<span>00:00:000</span>
+				</div>
+				-->
 			</div>
 			
 		</div>
 		
 		<div class="span3 fade-cue">
 			
-			<div class="row-fluid">
+			<div class="row-fluid pull-right">
 				
-				<div class="span5">
+				<div class="span6" style="margin-left: 0">
 					<input class="cue_in" type="text" value="{{ object.cue_in }}" />
 					<span>00:00:000</span>
 				</div>
-				<div class="span5">
+				<div class="span6" style="margin-left: 0">
 					<input class="cue_out" type="text" value="{{ object.cue_out }}" />
 					<span>00:00:000</span>
 				</div>
@@ -127,9 +142,12 @@
 			
 			<ul class="unstyled">
 				<li>
-				<a href="#" data-action="delete">
-					<i class=" icon-trash"></i>
-				</a>
+					<a href="#" data-action="collect" class=" pull-right">
+						<i class="icon-plus icon-large"></i>
+					</a>
+					<a href="#" data-action="delete" class=" pull-right">
+						<i class="icon-trash icon-large"></i>
+					</a>
 				</li>
 			</ul>
 			
@@ -233,15 +251,15 @@
 			</div>
 
 			<div class="span1">
-				{% trans "Duration" %}
+				<span class="pull-right">{% trans "Crossfade" %}</span>
 			</div>
 
 			<div class="span3 fade-cue">
-				{% trans "Fades" %}
+				<span class="pull-right">{% trans "Fade-In / -Out" %}</span>
 			</div>
 
 			<div class="span3 fade-cue">
-				{% trans "Cues" %}
+				<span class="pull-right">{% trans "Cue-In / -Out" %}</span>
 			</div>
 
 		</div>

@@ -106,7 +106,7 @@ class Playlist(models.Model):
     
     # relations
     user = models.ForeignKey(User, null=True, blank=True, default = None)
-    media = models.ManyToManyField('Media', through='PlaylistMedia', blank=True, null=True)
+    #media = models.ManyToManyField('Media', through='PlaylistMedia', blank=True, null=True)
     
     items = models.ManyToManyField('PlaylistItem', through='PlaylistItemPlaylist', blank=True, null=True)
 
@@ -127,10 +127,10 @@ class Playlist(models.Model):
     
     
     # is currently selected as default?
-    is_current = models.BooleanField(_('Currently selected as default?'), default=False)
+    is_current = models.BooleanField(_('Currently selected as default?'), default=True)
     
     
-    description = extra.MarkdownTextField(blank=True, null=True)
+    #description = extra.MarkdownTextField(blank=True, null=True)
     
     # manager
     objects = models.Manager()
@@ -238,15 +238,17 @@ class Playlist(models.Model):
             
             self.save()
         
-        
+    """"""
     def save(self, *args, **kwargs):
         
         duration = 0
         try:
-            for media in self.media.all():
-                media.get_duration()
-                if media.duration:
-                    duration += media.duration
+            for item in self.items.all():
+                item.content_object.get_duration()
+                if item.content_object.duration:
+                    duration += item.content_object.duration
+                    #duration -= item.cue_in
+                    #duration -= item.cue_out
         except Exception, e:
             print e
             pass
@@ -254,12 +256,17 @@ class Playlist(models.Model):
         self.duration = duration
         
         # update d_tags
-        t_tags = ''
-        for tag in self.tags:
-            t_tags += '%s, ' % tag    
+        try:
+            t_tags = ''
+            for tag in self.tags:
+                t_tags += '%s, ' % tag    
+            
+            self.tags = t_tags
+            self.d_tags = t_tags
+        except Exception, e:
+            print e
+            pass
         
-        self.tags = t_tags;
-        self.d_tags = t_tags;
         
         # self.user = request.user  
         super(Playlist, self).save(*args, **kwargs)
@@ -276,7 +283,7 @@ arating.enable_voting_on(Playlist)
 
 
 def playlist_post_save(sender, **kwargs):
-    obj = kwargs['instance']
+    #obj = kwargs['instance']
     pass
     
 post_save.connect(playlist_post_save, sender=Playlist)

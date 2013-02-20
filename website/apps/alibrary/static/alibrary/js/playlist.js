@@ -10,7 +10,7 @@ PlaylistUi = function() {
 
 	this.interval = false;
 	this.interval_loops = 0;
-	this.interval_duration = 20000;
+	this.interval_duration = 10000;
 	// this.interval_duration = false;
 	this.api_url = false;
 	
@@ -27,7 +27,6 @@ PlaylistUi = function() {
 		
 		this.inline_dom_element = $('#' + this.inline_dom_id);
 
-		
 		self.iface();
 		self.bindings();
 
@@ -64,7 +63,7 @@ PlaylistUi = function() {
 		
 		
 		// settings panel / create
-		$('.ui-persistent > .settings form', container).live('submit', function(e) {
+		$('.ui-persistent > .form form.create', container).live('submit', function(e) {
 			e.preventDefault();
 			var name = $('input.name', $(this)).val();
 			self.create_playlist(name);
@@ -79,7 +78,7 @@ PlaylistUi = function() {
 			
 			$.log(action, id);
 			
-			if(action == 'delete') {
+			if(action == 'delete' && confirm('Sure?')) {
 				self.delete_playlist(id);
 			}
 			
@@ -136,7 +135,6 @@ PlaylistUi = function() {
 		// list items
 		$('.action.download > a', self.inline_dom_element).live('click', function(e){
 			e.preventDefault();
-
 		});
 
 		// selector
@@ -146,7 +144,7 @@ PlaylistUi = function() {
 			
 			var resource_uri = $(this).val();
 
-			$('.playlist_holder', self.inline_dom_element).hide(500);
+			$('.playlist_holder', self.inline_dom_element).hide();
 
 			$.ajax({
 				url: resource_uri + 'set-current/',
@@ -189,6 +187,8 @@ PlaylistUi = function() {
 			'name': name
 		};
 		
+		// alert('create: ' + name);
+		
 		$.ajax({
 			url: self.api_url,
 			type: 'POST',
@@ -197,10 +197,14 @@ PlaylistUi = function() {
 			contentType: "application/json",
 			processData:  false,
 			success: function(data) {
-				self.run_interval();
+				// self.run_interval();
 			},
-			async: true
+			async: false
 		});
+		
+		// console.log('data:', data);
+		
+		self.run_interval();
 	};
 	
 	
@@ -292,17 +296,20 @@ PlaylistUi = function() {
 	
 	this.update_playlist_selector = function(data) {
 		
-		console.log(this.current_data, data)
+		// console.log(this.current_data, data)
 
+		if(data.objects.length > 1) {
 		
-		if( ! Object.equals(this.current_data, data)) {
-			console.log('data changed');
-
-			var html = ich.tpl_playlists_inline_selector(data);
-			$('.playlist-selector', self.inline_dom_element.parent()).html(html);
-
-		} else {
-			console.log('data unchanged');
+			if( ! Object.equals(this.current_data, data)) {
+				console.log('data changed');
+	
+				var html = ich.tpl_playlists_inline_selector(data);
+				$('.playlist-selector', self.inline_dom_element.parent()).html(html);
+	
+			} else {
+				console.log('data unchanged');
+			}
+		
 		}
 	};
 

@@ -8,6 +8,9 @@ from django.template import RequestContext
 from django.db.models import Q
 from django.conf import settings
 
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+
 from tagging.models import Tag, TaggedItem
 from tagging.utils import calculate_cloud
 from easy_thumbnails.files import get_thumbnailer
@@ -131,6 +134,12 @@ class PlaylistCreateView(CreateView):
     template_name = 'alibrary/playlist_create.html'
     form_class = PlaylistForm
     #success_url = lazy(reverse, str)("feedback-feedback-list")
+    
+
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(PlaylistCreateView, self).dispatch(*args, **kwargs)
         
 
     def get_context_data(self, **kwargs):
@@ -155,6 +164,11 @@ class PlaylistEditView(UpdateView):
     
     def __init__(self, *args, **kwargs):
         super(PlaylistEditView, self).__init__(*args, **kwargs)
+        
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(PlaylistEditView, self).dispatch(*args, **kwargs)
         
     def get_initial(self):
         self.initial.update({ 'user': self.request.user })

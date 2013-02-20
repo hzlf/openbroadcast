@@ -11,6 +11,6 @@ def sha1_by_file(file):
 
         return sha1
     
-    except Exceptin, e:
+    except Exception, e:
         print e
         return None

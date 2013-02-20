@@ -500,8 +500,8 @@ CollectorApp = (function() {
 				ct: 'media'
 			}
 
-			// TODO: make dynamic
-			var url ='/content/broadcasts/' + this.active_playlist.id + '/collect/';
+			
+			var url = this.active_playlist.resource_uri + 'collect/';
 			
 			/**/
 			jQuery.ajax({

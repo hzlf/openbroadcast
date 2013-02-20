@@ -88,7 +88,7 @@ div.row .sidebar
     
     background-image: none
 
-    div.wrapper, div.settings
+    div.wrapper, div.form
       display: none
     
     
@@ -96,7 +96,7 @@ div.row .sidebar
       border: 1px solid #CCCCCC
       background-color: #F5F5F5
       padding: 0 2px 2px 2px
-      div.wrapper, div.settings
+      div.wrapper, div.form
         display: block
 		
       div.header
@@ -106,7 +106,7 @@ div.row .sidebar
     &.close
       background-color: #FFFFFF
       padding: 0 2px 0 2px
-      div.wrapper, div.settings
+      div.wrapper, div.form
         display: none
     
     div.header
@@ -220,26 +220,32 @@ div.row .sidebar
     
     
     
-    div.settings
+    div.form
       color: #333333
-      padding: 3px 0 2px 7px
+      padding: 3px 0 2px 0
       border-bottom: none
       /*background-color: #ff00ff*/
-     
-     
+      margin-bottom: 0
       form
-        margin-bottom: 4px
-        .controls.pull-right
-          padding-right: 10px
-        input.full-width
-          width: 236px
+        margin: 0 0 0 0
      
-      div span
-        width: 90px
-        display: block
-        float: left
+      form.select
+        label
+          display: none
+        select
+          width: 254px
+          height: 23px
+          padding: 0 1px 0 4px
+          line-height: 13px
+     
+      form.create
+        margin-top: 10px
+        input.name
+          height: 15px
+          margin-top: 2px
+          width: 224px
 
-      input.create
+      input.create__
         background-color: #ffffff
         border: 1px solid #bbbbbb
         color: #5a5a5a
@@ -251,6 +257,9 @@ div.row .sidebar
         border: 1px solid #BBBBBB
         color: #5A5A5A
         width: 86px
+        
+        
+        
 
 div.row .sidebar
   select

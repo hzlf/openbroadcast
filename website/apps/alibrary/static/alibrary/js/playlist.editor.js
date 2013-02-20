@@ -67,6 +67,7 @@ PlaylistEditor = function() {
 				cursor: "move",
 				//cursorAt: { left: 5 },
 				delay: 150,
+				handle: '.base'
 			}
 		);
 		
@@ -132,8 +133,7 @@ PlaylistEditor = function() {
 	this.reorder = function() {
 		
 		// numbering
-		var reorder_url = self.current_playlist.reorder_url;
-		console.log('reorder_url:', reorder_url);
+		var reorder_url = self.current_playlist.resource_uri + 'reorder/';
 		
 		var order = new Array;
 		
@@ -362,8 +362,16 @@ PlaylistEditor = function() {
 		var next_item = this.editor_items[next_item_id];
 		
 		next_item.player.play();
+
 		
-//		alert(self.position_map.indexOf( current_id ));
+	};
+	
+	// play-flow functions
+	this.stop_all = function() {
+
+		for (var i in this.editor_items) {
+			this.editor_items[i].player.stop();
+		}
 		
 	};
 
@@ -395,6 +403,7 @@ PlaylistEditorItem = function() {
 	this.el_background;
 	this.el_buffer;
 	this.el_indicator;
+	this.el_indicator_cross;
 	this.el_waveform;
 	this.el_envelope;
 	this.el_controls;
@@ -402,6 +411,10 @@ PlaylistEditorItem = function() {
 	this.player;
 	
 	this.envelope_color = '#00bb00';
+	
+	
+	this.interval_duration = false;
+	self.interval_loops;
 	
 	this.duration = 0;
 	
@@ -450,6 +463,14 @@ PlaylistEditorItem = function() {
 		self.init_waveform();
 		self.init_player();
 		
+
+
+		// set interval and run once
+		if(self.interval_duration) {
+			self.set_interval(self.run_interval, self.interval_duration);
+		}
+		// self.run_interval();
+		
 		
 	};
 	
@@ -461,7 +482,7 @@ PlaylistEditorItem = function() {
 			
 			
 			
-			self.player.play();
+			// self.player.play();
 			
 			self.player.setPosition(self.px_to_abs(e.offsetX));
 			
@@ -481,6 +502,8 @@ PlaylistEditorItem = function() {
 					processData:  false,
 					success: function(data) {
 						self.dom_element.remove();
+						delete self.playlist_editor.current_items[self.item.id]
+						delete self.playlist_editor.editor_items[self.item.id]
 						self.playlist_editor.reorder();
 					},
 					async: false
@@ -488,14 +511,45 @@ PlaylistEditorItem = function() {
 			};
 			
 			if(action == 'play') {
-				self.player.play();
+				self.playlist_editor.stop_all();
+				self.player.play().setPosition(self.item.cue_in);
 			};
 			if(action == 'pause') {
-				self.player.pause();
+				self.player.togglePause();
+			};
+			if(action == 'stop') {
+				self.player.stop();
 			};
 			
 		});
 	}
+
+	// interval
+	this.set_interval = function(method, duration) {
+		self.interval = setInterval(method, duration);
+	};
+	this.clear_interval = function(method) {
+		self.interval = clearInterval(method);
+	};
+
+	this.run_interval = function() {
+		self.interval_loops += 1;
+		// Put functions needed in interval here
+		//console.log('run_interval');
+		//console.log(self.player);
+		
+		var paused = self.player.paused;
+		var playState = self.player.playState;
+		//console.log('paused: ', paused);
+		//console.log('playState: ', playState);
+		
+		if(paused) {
+			self.dom_element.addClass('paused');
+		} else {
+			self.dom_element.removeClass('paused');
+		}
+		
+	};
 
 	this.update = function(item, playlist_editor) {
 		console.log('PlaylistEditorItem - update');
@@ -507,10 +561,16 @@ PlaylistEditorItem = function() {
 		var x = self.get_x_points();
 		var path = self.get_path(x);
 		this.el_envelope.animate({path: path},100);
-
-
-
+		
+		
+		
 		self.el_buffer.attr({x: self.abs_to_px(self.item.cue_in), width: self.size_x - self.abs_to_px( self.item.cue_in + self.item.cue_out )});
+
+
+		if(self.item.fade_cross && self.item.fade_cross > 0) {
+			this.el_indicator_cross.animate({x: self.abs_to_px(self.co.duration - self.item.cue_out - self.item.fade_cross - 1)},100);
+			
+		}
 		
 
 		// this.player.unload();
@@ -522,12 +582,18 @@ PlaylistEditorItem = function() {
 		console.log('PlaylistEditorItem - init_waveform');
 		this.r = Raphael(self.waveform_dom_id, 830, 36);
 		
-		self.el_background = this.r.rect(0, 0, self.size_x, self.size_y).attr({ stroke: "none", fill: '#dedede' });
-		self.el_buffer = this.r.rect(0, 0, 0, self.size_y).attr({ stroke: "none", fill: '#5a5a5a' });
+		self.el_background = this.r.rect(0, 0, self.size_x, self.size_y).attr({ stroke: "none", fill: '90-#efefef-#bbb:50-#efefef' });
+		self.el_buffer = this.r.rect(0, 0, 0, self.size_y).attr({ stroke: "none", fill: '90-#aaa-#444:50-#aaa' });
 		
 		self.el_waveform = this.r.image(self.item.item.content_object.waveform_image, 0, 0, 830, 30);
 		
 		self.el_indicator = this.r.rect(-10, 0, 2, 40).attr({ stroke: "none", fill: '#00bb00' });
+		
+		self.el_indicator_cross = this.r.rect(-10, 30, 2, 36).attr({ stroke: "none", fill: '#ff0000' });
+		
+		if(self.item.fade_cross && self.item.fade_cross > 0) {
+			this.el_indicator_cross.animate({x: self.abs_to_px(self.co.duration - self.item.cue_out - self.item.fade_cross - 1)},100);
+		}
 		
 		// console.log('init_waveform', item.item.content_object.name, item.item.content_object.waveform_image);
 		
@@ -549,36 +615,60 @@ PlaylistEditorItem = function() {
 		var c_attr = { fill: self.envelope_color, stroke: "none" };
 	
 	
-	/*	
+	/*	*/
 		self.el_controls = this.r.set(
 			
-			this.r.rect(x[0] - c_size / 2, this.size_y - c_size / 2 - this.envelope_bottom, c_size, c_size).attr(c_attr),
+			//this.r.rect(x[0] - c_size / 2, this.size_y - c_size / 2 - this.envelope_bottom, c_size, c_size).attr(c_attr),
 			this.r.rect(x[1] - c_size / 2, this.envelope_top - c_size / 2, c_size, c_size).attr(c_attr),
-			this.r.rect(x[2] - c_size / 2, this.envelope_top - c_size / 2, c_size, c_size).attr(c_attr),
-			this.r.rect(x[3] - c_size / 2, this.size_y - c_size / 2 - this.envelope_bottom, c_size, c_size).attr(c_attr)
+			this.r.rect(x[2] - c_size / 2, this.envelope_top - c_size / 2, c_size, c_size).attr(c_attr)
+			//this.r.rect(x[3] - c_size / 2, this.size_y - c_size / 2 - this.envelope_bottom, c_size, c_size).attr(c_attr)
 			
          );
          
+         self.el_controls[0].update = function(x, y) {
+                        var X = this.attr("x") + x, Y = this.attr("y") + y;
+                        this.attr({x: X});
+                        path[1][1] = X;
+                        self.el_envelope.animate({path: path},0);
+                        $('.fade_in', self.dom_element).val(Math.floor(X * 1000));
+         };
+         
          self.el_controls.drag(self.controls_onmove, self.controls_onstart, self.controls_onend);
-*/
+
 	};
 	
-	this.controls_onmove = function(x, y, z, e) {
-		console.log(this);
 	
-
-		var X = this.attr("x") + x- (this.dx || 0);
-		this.attr({x: x});
+     this.controls_onmove = function move(dx, dy) {
+                    this.update(dx - (this.dx || 0), dy - (this.dy || 0));
+                    this.dx = dx;
+                    this.dy = dy;
+                    
+                    
+                    
+                }
+	
+	this.controls_onmove__ = function(dx, dy, x, y, e) {
+		console.log(this);
+		//var X = this.attr("x") + x- (this.dx || 0);
+		//this.attr({x: x});
 		
-		console.log('controls_onmove', x, y, z, e);
+		console.log('move: dx, dy, x, y, e', dx, dy, x, y, e);
 	}
 	
 	this.controls_onstart = function(x, y) {
 		console.log('controls_onstart', x, y);
 	}
 	
-	this.controls_onend = function(x, y) {
-		console.log('controls_onend', x, y);
+	this.controls_onend = function(e) {
+		console.log('controls_onend', e.offsetX);
+		this.dx = this.dy = 0;
+		
+		var pos_new = e.offsetX;
+		
+		
+		
+		self.playlist_editor.update_by_uuid(self.item.uuid);
+		
 	}
 	
 	
@@ -597,10 +687,13 @@ PlaylistEditorItem = function() {
 	this.get_path = function(x) {
 
 		
-		var p0 = ["M", x[0], this.size_y - this.envelope_bottom];
+		var diff = x[1] - x[0]
+		
+		var p0 = ["M", x[0], this.size_y - 1];
 		var p1 = ["T", x[1], this.envelope_top];
+		// var p1 = ["C", x[1] - diff / 1.5, this.envelope_top + 4, x[1] - diff / 4, this.envelope_top + 1, x[1], this.envelope_top];
 		var p2 = ["L", x[2], this.envelope_top];
-		var p3 = ["T", x[3], this.size_y - this.envelope_bottom];
+		var p3 = ["T", x[3], this.size_y - 1];
 		
 		return [p0, p1, p2, p3]
 		
@@ -621,6 +714,44 @@ PlaylistEditorItem = function() {
 	};
 	
 	
+	this.events = {
+		
+		classes: ['playing', 'paused'],
+		
+	    play: function() {
+			console.log('events: ', 'play');
+			self.dom_element.removeClass('paused');
+			self.dom_element.addClass('playing');
+	    },
+	
+	    stop: function() {
+			console.log('events: ', 'stop');
+			self.dom_element.removeClass('paused');
+			self.dom_element.removeClass('playing');
+			
+			self.el_indicator.attr({x: -10})
+	    },
+	
+	    pause: function() {
+			console.log('events: ', 'pause');
+			self.dom_element.removeClass('playing');
+			self.dom_element.addClass('paused');
+	    },
+	
+	    resume: function() {
+			console.log('events: ', 'resume');
+			self.dom_element.removeClass('paused');
+			self.dom_element.addClass('playing');
+	    },
+	
+	    finish: function() {
+			console.log('events: ', 'finish');
+			self.dom_element.removeClass('paused');
+			self.dom_element.removeClass('playing');
+	    },
+	}
+	
+	
 	this.init_player = function() {
 		
 		var options = {
@@ -629,10 +760,32 @@ PlaylistEditorItem = function() {
 			multiShot: false,
 			// autoPlay: true,
 			autoLoad: true,
-			whileplaying: this.whileplaying,
+			// events
+			onplay: self.events.play,
+			onstop: self.events.stop,
+			onpause: self.events.pause,
+			onresume: self.events.resume,
+			onfinish: self.events.finish,
+          
 			whileloading: this.whileloading,
-			onload: this.onload
+			whileplaying: this.whileplaying,
+			onload: this.onload,
 		}
+		
+		/*
+          # id:o.id,
+          # url:decodeURI(soundURL),
+          onplay:self.events.play,
+          onstop:self.events.stop,
+          onpause:self.events.pause,
+          onresume:self.events.resume,
+          onfinish:self.events.finish,
+          whileloading:self.events.whileloading,
+          whileplaying:self.events.whileplaying,
+          onmetadata:self.events.metadata,
+          onload:self.events.onload
+		*/
+		
 		
 		self.player = soundManager.createSound(options);
 	};
@@ -669,11 +822,11 @@ PlaylistEditorItem = function() {
 		// outs
 		// ins
 		if(self.player.position >= self.co.duration - self.item.cue_out) {
-			vol = 5;
-			self.player.setPosition(self.item.cue_in);
+			vol = 0;
+			// self.player.setPosition(self.item.cue_in);
 			
 			setTimeout(function(){
-				self.player.togglePause();
+				self.player.stop();
 			}, 100);
 
 		}
@@ -690,7 +843,7 @@ PlaylistEditorItem = function() {
 		// check for next
 		var remaining = self.co.duration - (self.item.cue_out) - self.player.position;
 			
-		console.log('remaining:', remaining);
+		// console.log('remaining:', remaining);
 		
 		if(remaining <= self.item.fade_cross + 100) {
 			self.playlist_editor.play_next(self.item.id);
@@ -732,86 +885,4 @@ PlaylistEditorItem = function() {
 
 
 
-
-
-
-
-
-
-
-
-
-WaveformEditor = function(playlist_editor) {
-	
-	var self = this;
-	
-	this.playlist_editor = playlist_editor;
-	
-	this.container;
-	this.r;
-	
-	this.init = function(id) {
-		
-		console.log('init', id)
-		
-		var item = self.playlist_editor.current_items[id];
-		
-		console.log(item);
-		
-		this.container = document.getElementById('playlist_item_waveform_' + id);
-		
-		this.r = Raphael(this.container, 830, 30);
-		
-		this.r.image(item.item.content_object.waveform_image, 0, 0, 830, 30);
-		
-		/*
-		this.r.image(item.waveform_image, 0, 15, 830, 30).attr({
-	        transform: "s1-1",
-	        opacity: .5
-    	});
-    	*/
-    	
-    	var rnd = Number(Math.random() * 700)
-    	
-    	var discattr = {fill: "#ff00ff", stroke: "none"};
-    	
-    	var path = [["M", 4, 30], ["L", item.fade_in, 4], ["L", rnd, 4], ["L", rnd + 40, 30] ]
-
-    	this.r.path(path).attr( { stroke: '#ff00ff', "stroke-width": 1, 'opacity': 0.4, "stroke-linecap": "round" } );
-
-		var controls = this.r.set(
-	        //this.r.circle(30, 4, 5).attr(discattr),
-	        this.r.rect(item.fade_in - 3, 1, 6, 6).attr(discattr),
-	        this.r.rect(rnd - 3, 1, 6, 6).attr(discattr)
-		);
-                        
-		controls[0].update = function (x, y) {
-			var X = this.attr("cx") + x,  Y = this.attr("cy") + y;
-			this.attr({cx: X, cy: Y});
-			path[0][1] = X;
-			path[0][2] = Y;
-			controls[0].update(x, y);
-		};
-    	
-    	
-    	controls.drag(move, up);
-    	
-    	
-		function move(dx, dy) {
-			this.update(dx - (this.dx || 0), dy - (this.dy || 0));
-			this.dx = dx;
-			this.dy = dy;
-		}
-		function up() {
-			this.dx = this.dy = 0;
-		}
-    	
-    	
-		
-	}
-	
-	this.update = function() {
-		console.log('update')
-	}
-}
 

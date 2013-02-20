@@ -49,18 +49,18 @@
 				<span class="small">{% trans "of" %} {{ item.target_duration|sec_to_time }}</span>
 			</li>
 			<li class="small">
-				{{ item.media.count }} {% trans "Tracks" %}
+				{{ item.items.count }} {% trans "Tracks" %}
 			</li>
 		</ul>
 	</div>
-	<div class="list_body_item c5 license {% if item.get_license %}{{ item.get_license.key }}{% endif %}">
+	<div class="list_body_item c5 timestamps">
 		
 		<ul class="unstyled">
 			<li>
 				{{ item.created|date:"SHORT_DATE_FORMAT" }}
 			</li>
 			<li class="small">
-				{{ item.updated|timesince }}
+				{{ item.updated|date:"SHORT_DATE_FORMAT" }}
 			</li>
 		</ul>
 		

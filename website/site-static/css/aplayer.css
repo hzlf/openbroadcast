@@ -5388,7 +5388,7 @@ div.row .sidebar div.playlist {
   background-image: none;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\0000391}}
-div.row .sidebar div.playlist div.wrapper, div.row .sidebar div.playlist div.settings {
+div.row .sidebar div.playlist div.wrapper, div.row .sidebar div.playlist div.form {
   display: none;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\0000395}}
@@ -5398,7 +5398,7 @@ div.row .sidebar div.playlist.expanded {
   padding: 0 2px 2px 2px;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\0000399}}
-div.row .sidebar div.playlist.expanded div.wrapper, div.row .sidebar div.playlist.expanded div.settings {
+div.row .sidebar div.playlist.expanded div.wrapper, div.row .sidebar div.playlist.expanded div.form {
   display: block;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003102}}
@@ -5412,7 +5412,7 @@ div.row .sidebar div.playlist.close {
   padding: 0 2px 0 2px;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003109}}
-div.row .sidebar div.playlist.close div.wrapper, div.row .sidebar div.playlist.close div.settings {
+div.row .sidebar div.playlist.close div.wrapper, div.row .sidebar div.playlist.close div.form {
   display: none;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003112}}
@@ -5562,46 +5562,54 @@ div.row .sidebar div.playlist div.wrapper div.playlist_holder div.list div.list_
   background-color: #d6def7;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003223}}
-div.row .sidebar div.playlist div.settings {
+div.row .sidebar div.playlist div.form {
   color: #333333;
-  padding: 3px 0 2px 7px;
+  padding: 3px 0 2px 0;
   border-bottom: none;
   /*background-color: #ff00ff */
+  margin-bottom: 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003230}}
-div.row .sidebar div.playlist div.settings form {
-  margin-bottom: 4px;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003229}}
+div.row .sidebar div.playlist div.form form {
+  margin: 0 0 0 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003232}}
-div.row .sidebar div.playlist div.settings form .controls.pull-right {
-  padding-right: 10px;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003233}}
+div.row .sidebar div.playlist div.form form.select label {
+  display: none;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003234}}
-div.row .sidebar div.playlist div.settings form input.full-width {
-  width: 236px;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003235}}
+div.row .sidebar div.playlist div.form form.select select {
+  width: 254px;
+  height: 23px;
+  padding: 0 1px 0 4px;
+  line-height: 13px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003237}}
-div.row .sidebar div.playlist div.settings div span {
-  width: 90px;
-  display: block;
-  float: left;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003241}}
+div.row .sidebar div.playlist div.form form.create {
+  margin-top: 10px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003242}}
-div.row .sidebar div.playlist div.settings input.create {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003243}}
+div.row .sidebar div.playlist div.form form.create input.name {
+  height: 15px;
+  margin-top: 2px;
+  width: 224px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003248}}
+div.row .sidebar div.playlist div.form input.create__ {
   background-color: white;
   border: 1px solid #bbbbbb;
   color: #5a5a5a;
   width: 84px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003249}}
-div.row .sidebar div.playlist div.settings select.default {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003255}}
+div.row .sidebar div.playlist div.form select.default {
   background-color: white;
   border: 1px solid #bbbbbb;
   color: #5a5a5a;
   width: 86px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003256}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/_sidebar\.sass}line{font-family:\00003265}}
 div.row .sidebar select {
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -8570,81 +8578,110 @@ form.form-playlist div.dayparts div.controls ul li.title {
   height: 14px;
   margin-right: 4px;
   background-color: transparent;
-  border: 1px dotted #bbbbbb;
+  border: 1px dotted transparent;
   text-align: right;
   padding: 1px 2px 1px 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003552}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003551}}
+.listview.editable.media [class^="visible-while-"], .listview.editable.media [class*=" visible-while-"] {
+  display: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003555}}
+.listview.editable.media .paused .visible-while-paused {
+  display: inline-block;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003558}}
+.listview.editable.media .playing {
+  background-color: transparent;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003561}}
+.listview.editable.media .playing a {
+  color: #00bb00 !important;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003563}}
+.listview.editable.media .playing .visible-while-playing {
+  display: inline-block;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003565}}
+.listview.editable.media .playing .hidden-while-playing {
+  display: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003570}}
+.listview.editable.media .hover .fade-cue input {
+  background-color: white;
+  border: 1px dotted #bbbbbb;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003577}}
 .listview.editable.media .summary {
   border-top: 1px solid #efefef !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003554}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003579}}
 .listview.editable.media .summary.error {
   background-color: #fcf8e3;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003562}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003587}}
 .listview.editable.media .summary .row-fluid > div {
   padding: 5px;
   margin: 1px 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003567}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003592}}
 .listview.editable.media .summary span {
   text-align: right;
   color: #5a5a5a;
   padding-right: 2px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003572}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003597}}
 .listview.editable.media .summary span.duration-total {
   font-weight: bold;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003576}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003601}}
 .listview.editable.media .summary span.duration-difference {
   color: red;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003585}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003610}}
 .playlist-edit.transform.listing.fixed {
   position: fixed;
   width: 260px;
   top: 120px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003590}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003615}}
 .playlist-edit.transform .item {
   padding: 4px 4px 4px 4px;
   margin: 5px 0 5px 0;
   border-bottom: 1px solid #efefef;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003596}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003621}}
 .playlist-edit.transform .item a.toggle {
   color: #333333;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003598}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003623}}
 .playlist-edit.transform .item a.toggle:hover {
   text-decoration: none;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003602}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003627}}
 .playlist-edit.transform .item .information {
   display: none;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003605}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003630}}
 .playlist-edit.transform .item.warning {
   background-color: #fcf8e3;
   color: #c09853;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003608}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003633}}
 .playlist-edit.transform .item.warning .information {
   display: block;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003611}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003636}}
 .playlist-edit.transform .item.success {
   background-color: #ddffd9;
   color: #00bb00;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003618}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003643}}
 .playlist-edit.transform .item.hover.done {
   background-color: #ddffd9;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003624}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/asite\/_forms_extra\.sass}line{font-family:\00003649}}
 .playlist-edit.transform .item.hover.ready {
   background-color: #ddffd9;
 }

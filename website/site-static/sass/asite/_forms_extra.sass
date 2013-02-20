@@ -543,9 +543,34 @@ form.form-playlist
         height: 14px
         margin-right: 4px
         background-color: transparent
-        border: 1px dotted #bbb
+        border: 1px dotted transparent
         text-align: right
         padding: 1px 2px 1px 0
+        
+        
+  [class^="visible-while-"], [class*=" visible-while-"]
+    display: none
+    
+  .paused
+    .visible-while-paused
+      display: inline-block
+        
+  .playing
+    // override
+    background-color: transparent
+    a
+      color: #00bb00 !important
+    .visible-while-playing
+      display: inline-block
+    .hidden-while-playing
+      display: none
+      
+  .hover .fade-cue
+
+    input
+      background-color: white
+      border: 1px dotted #bbb
+    
     
     
   

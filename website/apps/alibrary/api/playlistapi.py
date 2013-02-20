@@ -69,10 +69,11 @@ class DaypartResource(ModelResource):
 
 class PlaylistResource(ModelResource):
 
+    """
     media = fields.ToManyField('alibrary.api.PlaylistMediaResource',
             attribute=lambda bundle: bundle.obj.media.through.objects.filter(
                 playlist=bundle.obj).order_by('position') or bundle.obj.media, null=True, full=True, max_depth=3)
-
+    """
     items = fields.ToManyField('alibrary.api.PlaylistItemPlaylistResource',
             attribute=lambda bundle: bundle.obj.items.through.objects.filter(
                 playlist=bundle.obj).order_by('position') or bundle.obj.items, null=True, full=True, max_depth=5)
@@ -101,23 +102,33 @@ class PlaylistResource(ModelResource):
         #cache = SimpleCache(timeout=120)
         
     def obj_create(self, bundle, request=None, **kwargs):
-        return super(PlaylistResource, self).obj_create(bundle, request, user=request.user)
+        
+        bundle = super(PlaylistResource, self).obj_create(bundle, request, user=request.user)
+        
+        Playlist.objects.filter(user=request.user).exclude(bundle.obj).update(is_current=False)
+        bundle.obj.is_current = True
+        #bundle.obj.save()
+        return bundle
+    
     
     def dehydrate(self, bundle):
         bundle.data['edit_url'] = bundle.obj.get_edit_url();
         bundle.data['reorder_url'] = bundle.obj.get_reorder_url();
         return bundle
     
+    """
     def hydrate_m2m(self, bundle):
         print "hydrate m2m"
         
-        """
-        curl --dump-header - -H "Content-Type: application/json" -X PUT --data '{"media": [{"media": "/api/v1/track/16587/"}]}' "http://localhost:8080/de/api/v1/playlist/58/?username=root&api_key=APIKEY"
-        """
         
-        for item in bundle.data['media']:
-            #item[u'media'] = self.get_resource_uri(bundle.obj)
-            print item 
+        #curl --dump-header - -H "Content-Type: application/json" -X PUT --data '{"media": [{"media": "/api/v1/track/16587/"}]}' "http://localhost:8080/de/api/v1/playlist/58/?username=root&api_key=APIKEY"
+        
+        try:
+            for item in bundle.data['media']:
+                #item[u'media'] = self.get_resource_uri(bundle.obj)
+                print item 
+        except:
+            pass
         
     
     def save_m2m(self, bundle):
@@ -128,7 +139,7 @@ class PlaylistResource(ModelResource):
         print bundle
         
         return bundle
-    
+    """
     
     
     
@@ -138,7 +149,11 @@ class PlaylistResource(ModelResource):
         
         return [
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/set-current%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('set_current'), name="playlist_api_set_current"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/collect%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('collect'), name="playlist_api_collect"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/reorder%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('reorder'), name="playlist_api_reorder"),
         ]
+
+
 
     def set_current(self, request, **kwargs):
         
@@ -152,6 +167,53 @@ class PlaylistResource(ModelResource):
         cp.save()
         
         bundle = self.build_bundle(obj=cp, request=request)
+        bundle = self.full_dehydrate(bundle)
+
+        self.log_throttled_access(request)
+        return self.create_response(request, bundle)
+
+
+
+    def collect(self, request, **kwargs):
+        
+        self.method_check(request, allowed=['post'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        p = Playlist.objects.get(**self.remove_api_resource_names(kwargs))
+
+        ids = request.POST.get('ids', None)
+        ct = request.POST.get('ct', None)
+
+        if ids:
+            ids = ids.split(',')
+            p.add_items_by_ids(ids, ct)
+
+        
+        bundle = self.build_bundle(obj=p, request=request)
+        bundle = self.full_dehydrate(bundle)
+
+        self.log_throttled_access(request)
+        return self.create_response(request, bundle)
+
+
+
+    def reorder(self, request, **kwargs):
+        
+        self.method_check(request, allowed=['post'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        p = Playlist.objects.get(**self.remove_api_resource_names(kwargs))
+
+        order = request.POST.get('order', None)
+
+        if order:
+            order = order.split(',')
+            p.reorder_items_by_uuids(order)
+
+        
+        bundle = self.build_bundle(obj=p, request=request)
         bundle = self.full_dehydrate(bundle)
 
         self.log_throttled_access(request)
