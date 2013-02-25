@@ -52,6 +52,8 @@ class PlaylistListView(PaginationMixin, ListView):
         return self.paginate_by
 
     def get_context_data(self, **kwargs):
+        
+        
         context = super(PlaylistListView, self).get_context_data(**kwargs)
         
         self.extra_context['filter'] = self.filter
@@ -67,6 +69,11 @@ class PlaylistListView(PaginationMixin, ListView):
 
     def get_queryset(self, **kwargs):
 
+        print '--args'
+        print self.args
+        print '--kwargs'
+        print self.kwargs
+        print kwargs
         kwargs = {}
         
         self.tagcloud = None
@@ -79,6 +86,10 @@ class PlaylistListView(PaginationMixin, ListView):
         else:
             qs = Playlist.objects.all()
             
+            
+            
+        if 'type' in self.kwargs:
+            qs = qs.filter(type=self.kwargs['type'])
             
             
         # special relation filters
@@ -212,7 +223,7 @@ class PlaylistEditView(UpdateView):
         
         
         
-    
+"""
 def playlist_collect(request, pk):
     playlist = get_object_or_404(Playlist, pk=pk)
 
@@ -263,3 +274,5 @@ def playlist_collect__old(request, pk):
     content = {'session': 'OK!'}
     
     return http.HttpResponse(json.dumps(content), content_type='application/json')
+    
+"""

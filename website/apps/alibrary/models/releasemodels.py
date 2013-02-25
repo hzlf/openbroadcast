@@ -568,7 +568,7 @@ from actstream import action
 def action_handler(sender, instance, created, **kwargs):
     action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
 
-#post_save.connect(action_handler, sender=Release)
+post_save.connect(action_handler, sender=Release)
 
 
 class ReleaseExtraartists(models.Model):

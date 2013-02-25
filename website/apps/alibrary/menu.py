@@ -6,7 +6,7 @@ from menus.menu_pool import menu_pool
 from cms.menu_bases import CMSAttachMenu
 
 
-from alibrary.models import Profession, Release, Artist
+from alibrary.models import Profession, Release, Artist, Playlist
 
 
 class LibraryMenu(CMSAttachMenu):
@@ -109,6 +109,29 @@ class PlaylistMenu(CMSAttachMenu):
     
     def get_nodes(self, request):
         nodes = []
+
+        node = NavigationNode(
+            _('All Broadcasts'),
+            reverse('alibrary-playlist-type-list', args=['broadcast']),
+            301
+        )
+        nodes.append(node)
+        
+        node = NavigationNode(
+            _('All Playlists'),
+            reverse('alibrary-playlist-type-list', args=['playlist']),
+            311
+        )
+        nodes.append(node)
+        
+        node = NavigationNode(
+            _('All Baskets'),
+            # reverse('alibrary-playlist-type-list', args=['basket', 'root']),
+            reverse('alibrary-playlist-type-list', kwargs={'type': 'basket', 'user': 'root'}),
+            411
+        )
+        nodes.append(node)
+        
         return nodes
     
 menu_pool.register_menu(PlaylistMenu)

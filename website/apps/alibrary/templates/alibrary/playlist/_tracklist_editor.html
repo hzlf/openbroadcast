@@ -8,9 +8,12 @@
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/playlist.editor.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}
 <script>
+
+	var alibrary = alibrary || {};
+
 	$(function(){
 
-		var alibrary = alibrary || {};
+		
 		alibrary.playlist_editor = new PlaylistEditor();;
 		alibrary.playlist_editor.api_url = "{{ object.get_api_url }}";
 		// alibrary.playlist_editor.init();

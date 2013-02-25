@@ -412,122 +412,6 @@ ExporterApp = (function() {
 
 
 
-CollectorApp = (function() {
-	
-	var self = this;
-	this.api_url = '/api/v1/playlist/'
-	
-	this.active_playlist = false;
-	
-	this.init = function() {
-		$.log('CollectorApp: init');
-		this.bindings();
-	};
-	
-	this.bindings= function() {
-		
-		$('.collectable').live('click', function(e) {
-	
-			e.preventDefault();
-			
-			// get container item
-			
-			var container = $(this).parents('.item');
-			var resource_uri = container.data('resource_uri');
-			
-			items = new Array;
-			
-			// type switch
-			if(container.hasClass('release')) {
-				$.log('type: release')
-				$.log(resource_uri);
-				
-				$.ajax({
-					url: resource_uri,
-					success: function(data) {
-						
-						for(i in data.media) {
-							var item = data.media[i];
-							items.push(item.id);
-						}
-						
-					},
-					async: false
-				});
-				
-			}
-
-			if(base.ui.use_effects) {
-				$('#list_item_' + item_id).effect("transfer", { to: ".playlist.basket" }, 300);
-			}
-			
-			$.log(self.get_active_playlist());
-			
-			self.collect(items, false);
-	
-		});
-		
-	};
-	
-	
-	this.get_active_playlist = function() {
-		
-		if(!this.active_playlist || 1 == 1) {
-			
-			$.ajax({
-				url: self.api_url + '?status=0',
-				success: function(data) {
-					objects = data.objects;
-					console.log(objects);
-				},
-				async: false
-			});
-			
-			if(objects.length > 0) {
-				this.active_playlist = objects[0];	
-			}
-			
-		}
-		
-		return this.active_playlist;
-		
-	};
-	
-	this.collect = function(items) {
-
-			var data = {
-				ids: items.join(','), 
-				ct: 'media'
-			}
-
-			
-			var url = this.active_playlist.resource_uri + 'collect/';
-			
-			/**/
-			jQuery.ajax({
-				url: url,
-				type: 'POST',
-				data: data,
-				dataType: "json",
-				contentType: "application/json",
-				//processData:  false,
-				success: function(data) {
-					console.log(data);
-					// export_session = data;
-				},
-				async: false
-			});
-			
-
-
-		
-		
-		
-	};
-
-});
-
-
 
 /*
  * global interface things
@@ -537,10 +421,7 @@ base.ui.iface = function() {
 	
 	Boxy.DEFAULTS.title = '&nbsp;';
 	
-	
 	base.ui.exporter = new ExporterApp;
-	base.ui.collector = new CollectorApp;
-	base.ui.collector.init();
 	
 	if (window.console && console.firebug) {
 		console.warn('You should disable firebug, else performance can be very low!');
@@ -592,9 +473,9 @@ base.ui.iface = function() {
     }).bind("blur", function(event) {
     	
     	if(base.ui.use_effects) {
-    		$('body').animate({opacity:0.9},{queue:true,duration:200});
+    		// $('body').animate({opacity:0.1},{queue:true,duration:200});
     	} else {
-    		$('body').css('opacity', 0.9);
+    		// $('body').css('opacity', 0.1);
     	}
 		$('body').addClass('blur');
 

@@ -27,6 +27,10 @@ from cms.models import CMSPlugin, Page
 from cms.models.fields import PlaceholderField
 from cms.utils.placeholder import get_page_from_placeholder_if_exists
 
+# model_utils
+from model_utils.models import StatusModel, TimeFramedModel
+from model_utils import Choices
+
 # filer
 from filer.models.filemodels import *
 from filer.models.foldermodels import *
@@ -67,6 +71,20 @@ TARGET_DURATION_CHOICES = (
     (6300, '105'),
     (7200, '120'),
 )
+"""
+SEASOUN_CHOICES = (
+    (0, _('Spring')),
+    (1, _('Summer')),
+    (2, _('Autumn')),
+    (3, _('Winter')),
+)
+
+WEATHER_CHOICES = (
+    (0, _('Sunny')),
+    (1, _('Rainy')),
+    (2, _('Foggy ')),
+)
+"""
 
 def filename_by_uuid(instance, filename):
     filename, extension = os.path.splitext(filename)
@@ -74,6 +92,36 @@ def filename_by_uuid(instance, filename):
     filename = instance.uuid.replace('-', '/') + extension
     return os.path.join(path, filename)
 
+
+class Season(models.Model):
+    
+    name = models.CharField(max_length=200)
+    date_start = models.DateField(null=True, blank=True)
+    date_end = models.DateField(null=True, blank=True)
+    
+    class Meta:
+        app_label = 'alibrary'
+        verbose_name = _('Season')
+        verbose_name_plural = _('Seasons')
+        ordering = ('-name', )
+    
+    def __unicode__(self):
+        return '%s' % (self.name)
+
+
+class Weather(models.Model):
+    
+    name = models.CharField(max_length=200)
+    
+    class Meta:
+        app_label = 'alibrary'
+        verbose_name = _('Weather')
+        verbose_name_plural = _('Weather')
+        ordering = ('-name', )
+    
+    def __unicode__(self):
+        return '%s' % (self.name)
+    
 
 
 class Playlist(models.Model):
@@ -101,7 +149,6 @@ class Playlist(models.Model):
     )
     type = models.CharField(max_length=12, default='other', null=True, choices=TYPE_CHOICES)
     
-    #main_image = FilerImageField(null=True, blank=True, related_name="playlist_main_image", rel='')
     main_image = models.ImageField(verbose_name=_('Image'), upload_to=filename_by_uuid, null=True, blank=True)
     
     # relations
@@ -124,13 +171,17 @@ class Playlist(models.Model):
     target_duration = models.PositiveIntegerField(default=0, null=True, choices=TARGET_DURATION_CHOICES)
     
     dayparts = models.ManyToManyField(Daypart, null=True, blank=True, related_name='daypart_plalists')
+    seasons = models.ManyToManyField('Season', null=True, blank=True, related_name='season_plalists')
+    weather = models.ManyToManyField('Weather', null=True, blank=True, related_name='weather_plalists')
+    
+    
+    #season = models.PositiveIntegerField(default=0, null=True, choices=TARGET_DURATION_CHOICES)
     
     
     # is currently selected as default?
-    is_current = models.BooleanField(_('Currently selected as default?'), default=True)
+    is_current = models.BooleanField(_('Currently selected?'), default=False)
     
-    
-    #description = extra.MarkdownTextField(blank=True, null=True)
+    description = extra.MarkdownTextField(blank=True, null=True)
     
     # manager
     objects = models.Manager()
@@ -144,7 +195,7 @@ class Playlist(models.Model):
         app_label = 'alibrary'
         verbose_name = _('Playlist')
         verbose_name_plural = _('Playlists')
-        ordering = ('name', )
+        ordering = ('-updated', )
         
         permissions = (
             ('view_playlist', 'View Playlist'),
@@ -165,9 +216,9 @@ class Playlist(models.Model):
     def get_edit_url(self):
         return ('alibrary-playlist-edit', [self.pk])
     
-    @models.permalink
-    def get_reorder_url(self):
-        return ('alibrary-playlist-reorder', [self.pk])
+    #@models.permalink
+    #def get_reorder_url(self):
+    #    return ('alibrary-playlist-reorder', [self.pk])
     
     def get_api_url(self):
         return reverse('api_dispatch_detail', kwargs={  
@@ -241,6 +292,12 @@ class Playlist(models.Model):
     """"""
     def save(self, *args, **kwargs):
         
+        
+        # status update
+        if self.status == 0:
+            self.status = 2
+        
+        """"""
         duration = 0
         try:
             for item in self.items.all():
@@ -250,7 +307,7 @@ class Playlist(models.Model):
                     #duration -= item.cue_in
                     #duration -= item.cue_out
         except Exception, e:
-            print e
+            #print e
             pass
         
         self.duration = duration
@@ -264,7 +321,7 @@ class Playlist(models.Model):
             self.tags = t_tags
             self.d_tags = t_tags
         except Exception, e:
-            print e
+            #print e
             pass
         
         
@@ -341,7 +398,7 @@ class PlaylistItem(models.Model):
         verbose_name_plural = _('Playlist Items')
         #ordering = ('-created', )
         
-    ct_limit = models.Q(app_label = 'alibrary', model = 'media') | models.Q(app_label = 'alibrary', model = 'release')
+    ct_limit = models.Q(app_label = 'alibrary', model = 'media') | models.Q(app_label = 'alibrary', model = 'release') | models.Q(app_label = 'abcast', model = 'jingle')
     
     content_type = models.ForeignKey(ContentType, limit_choices_to = ct_limit)
     object_id = models.PositiveIntegerField()

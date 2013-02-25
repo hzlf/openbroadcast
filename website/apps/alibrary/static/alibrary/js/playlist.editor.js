@@ -9,7 +9,7 @@ PlaylistEditor = function() {
 
 	this.interval = false;
 	this.interval_loops = 0;
-	this.interval_duration = 9000;
+	this.interval_duration = 120000;
 	//this.interval_duration = false;
 	this.api_url = false;
 	
@@ -59,7 +59,9 @@ PlaylistEditor = function() {
 	this.bindings = function() {
 		
 		
-		/**/
+		/*
+		 * Playlist main-editor
+		 */
 		self.dom_element.sortable(
 			{
 				placeholder: "item drop-placeholder",
@@ -71,23 +73,78 @@ PlaylistEditor = function() {
 			}
 		);
 		
-		$('#jingle_list').sortable({
-			placeholder: "item drop-placeholder",
-			connectWith: self.dom_element,
-			helper: "clone" 
-		});
-		
 		self.dom_element.disableSelection();
 		
 		self.dom_element.on( "sortupdate", function( e, ui ) {
+
+			var dom_item = $(ui.item[0]);
 			
+			// check if dropped from outside
+			if(dom_item.hasClass('sidebar list item source')) {
+				
+				console.log('dropped from outside');
+	
+				var post_data = {};
+				
+				// get item details
+				jQuery.ajax({
+					url: dom_item.data('resource_uri'),
+					type: 'GET',
+					dataType: "json",
+					contentType: "application/json",
+					//processData:  false,
+					success: function(data) {
+						console.log(data);
+						post_data = {
+							ids: [data.item.object_id].join(','),
+							ct: data.item.content_type
+						}
+					},
+					async: false
+				});
+
+				// add item to current playlist (the one in the main editor)
+				url = self.api_url + 'collect/';
+				var data;
+				jQuery.ajax({
+					url: url,
+					type: 'POST',
+					data: post_data,
+					dataType: "json",
+					contentType: "application/json",
+					//processData:  false,
+					success: function(data) {
+						
+						
+						var item = data.items.pop();
+						
+						console.log('created item:', item);
+						
+						//data = data;
+						var temp_html = '<div class="temporary item editable" id="playlist_item_' + item.id + '" data-uuid="' + item.uuid + '"><i class="icon-spinner icon-spin icon-2x"></i></div>'
+						dom_item.replaceWith(temp_html);
+						
+					},
+					async: false
+				});
+				
+				
+				// create an entry in the editor list (uuid used for reordering)
+
+				
+				
+			};
+
 			
 			if(ui.sender && ui.sender[0].id == 'jingle_list') {
 				console.log('jingle dropped!!');	
 			}
 			
-			self.reorder();
+			if(ui.sender && ui.sender[0].id == 'inline_playlist_holder') {
+				console.log('jingle dropped!!');	
+			}
 			
+			self.reorder();
 			
 		});
 		
@@ -128,6 +185,25 @@ PlaylistEditor = function() {
 	
 	this.rebind = function() {
 
+		
+		/*
+		 * Sidebar, dragable jingles
+		 */
+		$('#jingle_list').sortable({
+			placeholder: "item drop-placeholder",
+			connectWith: self.dom_element,
+			helper: "clone" 
+		});
+		
+		/*
+		 * Sidebar, dragable playlists (a.k.a. baskets)
+		 */
+		$('#inline_playlist_holder .list').sortable({
+			placeholder: "item drop-placeholder",
+			connectWith: self.dom_element,
+			helper: "clone" 
+		});
+		
 	};
 	
 	this.reorder = function() {
@@ -328,8 +404,14 @@ PlaylistEditor = function() {
 				}
 				
 			} else {
-				this.editor_items[item.id] = new PlaylistEditorItem();
-				this.editor_items[item.id].init(item, self);
+				
+				if(content_type == 'media') {
+					this.editor_items[item.id] = new PlaylistEditorItem();
+					this.editor_items[item.id].init(item, self);
+				}
+
+				// TODO: jingles...
+				
 			}
 			
 			self.current_items[item.id] = item;
@@ -450,7 +532,14 @@ PlaylistEditorItem = function() {
 			html = ich.tpl_playlists_editor_media({object: self.item});
 		}
 		
-		self.editor_container.append(html);
+		// check if append or replace
+		if ($('#playlist_item_' + self.item.id).length) {
+			console.log('!!! replacing item !!!')
+			$('#playlist_item_' + self.item.id).replaceWith(html);
+		} else {
+			self.editor_container.append(html);
+		}
+		
 
 		self.dom_id = 'playlist_item_' + self.item.id;
 		self.dom_element = $('#' + self.dom_id);
@@ -488,7 +577,7 @@ PlaylistEditorItem = function() {
 			
 		});
 		
-		$('.actions a', self.dom_element).live('click', function(e){
+		$('.actions a', self.dom_element).live('click', function(e) {
 			e.preventDefault();
 			
 			var action = $(this).data('action');

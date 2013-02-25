@@ -113,7 +113,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.request',
     'django.core.context_processors.media',
     'django.contrib.messages.context_processors.messages',
-    'notification.context_processors.notification',
+    #'notification.context_processors.notification',
     #'announcements.context_processors.site_wide_announcements',
     # cms
     'cms.context_processors.media',
@@ -299,7 +299,8 @@ INSTALLED_APPS = (
     'django_jenkins',
     'django_filters',
 
-    'notification',
+    #'notification',
+    'notifications',
     'debug_toolbar',
     'mailer',
     'djcelery',
@@ -353,6 +354,9 @@ INSTALLED_APPS = (
     'sekizai',
     'compressor',
     'easy_thumbnails',
+    
+    # translation
+    'modeltranslation',
     
     
     # rest & API

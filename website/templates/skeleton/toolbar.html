@@ -1,4 +1,6 @@
-{% load menu_tags i18n %}
+{% load menu_tags i18n notifications_tags activity_tags %}
+{% notifications_unread as unread_count %}
+
 
 	<div>
 		<div class="navright">
@@ -20,8 +22,8 @@
 			        	{% if user.is_staff %}
 						<li><a href="/admin/"><span><i class="icon-dashboard"></i> {% trans 'Administration' %}</span></a></li>
 						{% endif %}
-						{% if notice_unseen_count > 0 %}
-						<li class="messages"><a href="#"><i class="icon-comment icon-white"></i><span class="icon-label">{{ notice_unseen_count }}</span></a></li>
+						{% if unread_count %}
+						<li class="messages"><a href="#"><i class="icon-comment icon-white"></i><span class="icon-label">{{ unread_count }}</span></a></li>
 						{% endif %}
 					{% else %}
 			        	<li><a title="Login" href="{% url account_login %}?next={{ request.get_full_path }}" rel="modal:open"><span><i class="icon-signin"></i> {% trans 'Login' %}</span></a></li>
@@ -42,6 +44,23 @@
 		</div>
 		<div class="clear"></div>
 	</div>
+	
+	
+	
+	
+	<!--
+	<div class="notification-holder">
+		<div class="message-list">
+			<div class="message">
+				<h2></h2>
+				<p></p>
+			</div>
+		</div>
+	</div>
+	-->
+	
+	
+	
 	<div class="subnav">
 		{% show_menu 0 1 100 100 "menu/navigation_sub.html" %}
 	</div>

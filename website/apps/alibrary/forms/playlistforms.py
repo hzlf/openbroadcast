@@ -59,21 +59,12 @@ from django.utils.encoding import force_unicode
 from itertools import chain
 class DaypartWidget(SelectMultiple):
     def render(self, name, value, attrs=None, choices=()):
-        
-        #self.choices = list(self.choices)
-        
         cs = []
-        
-        print '****************'
         for c in self.choices:
             c = list(c)
             c.append(True)
-            print c
-            
             cs.append(c)
-        print '****************'
-        
-        
+
         dps = Daypart.objects.active()
         cs = []
         t_dp_day = None
@@ -85,21 +76,15 @@ class DaypartWidget(SelectMultiple):
                  
             c = [dp.pk, '%02d - %02d' % (dp.time_start.hour, dp.time_end.hour), row_title]
             cs.append(c)
-            
-            
-        
+
         self.choices = cs
         
         if value is None: value = []
         has_id = attrs and 'id' in attrs
         final_attrs = self.build_attrs(attrs, name=name)
         output = [u'<ul class="unstyled" style="float: left;">']
-        #output = [u'']
-        # Normalize to strings
         str_values = set([force_unicode(v) for v in value])
         for i, (option_value, option_label, row_title) in enumerate(chain(self.choices, choices)):
-            # If an ID attribute was given, add a numeric index as a suffix,
-            # so that the checkboxes don't all have the same ID attribute.
             if has_id:
                 final_attrs = dict(final_attrs, id='%s_%s' % (attrs['id'], i))
                 label_for = u' for="%s"' % final_attrs['id']
@@ -115,25 +100,21 @@ class DaypartWidget(SelectMultiple):
                 output.append(u'</ul><ul class="unstyled" style="float: left;"><li class="title">%s</li>' % row_title)
             
             output.append(u'<li><label%s>%s %s</label></li>' % (label_for, rendered_cb, option_label))
-            
 
-
-        
-        #output.append(u'</ul>')
         return mark_safe(u'\n'.join(output))
 
     def id_for_label(self, id_):
-        # See the comment for RadioSelect.id_for_label()
         if id_:
             id_ += '_0'
         return id_
+
 
 class PlaylistForm(ModelForm):
 
     class Meta:
         model = Playlist
         #fields = ('name','label','releasetype','release_country','catalognumber','description', 'main_image', 'releasedate', 'd_tags')
-        fields = ('name', 'd_tags', 'description', 'main_image', 'dayparts', 'target_duration')
+        fields = ('name', 'd_tags', 'description', 'main_image', 'dayparts', 'weather', 'seasons', 'target_duration')
         
         
         widgets = {
@@ -197,10 +178,18 @@ class PlaylistForm(ModelForm):
         )
         
         daypart_layout = Fieldset(
-                "%s %s" % ('<i class="icon-calendar"></i>', _('Best Broadcast Dayparts')),
+                "%s %s" % ('<i class="icon-calendar"></i>', _('Best Broadcast...')),
                 Div(
                     Field('dayparts'),
                     css_class='dayparts'
+                ),
+                Div(
+                    Field('seasons'),
+                    css_class='seasons'
+                ),
+                Div(
+                    Field('weather'),
+                    css_class='weather'
                 ),
                 
         )
@@ -225,8 +214,11 @@ class PlaylistForm(ModelForm):
     description = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")   
 
     #dayparts = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple, queryset=Daypart.objects.active())
-    dayparts = forms.ModelMultipleChoiceField(widget=DaypartWidget(), queryset=Daypart.objects.active(), required=False)
     target_duration = forms.ChoiceField(widget=forms.RadioSelect, choices=TARGET_DURATION_CHOICES, required=False)
+    dayparts = forms.ModelMultipleChoiceField(label='...%s' % _('Dayparts'), widget=DaypartWidget(), queryset=Daypart.objects.active(), required=False)
+
+    seasons = forms.ModelMultipleChoiceField(label='...%s' % _('Seasons'), queryset=Season.objects.all(), required=False, widget=forms.CheckboxSelectMultiple)
+    weather = forms.ModelMultipleChoiceField(label='...%s' % _('Weather'), queryset=Weather.objects.all(), required=False, widget=forms.CheckboxSelectMultiple)
 
     def clean(self, *args, **kwargs):
         cd = super(PlaylistForm, self).clean()

@@ -308,7 +308,7 @@ class PlaylistItemPlaylistInline(admin.TabularInline):
         
 class PlaylistAdmin(BaseAdmin):
     
-    list_display   = ('name', 'user', 'type', 'duration', 'is_current',)
+    list_display   = ('name', 'user', 'type', 'duration', 'is_current', 'updated')
     list_filter = ('type', )
     
     #readonly_fields = ['slug', 'is_current',]
@@ -338,8 +338,14 @@ admin.site.register(Mediaformat, MediaformatAdmin)
 admin.site.register(APILookup)
 
 
+from modeltranslation.admin import TranslationAdmin
+class SeasonAdmin(TranslationAdmin):
+    pass
+class WeatherAdmin(TranslationAdmin):
+    pass
 
-
+admin.site.register(Season, SeasonAdmin)
+admin.site.register(Weather, WeatherAdmin)
 
 
 

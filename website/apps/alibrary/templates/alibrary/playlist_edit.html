@@ -15,13 +15,31 @@
 <script>
 	$(function(){
 		
+		
 		$('.target-duration input:checked').parent().addClass("selected");
 		$('.target-duration input').css('display', 'none');
-
 		$('.target-duration input').live('change', function(e){
 			$('.target-duration label').removeClass('selected');
 			$(this).parents('label').addClass('selected');
 		});
+		
+		
+		$('.weather input:checked').parent().addClass("selected");
+		$('.weather input').css('display', 'none');
+		$('.weather input').live('change', function(e){
+			//$('.weather label').removeClass('selected');
+			$(this).parents('label').toggleClass('selected');
+		});
+		
+		
+		$('.seasons input:checked').parent().addClass("selected");
+		$('.seasons input').css('display', 'none');
+		$('.seasons input').live('change', function(e){
+			//$('.seasons label').removeClass('selected');
+			$(this).parents('label').toggleClass('selected');
+		});
+		
+		
 		
 		$('.dayparts input:checked').parents('li').addClass("selected");
 		$('.dayparts input').css('display', 'none');
@@ -140,5 +158,13 @@
 <div class="sidebar form-sidebar holder">
 	{% include "alibrary/playlist/sidebar/_edit_transform.html" %}
 </div>
+
+<div class="sidebar holder">
+	{% include "alibrary/sidebar/_playlist.html" %}
+</div>
+
+
+
+
 {% endblock %}
 

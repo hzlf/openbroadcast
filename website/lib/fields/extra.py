@@ -114,7 +114,7 @@ class MarkdownTextField (TextField):
             setattr(model_instance, self._html_field, html)
             return value
         except Exception, e:
-            print e
+            #print e
             return ""
 
     def __unicode__ (self):

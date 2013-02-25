@@ -4,10 +4,10 @@ from django.conf.urls.defaults import *
 from tastypie.api import Api
 from bcmon.api import PlayoutResource as BcmonPlayoutResource
 from bcmon.api import ChannelResource as BcmonChannelResource
-from alibrary.api import MediaResource, ReleaseResource, ArtistResource, LabelResource, PlaylistResource, PlaylistItemPlaylistResource
+from alibrary.api import MediaResource, ReleaseResource, ArtistResource, LabelResource, SimplePlaylistResource, PlaylistResource, PlaylistItemPlaylistResource
 from importer.api import ImportResource, ImportFileResource
 from exporter.api import ExportResource, ExportItemResource
-from abcast.api import StationResource, ChannelResource
+from abcast.api import StationResource, ChannelResource, JingleResource, JingleSetResource
 
 from fluent_comments.api import CommentResource
 
@@ -22,6 +22,7 @@ api.register(MediaResource())
 api.register(ReleaseResource())
 api.register(ArtistResource())
 api.register(LabelResource())
+api.register(SimplePlaylistResource())
 api.register(PlaylistResource())
 api.register(PlaylistItemPlaylistResource())
 
@@ -36,6 +37,8 @@ api.register(ExportItemResource())
 # abcast
 api.register(StationResource())
 api.register(ChannelResource())
+api.register(JingleResource())
+api.register(JingleSetResource())
 
 # comment
 api.register(CommentResource())

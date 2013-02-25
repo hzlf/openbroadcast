@@ -15,7 +15,8 @@ from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
 from easy_thumbnails.files import get_thumbnailer
 
 from alibrary.models import Playlist, PlaylistMedia, Media, PlaylistItemPlaylist, PlaylistItem, Daypart
-
+from abcast.models import Jingle
+from abcast.api import JingleResource
 
 class PlaylistItemResource(ModelResource):
 
@@ -24,6 +25,7 @@ class PlaylistItemResource(ModelResource):
     co_to = {
              Release: ReleaseResource,
              Media: MediaResource,
+             Jingle: JingleResource,
              }
     
     content_object = GenericForeignKeyField(to=co_to, attribute='content_object', null=False, full=True)
@@ -66,14 +68,74 @@ class DaypartResource(ModelResource):
     class Meta:
         queryset = Daypart.objects.all()
         excludes = ['id',]
+        
+        
+class SimplePlaylistResource(ModelResource):
 
+    """
+    items = fields.ToManyField('alibrary.api.PlaylistItemPlaylistResource',
+            attribute=lambda bundle: bundle.obj.items.through.objects.filter(
+                playlist=bundle.obj).order_by('position') or bundle.obj.items, null=True, full=True, max_depth=1)
+    """
+    #dayparts = fields.ToManyField('alibrary.api.DaypartResource', 'dayparts', null=True, full=True, max_depth=3)
+
+
+    class Meta:
+        queryset = Playlist.objects.order_by('-created').all()
+        list_allowed_methods = ['get',]
+        detail_allowed_methods = ['get',]
+        resource_name = 'simpleplaylist'
+        #excludes = ['updated',]
+        include_absolute_url = True
+        
+        always_return_data = True
+        
+        authentication =  MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
+        authorization = Authorization()
+        filtering = {
+            #'channel': ALL_WITH_RELATIONS,
+            'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
+            'status': ['exact', 'range',],
+            'is_current': ['exact',],
+        }
+
+    def apply_authorization_limits(self, request, object_list):
+        return object_list.filter(user=request.user)
+
+    def dehydrate(self, bundle):
+        bundle.data['item_count'] = bundle.obj.items.count();
+        return bundle
+    
+
+    # additional methods
+    def prepend_urls(self):
+        
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/set-current%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('set_current'), name="playlist_api_set_current"),
+        ]
+
+    def set_current(self, request, **kwargs):
+        
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        Playlist.objects.filter(user=request.user).exclude(**self.remove_api_resource_names(kwargs)).update(is_current=False)
+        cp = Playlist.objects.get(**self.remove_api_resource_names(kwargs))
+        cp.is_current = True
+        cp.save()
+        
+        bundle = self.build_bundle(obj=cp, request=request)
+        bundle = self.full_dehydrate(bundle)
+
+        self.log_throttled_access(request)
+        return self.create_response(request, bundle)
+    
+    
+    
+    
 class PlaylistResource(ModelResource):
 
-    """
-    media = fields.ToManyField('alibrary.api.PlaylistMediaResource',
-            attribute=lambda bundle: bundle.obj.media.through.objects.filter(
-                playlist=bundle.obj).order_by('position') or bundle.obj.media, null=True, full=True, max_depth=3)
-    """
     items = fields.ToManyField('alibrary.api.PlaylistItemPlaylistResource',
             attribute=lambda bundle: bundle.obj.items.through.objects.filter(
                 playlist=bundle.obj).order_by('position') or bundle.obj.items, null=True, full=True, max_depth=5)
@@ -101,19 +163,34 @@ class PlaylistResource(ModelResource):
         }
         #cache = SimpleCache(timeout=120)
         
-    def obj_create(self, bundle, request=None, **kwargs):
         
+
+    def apply_authorization_limits(self, request, object_list):
+        return object_list.filter(user=request.user)
+        
+    def obj_create(self, bundle, request=None, **kwargs):
         bundle = super(PlaylistResource, self).obj_create(bundle, request, user=request.user)
         
-        Playlist.objects.filter(user=request.user).exclude(bundle.obj).update(is_current=False)
+        Playlist.objects.filter(user=request.user).update(is_current=False)
         bundle.obj.is_current = True
-        #bundle.obj.save()
+        bundle.obj.save()
         return bundle
+        
+    def obj_delete(self, request=None, **kwargs):
+        ret = super(PlaylistResource, self).obj_delete(request, **kwargs)
+        
+        p = Playlist.objects.filter(user=request.user)[0]
+        p.is_current = True
+        p.save()
+        
+        print p
+        
+        return ret
     
     
     def dehydrate(self, bundle):
         bundle.data['edit_url'] = bundle.obj.get_edit_url();
-        bundle.data['reorder_url'] = bundle.obj.get_reorder_url();
+        #bundle.data['reorder_url'] = bundle.obj.get_reorder_url();
         return bundle
     
     """
@@ -130,7 +207,7 @@ class PlaylistResource(ModelResource):
         except:
             pass
         
-    
+    """
     def save_m2m(self, bundle):
         
         print 
@@ -139,7 +216,7 @@ class PlaylistResource(ModelResource):
         print bundle
         
         return bundle
-    """
+    
     
     
     
@@ -149,8 +226,11 @@ class PlaylistResource(ModelResource):
         
         return [
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/set-current%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('set_current'), name="playlist_api_set_current"),
-            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/collect%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('collect'), name="playlist_api_collect"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/reorder%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('reorder'), name="playlist_api_reorder"),
+            # collecting
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/collect%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('collect_specific'), name="playlist_api_collect_specific"),
+            url(r"^(?P<resource_name>%s)/collect%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('collect'), name="playlist_api_collect"),
+
         ]
 
 
@@ -174,13 +254,44 @@ class PlaylistResource(ModelResource):
 
 
 
-    def collect(self, request, **kwargs):
+    """
+    collect with knowing the target playlist
+    """
+    def collect_specific(self, request, **kwargs):
         
         self.method_check(request, allowed=['post'])
         self.is_authenticated(request)
         self.throttle_check(request)
 
         p = Playlist.objects.get(**self.remove_api_resource_names(kwargs))
+
+        ids = request.POST.get('ids', None)
+        ct = request.POST.get('ct', None)
+        
+        print ids
+        print ct
+
+        if ids:
+            ids = ids.split(',')
+            p.add_items_by_ids(ids, ct)
+
+        
+        bundle = self.build_bundle(obj=p, request=request)
+        bundle = self.full_dehydrate(bundle)
+
+        self.log_throttled_access(request)
+        return self.create_response(request, bundle)
+
+    """
+    collect _without_ knowing the target playlist
+    """
+    def collect(self, request, **kwargs):
+        
+        self.method_check(request, allowed=['post'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        p = Playlist.objects.filter(user=request.user,is_current=True)[0]
 
         ids = request.POST.get('ids', None)
         ct = request.POST.get('ct', None)

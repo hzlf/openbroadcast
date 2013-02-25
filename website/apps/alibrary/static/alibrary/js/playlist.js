@@ -10,9 +10,10 @@ PlaylistUi = function() {
 
 	this.interval = false;
 	this.interval_loops = 0;
-	this.interval_duration = 10000;
+	this.interval_duration = 120000;
 	// this.interval_duration = false;
 	this.api_url = false;
+	this.api_url_simple = false; // used for listings as much faster..
 	
 	this.inline_dom_id = 'inline_playlist_holder';
 	this.inline_dom_element;
@@ -136,6 +137,38 @@ PlaylistUi = function() {
 		$('.action.download > a', self.inline_dom_element).live('click', function(e){
 			e.preventDefault();
 		});
+		
+		
+		
+		// list-inner items
+		$('.list.item a', self.inline_dom_element).live('click', function(e) {
+			
+			e.preventDefault();
+			var container = $(this).parents('.list.item');
+			var action = $(this).data('action');
+			var resource_uri = container.data('resource_uri');
+			
+			if(action == 'delete') {
+				container.remove()
+				$.ajax({
+					url: resource_uri,
+					type: 'DELETE',
+					dataType: "json",
+					contentType: "application/json",
+					processData:  false,
+					success: function(data) {
+						container.hide(1000)
+					},
+					async: true
+				});
+			};
+			
+			if(action == 'play') {
+
+			};
+
+			
+		});
 
 		// selector
 		
@@ -184,7 +217,8 @@ PlaylistUi = function() {
 	this.create_playlist = function(name) {
 		
 		var data = {
-			'name': name
+			'name': name,
+			'type': 'basket'
 		};
 		
 		// alert('create: ' + name);
@@ -197,14 +231,15 @@ PlaylistUi = function() {
 			contentType: "application/json",
 			processData:  false,
 			success: function(data) {
-				// self.run_interval();
+				$('> div', self.inline_dom_element).remove();
+				self.run_interval();
 			},
-			async: false
+			async: true
 		});
 		
 		// console.log('data:', data);
 		
-		self.run_interval();
+		// self.run_interval();
 	};
 	
 	
@@ -222,21 +257,45 @@ PlaylistUi = function() {
 				$('#playlist_holder_' + id).fadeOut(160, function() { $(this).remove(); })
 				
 				
-				// self.run_interval();
+				self.update_playlists();
 			},
 			async: true
 		});
 	};
 	
 	this.update_playlists = function() {
+		
+		$.getJSON(self.api_url_simple, function(data) {
+			self.update_playlist_selector(data);
+			
+		});
+		
+		$.getJSON(self.api_url + '?is_current=1', function(data) {
+			self.update_playlist_display(data);
+			this.current_data = data;
+			
+			// maybe not the best way. think about alternatives...
+			try {
+				alibrary.playlist_editor.rebind();
+			} catch(e) {
+				console.log('error', e);
+			}
+			
+		});
+		
+		
+		
+		/*
 		$.getJSON(self.api_url, function(data) {
 			self.update_playlists_callback(data);
 		});
+		*/
 	};
 	
 	this.update_playlists_callback = function(data) {
 
 		self.update_playlist_display(data);
+		
 		self.update_playlist_selector(data);
 		
 		this.current_data = data;
@@ -261,7 +320,7 @@ PlaylistUi = function() {
 
 			item.status_key = status_map[item.status];
 			
-			console.log(item);
+			// console.log(item);
 
 			// filter out current playlist
 			if (item.is_current) {
@@ -289,7 +348,7 @@ PlaylistUi = function() {
 				}
 			} else {
 				// remove item if not the current one
-				target_element.hide(200)
+				target_element.remove();
 			}
 		}
 	};
@@ -322,7 +381,92 @@ PlaylistUi = function() {
 
 
 
+CollectorApp = (function() {
+	
+	var self = this;
+	this.api_url;
+	this.playlist_app;
+	
+	this.active_playlist = false;
+	
+	this.init = function() {
+		$.log('CollectorApp: init');
+		this.bindings();
+	};
+	
+	this.bindings= function() {
+		
+		$('.collectable').live('click', function(e) {
+	
+			e.preventDefault();
+			
+			// get container item
+			
+			var container = $(this).parents('.item');
+			var resource_uri = container.data('resource_uri');
+			
+			items = new Array;
+			
+			// type switch
+			if(container.hasClass('release')) {
+				$.log('type: release')
+				$.log(resource_uri);
+				
+				$.ajax({
+					url: resource_uri,
+					success: function(data) {
+						
+						for(i in data.media) {
+							var item = data.media[i];
+							items.push(item.id);
+						}
+						
+						self.collect(items, false);
+						
+					},
+					async: true
+				});
+				
+			}
 
+			// if(base.ui.use_effects) {
+				// $('#' + container.attr('id')).hide(1000);
+				$('#' + container.attr('id')).effect("transfer", { to: ".playlist.basket" }, 300);
+			// }
+			
+		});
+		
+	};
+	
+	
+	this.collect = function(items) {
+
+			var data = {
+				ids: items.join(','), 
+				ct: 'media'
+			}
+
+			url = this.api_url + 'collect/';
+			
+			/**/
+			jQuery.ajax({
+				url: url,
+				type: 'POST',
+				data: data,
+				dataType: "json",
+				contentType: "application/json",
+				//processData:  false,
+				success: function(data) {
+					if(self.playlist_app) {
+						self.playlist_app.update_playlists();
+					}
+				},
+				async: true
+			});
+		
+	};
+
+});
 
 
 
