@@ -384,6 +384,7 @@ INSTALLED_APPS = (
 
     
     # custom apps/*
+    'pusher',
     'asite',
     'alibrary',
     'aplayer',
@@ -651,6 +652,17 @@ mb server
 """
 MUSICBRAINZ_HOST = 'mb.anorg.net'
 MUSICBRAINZ_RATE_LIMIT = False
+
+"""
+pusher / nodejs
+"""
+SOCKETIO_URL = 'http://localhost:8888/'
+
+PUSHER_SETTINGS = {
+    'MODELS': ('alibrary.playlist',),
+}
+
+
 
 # media conversion
 """

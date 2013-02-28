@@ -2,7 +2,7 @@
 
 {% load crispy_forms_tags dajaxice_templatetags sekizai_tags static %}
 
-{% load thumbnail i18n truncate %}
+{% load thumbnail i18n truncate alibrary_tags abcast_tags %}
 
 {% block heading %} <!-- heading / icon (large one) -->
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}selectable/js/jquery.dj.selectable.js"></script>{% endaddtoblock %}
@@ -145,26 +145,17 @@
 
 {% block form_sidebar %}
 
-<!-- dummy -->
-
-<div class="jingles">
-	<ul id="jingle_list">
-		<li>Jingle 1</li>
-		<li>Jingle 2</li>
-	</ul>
-	
-</div>
-
 <div class="sidebar form-sidebar holder">
 	{% include "alibrary/playlist/sidebar/_edit_transform.html" %}
 </div>
 
 <div class="sidebar holder">
-	{% include "alibrary/sidebar/_playlist.html" %}
+	{% playlists_inline %}
 </div>
 
-
-
+<div class="sidebar holder">
+	{% jingles_inline %}
+</div>
 
 {% endblock %}
 

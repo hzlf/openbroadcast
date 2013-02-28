@@ -149,6 +149,13 @@ class Playlist(models.Model):
     )
     type = models.CharField(max_length=12, default='other', null=True, choices=TYPE_CHOICES)
     
+    EDIT_MODE_CHOICES = (
+        (0, _('Compact')),
+        (1, _('Medium')),
+        (2, _('Extended')),
+    )
+    edit_mode = models.PositiveIntegerField(default=2, choices=EDIT_MODE_CHOICES)
+    
     main_image = models.ImageField(verbose_name=_('Image'), upload_to=filename_by_uuid, null=True, blank=True)
     
     # relations

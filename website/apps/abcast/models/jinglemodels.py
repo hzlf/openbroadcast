@@ -94,14 +94,12 @@ class Jingle(BaseModel):
 
     
     TYPE_CHOICES = (
-        ('track', _('Track')),
-        ('remix', _('Remix')),
-        ('mix', _('DJ-Mix')),
-        ('other', _('Other')),
+        ('jingle', _('Jingle')),
+        ('placeholder', _('Placeholder')),
     )
-    type = models.CharField(verbose_name=_('Type'), max_length=12, default='track', choices=TYPE_CHOICES)
+    type = models.CharField(verbose_name=_('Type'), max_length=12, default='jingle', choices=TYPE_CHOICES)
     description = models.TextField(verbose_name="Extra Description", blank=True, null=True)
-    duration = models.PositiveIntegerField(verbose_name="Duration (in ms)", max_length=12, blank=True, null=True, editable=False)
+    duration = models.PositiveIntegerField(verbose_name="Duration (in ms)", max_length=12, blank=True, null=True, editable=True)
     
     # relations
     user = models.ForeignKey(User, blank=True, null=True, related_name="jingle_user", on_delete=models.SET_NULL)

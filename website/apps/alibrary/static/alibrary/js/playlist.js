@@ -389,6 +389,9 @@ CollectorApp = (function() {
 	
 	this.active_playlist = false;
 	
+	this.use_effects = true;
+	this.animation_target = ".playlist.basket";
+	
 	this.init = function() {
 		$.log('CollectorApp: init');
 		this.bindings();
@@ -400,10 +403,14 @@ CollectorApp = (function() {
 	
 			e.preventDefault();
 			
+			$.log('collect');
+			
 			// get container item
 			
 			var container = $(this).parents('.item');
 			var resource_uri = container.data('resource_uri');
+			
+
 			
 			items = new Array;
 			
@@ -428,11 +435,21 @@ CollectorApp = (function() {
 				});
 				
 			}
+			
+			// type switch
+			if(container.hasClass('media')) {
+				var item_id = container.data('item_id');
+				$.log('type: media', 'id:' + item_id);
+				items.push(item_id);
+				self.collect(items, false);				
+			}
+			
 
-			// if(base.ui.use_effects) {
-				// $('#' + container.attr('id')).hide(1000);
-				$('#' + container.attr('id')).effect("transfer", { to: ".playlist.basket" }, 300);
-			// }
+			if(self.use_effects) {
+				$('#' + container.attr('id')).effect("transfer", { to: self.animation_target }, 300);
+			}
+			
+			return false;
 			
 		});
 		
@@ -470,6 +487,117 @@ CollectorApp = (function() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+// selector to set active playlist
+// currently osed in popup-player
+PlaylistSelector = function() {
+
+	var self = this;
+
+	this.interval = false;
+	this.interval_loops = 0;
+	this.interval_duration = false;
+	this.api_url_simple = false; // used for listings as much faster..
+	
+	this.dom_id;
+	this.dom_element;
+	
+	this.current_data;
+
+	this.init = function() {
+		
+		$.log('PlaylistSelector: init');		
+		this.dom_element = $('#' + this.dom_id);
+
+		self.iface();
+		self.bindings();
+
+		// set interval and run once
+		if(self.interval_duration) {
+			self.set_interval(self.run_interval, self.interval_duration);
+		}
+		self.run_interval();
+		
+	};
+
+	this.iface = function() {
+
+	};
+
+	this.bindings = function() {
+		// selector		
+		$('select', self.dom_element).live('change', function(e){
+			e.preventDefault();
+			var resource_uri = $(this).val();
+
+			$.ajax({
+				url: resource_uri + 'set-current/',
+				type: 'GET',
+				dataType: "json",
+				contentType: "application/json",
+				processData:  false,
+				success: function(data) {
+					self.run_interval();
+				},
+				async: true
+			});
+			
+			
+		});
+	};
+
+	// interval
+	this.set_interval = function(method, duration) {
+		self.interval = setInterval(method, duration);
+	};
+	this.clear_interval = function(method) {
+		self.interval = clearInterval(method);
+	};
+
+	this.run_interval = function() {
+		self.interval_loops += 1;
+		self.update();
+
+	};
+
+	
+	this.update = function() {
+		
+		var selector = $('select', self.dom_element);
+
+		$.getJSON(self.api_url_simple, function(data) {
+			
+			var html = '';
+			for (i in data.objects) {
+				var item = data.objects[i];
+				console.log('item:', item);
+				
+				html += '<option';
+				if(item.is_current) {
+					html += ' selected="selected" ';
+				}
+				html += ' value="' + item.resource_uri + '" ';
+				html += ' >'
+				html += item.name;
+				html += ' [' + item.item_count + ']';
+				html += '</option>';
+			};
+			selector.html(html);
+			
+		});
+	};
+
+};
 
 
 

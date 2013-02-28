@@ -1,45 +1,27 @@
-<div class="item playlist {{media.uuid}} hoverable" id="{{media.uuid}}" >
+<div class="item playlist media {{media.uuid}} hoverable" id="{{media.uuid}}" id="playlist_item_{{media.id}}" data-item_id="{{media.id}}" >
 
 	<div class="wrapper">
 	
-	<div class="row-fluid">
-		<div class="span1 icon">
-			<i class="icon-play"></i>
-		</div>
-		<div class="span9 information">
-			<h1>{{media.name}}</h1>
-			<h2><a class="parent_link" href="{{media.artist.absolute_url}}">{{media.artist.name}}</a> | <a class="parent_link" href="{{media.release.absolute_url}}">{{media.release.name}}</a></h2>
-		</div>
-		<div class="span2 duration">
-			{{media.formated_duration}}
-		</div>
-	</div>
-	
-	</div>
-	<!-- main wrapper
-	<div class="playhead">
-		
-
-		
-		<div class="information base" style="display: block;">
-
-			<div class="left icon-container">
-				
-				<h1>{{media.name}}<small class="pull-right">{{media.duration}}</small></h1>
-				
-				<ul class="horizontal unstyled">
-					
-					<li></li>
-					<li><a class="parent_link" href="{{media.artist.absolute_url}}">{{media.artist.name}}</a> | <a class="parent_link" href="{{media.release.absolute_url}}">{{media.release.name}}</a></li>
-					
+		<div class="row-fluid">
+			<div class="span1 icon">
+				<i class="icon-play"></i>
+			</div>
+			<div class="span9 information">
+				<h1>{{media.name}}</h1>
+				<h2><a class="parent_link" href="{{media.artist.absolute_url}}">{{media.artist.name}}</a> | <a class="parent_link" href="{{media.release.absolute_url}}">{{media.release.name}}</a></h2>
+			</div>
+			<div class="span2 duration">
+				{{media.formated_duration}}
+				<ul class="unstyled actions">
+					<li>
+						<a class="collectable" href="#"><i class="icon-plus icon-large"></i></a>
+					</li>
 				</ul>
 			</div>
-			<div class="clear"></div>
 		</div>
-		
-	</div>	
-		
- 	-->
+	
+	</div>
+
 		
 	<div class="indicator">
 		<div class="wrapper">

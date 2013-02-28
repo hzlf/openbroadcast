@@ -11,7 +11,29 @@ $inner-width: auto
 // height has to be the same as image size
 $controls-height: 160px
 
-// loading overlay
+// fixed footer
+$footer-height: 60px
+html, body
+  height: 100%
+  #wrap
+    min-height: 100%
+    height: auto !important
+    height: 100%
+    margin: 0 auto -#{$footer-height}
+  
+  #push, footer
+    height: $footer-height
+    background: $grayLighter
+    .container
+      padding: 0 10px
+      select
+        width: 260px
+    
+    
+    
+    
+  .navbar.navbar-fixed-top
+    background-image: none !important
 
 
 // main wrapper
@@ -73,10 +95,7 @@ body.popup
 
 body.popup
 
-  footer
-    width: 100%
-    .container
-      padding-left: 10px
+
     
   section.container
     width: 100%
@@ -187,6 +206,8 @@ body.popup
           padding-top: 0px
           text-align: right
           
+
+          
       &.hover, &.playing
         cursor: pointer
         border-bottom: none
@@ -231,6 +252,9 @@ body.popup
       
       .handler
         background-image: none
+        
+      .waveform
+        height: 30px
       
       &.hover
         .handler

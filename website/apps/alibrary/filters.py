@@ -73,11 +73,12 @@ class PlaylistFilter(django_filters.FilterSet):
     status = CharListFilter(label=_("Status"))
     target_duration = CharListFilter(label=_("Target Duration"))
     dayparts__day = CharListFilter(label="Dayparts")
+    weather__name = CharListFilter(label="Weather")
     #media_release__license__name = CharListFilter(label="License")
     #main_format__name = CharListFilter(label="Release Format")
     class Meta:
         model = Playlist
-        fields = ['type', 'status', 'target_duration', 'dayparts__day', ]
+        fields = ['type', 'status', 'target_duration', 'dayparts__day', 'weather__name', ]
     
     @property
     def filterlist(self):
@@ -93,8 +94,11 @@ class PlaylistFilter(django_filters.FilterSet):
                 
                 filter_.entries = ds
                 
-                if ds not in flist:                    
+                if ds not in flist:
+                    #pass                 
                     flist.append(filter_)
+                    
+                    
 
             self._filterlist = flist
         

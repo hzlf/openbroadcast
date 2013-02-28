@@ -12,11 +12,11 @@ PlaylistEditor = function() {
 	this.interval_duration = 120000;
 	//this.interval_duration = false;
 	this.api_url = false;
-	
+	this.uuid = 'sdkhj';
 	this.dom_id = 'playlist_editor_list';
 	this.dom_element;
 	
-	this.use_waveforms;
+	this.mode;
 	
 	// holding the playlist
 	this.current_playlist;
@@ -37,9 +37,8 @@ PlaylistEditor = function() {
 		console.log(self.api_url);
 		
 		self.dom_element = $('#' + this.dom_id);
-		
-		self.use_waveforms = true;
 
+		pusher.subscribe(self.api_url, self.update);
 
 		self.iface();
 		self.bindings();
@@ -51,6 +50,11 @@ PlaylistEditor = function() {
 		self.run_interval();
 		
 	};
+	
+	// just testing
+	this.update = function() {
+		self.run_interval();
+	}
 
 	this.iface = function() {
 		// this.floating_inline('lookup_providers', 120)
@@ -69,7 +73,9 @@ PlaylistEditor = function() {
 				cursor: "move",
 				//cursorAt: { left: 5 },
 				delay: 150,
-				handle: '.base'
+				handle: '.base',
+				scroll: true,
+				scrollSensitivity: 10
 			}
 		);
 		
@@ -179,6 +185,19 @@ PlaylistEditor = function() {
 		});
 		
 		
+		// mode switch TODO: improve
+		$('#editor_mode_switch a', $('#playlist_editor')).live('click', function(e){
+			e.preventDefault();
+			
+			var mode = $(this).data('mode');
+			$('#playlist_editor').removeClass('condensed extended');
+			$('#playlist_editor').addClass(mode);
+
+			
+			
+		});
+		
+		
 		this.rebind();
 
 	};
@@ -199,6 +218,12 @@ PlaylistEditor = function() {
 		 * Sidebar, dragable playlists (a.k.a. baskets)
 		 */
 		$('#inline_playlist_holder .list').sortable({
+			placeholder: "item drop-placeholder",
+			connectWith: self.dom_element,
+			helper: "clone" 
+		});
+		
+		$('#inline_jingle_holder .list').sortable({
 			placeholder: "item drop-placeholder",
 			connectWith: self.dom_element,
 			helper: "clone" 
@@ -250,7 +275,7 @@ PlaylistEditor = function() {
 
 	
 	// update data by uuid (using uuid mapping)
-	this.update_by_uuid = function(uuid) {
+	this.update_by_uuid = function(uuid, refresh_item) {
 		
 		var item = self.current_playlist.items[self.uuid_map[uuid]];
 		var container = $('.' + uuid, this.dom_element);
@@ -286,6 +311,12 @@ PlaylistEditor = function() {
 			processData:  false,
 			success: function(data) {
 				// console.log('data:', data);
+				if(refresh_item == true) {
+					console.log(self.editor_items);
+					// TODO: not working
+					self.editor_items[item.id].update(item, self);
+				}
+				
 			},
 			async: false
 		});
@@ -485,10 +516,12 @@ PlaylistEditorItem = function() {
 	this.el_background;
 	this.el_buffer;
 	this.el_indicator;
-	this.el_indicator_cross;
+	this.el_controls_cross;
 	this.el_waveform;
 	this.el_envelope;
-	this.el_controls;
+	this.el_controls_fade;
+	this.el_controls_cue;
+	this.el_controls_fade_cross;
 	
 	this.player;
 	
@@ -504,7 +537,7 @@ PlaylistEditorItem = function() {
 	
 	this.size_x = 830;
 	this.size_y = 30;
-	this.envelope_top = 12;
+	this.envelope_top = 8;
 	this.envelope_bottom = 6;
 	
 	this.r;
@@ -543,6 +576,8 @@ PlaylistEditorItem = function() {
 
 		self.dom_id = 'playlist_item_' + self.item.id;
 		self.dom_element = $('#' + self.dom_id);
+		
+		self.dom_element.css('height', self.size_y + 70);
 
 		self.waveform_dom_id = 'playlist_item_waveform_' + self.item.id;
 		
@@ -565,13 +600,20 @@ PlaylistEditorItem = function() {
 	
 	this.bindings = function() {
 		
+		
+		// hover mapping
+		$(self.dom_element).live('mouseenter', function(e){
+			self.trigger_hover(e);
+		});
+	
+		$(self.dom_element).live('mouseleave', function(e){
+			self.trigger_hout(e);
+		});
+		
+		
 		$('.waveform', self.dom_element).live('click', function(e){
 			console.log(e.offsetX);
 			console.log(self.px_to_abs(e.offsetX));
-			
-			
-			
-			// self.player.play();
 			
 			self.player.setPosition(self.px_to_abs(e.offsetX));
 			
@@ -649,43 +691,53 @@ PlaylistEditorItem = function() {
 		// self.el_indicator.rotate(30)
 		var x = self.get_x_points();
 		var path = self.get_path(x);
-		this.el_envelope.animate({path: path},100);
+		this.el_envelope.animate({path: path},0);
 		
 		
 		
 		self.el_buffer.attr({x: self.abs_to_px(self.item.cue_in), width: self.size_x - self.abs_to_px( self.item.cue_in + self.item.cue_out )});
 
-
+		// update fades
 		if(self.item.fade_cross && self.item.fade_cross > 0) {
-			this.el_indicator_cross.animate({x: self.abs_to_px(self.co.duration - self.item.cue_out - self.item.fade_cross - 1)},100);
-			
+			this.el_controls_cross.animate({x: self.abs_to_px(self.co.duration - self.item.cue_out - self.item.fade_cross - 1)},100);
 		}
 		
+		// update cues
+		console.log('t' + Math.floor(self.abs_to_px(self.item.cue_in)) + ',0')
+		console.log(self.el_controls_cue[0].transform());
+		self.el_controls_cue[0].transform('T' + Math.floor(self.abs_to_px(self.item.cue_in)) + ',0');
+		
+		/*
+		var temp = self.el_controls_cue[0].clone();
+		temp.transform('t' + Math.floor(self.abs_to_px(self.item.cue_in)) + ',0');
+		self.el_controls_cue[0].animate({path: temp.attr('path')}, 100);
+  		temp.remove();
+		*/
 
 		// this.player.unload();
 
 	};
+
+	this.trigger_hover = function(e) {
+		console.log('el hover', e);
+		self.el_controls_cue.attr({stroke: self.envelope_color});
+	}
+	this.trigger_hout = function(e) {
+		console.log('el hout', e);
+		self.el_controls_cue.attr({stroke: "none"});
+	}
 	
 	this.init_waveform = function() {
 		
 		console.log('PlaylistEditorItem - init_waveform');
-		this.r = Raphael(self.waveform_dom_id, 830, 36);
+		this.r = Raphael(self.waveform_dom_id, 830, self.size_y + 6);
 		
 		self.el_background = this.r.rect(0, 0, self.size_x, self.size_y).attr({ stroke: "none", fill: '90-#efefef-#bbb:50-#efefef' });
 		self.el_buffer = this.r.rect(0, 0, 0, self.size_y).attr({ stroke: "none", fill: '90-#aaa-#444:50-#aaa' });
 		
-		self.el_waveform = this.r.image(self.item.item.content_object.waveform_image, 0, 0, 830, 30);
+		self.el_waveform = this.r.image(self.item.item.content_object.waveform_image, 0, 0, 830, self.size_y);
 		
 		self.el_indicator = this.r.rect(-10, 0, 2, 40).attr({ stroke: "none", fill: '#00bb00' });
-		
-		self.el_indicator_cross = this.r.rect(-10, 30, 2, 36).attr({ stroke: "none", fill: '#ff0000' });
-		
-		if(self.item.fade_cross && self.item.fade_cross > 0) {
-			this.el_indicator_cross.animate({x: self.abs_to_px(self.co.duration - self.item.cue_out - self.item.fade_cross - 1)},100);
-		}
-		
-		// console.log('init_waveform', item.item.content_object.name, item.item.content_object.waveform_image);
-		
 		
 		self.set_envelope();
 	    
@@ -699,66 +751,223 @@ PlaylistEditorItem = function() {
 		
 		self.el_envelope = this.r.path(path).attr({stroke: self.envelope_color, "stroke-width": 1, 'opacity': 1, "stroke-linecap": "round"});
 		
+
+
+
+
+		/*
+		 * cue handling
+		 */
+		var c_cue_size = 8;
+		var c_cue_attr = { stroke: self.envelope_color, 'stroke-width': 2, 'fill-opacity': .1 , r: 0, cursor: 'move'};
 		
-		var c_size = 6;
-		var c_attr = { fill: self.envelope_color, stroke: "none" };
-	
-	
-	/*	*/
-		self.el_controls = this.r.set(
-			
-			//this.r.rect(x[0] - c_size / 2, this.size_y - c_size / 2 - this.envelope_bottom, c_size, c_size).attr(c_attr),
-			this.r.rect(x[1] - c_size / 2, this.envelope_top - c_size / 2, c_size, c_size).attr(c_attr),
-			this.r.rect(x[2] - c_size / 2, this.envelope_top - c_size / 2, c_size, c_size).attr(c_attr)
-			//this.r.rect(x[3] - c_size / 2, this.size_y - c_size / 2 - this.envelope_bottom, c_size, c_size).attr(c_attr)
-			
-         );
-         
-         self.el_controls[0].update = function(x, y) {
+		var cp = [];
+		cp[0] = [ ["M", c_cue_size, 2], ["L", 0, 2], ["L", 0,  self.size_y], ["L", c_cue_size,  self.size_y] ];
+		cp[1] = [ ["M", 0, 2], ["L", c_cue_size, 2], ["L", c_cue_size,  self.size_y], ["L", 0,  self.size_y] ];
+		
+		self.el_controls_cue = this.r.set(
+			this.r.path(cp[0]).attr(c_cue_attr),
+			this.r.path(cp[1]).attr(c_cue_attr)
+        ).mouseover(function (set) {
+        	console.log('set', set)
+			this.animate({"fill-opacity": .55, fill: self.envelope_color}, 100);
+		}).mouseout(function () {
+			this.animate(c_cue_attr, 300);
+		});
+		
+		// specific update functions
+         self.el_controls_cue[0].update = function(x, y) {         	
+                        // get X
+                        var X = this.transform()[0][1] + x;
+                        
+                        // set envelope
+                        path[1][1] = X + self.abs_to_px(self.item.fade_in);
+                        path[0][1] = X;
+                        self.el_envelope.animate({path: path},0);
+                        
+                        // set envelope controls
+                        self.el_controls_fade[0].attr({x: X + self.abs_to_px(self.item.fade_in)});
+                        
+                        // set self + update display
+                        this.transform('T' + X + ',0')            
+                        $('.cue_in', self.dom_element).val(Math.floor(self.px_to_abs(X)) );
+         };
+         self.el_controls_cue[1].update = function(x, y) {         	
+                        // get X
+                        var X = this.transform()[0][1] + x;
+                        
+                        // set envelope
+                        path[2][1] = X - self.abs_to_px(self.item.fade_out);
+                        path[3][1] = X;
+                        self.el_envelope.animate({path: path},0);
+                        
+                        // set envelope controls
+                        self.el_controls_fade[1].attr({x: X - self.abs_to_px(self.item.fade_out)});
+                        
+                        // set self + update display
+                        this.transform('T' + X + ',0')            
+                        $('.cue_out', self.dom_element).val(Math.floor(self.co.duration - self.px_to_abs(X + c_cue_size)));
+         };
+		
+		// transform to current values
+		self.el_controls_cue[0].transform('T' + x[0] + ',0');
+		self.el_controls_cue[1].transform('T' + (x[3] - c_cue_size ) + ',0');
+        self.el_controls_cue.drag(self.controls_cue_onmove, self.controls_cue_onstart, self.controls_cue_onend);
+
+
+		
+		/*
+		 * fade handling
+		 */
+		var c_fade_size = 6;
+		var c_fade_attr = { fill: self.envelope_color, 'stroke-width': 10, 'stroke-opacity': .20 , r: 1, cursor: 'move'};
+		
+		self.el_controls_fade = this.r.set(			
+			this.r.rect(x[1] - c_fade_size / 2, this.envelope_top - c_fade_size / 2, c_fade_size, c_fade_size).attr(c_fade_attr),
+			this.r.rect(x[2] - c_fade_size / 2, this.envelope_top - c_fade_size / 2, c_fade_size, c_fade_size).attr(c_fade_attr)
+        ).mouseover(function () {
+			this.animate({"stroke-opacity": .75, stroke: self.envelope_color}, 100);
+		}).mouseout(function () {
+			this.animate(c_fade_attr, 300);
+		});
+		
+		// specific update functions
+         self.el_controls_fade[0].update = function(x, y) {
                         var X = this.attr("x") + x, Y = this.attr("y") + y;
                         this.attr({x: X});
                         path[1][1] = X;
-                        self.el_envelope.animate({path: path},0);
-                        $('.fade_in', self.dom_element).val(Math.floor(X * 1000));
+                        self.el_envelope.animate({path: path},0);                        
+                        $('.fade_in', self.dom_element).val(Math.floor(self.px_to_abs(X)) - self.item.cue_in);
          };
-         
-         self.el_controls.drag(self.controls_onmove, self.controls_onstart, self.controls_onend);
+         self.el_controls_fade[1].update = function(x, y) {
+                        var X = this.attr("x") + x, Y = this.attr("y") + y;
+                        this.attr({x: X});
+                        path[2][1] = X;
+                        self.el_envelope.animate({path: path},0);
+                        $('.fade_out', self.dom_element).val(Math.floor(self.co.duration - self.px_to_abs(X))  - self.item.cue_out);
+         };
+        self.el_controls_fade.drag(self.controls_fade_onmove, self.controls_fade_onstart, self.controls_fade_onend);
+		self.el_controls_fade.dblclick(self.controls_fade_dbclick);
+
+
+
+
+
+
+
+
+	
+		// crossfade handler
+		var c_cross_size = 8;
+		var c_cross_attr = { y:  self.size_y -2 , height: 12, stroke: "red", 'stroke-opacity': 0.1  ,'stroke-width': 8, fill: '#ff0000', cursor: 'move'};
+		
+		
+		self.el_controls_cross = this.r.rect(-10,  self.size_y -2 , 2,  self.size_y + 6).attr(c_cross_attr)
+		.mouseover(function (set) {
+			this.animate({"fill-opacity": .55, y: 0, height:  self.size_y + 6}, 100);
+		}).mouseout(function () {
+			this.animate(c_cross_attr, 300);
+		});
+		
+
+         self.el_controls_cross.update = function(x, y) {
+                        var X = this.attr("x") + x, Y = this.attr("y") + y;
+                        this.attr({x: X});                      
+                        $('.fade_cross', self.dom_element).val(self.co.duration - (Math.floor(self.px_to_abs(X)) + self.item.cue_out));
+         };
+		
+		if(self.item.fade_cross && self.item.fade_cross > 0) {
+			this.el_controls_cross.animate({x: self.abs_to_px(self.co.duration - self.item.cue_out - self.item.fade_cross - 1)},100);
+		} else {
+			this.el_controls_cross.animate({x: self.abs_to_px(self.co.duration ) - 2},100);
+		}
+		
+        self.el_controls_cross.drag(self.controls_cross_onmove, self.controls_cross_onstart, self.controls_cross_onend);
+
+
+
 
 	};
 	
 	
-     this.controls_onmove = function move(dx, dy) {
-                    this.update(dx - (this.dx || 0), dy - (this.dy || 0));
-                    this.dx = dx;
-                    this.dy = dy;
-                    
-                    
-                    
-                }
 	
-	this.controls_onmove__ = function(dx, dy, x, y, e) {
-		console.log(this);
-		//var X = this.attr("x") + x- (this.dx || 0);
-		//this.attr({x: x});
-		
-		console.log('move: dx, dy, x, y, e', dx, dy, x, y, e);
+	// fade handlers
+    this.controls_fade_onmove = function(dx, dy) {
+		this.update(dx - (this.dx || 0), dy - (this.dy || 0));
+		this.dx = dx;
+		this.dy = dy;
 	}
 	
-	this.controls_onstart = function(x, y) {
-		console.log('controls_onstart', x, y);
+	this.controls_fade_onstart = function(x, y) {
+		console.log('controls_fade_onstart', x, y);
 	}
 	
-	this.controls_onend = function(e) {
-		console.log('controls_onend', e.offsetX);
+	this.controls_fade_onend = function(e) {
+		console.log('controls_fade_onend', e.offsetX);
 		this.dx = this.dy = 0;
-		
 		var pos_new = e.offsetX;
-		
-		
-		
 		self.playlist_editor.update_by_uuid(self.item.uuid);
-		
 	}
+	
+	
+    this.controls_fade_dbclick = function(e) {
+		console.log('dbclick', this);
+		self.item.fade_in = prompt('fade-in', self.item.fade_in);
+		$('.fade_in', self.dom_element).val(Math.floor(self.item.fade_in));
+		self.playlist_editor.update_by_uuid(self.item.uuid, true);
+	}
+	
+	
+	
+	// cue handlers
+    this.controls_cue_onmove = function(dx, dy) {
+		this.update(dx - (this.dx || 0), dy - (this.dy || 0));
+		this.dx = dx;
+		this.dy = dy;
+	}
+	
+	this.controls_cue_onstart = function(x, y) {
+		console.log('controls_cue_onstart', x, y);
+	}
+	
+	this.controls_cue_onend = function(e) {
+		console.log('controls_cue_onend', e.offsetX);
+		this.dx = this.dy = 0;
+		var pos_new = e.offsetX;
+		self.playlist_editor.update_by_uuid(self.item.uuid);
+	}
+	
+	
+	
+	// cross handlers
+    this.controls_cross_onmove = function(dx, dy) {
+		this.update(dx - (this.dx || 0), dy - (this.dy || 0));
+		this.dx = dx;
+		this.dy = dy;
+	}
+	
+	this.controls_cross_onstart = function(x, y) {
+		console.log('controls_fade_onstart', x, y);
+	}
+	
+	this.controls_cross_onend = function(e) {
+		console.log('controls_fade_onend', e.offsetX);
+		self.playlist_editor.update_by_uuid(self.item.uuid);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	this.get_x_points = function() {

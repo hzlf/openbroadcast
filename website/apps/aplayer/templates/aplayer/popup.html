@@ -4,51 +4,6 @@
 
 {% block extras %}
 
-{% compress js %}{% endcompress %}
-{% addtoblock "js" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jwplayer/jwplayer-5.9.js"></script>{% endaddtoblock %}
-
-{% addtoblock "js" %}
-<script type="text/javascript">
-	$(document).ready(function() {
-		$('.footer').live('hover', function(e) {
-			$(this).addClass("hover");
-		});
-		$('.footer').live('mouseleave', function(e) {
-			$(this).removeClass("hover");
-		});
-	}); 
-</script>
-{% endaddtoblock %}
-
-{% addtoblock "css" %}
-<style type="text/css">
-
-      html,
-      body {
-        height: 100%;
-        /* The html and body elements cannot have any padding or margin. */
-      }
-
-      /* Wrapper for page content to push down footer */
-      #wrap {
-        min-height: 100%;
-        height: auto !important;
-        height: 100%;
-        /* Negative indent footer by it's height */
-        margin: 0 auto -60px;
-      }
-
-      /* Set the fixed height of the footer here */
-      #push,
-      #footer {
-        height: 60px;
-      }
-      #footer {
-
-      }
-
-</style>
-{% endaddtoblock %}
 
 {% endblock %}
 
@@ -99,15 +54,21 @@
 <footer class="footer">
 	<div class="container">
 		
-		<p style="display: none;">
-			<small>
-				{% trans "'Spacebar': toggle play/pause" %}
-				{% trans "'Left/Right': play next/prev'" %}
-			</small>
-		</p>
-		<!--
-		<div class="wrapper" style="color: #5a5a5a; overflow: auto;"></div>
-		-->
+		<form class="form-horizontal">
+		  <div class="control-group" id="playlists_inline_selector">
+		    <label class="control-label" for="inputEmail">{% trans "Active Basket" %}</label>
+		    <div class="controls">
+				<select>
+				  <option>1</option>
+				  <option>2</option>
+				  <option>3</option>
+				  <option>4</option>
+				  <option>5</option>
+				</select>
+		    </div>
+		  </div>
+		</form>
+
 	</div>
 </footer>
 

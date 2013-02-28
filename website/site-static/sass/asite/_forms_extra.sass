@@ -460,8 +460,23 @@ form.form-playlist
       input
         //padding: 0
         //display: none
-        
+
+
+
 // also in playlist form [but outside from-tag]
+
+.listview.editable.media
+  &.condensed
+    .item
+      height: 35px !important
+      li.small, span
+        display: none
+
+      &.drop-placeholder
+        height: 65px !important
+    .waveform
+      display: none
+
 .listview.editable.media
 
   // background: green !important
@@ -475,12 +490,20 @@ form.form-playlist
       > div
         padding: 5px
         margin: 1px 0
-    
+        
+        
+    ul#editor_mode_switch
+      
+      > li
+        margin-left: 10px
+        a:hover
+          text-decoration: none
+          color: $green
+        i
+          // border: 1px solid red
+          // padding: 2px 0px 1px 1px
   
   .item
-  
-  
-    
   
     border-bottom: 1px solid #efefef !important
     

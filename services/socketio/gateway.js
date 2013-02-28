@@ -3,12 +3,6 @@ var redis = require('redis').createClient();
 
 redis.psubscribe('push_*');
 
-/*
-redis.on('pmessage', function(pattern, channel, key){
-	console.log(channel, key);
-	io.socket.emmit(channel, key);
-})
-*/
 io.sockets.on('connection', function (socket) {
 	
 	console.log('io.sockets.on connection');
@@ -25,20 +19,5 @@ io.sockets.on('connection', function (socket) {
 
 	})
 	
-	
-/*
-  socket.on('ferret', function (name, fn) {
-  	console.log('ferret');
-  	
-    fn('woot');
-  });
-*/
-  
 });
 
-/*
-io.sockets.on('connection', function (socket) {
-  socket.broadcast.emit('user connected');
-  socket.broadcast.json.send({ a: 'message' });
-});
-*/
