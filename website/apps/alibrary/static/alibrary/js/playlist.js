@@ -276,7 +276,7 @@ PlaylistUi = function() {
 			
 			// maybe not the best way. think about alternatives...
 			try {
-				alibrary.playlist_editor.rebind();
+					alibrary.playlist_editor.rebind();
 			} catch(e) {
 				console.log('error', e);
 			}
@@ -324,19 +324,22 @@ PlaylistUi = function() {
 
 			// filter out current playlist
 			if (item.is_current) {
+				
+				
+
 
 				if (item.id in self.current_items) {
 					self.current_items[item.id] = item;
 					console.log('item already present');
 
-					if(item.updated != target_element.attr('data-updated')) {
+					//if(item.updated != target_element.attr('data-updated')) {
 						console.log('update detected');
 						
 						var html = ich.tpl_playlists_inline({object: item});
 						
 						html.attr('data-updated', item.updated);
 						target_element.replaceWith(html);
-					}
+					//}
 					
 				} else {
 
@@ -345,6 +348,15 @@ PlaylistUi = function() {
 					self.inline_dom_element.append(html);
 
 					self.current_items[item.id] = item;
+					
+					try {
+						console.log('trying to subscribe to pusher with: ' + item.resource_uri);
+						pusher.subscribe(item.resource_uri, self.update_playlists);
+					} catch(e) {
+						console.log('error subscribe to pusher:', e);
+					}
+					
+					
 				}
 			} else {
 				// remove item if not the current one

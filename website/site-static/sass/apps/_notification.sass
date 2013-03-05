@@ -4,4 +4,13 @@ div.notification-holder
   right: 20px
   min-width: 400px
   z-index: 1000
-  background: green
+  background: #fafafa
+  
+  .message
+    border-bottom: 1px solid $white
+    .row-fluid
+      > div
+        > span, > a
+          padding: 4px
+          &.target
+            font-weight: bold

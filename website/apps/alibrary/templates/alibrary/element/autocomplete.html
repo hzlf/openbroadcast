@@ -11,28 +11,13 @@
 		{% for item in result %}
 		<div class="item linkable hoverable" style="background-image: url({% thumbnail item.release.main_image 50x50 crop upscale subject_location=item.release.main_image.subject_location %});">
 			<h2><a href="{{ item.release.get_absolute_url }}" class="link-main">{{ item.release.name|highlight:query }}{% if item.release.catalognumber %} [{{ item.release.catalognumber }}]{% endif %}</a></h2>
-			<p>
-			</p>
+
 			<div class="related">
-				{% if item.medias %} <h3>Tracks:</h3>
+				{% if item.medias %} <span>Tracks:</span>
 				<ul class="horizontal">
 					{% for media in item.medias %}
 					<li>
-						{{ media.name|highlight:query }}
-						
-					</li>
-					{% if forloop.last %}
-						<div class="clear"></div>
-					{% endif %}
-					{% endfor %}
-				</ul>
-				{% endif %}
-
-				{% if item.artists %} <h3>Artists:</h3>
-				<ul class="horizontal">
-					{% for artist in item.artists %}
-					<li>
-						{{ artist.name|highlight:query }}
+						<a href="{{ media.get_absolute_url}}">{{ media.name|highlight:query }}</a>
 						{% if not forloop.last %},&nbsp;{% endif %}
 					</li>
 					{% if forloop.last %}
@@ -42,7 +27,21 @@
 				</ul>
 				{% endif %}
 
-				{% if item.labels %} <h3>Labels:</h3>
+				{% if item.artists %} <span>Artists:</span>
+				<ul class="horizontal">
+					{% for artist in item.artists %}
+					<li>
+						<a href="{{ artist.get_absolute_url}}">{{ artist.name|highlight:query }}</a>
+						{% if not forloop.last %},&nbsp;{% endif %}
+					</li>
+					{% if forloop.last %}
+						<div class="clear"></div>
+					{% endif %}
+					{% endfor %}
+				</ul>
+				{% endif %}
+
+				{% if item.labels %} <span>Labels:</span>
 				<ul class="horizontal">
 					{% for label in item.labels %}
 					<li>

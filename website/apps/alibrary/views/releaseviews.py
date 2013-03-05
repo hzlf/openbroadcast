@@ -284,7 +284,7 @@ def release_autocomplete(request):
     
     result = []
     
-    if q and len(q) > 2:
+    if q and len(q) > 1:
         
         releases = Release.objects.filter(Q(name__istartswith=q)\
             | Q(media_release__name__icontains=q)\

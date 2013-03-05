@@ -64,7 +64,7 @@
 				
 
 				
-				<!--
+				<!---->
 				<table class="table table-condensed history">
 
 					<thead>
@@ -76,7 +76,7 @@
 					</thead>
 					<tbody>
 
-						{% for r in object.get_versions.all %}
+						{% for r in object.get_versions.all|slice:":20" %}
 						<tr>
 							<td><a href="{{ r.revision.user.get_profile.get_absolute_url }}">{{ r.revision.user }}</a></td>
 							<td>{{ r.revision.date_created }}</td>
@@ -88,7 +88,7 @@
 
 					</tbody>
 				</table>
-				-->
+				
 
 			</div>
 
@@ -107,21 +107,26 @@
 
 	</section>
 
-
-	<!-- comment testing -->
 	<section class="comments on-site">
-	{% if user.is_authenticated %}
-		{% render_comment_form for object %}
-	{% else %}
-		<p>Login to caht.</p>
-	{% endif %}
-	
-	<!-- TODO: maybe move to template tag.. just testing here... -->
-	{% with router=object.get_api_url %}
-	{% include "element/chat/_message_list.html" %}
-	{% endwith %}
-	
-	{% render_comment_list for object %}
+		
+		<div class="header">
+			<h3>{% trans "Comments" %}</h3>
+		</div>
+		
+		<div class="form">
+			{% if user.is_authenticated %}
+				{% render_comment_form for object %}
+			{% else %}
+				<p>{% trans "Please login to join the conversation" %}</p>
+			{% endif %}
+		</div>
+		
+		<!-- TODO: maybe move to template tag.. just testing here... -->
+		{% with router=object.get_api_url %}
+		{% include "element/chat/_message_list.html" %}
+		{% endwith %}
+		
+		{% render_comment_list for object %}
 	</section>
 	
 	<section class="comments disqus">

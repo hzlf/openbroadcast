@@ -55,15 +55,14 @@ class MediaResource(ModelResource):
             stream = None
         
         bundle.data['stream'] = stream
-            
+        bundle.data['waveform_image'] = None
         try:
             waveform_image = bundle.obj.get_waveform_image()
             if waveform_image:
                 bundle.data['waveform_image'] = bundle.obj.get_waveform_url()
-            else:
-                bundle.data['waveform_image'] = None
+
         except:
-            bundle.data['waveform_image'] = None
+            pass
 
         return bundle
         

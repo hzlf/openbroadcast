@@ -32,7 +32,7 @@ class ArtistListView(ListView):
     
     def get_queryset(self):
         kwargs = {}
-        return Artist.objects.listed().filter(**kwargs)
+        return Artist.objects.all().filter(**kwargs)
     
     
 class ArtistDetailView(DetailView):

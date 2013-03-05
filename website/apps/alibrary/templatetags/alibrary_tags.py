@@ -51,3 +51,8 @@ def dayparts_inline(context, object):
     context.update({'object': object})
     return context
 
+@register.inclusion_tag('alibrary/templatetags/m2m_inline.html', takes_context=True)
+def m2m_inline(context, items):
+    context.update({'items': items})
+    return context
+

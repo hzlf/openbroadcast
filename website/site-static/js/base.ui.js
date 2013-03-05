@@ -1202,11 +1202,11 @@ base.ui.searchbar = function() {
 			window.location = uri;
 			return false;
 		} else {
-			if(q.length > 2){
-				$('#dim_content').css('display', 'block');
+			if(q.length > 1){
+				//$('#dim_content').css('display', 'block');
 				$('#autocomplete_holder').load('/de/inhalt/library/releases/autocomplete/?q=' + encodeURIComponent(q));
 			} else {
-				$('#dim_content').css('display', 'none');
+				//$('#dim_content').css('display', 'none');
 				$('#autocomplete_holder').html('');
 			}
 		}

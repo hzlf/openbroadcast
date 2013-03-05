@@ -3,25 +3,40 @@
  */
 
 section.comments.on-site
+
   background-color: $white !important
-  
-  form
-    textarea
-      +box-sizing(border-box)
-      background: #fafafa
-      width: 100%
-      height: 48px
-      
-    .form-actions
-      border: none
-      margin-top: 0
-      padding-top: 0
+  margin-top: 24px
   
   #div_id_honeypot
     display: none
   
   
-  section.listing
+  div.header
+    h3
+      text-transform: none
+      font-weight: normal
+      color: #5a5a5a
+      font-size: 14px
+  
+  div.form
+  
+    form
+      textarea
+        +box-sizing(border-box)
+        background: #fafafa
+        width: 100%
+        height: 48px
+        
+      .form-actions
+        border: none
+        margin-top: 0
+        padding-top: 0
+        
+      .control-label
+        display: none
+  
+  
+  div.listing
   
     .item
       border: none

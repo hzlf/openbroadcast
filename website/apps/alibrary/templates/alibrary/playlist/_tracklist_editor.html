@@ -1,5 +1,6 @@
 {% load sekizai_tags thumbnail i18n truncate verbatim value_from_settings %}
 
+
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-impromptu.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/lib/raphael-min.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/lib/soundmanager2/soundmanager2.js"></script>{% endaddtoblock %}
@@ -15,9 +16,6 @@
 
 	$(function(){
 
-		pusher = new PusherApp;
-		pusher.socket_url = '{% value_from_settings "SOCKETIO_URL" %}';
-		pusher.init();
 		
 		alibrary.playlist_editor = new PlaylistEditor();
 		alibrary.playlist_editor.api_url = "{{ object.get_api_url }}";
@@ -44,17 +42,12 @@
 {% verbatim %}
 <script id="tpl_playlists_editor_media" type="text/html">
 	
-<div class="list_body_row item hoverable editable {{ object.uuid }}" data-updated="{{ object.updated }}" data-resource_uri="{{ object.resource_uri }}" data-uuid="{{ object.uuid }}" data-id="{{ object.id }}" id="playlist_item_{{ object.id }}">
+<div class="list_body_row item hoverable editable {{ object.uuid }} {{ object.item.content_type }}" data-updated="{{ object.updated }}" data-resource_uri="{{ object.resource_uri }}" data-uuid="{{ object.uuid }}" data-id="{{ object.id }}" id="playlist_item_{{ object.id }}">
 
 	<div class="row-fluid base">
 		
 		<div class="span1 actions">
-			
-			<!--
-			<span class="pos">{{ object.position }}</span>
-			<span class="pos_new">?</span>
-			-->
-			
+
 			<ul class="unstyled">
 				<li>
 					<a href="#" data-action="stop" class="visible-while-playing">
@@ -68,27 +61,48 @@
 					</a>
 				</li>
 			</ul>
+			
+			<span>{{ object.item.content_object.duration }}</span>
 		</div>
 		
 		<div class="span3">
 			<ul class="unstyled">
 				<li class="bold">
 					<a href="{{ object.item.content_object.absolute_url }}" title="{{ object.item.content_object.name }}">
-						{{ object.item.content_object.name }}
+						{{#ichTPL.limitChars}}{{ object.item.content_object.name }}{{/ichTPL.limitChars}}
 					</a>
 				</li>
-				<li class="small">
+				<li class="small relations">
+					
+					{{ #object.item.content_object.artist }}
 					<span>
 						<a href="{{ object.item.content_object.artist.absolute_url }}" title="{{ object.item.content_object.artist.name }}">
 							{{ object.item.content_object.artist.name }}
 						</a>
-					</span>
-					|
+					</span> |
+					{{ /object.item.content_object.artist }}
+					
+					
+					{{ #object.item.content_object.artist }}
 					<span>
 						<a href="{{ object.item.content_object.release.absolute_url }}" title="{{ object.item.content_object.release.name }}">
 							{{ object.item.content_object.release.name }}
 						</a>
-					</span>
+					</span> |
+					{{ /object.item.content_object.artist }}
+					
+					
+					{{ #object.item.content_object.set }}
+					<span>
+						<a href="{{ object.item.content_object.stationsetabsolute_url }}" title="{{ object.item.content_object.set.name }}">
+							{{ object.item.content_object.set.name }}
+						</a>
+					</span> |
+					{{ /object.item.content_object.set }}
+					
+					
+					
+					
 				</li>
 			</ul>
 		</div>
@@ -177,6 +191,27 @@
 </div>
 </script>
 {% endverbatim %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 {% verbatim %}
 <script id="tpl_playlists_editor_summary" type="text/html">	
 

@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from django.contrib.auth.models import User
 from django.db.models import Count
 
@@ -30,6 +32,58 @@ class JingleResource(ModelResource):
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
         }
         #cache = SimpleCache(timeout=120)
+
+
+    """
+    Add streaming information
+    """
+    def dehydrate(self, bundle):
+        
+        obj = bundle.obj
+        
+        if obj.master:
+            stream = {
+                     'rtmp_app': '%s' % settings.RTMP_APP,
+                     'rtmp_host': 'rtmp://%s:%s/' % (settings.RTMP_HOST, settings.RTMP_PORT),
+                     'file': obj.master, 
+                     'uuid': obj.uuid,
+                     'uri': obj.master.url,
+                     #'uri': obj.get_stream_url(),
+                     }
+        else:
+            stream = None
+        
+        bundle.data['stream'] = stream
+        bundle.data['waveform_image'] = '/inhalt/library/tracks/tracks/03f646f5-5e4a-11e2-8c4f-b8f6b11a3aed/waveform/'
+        try:
+            waveform_image = bundle.obj.get_waveform_image()
+            if waveform_image:
+                bundle.data['waveform_image'] = bundle.obj.get_waveform_url()
+
+        except:
+            pass
+
+        return bundle
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class JingleSetResource(ModelResource):

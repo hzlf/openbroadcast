@@ -61,6 +61,8 @@ from alibrary.models.releasemodels import *
 from alibrary.models.mediamodels import *
 
 
+
+
 TARGET_DURATION_CHOICES = (
     (900, '15'),
     (1800, '30'),
@@ -247,14 +249,22 @@ class Playlist(models.Model):
         for id in ids:
             id = int(id)
             
+            co = None
+            
             if ct == 'media':
-                m = Media.objects.get(pk=id)
-                
-            i = PlaylistItem(content_object=m)
-            i.save()    
-                
-            pi = PlaylistItemPlaylist(item=i, playlist=self, position=self.items.count())
-            pi.save()
+                co = Media.objects.get(pk=id)
+            
+            if ct == 'jingle':
+                from abcast.models import Jingle
+                co = Jingle.objects.get(pk=id)
+            
+             
+            if co:
+                i = PlaylistItem(content_object=co)
+                i.save()    
+                    
+                pi = PlaylistItemPlaylist(item=i, playlist=self, position=self.items.count())
+                pi.save()
             
             self.save()
 
@@ -296,7 +306,12 @@ class Playlist(models.Model):
             
             self.save()
         
-    """"""
+
+    def convert_to(self, type):
+        self.type = type
+        self.save()
+
+
     def save(self, *args, **kwargs):
         
         

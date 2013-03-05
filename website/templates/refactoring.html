@@ -1,4 +1,4 @@
-{% load compress cms_tags sekizai_tags %}
+{% load compress cms_tags sekizai_tags value_from_settings %}
 <!DOCTYPE html>
 <html lang="en">
 {% spaceless %}
@@ -171,6 +171,71 @@
 			//<![CDATA[//><!--
 			$(document).ready(function() {
 				/* js general init functions */
+				
+				if(!nunjucks.env) {
+				    nunjucks.env = new nunjucks.Environment(new nunjucks.HttpLoader('{{ STATIC_URL }}'));
+				}
+				nj = nunjucks.env;
+				
+				// testing nj filters...
+				nj.addFilter('shorten', function(str, count) {
+				    return str.slice(0, count || 5);
+				});
+				nj.addFilter('ms2time', function(time) {
+					
+					if(time == 0) {
+						return '00:00:000';
+					}
+					
+					time = Math.abs(time);
+					
+					var millis= time % 1000;
+				    time = parseInt(time/1000);
+				    var seconds = time % 60;
+				    time = parseInt(time/60);
+				    var minutes = time % 60;
+				    time = parseInt(time/60);
+				    var hours = time % 24;
+				    var out = "";
+				    
+				    if(hours && hours > 0) {
+				    	out += hours + ':';
+				    } else {
+				    	// out += '0' + ':';
+				    }
+				    
+				    if(minutes && minutes > 0) {
+				    	out += minutes + ':';
+				    } else {
+				    	out += '00' + ':';
+				    }
+				    
+				    if(seconds && seconds > 0) {
+				    	out += seconds + ':';
+				    } else {
+				    	out += '00' + ':';
+				    }
+				    
+				    if(millis && millis > 0) {
+				    	out += millis + '';
+				    } else {
+				    	out += '000' + '';
+				    }
+				    
+				    /*
+				    if(hours && hours > 0) out += hours + "" + ((hours == 1)?":":":") + "";
+				    if(minutes && minutes > 0) out += minutes + "" + ((minutes == 1)?":":":") + "";
+				    if(seconds && seconds > 0) out += seconds + "" + ((seconds == 1)?":":":") + "";
+				    if(millis&& millis> 0) out += millis+ "" + ((millis== 1)?"":"") + "";
+				    */
+				    return out.trim();
+				});
+				
+				
+				pusher = new PusherApp;
+				pusher.socket_url = '{% value_from_settings "SOCKETIO_URL" %}';
+				pusher.init();
+
 				
 				
 				base.ui.init();

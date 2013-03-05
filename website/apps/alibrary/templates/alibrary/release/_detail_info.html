@@ -19,6 +19,7 @@
 			{% endfor %}
 		</dd>
 
+		{% if object.label %}
 		<dt>
 			{% trans "Label" %}:
 		</dt>
@@ -27,29 +28,18 @@
 			{% include "alibrary/element/_inline_link.html" %}
 			{% endwith %}
 		</dd>
-
-		<dt>
-			{% trans "Release date" %}:
-		</dt>
-		<dd>
-			{% if object.releasedate %}
-			{{ object.releasedate|date:"SHORT_DATE_FORMAT" }}
-			{% else %}
-			{% trans "Unknown" %}
-			{% endif %}
-		</dd>
-
-		<dt>
-			{% trans "Catalog Number" %}:
-		</dt>
-		<dd>
-			{% if object.catalognumber %}
-			{{ object.catalognumber }}
-			{% else %}
-			{% trans "Unknown" %}
-			{% endif %}
-		</dd>
-
+		{% endif %}
+		
+		{% if object.releasedate %}
+		<dt>{% trans "Releasedate" %}:</dt>
+		<dd>{{ object.releasedate|date:"SHORT_DATE_FORMAT" }}</dd>
+		{% endif %}
+		
+		{% if object.catalognumber %}
+		<dt>{% trans "Catalog Number" %}:</dt>
+		<dd>{{ object.catalognumber }}</dd>
+		{% endif %}
+		
 	</dl>
 
 	<dl class="dl-horizontal license">
@@ -62,7 +52,7 @@
 				{% if object.get_license %}
 				<a rel="tooltip" href="{{ object.get_license.get_absolute_url }}" title="License details" class="dialog disabled-modal"><img src="/static/img/icons/transparent_16x16.png" width="78" height="24" alt="License" class="noborder"></a>
 				{% else %}
-				&nbsp;
+				&nbsp;?
 				{% endif %}
 			</div>
 		</dd>

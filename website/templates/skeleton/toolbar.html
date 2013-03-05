@@ -9,25 +9,19 @@
 				<ul id="nav" class="horizontal unstyled nav-profile"> 
 			
 					{% if user.is_authenticated %}
-			        	<li><a href="{% url account_logout %}?next={{ request.get_full_path }}"><span><i class="icon-signout"></i> {% trans 'Logout' %}</span></a></li>
-			        	<!--
-			        	<li><a href="{% url account_email %}"><span>{% trans 'Account' %} [{{ user.username }}]</span></a></li>
-			        	-->
-			        	<li><a href="{% url profiles-profile-detail user %}"><span><i class="icon-cog"></i> {% trans 'Profile' %} [{% firstof user.get_full_name user.username %}]</span></a></li>
-			        	
-			        	
-						
-			        	
+			        	<li><a href="{% url account_logout %}?next={{ request.get_full_path }}"><i class="icon-signout"></i><span> {% trans 'Logout' %}</span></a></li>
+
+			        	<li><a href="{% url profiles-profile-detail user %}"><i class="icon-cog"></i><span> {% trans 'Profile' %}</span></a></li>
 			        	
 			        	{% if user.is_staff %}
-						<li><a href="/admin/"><span><i class="icon-dashboard"></i> {% trans 'Administration' %}</span></a></li>
+						<li><a href="/admin/"><i class="icon-dashboard"></i> <span>{% trans 'Administration' %}</span></a></li>
 						{% endif %}
 						{% if unread_count %}
-						<li class="messages"><a href="#"><i class="icon-comment icon-white"></i><span class="icon-label">{{ unread_count }}</span></a></li>
+						<li class="messages"><a href="#"><i class="icon-comment icon-white"></i> <span class="icon-label">{{ unread_count }}</span></a></li>
 						{% endif %}
 					{% else %}
-			        	<li><a title="Login" href="{% url account_login %}?next={{ request.get_full_path }}" rel="modal:open"><span><i class="icon-signin"></i> {% trans 'Login' %}</span></a></li>
-						<li><a title="Login" href="{% url account_signup %}?next={{ request.get_full_path }}" rel="modal:open"><span><i class="icon-ok-sign"></i> {% trans 'Sign Up' %}</span></a></li>
+			        	<li><a title="Login" href="{% url account_login %}?next={{ request.get_full_path }}" rel="modal:open"><i class="icon-signin"></i><span> {% trans 'Login' %}</span></a></li>
+						<li><a title="Login" href="{% url account_signup %}?next={{ request.get_full_path }}" rel="modal:open"><i class="icon-ok-sign"></i><span> {% trans 'Sign Up' %}</span></a></li>
 			    	{% endif %}
 			    </ul>
 				<!-- // account section -->
@@ -47,17 +41,14 @@
 	
 	
 	
-	
+	{% if user.is_authenticated %}
 	<!--
 	<div class="notification-holder">
-		<div class="message-list">
-			<div class="message">
-				<h2></h2>
-				<p></p>
-			</div>
-		</div>
+		{% user_stream user %}
 	</div>
 	-->
+	{% endif %}
+
 	
 	
 	

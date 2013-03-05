@@ -67,7 +67,7 @@ SocketApp = function(base_app) {
 				
 				// routing data..
 				if(data.route == '{{ object.get_api_url }}') {
-					console.log('my channel!!')
+					console.log('my channel!!', data)
 				};
 
 				// build content by type
@@ -89,10 +89,10 @@ SocketApp = function(base_app) {
 				}
 
 
-				$('section.listing ul').prepend(html);
+				$('div.listing ul').prepend(html);
 				
-				$('section.listing ul').children().slice(9, 1000).fadeOut(500);
-				$('section.listing ul').children().slice(10, 1000).remove();
+				$('div.listing ul').children().slice(9, 1000).fadeOut(500);
+				$('div.listing ul').children().slice(10, 1000).remove();
 
 			});
 
@@ -111,8 +111,8 @@ sa.init();
 	
 </script>
 {% endaddtoblock %}
-<section class="listing">
+<div class="listing">
 	<ul class="unstyled"></ul>
-</section>
+</div>
 
 

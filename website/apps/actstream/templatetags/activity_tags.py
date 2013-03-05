@@ -1,4 +1,5 @@
 from actstream.models import Follow
+from actstream.models import user_stream as ac_user_stream
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.template import Variable, Library, Node, TemplateSyntaxError
@@ -116,7 +117,7 @@ def display_timestamped_action(parser, token, timestamped=True):
 
     Example::
 
-        {% display_action action %}
+        {% display_timestamped_action action %}
     """
     return DisplayAction.handle_token(parser, token)
 
@@ -210,3 +211,12 @@ def backwards_compatibility_check(template_name):
     if backwards:
         template_name = template_name.replace('actstream/', 'activity/')
     return template_name
+
+
+
+
+@register.inclusion_tag('actstream/templatetags/user_stream.html', takes_context=True)
+def user_stream(context, user):
+    stream = ac_user_stream(user)
+    context.update({'stream': stream})
+    return context

@@ -9,7 +9,7 @@ PlaylistEditor = function() {
 
 	this.interval = false;
 	this.interval_loops = 0;
-	this.interval_duration = 120000;
+	this.interval_duration = 10000;
 	//this.interval_duration = false;
 	this.api_url = false;
 	this.uuid = 'sdkhj';
@@ -38,14 +38,18 @@ PlaylistEditor = function() {
 		
 		self.dom_element = $('#' + this.dom_id);
 
-		pusher.subscribe(self.api_url, self.update);
+		
 
 		self.iface();
 		self.bindings();
 
-		// set interval and run once
-		if(self.interval_duration) {
-			self.set_interval(self.run_interval, self.interval_duration);
+		// set subscription, if failed an interval and run once
+		try {
+			pusher.subscribe(self.api_url, self.update);
+		} catch(e) {
+			if(self.interval_duration) {
+				self.set_interval(self.run_interval, self.interval_duration);
+			}
 		}
 		self.run_interval();
 		
@@ -101,10 +105,18 @@ PlaylistEditor = function() {
 					//processData:  false,
 					success: function(data) {
 						console.log(data);
-						post_data = {
-							ids: [data.item.object_id].join(','),
-							ct: data.item.content_type
-						}
+						try {
+							post_data = {
+								ids: [data.item.object_id].join(','),
+								ct: data.item.content_type
+							}
+						} catch(e) {
+							post_data = {
+								ids: [data.id].join(','),
+								// TODO: modularize: expose type in api
+								ct: 'jingle'
+							}
+						};
 					},
 					async: false
 				});
@@ -203,16 +215,6 @@ PlaylistEditor = function() {
 	};
 	
 	this.rebind = function() {
-
-		
-		/*
-		 * Sidebar, dragable jingles
-		 */
-		$('#jingle_list').sortable({
-			placeholder: "item drop-placeholder",
-			connectWith: self.dom_element,
-			helper: "clone" 
-		});
 		
 		/*
 		 * Sidebar, dragable playlists (a.k.a. baskets)
@@ -349,11 +351,14 @@ PlaylistEditor = function() {
 		self.rebind();
 	};
 	
+	
+	
+	
 	this.update_editor_transform = function() {
 		
 		var container = $('#playlist_transform');
 		
-		
+		/*
 		if(this.current_playlist.target_duration > 900) {
 			$('.target-duration', container).removeClass('warning');
 			$('.target-duration', container).addClass('success');
@@ -361,6 +366,7 @@ PlaylistEditor = function() {
 			$('.target-duration', container).removeClass('success');
 			$('.target-duration', container).addClass('warning');
 		}
+		*/
 		
 		if(this.current_playlist.dayparts.length > 0) {
 			$('.dayparts', container).removeClass('warning');
@@ -382,12 +388,14 @@ PlaylistEditor = function() {
 		for (i in self.current_items) {
 			var item = self.current_items[i];			
 			total_duration += item.item.content_object.duration;
-			total_duration -= (item.cue_in + item.cue_out);
+			total_duration -= (item.cue_in + item.cue_out + item.fade_cross);
 		}
 		
 		var error = true;
 		if (Math.abs(self.current_playlist.target_duration * 1000 - total_duration) < 2000) {
 			error = false;
+		} else {
+			error = 'Durations do not match.'
 		}
 		
 		var durations = {
@@ -405,6 +413,35 @@ PlaylistEditor = function() {
 		html = ich.tpl_playlists_editor_summary(data);
 		
 		$('#playlist_editor_summary').html(html)
+		
+		
+		// TODO: make modular
+		var container = $('#playlist_transform');
+		html = nj.render('alibrary/nj/playlist/editor_transform_summary.html',{ 
+			durations: durations,
+			object: self.current_playlist
+		});
+		
+		$('.sommary-holder', container).html(html);
+		
+		// TODO: make modular
+		if(error) {
+			$('.convert_broadcast', container).addClass('disabled');
+		} else {
+			$('.convert_broadcast', container).removeClass('disabled');
+		}
+		
+		
+		/*
+		if(this.current_playlist.target_duration > 1 && error == false) {
+			$('.target-duration', container).removeClass('warning');
+			$('.target-duration', container).addClass('success');
+		} else {
+			$('.target-duration', container).removeClass('success');
+			$('.target-duration', container).addClass('warning');
+		}*/
+		
+		
 		
 	};
 	
@@ -437,6 +474,11 @@ PlaylistEditor = function() {
 			} else {
 				
 				if(content_type == 'media') {
+					this.editor_items[item.id] = new PlaylistEditorItem();
+					this.editor_items[item.id].init(item, self);
+				}
+				
+				if(content_type == 'jingle') {
 					this.editor_items[item.id] = new PlaylistEditorItem();
 					this.editor_items[item.id].init(item, self);
 				}
@@ -494,12 +536,6 @@ PlaylistEditor = function() {
 
 
 
-
-
-
-
-
-
 PlaylistEditorItem = function() {
 
 	var self = this;
@@ -526,6 +562,7 @@ PlaylistEditorItem = function() {
 	this.player;
 	
 	this.envelope_color = '#00bb00';
+	this.waveform_fill = '90-#aaa-#444:50-#aaa';
 	
 	
 	this.interval_duration = false;
@@ -562,7 +599,27 @@ PlaylistEditorItem = function() {
 		
 		var html = '';
 		if(self.ct == 'media') {
-			html = ich.tpl_playlists_editor_media({object: self.item});
+			html = ich.tpl_playlists_editor_media({
+				object: self.item
+			});
+			
+			html = nj.render('alibrary/nj/playlist/editor_item.html',{ 
+					object: self.item
+			});
+		}
+		
+		if(self.ct == 'jingle') {
+			html = ich.tpl_playlists_editor_media({
+				object: self.item
+			});
+			this.waveform_fill = '90-#aaa-#63c:50-#aaa';
+			
+			html = nj.render('alibrary/nj/playlist/editor_item.html',{ 
+					object: self.item
+			});
+			
+			
+			
 		}
 		
 		// check if append or replace
@@ -653,6 +710,39 @@ PlaylistEditorItem = function() {
 			};
 			
 		});
+		
+		$('a.editor.preview', self.dom_element).live('click', function(e) {
+			e.preventDefault();
+			
+			var preview = $(this).data('preview');
+
+			var pos = 0;
+
+			self.playlist_editor.stop_all();
+
+			
+
+			if(preview == 'fade_cross') {
+				pos = self.co.duration - self.item.cue_out - self.item.fade_cross - 2000;
+			};
+
+			if(preview == 'fade_in') {
+				pos = self.item.cue_in;
+			};
+
+			if(preview == 'fade_out') {
+				if(self.item.fade_cross > self.item.fade_out) {
+					pos = self.co.duration - self.item.cue_out - self.item.fade_cross - 2000;
+				} else {
+					pos = self.co.duration - self.item.cue_out - self.item.fade_out - 2000;
+				}
+			};
+			
+			self.player.play().setPosition(pos);
+			
+		});
+		
+		
 	}
 
 	// interval
@@ -733,7 +823,7 @@ PlaylistEditorItem = function() {
 		this.r = Raphael(self.waveform_dom_id, 830, self.size_y + 6);
 		
 		self.el_background = this.r.rect(0, 0, self.size_x, self.size_y).attr({ stroke: "none", fill: '90-#efefef-#bbb:50-#efefef' });
-		self.el_buffer = this.r.rect(0, 0, 0, self.size_y).attr({ stroke: "none", fill: '90-#aaa-#444:50-#aaa' });
+		self.el_buffer = this.r.rect(0, 0, 0, self.size_y).attr({ stroke: "none", fill: self.waveform_fill });
 		
 		self.el_waveform = this.r.image(self.item.item.content_object.waveform_image, 0, 0, 830, self.size_y);
 		
@@ -1051,6 +1141,7 @@ PlaylistEditorItem = function() {
 	
 	
 	this.init_player = function() {
+		
 		
 		var options = {
 			id: 'player_' + self.item.id,

@@ -14,7 +14,6 @@
 			<a href="{{ object.user.get_absolute_url }}">{% firstof object.user.username object.user %}</a>
 		</dd>
 
-
 		<dt>
 			{% trans "Date Created" %}:
 		</dt>
@@ -38,67 +37,58 @@
 
 	</dl>
 
-
 	<dl class="dl-horizontal sub">
 
+		{% if object.target_duration %}
+		<dt>{% trans "Target Duration" %}:</dt>
+		<dd>{{ object.target_duration|divide:60 }}</dd>
+		{% endif %}
 
+		{% if object.dayparts.count > 0 %}
+		<dt>{% trans "Broadcast Dayparts" %}:</dt>
+		<dd>{% dayparts_inline object %}</dd>
+		{% endif %}
 
+		{% if object.seasons.count > 0 %}
+		<dt>{% trans "Broadcast Seasons" %}:</dt>
+		<dd>{% m2m_inline object.seasons.all %}</dd>
+		{% endif %}
 
-		<dt>
-			{% trans "Target Duration" %}:
-		</dt>
-		<dd>
-			{{ object.target_duration|divide:60 }}
-			&nbsp;
-		</dd>
-
-
-		<dt>
-			{% trans "Broadcast Dayparts" %}:
-		</dt>
-		<dd>
-			{% dayparts_inline object %}
-			&nbsp;
-		</dd>
-
-
-
-
+		{% if object.weather.count > 0 %}
+		<dt>{% trans "Broadcast Weather" %}:</dt>
+		<dd>{% m2m_inline object.weather.all %}</dd>
+		{% endif %}
+		
 		<!--
 		<dt>
-			{% trans "History" %}:
+		{% trans "History" %}:
 		</dt>
 		<dd>
-			
-			{% if object.owner %}
-			<span class="key">{% trans "Uploaded by" %}:</span> <span class="value"><a href="{{ object.owner.get_absolute_url }}">{{ object.owner }}</a></span> |
-			{% endif %}
-			
-			{% if object.publisher %}
-			<span class="key">{% trans "Published by" %}:</span> <span class="value"><a href="#">{{ object.publisher }}</a></span> |
-			{% endif %}
-			
-			{% if object.get_last_revision %}
-			<span class="key">{% trans "Last edit by" %}:</span> <span class="value"><a href="{{ object.get_last_revision.user.get_profile.get_absolute_url }}">{{ object.get_last_revision.user }}</a></span>
-			{% endif %}
-			&nbsp;
+
+		{% if object.owner %}
+		<span class="key">{% trans "Uploaded by" %}:</span> <span class="value"><a href="{{ object.owner.get_absolute_url }}">{{ object.owner }}</a></span> |
+		{% endif %}
+
+		{% if object.publisher %}
+		<span class="key">{% trans "Published by" %}:</span> <span class="value"><a href="#">{{ object.publisher }}</a></span> |
+		{% endif %}
+
+		{% if object.get_last_revision %}
+		<span class="key">{% trans "Last edit by" %}:</span> <span class="value"><a href="{{ object.get_last_revision.user.get_profile.get_absolute_url }}">{{ object.get_last_revision.user }}</a></span>
+		{% endif %}
+		&nbsp;
 		</dd>
 		-->
-		
 
 		<dt>
 			{% trans "Stats" %}:
 		</dt>
 		<dd>
-			<span class="value">3</span> <span class="key">{% trans "Airplays" %}</span> |
-			<span class="value">173</span> <span class="key">{% trans "Plays" %}</span> |
-			<span class="value">28</span> <span class="key">{% trans "Downloads" %}</span>
+			<span class="value">3</span> <span class="key">{% trans "Airplays" %}</span> | <span class="value">173</span> <span class="key">{% trans "Plays" %}</span> | <span class="value">28</span> <span class="key">{% trans "Downloads" %}</span>
 		</dd>
 
 		{% if object.tags %}
-		<dt>
-			{% trans "Tags" %}:
-		</dt>
+		<dt>{% trans "Tags" %}:</dt>
 		<dd>
 			{% for tag in object.tags %}
 			{{ tag.name }}{% if not forloop.last %},{% endif %}
@@ -116,7 +106,7 @@
 		{% if object.main_image %}
 		<a href="{% thumbnail object.main_image 800x800 crop upscale %}" class="zoomable cboxElement"> <img src="{% thumbnail object.main_image 172x172 crop upscale subject_location=object.main_image.subject_location %}" alt="Cover" /> </a>
 		{% else %}
-		<img src="/static/img/base/defaults/listview.release.xl.png" alt="{% trans "No cover available" %}" />
+		<img src="/static/img/base/defaults/listview.playlist.xl.png" alt="{% trans "No cover available" %}" />
 		{% endif %}
 	</div>
 

@@ -1,43 +1,37 @@
 {% load i18n %}
 
-<div id="playlist_transform" class="playlist-edit transform listing">
+<div id="playlist_transform" class="playlist-edit transform listing menu_context">
 	
 	<div class="page-header">
 		<h2>{% trans "Transform" %} <small>Playlist <> Broadcast</small></h2>
 		<p>In order to save a broadcast-ready playlist some criterias have to be correct.</p>
 	</div>
-	
-	<!--
-	<div class="summary item notice">
-		<h4><i class="icon-info-sign"></i> {% trans "Transform" %}</h4>
-		<div class="row-fluid ">
-			<div class="span12">
-				<p>In order to </p>
-			</div>
-		</div>
-	</div>
-	-->
-	
-	<div class="summary item target-duration">
-		<h4><i class="icon-check"></i> {% trans "Target Duration" %}</h4>
-		<div class="row-fluid information">
-			<div class="span12">
-				<p>Please specify the best Broadcast Dayparts</p>
-			</div>
 
-		</div>
-	</div>
+	<div class="set">
+		<ul class="unstyled">
 
-	
-	<div class="summary item dayparts">
-		<h4><i class="icon-warning-sign"></i> {% trans "Broadcast Dayparts" %}</h4>
-		<div class="row-fluid information">
-			<div class="span12">
-				<p>Please specify the best Broadcast Dayparts</p>
-			</div>
+			<li class="action disabled selection_single convert_broadcast">
+				<span class="left icon"><a href="{% url alibrary-playlist-convert object.pk "broadcast" %}" title="{% trans "Convert to Playlist" %}"><i class="icon-exchange"></i> {% trans "Convert to Broadcast" %}</a> </span>
+				<span class="opt"></span>
+				<span class="clear"></span>
+			</li>
+			
+			
+			<li class="action {% if object.type != "broadcast"  %}disabled{% endif %} selection_single convert_playlist">
+				<span class="left icon"><a href="{% url alibrary-playlist-convert object.pk "playlist" %}" title="{% trans "Convert to Playlist" %}"><i class="icon-exchange"></i> {% trans "Convert to Playlist" %}</a> </span>
+				<span class="opt"></span>
+				<span class="clear"></span>
+			</li>
 
-		</div>
+
+
+		</ul>
 	</div>
 
+	
+	<div class="sommary-holder">
+	
+	</div>
 
 </div>
+

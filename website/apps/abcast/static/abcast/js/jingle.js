@@ -167,21 +167,16 @@ JingleUi = function() {
 				self.update_jingle_display(data);
 			});
 		};
-		
-		/*
-		$.getJSON(self.api_url + '?is_current=1', function(data) {
-			self.update_jingle_display(data);
-			this.current_data = data;
 			
 			// maybe not the best way. think about alternatives...
 			try {
-				alibrary.playlist_editor.rebind();
+				setTimeout(function(){
+					alibrary.playlist_editor.rebind();
+				}, 500);
+				
 			} catch(e) {
-				// console.log('error', e);
+				console.log('error', e);
 			}
-			
-		});
-		*/
 		
 	};
 	

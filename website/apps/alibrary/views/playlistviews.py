@@ -221,7 +221,18 @@ class PlaylistEditView(UpdateView):
         else:
             return self.render_to_response(self.get_context_data(form=form))
         
-        
+
+
+
+def playlist_convert(request, pk, type):
+    
+    playlist = get_object_or_404(Playlist, pk=pk)
+    
+    playlist.convert_to(type)
+    
+
+    return HttpResponseRedirect(playlist.get_edit_url())
+
         
 """
 def playlist_collect(request, pk):
