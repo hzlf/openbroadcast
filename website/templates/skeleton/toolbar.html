@@ -16,8 +16,8 @@
 			        	{% if user.is_staff %}
 						<li><a href="/admin/"><i class="icon-dashboard"></i> <span>{% trans 'Administration' %}</span></a></li>
 						{% endif %}
-						{% if unread_count %}
-						<li class="messages"><a href="#"><i class="icon-comment icon-white"></i> <span class="icon-label">{{ unread_count }}</span></a></li>
+						{% if user|user_stream_count > 0 %}
+						<li class="messages"><a href="#"><i class="icon-comment icon-white"></i> <span class="icon-label">{{ user|user_stream_count }}</span></a></li>
 						{% endif %}
 					{% else %}
 			        	<li><a title="Login" href="{% url account_login %}?next={{ request.get_full_path }}" rel="modal:open"><i class="icon-signin"></i><span> {% trans 'Login' %}</span></a></li>
@@ -39,14 +39,13 @@
 		<div class="clear"></div>
 	</div>
 	
-	
-	
-	{% if user.is_authenticated %}
-	<!--
+
+	{% if user.is_authenticated and user|user_stream_count > 0 %}
+
 	<div class="notification-holder">
 		{% user_stream user %}
 	</div>
-	-->
+	
 	{% endif %}
 
 	

@@ -179,7 +179,16 @@
 				
 				// testing nj filters...
 				nj.addFilter('shorten', function(str, count) {
+
 				    return str.slice(0, count || 5);
+				});
+				
+				nj.addFilter('highlight', function(str, query) {
+				    //return str.slice(0, 4) + query;
+				    var re = new RegExp(query,"gi");
+				    var highlighted = str.replace(re, '<em class="highlight">' + query + '</em>');
+				    return highlighted
+				    
 				});
 				nj.addFilter('ms2time', function(time) {
 					

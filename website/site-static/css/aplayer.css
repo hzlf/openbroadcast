@@ -14051,8 +14051,15 @@ section.comments.on-site div.listing.comment {
   display: none;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_notification\.sass}line{font-family:\000031}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_notification\.sass}line{font-family:\000032}}
+ul.nav-profile .messages a > * {
+  color: #00bb00 !important;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_notification\.sass}line{font-family:\000035}}
 div.notification-holder {
+  display: none;
+  padding: 10px;
   position: absolute;
   top: 40px;
   right: 20px;
@@ -14060,17 +14067,23 @@ div.notification-holder {
   z-index: 1000;
   background: #fafafa;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_notification\.sass}line{font-family:\000039}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_notification\.sass}line{font-family:\0000317}}
 div.notification-holder .message {
+  margin: 2px 0;
+  padding: 2px 0;
   border-bottom: 1px solid white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_notification\.sass}line{font-family:\0000313}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_notification\.sass}line{font-family:\0000323}}
 div.notification-holder .message .row-fluid > div > span, div.notification-holder .message .row-fluid > div > a {
   padding: 4px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_notification\.sass}line{font-family:\0000315}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_notification\.sass}line{font-family:\0000325}}
 div.notification-holder .message .row-fluid > div > span.target, div.notification-holder .message .row-fluid > div > a.target {
   font-weight: bold;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_notification\.sass}line{font-family:\0000327}}
+div.notification-holder .message.hover {
+  background-color: #ddffd9;
 }
 
 /* qTip2 - Pretty powerful tooltips - v2.0.1-4-g

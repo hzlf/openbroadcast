@@ -94,43 +94,24 @@ class APILookup(models.Model):
     Generic Wrapper - distributes to corresponding method
     """
     def get_from_api(self):
-        print "get_from_api"
-        print self.provider
         
-        
-
+        log = logging.getLogger('alibrary.lookupmodels.get_from_api')
+        log.debug('provider: %s' % self.provider)
         
         if self.provider == 'discogs':
-            
-            
-            
-            if self.api_data:
-                pass
-                #return self.api_data
-            
             return self.get_from_discogs()
         
         
     def get_from_discogs(self):
         
-        print 'get from discogs'
+        log = logging.getLogger('alibrary.lookupmodels.get_from_discogs')
         
-        # discogs api needs ressource id (not url)
-        
-        print self.content_object
-        
+        log.debug('content_object: %s' % self.content_object)
+
         self.uri = self.content_object.relations.filter(service='discogs')[0].url
         
-        print 'uri'
-        print self.uri
-        print 'uri'
-        
-        
-        print 'url: %s' % self.uri
-        print 'ressource_id: %s' % self.ressource_id
-        
-        if not self.ressource_id:
-            pass
+        log.info('uri: %s' % self.uri)
+            
         try:
             ri = urlparse(self.uri).path
             ri = ri.split('/')
@@ -138,11 +119,21 @@ class APILookup(models.Model):
             ri = int(ri[0])
             
             self.ressource_id = ri
+            log.info('ressource_id: %s' % self.ressource_id)
             
         except Exception, e:
             self.ressource_id = None
-            print e
-            
+            log.warning('%s' % e)
+
+        if not self.ressource_id:
+            log.warning('no resource id for %s' % self.content_object)
+        
+        
+        
+        
+        """
+        Actual API requests
+        """
         
         import discogs_client as discogs
         discogs.user_agent = 'ANORGDiscogsAPIClient/0.0.1 +http://anorg.net'
@@ -155,10 +146,12 @@ class APILookup(models.Model):
         # get discog's key-release from ressource id
         d_release = discogs.Release(self.ressource_id)
         
+        # check if there is a master release
         try:
             d_release = d_release.master.key_release
         except Exception, e:
             print e
+            
         
         """ release:
          |  artists

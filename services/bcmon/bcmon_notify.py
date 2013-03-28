@@ -15,6 +15,10 @@ Main case:
    with the currently starting filename as parameter 
  - this python script takes this parameter, tries to extract the actual
    media id from it, and then calls back to obp via api to tell about
+   
+   /Users/ohrstrom/srv/openbroadcast.ch-upgrade/lib/python2.7/site-packages/django/./http/__init__.py
+   remove: # 
+   l 327
 
 
 """
@@ -280,8 +284,12 @@ class Notify:
 
         print 'Putting sample: %s' % sample_path_mp3
         # put recorded sample
-        put = api.playout(post["id"]).put({'status': 2, 'sample': open(sample_path_mp3)})    
-        print put
+        try:
+            put = api.playout(post["id"]).put({'status': 2, 'sample': open(sample_path_mp3)})    
+            print put
+        except Exception, e:
+            print '************************************************'
+            print e
         
         sys.exit()    
     

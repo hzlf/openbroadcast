@@ -217,6 +217,11 @@ def backwards_compatibility_check(template_name):
 
 @register.inclusion_tag('actstream/templatetags/user_stream.html', takes_context=True)
 def user_stream(context, user):
-    stream = ac_user_stream(user)
+    stream = ac_user_stream(user)[0:15]
     context.update({'stream': stream})
     return context
+
+@register.filter
+def user_stream_count(user):
+   return ac_user_stream(user).count()
+

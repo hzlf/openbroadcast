@@ -25,8 +25,6 @@ class XsSharingMiddleware(object):
         Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE
     """
     def process_request(self, request):
-        
-        print 'SSHjhgkjhsdgfkjhsgdfkjhgskjhfgskgfd'
 
         if 'HTTP_ACCESS_CONTROL_REQUEST_METHOD' in request.META:
             response = http.HttpResponse()

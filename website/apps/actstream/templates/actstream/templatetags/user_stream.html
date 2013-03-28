@@ -1,12 +1,23 @@
-{% load i18n %}
+{% load i18n sekizai_tags %}
+
+{% addtoblock "js-post" %}
+<script>
+	$(function(){
+		$('ul.nav-profile .messages > a').live('click', function(e){
+			$('.notification-holder').toggle(100);
+		});
+	});		
+</script>
+{% endaddtoblock %}
+
 <div class="message-list">
 	{% for item in stream %}
 	
-	<div class="message">
+	<div class="message hoverable linkable">
 	
 		<div class="row-fluid">
 			<div class="span8">
-				<a href="{{ item.target.get_absolute_url }}" class="target">{{ item.target }}</a>
+				<a class="link-main" href="{{ item.target.get_absolute_url }}" class="target">{{ item.target }}</a>
 			</div>
 			<div class="span4">
 				<span>{{ item.verb }}</span>
@@ -25,5 +36,13 @@
 	</div>
 	
 	{% endfor %}
+	
+	<div class="actions">
+
+		<a class="btn btn-primary btn-small" href="#">More</a>
+
+		
+	</div>
+	
 </div>
 

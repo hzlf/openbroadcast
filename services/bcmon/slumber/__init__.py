@@ -101,6 +101,16 @@ class Resource(ResourceAttributesMixin, object):
         headers = {
             'accept': s.get_content_type()
         }
+        
+        print 'data:'
+        print data
+        
+        print 'params:'
+        print params
+        
+        print 'files:'
+        print files
+        
         if not files:
             # files imply a content-type of multipart/form-data
             headers['content-type'] = s.get_content_type()
@@ -110,6 +120,10 @@ class Resource(ResourceAttributesMixin, object):
         if 400 <= resp.status_code <= 499:
             raise exceptions.HttpClientError("Client Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
         elif 500 <= resp.status_code <= 599:
+            
+            print resp
+            print resp.content
+            
             raise exceptions.HttpServerError("Server Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
 
         return resp
@@ -119,10 +133,19 @@ class Resource(ResourceAttributesMixin, object):
         Remove file-like objects from d and return them in a dictionary.
         """
         files = {}
+        file = None
         for k in d.keys():
+            print 'k: %s' % k
             if callable(getattr(d[k], 'read', None)):
                 files[k] = d[k]
+                
+                file = d[k]
+                
                 del d[k]
+                
+        print 'files:'
+        print file
+                
         return files
 
     def get(self, **kwargs):

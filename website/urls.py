@@ -81,6 +81,9 @@ urlpatterns = patterns('',
     (r'^shop/cart/', include('shop_ajax.urls')), # urls for variations
     (r'^shop/', include('shop.urls')), # shop main urls
     
+    (r'^search/', include('asearch.urls')),
+    (r'^search/', include('haystack.urls')),
+    
     url(r'^sitemap.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': sitemaps}),
     
     # apps

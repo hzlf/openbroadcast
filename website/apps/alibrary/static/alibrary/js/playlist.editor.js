@@ -511,14 +511,34 @@ PlaylistEditor = function() {
 		console.log(self.editor_items);
 		
 		var current_item_id = self.position_map.indexOf( current_id );
-		
 		var next_item_id = self.position_map[current_item_id + 1];
-		
 		var next_item = this.editor_items[next_item_id];
 		
 		next_item.player.play();
 
+	};	
+	// play-flow functions
+	this.load_next = function(current_id) {
 		
+		console.log('play next');
+		
+		// get ordered list
+
+		var order = new Array;
+		
+		$('.item.editable').each(function(i, e){
+			order.push($(e).data('id'));
+		});
+		
+		console.log(self.position_map);
+		console.log(self.editor_items);
+		
+		var current_item_id = self.position_map.indexOf( current_id );
+		var next_item_id = self.position_map[current_item_id + 1];
+		var next_item = this.editor_items[next_item_id];
+		
+		next_item.player.load();
+
 	};
 	
 	// play-flow functions
@@ -1148,7 +1168,7 @@ PlaylistEditorItem = function() {
 			url: self.co.stream.uri,
 			multiShot: false,
 			// autoPlay: true,
-			autoLoad: true,
+			autoLoad: false,
 			// events
 			onplay: self.events.play,
 			onstop: self.events.stop,
@@ -1233,6 +1253,10 @@ PlaylistEditorItem = function() {
 		var remaining = self.co.duration - (self.item.cue_out) - self.player.position;
 			
 		// console.log('remaining:', remaining);
+		
+		if(remaining <= self.item.fade_cross + 5000) {
+			self.playlist_editor.load_next(self.item.id);
+		}
 		
 		if(remaining <= self.item.fade_cross + 100) {
 			self.playlist_editor.play_next(self.item.id);

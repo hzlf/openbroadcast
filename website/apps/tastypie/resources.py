@@ -390,6 +390,12 @@ class Resource(object):
         if format is None:
             format = request.META.get('CONTENT_TYPE', 'application/json')
 
+
+        print request.FILES
+        
+        print 'format: %s' % format
+        
+
         if format == 'application/x-www-form-urlencoded':
             deserialized = request.POST
         elif format.startswith('multipart'):

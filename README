@@ -28,3 +28,8 @@ ssh 172.16.82.130 -l musicbrainz
 cd
 screen
 ./run_server.sh --listen 0.0.0.0:5000
+
+
+# haystack backend (solr)
+cd ~/srv/openbroadcast.ch-upgrade/services/solr-4.1.0/alibrary
+java -jar start.jar

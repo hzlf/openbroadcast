@@ -1186,7 +1186,45 @@ base.ui.toolbar = function() {
 
 };
 
+AutocompleteApp = function() {
+	
+	var self = this;
+	this.api_url;
+	this.container;
+	this.template;
+	this.q_min = 2;
+	
+	this.search = function(q) {
+		
+		console.log('AutocompleteApp - search', q);
+		
+		if(q.length >= this.q_min) {
+			$.get(this.api_url + '?q=' + q, function(data){
+				self.display(data);
+			});
+		} else {
+			self.container.html('');
+		}
+		
+	};
+	
+	this.display = function(data) {
+		console.log(data);
+		html = nj.render('alibrary/nj/release/autocomplete.html', data);
+		self.container.html(html);
+	};
+	
+	
+};
+
 base.ui.searchbar = function() {
+	
+	var self = this;
+	
+	this.autocomplete = new AutocompleteApp();
+	this.autocomplete.api_url = '/api/v1/release/autocomplete/';
+	this.autocomplete.container = $('#autocomplete_holder');
+	this.autocomplete.template = 'lalala';
 
 	
 	// Submit on 'ENTER'
@@ -1202,6 +1240,11 @@ base.ui.searchbar = function() {
 			window.location = uri;
 			return false;
 		} else {
+			
+			console.log(q);
+			self.autocomplete.search(q);
+			
+			/*
 			if(q.length > 1){
 				//$('#dim_content').css('display', 'block');
 				$('#autocomplete_holder').load('/de/inhalt/library/releases/autocomplete/?q=' + encodeURIComponent(q));
@@ -1209,6 +1252,7 @@ base.ui.searchbar = function() {
 				//$('#dim_content').css('display', 'none');
 				$('#autocomplete_holder').html('');
 			}
+			*/
 		}
 		
 	});

@@ -294,6 +294,8 @@ INSTALLED_APPS = (
     # server
     'gunicorn',
     
+    'haystack',
+    
     # core apps
     'django_extensions',
     'django_jenkins',
@@ -393,6 +395,7 @@ INSTALLED_APPS = (
     'abcast',
     'multiuploader',
     'arating',
+    'asearch',
     
     
     
@@ -596,6 +599,24 @@ Payment providers
 # paypal
 PAYPAL_RECEIVER_EMAIL = 'spam3_1325160774_biz@anorg.net'
 PAYPAL_CURRENCY_CODE = SHOP_CURRENCY['code']
+
+
+
+"""
+Search
+"""
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
+        'URL': 'http://127.0.0.1:8983/solr',
+    },
+}
+
+
+
+
+
+
 
 # other...
 PRETTIFY = True

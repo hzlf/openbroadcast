@@ -865,6 +865,7 @@ class Media(MigrationMixin):
                 if orig.master != self.master:
                     log.info('Media id: %s - Master changed from "%s" to "%s"' % (self.uuid, orig.master, self.master))
                     self.processed = 0
+                    
             except Exception, e:
                 print e
                 pass
