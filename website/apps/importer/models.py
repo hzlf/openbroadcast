@@ -30,7 +30,7 @@ from celery.task import task
 import logging
 log = logging.getLogger(__name__)
 
-USE_CELERYD = True    
+USE_CELERYD = False    
         
 GENERIC_STATUS_CHOICES = (
     (0, _('Init')),
@@ -65,6 +65,7 @@ def clean_upload_path(instance, filename):
 
 class BaseModel(models.Model):
 
+    uuid = UUIDField()
     created = CreationDateTimeField()
     updated = ModificationDateTimeField()
     
@@ -133,7 +134,44 @@ class Import(BaseModel):
 
     def get_api_url(self):
         url = reverse('api_dispatch_list', kwargs={'resource_name': 'import', 'api_name': 'v1'})
-        return url
+        return '%s%s/' % (url, self.pk)
+    
+    def apply_import_tag(self, importfile, **kwargs):
+        print 'apply_import_tag:'
+        print importfile.import_tag
+        
+        
+        if 'mb_release_id' in importfile.import_tag:
+        
+            mb_release_id = importfile.import_tag['mb_release_id']
+            
+            qs = self.files.exclude(pk=importfile.pk)
+            importfiles = qs.filter(status=2)
+            for file in importfiles:
+                print '*************************'
+                print file
+                print 'mb results'
+                for mb in file.results_musicbrainz:
+                    print mb
+                    
+                    # got a match - try to apply
+                    if 'mb_id' in mb and mb['mb_id'] == mb_release_id:
+                        print 'GOT A MATCH!!!'
+                        # main id
+                        file.import_tag['mb_release_id'] = mb_release_id
+                        # textual
+                        file.import_tag['release'] = mb['name']
+                        file.import_tag['artist'] = mb['artist']['name']
+                        file.import_tag['name'] = mb['media']['name']
+                        # mb ids
+                        file.import_tag['mb_artist_id'] = mb['artist']['mb_id']
+                        file.import_tag['mb_track_id'] = mb['media']['mb_id']
+                        
+                        kwargs['skip_apply_import_tag'] = True
+                        file.save(**kwargs)
+                    
+                print
+        
     
     def save(self, *args, **kwargs):
         
@@ -159,7 +197,7 @@ class ImportFile(BaseModel):
         app_label = 'importer'
         verbose_name = _('Import File')
         verbose_name_plural = _('Import Files')
-        ordering = ('-created', )
+        ordering = ('created', )
     
     filename = models.CharField(max_length=256, blank=True, null=True)
     #file = models.FileField(upload_to='dummy')
@@ -173,7 +211,6 @@ class ImportFile(BaseModel):
     
     """
     Result sets. Not stored in foreign model - as they are rather fix.
-    And would imply code changes anyway...
     """
     
     results_tag = JSONField(blank=True, null=True)
@@ -214,6 +251,12 @@ class ImportFile(BaseModel):
     
     def __unicode__(self):
         return self.filename
+        
+
+    def get_api_url(self):
+        url = reverse('api_dispatch_list', kwargs={'resource_name': 'importfile', 'api_name': 'v1'})
+        return '%s%s/' % (url, self.pk)
+    
 
     #@models.permalink
     def get_delete_url(self):
@@ -311,18 +354,34 @@ class ImportFile(BaseModel):
 
 
     
-    def save(self, *args, **kwargs):
+    def save(self, skip_apply_import_tag=False, *args, **kwargs):
         
         msg = {'key': 'save', 'content': 'object saved'}
         #self.messages.update(msg);
 
         if not self.filename:
             self.filename = self.file.name
+            
+        # check/update import_tag
+        if self.status == 2: # "Ready"
+            importer = Importer()
+            
+            self.import_tag = importer.complete_import_tag(self.import_tag)
+            
 
-        super(ImportFile, self).save(*args, **kwargs) # Call the "real" save() method.
+        if self.status == 2: # ready
+            # try to apply import_tag to other files of this import session
+            if not skip_apply_import_tag:
+                self.import_session.apply_import_tag(self)
+
+            
+
+        super(ImportFile, self).save(*args, **kwargs)
 
         
 def post_save_importfile(sender, **kwargs):
+    print 'post_save_importfile - kwargs'
+
     obj = kwargs['instance']
     if not obj.mimetype:
         mime = magic.Magic(mime=True)
@@ -331,6 +390,8 @@ def post_save_importfile(sender, **kwargs):
         
     if obj.status == 0:
         obj.process()
+        
+    
         
     if obj.status == 6:
         #pass

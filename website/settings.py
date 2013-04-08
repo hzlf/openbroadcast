@@ -270,6 +270,8 @@ INSTALLED_APPS = (
     'admin_style',
     'admin_tools',
     
+    'admin_shortcuts',
+    
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -396,6 +398,8 @@ INSTALLED_APPS = (
     'multiuploader',
     'arating',
     'asearch',
+    'pushy',
+    #'turbolinks',
     
     
     
@@ -457,6 +461,25 @@ FORMATS_MEDIA = {
     #'mp3': ['base', 'low'],
     'mp3': ['base',],    
 }
+
+
+"""
+ADMIN_SHORTCUTS = [
+    {
+        'title': 'Library',
+        'shortcuts': [
+            {
+                'url_name': 'admin:alibrary_release_changelist',
+                'title': 'Releases',
+                'count_new': 'project.utils.count_new_orders',
+            },
+        ]
+    },
+]
+"""
+
+
+
 
 """
 API-Keys (override in local_settings)
@@ -678,10 +701,24 @@ MUSICBRAINZ_RATE_LIMIT = False
 pusher / nodejs
 """
 SOCKETIO_URL = 'http://localhost:8888/'
-
 PUSHER_SETTINGS = {
     'MODELS': ('alibrary.playlist',),
 }
+
+"""
+using django pushy!!
+"""
+PUSHY_SETTINGS = {
+    'MODELS': (
+               #'alibrary.playlist',
+               'importer.import',
+               'importer.importfile',
+               ),
+    'SOCKET_SERVER': 'http://localhost:8888/',
+    'CHANNEL_PREFIX': 'pushy_',
+    'DEBUG': DEBUG
+}
+
 
 
 
@@ -763,9 +800,10 @@ logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('django.db.backends').setLevel(logging.ERROR)
 
 # try to override from local_config.py
-""""""
+DEBUG_APPS = None
 try:
     from local_settings import *
+    INSTALLED_APPS += DEBUG_APPS
 except ImportError:
     pass
 

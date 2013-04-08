@@ -86,6 +86,7 @@ class Process(object):
     
     
     def id_by_echoprint(self, file):
+        
         from ep.API import fp
         from lib.analyzer.echoprint import Echoprint
         e = Echoprint()
@@ -326,6 +327,7 @@ class Process(object):
                 result = musicbrainzngs.get_recording_by_id(id=media_id, includes=includes)
                 results.append(result)
             except Exception, e:
+                print e
                 pass
             
         # pass results to have them filled up
@@ -379,9 +381,22 @@ class Process(object):
             r = rg['recording']
             
             
-            result = musicbrainzngs.get_release_group_by_id(id=id, includes=['releases'])
+            result = musicbrainzngs.get_release_group_by_id(id=id, includes=['releases', 'url-rels'])
             
             releases = result['release-group']['release-list']
+            
+            try:
+                relations = result['release-group']['url-relation-list']
+                print
+                print
+                print '""""""""""""""""""""""""""""""""""""""""""""""""""'
+                print relations
+                print '""""""""""""""""""""""""""""""""""""""""""""""""""'
+                print
+                print
+            except:
+                relations = None
+            
             
             try:
                 sorted_releases = sorted(releases, key=lambda k: k['date']) 
@@ -401,11 +416,12 @@ class Process(object):
             print first_release
             
             # look up details for the first release
-            result = musicbrainzngs.get_release_by_id(id=first_release['id'], includes=['labels', 'url-rels',])
+            result = musicbrainzngs.get_release_by_id(id=first_release['id'], includes=['labels', 'url-rels', 'recordings'])
 
             res = {}
             res['release'] = result['release']
             res['recording'] = r
+            res['relations'] = relations
             master_releases.append(res)
             
             
@@ -427,21 +443,34 @@ class Process(object):
     """
     pre-apply some formatting & structure to provide straighter trmplateing
     """
-    def format_master_releases(self, res):
+    def format_master_releases(self, master_releases):
         
+        
+        print
+        print '***************************************************'
+        print 'format_master_releases'
+        print
+        print master_releases
+        print
+        print '***************************************************'
+        print
         
         
         releases = []
         
-        for re in res:
+        for re in master_releases:
             
             release = re['release']
             recording = re['recording']
+            relations = re['relations']
             
             print release
             
             print 'recording:'
             print recording
+            
+            print 'relations:'
+            print relations
             
             r = {}
             
@@ -510,6 +539,21 @@ class Process(object):
                 m['duration'] = recording['recording']['length']
             except:
                 pass
+            
+            
+            # try to get media position
+            if 'medium-list' in release:
+                print
+                print 'got medium list'
+                print '*************************************************************'
+                print release['medium-list']
+                print '*************************************************************'
+                for el in release['medium-list'][0]['track-list']:
+                    print
+                    print el
+                    print
+                print '*************************************************************'
+                print '*************************************************************'
             
             
             r['media'] = m
@@ -585,7 +629,7 @@ class Process(object):
             rel['discogs_image'] = None
             
             try:
-                relations = release['url-relation-list']
+                #relations = release['url-relation-list']
                 print
                 print 'RELATIONS'
                 print relations

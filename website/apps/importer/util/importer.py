@@ -69,7 +69,12 @@ class Importer(object):
         # map
         it = obj.import_tag
         
-        log.info('mb_track_id: %s' % (it['mb_track_id']))
+        print '*****************************'
+        print it
+        print '*****************************'
+        
+        if 'mb_track_id' in it:
+            log.info('mb_track_id: %s' % (it['mb_track_id']))
 
         m = Media(name=it['name'])
 
@@ -77,7 +82,7 @@ class Importer(object):
         
         # lookup by mb_id
         r = None
-        if it['mb_release_id']:
+        if 'mb_release_id' in it:
             lrs = lookup.release_by_mb_id(it['mb_release_id'])
             #print 'LRS!:'
             #print lrs
@@ -87,7 +92,7 @@ class Importer(object):
         if not r:
             r, created = Release.objects.get_or_create(name=it['release'])
             # assign mb_relation
-            if it['mb_release_id']:
+            if 'mb_release_id' in it:
                 url = 'http://musicbrainz.org/release/%s' % it['mb_release_id']
                 print 'musicbrainz_url: %s' % url
                 rel = Relation(content_object=r, url=url)
@@ -105,7 +110,7 @@ class Importer(object):
         
         
         # TODO: move
-        if m.release and it['mb_release_id']:
+        if m.release and 'mb_release_id' in it:
             print 'Trying to get tracknumber'
             includes = ["recordings",]
             mb_result = musicbrainzngs.get_release_by_id(id=it['mb_release_id'], includes=includes)
@@ -189,9 +194,9 @@ class Importer(object):
                     print 'DISCOGS: %s' % rel['target']
 
                     try:
-                        pass
-                        #rel = Relation(content_object=r, url=rel['target'])
-                        #rel.save()
+                        # pass
+                        rel = Relation(content_object=r, url=rel['target'])
+                        rel.save()
                     except Exception, e:
                         print 'RELATION EXCEPTION'
                         print e
@@ -219,7 +224,32 @@ class Importer(object):
         
         
         
+    def complete_import_tag(self, import_tag):
         
+        print import_tag
+        
+        if 'artist' in import_tag:
+            a = Artist.objects.filter(name=import_tag['artist'])
+            print a
+            if a.count() == 1:
+                print a[0].get_api_url()
+                import_tag['alibrary_artist_id'] = a[0].pk
+                import_tag['alibrary_artist_resource_uri'] = a[0].get_api_url()
+        else:
+            print 'no artist name in tag'
+        
+        if 'release' in import_tag:
+            r = Release.objects.filter(name=import_tag['release'])
+            print r
+            if r.count() == 1:
+                print r[0].get_api_url()
+                import_tag['alibrary_release_id'] = r[0].pk
+                import_tag['alibrary_release_resource_uri'] = r[0].get_api_url()
+        else:
+            print 'no release name in tag'
+        
+        
+        return import_tag
         
         
         

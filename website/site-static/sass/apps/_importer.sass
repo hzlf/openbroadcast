@@ -3,14 +3,21 @@
 i.icon-padded
   padding-left: 5px
   margin-left: 5px
+  display: block
+  background-repeat: no-repeat
 
 i.icon-id3
-  background-image: url(/static/img/icons/metadata.providers/id3v2.png)
+  background-image: url(/static/img/icons/metadata.providers/id3v2.png) !important
   background-position: 0 0
   width: 22px
   height: 22px
 i.icon-musicbrainz
-  background-image: url(/static/img/icons/metadata.providers/musicbrainz.png)
+  background-image: url(/static/img/icons/metadata.providers/musicbrainz.png) !important
+  background-position: 0 0
+  width: 22px
+  height: 22px
+i.icon-obp
+  background-image: url(/static/img/icons/metadata.providers/openbroadcast.png) !important
   background-position: 0 0
   width: 22px
   height: 22px
@@ -18,10 +25,16 @@ i.icon-musicbrainz
 
 $duplicateBackground: #fffeac
 
+
+
+
 section.importer-importfiles
 
   // base
   .listing
+  
+    .loading
+      // opacity: 0.5
   
     .item
       //padding: 5px
@@ -49,9 +62,9 @@ section.importer-importfiles
         .icon-blank:before
           content: "\f017" // icon-time
         div.result-actions
-          display: none
+          // display: none
         div.result-set
-          display: none
+          // display: none
         
       
       &.info
@@ -83,7 +96,7 @@ section.importer-importfiles
           content: "\f021" // icon-refresh
 
         div.result-actions
-          display: none
+          // display: none
         div.result-set
           display: block
     
@@ -98,9 +111,9 @@ section.importer-importfiles
         div.status-duplicate
           display: block
         div.result-actions
-          display: none
+          // display: none
         div.result-set
-          display: none
+          // display: none
     
       &.done
         background-color: $successBackground
@@ -120,7 +133,7 @@ section.importer-importfiles
         
       // status elements
       div.status
-        display: none
+        // display: none
         
       div.status-imported
         .information
@@ -152,7 +165,13 @@ section.importer-importfiles
         padding: 5px 0
         border-bottom: 1px solid $grayLighter
         
+        img
+          margin-right: 4px
+          width: 66px
+          height: 66px
+        
         &.provider-tag
+          font-size: 11px
           input[type='checkbox']
             display: none
             
@@ -176,7 +195,8 @@ section.importer-importfiles
         ul
           margin: 0
           > li
-            font-size: 11px
+            &.small
+              font-size: 11px
             &.key
               font-weight: bold
               padding: 0 5px 0 0
@@ -188,16 +208,40 @@ section.importer-importfiles
             
             
             
+      // result form
+      form.form-result
+        .base
+          padding-top: 0 !important
+        .ac-result
+          position: absolute
+          z-index: 1000
+          background: white
+          width: 416px
+          .listing
+            .item
+              margin-bottom: 0
+              padding: 4px
+              background-color: yellow
+              border-bottom: 1px solid #eeeeee
+              background: #333
+              color: $white
+              img
+                width: 63px
+                height: 63px
+              &.hover
+                background-color: #ddffd9
+                color: $black
+              
+            
+       
             
       // action form
       div.result-actions
         padding: 5px 20px 5px 10px
         // temporary
-        h4
-          display: none
         .base
           padding-top: 10px
-        .musicbrainz
+        .advanced-fields
           display: none
 
   // form overrides
@@ -250,4 +294,25 @@ i.ajax-loader
       &.ready
         background-color: #DDFFD9
 
+// hacks
+.popover
+  .popover-title
+    // display: none !important
+  .popover-content
+    padding: 8px
+    background: #333
+    color: $white
+    img
+      width: 70px
+      height: 70px
+    h1
+      line-height: 100%
+      color: $white
+      margin-bottom: 8px !important
+    .alert
+      margin-bottom: 0px
+      margin-top: 8px
 
+span.dim
+  background: transparent
+  color: #a3a3a3

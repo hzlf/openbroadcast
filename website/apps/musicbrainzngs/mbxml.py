@@ -103,11 +103,21 @@ def parse_inner(inner_els, element):
 	    ('subelement-key', <result>) then return a dict
 	    {'subelement-key': <result>} instead
 	"""
+	print
+	print 'parse_inner'
+	print inner_els
+	print inner_els.keys()
+	
 	result = {}
 	for sub in element:
 		t = fixtag(sub.tag, NS_MAP)[0]
 		if ":" in t:
 			t = t.split(":")[1]
+			
+
+		print 'tag: %s' % sub.tag
+		print 't: %s' % t
+		print
 		if t in inner_els.keys():
 			inner_result = inner_els[t](sub)
 			if isinstance(inner_result, tuple):
@@ -116,6 +126,8 @@ def parse_inner(inner_els, element):
 				result[t] = inner_result
 		else:
 			_log.debug("in <%s>, not delegating <%s>", fixtag(element.tag, NS_MAP)[0], t)
+			print
+			print
 	return result
 
 def parse_message(message):
@@ -145,6 +157,9 @@ def parse_message(message):
 
 	                  "message": parse_response_message
 	                  }
+	
+	# print valid_elements
+	
 	result.update(parse_inner(valid_elements, root))
 	return result
 
@@ -228,6 +243,15 @@ def parse_relation_list(rl):
     key = "%s-relation-list" % ttype["target-type"]
     return (key, [parse_relation(r) for r in rl])
 
+def fix_parse_relation_list(rl):
+    print 'RL!'
+    print rl
+    print 
+    attribs = ["target-type"]
+    ttype = parse_attributes(attribs, rl)
+    key = "%s-relation-list" % ttype["target-type"]
+    return (key, [parse_relation(r) for r in rl])
+
 def parse_relation(relation):
     result = {}
     attribs = ["type"]
@@ -285,6 +309,11 @@ def parse_text_representation(textr):
 	return parse_elements(["language", "script"], textr)
 
 def parse_release_group(rg):
+	
+
+    print '************************' 
+    print 'parse_release_group'
+	
     result = {}
     attribs = ["id", "type", "ext:score"]
     elements = ["title", "user-rating", "first-release-date", "primary-type"]
@@ -293,6 +322,8 @@ def parse_release_group(rg):
                  "tag-list": parse_tag_list,
                  "user-tag-list": parse_tag_list,
                  "secondary-type-list": parse_element_list,
+	              # rels (added by ohrstrom)
+	              "relation-list": fix_parse_relation_list,
                  "rating": parse_rating}
 
     result.update(parse_attributes(attribs, rg))
@@ -370,6 +401,8 @@ def parse_release_list(rl):
 	return result
 
 def parse_release_group_list(rgl):
+	print '************************' 
+	print 'parse_release_group_list'
 	result = []
 	for rg in rgl:
 		result.append(parse_release_group(rg))

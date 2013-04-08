@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db.models import Count
-
+import json
 from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
@@ -35,6 +35,26 @@ class ImportFileResource(ModelResource):
             'import_session': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
         }
+        
+
+    def dehydrate(self, bundle):
+        bundle.data['status'] = bundle.obj.get_status_display().lower();
+        # offload json parsing to the backend
+        # TODO: remove in js, enable here
+        """
+        bundle.data['import_tag'] = json.loads(bundle.data['import_tag'])
+        bundle.data['results_acoustid'] = json.loads(bundle.data['results_acoustid'])
+        bundle.data['results_musicbrainz'] = json.loads(bundle.data['results_musicbrainz'])
+        bundle.data['results_discogs'] = json.loads(bundle.data['results_discogs'])
+        bundle.data['results_tag'] = json.loads(bundle.data['results_tag'])
+        """
+        return bundle
+        
+        
+    def obj_update(self, bundle, request, **kwargs):
+        #import time
+        #time.sleep(3)
+        return super(ImportFileResource, self).obj_update(bundle, request, **kwargs)
         
 
     def obj_create(self, bundle, request, **kwargs):

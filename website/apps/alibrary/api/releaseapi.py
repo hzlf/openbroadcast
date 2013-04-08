@@ -64,6 +64,7 @@ class ReleaseResource(ModelResource):
         
         return [
               url(r"^(?P<resource_name>%s)/autocomplete%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('autocomplete'), name="alibrary-release_api-autocomplete"),
+              url(r"^(?P<resource_name>%s)/autocomplete-name%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('autocomplete_name'), name="alibrary-release_api-autocomplete_name"),
         ]
 
 
@@ -94,15 +95,27 @@ class ReleaseResource(ModelResource):
             bundle = self.autocomplete_dehydrate(bundle, q)
             objects.append(bundle)
 
-        meta = {
-                'query': q,
-                'total_count': qs.distinct().count()
-                }
-
-        data = {
-            'meta': meta,
-            'objects': objects,
-        }
+        if qs:
+            meta = {
+                    'query': q,
+                    'total_count': qs.distinct().count()
+                    }
+    
+            data = {
+                'meta': meta,
+                'objects': objects,
+            }
+        else:
+            meta = {
+                    'query': q,
+                    'total_count': 0
+                    }
+    
+            data = {
+                'meta': meta,
+                'objects': {},
+            }
+            
 
         self.log_throttled_access(request)
         return self.create_response(request, data)
@@ -130,8 +143,77 @@ class ReleaseResource(ModelResource):
     
     
     
+
+
+
+
+    def autocomplete_name(self, request, **kwargs):
+        
+        self.method_check(request, allowed=['get'])
+        # self.is_authenticated(request)
+        self.throttle_check(request)
+        
+        q = request.GET.get('q', None)
+        result = []
+        object_list = []
+        qs = None
+        if q and len(q) > 1:
+            qs = Release.objects.filter(name__istartswith=q)
+        
+        if qs:
+           object_list = qs.distinct()[0:20]
+
+        objects = []
+        for result in object_list:
+            bundle = self.build_bundle(obj=result, request=request)
+            bundle = self.autocomplete_name_dehydrate(bundle, q)
+            objects.append(bundle)
+
+        if qs:
+            meta = {
+                    'query': q,
+                    'total_count': qs.distinct().count()
+                    }
+    
+            data = {
+                'meta': meta,
+                'objects': objects,
+            }
+        else:
+            meta = {
+                    'query': q,
+                    'total_count': 0
+                    }
+    
+            data = {
+                'meta': meta,
+                'objects': {},
+            }
+            
+
+        self.log_throttled_access(request)
+        return self.create_response(request, data)
+    
+
     
     
-    
-    
+
+    def autocomplete_name_dehydrate(self, bundle, q):
+        bundle.data['name'] = bundle.obj.name
+        bundle.data['id'] = bundle.obj.pk
+        bundle.data['ct'] = 'release'
+        bundle.data['releasedate'] = bundle.obj.releasedate
+        bundle.data['artist'] = bundle.obj.get_artists()
+        bundle.data['media_count'] = bundle.obj.media_release.count()
+        bundle.data['get_absolute_url'] = bundle.obj.get_absolute_url()
+        bundle.data['resource_uri'] = bundle.obj.get_api_url()
+        bundle.data['main_image'] = None
+        try:
+            opt = THUMBNAIL_OPT
+            main_image = get_thumbnailer(bundle.obj.main_image).get_thumbnail(opt)
+            bundle.data['main_image'] = main_image.url
+        except:
+            pass
+
+        return bundle
     

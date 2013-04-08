@@ -140,6 +140,13 @@ class Artist(MigrationMixin):
         
         return ('alibrary-artist-detail', [self.slug])
     
+    def get_api_url(self):
+        return reverse('api_dispatch_detail', kwargs={  
+            'api_name': 'v1',  
+            'resource_name': 'artist',  
+            'pk': self.pk  
+        }) + ''
+    
     def get_membership(self):
 
         parents = []

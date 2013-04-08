@@ -1,11 +1,14 @@
 {% extends "layout_edit.html" %}
 
-{% load i18n sekizai_tags verbatim dajaxice_templatetags straight_include mustache %}
+{% load i18n sekizai_tags verbatim dajaxice_templatetags straight_include mustache pushy_tags %}
 
 {% block object_type %}import{% endblock %}
 
 
 {% block heading %} <!-- heading / icon (large one) -->
+
+{% addtoblock "js-post" %}{% pushy_scripts %}{% endaddtoblock %}
+
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}importer/js/lib/tmpl.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}importer/js/lib/fileupload/jquery.iframe-transport.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}importer/js/lib/fileupload/jquery.fileupload.js"></script>{% endaddtoblock %}
@@ -36,6 +39,8 @@
 	</section>
 
 	<div class="clear"></div>
+	
+	
 
 </div>
 {% endblock %}
@@ -71,10 +76,8 @@
 {% endaddtoblock %}
 
 
-{% addtoblock "js-post" %}<!--{% dajaxice_js_import %}-->{% endaddtoblock %}
-{% addtoblock "js-post" %}<!--<script type="text/javascript" src="{{ STATIC_URL }}dajax/jquery.dajax.core.js"></script>-->{% endaddtoblock %}
-
-{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}importer/js/base.js"></script>{% endaddtoblock %}
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}importer/js/importfile.js"></script>{% endaddtoblock %}
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}importer/js/base_pushy.js"></script>{% endaddtoblock %}
 
 
 
@@ -103,13 +106,13 @@ $(document).ready(function() {
 	$(function () {
 
 		importer.ui = new ImporterUi();
-		importer.ui.api_url = "{% url api_dispatch_list resource_name='import' api_name='v1'%}{{ object.id }}";
+		importer.ui.api_url = "{% url api_dispatch_list resource_name='import' api_name='v1'%}{{ object.id }}/";
 		importer.ui.fileupload_id = 'fileupload';
 		importer.ui.fileupload_options = {
 	        maxFileSize: 1000000000, // 1000 MB
 	        minFileSize: 200000,
 	        acceptFileTypes: /(\.|\/)(mp3|aif?f|wav|avi|flac|mp4|ogg|jpe?g)$/i,
-	        limitConcurrentUploads: 10
+	        limitConcurrentUploads: 2
 	   };
 	   
 	   importer.ui.init();

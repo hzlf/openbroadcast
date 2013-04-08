@@ -158,6 +158,8 @@ class License(MPTTModel, MigrationMixin):
     
     restricted = models.NullBooleanField(null=True, blank=True)
     
+    is_default = models.BooleanField(default=False)
+    
 
     class Translation(TranslationModel):
         

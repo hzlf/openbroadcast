@@ -132,9 +132,7 @@ class ImportCreateView(CreateView):
 class ImportUpdateView(UpdateView):
     
     model = Import
-    template_name = 'importer/import_form_jquery.html'
-    #template_name = 'importer/import_form_backbone.html'
-    #template_name = 'importer/import_form_rework.html'
+    template_name = 'importer/import_form_pushy.html'
     def get_queryset(self):
         kwargs = {}
         return Import.objects.filter(user=self.request.user)

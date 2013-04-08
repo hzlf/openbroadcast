@@ -885,6 +885,16 @@ class Media(MigrationMixin):
         log = logging.getLogger('alibrary.mediamodels.save')
         log.info('Media id: %s - Save' % (self.pk))
 
+
+        """
+        Assign a default license
+        """
+        if not self.license:
+            try:
+                license = License.objects.filter(is_default=True)[0]
+                self.license = license
+            except:
+                print 'no default license available'
         
     
         """

@@ -18,6 +18,8 @@ ImporterUi = function() {
 	this.interval_loops = 0;
 	this.interval_duration = 50000;
 	this.api_url = false;
+	
+	this.importfiles = [];
 
 	// attach fu here
 	this.fileupload_id = false;
@@ -29,8 +31,8 @@ ImporterUi = function() {
 	this.is_ie6 = $.browser == 'msie' && $.browser.version < 7;
 
 	this.init = function() {
-		console.log('importer: init');
-		console.log(self.api_url);
+		debug.debug('importer: init');
+		debug.debug(self.api_url);
 		self.iface();
 
 		self.fileupload = $('#' + self.fileupload_id);
@@ -58,23 +60,21 @@ ImporterUi = function() {
 		});
 		
 		// list items
+		/*
 		$('#result_holder .result-set').live('click', function(e){
-			
-			/*
-			$('.result-set', $(this).parents('.importfile')).removeClass('selected');
-			$(this).addClass('selected');
-			*/
 			$('.result-set', $(this).parents('.importfile')).removeClass('selected choosen');
 			$(this).addClass('choosen');
 			
 			self.apply_best_match();
 			
 		});
+		*/
 		
 		// item actions
 		var actions = $('#result_holder .importfile.item .result-actions');
 		
 		
+		/*
 		$('.delete-importfile', actions).live('click', function(e){
 			
 			var parent = $(this).parents('.importfile');
@@ -90,7 +90,7 @@ ImporterUi = function() {
   				processData:  false,
 				// data: JSON.stringify(data),
 				success: function(data) {
-					// console.log(data);
+					// debug.debug(data);
 					// form_result.hide();
 				},
 				complete: function(jqXHR) {
@@ -102,11 +102,12 @@ ImporterUi = function() {
 			});
 			
 		});
+		*/
 		
 		
 		
-		
-		$('.start-import', actions).live('click', function(e){
+		/* moved to importfile app
+		$('.start-import', actions).live('click', function(e) {
 			
 			var parent = $(this).parents('.importfile');
 			parent_id = parent.attr('id').split('_')[2];
@@ -114,6 +115,7 @@ ImporterUi = function() {
 			self.import_by_id(parent_id);
 
 		});
+		*/
 		
 		
 		$('.start-import-all', $('#import_summary')).live('click', function(e){
@@ -154,13 +156,14 @@ ImporterUi = function() {
 
 
 	this.import_by_id = function(id) {
-		console.log('id: ' + id);
+		debug.debug('id: ' + id);
 		
 		var item = self.current_data[id];
 		var el = $('#importfile_result_' + id)
 		var form_result = $('.form-result', el);
 
 		var import_tag = {
+		
 			name: $('input.name', form_result).val(), 
 			release: $('input.release', form_result).val(), 
 			releasedate: $('input.releasedate', form_result).val(), 
@@ -198,7 +201,7 @@ ImporterUi = function() {
 			processData:  false,
 			data: JSON.stringify(data),
 			success: function(data) {
-				console.log(data);
+				debug.debug(data);
 				form_result.hide();
 				
 			}
@@ -219,7 +222,7 @@ ImporterUi = function() {
 	};
 
 	this.run_interval = function() {
-		//console.log('interval: ' + self.interval_loops);
+		//debug.debug('interval: ' + self.interval_loops);
 		self.interval_loops += 1;
 
 		// Put functions needed in interval here
@@ -241,7 +244,7 @@ ImporterUi = function() {
 			self.update_best_match(data.files);
 			self.apply_best_match(data.files);
 		} catch(err) {
-			// console.log(err);
+			// debug.debug(err);
 		}
 		
 		
@@ -296,7 +299,7 @@ ImporterUi = function() {
 		$('.item.warning .num-files', container).html(count_warning);
 		$('.item.duplicate .num-files', container).html(count_duplicate);
 		$('.item.error .num-files', container).html(count_error);
-		//console.log('count_ready:', count_ready);
+		//debug.debug('count_ready:', count_ready);
 	
 	};
 
@@ -307,14 +310,14 @@ ImporterUi = function() {
 		
 		$('.importfile', holder).each(function(i, item) {
 			
-			//console.log(i);
-			//console.log(item);
+			//debug.debug(i);
+			//debug.debug(item);
 			
 			var selected = $('.result-set.musicbrainz-tag.selected, .result-set.musicbrainz-tag.choosen', item)
 			
-			console.log('media-id', $('.media-id', selected).val());
-			console.log('release-id', $('.release-id', selected).val());
-			console.log('artist-id', $('.artist-id', selected).val());
+			debug.debug('media-id', $('.media-id', selected).val());
+			debug.debug('release-id', $('.release-id', selected).val());
+			debug.debug('artist-id', $('.artist-id', selected).val());
 			
 			var result_form = $('.form-result', item);
 			// ids
@@ -340,7 +343,7 @@ ImporterUi = function() {
 
 		var active_releases = new Array;
 
-		//console.log('update_best_match');
+		//debug.debug('update_best_match');
 
 		// populate calculation array
 		for (var i in data) {
@@ -351,8 +354,9 @@ ImporterUi = function() {
 
 				try {
 					item.results_musicbrainz = JSON.parse(item.results_musicbrainz);
+					
 				} catch(err) {
-					//console.log(err);
+					//debug.debug(err);
 				}
 
 				if (item.id in self.current_data) {
@@ -361,7 +365,7 @@ ImporterUi = function() {
 
 						for (var k in item.results_musicbrainz) {
 							var res = item.results_musicbrainz[k]
-							//console.log(res);
+							//debug.debug(res);
 
 							if (res['mb_id'] in active_releases) {
 								active_releases[res['mb_id']] += 1;
@@ -377,13 +381,13 @@ ImporterUi = function() {
 
 		active_releases = sortObject(active_releases);
 
-		// console.log(active_releases.reverse());
+		// debug.debug(active_releases.reverse());
 		
 		var hits = active_releases.reverse().slice()
 		var top_hit = active_releases[0]['key'];
 
-		//console.log(hits);
-		//console.log(top_hit);
+		//debug.debug(hits);
+		//debug.debug(top_hit);
 
 		// set selection state
 		
@@ -399,23 +403,23 @@ ImporterUi = function() {
 			
 				if (item.status > 0) {
 					
-					//console.log(item.results_musicbrainz);
+					//debug.debug(item.results_musicbrainz);
 	
 					if (item.id in self.current_data) {
 	
 						if (item.results_musicbrainz) {
 	
-							//console.log('ok');	
+							//debug.debug('ok');	
 							
 							for (var k in item.results_musicbrainz) {
 								var res = item.results_musicbrainz[k]
-								//console.log(res['mb_id']);
+								//debug.debug(res['mb_id']);
 	
 								if (res['mb_id'] == top_hit) {
-									// console.log('top-match');
+									// debug.debug('top-match');
 									$('.result-set.musicbrainz-tag.mb_id-' + res['mb_id'], target_result).addClass('selected');
 								} else {
-									//console.log('NOOOOOOO-match');
+									//debug.debug('NOOOOOOO-match');
 								}
 	
 							}
@@ -438,9 +442,97 @@ ImporterUi = function() {
 	};
 
 	this.update_list_display = function(data) {
+		debug.debug(data);
+		$.each(data, function(i, item) {
+			debug.debug(item);
+			// parse raw data
+			try {
+				item.results_tag = JSON.parse(item.results_tag);
+				item.results_acoustid = JSON.parse(item.results_acoustid);
+				item.results_musicbrainz = JSON.parse(item.results_musicbrainz);
+				item.import_tag = JSON.parse(item.import_tag);
+			} catch(err) {
+				item.results_tag = false;
+				debug.debug(err);
+			}
+			
+			// check if in dom
+			if(! $('#' + item.uuid).size()) {
+				debug.debug('element not existent in dom');
+				
+				// add container
+				$('#result_holder').append('<div id="' + item.uuid + '"></div>');
+				
+				var ifa = new ImportfileApp;
+				ifa.local_data = item;
+				ifa.container = $('#' + item.uuid);
+				ifa.api_url = item.resource_uri;
+				ifa.importer = self;
+				ifa.init(true);
+				
+				self.importfiles.push(ifa);
+				
+			} else {
+				debug.debug('element exists in dom');
+			};
+			
+		});
+	};
+	
+	
+	this.update_summary = function() {
+	
+		var container = $('#import_summary');
+	
+		var count_init = 0;
+		var count_done = 0;
+		var count_ready = 0;
+		var count_working = 0;
+		var count_warning = 0;
+		var count_duplicate = 0;
+		var count_error = 0;
+	
+		$.each(self.importfiles, function(i, item) {
+			console.log('update importfile / ImporterApp');
+			var data = item.local_data;
 
-		// console.log(data)
-		// console.log(self.current_data)
+			if (data.status == 'done') {
+				count_done++;
+			}
+			if (data.status == 'ready') {
+				count_ready++;
+			}
+			if (data.status == 'working') {
+				count_working++;
+			}
+			if (data.status == 'warning') {
+				count_warning++;
+			}
+			if (data.status == 'duplicate') {
+				count_duplicate++;
+			}
+			if (data.status == 'error') {
+				count_error++;
+			}
+		});
+		
+		
+		$('.item.done .num-files', container).html(count_done);
+		$('.item.ready .num-files', container).html(count_ready);
+		$('.item.working .num-files', container).html(count_working);
+		$('.item.warning .num-files', container).html(count_warning);
+		$('.item.duplicate .num-files', container).html(count_duplicate);
+		$('.item.error .num-files', container).html(count_error);
+		
+		
+	
+	};
+	
+
+	this.update_list_display__ = function(data) {
+
+		// debug.debug(data)
+		// debug.debug(self.current_data)
 
 		var status_map = new Array;
 		status_map[0] = 'init';
@@ -467,14 +559,14 @@ ImporterUi = function() {
 					//item.messages = JSON.parse(item.messages);
 				} catch(err) {
 					item.results_tag = false;
-					//console.log(err);
+					//debug.debug(err);
 				}
 
-				//console.log(item.results_musicbrainz);
+				//debug.debug(item.results_musicbrainz);
 
 				if (item.id in self.current_data) {
 					self.current_data[item.id] = item;
-					console.log('item already present');
+					debug.debug('item already present');
 				} else {
 
 					var result = tmpl("template-import", item);
@@ -489,13 +581,13 @@ ImporterUi = function() {
 				// Applying gathered results
 				if (item.results_tag) {
 					
-					//console.log(item.results_tag)
+					//debug.debug(item.results_tag)
 
 					// building the target
 					target_set = $('.provider-tag', target_result);
 					for (var k in item.results_tag) {
 						var res = item.results_tag[k]
-						// console.log(k, res);
+						// debug.debug(k, res);
 						$('.holder-' + k + ' .value', target_set).html(res);
 					}
 				}
@@ -506,7 +598,7 @@ ImporterUi = function() {
 					target_set = $('.provider-tag', target_result);
 					for (var k in item.results_acoustid) {
 						var res = item.results_acoustid[k]
-						//console.log(k, res);
+						//debug.debug(k, res);
 						$('.holder-' + k + ' .value', target_set).html(res);
 					}
 				}
@@ -532,9 +624,9 @@ ImporterUi = function() {
 					target_set = $('.musicbrainz-tag-holder', target_result);
 
 					if (item.id in self.musicbrainz_data) {
-						console.log('results_musicbrainz already present');
+						debug.debug('results_musicbrainz already present');
 					} else {
-						console.log('results_musicbrainz NOT present');
+						debug.debug('results_musicbrainz NOT present');
 						self.musicbrainz_data[item.id] = item.results_musicbrainz;
 						
 						var res = tmpl("template-result-musicbrainz", item);
@@ -546,7 +638,7 @@ ImporterUi = function() {
 					
 					/*
 					for (var k in item.results_musicbrainz) {
-						console.log(k);
+						debug.debug(k);
 						var res = item.results_musicbrainz[k]
 						$('.holder-' + k + ' .value', target_set).html(res);
 					}
@@ -599,7 +691,7 @@ ImporterUi = function() {
 		try {
 
 		} catch(err) {
-			console.log(error);
+			debug.debug(error);
 		}
 
 	};

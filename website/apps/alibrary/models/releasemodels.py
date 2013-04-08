@@ -564,9 +564,13 @@ arating.enable_voting_on(Release)
 post_save.connect(library_post_save, sender=Release)  
 
 
+""""""
 from actstream import action
 def action_handler(sender, instance, created, **kwargs):
-    action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
+    try:
+        action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
+    except Exception, e:
+        print e
 
 post_save.connect(action_handler, sender=Release)
 

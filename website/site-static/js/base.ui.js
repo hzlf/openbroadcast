@@ -445,7 +445,7 @@ base.ui.iface = function() {
 	}
 	
 	
-	$('.tooltipable').tooltip()
+	$('.tooltipable').tooltip({delay: { show: 50, hide: 10 }});
 
 	
 	$('.hoverable').live('mouseenter', function(e){
@@ -510,7 +510,17 @@ base.ui.iface = function() {
 		}
 	});
 	
-
+	// add class to external links	
+	$('body').bind('DOMSubtreeModified', function(e) {
+	  if (e.target.innerHTML.length > 0) {
+		$("a").filter(function() {
+		    return this.hostname && this.hostname !== location.hostname;
+		})
+		.addClass('external')
+		// .attr("target","_blank")
+		;
+	  }
+	});
 
 
 	
@@ -1191,7 +1201,7 @@ AutocompleteApp = function() {
 	var self = this;
 	this.api_url;
 	this.container;
-	this.template;
+	this.template = 'alibrary/nj/release/autocomplete.html';
 	this.q_min = 2;
 	
 	this.search = function(q) {
@@ -1210,7 +1220,7 @@ AutocompleteApp = function() {
 	
 	this.display = function(data) {
 		console.log(data);
-		html = nj.render('alibrary/nj/release/autocomplete.html', data);
+		html = nj.render(self.template, data);
 		self.container.html(html);
 	};
 	
@@ -1224,7 +1234,6 @@ base.ui.searchbar = function() {
 	this.autocomplete = new AutocompleteApp();
 	this.autocomplete.api_url = '/api/v1/release/autocomplete/';
 	this.autocomplete.container = $('#autocomplete_holder');
-	this.autocomplete.template = 'lalala';
 
 	
 	// Submit on 'ENTER'
