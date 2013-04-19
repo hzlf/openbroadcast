@@ -810,7 +810,8 @@ logging.getLogger('django.db.backends').setLevel(logging.ERROR)
 DEBUG_APPS = None
 try:
     from local_settings import *
-    INSTALLED_APPS += DEBUG_APPS
+    if DEBUG_APPS:
+        INSTALLED_APPS += DEBUG_APPS
 except ImportError:
     pass
 
