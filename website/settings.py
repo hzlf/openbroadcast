@@ -399,7 +399,7 @@ INSTALLED_APPS = (
     'multiuploader',
     'arating',
     'asearch',
-    'django_db_signals',
+    #'django_db_signals',
     'pushy',
     #'turbolinks',
     
