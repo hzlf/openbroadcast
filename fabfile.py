@@ -56,13 +56,12 @@ def deploy():
         try:
             run('mkdir config')
         except Exception, e:
-            print e
             pass
         
         try:
             run('cp src/website/local_settings.py config/')  
         except Exception, e:
-            print e
+            pass
         
         """
         recreate src directory
@@ -70,7 +69,7 @@ def deploy():
         try:
             run('rm -Rf src')
         except Exception, e:
-            print e
+            pass
         
         run('mkdir src')
 
@@ -92,7 +91,7 @@ def deploy():
         try:
             run('cp config/local_settings.py src/website/')
         except Exception, e:
-            print e
+            pass
             
         
         """
@@ -102,7 +101,7 @@ def deploy():
             pass
             # run('virtualenv --no-site-packages /srv/%s' % env.site_id)
         except Exception, e:
-            print e
+            pass
 
             
             
@@ -117,7 +116,7 @@ def deploy():
             run('ln -s %s/media %s/src/website/media' % (env.storage, env.path))
             run('ln -s %s/smedia %s/src/website/smedia' % (env.storage, env.path))
         except Exception, e:
-            print e
+            pass
             
             
         """
@@ -127,7 +126,7 @@ def deploy():
             run('rm %s/%s.conf' % (env.supervisor, env.site_id))
             run('ln -s %s/src/conf/%s.supervised.conf %s/%s.conf' % (env.path, env.site_id, env.supervisor, env.site_id))
         except Exception, e:
-            print e
+            pass
             
         """
         additional supervisor configs
@@ -137,7 +136,7 @@ def deploy():
             run('rm %s/%s' % (env.nginx, env.site_id))
             run('ln -s %s/src/conf/%s.nginx.conf %s/%s' % (env.path, env.site_id, env.nginx, env.site_id))
         except Exception, e:
-            print e
+            pass
             
         """
         run migrations
@@ -145,7 +144,7 @@ def deploy():
         try:
             run('/srv/%s/bin/python /%s/src/website/manage.py migrate' % (env.site_id, env.path))
         except Exception, e:
-            print e
+            pass
             
         """
         staticfiles & compress
@@ -159,13 +158,13 @@ def deploy():
                 #run('rm -R css/*')
                 #run('/var/lib/gems/1.8/gems/compass-0.11.7/bin/compass compile -c config-production.rb')
         except Exception, e:
-            print e        
+            pass        
         
         try:
             run('/srv/%s/bin/python /%s/src/website/manage.py collectstatic --noinput --verbosity=0' % (env.site_id, env.path))
             run('/srv/%s/bin/python /%s/src/website/manage.py compress -f' % (env.site_id, env.path))
         except Exception, e:
-            print e
+            pass
             
         """
         (re)start gunicorn worker
@@ -182,7 +181,7 @@ def deploy():
             
             run('supervisorctl status')
         except Exception, e:
-            print e
+            pass
         
         
         
