@@ -1,5 +1,5 @@
 # views.py
-import simplejson as json
+import json
 from django.http import HttpResponse
 from haystack.query import SearchQuerySet
 
