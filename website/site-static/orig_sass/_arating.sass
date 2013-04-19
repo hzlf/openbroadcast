@@ -1,0 +1,45 @@
+// arating
+
+
+ul.arating
+  //background-color: green !important
+  +clearfix()
+  li
+    display: block
+    margin: 8px 8px 0 0
+    
+    border: 1px solid $grayLight
+    +border-radius(1px)
+    +box-shadow()
+    
+    a
+      display: block
+      height: 16px
+      min-width: 16px
+      background: url(#{$static-url}arating/img/like.dislike.16.png)
+      background-repeat: no-repeat
+      
+      padding: 0 7px 0 3px
+      background-color: white
+    
+      span
+        color: $gray
+        text-decoration: none
+        margin: 0 0 0 18px
+        
+    a
+      &.vote1
+        background-position: 0 -32px
+        &.active, &:hover
+          background-position: 0 0
+      &.vote-1
+        background-position: 0 -48px
+        &.active, &:hover
+          background-position: 0 -16px
+          
+
+        
+      &.active, &:hover
+        background-color: #DDFFD9
+        text-decoration: none !important
+

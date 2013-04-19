@@ -27,10 +27,12 @@ from alibrary.lookups import *
 
 
 import floppyforms as forms
+from django_date_extensions.fields import ApproximateDateFormField
 
     
-from django.forms.widgets import FileInput
-from floppyforms.widgets import DateInput
+from django.forms.widgets import FileInput, HiddenInput
+
+#from floppyforms.widgets import DateInput
 from tagging.forms import TagField
 from ac_tagging.widgets import TagAutocompleteTagIt
 
@@ -39,19 +41,36 @@ from lib.widgets.widgets import ReadOnlyIconField
 
 
 ACTION_LAYOUT =  action_layout = FormActions(
-                HTML('<button type="submit" name="save-i-classicon-arrow-upi" value="save" class="btn btn-primary pull-right ajax_submit" id="submit-id-save-i-classicon-arrow-upi"><i class="icon-ok icon-white"></i> Save</button>'),            
+                HTML('<button type="submit" name="save" value="save" class="btn btn-primary pull-right ajax_submit" id="submit-id-save-i-classicon-arrow-upi"><i class="icon-save icon-white"></i> Save</button>'),            
+                HTML('<button type="reset" name="reset" value="reset" class="reset resetButton btn btn-secondary pull-right" id="reset-id-reset"><i class="icon-trash"></i> Cancel</button>'),
+        )
+ACTION_LAYOUT_EXTENDED =  action_layout = FormActions(
+                Field('publish', css_class='input-hidden' ),
+                HTML('<button type="submit" name="save" value="save" class="btn btn-primary pull-right ajax_submit" id="submit-id-save-i-classicon-arrow-upi"><i class="icon-save icon-white"></i> Save</button>'),            
+                HTML('<button type="submit" name="save-and-publish" value="save" class="btn pull-right ajax_submit save-and-publish" id="submit-id-save-i-classicon-arrow-upi"><i class="icon-bullhorn icon-white"></i> Save & Publish</button>'),            
                 HTML('<button type="reset" name="reset" value="reset" class="reset resetButton btn btn-secondary pull-right" id="reset-id-reset"><i class="icon-trash"></i> Cancel</button>'),
         )
 
 
-class ActionForm(Form):
+class ReleaseActionForm(Form):
     
     def __init__(self, *args, **kwargs):
-        super(ActionForm, self).__init__(*args, **kwargs)
+        self.instance = kwargs.pop('instance', False)        
+        super(ReleaseActionForm, self).__init__(*args, **kwargs)
+        
         self.helper = FormHelper()
         self.helper.form_class = 'form-horizontal'
         self.helper.form_tag = False
-        self.helper.add_layout(ACTION_LAYOUT)
+        
+        
+        
+        if self.instance and self.instance.publish_date:
+            self.helper.add_layout(ACTION_LAYOUT)
+        else:
+            self.helper.add_layout(ACTION_LAYOUT_EXTENDED)
+            
+    publish = forms.BooleanField(required=False)
+
  
 
 """
@@ -60,6 +79,11 @@ Bulk edit - Autocomplete for fields to apply on whole listing
 class ReleaseBulkeditForm(Form):
     
     def __init__(self, *args, **kwargs):
+        
+        self.instance = kwargs.pop('instance', False) 
+        self.disable_license = False
+        if self.instance and self.instance.publish_date:
+            self.disable_license = True
 
         super(ReleaseBulkeditForm, self).__init__(*args, **kwargs)
 
@@ -70,6 +94,12 @@ class ReleaseBulkeditForm(Form):
         self.helper.form_method = 'post'
         self.helper.form_action = ''
         self.helper.form_tag = False
+
+
+        form_class = 'input-xlarge'
+        if self.disable_license:
+            form_class = 'hidden'
+
 
         base_layout = Div(
                 Div(HTML('<h4>%s</h4><p>%s</p>' % (_('Bulk Edit'), _('Choose Artist name and/or license to apply on every track.'))), css_class='form-help'),
@@ -86,7 +116,7 @@ class ReleaseBulkeditForm(Form):
                 ),
                 Row(
                     Column(
-                           Field('bulk_license', css_class='input-xlarge'),
+                           Field('bulk_license', css_class=form_class),
                            css_class='span6'
                            ),
                     Column(
@@ -111,7 +141,7 @@ class ReleaseForm(ModelForm):
 
     class Meta:
         model = Release
-        fields = ('name','label','releasetype','release_country','catalognumber','description', 'main_image', 'releasedate', 'd_tags')
+        fields = ('name','label','releasetype','release_country','catalognumber','description', 'main_image', 'releasedate_approx', 'd_tags')
         
 
     def __init__(self, *args, **kwargs):
@@ -126,6 +156,7 @@ class ReleaseForm(ModelForm):
 
         
         self.label = kwargs.pop('label', None)
+        
 
         super(ReleaseForm, self).__init__(*args, **kwargs)
         
@@ -163,7 +194,8 @@ class ReleaseForm(ModelForm):
                 LookupField('label', css_class='input-xlarge'),
                 LookupField('catalognumber', css_class='input-xlarge'),
                 LookupField('release_country', css_class='input-xlarge'),
-                LookupField('releasedate', css_class='input-xlarge'),
+                # LookupField('releasedate', css_class='input-xlarge'),
+                LookupField('releasedate_approx', css_class='input-xlarge'),
         )
         
 
@@ -181,7 +213,7 @@ class ReleaseForm(ModelForm):
         layout = Layout(
                         #ACTION_LAYOUT,
                         base_layout,
-                        artist_layout,
+                        # artist_layout,
                         image_layout,
                         catalog_layout,
                         tagging_layout,
@@ -194,13 +226,14 @@ class ReleaseForm(ModelForm):
 
     
     main_image = forms.Field(widget=FileInput(), required=False)
-    releasedate = forms.DateField(required=False,)
+    #releasedate = forms.DateField(required=False,widget=forms.DateInput(format = '%Y-%m-%d'), input_formats=('%Y-%m-%d',))
+    releasedate_approx = ApproximateDateFormField(label="Releasedate", required=False)
     d_tags = TagField(widget=TagAutocompleteTagIt(max_tags=9), required=False, label=_('Tags'))
     name = forms.CharField(widget=selectable.AutoCompleteWidget(ReleaseNameLookup), required=True)
     label = selectable.AutoCompleteSelectField(ReleaseLabelLookup, allow_new=True, required=False)    
     description = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")   
 
-    extra_artists = selectable.AutoComboboxSelectMultipleField(ArtistLookup, required=False)
+    #extra_artists = selectable.AutoComboboxSelectMultipleField(ArtistLookup, required=False)
     
 
     # TODO: rework clean function
@@ -264,6 +297,8 @@ class BaseReleaseMediaFormSet(BaseInlineFormSet):
         self.helper.form_tag = False
         
         
+        
+        
         base_layout = Row(
                 Column(
                        Field('tracknumber', css_class='input-small'),
@@ -310,10 +345,20 @@ class BaseReleaseMediaForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.instance = kwargs['instance']
         super(BaseReleaseMediaForm, self).__init__(*args, **kwargs)
+        if self.instance and self.instance.release and self.instance.release.publish_date:
+            self.fields['license'].widget.attrs['readonly'] = True
+            #self.fields['license'].widget = forms.TextInput(attrs={'readonly':'readonly'})
         
 
     artist = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False)
-    tracknumber =  forms.CharField(label=_('No.'))   
+    tracknumber =  forms.CharField(label=_('No.'))
+    
+    def clean_license(self):
+        instance = getattr(self, 'instance', None)
+        if instance and instance.release.publish_date:
+            return instance.license
+        else:
+            return self.cleaned_data['license']
 
 
 

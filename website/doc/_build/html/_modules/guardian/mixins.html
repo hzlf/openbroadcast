@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>guardian.mixins &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for guardian.mixins</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.decorators</span> <span class="kn">import</span> <span class="n">REDIRECT_FIELD_NAME</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.decorators</span> <span class="kn">import</span> <span class="n">login_required</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ImproperlyConfigured</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">PermissionDenied</span>
+<span class="kn">from</span> <span class="nn">guardian.utils</span> <span class="kn">import</span> <span class="n">get_403_or_None</span>
+
+
+<div class="viewcode-block" id="LoginRequiredMixin"><a class="viewcode-back" href="../../auto_modules.html#guardian.mixins.LoginRequiredMixin">[docs]</a><span class="k">class</span> <span class="nc">LoginRequiredMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A login required mixin for use with class based views. This Class is a</span>
+<span class="sd">    light wrapper around the `login_required` decorator and hence function</span>
+<span class="sd">    parameters are just attributes defined on the class.</span>
+
+<span class="sd">    Due to parent class order traversal this mixin must be added as the left</span>
+<span class="sd">    most mixin of a view.</span>
+
+<span class="sd">    The mixin has exaclty the same flow as `login_required` decorator:</span>
+
+<span class="sd">        If the user isn&#39;t logged in, redirect to ``settings.LOGIN_URL``, passing</span>
+<span class="sd">        the current absolute path in the query string. Example:</span>
+<span class="sd">        ``/accounts/login/?next=/polls/3/``.</span>
+
+<span class="sd">        If the user is logged in, execute the view normally. The view code is</span>
+<span class="sd">        free to assume the user is logged in.</span>
+
+<span class="sd">    **Class Settings**</span>
+
+<span class="sd">    ``LoginRequiredMixin.redirect_field_name``</span>
+
+<span class="sd">        *Default*: ``&#39;next&#39;``</span>
+
+<span class="sd">    ``LoginRequiredMixin.login_url``</span>
+
+<span class="sd">        *Default*: ``settings.LOGIN_URL``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">redirect_field_name</span> <span class="o">=</span> <span class="n">REDIRECT_FIELD_NAME</span>
+    <span class="n">login_url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">LOGIN_URL</span>
+
+<div class="viewcode-block" id="LoginRequiredMixin.dispatch"><a class="viewcode-back" href="../../auto_modules.html#guardian.mixins.LoginRequiredMixin.dispatch">[docs]</a>    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">login_required</span><span class="p">(</span><span class="n">redirect_field_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redirect_field_name</span><span class="p">,</span>
+            <span class="n">login_url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">login_url</span><span class="p">)(</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">LoginRequiredMixin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span>
+        <span class="p">)(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="PermissionRequiredMixin"><a class="viewcode-back" href="../../auto_modules.html#guardian.mixins.PermissionRequiredMixin">[docs]</a><span class="k">class</span> <span class="nc">PermissionRequiredMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A view mixin that verifies if the current logged in user has the specified</span>
+<span class="sd">    permission by wrapping the ``request.user.has_perm(..)`` method.</span>
+
+<span class="sd">    If a `get_object()` method is defined either manually or by including</span>
+<span class="sd">    another mixin (for example ``SingleObjectMixin``) or ``self.object`` is</span>
+<span class="sd">    defiend then the permission will be tested against that specific instance.</span>
+
+<span class="sd">    .. note:</span>
+<span class="sd">       Testing of a permission against a specific object instance requires an</span>
+<span class="sd">       authentication backend that supports. Please see ``django-guardian`` to</span>
+<span class="sd">       add object level permissions to your project.</span>
+
+<span class="sd">    The mixin does the following:</span>
+
+<span class="sd">        If the user isn&#39;t logged in, redirect to settings.LOGIN_URL, passing</span>
+<span class="sd">        the current absolute path in the query string. Example:</span>
+<span class="sd">        /accounts/login/?next=/polls/3/.</span>
+
+<span class="sd">        If the `raise_exception` is set to True than rather than redirect to</span>
+<span class="sd">        login page a `PermissionDenied` (403) is raised.</span>
+
+<span class="sd">        If the user is logged in, and passes the permission check than the view</span>
+<span class="sd">        is executed normally.</span>
+
+<span class="sd">    **Example Usage**::</span>
+
+<span class="sd">        class SecureView(PermissionRequiredMixin, View):</span>
+<span class="sd">            ...</span>
+<span class="sd">            permission_required = &#39;auth.change_user&#39;</span>
+<span class="sd">            ...</span>
+
+<span class="sd">    **Class Settings**</span>
+
+<span class="sd">    ``PermissionRequiredMixin.permission_required``</span>
+
+<span class="sd">        *Default*: ``None``, must be set to either a string or list of strings</span>
+<span class="sd">        in format: *&lt;app_label&gt;.&lt;permission_codename&gt;*.</span>
+
+<span class="sd">    ``PermissionRequiredMixin.login_url``</span>
+
+<span class="sd">        *Default*: ``settings.LOGIN_URL``</span>
+
+<span class="sd">    ``PermissionRequiredMixin.redirect_field_name``</span>
+
+<span class="sd">        *Default*: ``&#39;next&#39;``</span>
+
+<span class="sd">    ``PermissionRequiredMixin.return_403``</span>
+
+<span class="sd">        *Default*: ``False``. Returns 403 error page instead of redirecting</span>
+<span class="sd">        user.</span>
+
+<span class="sd">    ``PermissionRequiredMixin.raise_exception``</span>
+
+<span class="sd">        *Default*: ``False``</span>
+
+<span class="sd">        `permission_required` - the permission to check of form &quot;&lt;app_label&gt;.&lt;permission codename&gt;&quot;</span>
+<span class="sd">                                i.e. &#39;polls.can_vote&#39; for a permission on a model in the polls application.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">### default class view settings</span>
+    <span class="n">login_url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">LOGIN_URL</span>
+    <span class="n">permission_required</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">redirect_field_name</span> <span class="o">=</span> <span class="n">REDIRECT_FIELD_NAME</span>
+    <span class="n">return_403</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">raise_exception</span> <span class="o">=</span> <span class="bp">False</span>
+
+<div class="viewcode-block" id="PermissionRequiredMixin.get_required_permissions"><a class="viewcode-back" href="../../auto_modules.html#guardian.mixins.PermissionRequiredMixin.get_required_permissions">[docs]</a>    <span class="k">def</span> <span class="nf">get_required_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns list of permissions in format *&lt;app_label&gt;.&lt;codename&gt;* that</span>
+<span class="sd">        should be checked against *request.user* and *object*. By default, it</span>
+<span class="sd">        returns list from ``permission_required`` attribute.</span>
+
+<span class="sd">        :param request: Original request.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">permission_required</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">perms</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">permission_required</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">permission_required</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">perms</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">permission_required</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="s">&quot;&#39;PermissionRequiredMixin&#39; requires &quot;</span>
+                <span class="s">&quot;&#39;permission_required&#39; attribute to be set to &quot;</span>
+                <span class="s">&quot;&#39;&lt;app_label&gt;.&lt;permission codename&gt;&#39; but is set to &#39;</span><span class="si">%s</span><span class="s">&#39; instead&quot;</span>
+                <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">permission_required</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">perms</span>
+</div>
+<div class="viewcode-block" id="PermissionRequiredMixin.check_permissions"><a class="viewcode-back" href="../../auto_modules.html#guardian.mixins.PermissionRequiredMixin.check_permissions">[docs]</a>    <span class="k">def</span> <span class="nf">check_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if *request.user* has all permissions returned by</span>
+<span class="sd">        *get_required_permissions* method.</span>
+
+<span class="sd">        :param request: Original request.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;get_object&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="s">&#39;object&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">None</span>
+        <span class="n">forbidden</span> <span class="o">=</span> <span class="n">get_403_or_None</span><span class="p">(</span><span class="n">request</span><span class="p">,</span>
+            <span class="n">perms</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_required_permissions</span><span class="p">(</span><span class="n">request</span><span class="p">),</span>
+            <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span>
+            <span class="n">login_url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">login_url</span><span class="p">,</span>
+            <span class="n">redirect_field_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redirect_field_name</span><span class="p">,</span>
+            <span class="n">return_403</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">return_403</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">forbidden</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_permission_check_fail</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">forbidden</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">forbidden</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">raise_exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PermissionDenied</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">forbidden</span>
+</div>
+<div class="viewcode-block" id="PermissionRequiredMixin.on_permission_check_fail"><a class="viewcode-back" href="../../auto_modules.html#guardian.mixins.PermissionRequiredMixin.on_permission_check_fail">[docs]</a>    <span class="k">def</span> <span class="nf">on_permission_check_fail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method called upon permission check fail. By default it does nothing and</span>
+<span class="sd">        should be overridden, if needed.</span>
+
+<span class="sd">        :param request: Original request</span>
+<span class="sd">        :param response: 403 response returned by *check_permissions* method.</span>
+<span class="sd">        :param obj: Object that was fetched from the view (using ``get_object``</span>
+<span class="sd">          method or ``object`` attribute, in that order).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="PermissionRequiredMixin.dispatch"><a class="viewcode-back" href="../../auto_modules.html#guardian.mixins.PermissionRequiredMixin.dispatch">[docs]</a>    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_permissions</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">response</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">response</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">PermissionRequiredMixin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

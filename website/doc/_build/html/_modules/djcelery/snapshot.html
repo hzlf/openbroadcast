@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>djcelery.snapshot &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for djcelery.snapshot</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">transaction</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ObjectDoesNotExist</span>
+
+<span class="kn">from</span> <span class="nn">celery</span> <span class="kn">import</span> <span class="n">states</span>
+<span class="kn">from</span> <span class="nn">celery.events.state</span> <span class="kn">import</span> <span class="n">Task</span>
+<span class="kn">from</span> <span class="nn">celery.events.snapshot</span> <span class="kn">import</span> <span class="n">Polaroid</span>
+<span class="kn">from</span> <span class="nn">celery.utils.timeutils</span> <span class="kn">import</span> <span class="n">maybe_iso8601</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">WorkerState</span><span class="p">,</span> <span class="n">TaskState</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">make_aware</span>
+
+
+<span class="n">WORKER_UPDATE_FREQ</span> <span class="o">=</span> <span class="mi">60</span>  <span class="c"># limit worker timestamp write freq.</span>
+<span class="n">SUCCESS_STATES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">([</span><span class="n">states</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">])</span>
+
+<span class="c"># Expiry can be timedelta or None for never expire.</span>
+<span class="n">EXPIRE_SUCCESS</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&quot;CELERYCAM_EXPIRE_SUCCESS&quot;</span><span class="p">,</span>
+                         <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">EXPIRE_ERROR</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&quot;CELERYCAM_EXPIRE_ERROR&quot;</span><span class="p">,</span>
+                       <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+<span class="n">EXPIRE_PENDING</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&quot;CELERYCAM_EXPIRE_PENDING&quot;</span><span class="p">,</span>
+                         <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="Camera"><a class="viewcode-back" href="../../auto_modules.html#djcelery.snapshot.Camera">[docs]</a><span class="k">class</span> <span class="nc">Camera</span><span class="p">(</span><span class="n">Polaroid</span><span class="p">):</span>
+    <span class="n">TaskState</span> <span class="o">=</span> <span class="n">TaskState</span>
+    <span class="n">WorkerState</span> <span class="o">=</span> <span class="n">WorkerState</span>
+
+    <span class="n">clear_after</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">worker_update_freq</span> <span class="o">=</span> <span class="n">WORKER_UPDATE_FREQ</span>
+    <span class="n">expire_states</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">SUCCESS_STATES</span><span class="p">:</span> <span class="n">EXPIRE_SUCCESS</span><span class="p">,</span>
+            <span class="n">states</span><span class="o">.</span><span class="n">EXCEPTION_STATES</span><span class="p">:</span> <span class="n">EXPIRE_ERROR</span><span class="p">,</span>
+            <span class="n">states</span><span class="o">.</span><span class="n">UNREADY_STATES</span><span class="p">:</span> <span class="n">EXPIRE_PENDING</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Camera</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_worker_write</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Camera.get_heartbeat"><a class="viewcode-back" href="../../auto_modules.html#djcelery.snapshot.Camera.get_heartbeat">[docs]</a>    <span class="k">def</span> <span class="nf">get_heartbeat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worker</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">heartbeat</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">heartbeats</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">return</span> <span class="n">make_aware</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">heartbeat</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Camera.handle_worker"><a class="viewcode-back" href="../../auto_modules.html#djcelery.snapshot.Camera.handle_worker">[docs]</a>    <span class="k">def</span> <span class="nf">handle_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">worker</span><span class="p">)):</span>
+        <span class="n">last_write</span><span class="p">,</span> <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_worker_write</span><span class="p">[</span><span class="n">hostname</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">last_write</span> <span class="ow">or</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">last_write</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_update_freq</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">WorkerState</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">update_or_create</span><span class="p">(</span>
+                        <span class="n">hostname</span><span class="o">=</span><span class="n">hostname</span><span class="p">,</span>
+                        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s">&quot;last_heartbeat&quot;</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">get_heartbeat</span><span class="p">(</span><span class="n">worker</span><span class="p">)})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_worker_write</span><span class="p">[</span><span class="n">hostname</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="p">(),</span> <span class="n">obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span>
+</div>
+<div class="viewcode-block" id="Camera.handle_task"><a class="viewcode-back" href="../../auto_modules.html#djcelery.snapshot.Camera.handle_task">[docs]</a>    <span class="k">def</span> <span class="nf">handle_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">uuid</span><span class="p">,</span> <span class="n">task</span><span class="p">),</span> <span class="n">worker</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">worker</span> <span class="ow">and</span> <span class="n">task</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">hostname</span><span class="p">:</span>
+            <span class="n">worker</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_worker</span><span class="p">((</span><span class="n">task</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">hostname</span><span class="p">,</span> <span class="n">task</span><span class="o">.</span><span class="n">worker</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_task</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">task_id</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
+                <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                          <span class="s">&quot;args&quot;</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">args</span><span class="p">,</span>
+                          <span class="s">&quot;kwargs&quot;</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span>
+                          <span class="s">&quot;eta&quot;</span><span class="p">:</span> <span class="n">maybe_iso8601</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">eta</span><span class="p">),</span>
+                          <span class="s">&quot;expires&quot;</span><span class="p">:</span> <span class="n">maybe_iso8601</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">expires</span><span class="p">),</span>
+                          <span class="s">&quot;state&quot;</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">state</span><span class="p">,</span>
+                          <span class="s">&quot;tstamp&quot;</span><span class="p">:</span> <span class="n">make_aware</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span>
+                                        <span class="n">task</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)),</span>
+                          <span class="s">&quot;result&quot;</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">result</span> <span class="ow">or</span> <span class="n">task</span><span class="o">.</span><span class="n">exception</span><span class="p">,</span>
+                          <span class="s">&quot;traceback&quot;</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">traceback</span><span class="p">,</span>
+                          <span class="s">&quot;runtime&quot;</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">runtime</span><span class="p">,</span>
+                          <span class="s">&quot;worker&quot;</span><span class="p">:</span> <span class="n">worker</span><span class="p">})</span>
+</div>
+<div class="viewcode-block" id="Camera.update_task"><a class="viewcode-back" href="../../auto_modules.html#djcelery.snapshot.Camera.update_task">[docs]</a>    <span class="k">def</span> <span class="nf">update_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TaskState</span><span class="o">.</span><span class="n">objects</span>
+        <span class="n">defaults</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;defaults&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ObjectDoesNotExist</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">defaults</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">):</span>
+                <span class="k">return</span>
+            <span class="n">obj</span><span class="p">,</span> <span class="n">created</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">obj</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">states</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">states</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">state</span><span class="p">):</span>
+                <span class="n">keep</span> <span class="o">=</span> <span class="n">Task</span><span class="o">.</span><span class="n">merge_rules</span><span class="p">[</span><span class="n">states</span><span class="o">.</span><span class="n">RECEIVED</span><span class="p">]</span>
+                <span class="n">defaults</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">defaults</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                                        <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">defaults</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">obj</span>
+</div>
+    <span class="k">def</span> <span class="nf">_autocommit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fun</span><span class="p">()</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyboardInterrupt</span><span class="p">,</span> <span class="ne">SystemExit</span><span class="p">):</span>
+            <span class="n">transaction</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="k">raise</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">transaction</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+            <span class="k">raise</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">transaction</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+    <span class="nd">@transaction.commit_manually</span>
+<div class="viewcode-block" id="Camera.on_shutter"><a class="viewcode-back" href="../../auto_modules.html#djcelery.snapshot.Camera.on_shutter">[docs]</a>    <span class="k">def</span> <span class="nf">on_shutter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">commit_every</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">state</span><span class="o">.</span><span class="n">event_count</span><span class="p">:</span>
+            <span class="n">transaction</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="k">def</span> <span class="nf">_handle_tasks</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">task</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">handle_task</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span> <span class="o">%</span> <span class="n">commit_every</span><span class="p">:</span>
+                    <span class="n">transaction</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_autocommit</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_worker</span><span class="p">,</span>
+                                     <span class="n">state</span><span class="o">.</span><span class="n">workers</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_autocommit</span><span class="p">(</span><span class="n">_handle_tasks</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Camera.on_cleanup"><a class="viewcode-back" href="../../auto_modules.html#djcelery.snapshot.Camera.on_cleanup">[docs]</a>    <span class="k">def</span> <span class="nf">on_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dirty</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TaskState</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">expire_by_states</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="n">expires</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">states</span><span class="p">,</span> <span class="n">expires</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">expire_states</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">dirty</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="s">&quot;Cleanup: Marked </span><span class="si">%s</span><span class="s"> objects as dirty.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dirty</span><span class="p">,</span> <span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">TaskState</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">purge</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Cleanup: </span><span class="si">%s</span><span class="s"> objects purged.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dirty</span><span class="p">,</span> <span class="p">))</span>
+            <span class="k">return</span> <span class="n">dirty</span>
+        <span class="k">return</span> <span class="mi">0</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

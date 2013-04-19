@@ -1,0 +1,554 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>south.modelsinspector &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for south.modelsinspector</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Like the old south.modelsparser, but using introspection where possible</span>
+<span class="sd">rather than direct inspection of models.py.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">decimal</span>
+
+<span class="kn">from</span> <span class="nn">south.utils</span> <span class="kn">import</span> <span class="n">get_attribute</span><span class="p">,</span> <span class="n">auto_through</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.db.models.base</span> <span class="kn">import</span> <span class="n">ModelBase</span><span class="p">,</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">django.db.models.fields</span> <span class="kn">import</span> <span class="n">NOT_PROVIDED</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.utils.functional</span> <span class="kn">import</span> <span class="n">Promise</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes</span> <span class="kn">import</span> <span class="n">generic</span>
+<span class="kn">from</span> <span class="nn">django.utils.datastructures</span> <span class="kn">import</span> <span class="n">SortedDict</span>
+<span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">datetime_safe</span>
+
+<span class="n">NOISY</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">timezone</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">timezone</span> <span class="o">=</span> <span class="bp">False</span>
+
+
+<span class="c"># Define any converter functions first to prevent NameErrors</span>
+
+<div class="viewcode-block" id="convert_on_delete_handler"><a class="viewcode-back" href="../../auto_modules.html#south.modelsinspector.convert_on_delete_handler">[docs]</a><span class="k">def</span> <span class="nf">convert_on_delete_handler</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="n">django_db_models_module</span> <span class="o">=</span> <span class="s">&#39;models&#39;</span>  <span class="c"># relative to standard import &#39;django.db&#39;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="s">&quot;PROTECT&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">PROTECT</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">DO_NOTHING</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">SET_DEFAULT</span><span class="p">):</span>
+            <span class="c"># straightforward functions</span>
+            <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">django_db_models_module</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># This is totally dependent on the implementation of django.db.models.deletion.SET</span>
+            <span class="n">func_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s">&#39;__name__&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">func_name</span> <span class="o">==</span> <span class="s">&#39;set_on_delete&#39;</span><span class="p">:</span>
+                <span class="c"># we must inspect the function closure to see what parameters were passed in</span>
+                <span class="n">closure_contents</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">func_closure</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cell_contents</span>
+                <span class="k">if</span> <span class="n">closure_contents</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.SET_NULL&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">django_db_models_module</span><span class="p">)</span>
+                <span class="c"># simple function we can perhaps cope with:</span>
+                <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">closure_contents</span><span class="p">,</span> <span class="s">&#39;__call__&#39;</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;South does not support on_delete with SET(function) as values.&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># Attempt to serialise the value</span>
+                    <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.SET(</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">django_db_models_module</span><span class="p">,</span> <span class="n">value_clean</span><span class="p">(</span><span class="n">closure_contents</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> was not recognized as a valid model deletion handler. Possible values: </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">__name__</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">PROTECT</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">SET</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">SET_NULL</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">SET_DEFAULT</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">DO_NOTHING</span><span class="p">))))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;on_delete argument encountered in Django version that does not support it&quot;</span><span class="p">)</span>
+
+<span class="c"># Gives information about how to introspect certain fields.</span>
+<span class="c"># This is a list of triples; the first item is a list of fields it applies to,</span>
+<span class="c"># (note that isinstance is used, so superclasses are perfectly valid here)</span>
+<span class="c"># the second is a list of positional argument descriptors, and the third</span>
+<span class="c"># is a list of keyword argument descriptors.</span>
+<span class="c"># Descriptors are of the form:</span>
+<span class="c">#  [attrname, options]</span>
+<span class="c"># Where attrname is the attribute on the field to get the value from, and options</span>
+<span class="c"># is an optional dict.</span>
+<span class="c">#</span>
+<span class="c"># The introspector uses the combination of all matching entries, in order.</span>
+                                     </div>
+<span class="n">introspection_details</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="p">),</span>
+        <span class="p">[],</span>
+        <span class="p">{</span>
+            <span class="s">&quot;null&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;null&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}],</span>
+            <span class="s">&quot;blank&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;blank&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;ignore_if&quot;</span><span class="p">:</span><span class="s">&quot;primary_key&quot;</span><span class="p">}],</span>
+            <span class="s">&quot;primary_key&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;primary_key&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}],</span>
+            <span class="s">&quot;max_length&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;max_length&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}],</span>
+            <span class="s">&quot;unique&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;_unique&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}],</span>
+            <span class="s">&quot;db_index&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;db_index&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}],</span>
+            <span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;default&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="n">NOT_PROVIDED</span><span class="p">,</span> <span class="s">&quot;ignore_dynamics&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}],</span>
+            <span class="s">&quot;db_column&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;db_column&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}],</span>
+            <span class="s">&quot;db_tablespace&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;db_tablespace&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEFAULT_INDEX_TABLESPACE</span><span class="p">}],</span>
+        <span class="p">},</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">OneToOneField</span><span class="p">),</span>
+        <span class="p">[],</span>
+        <span class="nb">dict</span><span class="p">([</span>
+            <span class="p">(</span><span class="s">&quot;to&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;rel.to&quot;</span><span class="p">,</span> <span class="p">{}]),</span>
+            <span class="p">(</span><span class="s">&quot;to_field&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;rel.field_name&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default_attr&quot;</span><span class="p">:</span> <span class="s">&quot;rel.to._meta.pk.name&quot;</span><span class="p">}]),</span>
+            <span class="p">(</span><span class="s">&quot;related_name&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;rel.related_name&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}]),</span>
+            <span class="p">(</span><span class="s">&quot;db_index&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;db_index&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}]),</span>
+            <span class="p">(</span><span class="s">&quot;on_delete&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;rel.on_delete&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="s">&quot;CASCADE&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="s">&quot;is_django_function&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span> <span class="s">&quot;converter&quot;</span><span class="p">:</span> <span class="n">convert_on_delete_handler</span><span class="p">,</span> <span class="s">&quot;ignore_missing&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}])</span>
+        <span class="p">])</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">,),</span>
+        <span class="p">[],</span>
+        <span class="p">{</span>
+            <span class="s">&quot;to&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;rel.to&quot;</span><span class="p">,</span> <span class="p">{}],</span>
+            <span class="s">&quot;symmetrical&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;rel.symmetrical&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}],</span>
+            <span class="s">&quot;related_name&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;rel.related_name&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}],</span>
+            <span class="s">&quot;db_table&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;db_table&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}],</span>
+            <span class="c"># TODO: Kind of ugly to add this one-time-only option</span>
+            <span class="s">&quot;through&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;rel.through&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;ignore_if_auto_through&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}],</span>
+        <span class="p">},</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">DateField</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">TimeField</span><span class="p">),</span>
+        <span class="p">[],</span>
+        <span class="p">{</span>
+            <span class="s">&quot;auto_now&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;auto_now&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}],</span>
+            <span class="s">&quot;auto_now_add&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;auto_now_add&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}],</span>
+        <span class="p">},</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">,</span> <span class="p">),</span>
+        <span class="p">[],</span>
+        <span class="p">{</span>
+            <span class="s">&quot;max_digits&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;max_digits&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}],</span>
+            <span class="s">&quot;decimal_places&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;decimal_places&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}],</span>
+        <span class="p">},</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">SlugField</span><span class="p">,</span> <span class="p">),</span>
+        <span class="p">[],</span>
+        <span class="p">{</span>
+            <span class="s">&quot;db_index&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;db_index&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}],</span>
+        <span class="p">},</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">,</span> <span class="p">),</span>
+        <span class="p">[],</span>
+        <span class="p">{</span>
+            <span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;default&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="n">NOT_PROVIDED</span><span class="p">,</span> <span class="s">&quot;converter&quot;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">}],</span>
+            <span class="s">&quot;blank&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;blank&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span> <span class="s">&quot;ignore_if&quot;</span><span class="p">:</span><span class="s">&quot;primary_key&quot;</span><span class="p">}],</span>
+        <span class="p">},</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">FilePathField</span><span class="p">,</span> <span class="p">),</span>
+        <span class="p">[],</span>
+        <span class="p">{</span>
+            <span class="s">&quot;path&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;path&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">}],</span>
+            <span class="s">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;match&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}],</span>
+            <span class="s">&quot;recursive&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;recursive&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}],</span>
+        <span class="p">},</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="n">generic</span><span class="o">.</span><span class="n">GenericRelation</span><span class="p">,</span> <span class="p">),</span>
+        <span class="p">[],</span>
+        <span class="p">{</span>
+            <span class="s">&quot;to&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;rel.to&quot;</span><span class="p">,</span> <span class="p">{}],</span>
+            <span class="s">&quot;symmetrical&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;rel.symmetrical&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}],</span>
+            <span class="s">&quot;object_id_field&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;object_id_field_name&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="s">&quot;object_id&quot;</span><span class="p">}],</span>
+            <span class="s">&quot;content_type_field&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;content_type_field_name&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="s">&quot;content_type&quot;</span><span class="p">}],</span>
+            <span class="s">&quot;blank&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;blank&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}],</span>
+        <span class="p">},</span>
+    <span class="p">),</span>
+<span class="p">]</span>
+
+<span class="c"># Regexes of allowed field full paths</span>
+<span class="n">allowed_fields</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;^django\.db&quot;</span><span class="p">,</span>
+    <span class="s">&quot;^django\.contrib\.contenttypes\.generic&quot;</span><span class="p">,</span>
+    <span class="s">&quot;^django\.contrib\.localflavor&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c"># Regexes of ignored fields (custom fields which look like fields, but have no column behind them)</span>
+<span class="n">ignored_fields</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;^django\.contrib\.contenttypes\.generic\.GenericRelation&quot;</span><span class="p">,</span>
+    <span class="s">&quot;^django\.contrib\.contenttypes\.generic\.GenericForeignKey&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c"># Similar, but for Meta, so just the inner level (kwds).</span>
+<span class="n">meta_details</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&quot;db_table&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;db_table&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default_attr_concat&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;app_label&quot;</span><span class="p">,</span> <span class="s">&quot;module_name&quot;</span><span class="p">]}],</span>
+    <span class="s">&quot;db_tablespace&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;db_tablespace&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEFAULT_TABLESPACE</span><span class="p">}],</span>
+    <span class="s">&quot;unique_together&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;unique_together&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="p">[]}],</span>
+    <span class="s">&quot;ordering&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;ordering&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="p">[]}],</span>
+    <span class="s">&quot;proxy&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;proxy&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;ignore_missing&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}],</span>
+<span class="p">}</span>
+
+<span class="c"># 2.4 compatability</span>
+<span class="nb">any</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="n">y</span> <span class="ow">or</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="add_introspection_rules"><a class="viewcode-back" href="../../auto_modules.html#south.modelsinspector.add_introspection_rules">[docs]</a><span class="k">def</span> <span class="nf">add_introspection_rules</span><span class="p">(</span><span class="n">rules</span><span class="o">=</span><span class="p">[],</span> <span class="n">patterns</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="s">&quot;Allows you to add some introspection rules at runtime, e.g. for 3rd party apps.&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rules</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">patterns</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span>
+    <span class="n">allowed_fields</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">patterns</span><span class="p">)</span>
+    <span class="n">introspection_details</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">rules</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="add_ignored_fields"><a class="viewcode-back" href="../../auto_modules.html#south.modelsinspector.add_ignored_fields">[docs]</a><span class="k">def</span> <span class="nf">add_ignored_fields</span><span class="p">(</span><span class="n">patterns</span><span class="p">):</span>
+    <span class="s">&quot;Allows you to add some ignore field patterns.&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">patterns</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span>
+    <span class="n">ignored_fields</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">patterns</span><span class="p">)</span>
+    
+</div>
+<div class="viewcode-block" id="can_ignore"><a class="viewcode-back" href="../../auto_modules.html#south.modelsinspector.can_ignore">[docs]</a><span class="k">def</span> <span class="nf">can_ignore</span><span class="p">(</span><span class="n">field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns True if we know for certain that we can ignore this field, False</span>
+<span class="sd">    otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">full_name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">regex</span> <span class="ow">in</span> <span class="n">ignored_fields</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">full_name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="can_introspect"><a class="viewcode-back" href="../../auto_modules.html#south.modelsinspector.can_introspect">[docs]</a><span class="k">def</span> <span class="nf">can_introspect</span><span class="p">(</span><span class="n">field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns True if we are allowed to introspect this field, False otherwise.</span>
+<span class="sd">    (&#39;allowed&#39; means &#39;in core&#39;. Custom fields can declare they are introspectable</span>
+<span class="sd">    by the default South rules by adding the attribute _south_introspects = True.)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Check for special attribute</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="s">&quot;_south_introspects&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">_south_introspects</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="c"># Check it&#39;s an introspectable field</span>
+    <span class="n">full_name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">regex</span> <span class="ow">in</span> <span class="n">allowed_fields</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">full_name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="matching_details"><a class="viewcode-back" href="../../auto_modules.html#south.modelsinspector.matching_details">[docs]</a><span class="k">def</span> <span class="nf">matching_details</span><span class="p">(</span><span class="n">field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the union of all matching entries in introspection_details for the field.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">our_args</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">our_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">classes</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span> <span class="ow">in</span> <span class="n">introspection_details</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">]):</span>
+            <span class="n">our_args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+            <span class="n">our_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">our_args</span><span class="p">,</span> <span class="n">our_kwargs</span>
+
+</div>
+<div class="viewcode-block" id="IsDefault"><a class="viewcode-back" href="../../auto_modules.html#south.modelsinspector.IsDefault">[docs]</a><span class="k">class</span> <span class="nc">IsDefault</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exception for when a field contains its default value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+</div>
+<div class="viewcode-block" id="get_value"><a class="viewcode-back" href="../../auto_modules.html#south.modelsinspector.get_value">[docs]</a><span class="k">def</span> <span class="nf">get_value</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets an attribute value from a Field instance and formats it.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">attrname</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">descriptor</span>
+    <span class="c"># If the options say it&#39;s not a attribute name but a real value, use that.</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;is_value&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">attrname</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">get_attribute</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">attrname</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;ignore_missing&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">IsDefault</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span>
+            
+    <span class="c"># Lazy-eval functions get eval&#39;d.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Promise</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="c"># If the value is the same as the default, omit it for clarity</span>
+    <span class="k">if</span> <span class="s">&quot;default&quot;</span> <span class="ow">in</span> <span class="n">options</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">==</span> <span class="n">options</span><span class="p">[</span><span class="s">&#39;default&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="n">IsDefault</span>
+    <span class="c"># If there&#39;s an ignore_if, use it</span>
+    <span class="k">if</span> <span class="s">&quot;ignore_if&quot;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">get_attribute</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">options</span><span class="p">[</span><span class="s">&#39;ignore_if&#39;</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="n">IsDefault</span>
+    <span class="c"># If there&#39;s an ignore_if_auto_through which is True, use it</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;ignore_if_auto_through&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">auto_through</span><span class="p">(</span><span class="n">field</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">IsDefault</span>
+    <span class="c"># Some default values need to be gotten from an attribute too.</span>
+    <span class="k">if</span> <span class="s">&quot;default_attr&quot;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">default_value</span> <span class="o">=</span> <span class="n">get_attribute</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">options</span><span class="p">[</span><span class="s">&#39;default_attr&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="n">default_value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">IsDefault</span>
+    <span class="c"># Some are made from a formatting string and several attrs (e.g. db_table)</span>
+    <span class="k">if</span> <span class="s">&quot;default_attr_concat&quot;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">format</span><span class="p">,</span> <span class="n">attrs</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s">&#39;default_attr_concat&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">options</span><span class="p">[</span><span class="s">&#39;default_attr_concat&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">default_value</span> <span class="o">=</span> <span class="n">format</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">get_attribute</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="n">attrs</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="n">default_value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">IsDefault</span>
+    <span class="c"># Clean and return the value</span>
+    <span class="k">return</span> <span class="n">value_clean</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="value_clean"><a class="viewcode-back" href="../../auto_modules.html#south.modelsinspector.value_clean">[docs]</a><span class="k">def</span> <span class="nf">value_clean</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="s">&quot;Takes a value and cleans it up (so e.g. it has timezone working right)&quot;</span>
+    <span class="c"># Lazy-eval functions get eval&#39;d.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Promise</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="c"># Callables get called.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;is_django_function&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ModelBase</span><span class="p">):</span>
+        <span class="c"># Datetime.datetime.now is special, as we can access it from the eval</span>
+        <span class="c"># context (and because it changes all the time; people will file bugs otherwise).</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;datetime.datetime.now&quot;</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;datetime.datetime.utcnow&quot;</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;datetime.date.today&quot;</span>
+        <span class="c"># In case we use Django&#39;s own now function, revert to datetime&#39;s</span>
+        <span class="c"># original one since we&#39;ll deal with timezones on our own.</span>
+        <span class="k">elif</span> <span class="n">timezone</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">==</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;datetime.datetime.now&quot;</span>
+        <span class="c"># All other callables get called.</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">()</span>
+    <span class="c"># Models get their own special repr()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ModelBase</span><span class="p">):</span>
+        <span class="c"># If it&#39;s a proxy model, follow it back to its non-proxy parent</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span> <span class="s">&quot;proxy&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">proxy_for_model</span>
+        <span class="k">return</span> <span class="s">&quot;orm[&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">object_name</span><span class="p">)</span>
+    <span class="c"># As do model instances</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;ignore_dynamics&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">IsDefault</span>
+        <span class="k">return</span> <span class="s">&quot;orm[&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;].objects.get(pk=</span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">object_name</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+    <span class="c"># Make sure Decimal is converted down into a string</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="c"># in case the value is timezone aware</span>
+    <span class="n">datetime_types</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+        <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+        <span class="n">datetime_safe</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">timezone</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">datetime_types</span><span class="p">)</span> <span class="ow">and</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;USE_TZ&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">and</span>
+            <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">timezone</span><span class="o">.</span><span class="n">is_aware</span><span class="p">(</span><span class="n">value</span><span class="p">)):</span>
+        <span class="n">default_timezone</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">get_default_timezone</span><span class="p">()</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">make_naive</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">default_timezone</span><span class="p">)</span>
+    <span class="c"># datetime_safe has an improper repr value</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">datetime_safe</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="o">*</span><span class="n">value</span><span class="o">.</span><span class="n">utctimetuple</span><span class="p">()[:</span><span class="mi">7</span><span class="p">])</span>
+    <span class="c"># converting a date value to a datetime to be able to handle</span>
+    <span class="c"># timezones later gracefully</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime_safe</span><span class="o">.</span><span class="n">date</span><span class="p">)):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="o">*</span><span class="n">value</span><span class="o">.</span><span class="n">timetuple</span><span class="p">()[:</span><span class="mi">3</span><span class="p">])</span>
+    <span class="c"># Now, apply the converter func if there is one</span>
+    <span class="k">if</span> <span class="s">&quot;converter&quot;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s">&#39;converter&#39;</span><span class="p">](</span><span class="n">value</span><span class="p">)</span>
+    <span class="c"># Return the final value</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;is_django_function&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="introspector"><a class="viewcode-back" href="../../auto_modules.html#south.modelsinspector.introspector">[docs]</a><span class="k">def</span> <span class="nf">introspector</span><span class="p">(</span><span class="n">field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a field, introspects its definition triple.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">arg_defs</span><span class="p">,</span> <span class="n">kwarg_defs</span> <span class="o">=</span> <span class="n">matching_details</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c"># For each argument, use the descriptor to get the real value.</span>
+    <span class="k">for</span> <span class="n">defn</span> <span class="ow">in</span> <span class="n">arg_defs</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_value</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">defn</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">IsDefault</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">for</span> <span class="n">kwd</span><span class="p">,</span> <span class="n">defn</span> <span class="ow">in</span> <span class="n">kwarg_defs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="n">kwd</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_value</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">defn</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">IsDefault</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span>
+
+</div>
+<div class="viewcode-block" id="get_model_fields"><a class="viewcode-back" href="../../auto_modules.html#south.modelsinspector.get_model_fields">[docs]</a><span class="k">def</span> <span class="nf">get_model_fields</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">m2m</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a model class, returns a dict of {field_name: field_triple} defs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">field_defs</span> <span class="o">=</span> <span class="n">SortedDict</span><span class="p">()</span>
+    <span class="n">inherited_fields</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="c"># Go through all bases (that are themselves models, but not Model)</span>
+    <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">__bases__</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s">&#39;_meta&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">base</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">abstract</span><span class="p">:</span>
+                <span class="c"># Looks like we need their fields, Ma.</span>
+                <span class="n">inherited_fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">get_model_fields</span><span class="p">(</span><span class="n">base</span><span class="p">))</span>
+    
+    <span class="c"># Now, go through all the fields and try to get their definition</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">local_fields</span><span class="p">[:]</span>
+    <span class="k">if</span> <span class="n">m2m</span><span class="p">:</span>
+        <span class="n">source</span> <span class="o">+=</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">local_many_to_many</span>
+    
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">source</span><span class="p">:</span>
+        <span class="c"># Can we ignore it completely?</span>
+        <span class="k">if</span> <span class="n">can_ignore</span><span class="p">(</span><span class="n">field</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="c"># Does it define a south_field_triple method?</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="s">&quot;south_field_triple&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">NOISY</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot; ( Nativing field: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">field_defs</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">south_field_triple</span><span class="p">()</span>
+        <span class="c"># Can we introspect it?</span>
+        <span class="k">elif</span> <span class="n">can_introspect</span><span class="p">(</span><span class="n">field</span><span class="p">):</span>
+            <span class="c"># Get the full field class path.</span>
+            <span class="n">field_class</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span> <span class="o">+</span> <span class="s">&quot;.&quot;</span> <span class="o">+</span> <span class="n">field</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+            <span class="c"># Run this field through the introspector</span>
+            <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="n">introspector</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+            <span class="c"># Workaround for Django bug #13987</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">pk</span><span class="o">.</span><span class="n">column</span> <span class="o">==</span> <span class="n">field</span><span class="o">.</span><span class="n">column</span> <span class="ow">and</span> <span class="s">&#39;primary_key&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;primary_key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="c"># That&#39;s our definition!</span>
+            <span class="n">field_defs</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">field_class</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="c"># Shucks, no definition!</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">NOISY</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot; ( Nodefing field: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">field_defs</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="c"># If they&#39;ve used the horrific hack that is order_with_respect_to, deal with</span>
+    <span class="c"># it.</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">order_with_respect_to</span><span class="p">:</span>
+        <span class="n">field_defs</span><span class="p">[</span><span class="s">&#39;_order&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;django.db.models.fields.IntegerField&quot;</span><span class="p">,</span> <span class="p">[],</span> <span class="p">{</span><span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="s">&quot;0&quot;</span><span class="p">})</span>
+    
+    <span class="k">return</span> <span class="n">field_defs</span>
+
+</div>
+<div class="viewcode-block" id="get_model_meta"><a class="viewcode-back" href="../../auto_modules.html#south.modelsinspector.get_model_meta">[docs]</a><span class="k">def</span> <span class="nf">get_model_meta</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a model class, will return the dict representing the Meta class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c"># Get the introspected attributes</span>
+    <span class="n">meta_def</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">kwd</span><span class="p">,</span> <span class="n">defn</span> <span class="ow">in</span> <span class="n">meta_details</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">meta_def</span><span class="p">[</span><span class="n">kwd</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_value</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span> <span class="n">defn</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">IsDefault</span><span class="p">:</span>
+            <span class="k">pass</span>
+    
+    <span class="c"># Also, add on any non-abstract model base classes.</span>
+    <span class="c"># This is called _ormbases as the _bases variable was previously used</span>
+    <span class="c"># for a list of full class paths to bases, so we can&#39;t conflict.</span>
+    <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">__bases__</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s">&#39;_meta&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">base</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">abstract</span><span class="p">:</span>
+                <span class="c"># OK, that matches our terms.</span>
+                <span class="k">if</span> <span class="s">&quot;_ormbases&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">meta_def</span><span class="p">:</span>
+                    <span class="n">meta_def</span><span class="p">[</span><span class="s">&#39;_ormbases&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">meta_def</span><span class="p">[</span><span class="s">&#39;_ormbases&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">base</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span>
+                    <span class="n">base</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">object_name</span><span class="p">,</span>
+                <span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">meta_def</span>
+
+
+<span class="c"># Now, load the built-in South introspection plugins</span></div>
+<span class="kn">import</span> <span class="nn">south.introspection_plugins</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

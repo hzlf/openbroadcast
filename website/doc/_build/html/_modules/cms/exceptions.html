@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>cms.exceptions &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for cms.exceptions</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<div class="viewcode-block" id="PluginAlreadyRegistered"><a class="viewcode-back" href="../../auto_modules.html#cms.exceptions.PluginAlreadyRegistered">[docs]</a><span class="k">class</span> <span class="nc">PluginAlreadyRegistered</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="PluginNotRegistered"><a class="viewcode-back" href="../../auto_modules.html#cms.exceptions.PluginNotRegistered">[docs]</a><span class="k">class</span> <span class="nc">PluginNotRegistered</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="AppAlreadyRegistered"><a class="viewcode-back" href="../../auto_modules.html#cms.exceptions.AppAlreadyRegistered">[docs]</a><span class="k">class</span> <span class="nc">AppAlreadyRegistered</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+</div>
+<span class="n">AppAllreadyRegistered</span> <span class="o">=</span> <span class="n">AppAlreadyRegistered</span> <span class="c"># backwards compatibility, will be dropped in 2.3</span>
+
+<div class="viewcode-block" id="NotImplemented"><a class="viewcode-back" href="../../auto_modules.html#cms.exceptions.NotImplemented">[docs]</a><span class="k">class</span> <span class="nc">NotImplemented</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="SubClassNeededError"><a class="viewcode-back" href="../../auto_modules.html#cms.exceptions.SubClassNeededError">[docs]</a><span class="k">class</span> <span class="nc">SubClassNeededError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="MissingFormError"><a class="viewcode-back" href="../../auto_modules.html#cms.exceptions.MissingFormError">[docs]</a><span class="k">class</span> <span class="nc">MissingFormError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="NoHomeFound"><a class="viewcode-back" href="../../auto_modules.html#cms.exceptions.NoHomeFound">[docs]</a><span class="k">class</span> <span class="nc">NoHomeFound</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="PermissionsException"><a class="viewcode-back" href="../../auto_modules.html#cms.exceptions.PermissionsException">[docs]</a><span class="k">class</span> <span class="nc">PermissionsException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base permission exception</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="NoPermissionsException"><a class="viewcode-back" href="../../auto_modules.html#cms.exceptions.NoPermissionsException">[docs]</a><span class="k">class</span> <span class="nc">NoPermissionsException</span><span class="p">(</span><span class="n">PermissionsException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Can be fired when some violate action is performed on permission system. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    </div>
+<div class="viewcode-block" id="Deprecated"><a class="viewcode-back" href="../../auto_modules.html#cms.exceptions.Deprecated">[docs]</a><span class="k">class</span> <span class="nc">Deprecated</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span> <span class="k">pass</span>
+    </div>
+<div class="viewcode-block" id="DuplicatePlaceholderWarning"><a class="viewcode-back" href="../../auto_modules.html#cms.exceptions.DuplicatePlaceholderWarning">[docs]</a><span class="k">class</span> <span class="nc">DuplicatePlaceholderWarning</span><span class="p">(</span><span class="ne">Warning</span><span class="p">):</span> <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="DontUsePageAttributeWarning"><a class="viewcode-back" href="../../auto_modules.html#cms.exceptions.DontUsePageAttributeWarning">[docs]</a><span class="k">class</span> <span class="nc">DontUsePageAttributeWarning</span><span class="p">(</span><span class="ne">Warning</span><span class="p">):</span> <span class="k">pass</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

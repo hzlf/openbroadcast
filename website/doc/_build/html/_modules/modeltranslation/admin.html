@@ -1,0 +1,349 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>modeltranslation.admin &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for modeltranslation.admin</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+<span class="kn">from</span> <span class="nn">django.contrib.admin.options</span> <span class="kn">import</span> <span class="n">BaseModelAdmin</span><span class="p">,</span> <span class="n">InlineModelAdmin</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes</span> <span class="kn">import</span> <span class="n">generic</span>
+
+<span class="c"># Ensure that models are registered for translation before TranslationAdmin</span>
+<span class="c"># runs. The import is supposed to resolve a race condition between model import</span>
+<span class="c"># and translation registration in production (see issue #19).</span>
+<span class="kn">import</span> <span class="nn">modeltranslation.models</span>  <span class="c"># NOQA</span>
+<span class="kn">from</span> <span class="nn">modeltranslation.settings</span> <span class="kn">import</span> <span class="n">DEFAULT_LANGUAGE</span>
+<span class="kn">from</span> <span class="nn">modeltranslation.translator</span> <span class="kn">import</span> <span class="n">translator</span>
+<span class="kn">from</span> <span class="nn">modeltranslation.utils</span> <span class="kn">import</span> <span class="n">get_translation_fields</span><span class="p">,</span> <span class="n">build_css_class</span>
+
+
+<div class="viewcode-block" id="TranslationBaseModelAdmin"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.admin.TranslationBaseModelAdmin">[docs]</a><span class="k">class</span> <span class="nc">TranslationBaseModelAdmin</span><span class="p">(</span><span class="n">BaseModelAdmin</span><span class="p">):</span>
+    <span class="n">_orig_was_required</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TranslationBaseModelAdmin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trans_opts</span> <span class="o">=</span> <span class="n">translator</span><span class="o">.</span><span class="n">get_options_for_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patch_prepopulated_fields</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_declared_fieldsets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Take custom modelform fields option into account</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">,</span> <span class="s">&#39;_meta&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">fields</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldsets</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patch_fieldsets</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fieldsets</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[(</span><span class="bp">None</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;fields&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace_orig_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">)})]</span>
+        <span class="k">return</span> <span class="bp">None</span>
+    <span class="n">declared_fieldsets</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_declared_fieldsets</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TranslationBaseModelAdmin.formfield_for_dbfield"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.admin.TranslationBaseModelAdmin.formfield_for_dbfield">[docs]</a>    <span class="k">def</span> <span class="nf">formfield_for_dbfield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_field</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">TranslationBaseModelAdmin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">formfield_for_dbfield</span><span class="p">(</span><span class="n">db_field</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patch_translation_field</span><span class="p">(</span><span class="n">db_field</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">field</span>
+</div>
+<div class="viewcode-block" id="TranslationBaseModelAdmin.patch_translation_field"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.admin.TranslationBaseModelAdmin.patch_translation_field">[docs]</a>    <span class="k">def</span> <span class="nf">patch_translation_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_field</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">db_field</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans_opts</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                <span class="n">field</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="n">field</span><span class="o">.</span><span class="n">blank</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_orig_was_required</span><span class="p">[</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">db_field</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span> <span class="n">db_field</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="c"># For every localized field copy the widget from the original field</span>
+        <span class="c"># and add a css class to identify a modeltranslation widget.</span>
+        <span class="k">if</span> <span class="n">db_field</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans_opts</span><span class="o">.</span><span class="n">localized_fieldnames_rev</span><span class="p">:</span>
+            <span class="n">orig_fieldname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans_opts</span><span class="o">.</span><span class="n">localized_fieldnames_rev</span><span class="p">[</span><span class="n">db_field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">orig_formfield</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formfield_for_dbfield</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">orig_fieldname</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">field</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">orig_formfield</span><span class="o">.</span><span class="n">widget</span><span class="p">)</span>
+            <span class="n">css_classes</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;class&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">)</span>
+            <span class="n">css_classes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;mt&#39;</span><span class="p">)</span>
+            <span class="c"># Add localized fieldname css class</span>
+            <span class="n">css_classes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">build_css_class</span><span class="p">(</span><span class="n">db_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;mt-field&#39;</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">db_field</span><span class="o">.</span><span class="n">language</span> <span class="o">==</span> <span class="n">DEFAULT_LANGUAGE</span><span class="p">:</span>
+                <span class="c"># Add another css class to identify a default modeltranslation</span>
+                <span class="c"># widget.</span>
+                <span class="n">css_classes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;mt-default&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">orig_formfield</span><span class="o">.</span><span class="n">required</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orig_was_required</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                        <span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">db_field</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span> <span class="n">orig_fieldname</span><span class="p">))):</span>
+                    <span class="c"># In case the original form field was required, make the</span>
+                    <span class="c"># default translation field required instead.</span>
+                    <span class="n">orig_formfield</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="n">orig_formfield</span><span class="o">.</span><span class="n">blank</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">field</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">field</span><span class="o">.</span><span class="n">blank</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">field</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s">&#39;class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">css_classes</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_exclude_original_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">exclude</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">exclude</span><span class="p">:</span>
+            <span class="n">exclude_new</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">exclude</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">exclude_new</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trans_opts</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trans_opts</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TranslationBaseModelAdmin.replace_orig_field"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.admin.TranslationBaseModelAdmin.replace_orig_field">[docs]</a>    <span class="k">def</span> <span class="nf">replace_orig_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">option</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Replaces each original field in `option` that is registered for</span>
+<span class="sd">        translation by its translation fields.</span>
+
+<span class="sd">        Returns a new list with replaced fields. If `option` contains no</span>
+<span class="sd">        registered fields, it is returned unmodified.</span>
+
+<span class="sd">        &gt;&gt;&gt; print self.trans_opts.fields</span>
+<span class="sd">        (&#39;title&#39;,)</span>
+<span class="sd">        &gt;&gt;&gt; get_translation_fields(self.trans_opts.fields[0])</span>
+<span class="sd">        [&#39;title_de&#39;, &#39;title_en&#39;]</span>
+<span class="sd">        &gt;&gt;&gt; self.replace_orig_field([&#39;title&#39;, &#39;url&#39;])</span>
+<span class="sd">        [&#39;title_de&#39;, &#39;title_en&#39;, &#39;url&#39;]</span>
+
+<span class="sd">        Note that grouped fields are flattened. We do this because:</span>
+
+<span class="sd">            1. They are hard to handle in the jquery-ui tabs implementation</span>
+<span class="sd">            2. They don&#39;t scale well with more than a few languages</span>
+<span class="sd">            3. It&#39;s better than not handling them at all (okay that&#39;s weak)</span>
+
+<span class="sd">        &gt;&gt;&gt; print self.trans_opts.fields</span>
+<span class="sd">        ((&#39;title&#39;, &#39;url&#39;), &#39;email&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; get_translation_fields(self.trans_opts.fields[0])</span>
+<span class="sd">        [&#39;title_de&#39;, &#39;title_en&#39;, &#39;url_de&#39;, &#39;url_en&#39;, &#39;email_de&#39;, &#39;email_en&#39;]</span>
+<span class="sd">        &gt;&gt;&gt; self.replace_orig_field(((&#39;title&#39;, &#39;url&#39;), &#39;email&#39;, &#39;text&#39;))</span>
+<span class="sd">        [&#39;title_de&#39;, &#39;title_en&#39;, &#39;url_de&#39;, &#39;url_en&#39;, &#39;email_de&#39;, &#39;email_en&#39;, &#39;text&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span><span class="p">:</span>
+            <span class="n">option_new</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">option</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">opt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans_opts</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                    <span class="n">index</span> <span class="o">=</span> <span class="n">option_new</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
+                    <span class="n">option_new</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_translation_fields</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span>
+                        <span class="p">[</span><span class="n">o</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">opt</span> <span class="k">if</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans_opts</span><span class="o">.</span><span class="n">fields</span><span class="p">]):</span>
+                    <span class="n">index</span> <span class="o">=</span> <span class="n">option_new</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
+                    <span class="n">option_new</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace_orig_field</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
+            <span class="n">option</span> <span class="o">=</span> <span class="n">option_new</span>
+        <span class="k">return</span> <span class="n">option</span>
+</div>
+    <span class="k">def</span> <span class="nf">_patch_fieldsets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fieldsets</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fieldsets</span><span class="p">:</span>
+            <span class="n">fieldsets_new</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">fieldsets</span><span class="p">)</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span> <span class="ow">in</span> <span class="n">fieldsets</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s">&#39;fields&#39;</span> <span class="ow">in</span> <span class="n">dct</span><span class="p">:</span>
+                    <span class="n">dct</span><span class="p">[</span><span class="s">&#39;fields&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace_orig_field</span><span class="p">(</span><span class="n">dct</span><span class="p">[</span><span class="s">&#39;fields&#39;</span><span class="p">])</span>
+            <span class="n">fieldsets</span> <span class="o">=</span> <span class="n">fieldsets_new</span>
+        <span class="k">return</span> <span class="n">fieldsets</span>
+
+    <span class="k">def</span> <span class="nf">_patch_prepopulated_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepopulated_fields</span><span class="p">:</span>
+            <span class="n">prepopulated_fields_new</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prepopulated_fields</span><span class="p">)</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepopulated_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans_opts</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                    <span class="n">translation_fields</span> <span class="o">=</span> <span class="n">get_translation_fields</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">prepopulated_fields_new</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">translation_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prepopulated_fields</span> <span class="o">=</span> <span class="n">prepopulated_fields_new</span>
+
+    <span class="k">def</span> <span class="nf">_do_get_form_or_formset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Code shared among get_form and get_formset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">exclude</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">exclude</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude</span><span class="p">)</span>
+        <span class="n">exclude</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_readonly_fields</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">,</span> <span class="s">&#39;_meta&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">exclude</span><span class="p">:</span>
+            <span class="c"># Take the custom ModelForm&#39;s Meta.exclude into account only if the</span>
+            <span class="c"># ModelAdmin doesn&#39;t define its own.</span>
+            <span class="n">exclude</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">exclude</span><span class="p">)</span>
+        <span class="c"># If exclude is an empty list we pass None to be consistant with the</span>
+        <span class="c"># default on modelform_factory</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace_orig_field</span><span class="p">(</span><span class="n">exclude</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">None</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exclude_original_fields</span><span class="p">(</span><span class="n">exclude</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s">&#39;exclude&#39;</span><span class="p">:</span> <span class="n">exclude</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">kwargs</span>
+
+    <span class="k">def</span> <span class="nf">_do_get_fieldsets_pre_form_or_formset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Common get_fieldsets code shared among TranslationAdmin and</span>
+<span class="sd">        TranslationInlineModelAdmin.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_declared_fieldsets</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_do_get_fieldsets_post_form_or_formset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Common get_fieldsets code shared among TranslationAdmin and</span>
+<span class="sd">        TranslationInlineModelAdmin.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">base_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace_orig_field</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">base_fields</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">base_fields</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_readonly_fields</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="bp">None</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;fields&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace_orig_field</span><span class="p">(</span><span class="n">fields</span><span class="p">)})]</span>
+
+<div class="viewcode-block" id="TranslationBaseModelAdmin.get_translation_field_excludes"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.admin.TranslationBaseModelAdmin.get_translation_field_excludes">[docs]</a>    <span class="k">def</span> <span class="nf">get_translation_field_excludes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude_languages</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a tuple of translation field names to exclude base on</span>
+<span class="sd">        `exclude_languages` arg.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">exclude_languages</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">exclude_languages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">excl_languages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">exclude_languages</span><span class="p">:</span>
+            <span class="n">excl_languages</span> <span class="o">=</span> <span class="n">exclude_languages</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">orig_fieldname</span><span class="p">,</span> <span class="n">translation_fields</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans_opts</span><span class="o">.</span><span class="n">localized_fieldnames</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">tfield</span> <span class="ow">in</span> <span class="n">translation_fields</span><span class="p">:</span>
+                <span class="n">language</span> <span class="o">=</span> <span class="n">tfield</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">language</span> <span class="ow">in</span> <span class="n">excl_languages</span> <span class="ow">and</span> <span class="n">tfield</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
+                    <span class="n">exclude</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tfield</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">exclude</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="TranslationAdmin"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.admin.TranslationAdmin">[docs]</a><span class="k">class</span> <span class="nc">TranslationAdmin</span><span class="p">(</span><span class="n">TranslationBaseModelAdmin</span><span class="p">,</span> <span class="n">admin</span><span class="o">.</span><span class="n">ModelAdmin</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TranslationAdmin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patch_list_editable</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_patch_list_editable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_editable</span><span class="p">:</span>
+            <span class="n">editable_new</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_editable</span><span class="p">)</span>
+            <span class="n">display_new</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_display</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_editable</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans_opts</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                    <span class="n">index</span> <span class="o">=</span> <span class="n">editable_new</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+                    <span class="n">display_index</span> <span class="o">=</span> <span class="n">display_new</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+                    <span class="n">translation_fields</span> <span class="o">=</span> <span class="n">get_translation_fields</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+                    <span class="n">editable_new</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">translation_fields</span>
+                    <span class="n">display_new</span><span class="p">[</span><span class="n">display_index</span><span class="p">:</span><span class="n">display_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">translation_fields</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">list_editable</span> <span class="o">=</span> <span class="n">editable_new</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">list_display</span> <span class="o">=</span> <span class="n">display_new</span>
+
+<div class="viewcode-block" id="TranslationAdmin.get_form"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.admin.TranslationAdmin.get_form">[docs]</a>    <span class="k">def</span> <span class="nf">get_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_get_form_or_formset</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">TranslationAdmin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_form</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="TranslationAdmin.get_fieldsets"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.admin.TranslationAdmin.get_fieldsets">[docs]</a>    <span class="k">def</span> <span class="nf">get_fieldsets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">declared_fieldsets</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_get_fieldsets_pre_form_or_formset</span><span class="p">()</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_form</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_get_fieldsets_post_form_or_formset</span><span class="p">(</span>
+            <span class="n">request</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="TranslationInlineModelAdmin"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.admin.TranslationInlineModelAdmin">[docs]</a><span class="k">class</span> <span class="nc">TranslationInlineModelAdmin</span><span class="p">(</span><span class="n">TranslationBaseModelAdmin</span><span class="p">,</span> <span class="n">InlineModelAdmin</span><span class="p">):</span>
+<div class="viewcode-block" id="TranslationInlineModelAdmin.get_formset"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.admin.TranslationInlineModelAdmin.get_formset">[docs]</a>    <span class="k">def</span> <span class="nf">get_formset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_get_form_or_formset</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">TranslationInlineModelAdmin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_formset</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="TranslationInlineModelAdmin.get_fieldsets"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.admin.TranslationInlineModelAdmin.get_fieldsets">[docs]</a>    <span class="k">def</span> <span class="nf">get_fieldsets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c"># FIXME: If fieldsets are declared on an inline some kind of ghost</span>
+        <span class="c"># fieldset line with just the original model verbose_name of the model</span>
+        <span class="c"># is displayed above the new fieldsets.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">declared_fieldsets</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_get_fieldsets_pre_form_or_formset</span><span class="p">()</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formset</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="n">form</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_get_fieldsets_post_form_or_formset</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="TranslationTabularInline"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.admin.TranslationTabularInline">[docs]</a><span class="k">class</span> <span class="nc">TranslationTabularInline</span><span class="p">(</span><span class="n">TranslationInlineModelAdmin</span><span class="p">,</span> <span class="n">admin</span><span class="o">.</span><span class="n">TabularInline</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="TranslationStackedInline"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.admin.TranslationStackedInline">[docs]</a><span class="k">class</span> <span class="nc">TranslationStackedInline</span><span class="p">(</span><span class="n">TranslationInlineModelAdmin</span><span class="p">,</span> <span class="n">admin</span><span class="o">.</span><span class="n">StackedInline</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="TranslationGenericTabularInline"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.admin.TranslationGenericTabularInline">[docs]</a><span class="k">class</span> <span class="nc">TranslationGenericTabularInline</span><span class="p">(</span><span class="n">TranslationInlineModelAdmin</span><span class="p">,</span> <span class="n">generic</span><span class="o">.</span><span class="n">GenericTabularInline</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="TranslationGenericStackedInline"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.admin.TranslationGenericStackedInline">[docs]</a><span class="k">class</span> <span class="nc">TranslationGenericStackedInline</span><span class="p">(</span><span class="n">TranslationInlineModelAdmin</span><span class="p">,</span> <span class="n">generic</span><span class="o">.</span><span class="n">GenericStackedInline</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

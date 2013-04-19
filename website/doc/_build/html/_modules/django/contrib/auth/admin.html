@@ -1,0 +1,264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django.contrib.auth.admin &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for django.contrib.auth.admin</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">transaction</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.forms</span> <span class="kn">import</span> <span class="p">(</span><span class="n">UserCreationForm</span><span class="p">,</span> <span class="n">UserChangeForm</span><span class="p">,</span>
+    <span class="n">AdminPasswordChangeForm</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span><span class="p">,</span> <span class="n">Group</span>
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">messages</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">PermissionDenied</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponseRedirect</span><span class="p">,</span> <span class="n">Http404</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">get_object_or_404</span>
+<span class="kn">from</span> <span class="nn">django.template.response</span> <span class="kn">import</span> <span class="n">TemplateResponse</span>
+<span class="kn">from</span> <span class="nn">django.utils.html</span> <span class="kn">import</span> <span class="n">escape</span>
+<span class="kn">from</span> <span class="nn">django.utils.decorators</span> <span class="kn">import</span> <span class="n">method_decorator</span>
+<span class="kn">from</span> <span class="nn">django.utils.safestring</span> <span class="kn">import</span> <span class="n">mark_safe</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext</span><span class="p">,</span> <span class="n">ugettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">django.views.decorators.csrf</span> <span class="kn">import</span> <span class="n">csrf_protect</span>
+<span class="kn">from</span> <span class="nn">django.views.decorators.debug</span> <span class="kn">import</span> <span class="n">sensitive_post_parameters</span>
+
+<span class="n">csrf_protect_m</span> <span class="o">=</span> <span class="n">method_decorator</span><span class="p">(</span><span class="n">csrf_protect</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GroupAdmin"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.auth.admin.GroupAdmin">[docs]</a><span class="k">class</span> <span class="nc">GroupAdmin</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">ModelAdmin</span><span class="p">):</span>
+    <span class="n">search_fields</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,)</span>
+    <span class="n">ordering</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,)</span>
+    <span class="n">filter_horizontal</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;permissions&#39;</span><span class="p">,)</span>
+
+<div class="viewcode-block" id="GroupAdmin.formfield_for_manytomany"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.auth.admin.GroupAdmin.formfield_for_manytomany">[docs]</a>    <span class="k">def</span> <span class="nf">formfield_for_manytomany</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_field</span><span class="p">,</span> <span class="n">request</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">db_field</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;permissions&#39;</span><span class="p">:</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;queryset&#39;</span><span class="p">,</span> <span class="n">db_field</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">objects</span><span class="p">)</span>
+            <span class="c"># Avoid a major performance hit resolving permission names which</span>
+            <span class="c"># triggers a content_type load:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;queryset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">select_related</span><span class="p">(</span><span class="s">&#39;content_type&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">GroupAdmin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">formfield_for_manytomany</span><span class="p">(</span>
+            <span class="n">db_field</span><span class="p">,</span> <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="UserAdmin"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.auth.admin.UserAdmin">[docs]</a><span class="k">class</span> <span class="nc">UserAdmin</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">ModelAdmin</span><span class="p">):</span>
+    <span class="n">add_form_template</span> <span class="o">=</span> <span class="s">&#39;admin/auth/user/add_form.html&#39;</span>
+    <span class="n">change_user_password_template</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">fieldsets</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;fields&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)}),</span>
+        <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Personal info&#39;</span><span class="p">),</span> <span class="p">{</span><span class="s">&#39;fields&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;first_name&#39;</span><span class="p">,</span> <span class="s">&#39;last_name&#39;</span><span class="p">,</span> <span class="s">&#39;email&#39;</span><span class="p">)}),</span>
+        <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Permissions&#39;</span><span class="p">),</span> <span class="p">{</span><span class="s">&#39;fields&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;is_active&#39;</span><span class="p">,</span> <span class="s">&#39;is_staff&#39;</span><span class="p">,</span> <span class="s">&#39;is_superuser&#39;</span><span class="p">,</span>
+                                       <span class="s">&#39;groups&#39;</span><span class="p">,</span> <span class="s">&#39;user_permissions&#39;</span><span class="p">)}),</span>
+        <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Important dates&#39;</span><span class="p">),</span> <span class="p">{</span><span class="s">&#39;fields&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;last_login&#39;</span><span class="p">,</span> <span class="s">&#39;date_joined&#39;</span><span class="p">)}),</span>
+    <span class="p">)</span>
+    <span class="n">add_fieldsets</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">&#39;classes&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;wide&#39;</span><span class="p">,),</span>
+            <span class="s">&#39;fields&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password1&#39;</span><span class="p">,</span> <span class="s">&#39;password2&#39;</span><span class="p">)}</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">UserChangeForm</span>
+    <span class="n">add_form</span> <span class="o">=</span> <span class="n">UserCreationForm</span>
+    <span class="n">change_password_form</span> <span class="o">=</span> <span class="n">AdminPasswordChangeForm</span>
+    <span class="n">list_display</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;email&#39;</span><span class="p">,</span> <span class="s">&#39;first_name&#39;</span><span class="p">,</span> <span class="s">&#39;last_name&#39;</span><span class="p">,</span> <span class="s">&#39;is_staff&#39;</span><span class="p">)</span>
+    <span class="n">list_filter</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;is_staff&#39;</span><span class="p">,</span> <span class="s">&#39;is_superuser&#39;</span><span class="p">,</span> <span class="s">&#39;is_active&#39;</span><span class="p">)</span>
+    <span class="n">search_fields</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;first_name&#39;</span><span class="p">,</span> <span class="s">&#39;last_name&#39;</span><span class="p">,</span> <span class="s">&#39;email&#39;</span><span class="p">)</span>
+    <span class="n">ordering</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">,)</span>
+    <span class="n">filter_horizontal</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;user_permissions&#39;</span><span class="p">,)</span>
+
+<div class="viewcode-block" id="UserAdmin.get_fieldsets"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.auth.admin.UserAdmin.get_fieldsets">[docs]</a>    <span class="k">def</span> <span class="nf">get_fieldsets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_fieldsets</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">UserAdmin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_fieldsets</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="UserAdmin.get_form"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.auth.admin.UserAdmin.get_form">[docs]</a>    <span class="k">def</span> <span class="nf">get_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use special form during user creation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">defaults</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">defaults</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="s">&#39;form&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_form</span><span class="p">,</span>
+                <span class="s">&#39;fields&#39;</span><span class="p">:</span> <span class="n">admin</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">flatten_fieldsets</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">add_fieldsets</span><span class="p">),</span>
+            <span class="p">})</span>
+        <span class="n">defaults</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">UserAdmin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_form</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">defaults</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="UserAdmin.get_urls"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.auth.admin.UserAdmin.get_urls">[docs]</a>    <span class="k">def</span> <span class="nf">get_urls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">django.conf.urls</span> <span class="kn">import</span> <span class="n">patterns</span>
+        <span class="k">return</span> <span class="n">patterns</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+            <span class="p">(</span><span class="s">r&#39;^(\d+)/password/$&#39;</span><span class="p">,</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">admin_view</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_change_password</span><span class="p">))</span>
+        <span class="p">)</span> <span class="o">+</span> <span class="nb">super</span><span class="p">(</span><span class="n">UserAdmin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_urls</span><span class="p">()</span>
+</div>
+    <span class="nd">@sensitive_post_parameters</span><span class="p">()</span>
+    <span class="nd">@csrf_protect_m</span>
+    <span class="nd">@transaction.commit_on_success</span>
+<div class="viewcode-block" id="UserAdmin.add_view"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.auth.admin.UserAdmin.add_view">[docs]</a>    <span class="k">def</span> <span class="nf">add_view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">form_url</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">extra_context</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c"># It&#39;s an error for a user to have add permission but NOT change</span>
+        <span class="c"># permission for users. If we allowed such users to add users, they</span>
+        <span class="c"># could create superusers, which would mean they would essentially have</span>
+        <span class="c"># the permission to change users. To avoid the problem entirely, we</span>
+        <span class="c"># disallow users from adding users if they don&#39;t have change</span>
+        <span class="c"># permission.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_change_permission</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_add_permission</span><span class="p">(</span><span class="n">request</span><span class="p">)</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
+                <span class="c"># Raise Http404 in debug mode so that the user gets a helpful</span>
+                <span class="c"># error message.</span>
+                <span class="k">raise</span> <span class="n">Http404</span><span class="p">(</span>
+                    <span class="s">&#39;Your user does not have the &quot;Change user&quot; permission. In &#39;</span>
+                    <span class="s">&#39;order to add users, Django requires that your user &#39;</span>
+                    <span class="s">&#39;account have both the &quot;Add user&quot; and &quot;Change user&quot; &#39;</span>
+                    <span class="s">&#39;permissions set.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">PermissionDenied</span>
+        <span class="k">if</span> <span class="n">extra_context</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">extra_context</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;auto_populated_fields&#39;</span><span class="p">:</span> <span class="p">(),</span>
+            <span class="s">&#39;username_help_text&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">help_text</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">extra_context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">UserAdmin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">form_url</span><span class="p">,</span>
+                                               <span class="n">extra_context</span><span class="p">)</span>
+</div>
+    <span class="nd">@sensitive_post_parameters</span><span class="p">()</span>
+<div class="viewcode-block" id="UserAdmin.user_change_password"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.auth.admin.UserAdmin.user_change_password">[docs]</a>    <span class="k">def</span> <span class="nf">user_change_password</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">form_url</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_change_permission</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">PermissionDenied</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queryset</span><span class="p">(</span><span class="n">request</span><span class="p">),</span> <span class="n">pk</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;POST&#39;</span><span class="p">:</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">change_password_form</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+                <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">ugettext</span><span class="p">(</span><span class="s">&#39;Password changed successfully.&#39;</span><span class="p">)</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s">&#39;..&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">change_password_form</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+
+        <span class="n">fieldsets</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">None</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;fields&#39;</span><span class="p">:</span> <span class="n">form</span><span class="o">.</span><span class="n">base_fields</span><span class="o">.</span><span class="n">keys</span><span class="p">()})]</span>
+        <span class="n">adminForm</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">AdminForm</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">fieldsets</span><span class="p">,</span> <span class="p">{})</span>
+
+        <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Change password: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">escape</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">),</span>
+            <span class="s">&#39;adminForm&#39;</span><span class="p">:</span> <span class="n">adminForm</span><span class="p">,</span>
+            <span class="s">&#39;form_url&#39;</span><span class="p">:</span> <span class="n">mark_safe</span><span class="p">(</span><span class="n">form_url</span><span class="p">),</span>
+            <span class="s">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+            <span class="s">&#39;is_popup&#39;</span><span class="p">:</span> <span class="s">&#39;_popup&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">,</span>
+            <span class="s">&#39;add&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="s">&#39;change&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="s">&#39;has_delete_permission&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="s">&#39;has_change_permission&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="s">&#39;has_absolute_url&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="s">&#39;opts&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span>
+            <span class="s">&#39;original&#39;</span><span class="p">:</span> <span class="n">user</span><span class="p">,</span>
+            <span class="s">&#39;save_as&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="s">&#39;show_save&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">TemplateResponse</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">change_user_password_template</span> <span class="ow">or</span>
+            <span class="s">&#39;admin/auth/user/change_password.html&#39;</span>
+        <span class="p">],</span> <span class="n">context</span><span class="p">,</span> <span class="n">current_app</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="UserAdmin.response_add"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.auth.admin.UserAdmin.response_add">[docs]</a>    <span class="k">def</span> <span class="nf">response_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">post_url_continue</span><span class="o">=</span><span class="s">&#39;../</span><span class="si">%s</span><span class="s">/&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determines the HttpResponse for the add_view stage. It mostly defers to</span>
+<span class="sd">        its superclass implementation but is customized because the User model</span>
+<span class="sd">        has a slightly different workflow.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># We should allow further modification of the user just added i.e. the</span>
+        <span class="c"># &#39;Save&#39; button should behave like the &#39;Save and continue editing&#39;</span>
+        <span class="c"># button except in two scenarios:</span>
+        <span class="c"># * The user has pressed the &#39;Save and add another&#39; button</span>
+        <span class="c"># * We are adding a user in a popup</span>
+        <span class="k">if</span> <span class="s">&#39;_addanother&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span> <span class="ow">and</span> <span class="s">&#39;_popup&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">:</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">[</span><span class="s">&#39;_continue&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">UserAdmin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">response_add</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span>
+                                                   <span class="n">post_url_continue</span><span class="p">)</span>
+</div></div>
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Group</span><span class="p">,</span> <span class="n">GroupAdmin</span><span class="p">)</span>
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="n">UserAdmin</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

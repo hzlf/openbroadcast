@@ -1,0 +1,477 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>djangorestframework.renderers &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for djangorestframework.renderers</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Renderers are used to serialize a View&#39;s output into specific media types.</span>
+
+<span class="sd">Django REST framework also provides HTML and PlainText renderers that help self-document the API,</span>
+<span class="sd">by serializing the output along with documentation regarding the View, output status and headers,</span>
+<span class="sd">and providing forms and links depending on the allowed methods, renderers and parsers on the View. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.core.serializers.json</span> <span class="kn">import</span> <span class="n">DateTimeAwareJSONEncoder</span>
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">RequestContext</span><span class="p">,</span> <span class="n">loader</span>
+<span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">simplejson</span> <span class="k">as</span> <span class="n">json</span>
+
+
+<span class="kn">from</span> <span class="nn">djangorestframework.compat</span> <span class="kn">import</span> <span class="n">apply_markdown</span><span class="p">,</span> <span class="n">yaml</span>
+<span class="kn">from</span> <span class="nn">djangorestframework.utils</span> <span class="kn">import</span> <span class="n">dict2xml</span><span class="p">,</span> <span class="n">url_resolves</span>
+<span class="kn">from</span> <span class="nn">djangorestframework.utils.breadcrumbs</span> <span class="kn">import</span> <span class="n">get_breadcrumbs</span>
+<span class="kn">from</span> <span class="nn">djangorestframework.utils.description</span> <span class="kn">import</span> <span class="n">get_name</span><span class="p">,</span> <span class="n">get_description</span>
+<span class="kn">from</span> <span class="nn">djangorestframework.utils.mediatypes</span> <span class="kn">import</span> <span class="n">get_media_type_params</span><span class="p">,</span> <span class="n">add_media_type_param</span><span class="p">,</span> <span class="n">media_type_matches</span>
+<span class="kn">from</span> <span class="nn">djangorestframework</span> <span class="kn">import</span> <span class="n">VERSION</span>
+
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">from</span> <span class="nn">urllib</span> <span class="kn">import</span> <span class="n">quote_plus</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s">&#39;BaseRenderer&#39;</span><span class="p">,</span>
+    <span class="s">&#39;TemplateRenderer&#39;</span><span class="p">,</span>
+    <span class="s">&#39;JSONRenderer&#39;</span><span class="p">,</span>
+    <span class="s">&#39;DocumentingHTMLRenderer&#39;</span><span class="p">,</span>
+    <span class="s">&#39;DocumentingXHTMLRenderer&#39;</span><span class="p">,</span>
+    <span class="s">&#39;DocumentingPlainTextRenderer&#39;</span><span class="p">,</span>
+    <span class="s">&#39;XMLRenderer&#39;</span><span class="p">,</span>
+    <span class="s">&#39;YAMLRenderer&#39;</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="BaseRenderer"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.renderers.BaseRenderer">[docs]</a><span class="k">class</span> <span class="nc">BaseRenderer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    All renderers must extend this class, set the :attr:`media_type` attribute,</span>
+<span class="sd">    and override the :meth:`render` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">_FORMAT_QUERY_PARAM</span> <span class="o">=</span> <span class="s">&#39;format&#39;</span>
+
+    <span class="n">media_type</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">format</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view</span> <span class="o">=</span> <span class="n">view</span>
+
+<div class="viewcode-block" id="BaseRenderer.can_handle_response"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.renderers.BaseRenderer.can_handle_response">[docs]</a>    <span class="k">def</span> <span class="nf">can_handle_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accept</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns :const:`True` if this renderer is able to deal with the given</span>
+<span class="sd">        *accept* media type.</span>
+
+<span class="sd">        The default implementation for this function is to check the *accept*</span>
+<span class="sd">        argument against the :attr:`media_type` attribute set on the class to see if</span>
+<span class="sd">        they match.</span>
+
+<span class="sd">        This may be overridden to provide for other behavior, but typically you&#39;ll</span>
+<span class="sd">        instead want to just set the :attr:`media_type` attribute on the class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_FORMAT_QUERY_PARAM</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">format</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_FORMAT_QUERY_PARAM</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">format</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span>
+        <span class="k">return</span> <span class="n">media_type_matches</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">media_type</span><span class="p">,</span> <span class="n">accept</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BaseRenderer.render"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.renderers.BaseRenderer.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">media_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given an object render it into a string.</span>
+
+<span class="sd">        The requested media type is also passed to this method,</span>
+<span class="sd">        as it may contain parameters relevant to how the parser</span>
+<span class="sd">        should render the output.</span>
+<span class="sd">        EG: ``application/json; indent=4``</span>
+
+<span class="sd">        By default render simply returns the output as-is.</span>
+<span class="sd">        Override this method to provide for other behavior.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;&#39;</span>
+        
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="JSONRenderer"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.renderers.JSONRenderer">[docs]</a><span class="k">class</span> <span class="nc">JSONRenderer</span><span class="p">(</span><span class="n">BaseRenderer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Renderer which serializes to JSON</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">media_type</span> <span class="o">=</span> <span class="s">&#39;application/json&#39;</span>
+    <span class="n">format</span> <span class="o">=</span> <span class="s">&#39;json&#39;</span>
+
+<div class="viewcode-block" id="JSONRenderer.render"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.renderers.JSONRenderer.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">media_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Renders *obj* into serialized JSON.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;&#39;</span>
+
+        <span class="c"># If the media type looks like &#39;application/json; indent=4&#39;, then</span>
+        <span class="c"># pretty print the result.</span>
+        <span class="n">indent</span> <span class="o">=</span> <span class="n">get_media_type_params</span><span class="p">(</span><span class="n">media_type</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;indent&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">sort_keys</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">indent</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">indent</span><span class="p">),</span> <span class="mi">8</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">sort_keys</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="n">indent</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">DateTimeAwareJSONEncoder</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="n">indent</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="n">sort_keys</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="XMLRenderer"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.renderers.XMLRenderer">[docs]</a><span class="k">class</span> <span class="nc">XMLRenderer</span><span class="p">(</span><span class="n">BaseRenderer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Renderer which serializes to XML.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">media_type</span> <span class="o">=</span> <span class="s">&#39;application/xml&#39;</span>
+    <span class="n">format</span> <span class="o">=</span> <span class="s">&#39;xml&#39;</span>
+
+<div class="viewcode-block" id="XMLRenderer.render"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.renderers.XMLRenderer.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">media_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Renders *obj* into serialized XML.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">dict2xml</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+</div></div>
+<span class="k">if</span> <span class="n">yaml</span><span class="p">:</span>
+    <span class="k">class</span> <span class="nc">YAMLRenderer</span><span class="p">(</span><span class="n">BaseRenderer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Renderer which serializes to YAML.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    
+        <span class="n">media_type</span> <span class="o">=</span> <span class="s">&#39;application/yaml&#39;</span>
+        <span class="n">format</span> <span class="o">=</span> <span class="s">&#39;yaml&#39;</span>
+    
+        <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">media_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Renders *obj* into serialized YAML.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s">&#39;&#39;</span>
+
+            <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">YAMLRenderer</span> <span class="o">=</span> <span class="bp">None</span>
+
+
+<div class="viewcode-block" id="TemplateRenderer"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.renderers.TemplateRenderer">[docs]</a><span class="k">class</span> <span class="nc">TemplateRenderer</span><span class="p">(</span><span class="n">BaseRenderer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Base class provided for convenience.</span>
+
+<span class="sd">    Render the object simply by using the given template.</span>
+<span class="sd">    To create a template renderer, subclass this class, and set</span>
+<span class="sd">    the :attr:`media_type` and :attr:`template` attributes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">media_type</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="TemplateRenderer.render"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.renderers.TemplateRenderer.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">media_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Renders *obj* using the :attr:`template` specified on the class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;&#39;</span>
+
+        <span class="n">template</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">)</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">RequestContext</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">request</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;object&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+
+</div></div>
+<span class="k">class</span> <span class="nc">DocumentingTemplateRenderer</span><span class="p">(</span><span class="n">BaseRenderer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for renderers used to self-document the API.</span>
+<span class="sd">    Implementing classes should extend this class and set the template attribute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">template</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">_get_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">media_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the content as if it had been rendered by a non-documenting renderer.</span>
+
+<span class="sd">        (Typically this will be the content as it would have been if the Resource had been</span>
+<span class="sd">        requested with an &#39;Accept: */*&#39; header, although with verbose style formatting if appropriate.)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Find the first valid renderer and render the content. (Don&#39;t use another documenting renderer.)</span>
+        <span class="n">renderers</span> <span class="o">=</span> <span class="p">[</span><span class="n">renderer</span> <span class="k">for</span> <span class="n">renderer</span> <span class="ow">in</span> <span class="n">view</span><span class="o">.</span><span class="n">renderers</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">renderer</span><span class="p">,</span> <span class="n">DocumentingTemplateRenderer</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">renderers</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;[No renderers were found]&#39;</span>
+
+        <span class="n">media_type</span> <span class="o">=</span> <span class="n">add_media_type_param</span><span class="p">(</span><span class="n">media_type</span><span class="p">,</span> <span class="s">&#39;indent&#39;</span><span class="p">,</span> <span class="s">&#39;4&#39;</span><span class="p">)</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">renderers</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">view</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">media_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">char</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">printable</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">content</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&#39;[</span><span class="si">%d</span><span class="s"> bytes of binary content]&#39;</span>
+            
+        <span class="k">return</span> <span class="n">content</span>
+
+
+    <span class="k">def</span> <span class="nf">_get_form_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a form, possibly bound to either the input or output data.</span>
+<span class="sd">        In the absence on of the Resource having an associated form then</span>
+<span class="sd">        provide a form that can be used to submit arbitrary content.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Get the form instance if we have one bound to the input</span>
+        <span class="n">form_instance</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="s">&#39;method&#39;</span><span class="p">,</span> <span class="n">view</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">method</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="n">form_instance</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="s">&#39;bound_form_instance&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">form_instance</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="s">&#39;get_bound_form&#39;</span><span class="p">):</span>
+            <span class="c"># Otherwise if we have a response that is valid against the form then use that</span>
+            <span class="k">if</span> <span class="n">view</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">has_content_body</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">form_instance</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">get_bound_form</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">cleaned_content</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">form_instance</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">form_instance</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+                        <span class="n">form_instance</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">form_instance</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># If we still don&#39;t have a form instance then try to get an unbound form</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">form_instance</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">form_instance</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">get_bound_form</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="c"># If we still don&#39;t have a form instance then try to get an unbound form which can tunnel arbitrary content types</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">form_instance</span><span class="p">:</span>
+            <span class="n">form_instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_generic_content_form</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">form_instance</span>
+
+
+    <span class="k">def</span> <span class="nf">_get_generic_content_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a form that allows for arbitrary content types to be tunneled via standard HTML forms</span>
+<span class="sd">        (Which are typically application/x-www-form-urlencoded)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># If we&#39;re not using content overloading there&#39;s no point in supplying a generic form,</span>
+        <span class="c"># as the view won&#39;t treat the form&#39;s value as the content of the request.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="s">&#39;_USE_FORM_OVERLOADING&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="c"># NB. http://jacobian.org/writing/dynamic-form-generation/</span>
+        <span class="k">class</span> <span class="nc">GenericContentForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;We don&#39;t know the names of the fields we want to set until the point the form is instantiated,</span>
+<span class="sd">                as they are determined by the Resource the form is being created against.</span>
+<span class="sd">                Add the fields dynamically.&quot;&quot;&quot;</span>
+                <span class="nb">super</span><span class="p">(</span><span class="n">GenericContentForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+                <span class="n">contenttype_choices</span> <span class="o">=</span> <span class="p">[(</span><span class="n">media_type</span><span class="p">,</span> <span class="n">media_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">media_type</span> <span class="ow">in</span> <span class="n">view</span><span class="o">.</span><span class="n">_parsed_media_types</span><span class="p">]</span>
+                <span class="n">initial_contenttype</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">_default_parser</span><span class="o">.</span><span class="n">media_type</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="n">view</span><span class="o">.</span><span class="n">_CONTENTTYPE_PARAM</span><span class="p">]</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Content Type&#39;</span><span class="p">,</span>
+                                                                         <span class="n">choices</span><span class="o">=</span><span class="n">contenttype_choices</span><span class="p">,</span>
+                                                                         <span class="n">initial</span><span class="o">=</span><span class="n">initial_contenttype</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="n">view</span><span class="o">.</span><span class="n">_CONTENT_PARAM</span><span class="p">]</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Content&#39;</span><span class="p">,</span>
+                                                                   <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">Textarea</span><span class="p">)</span>
+
+        <span class="c"># If either of these reserved parameters are turned off then content tunneling is not possible</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">_CONTENTTYPE_PARAM</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">_CONTENT_PARAM</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="c"># Okey doke, let&#39;s do it</span>
+        <span class="k">return</span> <span class="n">GenericContentForm</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">media_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Renders *obj* using the :attr:`template` set on the class.</span>
+
+<span class="sd">        The context used in the template contains all the information</span>
+<span class="sd">        needed to self-document the response to this request.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_content</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">media_type</span><span class="p">)</span>
+
+        <span class="n">put_form_instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_form_instance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">)</span>
+        <span class="n">post_form_instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_form_instance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">,</span> <span class="s">&#39;post&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">url_resolves</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOGIN_URL</span><span class="p">)</span> <span class="ow">and</span> <span class="n">url_resolves</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOGOUT_URL</span><span class="p">):</span>
+            <span class="n">login_url</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">?next=</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOGIN_URL</span><span class="p">,</span> <span class="n">quote_plus</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+            <span class="n">logout_url</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">?next=</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOGOUT_URL</span><span class="p">,</span> <span class="n">quote_plus</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">login_url</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">logout_url</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">get_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">)</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="n">get_description</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">)</span>
+
+        <span class="n">markeddown</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">apply_markdown</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">markeddown</span> <span class="o">=</span> <span class="n">apply_markdown</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">markeddown</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="n">breadcrumb_list</span> <span class="o">=</span> <span class="n">get_breadcrumbs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="n">template</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">)</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">RequestContext</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">request</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">&#39;content&#39;</span><span class="p">:</span> <span class="n">content</span><span class="p">,</span>
+            <span class="s">&#39;view&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">,</span>
+            <span class="s">&#39;request&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">request</span><span class="p">,</span> <span class="c"># TODO: remove</span>
+            <span class="s">&#39;response&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">response</span><span class="p">,</span>
+            <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
+            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+            <span class="s">&#39;version&#39;</span><span class="p">:</span> <span class="n">VERSION</span><span class="p">,</span>
+            <span class="s">&#39;markeddown&#39;</span><span class="p">:</span> <span class="n">markeddown</span><span class="p">,</span>
+            <span class="s">&#39;breadcrumblist&#39;</span><span class="p">:</span> <span class="n">breadcrumb_list</span><span class="p">,</span>
+            <span class="s">&#39;available_formats&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">_rendered_formats</span><span class="p">,</span>
+            <span class="s">&#39;put_form&#39;</span><span class="p">:</span> <span class="n">put_form_instance</span><span class="p">,</span>
+            <span class="s">&#39;post_form&#39;</span><span class="p">:</span> <span class="n">post_form_instance</span><span class="p">,</span>
+            <span class="s">&#39;login_url&#39;</span><span class="p">:</span> <span class="n">login_url</span><span class="p">,</span>
+            <span class="s">&#39;logout_url&#39;</span><span class="p">:</span> <span class="n">logout_url</span><span class="p">,</span>
+            <span class="s">&#39;FORMAT_PARAM&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_FORMAT_QUERY_PARAM</span><span class="p">,</span>
+            <span class="s">&#39;METHOD_PARAM&#39;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">,</span> <span class="s">&#39;_METHOD_PARAM&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+            <span class="s">&#39;ADMIN_MEDIA_PREFIX&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">ADMIN_MEDIA_PREFIX</span>
+        <span class="p">})</span>
+        
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+
+        <span class="c"># Munge DELETE Response code to allow us to return content</span>
+        <span class="c"># (Do this *after* we&#39;ve rendered the template so that we include</span>
+        <span class="c"># the normal deletion response code in the output)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="mi">204</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+
+        <span class="k">return</span> <span class="n">ret</span>
+
+
+<div class="viewcode-block" id="DocumentingHTMLRenderer"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.renderers.DocumentingHTMLRenderer">[docs]</a><span class="k">class</span> <span class="nc">DocumentingHTMLRenderer</span><span class="p">(</span><span class="n">DocumentingTemplateRenderer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Renderer which provides a browsable HTML interface for an API.</span>
+<span class="sd">    See the examples at http://api.django-rest-framework.org to see this in action.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">media_type</span> <span class="o">=</span> <span class="s">&#39;text/html&#39;</span>
+    <span class="n">format</span> <span class="o">=</span> <span class="s">&#39;html&#39;</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="s">&#39;renderer.html&#39;</span>
+
+</div>
+<div class="viewcode-block" id="DocumentingXHTMLRenderer"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.renderers.DocumentingXHTMLRenderer">[docs]</a><span class="k">class</span> <span class="nc">DocumentingXHTMLRenderer</span><span class="p">(</span><span class="n">DocumentingTemplateRenderer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Identical to DocumentingHTMLRenderer, except with an xhtml media type.</span>
+<span class="sd">    We need this to be listed in preference to xml in order to return HTML to WebKit based browsers,</span>
+<span class="sd">    given their Accept headers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">media_type</span> <span class="o">=</span> <span class="s">&#39;application/xhtml+xml&#39;</span>
+    <span class="n">format</span> <span class="o">=</span> <span class="s">&#39;xhtml&#39;</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="s">&#39;renderer.html&#39;</span>
+
+</div>
+<div class="viewcode-block" id="DocumentingPlainTextRenderer"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.renderers.DocumentingPlainTextRenderer">[docs]</a><span class="k">class</span> <span class="nc">DocumentingPlainTextRenderer</span><span class="p">(</span><span class="n">DocumentingTemplateRenderer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Renderer that serializes the object with the default renderer, but also provides plain-text</span>
+<span class="sd">    documentation of the returned status and headers, and of the resource&#39;s name and description.</span>
+<span class="sd">    Useful for browsing an API with command line tools.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">media_type</span> <span class="o">=</span> <span class="s">&#39;text/plain&#39;</span>
+    <span class="n">format</span> <span class="o">=</span> <span class="s">&#39;txt&#39;</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="s">&#39;renderer.txt&#39;</span>
+
+</div>
+<span class="n">DEFAULT_RENDERERS</span> <span class="o">=</span> <span class="p">(</span> <span class="n">JSONRenderer</span><span class="p">,</span>
+                      <span class="n">DocumentingHTMLRenderer</span><span class="p">,</span>
+                      <span class="n">DocumentingXHTMLRenderer</span><span class="p">,</span>
+                      <span class="n">DocumentingPlainTextRenderer</span><span class="p">,</span>
+                      <span class="n">XMLRenderer</span> <span class="p">)</span>
+
+<span class="k">if</span> <span class="n">YAMLRenderer</span><span class="p">:</span>
+    <span class="n">DEFAULT_RENDERERS</span> <span class="o">+=</span> <span class="p">(</span><span class="n">YAMLRenderer</span><span class="p">,)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

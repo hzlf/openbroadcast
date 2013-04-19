@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bcmon.admin &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for bcmon.admin</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+
+<span class="kn">from</span> <span class="nn">bcmon.models</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">from</span> <span class="nn">lib.admin.actions</span> <span class="kn">import</span> <span class="n">export_as_csv_action</span>
+
+<span class="c">#class ChannelInline(admin.TabularInline):</span>
+<span class="c">#    model = Channel</span>
+
+
+
+<div class="viewcode-block" id="PlayoutAdmin"><a class="viewcode-back" href="../../auto_modules.html#bcmon.admin.PlayoutAdmin">[docs]</a><span class="k">class</span> <span class="nc">PlayoutAdmin</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">ModelAdmin</span><span class="p">):</span>    
+    
+    <span class="n">list_display</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;title&#39;</span><span class="p">,</span> <span class="s">&#39;time_start&#39;</span><span class="p">,</span> <span class="s">&#39;time_end&#39;</span><span class="p">,</span> <span class="s">&#39;channel&#39;</span><span class="p">,</span> <span class="s">&#39;status&#39;</span><span class="p">,</span> <span class="s">&#39;score&#39;</span><span class="p">,</span> <span class="s">&#39;dummy_result&#39;</span><span class="p">,)</span>
+    <span class="n">list_filter</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;channel&#39;</span><span class="p">,</span> <span class="s">&#39;status&#39;</span><span class="p">,</span> <span class="s">&#39;score&#39;</span><span class="p">,)</span>
+    
+    <span class="n">readonly_fields</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;created&#39;</span><span class="p">,</span> <span class="s">&#39;updated&#39;</span><span class="p">,</span> <span class="s">&#39;uuid&#39;</span><span class="p">,</span> <span class="s">&#39;enmfp&#39;</span><span class="p">,</span> <span class="s">&#39;analyzer_data&#39;</span><span class="p">,</span> <span class="s">&#39;echoprintfp&#39;</span><span class="p">,</span> <span class="s">&#39;echoprint_data&#39;</span><span class="p">,</span> <span class="s">&#39;score&#39;</span><span class="p">,</span> <span class="s">&#39;time_start&#39;</span><span class="p">,</span> <span class="s">&#39;time_end&#39;</span><span class="p">)</span>
+
+    <span class="n">date_hierarchy</span> <span class="o">=</span> <span class="s">&#39;created&#39;</span>
+    
+    <span class="n">inlines</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="n">export_as_csv_action</span><span class="p">(</span><span class="s">&quot;CSV Export&quot;</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;title&#39;</span><span class="p">,</span> <span class="s">&#39;created&#39;</span><span class="p">,</span> <span class="s">&#39;channel&#39;</span><span class="p">])]</span>
+    </div>
+<div class="viewcode-block" id="ChannelAdmin"><a class="viewcode-back" href="../../auto_modules.html#bcmon.admin.ChannelAdmin">[docs]</a><span class="k">class</span> <span class="nc">ChannelAdmin</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">ModelAdmin</span><span class="p">):</span>    
+    
+    <span class="n">list_display</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;slug&#39;</span><span class="p">,</span> <span class="s">&#39;stream_url&#39;</span><span class="p">,</span> <span class="p">)</span>
+    
+    <span class="n">readonly_fields</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;created&#39;</span><span class="p">,</span> <span class="s">&#39;updated&#39;</span><span class="p">,</span> <span class="s">&#39;uuid&#39;</span><span class="p">,</span> <span class="s">&#39;slug&#39;</span><span class="p">,</span> <span class="p">)</span>
+
+
+</div>
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Playout</span><span class="p">,</span> <span class="n">PlayoutAdmin</span><span class="p">)</span>
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Channel</span><span class="p">,</span> <span class="n">ChannelAdmin</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

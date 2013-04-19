@@ -1,0 +1,483 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>alibrary.__forms &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for alibrary.__forms</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+
+<span class="kn">from</span> <span class="nn">django.forms</span> <span class="kn">import</span> <span class="n">ModelForm</span><span class="p">,</span> <span class="n">Form</span>
+
+<span class="kn">from</span> <span class="nn">django.forms.models</span> <span class="kn">import</span> <span class="n">BaseInlineFormSet</span><span class="p">,</span> <span class="n">inlineformset_factory</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes.generic</span> <span class="kn">import</span> <span class="n">BaseGenericInlineFormSet</span><span class="p">,</span> <span class="n">generic_inlineformset_factory</span>
+
+
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="kn">from</span> <span class="nn">crispy_forms.helper</span> <span class="kn">import</span> <span class="n">FormHelper</span>
+<span class="kn">from</span> <span class="nn">crispy_forms.layout</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">crispy_forms.bootstrap</span> <span class="kn">import</span> <span class="n">FormActions</span>
+
+<span class="kn">from</span> <span class="nn">filer.models.imagemodels</span> <span class="kn">import</span> <span class="n">Image</span>
+
+<span class="kn">from</span> <span class="nn">django.contrib.admin</span> <span class="kn">import</span> <span class="n">widgets</span> <span class="k">as</span> <span class="n">admin_widgets</span>
+
+
+<span class="kn">from</span> <span class="nn">alibrary.models</span> <span class="kn">import</span> <span class="n">Release</span><span class="p">,</span> <span class="n">Media</span><span class="p">,</span> <span class="n">Relation</span>
+
+<span class="kn">from</span> <span class="nn">pagedown.widgets</span> <span class="kn">import</span> <span class="n">PagedownWidget</span>
+
+<span class="kn">import</span> <span class="nn">selectable.forms</span> <span class="kn">as</span> <span class="nn">selectable</span>
+<span class="kn">from</span> <span class="nn">alibrary.lookups</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="kn">import</span> <span class="nn">floppyforms</span> <span class="kn">as</span> <span class="nn">forms</span>
+
+    
+<span class="kn">from</span> <span class="nn">django.forms.widgets</span> <span class="kn">import</span> <span class="n">FileInput</span>
+<span class="kn">from</span> <span class="nn">floppyforms.widgets</span> <span class="kn">import</span> <span class="n">DateInput</span>
+<span class="kn">from</span> <span class="nn">tagging.forms</span> <span class="kn">import</span> <span class="n">TagField</span>
+<span class="kn">from</span> <span class="nn">ac_tagging.widgets</span> <span class="kn">import</span> <span class="n">TagAutocompleteTagIt</span>
+
+<span class="kn">from</span> <span class="nn">lib.widgets.widgets</span> <span class="kn">import</span> <span class="n">ReadOnlyIconField</span>
+
+
+
+<span class="n">ACTION_LAYOUT</span> <span class="o">=</span>  <span class="n">action_layout</span> <span class="o">=</span> <span class="n">FormActions</span><span class="p">(</span>
+                <span class="n">HTML</span><span class="p">(</span><span class="s">&#39;&lt;button type=&quot;submit&quot; name=&quot;save-i-classicon-arrow-upi&quot; value=&quot;save&quot; class=&quot;btn btn-primary pull-right ajax_submit&quot; id=&quot;submit-id-save-i-classicon-arrow-upi&quot;&gt;&lt;i class=&quot;icon-ok icon-white&quot;&gt;&lt;/i&gt; Save&lt;/button&gt;&#39;</span><span class="p">),</span>            
+                <span class="n">HTML</span><span class="p">(</span><span class="s">&#39;&lt;button type=&quot;reset&quot; name=&quot;reset&quot; value=&quot;reset&quot; class=&quot;reset resetButton btn btn-secondary pull-right&quot; id=&quot;reset-id-reset&quot;&gt;&lt;i class=&quot;icon-trash&quot;&gt;&lt;/i&gt; Cancel&lt;/button&gt;&#39;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+
+<div class="viewcode-block" id="ActionForm"><a class="viewcode-back" href="../../auto_modules.html#alibrary.__forms.ActionForm">[docs]</a><span class="k">class</span> <span class="nc">ActionForm</span><span class="p">(</span><span class="n">Form</span><span class="p">):</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ActionForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span> <span class="o">=</span> <span class="n">FormHelper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_class</span> <span class="o">=</span> <span class="s">&#39;form-horizontal&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_tag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">ACTION_LAYOUT</span><span class="p">)</span>
+ 
+</div>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Bulk edit - Autocomplete for fields to apply on whole listing</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ReleaseBulkeditForm"><a class="viewcode-back" href="../../auto_modules.html#alibrary.__forms.ReleaseBulkeditForm">[docs]</a><span class="k">class</span> <span class="nc">ReleaseBulkeditForm</span><span class="p">(</span><span class="n">Form</span><span class="p">):</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ReleaseBulkeditForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span> <span class="o">=</span> <span class="n">FormHelper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_id</span> <span class="o">=</span> <span class="s">&quot;bulk_edit</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="s">&#39;asd&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_class</span> <span class="o">=</span> <span class="s">&#39;form-horizontal&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_action</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_tag</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="n">base_layout</span> <span class="o">=</span> <span class="n">Div</span><span class="p">(</span>
+                <span class="n">Div</span><span class="p">(</span><span class="n">HTML</span><span class="p">(</span><span class="s">&#39;&lt;h4&gt;</span><span class="si">%s</span><span class="s">&lt;/h4&gt;&lt;p&gt;</span><span class="si">%s</span><span class="s">&lt;/p&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Bulk Edit&#39;</span><span class="p">),</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Choose Artist name and/or license to apply on every track.&#39;</span><span class="p">))),</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;form-help&#39;</span><span class="p">),</span>
+                <span class="n">Row</span><span class="p">(</span>
+                    <span class="n">Column</span><span class="p">(</span>
+                           <span class="n">Field</span><span class="p">(</span><span class="s">&#39;bulk_artist_name&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                           <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;span6&#39;</span>
+                           <span class="p">),</span>
+                    <span class="n">Column</span><span class="p">(</span>
+                           <span class="n">HTML</span><span class="p">(</span><span class="s">&#39;&lt;button type=&quot;button&quot; id=&quot;bulk_apply_artist_name&quot; value=&quot;apply&quot; class=&quot;btn btn-mini pull-right bulk_apply&quot; id=&quot;submit-&quot;&gt;&lt;i class=&quot;icon-plus&quot;&gt;&lt;/i&gt; </span><span class="si">%s</span><span class="s">&lt;/button&gt;&#39;</span> <span class="o">%</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Apply Artist to all tracks&#39;</span><span class="p">)),</span>
+                           <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;span2&#39;</span>
+                           <span class="p">),</span>
+                    <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;releasemedia-row row&#39;</span><span class="p">,</span>      
+                <span class="p">),</span>
+                <span class="n">Row</span><span class="p">(</span>
+                    <span class="n">Column</span><span class="p">(</span>
+                           <span class="n">Field</span><span class="p">(</span><span class="s">&#39;bulk_license&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                           <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;span6&#39;</span>
+                           <span class="p">),</span>
+                    <span class="n">Column</span><span class="p">(</span>
+                           <span class="n">HTML</span><span class="p">(</span><span class="s">&#39;&lt;button type=&quot;button&quot; id=&quot;bulk_apply_license&quot; value=&quot;apply&quot; class=&quot;btn btn-mini pull-right bulk_apply&quot; id=&quot;submit-&quot;&gt;&lt;i class=&quot;icon-plus&quot;&gt;&lt;/i&gt; </span><span class="si">%s</span><span class="s">&lt;/button&gt;&#39;</span> <span class="o">%</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Apply License to all tracks&#39;</span><span class="p">)),</span> 
+                           <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;span2&#39;</span>
+                           <span class="p">),</span>
+                    <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;releasemedia-row row&#39;</span><span class="p">,</span>      
+                <span class="p">),</span>
+                <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;bulk_edit&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+        
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">base_layout</span><span class="p">)</span>
+        
+    <span class="c"># Fields</span>
+    <span class="n">bulk_artist_name</span> <span class="o">=</span> <span class="n">selectable</span><span class="o">.</span><span class="n">AutoCompleteSelectField</span><span class="p">(</span><span class="n">ArtistLookup</span><span class="p">,</span> <span class="n">allow_new</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Artist&#39;</span><span class="p">))</span>
+    <span class="n">bulk_license</span> <span class="o">=</span> <span class="n">selectable</span><span class="o">.</span><span class="n">AutoComboboxSelectField</span><span class="p">(</span><span class="n">LicenseLookup</span><span class="p">,</span> <span class="n">allow_new</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;License&#39;</span><span class="p">))</span>
+    
+
+</div>
+<div class="viewcode-block" id="ReleaseForm"><a class="viewcode-back" href="../../auto_modules.html#alibrary.__forms.ReleaseForm">[docs]</a><span class="k">class</span> <span class="nc">ReleaseForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ReleaseForm.Meta"><a class="viewcode-back" href="../../auto_modules.html#alibrary.__forms.ReleaseForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Release</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span><span class="s">&#39;label&#39;</span><span class="p">,</span><span class="s">&#39;releasetype&#39;</span><span class="p">,</span><span class="s">&#39;release_country&#39;</span><span class="p">,</span><span class="s">&#39;catalognumber&#39;</span><span class="p">,</span><span class="s">&#39;description&#39;</span><span class="p">,</span> <span class="s">&#39;main_image&#39;</span><span class="p">,</span> <span class="s">&#39;releasedate&#39;</span><span class="p">,</span> <span class="s">&#39;d_tags&#39;</span><span class="p">)</span>
+        
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;initial&#39;</span><span class="p">][</span><span class="s">&#39;user&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;instance&#39;</span><span class="p">]</span>
+        
+        <span class="k">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span>
+        
+        <span class="k">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">has_perm</span><span class="p">(</span><span class="s">&quot;alibrary.edit_release&quot;</span><span class="p">)</span>
+        <span class="k">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">has_perm</span><span class="p">(</span><span class="s">&quot;alibrary.admin_release&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="p">)</span>
+
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;label&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ReleaseForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prototype function, set some fields to readonly depending on permissions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">has_perm</span><span class="p">(</span><span class="s">&quot;alibrary.admin_release&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s">&#39;catalognumber&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s">&#39;readonly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;readonly&#39;</span>
+        
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span> <span class="o">=</span> <span class="n">FormHelper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_id</span> <span class="o">=</span> <span class="s">&quot;id_feedback_form_</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="s">&#39;asd&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_class</span> <span class="o">=</span> <span class="s">&#39;form-horizontal&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_action</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_tag</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        
+        <span class="n">base_layout</span> <span class="o">=</span> <span class="n">Fieldset</span><span class="p">(</span>
+
+                               
+                <span class="n">_</span><span class="p">(</span><span class="s">&#39;General&#39;</span><span class="p">),</span>
+                <span class="c">#Div(HTML(&#39;&lt;h4&gt;%s&lt;/h4&gt;&lt;p&gt;%s&lt;/p&gt;&#39; % (_(&#39;Bulk Edit&#39;), _(&#39;Choose Artist name and/or license to apply on every track.&#39;))), css_class=&#39;form-help&#39;),</span>
+                <span class="n">LookupField</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">LookupField</span><span class="p">(</span><span class="s">&#39;releasetype&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+        <span class="p">)</span>
+        
+        <span class="n">artist_layout</span> <span class="o">=</span> <span class="n">Fieldset</span><span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span><span class="s">&#39;Artist(s)&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;extra_artists&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>    
+        <span class="p">)</span>
+        
+        <span class="n">catalog_layout</span> <span class="o">=</span> <span class="n">Fieldset</span><span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span><span class="s">&#39;Label/Catalog&#39;</span><span class="p">),</span>
+                <span class="n">LookupField</span><span class="p">(</span><span class="s">&#39;label&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">LookupField</span><span class="p">(</span><span class="s">&#39;catalognumber&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">LookupField</span><span class="p">(</span><span class="s">&#39;release_country&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">LookupField</span><span class="p">(</span><span class="s">&#39;releasedate&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+        <span class="p">)</span>
+        
+
+        <span class="n">image_layout</span> <span class="o">=</span> <span class="n">Fieldset</span><span class="p">(</span>
+                <span class="s">&#39;Meta&#39;</span><span class="p">,</span>
+                <span class="n">LookupField</span><span class="p">(</span><span class="s">&#39;description&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xxlarge&#39;</span><span class="p">),</span>
+                <span class="s">&#39;main_image&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+        
+        <span class="n">tagging_layout</span> <span class="o">=</span> <span class="n">Fieldset</span><span class="p">(</span>
+                <span class="s">&#39;Tags&#39;</span><span class="p">,</span>
+                <span class="s">&#39;d_tags&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+            
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
+                        <span class="c">#ACTION_LAYOUT,</span>
+                        <span class="n">base_layout</span><span class="p">,</span>
+                        <span class="n">artist_layout</span><span class="p">,</span>
+                        <span class="n">image_layout</span><span class="p">,</span>
+                        <span class="n">catalog_layout</span><span class="p">,</span>
+                        <span class="n">tagging_layout</span><span class="p">,</span>
+                        <span class="c">#ACTION_LAYOUT,</span>
+                        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+
+        
+
+    
+    <span class="n">main_image</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span><span class="n">widget</span><span class="o">=</span><span class="n">FileInput</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">releasedate</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">DateField</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,)</span>
+    <span class="n">d_tags</span> <span class="o">=</span> <span class="n">TagField</span><span class="p">(</span><span class="n">widget</span><span class="o">=</span><span class="n">TagAutocompleteTagIt</span><span class="p">(</span><span class="n">max_tags</span><span class="o">=</span><span class="mi">9</span><span class="p">),</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Tags&#39;</span><span class="p">))</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">widget</span><span class="o">=</span><span class="n">selectable</span><span class="o">.</span><span class="n">AutoCompleteWidget</span><span class="p">(</span><span class="n">ReleaseNameLookup</span><span class="p">),</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">selectable</span><span class="o">.</span><span class="n">AutoCompleteSelectField</span><span class="p">(</span><span class="n">ReleaseLabelLookup</span><span class="p">,</span> <span class="n">allow_new</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>    
+    <span class="n">description</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">widget</span><span class="o">=</span><span class="n">PagedownWidget</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s">&quot;Markdown enabled text&quot;</span><span class="p">)</span>   
+
+    <span class="n">extra_artists</span> <span class="o">=</span> <span class="n">selectable</span><span class="o">.</span><span class="n">AutoComboboxSelectMultipleField</span><span class="p">(</span><span class="n">ArtistLookup</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    
+
+    <span class="c"># TODO: rework clean function</span>
+<div class="viewcode-block" id="ReleaseForm.clean"><a class="viewcode-back" href="../../auto_modules.html#alibrary.__forms.ReleaseForm.clean">[docs]</a>    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        
+        <span class="n">cd</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ReleaseForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+
+        <span class="k">print</span> <span class="n">cd</span>
+        
+        <span class="n">label</span> <span class="o">=</span> <span class="n">cd</span><span class="p">[</span><span class="s">&#39;label&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">label</span><span class="o">.</span><span class="n">pk</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;SEEMS TO BE NEW ONE...&quot;</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            
+        
+        <span class="k">if</span> <span class="s">&#39;main_image&#39;</span> <span class="ow">in</span> <span class="n">cd</span> <span class="ow">and</span> <span class="n">cd</span><span class="p">[</span><span class="s">&#39;main_image&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;IMAGE SAFIX!!&quot;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ui</span> <span class="o">=</span> <span class="n">cd</span><span class="p">[</span><span class="s">&#39;main_image&#39;</span><span class="p">]</span>
+                <span class="n">dj_file</span> <span class="o">=</span> <span class="n">DjangoFile</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">temporary_file_path</span><span class="p">()),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;cover.jpg&#39;</span><span class="p">)</span>
+                <span class="n">cd</span><span class="p">[</span><span class="s">&#39;main_image&#39;</span><span class="p">],</span> <span class="n">created</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+                                    <span class="n">original_filename</span><span class="o">=</span><span class="s">&#39;cover_</span><span class="si">%s</span><span class="s">.jpg&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span>
+                                    <span class="nb">file</span><span class="o">=</span><span class="n">dj_file</span><span class="p">,</span>
+                                    <span class="n">folder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span>
+                                    <span class="n">is_public</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">e</span>
+                <span class="k">pass</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cd</span><span class="p">[</span><span class="s">&#39;main_image&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">main_image</span>
+
+
+        
+
+        <span class="k">return</span> <span class="n">cd</span>
+
+    <span class="c"># TODO: take a look at save</span></div>
+<div class="viewcode-block" id="ReleaseForm.save"><a class="viewcode-back" href="../../auto_modules.html#alibrary.__forms.ReleaseForm.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ReleaseForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+   
+    
+    
+ 
+
+  </div></div>
+<div class="viewcode-block" id="BaseReleaseMediaFormSet"><a class="viewcode-back" href="../../auto_modules.html#alibrary.__forms.BaseReleaseMediaFormSet">[docs]</a><span class="k">class</span> <span class="nc">BaseReleaseMediaFormSet</span><span class="p">(</span><span class="n">BaseInlineFormSet</span><span class="p">):</span> 
+        
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;instance&#39;</span><span class="p">]</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">BaseReleaseMediaFormSet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span> <span class="o">=</span> <span class="n">FormHelper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_id</span> <span class="o">=</span> <span class="s">&quot;id_releasemediainline_form_</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="s">&#39;asd&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_class</span> <span class="o">=</span> <span class="s">&#39;form-horizontal&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_action</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_tag</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        
+        <span class="n">base_layout</span> <span class="o">=</span> <span class="n">Row</span><span class="p">(</span>
+                <span class="n">Column</span><span class="p">(</span>
+                       <span class="n">Field</span><span class="p">(</span><span class="s">&#39;tracknumber&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-small&#39;</span><span class="p">),</span>
+                       <span class="n">Field</span><span class="p">(</span><span class="s">&#39;mediatype&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-small&#39;</span><span class="p">),</span>
+                       <span class="n">Field</span><span class="p">(</span><span class="s">&#39;license&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-small&#39;</span><span class="p">),</span>
+                       <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;span2&#39;</span>
+                       <span class="p">),</span>
+                <span class="n">Column</span><span class="p">(</span>
+                                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;artist&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;isrc&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                       <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;span5&#39;</span>
+                       <span class="p">),</span>
+                <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;releasemedia-row row&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">base_layout</span><span class="p">)</span>
+        
+
+        
+ 
+<div class="viewcode-block" id="BaseReleaseMediaFormSet.add_fields"><a class="viewcode-back" href="../../auto_modules.html#alibrary.__forms.BaseReleaseMediaFormSet.add_fields">[docs]</a>    <span class="k">def</span> <span class="nf">add_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="c"># allow the super class to create the fields as usual</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BaseReleaseMediaFormSet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add_fields</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+ 
+        <span class="c"># created the nested formset</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_queryset</span><span class="p">()[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">pk_value</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">pk</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">instance</span><span class="o">=</span><span class="bp">None</span>
+            <span class="n">pk_value</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">prefix</span><span class="p">)</span>
+ 
+ 
+</div></div>
+<div class="viewcode-block" id="BaseReleaseMediaForm"><a class="viewcode-back" href="../../auto_modules.html#alibrary.__forms.BaseReleaseMediaForm">[docs]</a><span class="k">class</span> <span class="nc">BaseReleaseMediaForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BaseReleaseMediaForm.Meta"><a class="viewcode-back" href="../../auto_modules.html#alibrary.__forms.BaseReleaseMediaForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Media</span>
+        <span class="n">parent_model</span> <span class="o">=</span> <span class="n">Release</span>
+        <span class="n">formset</span> <span class="o">=</span> <span class="n">BaseReleaseMediaFormSet</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span><span class="s">&#39;tracknumber&#39;</span><span class="p">,)</span>
+        </div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;instance&#39;</span><span class="p">]</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BaseReleaseMediaForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+
+    <span class="n">artist</span> <span class="o">=</span> <span class="n">selectable</span><span class="o">.</span><span class="n">AutoCompleteSelectField</span><span class="p">(</span><span class="n">ArtistLookup</span><span class="p">,</span> <span class="n">allow_new</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">tracknumber</span> <span class="o">=</span>  <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;No.&#39;</span><span class="p">))</span>   
+
+
+
+
+  </div>
+<div class="viewcode-block" id="BaseReleaseReleationFormSet"><a class="viewcode-back" href="../../auto_modules.html#alibrary.__forms.BaseReleaseReleationFormSet">[docs]</a><span class="k">class</span> <span class="nc">BaseReleaseReleationFormSet</span><span class="p">(</span><span class="n">BaseGenericInlineFormSet</span><span class="p">):</span>
+
+        
+        
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;instance&#39;</span><span class="p">]</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BaseReleaseReleationFormSet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span> <span class="o">=</span> <span class="n">FormHelper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_id</span> <span class="o">=</span> <span class="s">&quot;id_releasemediainline_form_</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="s">&#39;asdfds&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_class</span> <span class="o">=</span> <span class="s">&#39;form-horizontal&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_action</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_tag</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="n">base_layout</span> <span class="o">=</span> <span class="n">Row</span><span class="p">(</span>
+                <span class="n">Column</span><span class="p">(</span>
+                       <span class="n">Field</span><span class="p">(</span><span class="s">&#39;url&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                       <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;span5&#39;</span>
+                       <span class="p">),</span>
+                <span class="n">Column</span><span class="p">(</span>
+                       <span class="n">Field</span><span class="p">(</span><span class="s">&#39;service&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-small&#39;</span><span class="p">),</span>
+                       <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;span1&#39;</span>
+                       <span class="p">),</span>
+                <span class="n">Column</span><span class="p">(</span>
+                       <span class="n">Field</span><span class="p">(</span><span class="s">&#39;DELETE&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-mini&#39;</span><span class="p">),</span>
+                       <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;span1&#39;</span>
+                       <span class="p">),</span>
+                <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;row relation-row&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">base_layout</span><span class="p">)</span>
+        
+
+</div>
+<div class="viewcode-block" id="BaseReleaseReleationForm"><a class="viewcode-back" href="../../auto_modules.html#alibrary.__forms.BaseReleaseReleationForm">[docs]</a><span class="k">class</span> <span class="nc">BaseReleaseReleationForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BaseReleaseReleationForm.Meta"><a class="viewcode-back" href="../../auto_modules.html#alibrary.__forms.BaseReleaseReleationForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Relation</span>
+        <span class="n">parent_model</span> <span class="o">=</span> <span class="n">Release</span>
+        <span class="n">formset</span> <span class="o">=</span> <span class="n">BaseReleaseReleationFormSet</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;url&#39;</span><span class="p">,</span><span class="s">&#39;service&#39;</span><span class="p">,)</span>
+        </div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BaseReleaseReleationForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">instance</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;instance&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">instance</span> <span class="ow">and</span> <span class="n">instance</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s">&#39;service&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s">&#39;readonly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        
+<div class="viewcode-block" id="BaseReleaseReleationForm.clean_service"><a class="viewcode-back" href="../../auto_modules.html#alibrary.__forms.BaseReleaseReleationForm.clean_service">[docs]</a>    <span class="k">def</span> <span class="nf">clean_service</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">service</span>
+</div>
+    <span class="n">service</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="n">ReadOnlyIconField</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">URLField</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Website / URL&#39;</span><span class="p">),</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="c">#name = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False)</span>
+    <span class="c">#tracknumber =  forms.CharField(label=_(&#39;No.&#39;))  </span>
+
+
+<span class="c"># Compose Formsets</span></div>
+<span class="n">ReleaseMediaFormSet</span> <span class="o">=</span> <span class="n">inlineformset_factory</span><span class="p">(</span><span class="n">Release</span><span class="p">,</span> <span class="n">Media</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">BaseReleaseMediaForm</span><span class="p">,</span> <span class="n">formset</span><span class="o">=</span><span class="n">BaseReleaseMediaFormSet</span><span class="p">,</span> <span class="n">can_delete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;tracknumber&#39;</span><span class="p">,</span> <span class="s">&#39;isrc&#39;</span><span class="p">,</span> <span class="s">&#39;artist&#39;</span><span class="p">,</span> <span class="s">&#39;license&#39;</span><span class="p">,</span> <span class="s">&#39;mediatype&#39;</span><span class="p">,),</span> <span class="n">can_order</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">ReleaseRelationFormSet</span> <span class="o">=</span> <span class="n">generic_inlineformset_factory</span><span class="p">(</span><span class="n">Relation</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">BaseReleaseReleationForm</span><span class="p">,</span> <span class="n">formset</span><span class="o">=</span><span class="n">BaseReleaseReleationFormSet</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;action&#39;</span><span class="p">,),</span> <span class="n">can_delete</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+
+
+
+
+
+    
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

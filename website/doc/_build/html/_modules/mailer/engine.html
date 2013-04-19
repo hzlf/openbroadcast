@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mailer.engine &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mailer.engine</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">smtplib</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">lockfile</span> <span class="kn">import</span> <span class="n">FileLock</span><span class="p">,</span> <span class="n">AlreadyLocked</span><span class="p">,</span> <span class="n">LockTimeout</span>
+<span class="kn">from</span> <span class="nn">socket</span> <span class="kn">import</span> <span class="n">error</span> <span class="k">as</span> <span class="n">socket_error</span>
+
+<span class="kn">from</span> <span class="nn">mailer.models</span> <span class="kn">import</span> <span class="n">Message</span><span class="p">,</span> <span class="n">DontSendEntry</span><span class="p">,</span> <span class="n">MessageLog</span>
+
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.core.mail</span> <span class="kn">import</span> <span class="n">send_mail</span> <span class="k">as</span> <span class="n">core_send_mail</span>
+
+<span class="c"># when queue is empty, how long to wait (in seconds) before checking again</span>
+<span class="n">EMPTY_QUEUE_SLEEP</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&quot;MAILER_EMPTY_QUEUE_SLEEP&quot;</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+
+<span class="c"># lock timeout value. how long to wait for the lock to become available.</span>
+<span class="c"># default behavior is to never wait for the lock to be available.</span>
+<span class="n">LOCK_WAIT_TIMEOUT</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&quot;MAILER_LOCK_WAIT_TIMEOUT&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="prioritize"><a class="viewcode-back" href="../../auto_modules.html#mailer.engine.prioritize">[docs]</a><span class="k">def</span> <span class="nf">prioritize</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Yield the messages in the queue in the order they should be sent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">while</span> <span class="n">Message</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">high_priority</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="ow">or</span> <span class="n">Message</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">medium_priority</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">():</span>
+            <span class="k">while</span> <span class="n">Message</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">high_priority</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">Message</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">high_priority</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s">&#39;when_added&#39;</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="n">message</span>
+            <span class="k">while</span> <span class="n">Message</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">high_priority</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">Message</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">medium_priority</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">():</span>
+                <span class="k">yield</span> <span class="n">Message</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">medium_priority</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s">&#39;when_added&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">while</span> <span class="n">Message</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">high_priority</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">Message</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">medium_priority</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">Message</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">low_priority</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="n">Message</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">low_priority</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s">&#39;when_added&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">Message</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">non_deferred</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">break</span>
+
+</div>
+<div class="viewcode-block" id="send_all"><a class="viewcode-back" href="../../auto_modules.html#mailer.engine.send_all">[docs]</a><span class="k">def</span> <span class="nf">send_all</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Send all eligible messages in the queue.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">lock</span> <span class="o">=</span> <span class="n">FileLock</span><span class="p">(</span><span class="s">&quot;send_mail&quot;</span><span class="p">)</span>
+    
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;acquiring lock...&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">(</span><span class="n">LOCK_WAIT_TIMEOUT</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">AlreadyLocked</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;lock already in place. quitting.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">except</span> <span class="n">LockTimeout</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;waiting for the lock timed out. quitting.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;acquired.&quot;</span><span class="p">)</span>
+    
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    
+    <span class="n">dont_send</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">deferred</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">sent</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">prioritize</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">DontSendEntry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">has_address</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">to_address</span><span class="p">):</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;skipping email to </span><span class="si">%s</span><span class="s"> as on don&#39;t send list &quot;</span> <span class="o">%</span> <span class="n">message</span><span class="o">.</span><span class="n">to_address</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&quot;utf-8&quot;</span><span class="p">))</span>
+                <span class="n">MessageLog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="c"># @@@ avoid using literal result code</span>
+                <span class="n">message</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+                <span class="n">dont_send</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;sending message &#39;</span><span class="si">%s</span><span class="s">&#39; to </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">subject</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&quot;utf-8&quot;</span><span class="p">),</span> <span class="n">message</span><span class="o">.</span><span class="n">to_address</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&quot;utf-8&quot;</span><span class="p">)))</span>
+                    <span class="n">core_send_mail</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">subject</span><span class="p">,</span> <span class="n">message</span><span class="o">.</span><span class="n">message_body</span><span class="p">,</span> <span class="n">message</span><span class="o">.</span><span class="n">from_address</span><span class="p">,</span> <span class="p">[</span><span class="n">message</span><span class="o">.</span><span class="n">to_address</span><span class="p">])</span>
+                    <span class="n">MessageLog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c"># @@@ avoid using literal result code</span>
+                    <span class="n">message</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+                    <span class="n">sent</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">except</span> <span class="p">(</span><span class="n">socket_error</span><span class="p">,</span> <span class="n">smtplib</span><span class="o">.</span><span class="n">SMTPSenderRefused</span><span class="p">,</span> <span class="n">smtplib</span><span class="o">.</span><span class="n">SMTPRecipientsRefused</span><span class="p">,</span> <span class="n">smtplib</span><span class="o">.</span><span class="n">SMTPAuthenticationError</span><span class="p">),</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">message</span><span class="o">.</span><span class="n">defer</span><span class="p">()</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;message deferred due to failure: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                    <span class="n">MessageLog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">log_message</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span> <span class="c"># @@@ avoid using literal result code</span>
+                    <span class="n">deferred</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;releasing lock...&quot;</span><span class="p">)</span>
+        <span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;released.&quot;</span><span class="p">)</span>
+    
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> sent; </span><span class="si">%s</span><span class="s"> deferred; </span><span class="si">%s</span><span class="s"> don&#39;t send&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sent</span><span class="p">,</span> <span class="n">deferred</span><span class="p">,</span> <span class="n">dont_send</span><span class="p">))</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;done in </span><span class="si">%.2f</span><span class="s"> seconds&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="send_loop"><a class="viewcode-back" href="../../auto_modules.html#mailer.engine.send_loop">[docs]</a><span class="k">def</span> <span class="nf">send_loop</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loop indefinitely, checking queue at intervals of EMPTY_QUEUE_SLEEP and</span>
+<span class="sd">    sending messages if any are on queue.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">Message</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;sleeping for </span><span class="si">%s</span><span class="s"> seconds before checking queue again&quot;</span> <span class="o">%</span> <span class="n">EMPTY_QUEUE_SLEEP</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">EMPTY_QUEUE_SLEEP</span><span class="p">)</span>
+        <span class="n">send_all</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

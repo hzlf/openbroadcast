@@ -207,8 +207,8 @@ class ReleaseEditView(UpdateView):
         context = super(ReleaseEditView, self).get_context_data(**kwargs)
         
         # 
-        context['release_bulkedit_form'] = ReleaseBulkeditForm()
-        context['action_form'] = ActionForm()
+        context['release_bulkedit_form'] = ReleaseBulkeditForm(instance=self.object)
+        context['action_form'] = ReleaseActionForm(instance=self.object)
         
         context['releasemedia_form'] = ReleaseMediaFormSet(instance=self.object)
         context['relation_form'] = ReleaseRelationFormSet(instance=self.object)
@@ -226,6 +226,9 @@ class ReleaseEditView(UpdateView):
         # get the inline forms
         releasemedia_form = context['releasemedia_form']
         relation_form = context['relation_form']
+        
+        
+
         
         print 'validation:'
 
@@ -263,11 +266,32 @@ class ReleaseEditView(UpdateView):
                 
                 
                 releasemedia_form.save()
+                
 
-                form.save()
+
+                obj = form.save()
                 form.save_m2m()
+                
+                """
+                handle publish action
+                """
+                action_form = ReleaseActionForm(self.request.POST)
+                publish = False
+                if action_form.is_valid():
+                    publish = action_form.cleaned_data['publish']
+                    
+                if publish:
+                    print 'publish:'
+                    print publish
+                    from datetime import datetime
+                    obj.publish_date = datetime.now()
+                    obj.publisher = self.request.user
+                    
+                    obj.save()
+                    
             else:
                 print releasemedia_form.errors
+
 
             return HttpResponseRedirect('#')
         else:

@@ -7,7 +7,7 @@ import slumber
 
 import json
 
-API_ENDPOINT = 'http://local.openbroadcast.ch:8000/api/v1/'
+API_ENDPOINT = 'http://local.openbroadcast.ch:8080/de/api/v1/'
 API_AUTH = ("root", "root")
 
 
@@ -64,7 +64,7 @@ path = filename
 print 'path: %s' % path
 
 p = subprocess.Popen([
-    ecb, path, '30', '40',
+    ecb, path, '12', '10',
 ], stdout=subprocess.PIPE)
 stdout = p.communicate()        
 d = json.loads(stdout[0])
@@ -91,7 +91,7 @@ for track in tracks['objects']:
     print track['resource_uri']
     print track['absolute_url']
     print
-    print track
+    #print track
     
 print
 print

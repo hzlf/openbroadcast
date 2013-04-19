@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>shop.forms &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for shop.forms</h1><div class="highlight"><pre>
+<span class="c">#-*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Forms for the django-shop app.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.forms.models</span> <span class="kn">import</span> <span class="n">modelformset_factory</span>
+
+<span class="kn">from</span> <span class="nn">shop.backends_pool</span> <span class="kn">import</span> <span class="n">backends_pool</span>
+<span class="kn">from</span> <span class="nn">shop.models.cartmodel</span> <span class="kn">import</span> <span class="n">CartItem</span>
+
+
+<div class="viewcode-block" id="get_shipping_backends_choices"><a class="viewcode-back" href="../../auto_modules.html#shop.forms.get_shipping_backends_choices">[docs]</a><span class="k">def</span> <span class="nf">get_shipping_backends_choices</span><span class="p">():</span>
+    <span class="n">shipping_backends</span> <span class="o">=</span> <span class="n">backends_pool</span><span class="o">.</span><span class="n">get_shipping_backends_list</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="p">[(</span><span class="n">x</span><span class="o">.</span><span class="n">url_namespace</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">backend_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">shipping_backends</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="get_billing_backends_choices"><a class="viewcode-back" href="../../auto_modules.html#shop.forms.get_billing_backends_choices">[docs]</a><span class="k">def</span> <span class="nf">get_billing_backends_choices</span><span class="p">():</span>
+    <span class="n">billing_backends</span> <span class="o">=</span> <span class="n">backends_pool</span><span class="o">.</span><span class="n">get_payment_backends_list</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">([(</span><span class="n">x</span><span class="o">.</span><span class="n">url_namespace</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">backend_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">billing_backends</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="BillingShippingForm"><a class="viewcode-back" href="../../auto_modules.html#shop.forms.BillingShippingForm">[docs]</a><span class="k">class</span> <span class="nc">BillingShippingForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A form displaying all available payment and shipping methods (the ones</span>
+<span class="sd">    defined in settings.SHOP_SHIPPING_BACKENDS and</span>
+<span class="sd">    settings.SHOP_PAYMENT_BACKENDS)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">shipping_method</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">get_shipping_backends_choices</span><span class="p">())</span>
+    <span class="n">payment_method</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">get_billing_backends_choices</span><span class="p">())</span>
+
+</div>
+<div class="viewcode-block" id="CartItemModelForm"><a class="viewcode-back" href="../../auto_modules.html#shop.forms.CartItemModelForm">[docs]</a><span class="k">class</span> <span class="nc">CartItemModelForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A form for the CartItem model. To be used in the CartDetails view.&quot;&quot;&quot;</span>
+
+    <span class="c">#quantity = forms.IntegerField(min_value=0, max_value=9999)</span>
+    
+    <span class="n">quantity_choices</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;0&#39;</span><span class="p">),</span>
+                            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">),</span>
+                            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s">&#39;2&#39;</span><span class="p">),</span>
+                            <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s">&#39;3&#39;</span><span class="p">),</span>
+                            <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s">&#39;4&#39;</span><span class="p">),</span>
+                            <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s">&#39;5&#39;</span><span class="p">),</span>
+                            <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="s">&#39;6&#39;</span><span class="p">),</span>
+                            <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="s">&#39;7&#39;</span><span class="p">),</span>
+                            <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="s">&#39;8&#39;</span><span class="p">),</span>
+                            <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="s">&#39;9&#39;</span><span class="p">),</span>
+                            <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s">&#39;10&#39;</span><span class="p">),</span>
+                        <span class="p">)</span>
+    
+    <span class="n">quantity</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span><span class="n">choices</span> <span class="o">=</span> <span class="n">quantity_choices</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CartItemModelForm.Meta"><a class="viewcode-back" href="../../auto_modules.html#shop.forms.CartItemModelForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">CartItem</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;quantity&#39;</span><span class="p">,</span> <span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CartItemModelForm.save"><a class="viewcode-back" href="../../auto_modules.html#shop.forms.CartItemModelForm.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        We don&#39;t save the model using the regular way here because the</span>
+<span class="sd">        Cart&#39;s ``update_quantity()`` method already takes care of deleting</span>
+<span class="sd">        items from the cart when the quantity is set to 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">quantity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;quantity&#39;</span><span class="p">]</span>
+        
+        <span class="sd">&quot;&quot;&quot; convert to int (needed when using select instead of input) &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">quantity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="n">instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">cart</span><span class="o">.</span><span class="n">update_quantity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="n">quantity</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">instance</span>
+
+</div></div>
+<div class="viewcode-block" id="get_cart_item_formset"><a class="viewcode-back" href="../../auto_modules.html#shop.forms.get_cart_item_formset">[docs]</a><span class="k">def</span> <span class="nf">get_cart_item_formset</span><span class="p">(</span><span class="n">cart_items</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a CartItemFormSet which can be used in the CartDetails view.</span>
+
+<span class="sd">    :param cart_items: The queryset to be used for this formset. This should</span>
+<span class="sd">      be the list of updated cart items of the current cart.</span>
+<span class="sd">    :param data: Optional POST data to be bound to this formset.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">cart_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">CartItemFormSet</span> <span class="o">=</span> <span class="n">modelformset_factory</span><span class="p">(</span><span class="n">CartItem</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">CartItemModelForm</span><span class="p">,</span>
+            <span class="n">extra</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;queryset&#39;</span><span class="p">:</span> <span class="n">cart_items</span><span class="p">,</span> <span class="p">}</span>
+    <span class="n">form_set</span> <span class="o">=</span> <span class="n">CartItemFormSet</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c"># The Django ModelFormSet pulls the item out of the database again and we</span>
+    <span class="c"># would lose the updated line_subtotals</span>
+    <span class="k">for</span> <span class="n">form</span> <span class="ow">in</span> <span class="n">form_set</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">cart_item</span> <span class="ow">in</span> <span class="n">cart_items</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">cart_item</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+                <span class="n">form</span><span class="o">.</span><span class="n">instance</span> <span class="o">=</span> <span class="n">cart_item</span>
+    <span class="k">return</span> <span class="n">form_set</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

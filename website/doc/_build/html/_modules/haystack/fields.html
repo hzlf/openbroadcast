@@ -1,0 +1,526 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>haystack.fields &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for haystack.fields</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">datetime_safe</span>
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">loader</span><span class="p">,</span> <span class="n">Context</span>
+<span class="kn">from</span> <span class="nn">haystack.exceptions</span> <span class="kn">import</span> <span class="n">SearchFieldError</span>
+
+
+<div class="viewcode-block" id="NOT_PROVIDED"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.NOT_PROVIDED">[docs]</a><span class="k">class</span> <span class="nc">NOT_PROVIDED</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+</div>
+<span class="n">DATETIME_REGEX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;^(?P&lt;year&gt;\d{4})-(?P&lt;month&gt;\d{2})-(?P&lt;day&gt;\d{2})(T|\s+)(?P&lt;hour&gt;\d{2}):(?P&lt;minute&gt;\d{2}):(?P&lt;second&gt;\d{2}).*?$&#39;</span><span class="p">)</span>
+
+
+<span class="c"># All the SearchFields variants.</span>
+
+<div class="viewcode-block" id="SearchField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.SearchField">[docs]</a><span class="k">class</span> <span class="nc">SearchField</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The base implementation of a search field.&quot;&quot;&quot;</span>
+    <span class="n">field_type</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_attr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">use_template</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">template_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">document</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">indexed</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">stored</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">faceted</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">default</span><span class="o">=</span><span class="n">NOT_PROVIDED</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">index_fieldname</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">facet_class</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">boost</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c"># Track what the index thinks this field is called.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_attr</span> <span class="o">=</span> <span class="n">model_attr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_template</span> <span class="o">=</span> <span class="n">use_template</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">template_name</span> <span class="o">=</span> <span class="n">template_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">document</span> <span class="o">=</span> <span class="n">document</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indexed</span> <span class="o">=</span> <span class="n">indexed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stored</span> <span class="o">=</span> <span class="n">stored</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">faceted</span> <span class="o">=</span> <span class="n">faceted</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_default</span> <span class="o">=</span> <span class="n">default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">null</span> <span class="o">=</span> <span class="n">null</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_fieldname</span> <span class="o">=</span> <span class="n">index_fieldname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">boost</span> <span class="o">=</span> <span class="n">weight</span> <span class="ow">or</span> <span class="n">boost</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivalued</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># We supply the facet_class for making it easy to create a faceted</span>
+        <span class="c"># field based off of this field.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">facet_class</span> <span class="o">=</span> <span class="n">facet_class</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">facet_class</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">facet_class</span> <span class="o">=</span> <span class="n">FacetCharField</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_instance_name</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SearchField.set_instance_name"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.SearchField.set_instance_name">[docs]</a>    <span class="k">def</span> <span class="nf">set_instance_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_name</span> <span class="o">=</span> <span class="n">instance_name</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_fieldname</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">index_fieldname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_name</span>
+</div>
+<div class="viewcode-block" id="SearchField.has_default"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.SearchField.has_default">[docs]</a>    <span class="k">def</span> <span class="nf">has_default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a boolean of whether this field has a default value.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NOT_PROVIDED</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SearchField.default"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.SearchField.default">[docs]</a>    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the default value for the field.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_default</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span>
+</div>
+<div class="viewcode-block" id="SearchField.prepare"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.SearchField.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes data from the provided object and prepares it for storage in the</span>
+<span class="sd">        index.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Give priority to a template.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_template</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_template</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_attr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># Check for `__` in the field for looking through the relation.</span>
+            <span class="n">attrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_attr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;__&#39;</span><span class="p">)</span>
+            <span class="n">current_object</span> <span class="o">=</span> <span class="n">obj</span>
+
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">current_object</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">SearchFieldError</span><span class="p">(</span><span class="s">&quot;The model &#39;</span><span class="si">%s</span><span class="s">&#39; does not have a model_attr &#39;</span><span class="si">%s</span><span class="s">&#39;.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span> <span class="n">attr</span><span class="p">))</span>
+
+                <span class="n">current_object</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">current_object</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">current_object</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_default</span><span class="p">():</span>
+                        <span class="n">current_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span>
+                        <span class="c"># Fall out of the loop, given any further attempts at</span>
+                        <span class="c"># accesses will fail misreably.</span>
+                        <span class="k">break</span>
+                    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">null</span><span class="p">:</span>
+                        <span class="n">current_object</span> <span class="o">=</span> <span class="bp">None</span>
+                        <span class="c"># Fall out of the loop, given any further attempts at</span>
+                        <span class="c"># accesses will fail misreably.</span>
+                        <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">SearchFieldError</span><span class="p">(</span><span class="s">&quot;The model &#39;</span><span class="si">%s</span><span class="s">&#39; has an empty model_attr &#39;</span><span class="si">%s</span><span class="s">&#39; and doesn&#39;t allow a default or null value.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span> <span class="n">attr</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">current_object</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">current_object</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="n">current_object</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_default</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="SearchField.prepare_template"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.SearchField.prepare_template">[docs]</a>    <span class="k">def</span> <span class="nf">prepare_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Flattens an object for indexing.</span>
+
+<span class="sd">        This loads a template</span>
+<span class="sd">        (``search/indexes/{app_label}/{model_name}_{field_name}.txt``) and</span>
+<span class="sd">        returns the result of rendering that template. ``object`` will be in</span>
+<span class="sd">        its context.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_name</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SearchFieldError</span><span class="p">(</span><span class="s">&quot;This field requires either its instance_name variable to be populated or an explicit template_name in order to load the correct template.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">template_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_name</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">template_names</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">template_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">template_names</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">template_names</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;search/indexes/</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">module_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_name</span><span class="p">)]</span>
+
+        <span class="n">t</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">select_template</span><span class="p">(</span><span class="n">template_names</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">t</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">Context</span><span class="p">({</span><span class="s">&#39;object&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="p">}))</span>
+</div>
+<div class="viewcode-block" id="SearchField.convert"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.SearchField.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handles conversion between the data found and the type of the field.</span>
+
+<span class="sd">        Extending classes should override this method and provide correct</span>
+<span class="sd">        data coercion.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+</div></div>
+<div class="viewcode-block" id="CharField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.CharField">[docs]</a><span class="k">class</span> <span class="nc">CharField</span><span class="p">(</span><span class="n">SearchField</span><span class="p">):</span>
+    <span class="n">field_type</span> <span class="o">=</span> <span class="s">&#39;string&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;facet_class&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;facet_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FacetCharField</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">CharField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CharField.prepare"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.CharField.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">CharField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="CharField.convert"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.CharField.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="LocationField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.LocationField">[docs]</a><span class="k">class</span> <span class="nc">LocationField</span><span class="p">(</span><span class="n">SearchField</span><span class="p">):</span>
+    <span class="n">field_type</span> <span class="o">=</span> <span class="s">&#39;location&#39;</span>
+
+<div class="viewcode-block" id="LocationField.prepare"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.LocationField.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">haystack.utils.geo</span> <span class="kn">import</span> <span class="n">ensure_point</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">LocationField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="n">pnt</span> <span class="o">=</span> <span class="n">ensure_point</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">pnt_lng</span><span class="p">,</span> <span class="n">pnt_lat</span> <span class="o">=</span> <span class="n">pnt</span><span class="o">.</span><span class="n">get_coords</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pnt_lat</span><span class="p">,</span> <span class="n">pnt_lng</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LocationField.convert"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.LocationField.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">haystack.utils.geo</span> <span class="kn">import</span> <span class="n">ensure_point</span><span class="p">,</span> <span class="n">Point</span>
+
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s">&#39;geom_type&#39;</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">ensure_point</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">value</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">lat</span><span class="p">,</span> <span class="n">lng</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="c"># GeoJSON-alike</span>
+            <span class="n">lat</span><span class="p">,</span> <span class="n">lng</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">lat</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;lat&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">lng</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;lon&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lng</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">lat</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+</div></div>
+<div class="viewcode-block" id="NgramField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.NgramField">[docs]</a><span class="k">class</span> <span class="nc">NgramField</span><span class="p">(</span><span class="n">CharField</span><span class="p">):</span>
+    <span class="n">field_type</span> <span class="o">=</span> <span class="s">&#39;ngram&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;faceted&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SearchFieldError</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> can not be faceted.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">NgramField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="EdgeNgramField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.EdgeNgramField">[docs]</a><span class="k">class</span> <span class="nc">EdgeNgramField</span><span class="p">(</span><span class="n">NgramField</span><span class="p">):</span>
+    <span class="n">field_type</span> <span class="o">=</span> <span class="s">&#39;edge_ngram&#39;</span>
+
+</div>
+<div class="viewcode-block" id="IntegerField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.IntegerField">[docs]</a><span class="k">class</span> <span class="nc">IntegerField</span><span class="p">(</span><span class="n">SearchField</span><span class="p">):</span>
+    <span class="n">field_type</span> <span class="o">=</span> <span class="s">&#39;integer&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;facet_class&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;facet_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FacetIntegerField</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">IntegerField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="IntegerField.prepare"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.IntegerField.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">IntegerField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="IntegerField.convert"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.IntegerField.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="FloatField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.FloatField">[docs]</a><span class="k">class</span> <span class="nc">FloatField</span><span class="p">(</span><span class="n">SearchField</span><span class="p">):</span>
+    <span class="n">field_type</span> <span class="o">=</span> <span class="s">&#39;float&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;facet_class&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;facet_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FacetFloatField</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">FloatField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FloatField.prepare"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.FloatField.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">FloatField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FloatField.convert"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.FloatField.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="DecimalField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.DecimalField">[docs]</a><span class="k">class</span> <span class="nc">DecimalField</span><span class="p">(</span><span class="n">SearchField</span><span class="p">):</span>
+    <span class="n">field_type</span> <span class="o">=</span> <span class="s">&#39;string&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;facet_class&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;facet_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FacetDecimalField</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">DecimalField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DecimalField.prepare"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.DecimalField.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">DecimalField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="DecimalField.convert"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.DecimalField.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="BooleanField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.BooleanField">[docs]</a><span class="k">class</span> <span class="nc">BooleanField</span><span class="p">(</span><span class="n">SearchField</span><span class="p">):</span>
+    <span class="n">field_type</span> <span class="o">=</span> <span class="s">&#39;boolean&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;facet_class&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;facet_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FacetBooleanField</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">BooleanField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BooleanField.prepare"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.BooleanField.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">BooleanField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="BooleanField.convert"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.BooleanField.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="DateField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.DateField">[docs]</a><span class="k">class</span> <span class="nc">DateField</span><span class="p">(</span><span class="n">SearchField</span><span class="p">):</span>
+    <span class="n">field_type</span> <span class="o">=</span> <span class="s">&#39;date&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;facet_class&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;facet_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FacetDateField</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">DateField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DateField.convert"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.DateField.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">DATETIME_REGEX</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groupdict</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">datetime_safe</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;year&#39;</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;month&#39;</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;day&#39;</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SearchFieldError</span><span class="p">(</span><span class="s">&quot;Date provided to &#39;</span><span class="si">%s</span><span class="s">&#39; field doesn&#39;t appear to be a valid date string: &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_name</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">value</span>
+
+</div></div>
+<div class="viewcode-block" id="DateTimeField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.DateTimeField">[docs]</a><span class="k">class</span> <span class="nc">DateTimeField</span><span class="p">(</span><span class="n">SearchField</span><span class="p">):</span>
+    <span class="n">field_type</span> <span class="o">=</span> <span class="s">&#39;datetime&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;facet_class&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;facet_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FacetDateTimeField</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">DateTimeField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DateTimeField.convert"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.DateTimeField.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">DATETIME_REGEX</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groupdict</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">datetime_safe</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;year&#39;</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;month&#39;</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;day&#39;</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;hour&#39;</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;minute&#39;</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;second&#39;</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SearchFieldError</span><span class="p">(</span><span class="s">&quot;Datetime provided to &#39;</span><span class="si">%s</span><span class="s">&#39; field doesn&#39;t appear to be a valid datetime string: &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_name</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">value</span>
+
+</div></div>
+<div class="viewcode-block" id="MultiValueField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.MultiValueField">[docs]</a><span class="k">class</span> <span class="nc">MultiValueField</span><span class="p">(</span><span class="n">SearchField</span><span class="p">):</span>
+    <span class="n">field_type</span> <span class="o">=</span> <span class="s">&#39;string&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;facet_class&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;facet_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FacetMultiValueField</span>
+
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;use_template&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SearchFieldError</span><span class="p">(</span><span class="s">&quot;&#39;</span><span class="si">%s</span><span class="s">&#39; fields can not use templates to prepare their data.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">MultiValueField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_multivalued</span> <span class="o">=</span> <span class="bp">True</span>
+
+<div class="viewcode-block" id="MultiValueField.prepare"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.MultiValueField.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">MultiValueField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="MultiValueField.convert"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.MultiValueField.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="FacetField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.FacetField">[docs]</a><span class="k">class</span> <span class="nc">FacetField</span><span class="p">(</span><span class="n">SearchField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ``FacetField`` is slightly different than the other fields because it can</span>
+<span class="sd">    work in conjunction with other fields as its data source.</span>
+
+<span class="sd">    Accepts an optional ``facet_for`` kwarg, which should be the field name</span>
+<span class="sd">    (not ``index_fieldname``) of the field it should pull data from.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">instance_name</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">handled_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_facet_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FacetField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">handled_kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FacetField.handle_facet_parameters"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.FacetField.handle_facet_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">handle_facet_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;faceted&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">SearchFieldError</span><span class="p">(</span><span class="s">&quot;FacetField (</span><span class="si">%s</span><span class="s">) does not accept the &#39;faceted&#39; argument.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;null&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">SearchFieldError</span><span class="p">(</span><span class="s">&quot;FacetField (</span><span class="si">%s</span><span class="s">) does not accept False for the &#39;null&#39; argument.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;indexed&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">SearchFieldError</span><span class="p">(</span><span class="s">&quot;FacetField (</span><span class="si">%s</span><span class="s">) does not accept False for the &#39;indexed&#39; argument.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;facet_class&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">SearchFieldError</span><span class="p">(</span><span class="s">&quot;FacetField (</span><span class="si">%s</span><span class="s">) does not accept the &#39;facet_class&#39; argument.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">facet_for</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">facet_class</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># Make sure the field is nullable.</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;null&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="s">&#39;facet_for&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">facet_for</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;facet_for&#39;</span><span class="p">]</span>
+            <span class="k">del</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;facet_for&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">kwargs</span>
+</div>
+<div class="viewcode-block" id="FacetField.get_facet_for_name"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.FacetField.get_facet_for_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_facet_for_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">facet_for</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_name</span>
+
+</div></div>
+<div class="viewcode-block" id="FacetCharField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.FacetCharField">[docs]</a><span class="k">class</span> <span class="nc">FacetCharField</span><span class="p">(</span><span class="n">FacetField</span><span class="p">,</span> <span class="n">CharField</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="FacetIntegerField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.FacetIntegerField">[docs]</a><span class="k">class</span> <span class="nc">FacetIntegerField</span><span class="p">(</span><span class="n">FacetField</span><span class="p">,</span> <span class="n">IntegerField</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="FacetFloatField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.FacetFloatField">[docs]</a><span class="k">class</span> <span class="nc">FacetFloatField</span><span class="p">(</span><span class="n">FacetField</span><span class="p">,</span> <span class="n">FloatField</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="FacetDecimalField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.FacetDecimalField">[docs]</a><span class="k">class</span> <span class="nc">FacetDecimalField</span><span class="p">(</span><span class="n">FacetField</span><span class="p">,</span> <span class="n">DecimalField</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="FacetBooleanField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.FacetBooleanField">[docs]</a><span class="k">class</span> <span class="nc">FacetBooleanField</span><span class="p">(</span><span class="n">FacetField</span><span class="p">,</span> <span class="n">BooleanField</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="FacetDateField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.FacetDateField">[docs]</a><span class="k">class</span> <span class="nc">FacetDateField</span><span class="p">(</span><span class="n">FacetField</span><span class="p">,</span> <span class="n">DateField</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="FacetDateTimeField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.FacetDateTimeField">[docs]</a><span class="k">class</span> <span class="nc">FacetDateTimeField</span><span class="p">(</span><span class="n">FacetField</span><span class="p">,</span> <span class="n">DateTimeField</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="FacetMultiValueField"><a class="viewcode-back" href="../../auto_modules.html#haystack.fields.FacetMultiValueField">[docs]</a><span class="k">class</span> <span class="nc">FacetMultiValueField</span><span class="p">(</span><span class="n">FacetField</span><span class="p">,</span> <span class="n">MultiValueField</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

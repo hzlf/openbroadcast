@@ -1,0 +1,323 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>profiles.models &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for profiles.models</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">datetime</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">dateutil</span> <span class="kn">import</span> <span class="n">relativedelta</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">permalink</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.db.models.signals</span> <span class="kn">import</span> <span class="n">post_save</span>
+
+<span class="kn">from</span> <span class="nn">django_countries</span> <span class="kn">import</span> <span class="n">CountryField</span>
+
+<span class="kn">import</span> <span class="nn">tagging</span>
+<span class="kn">import</span> <span class="nn">arating</span>
+
+<span class="kn">from</span> <span class="nn">lib.fields</span> <span class="kn">import</span> <span class="n">extra</span>
+
+<span class="kn">from</span> <span class="nn">django_extensions.db.fields</span> <span class="kn">import</span> <span class="n">AutoSlugField</span><span class="p">,</span> <span class="n">UUIDField</span>
+
+<span class="kn">from</span> <span class="nn">phonenumber_field.modelfields</span> <span class="kn">import</span> <span class="n">PhoneNumberField</span>
+
+<div class="viewcode-block" id="filename_by_uuid"><a class="viewcode-back" href="../../auto_modules.html#profiles.models.filename_by_uuid">[docs]</a><span class="k">def</span> <span class="nf">filename_by_uuid</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="n">filename</span><span class="p">,</span> <span class="n">extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s">&quot;profiles/&quot;</span>
+    
+    <span class="c"># splitted</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">uuid</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">,</span> <span class="s">&#39;/&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">extension</span>
+    
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Profile"><a class="viewcode-back" href="../../auto_modules.html#profiles.models.Profile">[docs]</a><span class="k">class</span> <span class="nc">Profile</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Profile model&quot;&quot;&quot;</span>
+    <span class="n">GENDER_CHOICES</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Male&#39;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Female&#39;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Other&#39;</span><span class="p">)),</span>
+    <span class="p">)</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+    <span class="c">#</span>
+    <span class="n">uuid</span> <span class="o">=</span> <span class="n">UUIDField</span><span class="p">()</span>
+    
+    <span class="c">#Personal</span>
+    <span class="n">gender</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">PositiveSmallIntegerField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;gender&#39;</span><span class="p">),</span> <span class="n">choices</span><span class="o">=</span><span class="n">GENDER_CHOICES</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">birth_date</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;birth date&#39;</span><span class="p">),</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+    <span class="c"># Profile</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="n">extra</span><span class="o">.</span><span class="n">MarkdownTextField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ImageField</span><span class="p">(</span><span class="n">verbose_name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Profile Image&#39;</span><span class="p">),</span> <span class="n">upload_to</span><span class="o">=</span><span class="n">filename_by_uuid</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+    <span class="c"># hm...</span>
+    <span class="c"># mugshot = models.FileField(_(&#39;mugshot&#39;), upload_to=&#39;mugshots&#39;, null=True, blank=True)</span>
+    
+    <span class="c"># Contact</span>
+    <span class="n">mobile</span> <span class="o">=</span> <span class="n">PhoneNumberField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;mobile&#39;</span><span class="p">),</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">phone</span> <span class="o">=</span> <span class="n">PhoneNumberField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;phone&#39;</span><span class="p">),</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">fax</span> <span class="o">=</span> <span class="n">PhoneNumberField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;fax&#39;</span><span class="p">),</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+    <span class="n">address1</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;address&#39;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">address2</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;address (secondary)&#39;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="c"># state = models.CharField(_(&#39;state&#39;), null=True, blank=True, max_length=100)</span>
+    <span class="n">city</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;city&#39;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="nb">zip</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;zip&#39;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="c">#country = models.CharField(_(&#39;country&#39;), null=True, blank=True, max_length=100)</span>
+    <span class="n">country</span> <span class="o">=</span> <span class="n">CountryField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+    
+    <span class="n">iban</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;IBAN&#39;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">paypal</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">EmailField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Paypal&#39;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+    
+    <span class="c"># relations</span>
+    <span class="n">expertise</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span><span class="s">&#39;Expertise&#39;</span><span class="p">,</span> <span class="n">verbose_name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Fields of expertise&#39;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+    
+    <span class="c"># tagging (d_tags = &quot;display tags&quot;)</span>
+    <span class="n">d_tags</span> <span class="o">=</span> <span class="n">tagging</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">TagField</span><span class="p">(</span><span class="n">verbose_name</span><span class="o">=</span><span class="s">&quot;Tags&quot;</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s">&#39;profiles&#39;</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;user profile&#39;</span><span class="p">)</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;user profiles&#39;</span><span class="p">)</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s">&#39;user_profiles&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">get_full_name</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Profile.age"><a class="viewcode-back" href="../../auto_modules.html#profiles.models.Profile.age">[docs]</a>    <span class="k">def</span> <span class="nf">age</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">TODAY</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">birth_date</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">relativedelta</span><span class="o">.</span><span class="n">relativedelta</span><span class="p">(</span><span class="n">TODAY</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">birth_date</span><span class="p">)</span><span class="o">.</span><span class="n">years</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+</div>
+    <span class="nd">@permalink</span>
+<div class="viewcode-block" id="Profile.get_absolute_url"><a class="viewcode-back" href="../../auto_modules.html#profiles.models.Profile.get_absolute_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_absolute_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s">&#39;profiles-profile-detail&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="p">{</span> <span class="s">&#39;slug&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span> <span class="p">})</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Profile.sms_address"><a class="viewcode-back" href="../../auto_modules.html#profiles.models.Profile.sms_address">[docs]</a>    <span class="k">def</span> <span class="nf">sms_address</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mobile</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mobile_provider</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s">@</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mobile</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">mobile_provider</span><span class="o">.</span><span class="n">domain</span><span class="p">)</span>
+        
+</div>
+<div class="viewcode-block" id="Profile.save"><a class="viewcode-back" href="../../auto_modules.html#profiles.models.Profile.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">t_tags</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        for tag in self.tags:</span>
+<span class="sd">            t_tags += &#39;%s, &#39; % tag    </span>
+<span class="sd">        </span>
+<span class="sd">        self.tags = t_tags;</span>
+<span class="sd">        self.d_tags = t_tags;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Profile</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div></div>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">tagging</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Profile</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="n">arating</span><span class="o">.</span><span class="n">enable_voting_on</span><span class="p">(</span><span class="n">Profile</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="create_profile"><a class="viewcode-back" href="../../auto_modules.html#profiles.models.create_profile">[docs]</a><span class="k">def</span> <span class="nf">create_profile</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">created</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  
+    <span class="k">if</span> <span class="n">created</span><span class="p">:</span>  
+       <span class="n">profile</span><span class="p">,</span> <span class="n">created</span> <span class="o">=</span> <span class="n">Profile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">instance</span><span class="p">)</span>  
+</div>
+<span class="n">post_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">create_profile</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">User</span><span class="p">)</span> 
+
+<div class="viewcode-block" id="MobileProvider"><a class="viewcode-back" href="../../auto_modules.html#profiles.models.MobileProvider">[docs]</a><span class="k">class</span> <span class="nc">MobileProvider</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;MobileProvider model&quot;&quot;&quot;</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;title&#39;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+    <span class="n">domain</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;domain&#39;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;mobile provider&#39;</span><span class="p">)</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;mobile providers&#39;</span><span class="p">)</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s">&#39;user_mobile_providers&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span>
+
+</div>
+<div class="viewcode-block" id="ServiceType"><a class="viewcode-back" href="../../auto_modules.html#profiles.models.ServiceType">[docs]</a><span class="k">class</span> <span class="nc">ServiceType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Service type model&quot;&quot;&quot;</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;title&#39;</span><span class="p">),</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">URLField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;url&#39;</span><span class="p">),</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s">&#39;URL with a single </span><span class="se">\&#39;</span><span class="s">{user}</span><span class="se">\&#39;</span><span class="s"> placeholder to turn a username into a service URL.&#39;</span><span class="p">,</span> <span class="n">verify_exists</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;service type&#39;</span><span class="p">)</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;service types&#39;</span><span class="p">)</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s">&#39;user_service_types&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span>
+
+</div>
+<div class="viewcode-block" id="Service"><a class="viewcode-back" href="../../auto_modules.html#profiles.models.Service">[docs]</a><span class="k">class</span> <span class="nc">Service</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Service model&quot;&quot;&quot;</span>
+    <span class="n">service</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">ServiceType</span><span class="p">)</span>
+    <span class="n">profile</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Profile</span><span class="p">)</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Userame / ID&#39;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">created</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now_add</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">modified</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;service&#39;</span><span class="p">)</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;services&#39;</span><span class="p">)</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s">&#39;user_services&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Service.service_url"><a class="viewcode-back" href="../../auto_modules.html#profiles.models.Service.service_url">[docs]</a>    <span class="k">def</span> <span class="nf">service_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;{user}&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Service.title"><a class="viewcode-back" href="../../auto_modules.html#profiles.models.Service.title">[docs]</a>    <span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">title</span>
+
+</div></div>
+<div class="viewcode-block" id="Link"><a class="viewcode-back" href="../../auto_modules.html#profiles.models.Link">[docs]</a><span class="k">class</span> <span class="nc">Link</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Service type model&quot;&quot;&quot;</span>
+    <span class="n">profile</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Profile</span><span class="p">)</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;title&#39;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">URLField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;url&#39;</span><span class="p">),</span> <span class="n">verify_exists</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;link&#39;</span><span class="p">)</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;links&#39;</span><span class="p">)</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s">&#39;user_links&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span>
+    
+    
+    
+    
+    
+    
+    </div>
+<div class="viewcode-block" id="Expertise"><a class="viewcode-back" href="../../auto_modules.html#profiles.models.Expertise">[docs]</a><span class="k">class</span> <span class="nc">Expertise</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s">&#39;profiles&#39;</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Expertise&#39;</span><span class="p">)</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Expertise&#39;</span><span class="p">)</span>
+        <span class="c"># ordering = (&#39;name&#39;, )</span>
+        
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        </div>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">class UserExpertise(models.Model):</span>
+<span class="sd">    profile = models.ForeignKey(Profile)</span>
+<span class="sd">    expertise = models.ForeignKey(Expertise)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

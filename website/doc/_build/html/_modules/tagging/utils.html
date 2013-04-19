@@ -1,0 +1,355 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>tagging.utils &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for tagging.utils</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Tagging utilities - from user tag input parsing to tag cloud</span>
+<span class="sd">calculation.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">types</span>
+
+<span class="kn">from</span> <span class="nn">django.db.models.query</span> <span class="kn">import</span> <span class="n">QuerySet</span>
+<span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">force_unicode</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="c"># Python 2.3 compatibility</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">set</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">sets</span> <span class="kn">import</span> <span class="n">Set</span> <span class="k">as</span> <span class="nb">set</span>
+
+<div class="viewcode-block" id="parse_tag_input"><a class="viewcode-back" href="../../auto_modules.html#tagging.utils.parse_tag_input">[docs]</a><span class="k">def</span> <span class="nf">parse_tag_input</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses tag input, with multiple word input being activated and</span>
+<span class="sd">    delineated by commas and double quotes. Quotes take precedence, so</span>
+<span class="sd">    they may contain commas.</span>
+
+<span class="sd">    Returns a sorted list of unique tag names.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">input</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="nb">input</span> <span class="o">=</span> <span class="n">force_unicode</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+
+    <span class="c"># Special case - if there are no commas or double quotes in the</span>
+    <span class="c"># input, we don&#39;t *do* a recall... I mean, we know we only need to</span>
+    <span class="c"># split on spaces.</span>
+    <span class="k">if</span> <span class="s">u&#39;,&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">input</span> <span class="ow">and</span> <span class="s">u&#39;&quot;&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">:</span>
+        <span class="n">words</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">split_strip</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="s">u&#39; &#39;</span><span class="p">)))</span>
+        <span class="n">words</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">words</span>
+
+    <span class="n">words</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="nb">buffer</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c"># Defer splitting of non-quoted sections until we know if there are</span>
+    <span class="c"># any unquoted commas.</span>
+    <span class="n">to_be_split</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">saw_loose_comma</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">open_quote</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s">u&#39;&quot;&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">buffer</span><span class="p">:</span>
+                    <span class="n">to_be_split</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">u&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">buffer</span><span class="p">))</span>
+                    <span class="nb">buffer</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="c"># Find the matching quote</span>
+                <span class="n">open_quote</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+                <span class="k">while</span> <span class="n">c</span> <span class="o">!=</span> <span class="s">u&#39;&quot;&#39;</span><span class="p">:</span>
+                    <span class="nb">buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+                    <span class="n">c</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">buffer</span><span class="p">:</span>
+                    <span class="n">word</span> <span class="o">=</span> <span class="s">u&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">buffer</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">word</span><span class="p">:</span>
+                        <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+                    <span class="nb">buffer</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">open_quote</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">saw_loose_comma</span> <span class="ow">and</span> <span class="n">c</span> <span class="o">==</span> <span class="s">u&#39;,&#39;</span><span class="p">:</span>
+                    <span class="n">saw_loose_comma</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="nb">buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+        <span class="c"># If we were parsing an open quote which was never closed treat</span>
+        <span class="c"># the buffer as unquoted.</span>
+        <span class="k">if</span> <span class="nb">buffer</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">open_quote</span> <span class="ow">and</span> <span class="s">u&#39;,&#39;</span> <span class="ow">in</span> <span class="nb">buffer</span><span class="p">:</span>
+                <span class="n">saw_loose_comma</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">to_be_split</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">u&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">buffer</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">to_be_split</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">saw_loose_comma</span><span class="p">:</span>
+            <span class="n">delimiter</span> <span class="o">=</span> <span class="s">u&#39;,&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">delimiter</span> <span class="o">=</span> <span class="s">u&#39; &#39;</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">to_be_split</span><span class="p">:</span>
+            <span class="n">words</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">split_strip</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">))</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">words</span><span class="p">))</span>
+    <span class="n">words</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">words</span>
+</div>
+<div class="viewcode-block" id="split_strip"><a class="viewcode-back" href="../../auto_modules.html#tagging.utils.split_strip">[docs]</a><span class="k">def</span> <span class="nf">split_strip</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">u&#39;,&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Splits ``input`` on ``delimiter``, stripping each resulting string</span>
+<span class="sd">    and returning a list of non-empty strings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">input</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">input</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words</span> <span class="k">if</span> <span class="n">w</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="edit_string_for_tags"><a class="viewcode-back" href="../../auto_modules.html#tagging.utils.edit_string_for_tags">[docs]</a><span class="k">def</span> <span class="nf">edit_string_for_tags</span><span class="p">(</span><span class="n">tags</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given list of ``Tag`` instances, creates a string representation of</span>
+<span class="sd">    the list suitable for editing by the user, such that submitting the</span>
+<span class="sd">    given string representation back without changing it will give the</span>
+<span class="sd">    same list of tags.</span>
+
+<span class="sd">    Tag names which contain commas will be double quoted.</span>
+
+<span class="sd">    If any tag name which isn&#39;t being quoted contains whitespace, the</span>
+<span class="sd">    resulting string of tag names will be comma-delimited, otherwise</span>
+<span class="sd">    it will be space-delimited.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">use_commas</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">tag</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="s">u&#39;,&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;&quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="s">u&#39; &#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">use_commas</span><span class="p">:</span>
+                <span class="n">use_commas</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">use_commas</span><span class="p">:</span>
+        <span class="n">glue</span> <span class="o">=</span> <span class="s">u&#39;, &#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">glue</span> <span class="o">=</span> <span class="s">u&#39; &#39;</span>
+    <span class="k">return</span> <span class="n">glue</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="get_queryset_and_model"><a class="viewcode-back" href="../../auto_modules.html#tagging.utils.get_queryset_and_model">[docs]</a><span class="k">def</span> <span class="nf">get_queryset_and_model</span><span class="p">(</span><span class="n">queryset_or_model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a ``QuerySet`` or a ``Model``, returns a two-tuple of</span>
+<span class="sd">    (queryset, model).</span>
+
+<span class="sd">    If a ``Model`` is given, the ``QuerySet`` returned will be created</span>
+<span class="sd">    using its default manager.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">queryset_or_model</span><span class="p">,</span> <span class="n">queryset_or_model</span><span class="o">.</span><span class="n">model</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">queryset_or_model</span><span class="o">.</span><span class="n">_default_manager</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="n">queryset_or_model</span>
+</div>
+<div class="viewcode-block" id="get_tag_list"><a class="viewcode-back" href="../../auto_modules.html#tagging.utils.get_tag_list">[docs]</a><span class="k">def</span> <span class="nf">get_tag_list</span><span class="p">(</span><span class="n">tags</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility function for accepting tag input in a flexible manner.</span>
+
+<span class="sd">    If a ``Tag`` object is given, it will be returned in a list as</span>
+<span class="sd">    its single occupant.</span>
+
+<span class="sd">    If given, the tag names in the following will be used to create a</span>
+<span class="sd">    ``Tag`` ``QuerySet``:</span>
+
+<span class="sd">       * A string, which may contain multiple tag names.</span>
+<span class="sd">       * A list or tuple of strings corresponding to tag names.</span>
+<span class="sd">       * A list or tuple of integers corresponding to tag ids.</span>
+
+<span class="sd">    If given, the following will be returned as-is:</span>
+
+<span class="sd">       * A list or tuple of ``Tag`` objects.</span>
+<span class="sd">       * A ``Tag`` ``QuerySet``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">tagging.models</span> <span class="kn">import</span> <span class="n">Tag</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tags</span><span class="p">,</span> <span class="n">Tag</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">tags</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tags</span><span class="p">,</span> <span class="n">QuerySet</span><span class="p">)</span> <span class="ow">and</span> <span class="n">tags</span><span class="o">.</span><span class="n">model</span> <span class="ow">is</span> <span class="n">Tag</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">tags</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tags</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">StringTypes</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Tag</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name__in</span><span class="o">=</span><span class="n">parse_tag_input</span><span class="p">(</span><span class="n">tags</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tags</span><span class="p">,</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">ListType</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">TupleType</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">tags</span>
+        <span class="n">contents</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">StringTypes</span><span class="p">):</span>
+                <span class="n">contents</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;string&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">Tag</span><span class="p">):</span>
+                <span class="n">contents</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;tag&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">IntType</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">LongType</span><span class="p">)):</span>
+                <span class="n">contents</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;int&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;string&#39;</span> <span class="ow">in</span> <span class="n">contents</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Tag</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name__in</span><span class="o">=</span><span class="p">[</span><span class="n">force_unicode</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span> \
+                                                    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="s">&#39;tag&#39;</span> <span class="ow">in</span> <span class="n">contents</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">tags</span>
+            <span class="k">elif</span> <span class="s">&#39;int&#39;</span> <span class="ow">in</span> <span class="n">contents</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Tag</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">id__in</span><span class="o">=</span><span class="n">tags</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;If a list or tuple of tags is provided, they must all be tag names, Tag objects or Tag ids.&#39;</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;The tag input given was invalid.&#39;</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="get_tag"><a class="viewcode-back" href="../../auto_modules.html#tagging.utils.get_tag">[docs]</a><span class="k">def</span> <span class="nf">get_tag</span><span class="p">(</span><span class="n">tag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility function for accepting single tag input in a flexible</span>
+<span class="sd">    manner.</span>
+
+<span class="sd">    If a ``Tag`` object is given it will be returned as-is; if a</span>
+<span class="sd">    string or integer are given, they will be used to lookup the</span>
+<span class="sd">    appropriate ``Tag``.</span>
+
+<span class="sd">    If no matching tag can be found, ``None`` will be returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">tagging.models</span> <span class="kn">import</span> <span class="n">Tag</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">Tag</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">tag</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">StringTypes</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Tag</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">tag</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">IntType</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">LongType</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">Tag</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">tag</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">Tag</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="bp">None</span>
+
+<span class="c"># Font size distribution algorithms</span></div>
+<span class="n">LOGARITHMIC</span><span class="p">,</span> <span class="n">LINEAR</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
+
+<span class="k">def</span> <span class="nf">_calculate_thresholds</span><span class="p">(</span><span class="n">min_weight</span><span class="p">,</span> <span class="n">max_weight</span><span class="p">,</span> <span class="n">steps</span><span class="p">):</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_weight</span> <span class="o">-</span> <span class="n">min_weight</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">min_weight</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">delta</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
+<span class="k">def</span> <span class="nf">_calculate_tag_weight</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span> <span class="n">max_weight</span><span class="p">,</span> <span class="n">distribution</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Logarithmic tag weight calculation is based on code from the</span>
+<span class="sd">    `Tag Cloud`_ plugin for Mephisto, by Sven Fuchs.</span>
+
+<span class="sd">    .. _`Tag Cloud`: http://www.artweb-design.de/projects/mephisto-plugin-tag-cloud</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">distribution</span> <span class="o">==</span> <span class="n">LINEAR</span> <span class="ow">or</span> <span class="n">max_weight</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">weight</span>
+    <span class="k">elif</span> <span class="n">distribution</span> <span class="o">==</span> <span class="n">LOGARITHMIC</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span> <span class="o">*</span> <span class="n">max_weight</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">max_weight</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Invalid distribution algorithm specified: </span><span class="si">%s</span><span class="s">.&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">distribution</span><span class="p">)</span>
+
+<div class="viewcode-block" id="calculate_cloud"><a class="viewcode-back" href="../../auto_modules.html#tagging.utils.calculate_cloud">[docs]</a><span class="k">def</span> <span class="nf">calculate_cloud</span><span class="p">(</span><span class="n">tags</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">distribution</span><span class="o">=</span><span class="n">LOGARITHMIC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add a ``font_size`` attribute to each tag according to the</span>
+<span class="sd">    frequency of its use, as indicated by its ``count``</span>
+<span class="sd">    attribute.</span>
+
+<span class="sd">    ``steps`` defines the range of font sizes - ``font_size`` will</span>
+<span class="sd">    be an integer between 1 and ``steps`` (inclusive).</span>
+
+<span class="sd">    ``distribution`` defines the type of font size distribution</span>
+<span class="sd">    algorithm which will be used - logarithmic or linear. It must be</span>
+<span class="sd">    one of ``tagging.utils.LOGARITHMIC`` or ``tagging.utils.LINEAR``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">count</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">]</span>
+        <span class="n">min_weight</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">counts</span><span class="p">))</span>
+        <span class="n">max_weight</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">counts</span><span class="p">))</span>
+        <span class="n">thresholds</span> <span class="o">=</span> <span class="n">_calculate_thresholds</span><span class="p">(</span><span class="n">min_weight</span><span class="p">,</span> <span class="n">max_weight</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+            <span class="n">font_set</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">tag_weight</span> <span class="o">=</span> <span class="n">_calculate_tag_weight</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">max_weight</span><span class="p">,</span> <span class="n">distribution</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">font_set</span> <span class="ow">and</span> <span class="n">tag_weight</span> <span class="o">&lt;=</span> <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="n">tag</span><span class="o">.</span><span class="n">font_size</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="n">font_set</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="n">tags</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>tastypie.api &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for tastypie.api</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">django.conf.urls.defaults</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ImproperlyConfigured</span>
+<span class="kn">from</span> <span class="nn">django.core.urlresolvers</span> <span class="kn">import</span> <span class="n">reverse</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponse</span>
+<span class="kn">from</span> <span class="nn">tastypie.exceptions</span> <span class="kn">import</span> <span class="n">NotRegistered</span><span class="p">,</span> <span class="n">BadRequest</span>
+<span class="kn">from</span> <span class="nn">tastypie.serializers</span> <span class="kn">import</span> <span class="n">Serializer</span>
+<span class="kn">from</span> <span class="nn">tastypie.utils</span> <span class="kn">import</span> <span class="n">trailing_slash</span><span class="p">,</span> <span class="n">is_valid_jsonp_callback_value</span>
+<span class="kn">from</span> <span class="nn">tastypie.utils.mime</span> <span class="kn">import</span> <span class="n">determine_format</span><span class="p">,</span> <span class="n">build_content_type</span>
+
+
+<div class="viewcode-block" id="Api"><a class="viewcode-back" href="../../auto_modules.html#tastypie.api.Api">[docs]</a><span class="k">class</span> <span class="nc">Api</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implements a registry to tie together the various resources that make up</span>
+<span class="sd">    an API.</span>
+
+<span class="sd">    Especially useful for navigation, HATEOAS and for providing multiple</span>
+<span class="sd">    versions of your API.</span>
+
+<span class="sd">    Optionally supplying ``api_name`` allows you to name the API. Generally,</span>
+<span class="sd">    this is done with version numbers (i.e. ``v1``, ``v2``, etc.) but can</span>
+<span class="sd">    be named any string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_name</span><span class="o">=</span><span class="s">&quot;v1&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_name</span> <span class="o">=</span> <span class="n">api_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_canonicals</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="Api.register"><a class="viewcode-back" href="../../auto_modules.html#tastypie.api.Api.register">[docs]</a>    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource</span><span class="p">,</span> <span class="n">canonical</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Registers an instance of a ``Resource`` subclass with the API.</span>
+
+<span class="sd">        Optionally accept a ``canonical`` argument, which indicates that the</span>
+<span class="sd">        resource being registered is the canonical variant. Defaults to</span>
+<span class="sd">        ``True``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">resource_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span> <span class="s">&#39;resource_name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">resource_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="s">&quot;Resource </span><span class="si">%r</span><span class="s"> must define a &#39;resource_name&#39;.&quot;</span> <span class="o">%</span> <span class="n">resource</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">[</span><span class="n">resource_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">resource</span>
+
+        <span class="k">if</span> <span class="n">canonical</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">resource_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canonicals</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;A new resource &#39;</span><span class="si">%r</span><span class="s">&#39; is replacing the existing canonical URL for &#39;</span><span class="si">%s</span><span class="s">&#39;.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="n">resource_name</span><span class="p">),</span> <span class="ne">Warning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_canonicals</span><span class="p">[</span><span class="n">resource_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">resource</span>
+            <span class="c"># TODO: This is messy, but makes URI resolution on FK/M2M fields</span>
+            <span class="c">#       work consistently.</span>
+            <span class="n">resource</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">api_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_name</span>
+            <span class="n">resource</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">Meta</span><span class="o">.</span><span class="n">api_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_name</span>
+</div>
+<div class="viewcode-block" id="Api.unregister"><a class="viewcode-back" href="../../auto_modules.html#tastypie.api.Api.unregister">[docs]</a>    <span class="k">def</span> <span class="nf">unregister</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If present, unregisters a resource from the API.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">resource_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">:</span>
+            <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">[</span><span class="n">resource_name</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">resource_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canonicals</span><span class="p">:</span>
+            <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_canonicals</span><span class="p">[</span><span class="n">resource_name</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="Api.canonical_resource_for"><a class="viewcode-back" href="../../auto_modules.html#tastypie.api.Api.canonical_resource_for">[docs]</a>    <span class="k">def</span> <span class="nf">canonical_resource_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the canonical resource for a given ``resource_name``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">resource_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canonicals</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canonicals</span><span class="p">[</span><span class="n">resource_name</span><span class="p">]</span>
+
+        <span class="k">raise</span> <span class="n">NotRegistered</span><span class="p">(</span><span class="s">&quot;No resource was registered as canonical for &#39;</span><span class="si">%s</span><span class="s">&#39;.&quot;</span> <span class="o">%</span> <span class="n">resource_name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Api.wrap_view"><a class="viewcode-back" href="../../auto_modules.html#tastypie.api.Api.wrap_view">[docs]</a>    <span class="k">def</span> <span class="nf">wrap_view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view</span><span class="p">)(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+</div>
+<div class="viewcode-block" id="Api.override_urls"><a class="viewcode-back" href="../../auto_modules.html#tastypie.api.Api.override_urls">[docs]</a>    <span class="k">def</span> <span class="nf">override_urls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Deprecated. Will be removed by v1.0.0. Please use ``prepend_urls`` instead.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;&#39;override_urls&#39; is a deprecated method &amp; will be removed by v1.0.0. Please use ``prepend_urls`` instead.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepend_urls</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Api.prepend_urls"><a class="viewcode-back" href="../../auto_modules.html#tastypie.api.Api.prepend_urls">[docs]</a>    <span class="k">def</span> <span class="nf">prepend_urls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A hook for adding your own URLs or matching before the default URLs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[]</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Api.urls"><a class="viewcode-back" href="../../auto_modules.html#tastypie.api.Api.urls">[docs]</a>    <span class="k">def</span> <span class="nf">urls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provides URLconf details for the ``Api`` and all registered</span>
+<span class="sd">        ``Resources`` beneath it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pattern_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">url</span><span class="p">(</span><span class="s">r&quot;^(?P&lt;api_name&gt;</span><span class="si">%s</span><span class="s">)</span><span class="si">%s</span><span class="s">$&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api_name</span><span class="p">,</span> <span class="n">trailing_slash</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_view</span><span class="p">(</span><span class="s">&#39;top_level&#39;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;api_</span><span class="si">%s</span><span class="s">_top_level&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_name</span><span class="p">),</span>
+        <span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">api_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_name</span>
+            <span class="n">pattern_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">r&quot;^(?P&lt;api_name&gt;</span><span class="si">%s</span><span class="s">)/&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_name</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">urls</span><span class="p">)))</span>
+
+        <span class="n">urlpatterns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepend_urls</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">override_urls</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;&#39;override_urls&#39; is a deprecated method &amp; will be removed by v1.0.0. Please rename your method to ``prepend_urls``.&quot;</span><span class="p">)</span>
+            <span class="n">urlpatterns</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">override_urls</span><span class="p">()</span>
+
+        <span class="n">urlpatterns</span> <span class="o">+=</span> <span class="n">patterns</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">pattern_list</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">urlpatterns</span>
+</div>
+<div class="viewcode-block" id="Api.top_level"><a class="viewcode-back" href="../../auto_modules.html#tastypie.api.Api.top_level">[docs]</a>    <span class="k">def</span> <span class="nf">top_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">api_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A view that returns a serialized list of all resources registers</span>
+<span class="sd">        to the ``Api``. Useful for discovery.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">serializer</span> <span class="o">=</span> <span class="n">Serializer</span><span class="p">()</span>
+        <span class="n">available_resources</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">api_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">api_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_name</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">available_resources</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s">&#39;list_endpoint&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_reverse_url</span><span class="p">(</span><span class="s">&quot;api_dispatch_list&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s">&#39;api_name&#39;</span><span class="p">:</span> <span class="n">api_name</span><span class="p">,</span>
+                    <span class="s">&#39;resource_name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                <span class="p">}),</span>
+                <span class="s">&#39;schema&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_reverse_url</span><span class="p">(</span><span class="s">&quot;api_get_schema&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s">&#39;api_name&#39;</span><span class="p">:</span> <span class="n">api_name</span><span class="p">,</span>
+                    <span class="s">&#39;resource_name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                <span class="p">}),</span>
+            <span class="p">}</span>
+
+        <span class="n">desired_format</span> <span class="o">=</span> <span class="n">determine_format</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">serializer</span><span class="p">)</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="s">&#39;text/javascript&#39;</span> <span class="ow">in</span> <span class="n">desired_format</span><span class="p">:</span>
+            <span class="n">callback</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;callback&#39;</span><span class="p">,</span> <span class="s">&#39;callback&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid_jsonp_callback_value</span><span class="p">(</span><span class="n">callback</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">BadRequest</span><span class="p">(</span><span class="s">&#39;JSONP callback name is invalid.&#39;</span><span class="p">)</span>
+
+            <span class="n">options</span><span class="p">[</span><span class="s">&#39;callback&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">callback</span>
+
+        <span class="n">serialized</span> <span class="o">=</span> <span class="n">serializer</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">available_resources</span><span class="p">,</span> <span class="n">desired_format</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="n">serialized</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="n">build_content_type</span><span class="p">(</span><span class="n">desired_format</span><span class="p">))</span>
+</div>
+    <span class="k">def</span> <span class="nf">_build_reverse_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A convenience hook for overriding how URLs are built.</span>
+
+<span class="sd">        See ``NamespacedApi._build_reverse_url`` for an example.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">reverse</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="NamespacedApi"><a class="viewcode-back" href="../../auto_modules.html#tastypie.api.NamespacedApi">[docs]</a><span class="k">class</span> <span class="nc">NamespacedApi</span><span class="p">(</span><span class="n">Api</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An API subclass that respects Django namespaces.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_name</span><span class="o">=</span><span class="s">&quot;v1&quot;</span><span class="p">,</span> <span class="n">urlconf_namespace</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NamespacedApi</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">api_name</span><span class="o">=</span><span class="n">api_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">urlconf_namespace</span> <span class="o">=</span> <span class="n">urlconf_namespace</span>
+
+<div class="viewcode-block" id="NamespacedApi.register"><a class="viewcode-back" href="../../auto_modules.html#tastypie.api.NamespacedApi.register">[docs]</a>    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource</span><span class="p">,</span> <span class="n">canonical</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NamespacedApi</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="n">canonical</span><span class="o">=</span><span class="n">canonical</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">canonical</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="c"># Plop in the namespace here as well.</span>
+            <span class="n">resource</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">urlconf_namespace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">urlconf_namespace</span>
+</div>
+    <span class="k">def</span> <span class="nf">_build_reverse_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">namespaced</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">urlconf_namespace</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">reverse</span><span class="p">(</span><span class="n">namespaced</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

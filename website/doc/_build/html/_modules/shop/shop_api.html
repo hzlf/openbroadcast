@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>shop.shop_api &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for shop.shop_api</h1><div class="highlight"><pre>
+<span class="c">#-*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">shop.models.ordermodel</span> <span class="kn">import</span> <span class="n">OrderExtraInfo</span><span class="p">,</span> <span class="n">Order</span>
+<span class="kn">from</span> <span class="nn">shop.util.order</span> <span class="kn">import</span> <span class="n">get_order_from_request</span>
+
+
+<div class="viewcode-block" id="ShopAPI"><a class="viewcode-back" href="../../auto_modules.html#shop.shop_api.ShopAPI">[docs]</a><span class="k">class</span> <span class="nc">ShopAPI</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A base-baseclass for shop APIs.</span>
+
+<span class="sd">    Both payment and shipping backends need some common functions from the shop</span>
+<span class="sd">    interface (for example get_order() is useful in both cases). To reduce code</span>
+<span class="sd">    duplication, theses common methods are defined here and inherited by shop</span>
+<span class="sd">    interfaces (DRY)</span>
+
+<span class="sd">    Another approach would be to stuff everything here, but I think it opens</span>
+<span class="sd">    up potential to overbloating this one class.</span>
+<span class="sd">    This is debatable and relatively easy to change later anyway.</span>
+
+<span class="sd">    Define all functions common to both the shipping and the payment shop APIs</span>
+<span class="sd">    here</span>
+
+<span class="sd">    PLEASE: When adding functions here please write a short description of</span>
+<span class="sd">    them in BaseShippingBackend and BasePaymentBackend, future implementers</span>
+<span class="sd">    thank you :)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ShopAPI.get_order"><a class="viewcode-back" href="../../auto_modules.html#shop.shop_api.ShopAPI.get_order">[docs]</a>    <span class="k">def</span> <span class="nf">get_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the order object for the current shopper.</span>
+
+<span class="sd">        This is called from the backend&#39;s views as:</span>
+<span class="sd">        &gt;&gt;&gt; order = self.shop.getOrder(request)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># it might seem a bit strange to simply forward the call to a helper,</span>
+        <span class="c"># but this avoids exposing the shop&#39;s internal workings to module</span>
+        <span class="c"># writers</span>
+        <span class="k">return</span> <span class="n">get_order_from_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShopAPI.add_extra_info"><a class="viewcode-back" href="../../auto_modules.html#shop.shop_api.ShopAPI.add_extra_info">[docs]</a>    <span class="k">def</span> <span class="nf">add_extra_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add an extra info text field to the order</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">OrderExtraInfo</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShopAPI.is_order_payed"><a class="viewcode-back" href="../../auto_modules.html#shop.shop_api.ShopAPI.is_order_payed">[docs]</a>    <span class="k">def</span> <span class="nf">is_order_payed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Whether the passed order is fully payed or not.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">order</span><span class="o">.</span><span class="n">is_payed</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ShopAPI.is_order_completed"><a class="viewcode-back" href="../../auto_modules.html#shop.shop_api.ShopAPI.is_order_completed">[docs]</a>    <span class="k">def</span> <span class="nf">is_order_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">order</span><span class="o">.</span><span class="n">is_completed</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ShopAPI.get_order_total"><a class="viewcode-back" href="../../auto_modules.html#shop.shop_api.ShopAPI.get_order_total">[docs]</a>    <span class="k">def</span> <span class="nf">get_order_total</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The total amount to be charged for passed order&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">order</span><span class="o">.</span><span class="n">order_total</span>
+</div>
+<div class="viewcode-block" id="ShopAPI.get_order_subtotal"><a class="viewcode-back" href="../../auto_modules.html#shop.shop_api.ShopAPI.get_order_subtotal">[docs]</a>    <span class="k">def</span> <span class="nf">get_order_subtotal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The total amount to be charged for passed order&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">order</span><span class="o">.</span><span class="n">order_subtotal</span>
+</div>
+<div class="viewcode-block" id="ShopAPI.get_order_short_name"><a class="viewcode-back" href="../../auto_modules.html#shop.shop_api.ShopAPI.get_order_short_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_order_short_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A short name for the order, to be displayed on the payment processor&#39;s</span>
+<span class="sd">        website. Should be human-readable, as much as possible</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">order</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">order</span><span class="o">.</span><span class="n">order_total</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShopAPI.get_order_unique_id"><a class="viewcode-back" href="../../auto_modules.html#shop.shop_api.ShopAPI.get_order_unique_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_order_unique_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A unique identifier for this order. This should be our shop&#39;s reference</span>
+<span class="sd">        number. This is sent back by the payment processor when confirming</span>
+<span class="sd">        payment, for example.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">order</span><span class="o">.</span><span class="n">id</span>
+</div>
+<div class="viewcode-block" id="ShopAPI.get_order_for_id"><a class="viewcode-back" href="../../auto_modules.html#shop.shop_api.ShopAPI.get_order_for_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_order_for_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get an order for a given ID. Typically, this would be used when the</span>
+<span class="sd">        backend receives notification from the transaction processor (i.e.</span>
+<span class="sd">        paypal ipn), with an attached &quot;invoice ID&quot; or &quot;order ID&quot;, which should</span>
+<span class="sd">        then be used to get the shop&#39;s order with this method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Order</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

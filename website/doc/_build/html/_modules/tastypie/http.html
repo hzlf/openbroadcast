@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>tastypie.http &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for tastypie.http</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The various HTTP responses for use in returning proper HTTP codes.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponse</span>
+
+
+<div class="viewcode-block" id="HttpCreated"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpCreated">[docs]</a><span class="k">class</span> <span class="nc">HttpCreated</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">201</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">location</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;location&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">HttpCreated</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s">&#39;Location&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">location</span>
+
+</div>
+<div class="viewcode-block" id="HttpAccepted"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpAccepted">[docs]</a><span class="k">class</span> <span class="nc">HttpAccepted</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">202</span>
+
+</div>
+<div class="viewcode-block" id="HttpNoContent"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpNoContent">[docs]</a><span class="k">class</span> <span class="nc">HttpNoContent</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">204</span>
+
+</div>
+<div class="viewcode-block" id="HttpMultipleChoices"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpMultipleChoices">[docs]</a><span class="k">class</span> <span class="nc">HttpMultipleChoices</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">300</span>
+
+</div>
+<div class="viewcode-block" id="HttpSeeOther"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpSeeOther">[docs]</a><span class="k">class</span> <span class="nc">HttpSeeOther</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">303</span>
+
+</div>
+<div class="viewcode-block" id="HttpNotModified"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpNotModified">[docs]</a><span class="k">class</span> <span class="nc">HttpNotModified</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">304</span>
+
+</div>
+<div class="viewcode-block" id="HttpBadRequest"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpBadRequest">[docs]</a><span class="k">class</span> <span class="nc">HttpBadRequest</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">400</span>
+
+</div>
+<div class="viewcode-block" id="HttpUnauthorized"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpUnauthorized">[docs]</a><span class="k">class</span> <span class="nc">HttpUnauthorized</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">401</span>
+
+</div>
+<div class="viewcode-block" id="HttpForbidden"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpForbidden">[docs]</a><span class="k">class</span> <span class="nc">HttpForbidden</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">403</span>
+
+</div>
+<div class="viewcode-block" id="HttpNotFound"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpNotFound">[docs]</a><span class="k">class</span> <span class="nc">HttpNotFound</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">404</span>
+
+</div>
+<div class="viewcode-block" id="HttpMethodNotAllowed"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpMethodNotAllowed">[docs]</a><span class="k">class</span> <span class="nc">HttpMethodNotAllowed</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">405</span>
+
+</div>
+<div class="viewcode-block" id="HttpConflict"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpConflict">[docs]</a><span class="k">class</span> <span class="nc">HttpConflict</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">409</span>
+
+</div>
+<div class="viewcode-block" id="HttpGone"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpGone">[docs]</a><span class="k">class</span> <span class="nc">HttpGone</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">410</span>
+
+</div>
+<div class="viewcode-block" id="HttpTooManyRequests"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpTooManyRequests">[docs]</a><span class="k">class</span> <span class="nc">HttpTooManyRequests</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">429</span>
+
+</div>
+<div class="viewcode-block" id="HttpApplicationError"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpApplicationError">[docs]</a><span class="k">class</span> <span class="nc">HttpApplicationError</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">500</span>
+
+</div>
+<div class="viewcode-block" id="HttpNotImplemented"><a class="viewcode-back" href="../../auto_modules.html#tastypie.http.HttpNotImplemented">[docs]</a><span class="k">class</span> <span class="nc">HttpNotImplemented</span><span class="p">(</span><span class="n">HttpResponse</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="mi">501</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

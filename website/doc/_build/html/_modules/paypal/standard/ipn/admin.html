@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>paypal.standard.ipn.admin &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for paypal.standard.ipn.admin</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+<span class="kn">from</span> <span class="nn">paypal.standard.ipn.models</span> <span class="kn">import</span> <span class="n">PayPalIPN</span>
+
+
+<div class="viewcode-block" id="PayPalIPNAdmin"><a class="viewcode-back" href="../../../../auto_modules.html#paypal.standard.ipn.admin.PayPalIPNAdmin">[docs]</a><span class="k">class</span> <span class="nc">PayPalIPNAdmin</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">ModelAdmin</span><span class="p">):</span>
+    <span class="n">date_hierarchy</span> <span class="o">=</span> <span class="s">&#39;payment_date&#39;</span>
+    <span class="n">fieldsets</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">&quot;fields&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s">&quot;flag&quot;</span><span class="p">,</span> <span class="s">&quot;txn_id&quot;</span><span class="p">,</span> <span class="s">&quot;txn_type&quot;</span><span class="p">,</span> <span class="s">&quot;payment_status&quot;</span><span class="p">,</span> <span class="s">&quot;payment_date&quot;</span><span class="p">,</span>
+                <span class="s">&quot;transaction_entity&quot;</span><span class="p">,</span> <span class="s">&quot;reason_code&quot;</span><span class="p">,</span> <span class="s">&quot;pending_reason&quot;</span><span class="p">,</span> 
+                <span class="s">&quot;mc_gross&quot;</span><span class="p">,</span> <span class="s">&quot;mc_fee&quot;</span><span class="p">,</span> <span class="s">&quot;auth_status&quot;</span><span class="p">,</span> <span class="s">&quot;auth_amount&quot;</span><span class="p">,</span> <span class="s">&quot;auth_exp&quot;</span><span class="p">,</span> 
+                <span class="s">&quot;auth_id&quot;</span>
+            <span class="p">]</span>
+        <span class="p">}),</span>
+        <span class="p">(</span><span class="s">&quot;Address&quot;</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">&quot;description&quot;</span><span class="p">:</span> <span class="s">&quot;The address of the Buyer.&quot;</span><span class="p">,</span>
+            <span class="s">&#39;classes&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;collapse&#39;</span><span class="p">,),</span>
+            <span class="s">&quot;fields&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s">&quot;address_city&quot;</span><span class="p">,</span> <span class="s">&quot;address_country&quot;</span><span class="p">,</span> <span class="s">&quot;address_country_code&quot;</span><span class="p">,</span>
+                <span class="s">&quot;address_name&quot;</span><span class="p">,</span> <span class="s">&quot;address_state&quot;</span><span class="p">,</span> <span class="s">&quot;address_status&quot;</span><span class="p">,</span> 
+                <span class="s">&quot;address_street&quot;</span><span class="p">,</span> <span class="s">&quot;address_zip&quot;</span>
+            <span class="p">]</span>
+        <span class="p">}),</span>
+        <span class="p">(</span><span class="s">&quot;Buyer&quot;</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">&quot;description&quot;</span><span class="p">:</span> <span class="s">&quot;The information about the Buyer.&quot;</span><span class="p">,</span>
+            <span class="s">&#39;classes&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;collapse&#39;</span><span class="p">,),</span>
+            <span class="s">&quot;fields&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s">&quot;first_name&quot;</span><span class="p">,</span> <span class="s">&quot;last_name&quot;</span><span class="p">,</span> <span class="s">&quot;payer_business_name&quot;</span><span class="p">,</span> <span class="s">&quot;payer_email&quot;</span><span class="p">,</span>
+                <span class="s">&quot;payer_id&quot;</span><span class="p">,</span> <span class="s">&quot;payer_status&quot;</span><span class="p">,</span> <span class="s">&quot;contact_phone&quot;</span><span class="p">,</span> <span class="s">&quot;residence_country&quot;</span>
+            <span class="p">]</span>
+        <span class="p">}),</span>
+        <span class="p">(</span><span class="s">&quot;Seller&quot;</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">&quot;description&quot;</span><span class="p">:</span> <span class="s">&quot;The information about the Seller.&quot;</span><span class="p">,</span>
+            <span class="s">&#39;classes&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;collapse&#39;</span><span class="p">,),</span>
+            <span class="s">&quot;fields&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s">&quot;business&quot;</span><span class="p">,</span> <span class="s">&quot;item_name&quot;</span><span class="p">,</span> <span class="s">&quot;item_number&quot;</span><span class="p">,</span> <span class="s">&quot;quantity&quot;</span><span class="p">,</span> 
+                <span class="s">&quot;receiver_email&quot;</span><span class="p">,</span> <span class="s">&quot;receiver_id&quot;</span><span class="p">,</span> <span class="s">&quot;custom&quot;</span><span class="p">,</span> <span class="s">&quot;invoice&quot;</span><span class="p">,</span> <span class="s">&quot;memo&quot;</span>
+            <span class="p">]</span>
+        <span class="p">}),</span>
+        <span class="p">(</span><span class="s">&quot;Recurring&quot;</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">&quot;description&quot;</span><span class="p">:</span> <span class="s">&quot;Information about recurring Payments.&quot;</span><span class="p">,</span>
+            <span class="s">&quot;classes&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s">&quot;collapse&quot;</span><span class="p">,),</span>
+            <span class="s">&quot;fields&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s">&quot;profile_status&quot;</span><span class="p">,</span> <span class="s">&quot;initial_payment_amount&quot;</span><span class="p">,</span> <span class="s">&quot;amount_per_cycle&quot;</span><span class="p">,</span> 
+                <span class="s">&quot;outstanding_balance&quot;</span><span class="p">,</span> <span class="s">&quot;period_type&quot;</span><span class="p">,</span> <span class="s">&quot;product_name&quot;</span><span class="p">,</span> 
+                <span class="s">&quot;product_type&quot;</span><span class="p">,</span> <span class="s">&quot;recurring_payment_id&quot;</span><span class="p">,</span> <span class="s">&quot;receipt_id&quot;</span><span class="p">,</span> 
+                <span class="s">&quot;next_payment_date&quot;</span>
+            <span class="p">]</span>
+        <span class="p">}),</span>
+        <span class="p">(</span><span class="s">&quot;Admin&quot;</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">&quot;description&quot;</span><span class="p">:</span> <span class="s">&quot;Additional Info.&quot;</span><span class="p">,</span>
+            <span class="s">&quot;classes&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;collapse&#39;</span><span class="p">,),</span>
+            <span class="s">&quot;fields&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s">&quot;test_ipn&quot;</span><span class="p">,</span> <span class="s">&quot;ipaddress&quot;</span><span class="p">,</span> <span class="s">&quot;query&quot;</span><span class="p">,</span> <span class="s">&quot;response&quot;</span><span class="p">,</span> <span class="s">&quot;flag_code&quot;</span><span class="p">,</span> 
+                <span class="s">&quot;flag_info&quot;</span>
+            <span class="p">]</span>
+        <span class="p">}),</span>
+    <span class="p">)</span>
+    <span class="n">list_display</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s">&quot;__unicode__&quot;</span><span class="p">,</span> <span class="s">&quot;flag&quot;</span><span class="p">,</span> <span class="s">&quot;flag_info&quot;</span><span class="p">,</span> <span class="s">&quot;invoice&quot;</span><span class="p">,</span> <span class="s">&quot;custom&quot;</span><span class="p">,</span> 
+        <span class="s">&quot;payment_status&quot;</span><span class="p">,</span> <span class="s">&quot;created_at&quot;</span>
+    <span class="p">]</span>
+    <span class="n">search_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;txn_id&quot;</span><span class="p">,</span> <span class="s">&quot;recurring_payment_id&quot;</span><span class="p">]</span>
+
+</div>
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">PayPalIPN</span><span class="p">,</span> <span class="n">PayPalIPNAdmin</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

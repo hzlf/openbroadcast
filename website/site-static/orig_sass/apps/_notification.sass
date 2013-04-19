@@ -1,0 +1,28 @@
+ul.nav-profile .messages
+  a > *
+    color: #00bb00 !important
+
+div.notification-holder
+
+  display: none
+  padding: 10px
+
+  position: absolute
+  top: 40px
+  right: 20px
+  min-width: 400px
+  z-index: 1000
+  background: #fafafa
+  
+  .message
+    margin: 2px 0
+    padding: 2px 0
+    border-bottom: 1px solid $white
+    .row-fluid
+      > div
+        > span, > a
+          padding: 4px
+          &.target
+            font-weight: bold
+    &.hover
+      background-color: #ddffd9

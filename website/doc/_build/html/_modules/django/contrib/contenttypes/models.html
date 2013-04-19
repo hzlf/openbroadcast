@@ -1,0 +1,261 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django.contrib.contenttypes.models &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for django.contrib.contenttypes.models</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">smart_unicode</span><span class="p">,</span> <span class="n">force_unicode</span>
+
+<div class="viewcode-block" id="ContentTypeManager"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.contenttypes.models.ContentTypeManager">[docs]</a><span class="k">class</span> <span class="nc">ContentTypeManager</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">):</span>
+
+    <span class="c"># Cache to avoid re-looking up ContentType objects all over the place.</span>
+    <span class="c"># This cache is shared by all the get_for_* methods.</span>
+    <span class="n">_cache</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="ContentTypeManager.get_by_natural_key"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.contenttypes.models.ContentTypeManager.get_by_natural_key">[docs]</a>    <span class="k">def</span> <span class="nf">get_by_natural_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_label</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">][(</span><span class="n">app_label</span><span class="p">,</span> <span class="n">model</span><span class="p">)]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">ct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">app_label</span><span class="o">=</span><span class="n">app_label</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_cache</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">,</span> <span class="n">ct</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ct</span>
+</div>
+    <span class="k">def</span> <span class="nf">_get_opts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">concrete_model</span><span class="o">.</span><span class="n">_meta</span>
+
+    <span class="k">def</span> <span class="nf">_get_from_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opts</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">opts</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span> <span class="n">opts</span><span class="o">.</span><span class="n">object_name</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ContentTypeManager.get_for_model"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.contenttypes.models.ContentTypeManager.get_for_model">[docs]</a>    <span class="k">def</span> <span class="nf">get_for_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the ContentType object for a given model, creating the</span>
+<span class="sd">        ContentType if necessary. Lookups are cached so that subsequent lookups</span>
+<span class="sd">        for the same model don&#39;t hit the database.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_opts</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_from_cache</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c"># Load or create the ContentType entry. The smart_unicode() is</span>
+            <span class="c"># needed around opts.verbose_name_raw because name_raw might be a</span>
+            <span class="c"># django.utils.functional.__proxy__ object.</span>
+            <span class="n">ct</span><span class="p">,</span> <span class="n">created</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+                <span class="n">app_label</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">object_name</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+                <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="n">smart_unicode</span><span class="p">(</span><span class="n">opts</span><span class="o">.</span><span class="n">verbose_name_raw</span><span class="p">)},</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_cache</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">,</span> <span class="n">ct</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ct</span>
+</div>
+<div class="viewcode-block" id="ContentTypeManager.get_for_models"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.contenttypes.models.ContentTypeManager.get_for_models">[docs]</a>    <span class="k">def</span> <span class="nf">get_for_models</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">models</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given *models, returns a dictionary mapping {model: content_type}.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Final results</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c"># models that aren&#39;t already in the cache</span>
+        <span class="n">needed_app_labels</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">needed_models</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">needed_opts</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+            <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_opts</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_from_cache</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">needed_app_labels</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">opts</span><span class="o">.</span><span class="n">app_label</span><span class="p">)</span>
+                <span class="n">needed_models</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">opts</span><span class="o">.</span><span class="n">object_name</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+                <span class="n">needed_opts</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">model</span><span class="p">]</span> <span class="o">=</span> <span class="n">ct</span>
+        <span class="k">if</span> <span class="n">needed_opts</span><span class="p">:</span>
+            <span class="n">cts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                <span class="n">app_label__in</span><span class="o">=</span><span class="n">needed_app_labels</span><span class="p">,</span>
+                <span class="n">model__in</span><span class="o">=</span><span class="n">needed_models</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">ct</span> <span class="ow">in</span> <span class="n">cts</span><span class="p">:</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">model_class</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span> <span class="ow">in</span> <span class="n">needed_opts</span><span class="p">:</span>
+                    <span class="n">results</span><span class="p">[</span><span class="n">model</span><span class="p">]</span> <span class="o">=</span> <span class="n">ct</span>
+                    <span class="n">needed_opts</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_cache</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">,</span> <span class="n">ct</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">opts</span> <span class="ow">in</span> <span class="n">needed_opts</span><span class="p">:</span>
+            <span class="c"># These weren&#39;t in the cache, or the DB, create them.</span>
+            <span class="n">ct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                <span class="n">app_label</span><span class="o">=</span><span class="n">opts</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span>
+                <span class="n">model</span><span class="o">=</span><span class="n">opts</span><span class="o">.</span><span class="n">object_name</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">smart_unicode</span><span class="p">(</span><span class="n">opts</span><span class="o">.</span><span class="n">verbose_name_raw</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_cache</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">,</span> <span class="n">ct</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">ct</span><span class="o">.</span><span class="n">model_class</span><span class="p">()]</span> <span class="o">=</span> <span class="n">ct</span>
+        <span class="k">return</span> <span class="n">results</span>
+</div>
+<div class="viewcode-block" id="ContentTypeManager.get_for_id"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.contenttypes.models.ContentTypeManager.get_for_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_for_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Lookup a ContentType by ID. Uses the same shared cache as get_for_model</span>
+<span class="sd">        (though ContentTypes are obviously not created on-the-fly by get_by_id).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">][</span><span class="nb">id</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c"># This could raise a DoesNotExist; that&#39;s correct behavior and will</span>
+            <span class="c"># make sure that only correct ctypes get stored in the cache dict.</span>
+            <span class="n">ct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_cache</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">,</span> <span class="n">ct</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ct</span>
+</div>
+<div class="viewcode-block" id="ContentTypeManager.clear_cache"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.contenttypes.models.ContentTypeManager.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clear out the content-type cache. This needs to happen during database</span>
+<span class="sd">        flushes to prevent caching of &quot;stale&quot; content type IDs (see</span>
+<span class="sd">        django.contrib.contenttypes.management.update_contenttypes for where</span>
+<span class="sd">        this gets called).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">_add_to_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">using</span><span class="p">,</span> <span class="n">ct</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Insert a ContentType into the cache.&quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">model_class</span><span class="p">()</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">object_name</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">using</span><span class="p">,</span> <span class="p">{})[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ct</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">using</span><span class="p">,</span> <span class="p">{})[</span><span class="n">ct</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">ct</span>
+</div>
+<div class="viewcode-block" id="ContentType"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.contenttypes.models.ContentType">[docs]</a><span class="k">class</span> <span class="nc">ContentType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">app_label</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;python model class name&#39;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">ContentTypeManager</span><span class="p">()</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;content type&#39;</span><span class="p">)</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;content types&#39;</span><span class="p">)</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s">&#39;django_content_type&#39;</span>
+        <span class="n">ordering</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,)</span>
+        <span class="n">unique_together</span> <span class="o">=</span> <span class="p">((</span><span class="s">&#39;app_label&#39;</span><span class="p">,</span> <span class="s">&#39;model&#39;</span><span class="p">),)</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># self.name is deprecated in favor of using model&#39;s verbose_name, which</span>
+        <span class="c"># can be translated. Formal deprecation is delayed until we have DB</span>
+        <span class="c"># migration to be able to remove the field from the database along with</span>
+        <span class="c"># the attribute.</span>
+        <span class="c">#</span>
+        <span class="c"># We return self.name only when users have changed its value from the</span>
+        <span class="c"># initial verbose_name_raw and might rely on it.</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">verbose_name_raw</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">force_unicode</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">verbose_name</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ContentType.model_class"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.contenttypes.models.ContentType.model_class">[docs]</a>    <span class="k">def</span> <span class="nf">model_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;Returns the Python model class for this type of content.&quot;</span>
+        <span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+        <span class="k">return</span> <span class="n">models</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                                <span class="n">only_installed</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ContentType.get_object_for_this_type"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.contenttypes.models.ContentType.get_object_for_this_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_object_for_this_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an object of this type for the keyword arguments given.</span>
+<span class="sd">        Basically, this is a proxy around this object_type&#39;s get_object() model</span>
+<span class="sd">        method. The ObjectNotExist exception, if thrown, will not be caught,</span>
+<span class="sd">        so code that calls this method should catch it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span><span class="p">()</span><span class="o">.</span><span class="n">_base_manager</span><span class="o">.</span><span class="n">using</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_state</span><span class="o">.</span><span class="n">db</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ContentType.get_all_objects_for_this_type"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.contenttypes.models.ContentType.get_all_objects_for_this_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_all_objects_for_this_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns all objects of this type for the keyword arguments given.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span><span class="p">()</span><span class="o">.</span><span class="n">_base_manager</span><span class="o">.</span><span class="n">using</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_state</span><span class="o">.</span><span class="n">db</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ContentType.natural_key"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.contenttypes.models.ContentType.natural_key">[docs]</a>    <span class="k">def</span> <span class="nf">natural_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

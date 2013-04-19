@@ -41,6 +41,9 @@ from filer.fields.file import FilerFileField
 from django_countries import CountryField
 from easy_thumbnails.files import get_thumbnailer
 
+import tagging
+import reversion 
+
 # model extensions
 from mptt.models import MPTTModel, TreeForeignKey, TreeManyToManyField 
 from multilingual.translation import TranslationModel
@@ -62,6 +65,8 @@ from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
 
 
+
+    
 
 class MigrationMixin(models.Model):
     
@@ -105,8 +110,18 @@ class Label(MPTTModel, MigrationMixin):
     parent = TreeForeignKey('self', null=True, blank=True, related_name='label_children')
     folder = models.ForeignKey(Folder, blank=True, null=True, related_name='label_folder')
     
+    # user relations
+    owner = models.ForeignKey(User, blank=True, null=True, related_name="labels_owner", on_delete=models.SET_NULL)
+    creator = models.ForeignKey(User, blank=True, null=True, related_name="labels_creator", on_delete=models.SET_NULL)
+    publisher = models.ForeignKey(User, blank=True, null=True, related_name="labels_publisher", on_delete=models.SET_NULL)
+    
+
     # relations a.k.a. links
     relations = generic.GenericRelation('Relation')
+    
+    # tagging (d_tags = "display tags")
+    d_tags = tagging.fields.TagField(verbose_name="Tags", blank=True, null=True)
+ 
     
     # manager
     objects = models.Manager()
@@ -131,10 +146,22 @@ class Label(MPTTModel, MigrationMixin):
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
+        
+        # update d_tags
+        t_tags = ''
+        for tag in self.tags:
+            t_tags += '%s, ' % tag    
+        
+        self.tags = t_tags;
+        self.d_tags = t_tags;
+        
         super(Label, self).save(*args, **kwargs)
     
         
-
+try:
+    tagging.register(Label)
+except:
+    pass
 
 # register
 post_save.connect(library_post_save, sender=Label)   
@@ -316,9 +343,12 @@ class Relation(models.Model):
         ('facebook', _('Facebook')),
         ('youtube', _('YouTube')),
         ('discogs', _('Discogs')),
+        ('discogs_master', _('Discogs | master-release')),
         ('wikipedia', _('Wikipedia')),
         ('musicbrainz', _('Musicbrainz')),
         ('bandcamp', _('Bandcamp')),
+        ('itunes', _('iTunes')),
+        ('official', _('Official website')),
     )
     service = models.CharField(max_length=50, default='generic', choices=SERVICE_CHOICES)
     
@@ -342,7 +372,7 @@ class Relation(models.Model):
         verbose_name = _('Relation')
         verbose_name_plural = _('Relations')
         ordering = ('url', )
-        unique_together = ('service', 'content_type', 'object_id')
+        #unique_together = ('content_type', 'object_id')
     
     def __unicode__(self):
         return self.url
@@ -360,7 +390,10 @@ class Relation(models.Model):
             self.service = 'youtube' 
                    
         if self.url.find('discogs.com') != -1:
-            self.service = 'discogs'
+            if self.url.find('/master/') != -1:
+                self.service = 'discogs_master'
+            else:
+                self.service = 'discogs'
                    
         if self.url.find('wikipedia.org') != -1:
             self.service = 'wikipedia'
@@ -370,9 +403,14 @@ class Relation(models.Model):
                    
         if self.url.find('bandcamp.com') != -1:
             self.service = 'bandcamp'
+                   
+        if self.url.find('itunes.apple.com') != -1:
+            self.service = 'itunes'
             
         # find already assigned services and delete them
-        reld = Relation.objects.filter(service=self.service, content_type=self.content_type, object_id=self.object_id).delete()
+        if self.service != 'generic':
+            # TODO: fix unique problem
+            reld = Relation.objects.filter(service=self.service, content_type=self.content_type, object_id=self.object_id).delete()
 
         super(Relation, self).save(*args, **kwargs)
     

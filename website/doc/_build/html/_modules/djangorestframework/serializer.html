@@ -1,0 +1,403 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>djangorestframework.serializer &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for djangorestframework.serializer</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Customizable serialization.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.db.models.query</span> <span class="kn">import</span> <span class="n">QuerySet</span>
+<span class="kn">from</span> <span class="nn">django.db.models.fields.related</span> <span class="kn">import</span> <span class="n">RelatedField</span>
+<span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">smart_unicode</span><span class="p">,</span> <span class="n">is_protected_type</span><span class="p">,</span> <span class="n">smart_str</span>
+
+<span class="kn">import</span> <span class="nn">decimal</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">types</span>
+
+
+<span class="c"># We register serializer classes, so that we can refer to them by their</span>
+<span class="c"># class names, if there are cyclical serialization heirachys.</span>
+<span class="n">_serializers</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<span class="k">def</span> <span class="nf">_field_to_tuple</span><span class="p">(</span><span class="n">field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert an item in the `fields` attribute into a 2-tuple. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_fields_to_list</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a list of field names.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">_field_to_tuple</span><span class="p">(</span><span class="n">field</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span> <span class="ow">or</span> <span class="p">()]</span>
+
+<span class="k">def</span> <span class="nf">_fields_to_dict</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a `dict` of field name -&gt; None, or tuple of fields, or Serializer class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">([</span><span class="n">_field_to_tuple</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span> <span class="ow">or</span> <span class="p">()])</span>
+
+
+<span class="k">class</span> <span class="nc">_SkipField</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Signals that a serialized field should be ignored.</span>
+<span class="sd">    We use this mechanism as the default behavior for ensuring</span>
+<span class="sd">    that we don&#39;t infinitely recurse when dealing with nested data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">_RegisterSerializer</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Metaclass to register serializers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="c"># Build the class and register it.</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">_RegisterSerializer</span><span class="p">,</span> <span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span> 
+        <span class="n">_serializers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+
+<div class="viewcode-block" id="Serializer"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.serializer.Serializer">[docs]</a><span class="k">class</span> <span class="nc">Serializer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts python objects into plain old native types suitable for</span>
+<span class="sd">    serialization.  In particular it handles models and querysets.</span>
+<span class="sd">    </span>
+<span class="sd">    The output format is specified by setting a number of attributes</span>
+<span class="sd">    on the class.</span>
+
+<span class="sd">    You may also override any of the serialization methods, to provide</span>
+<span class="sd">    for more flexible behavior.</span>
+<span class="sd"> </span>
+<span class="sd">    Valid output types include anything that may be directly rendered into</span>
+<span class="sd">    json, xml etc...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">_RegisterSerializer</span>
+
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">()</span> 
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specify the fields to be serialized on a model or dict.</span>
+<span class="sd">    Overrides `include` and `exclude`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">include</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fields to add to the default set to be serialized on a model/dict.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">exclude</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fields to remove from the default set to be serialized on a model/dict.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">rename</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A dict of key-&gt;name to use for the field keys.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">related_serializer</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The default serializer class to use for any related models.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">depth</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The maximum depth to serialize to, or `None`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">stack</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">depth</span> <span class="o">=</span> <span class="n">depth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span> <span class="o">=</span> <span class="n">stack</span>
+        
+
+<div class="viewcode-block" id="Serializer.get_fields"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.serializer.Serializer.get_fields">[docs]</a>    <span class="k">def</span> <span class="nf">get_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the set of field names/keys to use for a model instance/dict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span>
+
+        <span class="c"># If `fields` is not set, we use the default fields and modify</span>
+        <span class="c"># them with `include` and `exclude`</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_default_fields</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="n">include</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">include</span> <span class="ow">or</span> <span class="p">()</span>
+            <span class="n">exclude</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span> <span class="ow">or</span> <span class="p">()</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">default</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">include</span><span class="p">))</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">exclude</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="n">_fields_to_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fields</span>
+
+</div>
+<div class="viewcode-block" id="Serializer.get_default_fields"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.serializer.Serializer.get_default_fields">[docs]</a>    <span class="k">def</span> <span class="nf">get_default_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the default list of field names/keys for a model instance/dict.</span>
+<span class="sd">        These are used if `fields` is not given.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+            <span class="n">opts</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_meta</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">opts</span><span class="o">.</span><span class="n">fields</span> <span class="o">+</span> <span class="n">opts</span><span class="o">.</span><span class="n">many_to_many</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="Serializer.get_related_serializer"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.serializer.Serializer.get_related_serializer">[docs]</a>    <span class="k">def</span> <span class="nf">get_related_serializer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">_fields_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="c"># If an element in `fields` is a 2-tuple of (str, tuple)</span>
+        <span class="c"># then the second element of the tuple is the fields to</span>
+        <span class="c"># set on the related serializer</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">class</span> <span class="nc">OnTheFlySerializer</span><span class="p">(</span><span class="n">Serializer</span><span class="p">):</span>
+                <span class="n">fields</span> <span class="o">=</span> <span class="n">info</span>
+            <span class="k">return</span> <span class="n">OnTheFlySerializer</span>
+
+        <span class="c"># If an element in `fields` is a 2-tuple of (str, Serializer)</span>
+        <span class="c"># then the second element of the tuple is the Serializer</span>
+        <span class="c"># class to use for that field.</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">Serializer</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">info</span>
+
+        <span class="c"># If an element in `fields` is a 2-tuple of (str, str)</span>
+        <span class="c"># then the second element of the tuple is the name of the Serializer</span>
+        <span class="c"># class to use for that field.</span>
+        <span class="c">#</span>
+        <span class="c"># Black magic to deal with cyclical Serializer dependancies.</span>
+        <span class="c"># Similar to what Django does for cyclically related models.</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">_serializers</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_serializers</span><span class="p">[</span><span class="n">info</span><span class="p">]</span>
+        
+        <span class="c"># Otherwise use `related_serializer` or fall back to `Serializer`</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;related_serializer&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">Serializer</span>
+
+</div>
+<div class="viewcode-block" id="Serializer.serialize_key"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.serializer.Serializer.serialize_key">[docs]</a>    <span class="k">def</span> <span class="nf">serialize_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Keys serialize to their string value,</span>
+<span class="sd">        unless they exist in the `rename` dict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">smart_str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">smart_str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="Serializer.serialize_val"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.serializer.Serializer.serialize_val">[docs]</a>    <span class="k">def</span> <span class="nf">serialize_val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a model field or dict value into a serializable representation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">related_serializer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_related_serializer</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+     
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize_max_depth</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">obj</span> <span class="ow">is</span> <span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize_recursion</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">[:]</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">related_serializer</span><span class="p">(</span><span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span> <span class="n">stack</span><span class="o">=</span><span class="n">stack</span><span class="p">)</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Serializer.serialize_max_depth"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.serializer.Serializer.serialize_max_depth">[docs]</a>    <span class="k">def</span> <span class="nf">serialize_max_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determine how objects should be serialized once `depth` is exceeded.</span>
+<span class="sd">        The default behavior is to ignore the field.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">_SkipField</span>
+
+</div>
+<div class="viewcode-block" id="Serializer.serialize_recursion"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.serializer.Serializer.serialize_recursion">[docs]</a>    <span class="k">def</span> <span class="nf">serialize_recursion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determine how objects should be serialized if recursion occurs.</span>
+<span class="sd">        The default behavior is to ignore the field.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">_SkipField</span>
+
+</div>
+<div class="viewcode-block" id="Serializer.serialize_model"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.serializer.Serializer.serialize_model">[docs]</a>    <span class="k">def</span> <span class="nf">serialize_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a model instance or dict, serialize it to a dict..</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_fields</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+
+        <span class="c"># serialize each required field </span>
+        <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smart_str</span><span class="p">(</span><span class="n">fname</span><span class="p">)):</span>
+                <span class="c"># check first for a method &#39;fname&#39; on self first</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">(</span><span class="n">meth</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">meth</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">obj</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="s">&#39;__contains__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">instance</span><span class="p">:</span>
+                <span class="c"># check for a key &#39;fname&#39; on the instance</span>
+                <span class="n">obj</span> <span class="o">=</span> <span class="n">instance</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">smart_str</span><span class="p">(</span><span class="n">fname</span><span class="p">)):</span>
+                <span class="c"># finally check for an attribute &#39;fname&#39; on the instance</span>
+                <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize_key</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize_val</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+            <span class="k">except</span> <span class="n">_SkipField</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="n">data</span>
+
+</div>
+<div class="viewcode-block" id="Serializer.serialize_iter"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.serializer.Serializer.serialize_iter">[docs]</a>    <span class="k">def</span> <span class="nf">serialize_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert iterables into a serializable representation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="Serializer.serialize_func"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.serializer.Serializer.serialize_func">[docs]</a>    <span class="k">def</span> <span class="nf">serialize_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert no-arg methods and functions into a serializable representation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">obj</span><span class="p">())</span>
+
+</div>
+<div class="viewcode-block" id="Serializer.serialize_manager"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.serializer.Serializer.serialize_manager">[docs]</a>    <span class="k">def</span> <span class="nf">serialize_manager</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a model manager into a serializable representation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize_iter</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+
+</div>
+<div class="viewcode-block" id="Serializer.serialize_fallback"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.serializer.Serializer.serialize_fallback">[docs]</a>    <span class="k">def</span> <span class="nf">serialize_fallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert any unhandled object into a serializable representation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">smart_unicode</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">strings_only</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+ 
+ </div>
+<div class="viewcode-block" id="Serializer.serialize"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.serializer.Serializer.serialize">[docs]</a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert any object into a serializable representation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">)):</span>
+            <span class="c"># Model instances &amp; dictionaries</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize_model</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="n">QuerySet</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">GeneratorType</span><span class="p">)):</span>
+            <span class="c"># basic iterables</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize_iter</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">):</span>
+            <span class="c"># Manager objects</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize_manager</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isfunction</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">obj</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="c"># function with no args</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize_func</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">obj</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c"># bound method</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize_func</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="c"># Protected types are passed through as is.</span>
+        <span class="c"># (i.e. Primitives like None, numbers, dates, and Decimals.)</span>
+        <span class="k">if</span> <span class="n">is_protected_type</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">obj</span>
+
+        <span class="c"># All other values are converted to string.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize_fallback</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

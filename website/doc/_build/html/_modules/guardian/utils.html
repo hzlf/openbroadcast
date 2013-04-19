@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>guardian.utils &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for guardian.utils</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">django-guardian helper functions.</span>
+
+<span class="sd">Functions defined within this module should be considered as django-guardian&#39;s</span>
+<span class="sd">internal functionality. They are **not** guaranteed to be stable - which means</span>
+<span class="sd">they actual input parameters/output type may change in future releases.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth</span> <span class="kn">import</span> <span class="n">REDIRECT_FIELD_NAME</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span><span class="p">,</span> <span class="n">AnonymousUser</span><span class="p">,</span> <span class="n">Group</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">PermissionDenied</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponseForbidden</span><span class="p">,</span> <span class="n">HttpResponseRedirect</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span>
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">RequestContext</span><span class="p">,</span> <span class="n">TemplateDoesNotExist</span>
+<span class="kn">from</span> <span class="nn">django.utils.http</span> <span class="kn">import</span> <span class="n">urlquote</span>
+<span class="kn">from</span> <span class="nn">guardian.conf</span> <span class="kn">import</span> <span class="n">settings</span> <span class="k">as</span> <span class="n">guardian_settings</span>
+<span class="kn">from</span> <span class="nn">guardian.exceptions</span> <span class="kn">import</span> <span class="n">NotUserNorGroup</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_anonymous_user"><a class="viewcode-back" href="../../auto_modules.html#guardian.utils.get_anonymous_user">[docs]</a><span class="k">def</span> <span class="nf">get_anonymous_user</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns ``User`` instance (not ``AnonymousUser``) depending on</span>
+<span class="sd">    ``ANONYMOUS_USER_ID`` configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">guardian_settings</span><span class="o">.</span><span class="n">ANONYMOUS_USER_ID</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="get_identity"><a class="viewcode-back" href="../../auto_modules.html#guardian.utils.get_identity">[docs]</a><span class="k">def</span> <span class="nf">get_identity</span><span class="p">(</span><span class="n">identity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns (user_obj, None) or (None, group_obj) tuple depending on what is</span>
+<span class="sd">    given. Also accepts AnonymousUser instance but would return ``User``</span>
+<span class="sd">    instead - it is convenient and needed for authorization backend to support</span>
+<span class="sd">    anonymous users.</span>
+
+<span class="sd">    :param identity: either ``User`` or ``Group`` instance</span>
+
+<span class="sd">    :raises ``NotUserNorGroup``: if cannot return proper identity instance</span>
+
+<span class="sd">    **Examples**::</span>
+
+<span class="sd">       &gt;&gt;&gt; user = User.objects.create(username=&#39;joe&#39;)</span>
+<span class="sd">       &gt;&gt;&gt; get_identity(user)</span>
+<span class="sd">       (&lt;User: joe&gt;, None)</span>
+
+<span class="sd">       &gt;&gt;&gt; group = Group.objects.create(name=&#39;users&#39;)</span>
+<span class="sd">       &gt;&gt;&gt; get_identity(group)</span>
+<span class="sd">       (None, &lt;Group: users&gt;)</span>
+
+<span class="sd">       &gt;&gt;&gt; anon = AnonymousUser()</span>
+<span class="sd">       &gt;&gt;&gt; get_identity(anon)</span>
+<span class="sd">       (&lt;User: AnonymousUser&gt;, None)</span>
+
+<span class="sd">       &gt;&gt;&gt; get_identity(&quot;not instance&quot;)</span>
+<span class="sd">       ...</span>
+<span class="sd">       NotUserNorGroup: User/AnonymousUser or Group instance is required (got )</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identity</span><span class="p">,</span> <span class="n">AnonymousUser</span><span class="p">):</span>
+        <span class="n">identity</span> <span class="o">=</span> <span class="n">get_anonymous_user</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identity</span><span class="p">,</span> <span class="n">User</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">identity</span><span class="p">,</span> <span class="bp">None</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identity</span><span class="p">,</span> <span class="n">Group</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="n">identity</span>
+
+    <span class="k">raise</span> <span class="n">NotUserNorGroup</span><span class="p">(</span><span class="s">&quot;User/AnonymousUser or Group instance is required &quot;</span>
+        <span class="s">&quot;(got </span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="n">identity</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="get_403_or_None"><a class="viewcode-back" href="../../auto_modules.html#guardian.utils.get_403_or_None">[docs]</a><span class="k">def</span> <span class="nf">get_403_or_None</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">perms</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">login_url</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="n">redirect_field_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">return_403</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">accept_global_perms</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="n">login_url</span> <span class="o">=</span> <span class="n">login_url</span> <span class="ow">or</span> <span class="n">settings</span><span class="o">.</span><span class="n">LOGIN_URL</span>
+    <span class="n">redirect_field_name</span> <span class="o">=</span> <span class="n">redirect_field_name</span> <span class="ow">or</span> <span class="n">REDIRECT_FIELD_NAME</span>
+
+    <span class="c"># Handles both original and with object provided permission check</span>
+    <span class="c"># as ``obj`` defaults to None</span>
+
+    <span class="n">has_permissions</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="c"># global perms check first (if accept_global_perms)</span>
+    <span class="k">if</span> <span class="n">accept_global_perms</span><span class="p">:</span>
+        <span class="n">has_permissions</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">has_perm</span><span class="p">(</span><span class="n">perm</span><span class="p">)</span> <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">perms</span><span class="p">)</span>
+    <span class="c"># if still no permission granted, try obj perms</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_permissions</span><span class="p">:</span>
+        <span class="n">has_permissions</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">has_perm</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">perms</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_permissions</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">return_403</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">guardian_settings</span><span class="o">.</span><span class="n">RENDER_403</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">response</span> <span class="o">=</span> <span class="n">render_to_response</span><span class="p">(</span>
+                        <span class="n">guardian_settings</span><span class="o">.</span><span class="n">TEMPLATE_403</span><span class="p">,</span> <span class="p">{},</span>
+                        <span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+                    <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">=</span> <span class="mi">403</span>
+                    <span class="k">return</span> <span class="n">response</span>
+                <span class="k">except</span> <span class="n">TemplateDoesNotExist</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">e</span>
+            <span class="k">elif</span> <span class="n">guardian_settings</span><span class="o">.</span><span class="n">RAISE_403</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PermissionDenied</span>
+            <span class="k">return</span> <span class="n">HttpResponseForbidden</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">urlquote</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">get_full_path</span><span class="p">())</span>
+            <span class="n">tup</span> <span class="o">=</span> <span class="n">login_url</span><span class="p">,</span> <span class="n">redirect_field_name</span><span class="p">,</span> <span class="n">path</span>
+            <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">?</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">tup</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="clean_orphan_obj_perms"><a class="viewcode-back" href="../../auto_modules.html#guardian.utils.clean_orphan_obj_perms">[docs]</a><span class="k">def</span> <span class="nf">clean_orphan_obj_perms</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Seeks and removes all object permissions entries pointing at non-existing</span>
+<span class="sd">    targets.</span>
+
+<span class="sd">    Returns number of removed objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">guardian.models</span> <span class="kn">import</span> <span class="n">UserObjectPermission</span>
+    <span class="kn">from</span> <span class="nn">guardian.models</span> <span class="kn">import</span> <span class="n">GroupObjectPermission</span>
+
+
+    <span class="n">deleted</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c"># TODO: optimise</span>
+    <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">chain</span><span class="p">(</span><span class="n">UserObjectPermission</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span>
+        <span class="n">GroupObjectPermission</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">perm</span><span class="o">.</span><span class="n">content_object</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Removing </span><span class="si">%s</span><span class="s"> (pk=</span><span class="si">%d</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="n">perm</span><span class="o">.</span><span class="n">pk</span><span class="p">))</span>
+            <span class="n">perm</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+            <span class="n">deleted</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Total removed orphan object permissions instances: </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span>
+        <span class="n">deleted</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">deleted</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

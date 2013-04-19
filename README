@@ -33,3 +33,18 @@ screen
 # haystack backend (solr)
 cd ~/srv/openbroadcast.ch-upgrade/services/apache-solr-3.6.2/example
 java -jar start.jar
+
+
+
+# dumping and restore/fixtures
+./manage.py dumpdata cms text link menus sites > fixtures/initial.json
+
+# snapshot (dev, osx)
+mysqldump5 -h 127.0.0.1 -u root -proot ch_openbroadcast_local > ~/tmp/ch_openbroadcast_local.sql
+mysql5 -h 127.0.0.1 -u root -proot ch_openbroadcast_local < ~/tmp/ch_openbroadcast_local.sql
+
+
+
+# font compiler
+cd ~/code/openbroadcast.ch/website/site-static
+fontcustom watch iconset -n FontAwesome -o css/iconset

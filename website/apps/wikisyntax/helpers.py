@@ -42,7 +42,7 @@ def wikify(match): # Excepts a regexp match
 
 	token, trail = match.groups() # we track the 'trail' because it may be a plural 's' or something useful
 
-	if ':' in token:
+	if '=' in token:
 		
 		print ' : in token'
 		
@@ -56,8 +56,10 @@ def wikify(match): # Excepts a regexp match
 		[[card:Jack of Hearts]]
 
 		"""
-		prefix = token.split(':',1)[0].lower().rstrip()
-		name = token.split(':',1)[1].rstrip()
+		#prefix = token.split(':',1)[0].lower().rstrip()
+		#name = token.split(':',1)[1].rstrip()
+		prefix = token.split('=',1)[0].lower().rstrip()
+		name = token.split('=',1)[1].rstrip()
 		
 		
 		print 'prefix:',
@@ -79,6 +81,13 @@ def wikify(match): # Excepts a regexp match
 					"""
 					return wiki.render(name,trail=trail,explicit=True)
 				else:
+					
+					if prefix == 'a':
+						return '<a href="http://www.discogs.com/search?q=%s&type=artist">%s</a>' % (name, name)
+					
+					return '* %s *' % name
+				
+				
 					raise WikiException
 
 	"""
@@ -116,7 +125,8 @@ class wikify_string(object):
 		self.set_cache = {}
 
 		from wikisyntax import fix_unicode
-		WIKIBRACKETS = '\[\[([^\]]+?)\]\]'
+		#WIKIBRACKETS = '\[\[([^\]]+?)\]\]'
+		WIKIBRACKETS = '\[([^\]]+?)\]'
 		if not string:
 			return ''
 

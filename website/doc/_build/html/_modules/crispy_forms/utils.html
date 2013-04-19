@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>crispy_forms.utils &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for crispy_forms.utils</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.forms.forms</span> <span class="kn">import</span> <span class="n">BoundField</span>
+<span class="kn">from</span> <span class="nn">django.template.loader</span> <span class="kn">import</span> <span class="n">get_template</span>
+<span class="kn">from</span> <span class="nn">django.utils.html</span> <span class="kn">import</span> <span class="n">conditional_escape</span>
+
+
+<span class="c"># Global field template, default template used for rendering a field. This way we avoid </span>
+<span class="c"># loading the template every time render_field is called without a template</span>
+<span class="n">TEMPLATE_PACK</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;CRISPY_TEMPLATE_PACK&#39;</span><span class="p">,</span> <span class="s">&#39;bootstrap&#39;</span><span class="p">)</span>
+<span class="n">default_field_template</span> <span class="o">=</span> <span class="n">get_template</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">/field.html&quot;</span> <span class="o">%</span> <span class="n">TEMPLATE_PACK</span><span class="p">)</span>
+
+<div class="viewcode-block" id="render_field"><a class="viewcode-back" href="../../auto_modules.html#crispy_forms.utils.render_field">[docs]</a><span class="k">def</span> <span class="nf">render_field</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">form_style</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">labelclass</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">layout_object</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Renders a django-crispy-forms field</span>
+<span class="sd">    </span>
+<span class="sd">    :param field: Can be a string or a Layout object like `Row`. If it&#39;s a layout</span>
+<span class="sd">        object, we call its render method, otherwise we instantiate a BoundField</span>
+<span class="sd">        and render it using default template &#39;uni_form/field.html&#39;</span>
+<span class="sd">        The field is added to a list that the form holds called `rendered_fields`</span>
+<span class="sd">        to avoid double rendering fields.</span>
+
+<span class="sd">    :param form: The form/formset to which that field belongs to.</span>
+<span class="sd">    </span>
+<span class="sd">    :param form_style: A way to pass style name to the CSS framework used.</span>
+
+<span class="sd">    :template: Template used for rendering the field.</span>
+
+<span class="sd">    :layout_object: If passed, it points to the Layout object that is being rendered.</span>
+<span class="sd">        We use it to store its bound fields in a list called `layout_object.bound_fields`</span>
+
+<span class="sd">    :attrs: Attributes for the field&#39;s widget</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">FAIL_SILENTLY</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;CRISPY_FAIL_SILENTLY&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="s">&#39;render&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">form_style</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># This allows fields to be unicode strings, always they don&#39;t use non ASCII</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">):</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+            <span class="c"># If `field` is not unicode then we turn it into a unicode string, otherwise doing</span>
+            <span class="c"># str(field) would give no error and the field would not be resolved, causing confusion </span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">unicode</span><span class="p">(</span><span class="n">field</span><span class="p">))</span>
+                
+        <span class="k">except</span> <span class="p">(</span><span class="ne">UnicodeEncodeError</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Field &#39;</span><span class="si">%s</span><span class="s">&#39; is using forbidden unicode characters&quot;</span> <span class="o">%</span> <span class="n">field</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># Injecting HTML attributes into field&#39;s widget, Django handles rendering these</span>
+        <span class="n">field_instance</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">field_instance</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">FAIL_SILENTLY</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Could not resolve form field &#39;</span><span class="si">%s</span><span class="s">&#39;.&quot;</span> <span class="o">%</span> <span class="n">field</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">field_instance</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Could not resolve form field &#39;</span><span class="si">%s</span><span class="s">&#39;.&quot;</span> <span class="o">%</span> <span class="n">field</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
+            
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">form</span><span class="o">.</span><span class="n">rendered_fields</span><span class="p">:</span>
+        <span class="n">form</span><span class="o">.</span><span class="n">rendered_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">FAIL_SILENTLY</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;A field should only be rendered once: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">field</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;A field should only be rendered once: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">field</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">field_instance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">bound_field</span> <span class="o">=</span> <span class="n">BoundField</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">field_instance</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">template</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="n">default_field_template</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="n">get_template</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+
+        <span class="c"># We save the Layout object&#39;s bound fields in the layout object&#39;s `bound_fields` list</span>
+        <span class="k">if</span> <span class="n">layout_object</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">layout_object</span><span class="o">.</span><span class="n">bound_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bound_field</span><span class="p">)</span>
+
+        <span class="n">context</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="n">bound_field</span><span class="p">,</span> <span class="s">&#39;labelclass&#39;</span><span class="p">:</span> <span class="n">labelclass</span><span class="p">,</span> <span class="s">&#39;flat_attrs&#39;</span><span class="p">:</span> <span class="n">flatatt</span><span class="p">(</span><span class="n">attrs</span> <span class="ow">or</span> <span class="p">{})})</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">html</span>
+
+</div>
+<div class="viewcode-block" id="flatatt"><a class="viewcode-back" href="../../auto_modules.html#crispy_forms.utils.flatatt">[docs]</a><span class="k">def</span> <span class="nf">flatatt</span><span class="p">(</span><span class="n">attrs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Taken from django.core.utils </span>
+<span class="sd">    Convert a dictionary of attributes to a single string.</span>
+<span class="sd">    The returned string will contain a leading space followed by key=&quot;value&quot;,</span>
+<span class="sd">    XML-style pairs.  It is assumed that the keys do not need to be XML-escaped.</span>
+<span class="sd">    If the passed dictionary is empty, then return an empty string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">u&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">u&#39; </span><span class="si">%s</span><span class="s">=&quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">,</span> <span class="s">&#39;-&#39;</span><span class="p">),</span> <span class="n">conditional_escape</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

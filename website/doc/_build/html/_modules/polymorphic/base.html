@@ -1,0 +1,282 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>polymorphic.base &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for polymorphic.base</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot; PolymorphicModel Meta Class</span>
+<span class="sd">    Please see README.rst or DOCS.rst or http://bserve.webhop.org/wiki/django_polymorphic</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.db.models.base</span> <span class="kn">import</span> <span class="n">ModelBase</span>
+
+<span class="kn">from</span> <span class="nn">manager</span> <span class="kn">import</span> <span class="n">PolymorphicManager</span>
+<span class="kn">from</span> <span class="nn">query</span> <span class="kn">import</span> <span class="n">PolymorphicQuerySet</span>
+
+<span class="c"># PolymorphicQuerySet Q objects (and filter()) support these additional key words.</span>
+<span class="c"># These are forbidden as field names (a descriptive exception is raised)</span>
+<span class="n">POLYMORPHIC_SPECIAL_Q_KWORDS</span> <span class="o">=</span> <span class="p">[</span> <span class="s">&#39;instance_of&#39;</span><span class="p">,</span> <span class="s">&#39;not_instance_of&#39;</span><span class="p">]</span>
+
+
+<span class="c">###################################################################################</span>
+<span class="c">### PolymorphicModel meta class</span>
+
+<div class="viewcode-block" id="PolymorphicModelBase"><a class="viewcode-back" href="../../auto_modules.html#polymorphic.base.PolymorphicModelBase">[docs]</a><span class="k">class</span> <span class="nc">PolymorphicModelBase</span><span class="p">(</span><span class="n">ModelBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Manager inheritance is a pretty complex topic which may need</span>
+<span class="sd">    more thought regarding how this should be handled for polymorphic</span>
+<span class="sd">    models.</span>
+
+<span class="sd">    In any case, we probably should propagate &#39;objects&#39; and &#39;base_objects&#39;</span>
+<span class="sd">    from PolymorphicModel to every subclass. We also want to somehow</span>
+<span class="sd">    inherit/propagate _default_manager as well, as it needs to be polymorphic.</span>
+
+<span class="sd">    The current implementation below is an experiment to solve this</span>
+<span class="sd">    problem with a very simplistic approach: We unconditionally</span>
+<span class="sd">    inherit/propagate any and all managers (using _copy_to_model),</span>
+<span class="sd">    as long as they are defined on polymorphic models</span>
+<span class="sd">    (the others are left alone).</span>
+
+<span class="sd">    Like Django ModelBase, we special-case _default_manager:</span>
+<span class="sd">    if there are any user-defined managers, it is set to the first of these.</span>
+
+<span class="sd">    We also require that _default_manager as well as any user defined</span>
+<span class="sd">    polymorphic managers produce querysets that are derived from</span>
+<span class="sd">    PolymorphicQuerySet.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="c">#print; print &#39;###&#39;, model_name, &#39;- bases:&#39;, bases</span>
+
+        <span class="c"># create new model</span>
+        <span class="n">new_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">call_superclass_new_method</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+
+        <span class="c"># check if the model fields are all allowed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate_model_fields</span><span class="p">(</span><span class="n">new_class</span><span class="p">)</span>
+
+        <span class="c"># create list of all managers to be inherited from the base classes</span>
+        <span class="n">inherited_managers</span> <span class="o">=</span> <span class="n">new_class</span><span class="o">.</span><span class="n">get_inherited_managers</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+
+        <span class="c"># add the managers to the new model</span>
+        <span class="k">for</span> <span class="n">source_name</span><span class="p">,</span> <span class="n">mgr_name</span><span class="p">,</span> <span class="n">manager</span> <span class="ow">in</span> <span class="n">inherited_managers</span><span class="p">:</span>
+            <span class="c">#print &#39;** add inherited manager from model %s, manager %s, %s&#39; % (source_name, mgr_name, manager.__class__.__name__)</span>
+            <span class="n">new_manager</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">_copy_to_model</span><span class="p">(</span><span class="n">new_class</span><span class="p">)</span>
+            <span class="n">new_class</span><span class="o">.</span><span class="n">add_to_class</span><span class="p">(</span><span class="n">mgr_name</span><span class="p">,</span> <span class="n">new_manager</span><span class="p">)</span>
+
+        <span class="c"># get first user defined manager; if there is one, make it the _default_manager</span>
+        <span class="n">user_manager</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_first_user_defined_manager</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">user_manager</span><span class="p">:</span>
+            <span class="n">def_mgr</span> <span class="o">=</span> <span class="n">user_manager</span><span class="o">.</span><span class="n">_copy_to_model</span><span class="p">(</span><span class="n">new_class</span><span class="p">)</span>
+            <span class="c">#print &#39;## add default manager&#39;, type(def_mgr)</span>
+            <span class="n">new_class</span><span class="o">.</span><span class="n">add_to_class</span><span class="p">(</span><span class="s">&#39;_default_manager&#39;</span><span class="p">,</span> <span class="n">def_mgr</span><span class="p">)</span>
+            <span class="n">new_class</span><span class="o">.</span><span class="n">_default_manager</span><span class="o">.</span><span class="n">_inherited</span> <span class="o">=</span> <span class="bp">False</span>   <span class="c"># the default mgr was defined by the user, not inherited</span>
+
+        <span class="c"># validate resulting default manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate_model_manager</span><span class="p">(</span><span class="n">new_class</span><span class="o">.</span><span class="n">_default_manager</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="s">&#39;_default_manager&#39;</span><span class="p">)</span>
+
+        <span class="c"># for __init__ function of this class (monkeypatching inheritance accessors)</span>
+        <span class="n">new_class</span><span class="o">.</span><span class="n">polymorphic_super_sub_accessors_replaced</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># determine the name of the primary key field and store it into the class variable</span>
+        <span class="c"># polymorphic_primary_key_name (it is needed by query.py)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">new_class</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">primary_key</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">!=</span><span class="n">models</span><span class="o">.</span><span class="n">OneToOneField</span><span class="p">:</span>
+                <span class="n">new_class</span><span class="o">.</span><span class="n">polymorphic_primary_key_name</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">name</span>
+                <span class="k">break</span>
+
+        <span class="k">return</span> <span class="n">new_class</span>
+
+<div class="viewcode-block" id="PolymorphicModelBase.get_inherited_managers"><a class="viewcode-back" href="../../auto_modules.html#polymorphic.base.PolymorphicModelBase.get_inherited_managers">[docs]</a>    <span class="k">def</span> <span class="nf">get_inherited_managers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return list of all managers to be inherited/propagated from the base classes;</span>
+<span class="sd">        use correct mro, only use managers with _inherited==False (they are of no use),</span>
+<span class="sd">        skip managers that are overwritten by the user with same-named class attributes (in attrs)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">add_managers</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">add_managers_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mro__</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span> <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s">&#39;polymorphic_model_marker&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span> <span class="k">continue</span> <span class="c"># leave managers of non-polym. models alone</span>
+
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">manager</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">manager</span><span class="p">)</span> <span class="o">==</span> <span class="n">models</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">ManagerDescriptor</span><span class="p">:</span> <span class="n">manager</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">manager</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">manager</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">):</span> <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;_base_manager&#39;</span><span class="p">]:</span> <span class="k">continue</span>       <span class="c"># let Django handle _base_manager</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span> <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">add_managers_keys</span><span class="p">:</span> <span class="k">continue</span>       <span class="c"># manager with that name already added, skip</span>
+                <span class="k">if</span> <span class="n">manager</span><span class="o">.</span><span class="n">_inherited</span><span class="p">:</span> <span class="k">continue</span>             <span class="c"># inherited managers (on the bases) have no significance, they are just copies</span>
+                <span class="c">#print &gt;&gt;sys.stderr,&#39;##&#39;,self.__name__, key</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">manager</span><span class="p">,</span> <span class="n">PolymorphicManager</span><span class="p">):</span> <span class="c"># validate any inherited polymorphic managers</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">validate_model_manager</span><span class="p">(</span><span class="n">manager</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                <span class="n">add_managers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">base</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">manager</span><span class="p">))</span>
+                <span class="n">add_managers_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">add_managers</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="PolymorphicModelBase.get_first_user_defined_manager"><a class="viewcode-back" href="../../auto_modules.html#polymorphic.base.PolymorphicModelBase.get_first_user_defined_manager">[docs]</a>    <span class="k">def</span> <span class="nf">get_first_user_defined_manager</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="n">mgr_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">):</span> <span class="k">continue</span>
+            <span class="n">mgr_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">val</span><span class="o">.</span><span class="n">creation_counter</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+        <span class="c"># if there are user defined managers, use first one as _default_manager</span>
+        <span class="k">if</span> <span class="n">mgr_list</span><span class="p">:</span>                        <span class="c">#</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">manager_name</span><span class="p">,</span> <span class="n">manager</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">mgr_list</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c">#sys.stderr.write( &#39;\n# first user defined manager for model &quot;{model}&quot;:\n#  &quot;{mgrname}&quot;: {mgr}\n#  manager model: {mgrmodel}\n\n&#39;</span>
+            <span class="c">#    .format( model=model_name, mgrname=manager_name, mgr=manager, mgrmodel=manager.model ) )</span>
+            <span class="k">return</span> <span class="n">manager</span>
+        <span class="k">return</span> <span class="bp">None</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="PolymorphicModelBase.call_superclass_new_method"><a class="viewcode-back" href="../../auto_modules.html#polymorphic.base.PolymorphicModelBase.call_superclass_new_method">[docs]</a>    <span class="k">def</span> <span class="nf">call_superclass_new_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;call __new__ method of super class and return the newly created class.</span>
+<span class="sd">        Also work around a limitation in Django&#39;s ModelBase.&quot;&quot;&quot;</span>
+        <span class="c"># There seems to be a general limitation in Django&#39;s app_label handling</span>
+        <span class="c"># regarding abstract models (in ModelBase). See issue 1 on github - TODO: propose patch for Django</span>
+        <span class="c"># We run into this problem if polymorphic.py is located in a top-level directory</span>
+        <span class="c"># which is directly in the python path. To work around this we temporarily set</span>
+        <span class="c"># app_label here for PolymorphicModel.</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;Meta&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">model_module_name</span> <span class="o">=</span> <span class="n">attrs</span><span class="p">[</span><span class="s">&#39;__module__&#39;</span><span class="p">]</span>
+        <span class="n">do_app_label_workaround</span> <span class="o">=</span> <span class="p">(</span><span class="n">meta</span>
+                                    <span class="ow">and</span> <span class="n">model_module_name</span> <span class="o">==</span> <span class="s">&#39;polymorphic&#39;</span>
+                                    <span class="ow">and</span> <span class="n">model_name</span> <span class="o">==</span> <span class="s">&#39;PolymorphicModel&#39;</span>
+                                    <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="s">&#39;app_label&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">do_app_label_workaround</span><span class="p">:</span> <span class="n">meta</span><span class="o">.</span><span class="n">app_label</span> <span class="o">=</span> <span class="s">&#39;poly_dummy_app_label&#39;</span>
+        <span class="n">new_class</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">PolymorphicModelBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">do_app_label_workaround</span><span class="p">:</span> <span class="k">del</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_class</span>
+</div>
+<div class="viewcode-block" id="PolymorphicModelBase.validate_model_fields"><a class="viewcode-back" href="../../auto_modules.html#polymorphic.base.PolymorphicModelBase.validate_model_fields">[docs]</a>    <span class="k">def</span> <span class="nf">validate_model_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;check if all fields names are allowed (i.e. not in POLYMORPHIC_SPECIAL_Q_KWORDS)&quot;</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">POLYMORPHIC_SPECIAL_Q_KWORDS</span><span class="p">:</span>
+                <span class="n">e</span> <span class="o">=</span> <span class="s">&#39;PolymorphicModel: &quot;</span><span class="si">%s</span><span class="s">&quot; - field name &quot;</span><span class="si">%s</span><span class="s">&quot; is not allowed in polymorphic models&#39;</span>
+                <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="n">e</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="p">)</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="PolymorphicModelBase.validate_model_manager"><a class="viewcode-back" href="../../auto_modules.html#polymorphic.base.PolymorphicModelBase.validate_model_manager">[docs]</a>    <span class="k">def</span> <span class="nf">validate_model_manager</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">manager</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">manager_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;check if the manager is derived from PolymorphicManager</span>
+<span class="sd">        and its querysets from PolymorphicQuerySet - throw AssertionError if not&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">manager</span><span class="p">),</span> <span class="n">PolymorphicManager</span><span class="p">):</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="s">&#39;PolymorphicModel: &quot;&#39;</span> <span class="o">+</span> <span class="n">model_name</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">manager_name</span> <span class="o">+</span> <span class="s">&#39;&quot; manager is of type &quot;&#39;</span> <span class="o">+</span> <span class="nb">type</span><span class="p">(</span><span class="n">manager</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span>
+            <span class="n">e</span> <span class="o">+=</span> <span class="s">&#39;&quot;, but must be a subclass of PolymorphicManager&#39;</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">manager</span><span class="p">,</span> <span class="s">&#39;queryset_class&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">manager</span><span class="o">.</span><span class="n">queryset_class</span><span class="p">,</span> <span class="n">PolymorphicQuerySet</span><span class="p">):</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="s">&#39;PolymorphicModel: &quot;&#39;</span> <span class="o">+</span> <span class="n">model_name</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">manager_name</span> <span class="o">+</span> <span class="s">&#39;&quot; (PolymorphicManager) has been instantiated with a queryset class which is&#39;</span>
+            <span class="n">e</span> <span class="o">+=</span> <span class="s">&#39; not a subclass of PolymorphicQuerySet (which is required)&#39;</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">manager</span>
+
+
+    <span class="c"># hack: a small patch to Django would be a better solution.</span>
+    <span class="c"># Django&#39;s management command &#39;dumpdata&#39; relies on non-polymorphic</span>
+    <span class="c"># behaviour of the _default_manager. Therefore, we catch any access to _default_manager</span>
+    <span class="c"># here and return the non-polymorphic default manager instead if we are called from &#39;dumpdata.py&#39;</span>
+    <span class="c"># (non-polymorphic default manager is &#39;base_objects&#39; for polymorphic models).</span>
+    <span class="c"># This way we don&#39;t need to patch django.core.management.commands.dumpdata</span>
+    <span class="c"># for all supported Django versions.</span>
+    <span class="c"># TODO: investigate Django how this can be avoided</span></div>
+    <span class="n">_dumpdata_command_running</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span> <span class="n">_dumpdata_command_running</span> <span class="o">=</span> <span class="p">(</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;dumpdata&#39;</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">==</span><span class="s">&#39;_default_manager&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dumpdata_command_running</span><span class="p">:</span>
+                <span class="n">frm</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="c"># frm[1] is caller file name, frm[3] is caller function name</span>
+                <span class="k">if</span> <span class="s">&#39;django/core/management/commands/dumpdata.py&#39;</span> <span class="ow">in</span> <span class="n">frm</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_objects</span>
+                <span class="c">#caller_mod_name = inspect.getmodule(frm[0]).__name__  # does not work with python 2.4</span>
+                <span class="c">#if caller_mod_name == &#39;django.core.management.commands.dumpdata&#39;:</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">PolymorphicModelBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__getattribute__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

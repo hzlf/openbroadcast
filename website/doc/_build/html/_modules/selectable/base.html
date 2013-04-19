@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>selectable.base &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for selectable.base</h1><div class="highlight"><pre>
+<span class="s">&quot;Base classes for lookup creation.&quot;</span>
+
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.core.paginator</span> <span class="kn">import</span> <span class="n">Paginator</span><span class="p">,</span> <span class="n">InvalidPage</span><span class="p">,</span> <span class="n">EmptyPage</span>
+<span class="kn">from</span> <span class="nn">django.core.urlresolvers</span> <span class="kn">import</span> <span class="n">reverse</span>
+<span class="kn">from</span> <span class="nn">django.core.serializers.json</span> <span class="kn">import</span> <span class="n">DjangoJSONEncoder</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponse</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">simplejson</span> <span class="k">as</span> <span class="n">json</span>
+<span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">smart_unicode</span>
+<span class="kn">from</span> <span class="nn">django.utils.html</span> <span class="kn">import</span> <span class="n">conditional_escape</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="kn">from</span> <span class="nn">selectable.forms</span> <span class="kn">import</span> <span class="n">BaseLookupForm</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s">&#39;LookupBase&#39;</span><span class="p">,</span>
+    <span class="s">&#39;ModelLookup&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="LookupBase"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.LookupBase">[docs]</a><span class="k">class</span> <span class="nc">LookupBase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="s">&quot;Base class for all django-selectable lookups.&quot;</span>
+
+    <span class="n">form</span> <span class="o">=</span> <span class="n">BaseLookupForm</span>
+
+    <span class="k">def</span> <span class="nf">_name</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="n">app_name</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__module__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">class_name</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s">u&#39;</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">app_name</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span>       
+        <span class="k">return</span> <span class="n">name</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="nb">classmethod</span><span class="p">(</span><span class="n">_name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_url</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;selectable-lookup&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">cls</span><span class="o">.</span><span class="n">name</span><span class="p">()])</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="nb">classmethod</span><span class="p">(</span><span class="n">_url</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LookupBase.get_query"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.LookupBase.get_query">[docs]</a>    <span class="k">def</span> <span class="nf">get_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">term</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="LookupBase.get_item_label"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.LookupBase.get_item_label">[docs]</a>    <span class="k">def</span> <span class="nf">get_item_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">smart_unicode</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LookupBase.get_item_id"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.LookupBase.get_item_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_item_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">smart_unicode</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LookupBase.get_item_value"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.LookupBase.get_item_value">[docs]</a>    <span class="k">def</span> <span class="nf">get_item_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">smart_unicode</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LookupBase.get_item"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.LookupBase.get_item">[docs]</a>    <span class="k">def</span> <span class="nf">get_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span>
+</div>
+<div class="viewcode-block" id="LookupBase.create_item"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.LookupBase.create_item">[docs]</a>    <span class="k">def</span> <span class="nf">create_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="LookupBase.format_item"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.LookupBase.format_item">[docs]</a>    <span class="k">def</span> <span class="nf">format_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+         <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;id&#39;</span><span class="p">:</span> <span class="n">conditional_escape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_item_id</span><span class="p">(</span><span class="n">item</span><span class="p">)),</span>
+            <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">conditional_escape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_item_value</span><span class="p">(</span><span class="n">item</span><span class="p">)),</span>
+            <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="n">conditional_escape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_item_label</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+        <span class="p">}</span>
+</div>
+<div class="viewcode-block" id="LookupBase.paginate_results"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.LookupBase.paginate_results">[docs]</a>    <span class="k">def</span> <span class="nf">paginate_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
+        <span class="n">paginator</span> <span class="o">=</span> <span class="n">Paginator</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">page</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;page&#39;</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">page</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">paginator</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">EmptyPage</span><span class="p">,</span> <span class="n">InvalidPage</span><span class="p">):</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">paginator</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="n">paginator</span><span class="o">.</span><span class="n">num_pages</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">results</span>
+</div>
+<div class="viewcode-block" id="LookupBase.results"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.LookupBase.results">[docs]</a>    <span class="k">def</span> <span class="nf">results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">term</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;term&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">limit</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;limit&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">raw_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_query</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">term</span><span class="p">)</span>
+            <span class="n">page_data</span> <span class="o">=</span> <span class="bp">None</span>      
+            <span class="k">if</span> <span class="n">limit</span><span class="p">:</span>
+                <span class="n">page_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">paginate_results</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">raw_data</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+                <span class="n">raw_data</span> <span class="o">=</span> <span class="n">page_data</span><span class="o">.</span><span class="n">object_list</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">raw_data</span><span class="p">:</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">format_item</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">page_data</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">page_data</span><span class="p">,</span> <span class="s">&#39;has_next&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">page_data</span><span class="o">.</span><span class="n">has_next</span><span class="p">():</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s">&#39;id&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                    <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                    <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Show more results&#39;</span><span class="p">),</span>
+                    <span class="s">&#39;page&#39;</span><span class="p">:</span> <span class="n">page_data</span><span class="o">.</span><span class="n">next_page_number</span><span class="p">()</span>
+                <span class="p">})</span>        
+        <span class="n">content</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">DjangoJSONEncoder</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s">&#39;application/json&#39;</span><span class="p">)</span>    
+
+</div></div>
+<div class="viewcode-block" id="ModelLookup"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.ModelLookup">[docs]</a><span class="k">class</span> <span class="nc">ModelLookup</span><span class="p">(</span><span class="n">LookupBase</span><span class="p">):</span>
+    <span class="s">&quot;Lookup class for easily defining lookups based on Django models.&quot;</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">filters</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">search_fields</span> <span class="o">=</span> <span class="p">()</span>
+
+<div class="viewcode-block" id="ModelLookup.get_query"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.ModelLookup.get_query">[docs]</a>    <span class="k">def</span> <span class="nf">get_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">term</span><span class="p">):</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_queryset</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">term</span><span class="p">:</span>
+            <span class="n">search_filters</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_fields</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_fields</span><span class="p">:</span>
+                    <span class="n">search_filters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Q</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">field</span><span class="p">:</span> <span class="n">term</span><span class="p">}))</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">or_</span><span class="p">,</span> <span class="n">search_filters</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">qs</span>
+</div>
+<div class="viewcode-block" id="ModelLookup.get_queryset"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.ModelLookup.get_queryset">[docs]</a>    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_default_manager</span><span class="o">.</span><span class="n">get_query_set</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">:</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">qs</span>
+</div>
+<div class="viewcode-block" id="ModelLookup.get_item_id"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.ModelLookup.get_item_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_item_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">item</span><span class="o">.</span><span class="n">pk</span>
+</div>
+<div class="viewcode-block" id="ModelLookup.get_item"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.ModelLookup.get_item">[docs]</a>    <span class="k">def</span> <span class="nf">get_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_queryset</span><span class="p">()</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">value</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">item</span>
+</div>
+<div class="viewcode-block" id="ModelLookup.create_item"><a class="viewcode-back" href="../../auto_modules.html#selectable.base.ModelLookup.create_item">[docs]</a>    <span class="k">def</span> <span class="nf">create_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_fields</span><span class="p">:</span>
+            <span class="n">field_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;__\w+$&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">search_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">field_name</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">field_name</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

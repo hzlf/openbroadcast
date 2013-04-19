@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>compressor.css &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for compressor.css</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">compressor.base</span> <span class="kn">import</span> <span class="n">Compressor</span><span class="p">,</span> <span class="n">SOURCE_HUNK</span><span class="p">,</span> <span class="n">SOURCE_FILE</span>
+<span class="kn">from</span> <span class="nn">compressor.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">compressor.exceptions</span> <span class="kn">import</span> <span class="n">UncompressableFileError</span>
+
+
+<div class="viewcode-block" id="CssCompressor"><a class="viewcode-back" href="../../auto_modules.html#compressor.css.CssCompressor">[docs]</a><span class="k">class</span> <span class="nc">CssCompressor</span><span class="p">(</span><span class="n">Compressor</span><span class="p">):</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&quot;compressor/css.html&quot;</span>
+    <span class="n">template_name_inline</span> <span class="o">=</span> <span class="s">&quot;compressor/css_inline.html&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">output_prefix</span><span class="o">=</span><span class="s">&quot;css&quot;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CssCompressor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">,</span>
+            <span class="n">output_prefix</span><span class="o">=</span><span class="n">output_prefix</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">COMPRESS_CSS_FILTERS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">output_prefix</span>
+
+<div class="viewcode-block" id="CssCompressor.split_contents"><a class="viewcode-back" href="../../auto_modules.html#compressor.css.CssCompressor.split_contents">[docs]</a>    <span class="k">def</span> <span class="nf">split_contents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_content</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_content</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">media_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">css_elems</span><span class="p">():</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">elem_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">elem_name</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+            <span class="n">elem_attribs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">elem_attribs</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">elem_name</span> <span class="o">==</span> <span class="s">&#39;link&#39;</span> <span class="ow">and</span> <span class="n">elem_attribs</span><span class="p">[</span><span class="s">&#39;rel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;stylesheet&#39;</span><span class="p">:</span>
+                <span class="n">basename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_basename</span><span class="p">(</span><span class="n">elem_attribs</span><span class="p">[</span><span class="s">&#39;href&#39;</span><span class="p">])</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_filename</span><span class="p">(</span><span class="n">basename</span><span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="n">SOURCE_FILE</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">elem</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">elem_name</span> <span class="o">==</span> <span class="s">&#39;style&#39;</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="n">SOURCE_HUNK</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">elem_content</span><span class="p">(</span><span class="n">elem</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="n">elem</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">split_content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">media</span> <span class="o">=</span> <span class="n">elem_attribs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;media&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                <span class="c"># Append to the previous node if it had the same media type,</span>
+                <span class="c"># otherwise create a new node.</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">media_nodes</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">media_nodes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">media</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">media_nodes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split_content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">node</span> <span class="o">=</span> <span class="n">CssCompressor</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">elem_str</span><span class="p">(</span><span class="n">elem</span><span class="p">),</span>
+                                         <span class="n">context</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">split_content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">media_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">media</span><span class="p">,</span> <span class="n">node</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_content</span>
+</div>
+<div class="viewcode-block" id="CssCompressor.output"><a class="viewcode-back" href="../../auto_modules.html#compressor.css.CssCompressor.output">[docs]</a>    <span class="k">def</span> <span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">COMPRESS_ENABLED</span> <span class="ow">or</span> <span class="n">settings</span><span class="o">.</span><span class="n">COMPRESS_PRECOMPILERS</span> <span class="ow">or</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;forced&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)):</span>
+            <span class="c"># Populate self.split_content</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">split_contents</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;media_nodes&#39;</span><span class="p">):</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">media</span><span class="p">,</span> <span class="n">subnode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">media_nodes</span><span class="p">:</span>
+                    <span class="n">subnode</span><span class="o">.</span><span class="n">extra_context</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s">&#39;media&#39;</span><span class="p">:</span> <span class="n">media</span><span class="p">})</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subnode</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+                <span class="k">return</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">CssCompressor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -82,7 +82,7 @@ var ImportfileApp = function() {
 		$("input.autocomplete", self.container).live('keyup focus', function (e) {
 			
 			var q = $(this).val();
-			var ct = $(this).attr('data-ac_ct');
+			var ct = $(this).attr('data-ct');
 			var target = $('.ac-result', $(this).parent());
 			
 
@@ -98,7 +98,7 @@ var ImportfileApp = function() {
 		$("input.autocomplete", self.container).live('blur', function (e) {
 			
 			var q = $(this).val();
-			var ct = $(this).attr('data-ac_ct');
+			var ct = $(this).attr('data-ct');
 			var target = $('.ac-result', $(this).parent());
 
 			target.fadeOut(200);
@@ -107,20 +107,51 @@ var ImportfileApp = function() {
 			}, 200);
 			target.fadeIn(1);
 			
-			// TODO: not sure about this?
+			
+			// apply to local data first (to allow tabbing)
+			// TODO: implementation
+
+			
+
 			setTimeout(function() {
 				if(! self.api_lock) {
 
 					var import_tag = self.local_data.import_tag;
 			
+					/**/
 					if(ct == 'release') {
 						import_tag['release'] = q;
 						delete import_tag['alibrary_release_id'];
 					}
+			
+					if(ct == 'artist') {
+						import_tag['artist'] = q;
+						delete import_tag['alibrary_artist_id'];
+					}
+					
 					
 					debug.debug('blur', name, ct);
 					
 					self.set_import_tag(import_tag);
+				}
+			}, 200);
+			
+		});
+		$("input.autoupdate", self.container).live('blur', function (e) {
+			
+			var value = $(this).val();
+			var ct = $(this).attr('data-ct');
+
+			if(ct == 'media') {
+				self.local_data.import_tag['name'] = value
+			}
+
+			setTimeout(function() {
+				if(! self.api_lock) {
+
+					var import_tag = self.local_data.import_tag;
+					self.set_import_tag(import_tag);
+					
 				}
 			}, 200);
 			
@@ -187,6 +218,50 @@ var ImportfileApp = function() {
 		
 		
 		
+		$('.rescan', self.container).live('click', function(e) {
+			
+			e.preventDefault();
+
+			var settings = {
+				skip_tracknumber: false
+			};
+			var extra_settings = $(this).data('settings');
+			
+			if(extra_settings) {
+				extra_settings = extra_settings.replace(/\s+/g, '').split(',');
+				$.each(extra_settings, function(i, key) {
+					if(key == 'skip_tracknumber') {
+						settings.skip_tracknumber = true;
+					}
+				});
+			}
+			
+			
+			var data = { 
+				status: 0,
+				settings: settings
+			};
+			
+			debug.debug(data);
+			
+			/**/
+			$.ajax({
+				type: "PUT",
+				url: self.api_url,
+				dataType: "application/json",
+				contentType: 'application/json',
+				processData:  false,
+				data: JSON.stringify(data),
+				success: function(data) {
+					debug.debug(data);					
+				}
+			});
+			
+
+		});
+		
+		
+		
 		$('.delete-importfile', self.container).live('click', function(e) {
 			
 			$.ajax({
@@ -199,6 +274,35 @@ var ImportfileApp = function() {
 					self.container.fadeOut(200);				
 				}
 			});
+
+		});
+		
+		
+		
+		$('.apply-to-all', self.container).live('click', function(e) {
+			
+			e.preventDefault();
+			var url = self.importer.api_url + 'apply-to-all/';
+			var data = {
+				item_id: self.local_data.id,
+				ct: $(this).attr('data-ct'),
+			}
+			
+			// data = JSON.stringify(data);
+			
+			/**/
+			$.ajax({
+				type: "POST",
+				url: url,
+				dataType: "application/json",
+				contentType: 'application/json',
+				processData:  true,
+				data: data,
+				success: function(data) {
+					debug.debug(data);					
+				}
+			});
+			
 
 		});
 		
@@ -318,6 +422,7 @@ var ImportfileApp = function() {
 	this.set_import_tag = function(import_tag) {
 	
 		debug.debug('ImportfileApp - set_import_tag');
+		// debug.debug(import_tag)
 		
 		self.api_lock = true;
 		

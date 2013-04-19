@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>haystack.constants &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for haystack.constants</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+
+<span class="n">DEFAULT_ALIAS</span> <span class="o">=</span> <span class="s">&#39;default&#39;</span>
+
+<span class="c"># Reserved field names</span>
+<span class="n">ID</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;HAYSTACK_ID_FIELD&#39;</span><span class="p">,</span> <span class="s">&#39;id&#39;</span><span class="p">)</span>
+<span class="n">DJANGO_CT</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;HAYSTACK_DJANGO_CT_FIELD&#39;</span><span class="p">,</span> <span class="s">&#39;django_ct&#39;</span><span class="p">)</span>
+<span class="n">DJANGO_ID</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;HAYSTACK_DJANGO_ID_FIELD&#39;</span><span class="p">,</span> <span class="s">&#39;django_id&#39;</span><span class="p">)</span>
+
+<span class="c"># Default operator. Valid options are AND/OR.</span>
+<span class="n">DEFAULT_OPERATOR</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;HAYSTACK_DEFAULT_OPERATOR&#39;</span><span class="p">,</span> <span class="s">&#39;AND&#39;</span><span class="p">)</span>
+
+<span class="c"># Valid expression extensions.</span>
+<span class="n">VALID_FILTERS</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s">&#39;contains&#39;</span><span class="p">,</span> <span class="s">&#39;exact&#39;</span><span class="p">,</span> <span class="s">&#39;gt&#39;</span><span class="p">,</span> <span class="s">&#39;gte&#39;</span><span class="p">,</span> <span class="s">&#39;lt&#39;</span><span class="p">,</span> <span class="s">&#39;lte&#39;</span><span class="p">,</span> <span class="s">&#39;in&#39;</span><span class="p">,</span> <span class="s">&#39;startswith&#39;</span><span class="p">,</span> <span class="s">&#39;range&#39;</span><span class="p">])</span>
+<span class="n">FILTER_SEPARATOR</span> <span class="o">=</span> <span class="s">&#39;__&#39;</span>
+
+<span class="c"># The maximum number of items to display in a SearchQuerySet.__repr__</span>
+<span class="n">REPR_OUTPUT_SIZE</span> <span class="o">=</span> <span class="mi">20</span>
+
+<span class="c"># Number of SearchResults to load at a time.</span>
+<span class="n">ITERATOR_LOAD_PER_QUERY</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;HAYSTACK_ITERATOR_LOAD_PER_QUERY&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="c"># A marker class in the hierarchy to indicate that it handles search data.</span>
+<div class="viewcode-block" id="Indexable"><a class="viewcode-back" href="../../auto_modules.html#haystack.constants.Indexable">[docs]</a><span class="k">class</span> <span class="nc">Indexable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">haystack_use_for_indexing</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="c"># For the geo bits, since that&#39;s what Solr &amp; Elasticsearch seem to silently</span>
+<span class="c"># assume...</span></div>
+<span class="n">WGS_84_SRID</span> <span class="o">=</span> <span class="mi">4326</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

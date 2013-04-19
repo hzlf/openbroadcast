@@ -4,9 +4,12 @@ from mutagen.id3 import ID3
 
 from django.conf import settings
 
+import os
+import re
 import locale
 import acoustid
 import requests
+import pprint
 
 from xml.etree import ElementTree as ET
 import simplejson
@@ -69,6 +72,8 @@ class Process(object):
         musicbrainzngs.set_useragent("NRG Processor", "0.01", "http://anorg.net/")
         musicbrainzngs.set_rate_limit(MUSICBRAINZ_RATE_LIMIT)
         
+        self.pp = pprint.PrettyPrinter(indent=4)
+        
         if MUSICBRAINZ_HOST:
             musicbrainzngs.set_hostname(MUSICBRAINZ_HOST)
     
@@ -77,9 +82,6 @@ class Process(object):
         sha1 = sha1_by_file(file)
         print 'SHA1: %s' % sha1
         try:
-            print '********************'
-            print '* Duplicate by SHA1'
-            print '********************'
             return Media.objects.filter(master_sha1=sha1)[0].pk
         except:
             return None
@@ -125,12 +127,19 @@ class Process(object):
     
     
     def extract_metadata(self, file):
+        
+
+        log = logging.getLogger('importer.process.extract_metadata')
+        log.info('Extracting metadata for: %s' % (file.path))
+        
         enc = locale.getpreferredencoding()
         
         try:
             meta = EasyID3(file.path)
+            log.debug('using EasyID3')
         except Exception, e:
             meta = MutagenFile(file.path)
+            log.debug('using MutagenFile')
 
         
         dataset = dict(METADATA_SET)
@@ -170,6 +179,26 @@ class Process(object):
         except Exception, e:
             print e
            
+           
+           
+        # try to extract tracknumber from filename
+        if 'media_tracknumber' in dataset and not dataset['media_tracknumber']:
+            
+            t_num = None
+            
+            path, filename = os.path.split(file.path)
+            log.info('Looking for number in filename: %s' % filename)
+
+            
+            match = re.search("\A\d+", filename)
+            
+            try:
+                if match:
+                    t_num = int(match.group(0))
+            except:
+                pass
+            
+            dataset['media_tracknumber'] = t_num
            
             
         # Artist
@@ -282,6 +311,11 @@ class Process(object):
     
     def get_aid(self, file):
         
+
+        log = logging.getLogger('importer.process.get_aid')
+        log.info('Lookup acoustid for: %s' % (file.path))
+        
+        
         data = acoustid.match(AC_API_KEY, file.path)
         
         res = []
@@ -295,45 +329,489 @@ class Process(object):
                  'id': d[1],
                  'selected': selected,
                  }
+
+            log.info('got result - score: %s | mb_id: %s' % (d[0], d[1]))
             res.append(t)
             i += 1
-            
 
-        
-        print
-        print '### ACOUSTID LOOKUP ###'
-        
-        print res
-        
-        print
-        print
-            
         return res
 
-        
-    """
-    get all 'recordings' from musicbrainz
-    """
+       
     def get_musicbrainz(self, obj):
-
-        results = []
-
-        includes = ['releases','artists']
         
-        for e in obj.results_acoustid:
-            media_id = e['id']
+        log = logging.getLogger('importer.process.get_musicbrainz')
+        log.info('Lookup musicbrainz for importfile id: %s' % obj.pk)
 
-            try:
-                result = musicbrainzngs.get_recording_by_id(id=media_id, includes=includes)
-                results.append(result)
-            except Exception, e:
-                print e
-                pass
+
+        """
+        trying to get the tracknumber
+        """
+        tracknumber = None
+        releasedate = None
+        
+        """
+        try loading settings
+        """
+        skip_tracknumber = obj.settings.get('skip_tracknumber', False)
+        
+        
+        """"""
+        try:
+            tracknumber = obj.results_tag['media_tracknumber']
+            log.debug('Got tracknumber: %s' % tracknumber)
+        except Exception, e:
+            log.debug('Unable to get tracknumber') 
             
-        # pass results to have them filled up
-        results = self.complete_musicbrainz(results)    
+        try:
+            releasedate = obj.results_tag['release_date']
+            log.debug('Got releasedate: %s' % releasedate)
+        except Exception, e:
+            log.debug('Unable to get releasedate') 
         
-        return results
+            
+        # tracknumber = 5
+        
+        """
+         - loop recording ids
+         - query by it and tracknumber (if available)
+         - sort releases by date
+         
+        release entry looks as following:
+         
+        {
+            id: "12a0eabc-28ee-3ac6-834d-390861f0f20c",
+            title: "Live!",
+            status: "Official",
+            release-group: {
+                id: "90eb5951-1225-35bc-9ef0-0845ac3c81aa",
+                primary-type: "Album",
+                secondary-types: [
+                    "Live"
+                ]
+            },
+            date: "1995",
+            country: "GB",
+            track-count: 30,
+            media: [
+                {
+                    position: 2,
+                    format: "CD",
+                    track: [
+                        {
+                            number: "3",
+                            title: "Walking in Your Footsteps",
+                            length: 295000
+                        }
+                    ],
+                    track-count: 15,
+                    track-offset: 2
+                }
+            ]
+        }
+        
+        """
+        releases = []
+        for e in obj.results_acoustid:
+            recording_id = e['id']
+            print recording_id
+        
+            """
+            search query e.g.:
+            http://www.musicbrainz.org/ws/2/recording/?query=rid:1e701b4e-2b6e-4509-af29-b8df2cdc8225%20AND%20number:3&fmt=json
+            """
+            
+            url = 'http://%s/ws/2/recording/?fmt=json&query=rid:%s' % (MUSICBRAINZ_HOST, recording_id)
+            
+            if tracknumber and not skip_tracknumber:
+                url = '%s%s%s' % (url, '%20AND%20number:', tracknumber)
+            
+            """    
+            if releasedate:
+                url = '%s%s%s' % (url, '%20AND%20date:', releasedate)
+            """
+            
+            log.info('API url for request: %s' % url)
+            r = requests.get(url)
+            
+            result = r.json()
+            
+            print 'try recording'
+            if 'recording' in result:
+                print 'got recording: %s' % recording_id
+                if len(result['recording']) > 0:
+                    if 'releases' in result['recording'][0]:
+                        
+                        
+                        """
+                        fix missing dates
+                        """
+                        for r in result['recording'][0]['releases']:
+                            # dummy-date - sorry, none comes first else.
+                            if 'date' not in r:
+                                r['date'] = '9999'
+                                
+                        
+                        """
+                        try to get the first one, by date
+                        """
+                        try:
+                            sorted_releases = sorted(result['recording'][0]['releases'], key=lambda k: k['date'])
+                            release = sorted_releases[0]
+                            log.debug('Sorting OK!')
+                            # reset dummy-date
+                            if release['date'] == '9999':
+                                release['date'] = None
+                            log.debug('First Date: %s' % release['date'])
+                        except Exception, e:
+                            log.warning('Unable to sort by date: %s' % e)
+
+                            
+                            sorted_releases = result['recording'][0]['releases']
+                            
+                            
+                        selected_releases = []
+                        if len(sorted_releases) > 1:
+                            
+                            """
+                            Append releases with unique names
+                            """
+                            count = 0
+                            current_names = []
+                            for t_rel in sorted_releases:
+                                if not t_rel['title'] in current_names and count < 5:
+                                    #print 'FRESH NAME: %s' % t_rel['title']
+                                    current_names.append(t_rel['title'])
+                                    selected_releases.append(t_rel)
+                                    count += 1
+                                #else:
+                                    #print 'NAME ALREADY HERE: %s' % t_rel['title']
+                                    
+                            
+                            """
+                            if len(sorted_releases) > 3:
+                                limit = 3
+                            else:
+                                limit = len(sorted_releases) 
+                            for i in range(limit):
+                                selected_releases.append(sorted_releases[i])
+                            """ 
+                                
+                        else:
+                            selected_releases.append(sorted_releases[0])
+                            
+                              
+                              
+                        for selected_release in selected_releases:
+                            
+                            selected_release['artist'] = result['recording'][0]['artist-credit'][0]['artist']
+                            selected_release['recording'] = result['recording'][0]
+                            try:
+                                selected_release['recording']['releases'] = None
+                            except Exception, e:
+                                print e
+                            
+                            
+                            if releasedate and 1 == 2:
+                                print 'HAVE RELEASEDATE: %s' % releasedate
+                                s_rd = releasedate[0:4]
+                                t_rd = selected_release['date'][0:4]
+                                
+                                print 'dates: %s | %s' % (s_rd, t_rd)
+                                
+                                if s_rd == t_rd:
+                                    releases.append(selected_release)
+                                else:
+                                    print 'DATE MISMATCH'
+                            
+                            else:
+                                releases.append(selected_release)
+                              
+                
+                        """
+                        release['artist'] = result['recording'][0]['artist-credit'][0]['artist']
+                        release['recording'] = result['recording'][0]
+                        try:
+                            release['recording']['releases'] = None
+                        except Exception, e:
+                            print e
+                                                
+                        releases.append(release)
+                        
+                        
+                        if recording_id == '2b650c75-f24b-4988-be92-bde220277488':
+                            print '###############################################'
+                            self.pp.pprint(selected_release)
+                            print '###############################################'
+                        """
+
+            
+            
+
+        
+        releases = self.complete_releases(releases)
+        releases = self.format_releases(releases)
+        
+        self.pp.pprint(releases)
+        
+        return releases
+
+
+        
+        
+    def complete_releases(self, releases):
+        
+
+        log = logging.getLogger('importer.process.complete_releases')
+        log.info('Got %s releases to complete' % len(releases))
+        
+        completed_releases = []
+        
+        for release in releases:
+            if release['id'] in completed_releases:
+                log.debug('already completed release with id: %s' % release['id'])
+                releases.remove(release)
+                
+            else:
+                log.debug('complete release with id: %s' % release['id'])
+                
+                r_id = release['id']
+                rg_id = release['release-group']['id']
+                
+                print 'r_id: %s' % r_id
+                print 'rg_id: %s' % rg_id
+                
+                
+                release['label'] = None
+                release['catalog-number'] = None
+                release['discogs_url'] = None
+                release['discogs_master_url'] = None
+                release['discogs_image'] = None
+                
+                
+                """
+                get release details
+                """
+                inc = ('labels', 'artists', 'url-rels', 'label-rels',)
+                url = 'http://%s/ws/2/release/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, r_id, "+".join(inc))
+                
+                r = requests.get(url)
+                result = r.json()
+                #self.pp.pprint(result)
+
+                # only apply label info if unique
+                if 'label-info' in result and len(result['label-info']) == 1:
+                    if 'label' in result['label-info'][0]:
+                        release['label'] = result['label-info'][0]['label']
+                    if 'catalog-number' in result['label-info'][0]:
+                        release['catalog-number'] = result['label-info'][0]['catalog-number']
+                    
+                # try to get discogs url
+                if 'relations' in result:
+                    for relation in result['relations']:
+                        if relation['type'] == 'discogs':
+                            log.debug('got discogs url from release: %s' % relation['url'])
+                            release['discogs_url'] = relation['url']
+                
+                
+                
+                """
+                get release-group details
+                """
+                inc = ('url-rels',)
+                url = 'http://%s/ws/2/release-group/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, rg_id, "+".join(inc))
+                
+                r = requests.get(url)
+                result = r.json()
+                #self.pp.pprint(result)
+                    
+                # try to get discogs master-url
+                if 'relations' in result:
+                    for relation in result['relations']:
+                        if relation['type'] == 'discogs':
+                            log.debug('got discogs url from release: %s' % relation['url'])
+                            release['discogs_master_url'] = relation['url']
+                        
+                        
+                        
+                        
+                """
+                assign cover image (if available)
+                """
+                if release['discogs_url']:
+                    try:
+                        release['discogs_image'] = discogs_image_by_url(release['discogs_url'], 'uri150')
+                    except:
+                        pass
+                    
+                if not release['discogs_image']:
+                    try:
+                        release['discogs_image'] = discogs_image_by_url(release['discogs_master_url'], 'uri150')
+                    except:
+                        pass
+                """
+                finally try to get image from coverartarchive.org
+                """
+                if not release['discogs_image']:
+                    url = 'http://coverartarchive.org/release/%s' % r_id
+                    try:    
+                        r = requests.get(url)
+                        result = r.json()
+                        release['discogs_image'] = result['images'][0]['image']
+                    except:
+                        pass
+                    
+
+                
+                completed_releases.append(release['id'])
+            
+        
+        
+        return releases
+    
+    
+    """
+    formatting method, to have easy to use variables on client side
+    """
+    def format_releases(self, releases):
+
+        log = logging.getLogger('importer.process.format_releases')
+        log.info('Got %s releases to complete' % len(releases))
+        
+        formatted_releases = []
+        
+        completed_releases = []
+        
+        
+        for release in releases:
+            
+            if release['id'] in completed_releases:
+                log.debug('already formated release with id: %s' % release['id'])
+                
+            else:
+            
+                log.debug('formating release with id: %s' % release['id'])
+                completed_releases.append(release['id'])
+                
+                self.pp.pprint(release)
+                
+                # release
+                r = {}
+                r['mb_id'] = None
+                r['name'] = None
+                r['status'] = None
+                r['releasedate'] = None
+                r['catalognumber'] = None
+                r['country'] = None
+                r['asin'] = None
+                r['barcode'] = None
+                
+                if 'id' in release:
+                    r['mb_id'] = release['id']
+                
+                if 'title' in release:
+                    r['name'] = release['title']
+                
+                if 'status' in release:
+                    r['status'] = release['status']
+                
+                if 'date' in release:
+                    r['releasedate'] = release['date']
+                
+                if 'country' in release:
+                    r['country'] = release['country']
+                
+                if 'catalog-number' in release:
+                    r['catalognumber'] = release['catalog-number']
+                
+                
+                # media
+                m = {}
+                m['mb_id'] = None
+                m['name'] = None
+                m['duration'] = None
+                
+                if 'recording' in release and release['recording']:
+                    
+                    if 'title' in release['recording']:
+                        m['name'] = release['recording']['title']
+                        
+                    if 'id' in release['recording']:
+                        m['mb_id'] = release['recording']['id']
+                        
+                    if 'length' in release['recording']:
+                        m['duration'] = release['recording']['length']
+                
+                
+                
+                
+                # artist
+                a = {}
+                a['mb_id'] = None
+                a['name'] = None
+                
+                if 'artist' in release and release['artist']:
+                    
+                    if 'name' in release['artist']:
+                        a['name'] = release['artist']['name']
+                        
+                    if 'id' in release['artist']:
+                        a['mb_id'] = release['artist']['id']
+    
+                
+                
+                
+                # label
+                l = {}
+                l['mb_id'] = None
+                l['name'] = None
+                l['code'] = None
+                
+                
+                if 'label' in release and release['label']:
+                    
+                    if 'name' in release['label']:
+                        l['name'] = release['label']['name']
+                        
+                    if 'id' in release['label']:
+                        l['mb_id'] = release['label']['id']
+                        
+                    if 'label-code' in release['label']:
+                        l['code'] = release['label']['label-code']
+                
+    
+                
+                
+    
+                
+                
+                # relation mapping
+                rel = {}
+                rel['discogs_url'] = None
+                rel['discogs_image'] = None
+                
+                if 'discogs_image' in release and release['discogs_image']:
+                    rel['discogs_image'] = release['discogs_image']
+                
+                if 'discogs_url' in release and release['discogs_url']:
+                    rel['discogs_url'] = release['discogs_url']
+                    
+                elif 'discogs_master_url' in release and release['discogs_master_url']:
+                    rel['discogs_url'] = release['discogs_master_url']
+                
+                
+                
+                
+                r['media'] = m
+                r['artist'] = a
+                r['label'] = l
+                r['relations'] = rel
+    
+    
+                formatted_releases.append(r)
+            
+            
+        return formatted_releases
+    
     
     
     
@@ -660,68 +1138,7 @@ class Process(object):
         
         
         return releases
-    
-    
 
-    
-    
-    
-    def complete_musicbrainz__(self, results):
-        
-        completed_results = []
-        
-        i = 0
-        
-        for r in results:
-            
-            if i > 3:
-                #pass
-                break
-            
-            i+=1
-            
-            print
-            print 'RESULT'
-            
-            
-            releases = []
-            
-            recording = r['recording']
-            for release in recording['release-list']:
-                
-                #print release['id']
-                
-                release = musicbrainzngs.get_release_by_id(id=release['id'], includes=['url-rels', 'release-groups'])
-                
-                #print 'RELEASE!:::::::::::::::::::::::::::::::::::::::::::::::::'
-                #print release
-                
-                relations = []
-                
-                try:
-                    for relation in release['release']['url-relation-list']:
-                        #print "Relation: target: %s - url: %s" % (relation['type'], relation['target'])
-                        relations.append(relation)
-                        
-                except Exception, e:
-                    #print e
-                    pass
-                
-                release['relations'] = relations
-                    
-                releases.append(release)
-                
-
-            # order releases by date
-            releases = self.mb_order_by_releasedate(releases)
-            
-            r['release-list'] = releases 
-            
-            completed_results.append(r)
-            
-                    
-        return completed_results
-        
 
     def mb_order_by_releasedate(self, releases):
         
@@ -738,6 +1155,7 @@ class Process(object):
         
 
         
-        
+if __name__ == '__main__':
+    print "Hello World again from %s!" % __name__
         
         

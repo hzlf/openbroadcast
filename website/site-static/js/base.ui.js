@@ -513,7 +513,7 @@ base.ui.iface = function() {
 	// add class to external links	
 	$('body').bind('DOMSubtreeModified', function(e) {
 	  if (e.target.innerHTML.length > 0) {
-		$("a").filter(function() {
+		$("a:not(.skip-external)").filter(function() {
 		    return this.hostname && this.hostname !== location.hostname;
 		})
 		.addClass('external')
@@ -1583,8 +1583,8 @@ base.ui.itemview = function() {
 	// zoomable images
 	var zoomable_defaults = {
 		transition : "none",
-		width : "360px",
-		height : "360px"
+		width : "520px",
+		height : "520px"
 	};
 	$("a.zoomable").colorbox(zoomable_defaults);
 	

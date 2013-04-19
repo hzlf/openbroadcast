@@ -1,0 +1,383 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django_filters.filterset &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for django_filters.filterset</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.db.models.fields</span> <span class="kn">import</span> <span class="n">FieldDoesNotExist</span>
+<span class="kn">from</span> <span class="nn">django.db.models.related</span> <span class="kn">import</span> <span class="n">RelatedObject</span>
+<span class="kn">from</span> <span class="nn">django.db.models.sql.constants</span> <span class="kn">import</span> <span class="n">LOOKUP_SEP</span>
+<span class="kn">from</span> <span class="nn">django.utils.datastructures</span> <span class="kn">import</span> <span class="n">SortedDict</span>
+<span class="kn">from</span> <span class="nn">django.utils.text</span> <span class="kn">import</span> <span class="n">capfirst</span>
+
+<span class="kn">from</span> <span class="nn">django_filters.filters</span> <span class="kn">import</span> <span class="n">Filter</span><span class="p">,</span> <span class="n">CharFilter</span><span class="p">,</span> <span class="n">BooleanFilter</span><span class="p">,</span> \
+    <span class="n">ChoiceFilter</span><span class="p">,</span> <span class="n">DateFilter</span><span class="p">,</span> <span class="n">DateTimeFilter</span><span class="p">,</span> <span class="n">TimeFilter</span><span class="p">,</span> <span class="n">ModelChoiceFilter</span><span class="p">,</span> \
+    <span class="n">ModelMultipleChoiceFilter</span><span class="p">,</span> <span class="n">NumberFilter</span>
+
+<span class="n">ORDER_BY_FIELD</span> <span class="o">=</span> <span class="s">&#39;o&#39;</span>
+
+<div class="viewcode-block" id="get_declared_filters"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filterset.get_declared_filters">[docs]</a><span class="k">def</span> <span class="nf">get_declared_filters</span><span class="p">(</span><span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="n">with_base_filters</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">filters</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">filter_name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Filter</span><span class="p">):</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">filter_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">filter_name</span>
+            <span class="n">filters</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">filter_name</span><span class="p">,</span> <span class="n">obj</span><span class="p">))</span>
+    <span class="n">filters</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">creation_counter</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">with_base_filters</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s">&#39;base_filters&#39;</span><span class="p">):</span>
+                <span class="n">filters</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">base_filters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">filters</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s">&#39;declared_filters&#39;</span><span class="p">):</span>
+                <span class="n">filters</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">declared_filters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">filters</span>
+
+    <span class="k">return</span> <span class="n">SortedDict</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="get_model_field"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filterset.get_model_field">[docs]</a><span class="k">def</span> <span class="nf">get_model_field</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">LOOKUP_SEP</span><span class="p">)</span>
+    <span class="n">opts</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">rel</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">get_field_by_name</span><span class="p">(</span><span class="n">name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="n">FieldDoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rel</span><span class="p">,</span> <span class="n">RelatedObject</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">rel</span><span class="o">.</span><span class="n">model</span>
+            <span class="n">opts</span> <span class="o">=</span> <span class="n">rel</span><span class="o">.</span><span class="n">opts</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">rel</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">to</span>
+            <span class="n">opts</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">rel</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">direct</span><span class="p">,</span> <span class="n">m2m</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">get_field_by_name</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">except</span> <span class="n">FieldDoesNotExist</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">direct</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rel</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">to_field</span>
+    <span class="k">return</span> <span class="n">rel</span>
+</div>
+<div class="viewcode-block" id="filters_for_model"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filterset.filters_for_model">[docs]</a><span class="k">def</span> <span class="nf">filters_for_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filter_for_field</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">field_dict</span> <span class="o">=</span> <span class="n">SortedDict</span><span class="p">()</span>
+    <span class="n">opts</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span>
+    <span class="k">if</span> <span class="n">fields</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">opts</span><span class="o">.</span><span class="n">fields</span> <span class="o">+</span> <span class="n">opts</span><span class="o">.</span><span class="n">many_to_many</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">get_model_field</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">field</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">field_dict</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">continue</span>
+        <span class="n">filter_</span> <span class="o">=</span> <span class="n">filter_for_field</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filter_</span><span class="p">:</span>
+            <span class="n">field_dict</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">filter_</span>
+    <span class="k">return</span> <span class="n">field_dict</span>
+</div>
+<div class="viewcode-block" id="FilterSetOptions"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filterset.FilterSetOptions">[docs]</a><span class="k">class</span> <span class="nc">FilterSetOptions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="s">&#39;model&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="s">&#39;fields&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="s">&#39;exclude&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">order_by</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="s">&#39;order_by&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="s">&#39;form&#39;</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FilterSetMetaclass"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filterset.FilterSetMetaclass">[docs]</a><span class="k">class</span> <span class="nc">FilterSetMetaclass</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">parents</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bases</span> <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">FilterSet</span><span class="p">)]</span>
+        <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+            <span class="c"># We are defining FilterSet itself here</span>
+            <span class="n">parents</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">declared_filters</span> <span class="o">=</span> <span class="n">get_declared_filters</span><span class="p">(</span><span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="n">new_class</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">FilterSetMetaclass</span><span class="p">,</span> <span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parents</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">new_class</span>
+
+        <span class="n">opts</span> <span class="o">=</span> <span class="n">new_class</span><span class="o">.</span><span class="n">_meta</span> <span class="o">=</span> <span class="n">FilterSetOptions</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">new_class</span><span class="p">,</span> <span class="s">&#39;Meta&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">opts</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
+            <span class="n">filters</span> <span class="o">=</span> <span class="n">filters_for_model</span><span class="p">(</span><span class="n">opts</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">opts</span><span class="o">.</span><span class="n">fields</span><span class="p">,</span> <span class="n">opts</span><span class="o">.</span><span class="n">exclude</span><span class="p">,</span> <span class="n">new_class</span><span class="o">.</span><span class="n">filter_for_field</span><span class="p">)</span>
+            <span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">declared_filters</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filters</span> <span class="o">=</span> <span class="n">declared_filters</span>
+
+        <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">filters</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Meta.fields contains a field that isn&#39;t defined &quot;</span>
+                <span class="s">&quot;on this FilterSet&quot;</span><span class="p">)</span>
+
+        <span class="n">new_class</span><span class="o">.</span><span class="n">declared_filters</span> <span class="o">=</span> <span class="n">declared_filters</span>
+        <span class="n">new_class</span><span class="o">.</span><span class="n">base_filters</span> <span class="o">=</span> <span class="n">filters</span>
+        <span class="k">return</span> <span class="n">new_class</span>
+</div>
+<span class="n">FILTER_FOR_DBFIELD_DEFAULTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">CharFilter</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">CharFilter</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">BooleanFilter</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">DateField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">DateFilter</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">DateTimeFilter</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">TimeField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">TimeFilter</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">OneToOneField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">ModelChoiceFilter</span><span class="p">,</span>
+        <span class="s">&#39;extra&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;queryset&#39;</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">_default_manager</span><span class="o">.</span><span class="n">complex_filter</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">limit_choices_to</span><span class="p">),</span>
+            <span class="s">&#39;to_field_name&#39;</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">field_name</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">ModelChoiceFilter</span><span class="p">,</span>
+        <span class="s">&#39;extra&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;queryset&#39;</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">_default_manager</span><span class="o">.</span><span class="n">complex_filter</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">limit_choices_to</span><span class="p">),</span>
+            <span class="s">&#39;to_field_name&#39;</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">field_name</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">ModelMultipleChoiceFilter</span><span class="p">,</span>
+        <span class="s">&#39;extra&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;queryset&#39;</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">_default_manager</span><span class="o">.</span><span class="n">complex_filter</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">limit_choices_to</span><span class="p">),</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">NumberFilter</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">SmallIntegerField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">NumberFilter</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">NumberFilter</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">PositiveIntegerField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">NumberFilter</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">PositiveSmallIntegerField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">NumberFilter</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">NumberFilter</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">NullBooleanField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">BooleanFilter</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">SlugField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">CharFilter</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">EmailField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">CharFilter</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">FilePathField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">CharFilter</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">URLField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">CharFilter</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">IPAddressField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">CharFilter</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">CommaSeparatedIntegerField</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">CharFilter</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="s">&quot;XMLField&quot;</span><span class="p">):</span>
+    <span class="n">FILTER_FOR_DBFIELD_DEFAULTS</span><span class="p">[</span><span class="n">models</span><span class="o">.</span><span class="n">XMLField</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;filter_class&#39;</span><span class="p">:</span> <span class="n">CharFilter</span><span class="p">,</span>
+    <span class="p">}</span>
+
+<div class="viewcode-block" id="BaseFilterSet"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filterset.BaseFilterSet">[docs]</a><span class="k">class</span> <span class="nc">BaseFilterSet</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">filter_overrides</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">queryset</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_bound</span> <span class="o">=</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">queryset</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">queryset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_default_manager</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queryset</span> <span class="o">=</span> <span class="n">queryset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">form_prefix</span> <span class="o">=</span> <span class="n">prefix</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filters</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_filters</span><span class="p">)</span>
+        <span class="c"># propagate the model being used through the filters</span>
+        <span class="k">for</span> <span class="n">filter_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">filter_</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">model</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">qs</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">obj</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BaseFilterSet.qs"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filterset.BaseFilterSet.qs">[docs]</a>    <span class="k">def</span> <span class="nf">qs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_qs&#39;</span><span class="p">):</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">queryset</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">filter_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_bound</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">initial</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">initial</span><span class="p">)</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">clean</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                    <span class="n">qs</span> <span class="o">=</span> <span class="n">filter_</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">qs</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">order_by</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="n">ORDER_BY_FIELD</span><span class="p">]</span><span class="o">.</span><span class="n">clean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="n">ORDER_BY_FIELD</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+                        <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qs</span> <span class="o">=</span> <span class="n">qs</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qs</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BaseFilterSet.form"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filterset.BaseFilterSet.form">[docs]</a>    <span class="k">def</span> <span class="nf">form</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_form&#39;</span><span class="p">):</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="n">SortedDict</span><span class="p">([(</span><span class="n">name</span><span class="p">,</span> <span class="n">filter_</span><span class="o">.</span><span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">filter_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()])</span>
+            <span class="n">fields</span><span class="p">[</span><span class="n">ORDER_BY_FIELD</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordering_field</span>
+            <span class="n">Form</span> <span class="o">=</span>  <span class="nb">type</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">Form&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">form</span><span class="p">,),</span> <span class="n">fields</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_bound</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_form</span> <span class="o">=</span> <span class="n">Form</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">form_prefix</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_form</span> <span class="o">=</span> <span class="n">Form</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">form_prefix</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_form</span>
+</div>
+<div class="viewcode-block" id="BaseFilterSet.get_ordering_field"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filterset.BaseFilterSet.get_ordering_field">[docs]</a>    <span class="k">def</span> <span class="nf">get_ordering_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">order_by</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">order_by</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">choices</span> <span class="o">=</span> <span class="p">[(</span><span class="n">f</span><span class="p">,</span> <span class="n">capfirst</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">order_by</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">choices</span> <span class="o">=</span> <span class="p">[(</span><span class="n">f</span><span class="p">,</span> <span class="n">capfirst</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Ordering&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BaseFilterSet.ordering_field"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filterset.BaseFilterSet.ordering_field">[docs]</a>    <span class="k">def</span> <span class="nf">ordering_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_ordering_field&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ordering_field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ordering_field</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ordering_field</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="BaseFilterSet.filter_for_field"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filterset.BaseFilterSet.filter_for_field">[docs]</a>    <span class="k">def</span> <span class="nf">filter_for_field</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">filter_for_field</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">FILTER_FOR_DBFIELD_DEFAULTS</span><span class="p">,</span> <span class="o">**</span><span class="n">cls</span><span class="o">.</span><span class="n">filter_overrides</span><span class="p">)</span>
+
+        <span class="n">default</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+            <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="n">capfirst</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">verbose_name</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">choices</span><span class="p">:</span>
+            <span class="n">default</span><span class="p">[</span><span class="s">&#39;choices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">choices</span>
+            <span class="k">return</span> <span class="n">ChoiceFilter</span><span class="p">(</span><span class="o">**</span><span class="n">default</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">filter_for_field</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">filter_class</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;filter_class&#39;</span><span class="p">)</span>
+        <span class="n">default</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;extra&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">:</span> <span class="p">{})(</span><span class="n">f</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">filter_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">filter_class</span><span class="p">(</span><span class="o">**</span><span class="n">default</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="FilterSet"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filterset.FilterSet">[docs]</a><span class="k">class</span> <span class="nc">FilterSet</span><span class="p">(</span><span class="n">BaseFilterSet</span><span class="p">):</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">FilterSetMetaclass</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

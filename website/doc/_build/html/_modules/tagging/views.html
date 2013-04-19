@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>tagging.views &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for tagging.views</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Tagging related views.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">Http404</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">django.views.generic.list_detail</span> <span class="kn">import</span> <span class="n">object_list</span>
+
+<span class="kn">from</span> <span class="nn">tagging.models</span> <span class="kn">import</span> <span class="n">Tag</span><span class="p">,</span> <span class="n">TaggedItem</span>
+<span class="kn">from</span> <span class="nn">tagging.utils</span> <span class="kn">import</span> <span class="n">get_tag</span><span class="p">,</span> <span class="n">get_queryset_and_model</span>
+
+<div class="viewcode-block" id="tagged_object_list"><a class="viewcode-back" href="../../auto_modules.html#tagging.views.tagged_object_list">[docs]</a><span class="k">def</span> <span class="nf">tagged_object_list</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">queryset_or_model</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">related_tags</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">related_tag_counts</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A thin wrapper around</span>
+<span class="sd">    ``django.views.generic.list_detail.object_list`` which creates a</span>
+<span class="sd">    ``QuerySet`` containing instances of the given queryset or model</span>
+<span class="sd">    tagged with the given tag.</span>
+
+<span class="sd">    In addition to the context variables set up by ``object_list``, a</span>
+<span class="sd">    ``tag`` context variable will contain the ``Tag`` instance for the</span>
+<span class="sd">    tag.</span>
+
+<span class="sd">    If ``related_tags`` is ``True``, a ``related_tags`` context variable</span>
+<span class="sd">    will contain tags related to the given tag for the given model.</span>
+<span class="sd">    Additionally, if ``related_tag_counts`` is ``True``, each related</span>
+<span class="sd">    tag will have a ``count`` attribute indicating the number of items</span>
+<span class="sd">    which have it in addition to the given tag.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">queryset_or_model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">queryset_or_model</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;queryset_or_model&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;tagged_object_list must be called with a queryset or a model.&#39;</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">tag</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tag</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;tag&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;tagged_object_list must be called with a tag.&#39;</span><span class="p">))</span>
+
+    <span class="n">tag_instance</span> <span class="o">=</span> <span class="n">get_tag</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tag_instance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">Http404</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;No Tag found matching &quot;</span><span class="si">%s</span><span class="s">&quot;.&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">tag</span><span class="p">)</span>
+    <span class="n">queryset</span> <span class="o">=</span> <span class="n">TaggedItem</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_by_model</span><span class="p">(</span><span class="n">queryset_or_model</span><span class="p">,</span> <span class="n">tag_instance</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;extra_context&#39;</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;extra_context&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;extra_context&#39;</span><span class="p">][</span><span class="s">&#39;tag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tag_instance</span>
+    <span class="k">if</span> <span class="n">related_tags</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;extra_context&#39;</span><span class="p">][</span><span class="s">&#39;related_tags&#39;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">Tag</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">related_for_model</span><span class="p">(</span><span class="n">tag_instance</span><span class="p">,</span> <span class="n">queryset_or_model</span><span class="p">,</span>
+                                          <span class="n">counts</span><span class="o">=</span><span class="n">related_tag_counts</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">object_list</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">queryset</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

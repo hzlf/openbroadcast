@@ -1,0 +1,237 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>gunicorn.sock &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for gunicorn.sock</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -</span>
+<span class="c">#</span>
+<span class="c"># This file is part of gunicorn released under the MIT license. </span>
+<span class="c"># See the NOTICE for more information.</span>
+
+<span class="kn">import</span> <span class="nn">errno</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">gunicorn</span> <span class="kn">import</span> <span class="n">util</span>
+
+
+<div class="viewcode-block" id="BaseSocket"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.sock.BaseSocket">[docs]</a><span class="k">class</span> <span class="nc">BaseSocket</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conf</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">fd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conf</span> <span class="o">=</span> <span class="n">conf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">address</span>
+        <span class="k">if</span> <span class="n">fd</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FAMILY</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">fromfd</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FAMILY</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sock</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_options</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="p">(</span><span class="n">fd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;socket </span><span class="si">%d</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">fileno</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="BaseSocket.set_options"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.sock.BaseSocket.set_options">[docs]</a>    <span class="k">def</span> <span class="nf">set_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sock</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">sock</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SO_REUSEADDR</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">bound</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">sock</span><span class="p">)</span>
+        <span class="n">sock</span><span class="o">.</span><span class="n">setblocking</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">sock</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">backlog</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sock</span>
+        </div>
+<div class="viewcode-block" id="BaseSocket.bind"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.sock.BaseSocket.bind">[docs]</a>    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sock</span><span class="p">):</span>
+        <span class="n">sock</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="BaseSocket.close"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.sock.BaseSocket.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Error while closing socket </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">sock</span>
+</div></div>
+<div class="viewcode-block" id="TCPSocket"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.sock.TCPSocket">[docs]</a><span class="k">class</span> <span class="nc">TCPSocket</span><span class="p">(</span><span class="n">BaseSocket</span><span class="p">):</span>
+    
+    <span class="n">FAMILY</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;http://</span><span class="si">%s</span><span class="s">:</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">getsockname</span><span class="p">()</span>
+    
+<div class="viewcode-block" id="TCPSocket.set_options"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.sock.TCPSocket.set_options">[docs]</a>    <span class="k">def</span> <span class="nf">set_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sock</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">sock</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">IPPROTO_TCP</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">TCP_NODELAY</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">TCPSocket</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">set_options</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">bound</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="TCP6Socket"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.sock.TCP6Socket">[docs]</a><span class="k">class</span> <span class="nc">TCP6Socket</span><span class="p">(</span><span class="n">TCPSocket</span><span class="p">):</span>
+
+    <span class="n">FAMILY</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">AF_INET6</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">fl</span><span class="p">,</span> <span class="n">sc</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">getsockname</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s">&quot;http://[</span><span class="si">%s</span><span class="s">]:</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="UnixSocket"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.sock.UnixSocket">[docs]</a><span class="k">class</span> <span class="nc">UnixSocket</span><span class="p">(</span><span class="n">BaseSocket</span><span class="p">):</span>
+    
+    <span class="n">FAMILY</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">AF_UNIX</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conf</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">fd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fd</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UnixSocket</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">fd</span><span class="o">=</span><span class="n">fd</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;unix:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">address</span>
+        
+<div class="viewcode-block" id="UnixSocket.bind"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.sock.UnixSocket.bind">[docs]</a>    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sock</span><span class="p">):</span>
+        <span class="n">old_umask</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">umask</span><span class="p">)</span>
+        <span class="n">sock</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+        <span class="n">util</span><span class="o">.</span><span class="n">chown</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">gid</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">old_umask</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="UnixSocket.close"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.sock.UnixSocket.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UnixSocket</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="create_socket"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.sock.create_socket">[docs]</a><span class="k">def</span> <span class="nf">create_socket</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">log</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a new socket for the given address. If the</span>
+<span class="sd">    address is a tuple, a TCP socket is created. If it</span>
+<span class="sd">    is a string, a Unix socket is created. Otherwise</span>
+<span class="sd">    a TypeError is raised.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># get it only once</span>
+    <span class="n">addr</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">address</span>
+    
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">util</span><span class="o">.</span><span class="n">is_ipv6</span><span class="p">(</span><span class="n">addr</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">sock_type</span> <span class="o">=</span> <span class="n">TCP6Socket</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sock_type</span> <span class="o">=</span> <span class="n">TCPSocket</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="n">sock_type</span> <span class="o">=</span> <span class="n">UnixSocket</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Unable to create socket from: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">addr</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s">&#39;GUNICORN_FD&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="n">fd</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;GUNICORN_FD&#39;</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">sock_type</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">fd</span><span class="o">=</span><span class="n">fd</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">errno</span><span class="o">.</span><span class="n">ENOTCONN</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;GUNICORN_FD should refer to an open socket.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span>
+
+    <span class="c"># If we fail to create a socket from GUNICORN_FD</span>
+    <span class="c"># we fall through and try and open the socket</span>
+    <span class="c"># normally.</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">sock_type</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">errno</span><span class="o">.</span><span class="n">EADDRINUSE</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Connection in use: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">addr</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">errno</span><span class="o">.</span><span class="n">EADDRNOTAVAIL</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Invalid address: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">addr</span><span class="p">))</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Retrying in 1 second.&quot;</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+          
+    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Can&#39;t connect to </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">addr</span><span class="p">))</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>private_files.views &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for private_files.views</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">mimetypes</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">posixpath</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponse</span><span class="p">,</span> <span class="n">Http404</span><span class="p">,</span> <span class="n">HttpResponseRedirect</span><span class="p">,</span> <span class="n">HttpResponseNotModified</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">PermissionDenied</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">get_model</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">get_object_or_404</span>
+<span class="kn">from</span> <span class="nn">django.contrib.admin.util</span> <span class="kn">import</span> <span class="n">unquote</span>
+<span class="kn">from</span> <span class="nn">django.views.static</span> <span class="kn">import</span> <span class="n">was_modified_since</span>
+<span class="kn">from</span> <span class="nn">django.utils.http</span> <span class="kn">import</span> <span class="n">http_date</span><span class="p">,</span> <span class="n">parse_http_date</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ImproperlyConfigured</span>
+
+<span class="kn">from</span> <span class="nn">private_files.signals</span> <span class="kn">import</span> <span class="n">pre_download</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;FILE_PROTECTION_METHOD&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="s">&#39;You need to set FILE_PROTECTION_METHOD in your project settings&#39;</span><span class="p">)</span>
+
+
+
+
+<span class="k">def</span> <span class="nf">_handle_basic</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
+    <span class="n">field_file</span>  <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
+    
+    <span class="n">mimetype</span><span class="p">,</span> <span class="n">encoding</span> <span class="o">=</span> <span class="n">mimetypes</span><span class="o">.</span><span class="n">guess_type</span><span class="p">(</span><span class="n">field_file</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">mimetype</span> <span class="o">=</span> <span class="n">mimetype</span> <span class="ow">or</span> <span class="s">&#39;application/octet-stream&#39;</span>
+    <span class="n">statobj</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">field_file</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">was_modified_since</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;HTTP_IF_MODIFIED_SINCE&#39;</span><span class="p">),</span>
+                              <span class="n">statobj</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">,</span> <span class="n">statobj</span><span class="o">.</span><span class="n">st_size</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">HttpResponseNotModified</span><span class="p">(</span><span class="n">mimetype</span><span class="o">=</span><span class="n">mimetype</span><span class="p">)</span>
+    <span class="n">basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">field_file</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">field_file</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">field_file</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">mimetype</span><span class="o">=</span><span class="n">mimetype</span><span class="p">)</span>
+    <span class="n">response</span><span class="p">[</span><span class="s">&quot;Last-Modified&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">http_date</span><span class="p">(</span><span class="n">statobj</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">)</span>
+    <span class="n">response</span><span class="p">[</span><span class="s">&quot;Content-Length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">statobj</span><span class="o">.</span><span class="n">st_size</span>
+    <span class="k">if</span> <span class="n">field_file</span><span class="o">.</span><span class="n">attachment</span><span class="p">:</span>
+        <span class="n">response</span><span class="p">[</span><span class="s">&#39;Content-Disposition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;attachment; filename=</span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="n">basename</span>
+    <span class="k">if</span> <span class="n">encoding</span><span class="p">:</span>
+        <span class="n">response</span><span class="p">[</span><span class="s">&quot;Content-Encoding&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoding</span>
+    <span class="n">field_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">response</span>
+
+    
+<span class="k">def</span> <span class="nf">_handle_nginx</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
+    <span class="n">field_file</span>  <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
+    <span class="n">basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">field_file</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">mimetype</span><span class="p">,</span> <span class="n">encoding</span> <span class="o">=</span> <span class="n">mimetypes</span><span class="o">.</span><span class="n">guess_type</span><span class="p">(</span><span class="n">field_file</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">mimetype</span> <span class="o">=</span> <span class="n">mimetype</span> <span class="ow">or</span> <span class="s">&#39;application/octet-stream&#39;</span>
+    <span class="n">statobj</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">field_file</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">HttpResponse</span><span class="p">()</span>
+    <span class="n">response</span><span class="p">[</span><span class="s">&#39;Content-Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mimetype</span>
+    <span class="k">if</span> <span class="n">field_file</span><span class="o">.</span><span class="n">attachment</span><span class="p">:</span>
+        <span class="n">response</span><span class="p">[</span><span class="s">&#39;Content-Disposition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;attachment; filename=</span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="n">basename</span>
+    <span class="n">response</span><span class="p">[</span><span class="s">&quot;X-Accel-Redirect&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;/</span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="nb">unicode</span><span class="p">(</span><span class="n">field_file</span><span class="p">)</span>
+    <span class="n">response</span><span class="p">[</span><span class="s">&#39;Content-Length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">statobj</span><span class="o">.</span><span class="n">st_size</span>
+    <span class="k">return</span> <span class="n">response</span>
+
+<span class="k">def</span> <span class="nf">_handle_xsendfile</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
+    <span class="n">field_file</span>  <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
+    <span class="n">basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">field_file</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">mimetype</span><span class="p">,</span> <span class="n">encoding</span> <span class="o">=</span> <span class="n">mimetypes</span><span class="o">.</span><span class="n">guess_type</span><span class="p">(</span><span class="n">field_file</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">mimetype</span> <span class="o">=</span> <span class="n">mimetype</span> <span class="ow">or</span> <span class="s">&#39;application/octet-stream&#39;</span>
+    <span class="n">statobj</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">field_file</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">HttpResponse</span><span class="p">()</span>
+    <span class="n">response</span><span class="p">[</span><span class="s">&#39;Content-Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mimetype</span>
+    <span class="k">if</span> <span class="n">field_file</span><span class="o">.</span><span class="n">attachment</span><span class="p">:</span>
+        <span class="n">response</span><span class="p">[</span><span class="s">&#39;Content-Disposition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;attachment; filename=</span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="n">basename</span>
+    <span class="n">response</span><span class="p">[</span><span class="s">&quot;X-Sendfile&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">field_file</span><span class="o">.</span><span class="n">path</span>
+    <span class="n">response</span><span class="p">[</span><span class="s">&#39;Content-Length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">statobj</span><span class="o">.</span><span class="n">st_size</span>
+    <span class="k">return</span> <span class="n">response</span>
+    
+<span class="n">METHODS</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;basic&#39;</span><span class="p">:</span> <span class="n">_handle_basic</span><span class="p">,</span>
+        <span class="s">&#39;nginx&#39;</span><span class="p">:</span> <span class="n">_handle_nginx</span><span class="p">,</span>
+        <span class="s">&#39;xsendfile&#39;</span><span class="p">:</span> <span class="n">_handle_xsendfile</span>
+        <span class="p">}</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">METHOD</span> <span class="o">=</span> <span class="n">METHODS</span><span class="p">[</span><span class="n">settings</span><span class="o">.</span><span class="n">FILE_PROTECTION_METHOD</span><span class="p">]</span>
+<span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="s">&#39;FILE_PROTECTION_METHOD in your project settings needs to be set to one of </span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">METHODS</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+<div class="viewcode-block" id="get_file"><a class="viewcode-back" href="../../auto_modules.html#private_files.views.get_file">[docs]</a><span class="k">def</span> <span class="nf">get_file</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">app_label</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">object_id</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">get_model</span><span class="p">(</span><span class="n">app_label</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span>
+    <span class="n">instance</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">pk</span> <span class="o">=</span><span class="n">unquote</span><span class="p">(</span><span class="n">object_id</span><span class="p">))</span>
+    <span class="n">condition</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span><span class="o">.</span><span class="n">condition</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">Http404</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">Http404</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">condition</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="n">pre_download</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">sender</span> <span class="o">=</span> <span class="n">model</span><span class="p">,</span> <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span><span class="p">,</span> <span class="n">field_name</span> <span class="o">=</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">request</span> <span class="o">=</span> <span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">METHOD</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">PermissionDenied</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

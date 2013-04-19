@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fluent_comments.moderation &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for fluent_comments.moderation</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">urlparse</span> <span class="kn">import</span> <span class="n">urljoin</span>
+<span class="kn">from</span> <span class="nn">django.contrib.comments.moderation</span> <span class="kn">import</span> <span class="n">CommentModerator</span><span class="p">,</span> <span class="n">moderator</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sites.models</span> <span class="kn">import</span> <span class="n">get_current_site</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ImproperlyConfigured</span>
+<span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">smart_str</span>
+<span class="kn">from</span> <span class="nn">akismet</span> <span class="kn">import</span> <span class="n">Akismet</span>
+<span class="kn">from</span> <span class="nn">fluent_comments</span> <span class="kn">import</span> <span class="n">appsettings</span>
+
+<span class="c"># Akismet code originally based on django-comments-spamfighter.</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s">&#39;FluentCommentsModerator&#39;</span><span class="p">,</span>
+    <span class="s">&#39;moderate_model&#39;</span><span class="p">,</span>
+    <span class="s">&#39;get_model_moderator&#39;</span><span class="p">,</span>
+    <span class="s">&#39;comments_are_open&#39;</span><span class="p">,</span>
+    <span class="s">&#39;comments_are_moderated&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="FluentCommentsModerator"><a class="viewcode-back" href="../../auto_modules.html#fluent_comments.moderation.FluentCommentsModerator">[docs]</a><span class="k">class</span> <span class="nc">FluentCommentsModerator</span><span class="p">(</span><span class="n">CommentModerator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Moderation policy for fluent-comments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">auto_close_field</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">auto_moderate_field</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">enable_field</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">close_after</span> <span class="o">=</span> <span class="n">appsettings</span><span class="o">.</span><span class="n">FLUENT_COMMENTS_CLOSE_AFTER_DAYS</span>
+    <span class="n">moderate_after</span> <span class="o">=</span> <span class="n">appsettings</span><span class="o">.</span><span class="n">FLUENT_COMMENTS_MODERATE_AFTER_DAYS</span>
+    <span class="n">email_notification</span> <span class="o">=</span> <span class="bp">False</span>   <span class="c"># Using signals instead</span>
+    <span class="n">akismet_check</span> <span class="o">=</span> <span class="n">appsettings</span><span class="o">.</span><span class="n">FLUENT_CONTENTS_USE_AKISMET</span>
+    <span class="n">akismet_check_action</span> <span class="o">=</span> <span class="n">appsettings</span><span class="o">.</span><span class="n">FLUENT_COMMENTS_AKISMET_ACTION</span>
+
+
+<div class="viewcode-block" id="FluentCommentsModerator.allow"><a class="viewcode-back" href="../../auto_modules.html#fluent_comments.moderation.FluentCommentsModerator.allow">[docs]</a>    <span class="k">def</span> <span class="nf">allow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comment</span><span class="p">,</span> <span class="n">content_object</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determine whether a given comment is allowed to be posted on a given object.</span>
+
+<span class="sd">        Returns ``True`` if the comment should be allowed, ``False`` otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Parent class check</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">super</span><span class="p">(</span><span class="n">FluentCommentsModerator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">allow</span><span class="p">(</span><span class="n">comment</span><span class="p">,</span> <span class="n">content_object</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Akismet check</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">akismet_check</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">akismet_check_action</span> <span class="o">==</span> <span class="s">&#39;delete&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_akismet_check</span><span class="p">(</span><span class="n">comment</span><span class="p">,</span> <span class="n">content_object</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">False</span>  <span class="c"># Akismet marked the comment as spam.</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+
+</div>
+<div class="viewcode-block" id="FluentCommentsModerator.moderate"><a class="viewcode-back" href="../../auto_modules.html#fluent_comments.moderation.FluentCommentsModerator.moderate">[docs]</a>    <span class="k">def</span> <span class="nf">moderate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comment</span><span class="p">,</span> <span class="n">content_object</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determine whether a given comment on a given object should be allowed to show up immediately,</span>
+<span class="sd">        or should be marked non-public and await approval.</span>
+
+<span class="sd">        Returns ``True`` if the comment should be moderated (marked non-public), ``False`` otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Parent class check</span>
+        <span class="k">if</span> <span class="nb">super</span><span class="p">(</span><span class="n">FluentCommentsModerator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">moderate</span><span class="p">(</span><span class="n">comment</span><span class="p">,</span> <span class="n">content_object</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="c"># Akismet check</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">akismet_check</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">akismet_check_action</span> <span class="o">==</span> <span class="s">&#39;moderate&#39;</span><span class="p">:</span>
+            <span class="c"># Return True if akismet marks this comment as spam and we want to moderate it.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_akismet_check</span><span class="p">(</span><span class="n">comment</span><span class="p">,</span> <span class="n">content_object</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">_akismet_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comment</span><span class="p">,</span> <span class="n">content_object</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Connects to Akismet and returns True if Akismet marks this comment as</span>
+<span class="sd">        spam. Otherwise returns False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Get Akismet data</span>
+        <span class="n">AKISMET_API_KEY</span> <span class="o">=</span> <span class="n">appsettings</span><span class="o">.</span><span class="n">AKISMET_API_KEY</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">AKISMET_API_KEY</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="s">&#39;You must set AKISMET_API_KEY to use comment moderation with Akismet.&#39;</span><span class="p">)</span>
+
+        <span class="n">current_domain</span> <span class="o">=</span> <span class="n">get_current_site</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="o">.</span><span class="n">domain</span>
+        <span class="n">auto_blog_url</span> <span class="o">=</span> <span class="s">&#39;{0}://{1}/&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">is_secure</span><span class="p">()</span> <span class="ow">and</span> <span class="s">&#39;https&#39;</span> <span class="ow">or</span> <span class="s">&#39;http&#39;</span><span class="p">,</span> <span class="n">current_domain</span><span class="p">)</span>
+        <span class="n">blog_url</span> <span class="o">=</span> <span class="n">appsettings</span><span class="o">.</span><span class="n">AKISMET_BLOG_URL</span> <span class="ow">or</span> <span class="n">auto_blog_url</span>
+
+        <span class="n">akismet_api</span> <span class="o">=</span> <span class="n">Akismet</span><span class="p">(</span>
+            <span class="n">key</span><span class="o">=</span><span class="n">AKISMET_API_KEY</span><span class="p">,</span>
+            <span class="n">blog_url</span><span class="o">=</span><span class="n">blog_url</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">akismet_api</span><span class="o">.</span><span class="n">verify_key</span><span class="p">():</span>
+            <span class="n">akismet_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_akismet_data</span><span class="p">(</span><span class="n">blog_url</span><span class="p">,</span> <span class="n">comment</span><span class="p">,</span> <span class="n">content_object</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">akismet_api</span><span class="o">.</span><span class="n">comment_check</span><span class="p">(</span><span class="n">smart_str</span><span class="p">(</span><span class="n">comment</span><span class="o">.</span><span class="n">comment</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">akismet_data</span><span class="p">,</span> <span class="n">build_data</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">_get_akismet_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blog_url</span><span class="p">,</span> <span class="n">comment</span><span class="p">,</span> <span class="n">content_object</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="c"># Field documentation:</span>
+        <span class="c"># http://akismet.com/development/api/#comment-check</span>
+        <span class="n">akismet_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="c"># Comment info</span>
+            <span class="s">&#39;permalink&#39;</span><span class="p">:</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">blog_url</span><span class="p">,</span> <span class="n">content_object</span><span class="o">.</span><span class="n">get_absolute_url</span><span class="p">()),</span>
+            <span class="s">&#39;comment_type&#39;</span><span class="p">:</span> <span class="s">&#39;comment&#39;</span><span class="p">,</span>   <span class="c"># comment, trackback, pingback, see http://blog.akismet.com/2012/06/19/pro-tip-tell-us-your-comment_type/</span>
+            <span class="s">&#39;comment_author&#39;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">comment</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+            <span class="s">&#39;comment_author_email&#39;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">comment</span><span class="p">,</span> <span class="s">&#39;email&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+            <span class="s">&#39;comment_author_url&#39;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">comment</span><span class="p">,</span> <span class="s">&#39;url&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+
+            <span class="c"># Request info</span>
+            <span class="s">&#39;referrer&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;HTTP_REFERER&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+            <span class="s">&#39;user_agent&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;HTTP_USER_AGENT&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+            <span class="s">&#39;user_ip&#39;</span><span class="p">:</span> <span class="n">comment</span><span class="o">.</span><span class="n">ip_address</span><span class="p">,</span>
+
+            <span class="c"># Server info</span>
+            <span class="s">&#39;SERVER_ADDR&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;SERVER_ADDR&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+            <span class="s">&#39;SERVER_ADMIN&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;SERVER_ADMIN&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+            <span class="s">&#39;SERVER_NAME&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;SERVER_NAME&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+            <span class="s">&#39;SERVER_PORT&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;SERVER_PORT&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+            <span class="s">&#39;SERVER_SIGNATURE&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;SERVER_SIGNATURE&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+            <span class="s">&#39;SERVER_SOFTWARE&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;SERVER_SOFTWARE&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+            <span class="s">&#39;HTTP_ACCEPT&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;HTTP_ACCEPT&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="c"># Allow testing, see:</span>
+        <span class="c"># http://blog.akismet.com/2012/07/20/pro-tip-testing-testing/</span>
+        <span class="k">if</span> <span class="n">appsettings</span><span class="o">.</span><span class="n">AKISMET_IS_TEST</span><span class="p">:</span>
+            <span class="n">akismet_data</span><span class="p">[</span><span class="s">&#39;is_test&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;1&#39;</span>
+
+        <span class="k">return</span> <span class="n">akismet_data</span>
+
+</div>
+<div class="viewcode-block" id="moderate_model"><a class="viewcode-back" href="../../auto_modules.html#fluent_comments.moderation.moderate_model">[docs]</a><span class="k">def</span> <span class="nf">moderate_model</span><span class="p">(</span><span class="n">ParentModel</span><span class="p">,</span> <span class="n">publication_date_field</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">enable_comments_field</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Register a parent model (e.g. ``Blog`` or ``Article``) that should receive comment moderation.</span>
+
+<span class="sd">    :param ParentModel: The parent model, e.g. a ``Blog`` or ``Article`` model.</span>
+<span class="sd">    :param publication_date_field: The field name of a :class:`~django.db.models.DateTimeField` in the parent model which stores the publication date.</span>
+<span class="sd">    :type publication_date_field: str</span>
+<span class="sd">    :param enable_comments_field: The field name of a :class:`~django.db.models.BooleanField` in the parent model which stores the whether comments are enabled.</span>
+<span class="sd">    :type enable_comments_field: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;auto_close_field&#39;</span><span class="p">:</span> <span class="n">publication_date_field</span><span class="p">,</span>
+        <span class="s">&#39;auto_moderate_field&#39;</span><span class="p">:</span> <span class="n">publication_date_field</span><span class="p">,</span>
+        <span class="s">&#39;enable_field&#39;</span><span class="p">:</span> <span class="n">enable_comments_field</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">ModerationClass</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">ParentModel</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s">&#39;Moderator&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">FluentCommentsModerator</span><span class="p">,),</span> <span class="n">attrs</span><span class="p">)</span>
+    <span class="n">moderator</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">ParentModel</span><span class="p">,</span> <span class="n">ModerationClass</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="get_model_moderator"><a class="viewcode-back" href="../../auto_modules.html#fluent_comments.moderation.get_model_moderator">[docs]</a><span class="k">def</span> <span class="nf">get_model_moderator</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the moderator class that is registered with a content object.</span>
+<span class="sd">    If there is no associated moderator with a class, None is returned.</span>
+
+<span class="sd">    :param model: The Django model registered with :func:`moderate_model`</span>
+<span class="sd">    :type model: :class:`~django.db.models.Model`</span>
+<span class="sd">    :return: The moderator class which holds the moderation policies.</span>
+<span class="sd">    :rtype: :class:`~django.contrib.comments.moderation.CommentModerator`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">moderator</span><span class="o">.</span><span class="n">_registry</span><span class="p">[</span><span class="n">model</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+</div>
+<div class="viewcode-block" id="comments_are_open"><a class="viewcode-back" href="../../auto_modules.html#fluent_comments.moderation.comments_are_open">[docs]</a><span class="k">def</span> <span class="nf">comments_are_open</span><span class="p">(</span><span class="n">content_object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return whether comments are still open for a given target object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">moderator</span> <span class="o">=</span> <span class="n">get_model_moderator</span><span class="p">(</span><span class="n">content_object</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">moderator</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="c"># Check the &#39;enable_field&#39;, &#39;auto_close_field&#39; and &#39;close_after&#39;,</span>
+    <span class="c"># by reusing the basic Django policies.</span>
+    <span class="k">return</span> <span class="n">CommentModerator</span><span class="o">.</span><span class="n">allow</span><span class="p">(</span><span class="n">moderator</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">content_object</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="comments_are_moderated"><a class="viewcode-back" href="../../auto_modules.html#fluent_comments.moderation.comments_are_moderated">[docs]</a><span class="k">def</span> <span class="nf">comments_are_moderated</span><span class="p">(</span><span class="n">content_object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return whether comments are moderated for a given target object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">moderator</span> <span class="o">=</span> <span class="n">get_model_moderator</span><span class="p">(</span><span class="n">content_object</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">moderator</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="c"># Check the &#39;auto_moderate_field&#39;, &#39;moderate_after&#39;,</span>
+    <span class="c"># by reusing the basic Django policies.</span>
+    <span class="k">return</span> <span class="n">CommentModerator</span><span class="o">.</span><span class="n">moderate</span><span class="p">(</span><span class="n">moderator</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">content_object</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

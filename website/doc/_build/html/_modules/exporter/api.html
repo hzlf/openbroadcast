@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>exporter.api &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for exporter.api</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">Count</span>
+
+<span class="kn">from</span> <span class="nn">tastypie</span> <span class="kn">import</span> <span class="n">fields</span>
+<span class="kn">from</span> <span class="nn">tastypie.authentication</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">tastypie.authorization</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">tastypie.resources</span> <span class="kn">import</span> <span class="n">ModelResource</span><span class="p">,</span> <span class="n">Resource</span><span class="p">,</span> <span class="n">ALL</span><span class="p">,</span> <span class="n">ALL_WITH_RELATIONS</span>
+
+<span class="kn">from</span> <span class="nn">exporter.models</span> <span class="kn">import</span> <span class="n">Export</span><span class="p">,</span> <span class="n">ExportItem</span>
+
+<span class="kn">from</span> <span class="nn">alibrary.api</span> <span class="kn">import</span> <span class="n">ReleaseResource</span><span class="p">,</span> <span class="n">ArtistResource</span>
+<span class="kn">from</span> <span class="nn">alibrary.models</span> <span class="kn">import</span> <span class="n">Release</span><span class="p">,</span> <span class="n">Artist</span>
+
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">defaultfilters</span> <span class="k">as</span> <span class="n">dj_filters</span>
+<span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">formats</span>
+
+
+<span class="kn">from</span> <span class="nn">tastypie.contrib.contenttypes.fields</span> <span class="kn">import</span> <span class="n">GenericForeignKeyField</span>
+
+
+<div class="viewcode-block" id="ExportItemResource"><a class="viewcode-back" href="../../auto_modules.html#exporter.api.ExportItemResource">[docs]</a><span class="k">class</span> <span class="nc">ExportItemResource</span><span class="p">(</span><span class="n">ModelResource</span><span class="p">):</span>
+    
+    <span class="n">export_session</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s">&#39;exporter.api.ExportResource&#39;</span><span class="p">,</span> <span class="s">&#39;export_session&#39;</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    
+    <span class="n">co_to</span> <span class="o">=</span> <span class="p">{</span>
+             <span class="n">Release</span><span class="p">:</span> <span class="n">ReleaseResource</span><span class="p">,</span>
+             <span class="n">Artist</span><span class="p">:</span> <span class="n">ArtistResource</span><span class="p">,</span>
+             <span class="p">}</span>
+    
+    <span class="n">content_object</span> <span class="o">=</span> <span class="n">GenericForeignKeyField</span><span class="p">(</span><span class="n">to</span><span class="o">=</span><span class="n">co_to</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s">&#39;content_object&#39;</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ExportItemResource.Meta"><a class="viewcode-back" href="../../auto_modules.html#exporter.api.ExportItemResource.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">ExportItem</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">list_allowed_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;get&#39;</span><span class="p">,</span> <span class="s">&#39;post&#39;</span><span class="p">]</span>
+        <span class="n">detail_allowed_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;get&#39;</span><span class="p">,</span> <span class="s">&#39;post&#39;</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">,</span> <span class="s">&#39;delete&#39;</span><span class="p">]</span>
+        <span class="n">resource_name</span> <span class="o">=</span> <span class="s">&#39;exportitem&#39;</span>
+        <span class="c"># excludes = [&#39;type&#39;,&#39;results_musicbrainz&#39;]</span>
+        <span class="c">#excludes = [&#39;id&#39;,]</span>
+        <span class="n">authentication</span> <span class="o">=</span>  <span class="n">MultiAuthentication</span><span class="p">(</span><span class="n">SessionAuthentication</span><span class="p">(),</span> <span class="n">ApiKeyAuthentication</span><span class="p">())</span>
+        <span class="n">authorization</span> <span class="o">=</span> <span class="n">Authorization</span><span class="p">()</span>
+        <span class="n">always_return_data</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">filtering</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;import_session&#39;</span><span class="p">:</span> <span class="n">ALL_WITH_RELATIONS</span><span class="p">,</span>
+            <span class="s">&#39;created&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;exact&#39;</span><span class="p">,</span> <span class="s">&#39;range&#39;</span><span class="p">,</span> <span class="s">&#39;gt&#39;</span><span class="p">,</span> <span class="s">&#39;gte&#39;</span><span class="p">,</span> <span class="s">&#39;lt&#39;</span><span class="p">,</span> <span class="s">&#39;lte&#39;</span><span class="p">],</span>
+        <span class="p">}</span>
+        
+    
+</div>
+<div class="viewcode-block" id="ExportItemResource.apply_authorization_limits"><a class="viewcode-back" href="../../auto_modules.html#exporter.api.ExportItemResource.apply_authorization_limits">[docs]</a>    <span class="k">def</span> <span class="nf">apply_authorization_limits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">object_list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">object_list</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">export_session__user</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ExportItemResource.obj_create"><a class="viewcode-back" href="../../auto_modules.html#exporter.api.ExportItemResource.obj_create">[docs]</a>    <span class="k">def</span> <span class="nf">obj_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundle</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        
+        
+        <span class="n">item</span> <span class="o">=</span> <span class="n">bundle</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;item&#39;</span><span class="p">]</span>
+        <span class="k">print</span> <span class="n">bundle</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;item&#39;</span><span class="p">][</span><span class="s">&#39;item_id&#39;</span><span class="p">]</span>
+        
+        <span class="c"># dummy</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s">&#39;item_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;release&#39;</span><span class="p">:</span>
+            <span class="n">co</span> <span class="o">=</span> <span class="n">Release</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s">&#39;item_id&#39;</span><span class="p">]))</span>
+            
+        <span class="n">bundle</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;content_object&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">co</span>
+        
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ExportItemResource</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">obj_create</span><span class="p">(</span><span class="n">bundle</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="ExportResource"><a class="viewcode-back" href="../../auto_modules.html#exporter.api.ExportResource">[docs]</a><span class="k">class</span> <span class="nc">ExportResource</span><span class="p">(</span><span class="n">ModelResource</span><span class="p">):</span>
+    
+    <span class="n">items</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">ToManyField</span><span class="p">(</span><span class="s">&#39;exporter.api.ExportItemResource&#39;</span><span class="p">,</span> <span class="s">&#39;export_items&#39;</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ExportResource.Meta"><a class="viewcode-back" href="../../auto_modules.html#exporter.api.ExportResource.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">Export</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">list_allowed_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;get&#39;</span><span class="p">,</span> <span class="s">&#39;post&#39;</span><span class="p">]</span>
+        <span class="n">detail_allowed_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;get&#39;</span><span class="p">,</span> <span class="s">&#39;post&#39;</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">,</span> <span class="s">&#39;delete&#39;</span><span class="p">]</span>
+        <span class="c">#list_allowed_methods = [&#39;get&#39;,]</span>
+        <span class="c">#detail_allowed_methods = [&#39;get&#39;,]</span>
+        <span class="n">resource_name</span> <span class="o">=</span> <span class="s">&#39;export&#39;</span>
+        <span class="n">excludes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;updated&#39;</span><span class="p">,]</span>
+        <span class="n">include_absolute_url</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">authentication</span> <span class="o">=</span>  <span class="n">MultiAuthentication</span><span class="p">(</span><span class="n">SessionAuthentication</span><span class="p">(),</span> <span class="n">ApiKeyAuthentication</span><span class="p">())</span>
+        <span class="n">authorization</span> <span class="o">=</span> <span class="n">Authorization</span><span class="p">()</span>
+        <span class="n">always_return_data</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">filtering</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="c">#&#39;channel&#39;: ALL_WITH_RELATIONS,</span>
+            <span class="s">&#39;created&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;exact&#39;</span><span class="p">,</span> <span class="s">&#39;range&#39;</span><span class="p">,</span> <span class="s">&#39;gt&#39;</span><span class="p">,</span> <span class="s">&#39;gte&#39;</span><span class="p">,</span> <span class="s">&#39;lt&#39;</span><span class="p">,</span> <span class="s">&#39;lte&#39;</span><span class="p">],</span>
+            <span class="s">&#39;status&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;exact&#39;</span><span class="p">,],</span>
+        <span class="p">}</span>
+        </div>
+<div class="viewcode-block" id="ExportResource.obj_create"><a class="viewcode-back" href="../../auto_modules.html#exporter.api.ExportResource.obj_create">[docs]</a>    <span class="k">def</span> <span class="nf">obj_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundle</span><span class="p">,</span> <span class="n">request</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ExportResource</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">obj_create</span><span class="p">(</span><span class="n">bundle</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        
+</div>
+<div class="viewcode-block" id="ExportResource.dehydrate"><a class="viewcode-back" href="../../auto_modules.html#exporter.api.ExportResource.dehydrate">[docs]</a>    <span class="k">def</span> <span class="nf">dehydrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
+        <span class="n">bundle</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;download_url&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bundle</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">get_download_url</span><span class="p">();</span>
+        
+        <span class="c"># pre-format some values</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">formatted_created</span> <span class="o">=</span> <span class="n">formats</span><span class="o">.</span><span class="n">date_format</span><span class="p">(</span><span class="n">bundle</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">created</span><span class="p">,</span> <span class="s">&quot;SHORT_DATETIME_FORMAT&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">formatted_created</span> <span class="o">=</span> <span class="bp">None</span>
+            
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">formatted_downloaded</span> <span class="o">=</span> <span class="n">formats</span><span class="o">.</span><span class="n">date_format</span><span class="p">(</span><span class="n">bundle</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">downloaded</span><span class="p">,</span> <span class="s">&quot;SHORT_DATETIME_FORMAT&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">formatted_downloaded</span> <span class="o">=</span> <span class="bp">None</span>
+            
+        
+        <span class="n">bundle</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;formatted_created&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">formatted_created</span>
+        <span class="n">bundle</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;formatted_downloaded&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">formatted_downloaded</span>
+        <span class="n">bundle</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;formatted_filesize&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">dj_filters</span><span class="o">.</span><span class="n">filesizeformat</span><span class="p">(</span><span class="n">bundle</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">filesize</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">bundle</span>
+        </div>
+<div class="viewcode-block" id="ExportResource.save_related"><a class="viewcode-back" href="../../auto_modules.html#exporter.api.ExportResource.save_related">[docs]</a>    <span class="k">def</span> <span class="nf">save_related</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    
+</div>
+<div class="viewcode-block" id="ExportResource.apply_authorization_limits"><a class="viewcode-back" href="../../auto_modules.html#exporter.api.ExportResource.apply_authorization_limits">[docs]</a>    <span class="k">def</span> <span class="nf">apply_authorization_limits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">object_list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">object_list</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+
+        
+
+    
+    
+    
+
+    </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

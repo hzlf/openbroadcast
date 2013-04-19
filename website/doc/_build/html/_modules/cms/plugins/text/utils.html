@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>cms.plugins.text.utils &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for cms.plugins.text.utils</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">django.template.defaultfilters</span> <span class="kn">import</span> <span class="n">force_escape</span>
+
+<span class="kn">from</span> <span class="nn">cms.models</span> <span class="kn">import</span> <span class="n">CMSPlugin</span>
+<span class="kn">from</span> <span class="nn">cms.plugins.utils</span> <span class="kn">import</span> <span class="n">downcast_plugins</span>
+
+<span class="n">OBJ_TAG_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">u&quot;\{\{ plugin_object (\d+) \}\}&quot;</span><span class="p">)</span>
+<span class="n">OBJ_ADMIN_RE_PATTERN</span> <span class="o">=</span> <span class="s">ur&#39;&lt;img [^&gt;]*\bid=&quot;plugin_obj_(\d+)&quot;[^&gt;]*/?&gt;&#39;</span>
+<span class="n">OBJ_ADMIN_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">OBJ_ADMIN_RE_PATTERN</span><span class="p">)</span>
+
+<div class="viewcode-block" id="plugin_tags_to_admin_html"><a class="viewcode-back" href="../../../../auto_modules.html#cms.plugins.text.utils.plugin_tags_to_admin_html">[docs]</a><span class="k">def</span> <span class="nf">plugin_tags_to_admin_html</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert plugin object &#39;tags&#39; into the form used to represent</span>
+<span class="sd">    them in the admin text editor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plugin_map</span> <span class="o">=</span> <span class="n">_plugin_dict</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="n">OBJ_TAG_RE</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_tag_to_admin</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+        <span class="n">plugin_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">plugin_map</span><span class="p">[</span><span class="n">plugin_id</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c"># Object must have been deleted.  It cannot be rendered to</span>
+            <span class="c"># end user, or edited, so just remove it from the HTML</span>
+            <span class="c"># altogether</span>
+            <span class="k">return</span> <span class="s">u&#39;&#39;</span>
+        <span class="k">return</span> <span class="s">u&#39;&lt;img src=&quot;</span><span class="si">%(icon_src)s</span><span class="s">&quot; alt=&quot;</span><span class="si">%(icon_alt)s</span><span class="s">&quot; title=&quot;</span><span class="si">%(icon_alt)s</span><span class="s">&quot; id=&quot;plugin_obj_</span><span class="si">%(id)d</span><span class="s">&quot; /&gt;&#39;</span> <span class="o">%</span> \
+               <span class="nb">dict</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">plugin_id</span><span class="p">,</span>
+                    <span class="n">icon_src</span><span class="o">=</span><span class="n">force_escape</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">get_instance_icon_src</span><span class="p">()),</span>
+                    <span class="n">icon_alt</span><span class="o">=</span><span class="n">force_escape</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">get_instance_icon_alt</span><span class="p">()),</span>
+                    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">OBJ_TAG_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">_tag_to_admin</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="plugin_tags_to_id_list"><a class="viewcode-back" href="../../../../auto_modules.html#cms.plugins.text.utils.plugin_tags_to_id_list">[docs]</a><span class="k">def</span> <span class="nf">plugin_tags_to_id_list</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="n">OBJ_ADMIN_RE</span><span class="p">):</span>
+    <span class="n">ids</span> <span class="o">=</span> <span class="n">regex</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span> <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">ids</span> <span class="k">if</span> <span class="nb">id</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()]</span>
+</div>
+<div class="viewcode-block" id="plugin_tags_to_user_html"><a class="viewcode-back" href="../../../../auto_modules.html#cms.plugins.text.utils.plugin_tags_to_user_html">[docs]</a><span class="k">def</span> <span class="nf">plugin_tags_to_user_html</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">placeholder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert plugin object &#39;tags&#39; into the form for public site.</span>
+
+<span class="sd">    context is the template context to use, placeholder is the placeholder name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plugin_map</span> <span class="o">=</span> <span class="n">_plugin_dict</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_render_tag</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+        <span class="n">plugin_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">plugin_map</span><span class="p">[</span><span class="n">plugin_id</span><span class="p">]</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">_render_meta</span><span class="o">.</span><span class="n">text_enabled</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c"># Object must have been deleted.  It cannot be rendered to</span>
+            <span class="c"># end user so just remove it from the HTML altogether</span>
+            <span class="k">return</span> <span class="s">u&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">render_plugin</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">placeholder</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">OBJ_ADMIN_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">_render_tag</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="plugin_admin_html_to_tags"><a class="viewcode-back" href="../../../../auto_modules.html#cms.plugins.text.utils.plugin_admin_html_to_tags">[docs]</a><span class="k">def</span> <span class="nf">plugin_admin_html_to_tags</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert the HTML used in admin editor to represent plugin objects</span>
+<span class="sd">    into the &#39;tag&#39; form used in the database</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">OBJ_ADMIN_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="s">u&quot;{{ plugin_object </span><span class="si">%s</span><span class="s"> }}&quot;</span>  <span class="o">%</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">text</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="replace_plugin_tags"><a class="viewcode-back" href="../../../../auto_modules.html#cms.plugins.text.utils.replace_plugin_tags">[docs]</a><span class="k">def</span> <span class="nf">replace_plugin_tags</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">id_dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_replace_tag</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+        <span class="n">plugin_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">new_id</span> <span class="o">=</span> <span class="n">id_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">plugin_id</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">CMSPlugin</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">new_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">CMSPlugin</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="c"># Object must have been deleted.  It cannot be rendered to</span>
+            <span class="c"># end user, or edited, so just remove it from the HTML</span>
+            <span class="c"># altogether</span>
+            <span class="k">return</span> <span class="s">u&#39;&#39;</span>
+        <span class="k">return</span> <span class="s">u&#39;&lt;img src=&quot;</span><span class="si">%(icon_src)s</span><span class="s">&quot; alt=&quot;</span><span class="si">%(icon_alt)s</span><span class="s">&quot; title=&quot;</span><span class="si">%(icon_alt)s</span><span class="s">&quot; id=&quot;plugin_obj_</span><span class="si">%(id)d</span><span class="s">&quot; /&gt;&#39;</span> <span class="o">%</span> \
+               <span class="nb">dict</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">new_id</span><span class="p">,</span>
+                    <span class="n">icon_src</span><span class="o">=</span><span class="n">force_escape</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">get_instance_icon_src</span><span class="p">()),</span>
+                    <span class="n">icon_alt</span><span class="o">=</span><span class="n">force_escape</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">get_instance_icon_alt</span><span class="p">()),</span>
+                    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">OBJ_ADMIN_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">_replace_tag</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_plugin_dict</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="n">OBJ_ADMIN_RE</span><span class="p">):</span>
+    <span class="n">plugin_ids</span> <span class="o">=</span> <span class="n">plugin_tags_to_id_list</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">regex</span><span class="p">)</span>
+    <span class="n">plugin_list</span> <span class="o">=</span> <span class="n">downcast_plugins</span><span class="p">(</span><span class="n">CMSPlugin</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pk__in</span><span class="o">=</span><span class="n">plugin_ids</span><span class="p">),</span> <span class="n">select_placeholder</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">plugin</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">plugin</span><span class="p">)</span> <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">plugin_list</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

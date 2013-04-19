@@ -1,0 +1,323 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>haystack.views &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for haystack.views</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.core.paginator</span> <span class="kn">import</span> <span class="n">Paginator</span><span class="p">,</span> <span class="n">InvalidPage</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">Http404</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span>
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">RequestContext</span>
+<span class="kn">from</span> <span class="nn">haystack.forms</span> <span class="kn">import</span> <span class="n">ModelSearchForm</span><span class="p">,</span> <span class="n">FacetedSearchForm</span>
+<span class="kn">from</span> <span class="nn">haystack.query</span> <span class="kn">import</span> <span class="n">EmptySearchQuerySet</span>
+
+
+<span class="n">RESULTS_PER_PAGE</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;HAYSTACK_SEARCH_RESULTS_PER_PAGE&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SearchView"><a class="viewcode-back" href="../../auto_modules.html#haystack.views.SearchView">[docs]</a><span class="k">class</span> <span class="nc">SearchView</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="s">&#39;search/search.html&#39;</span>
+    <span class="n">extra_context</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">EmptySearchQuerySet</span><span class="p">()</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">results_per_page</span> <span class="o">=</span> <span class="n">RESULTS_PER_PAGE</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">load_all</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">form_class</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">searchqueryset</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">context_class</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">,</span> <span class="n">results_per_page</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_all</span> <span class="o">=</span> <span class="n">load_all</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">form_class</span> <span class="o">=</span> <span class="n">form_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context_class</span> <span class="o">=</span> <span class="n">context_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searchqueryset</span> <span class="o">=</span> <span class="n">searchqueryset</span>
+
+        <span class="k">if</span> <span class="n">form_class</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">form_class</span> <span class="o">=</span> <span class="n">ModelSearchForm</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">results_per_page</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results_per_page</span> <span class="o">=</span> <span class="n">results_per_page</span>
+
+        <span class="k">if</span> <span class="n">template</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="n">template</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates the actual response to the search.</span>
+
+<span class="sd">        Relies on internal, overridable methods to construct the response.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">request</span> <span class="o">=</span> <span class="n">request</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_form</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_query</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_results</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_response</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SearchView.build_form"><a class="viewcode-back" href="../../auto_modules.html#haystack.views.SearchView.build_form">[docs]</a>    <span class="k">def</span> <span class="nf">build_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Instantiates the form the class should use to process the search query.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;load_all&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_all</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">form_kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">form_kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchqueryset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;searchqueryset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchqueryset</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_class</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SearchView.get_query"><a class="viewcode-back" href="../../auto_modules.html#haystack.views.SearchView.get_query">[docs]</a>    <span class="k">def</span> <span class="nf">get_query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the query provided by the user.</span>
+
+<span class="sd">        Returns an empty string if the query is invalid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;q&#39;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="s">&#39;&#39;</span>
+</div>
+<div class="viewcode-block" id="SearchView.get_results"><a class="viewcode-back" href="../../auto_modules.html#haystack.views.SearchView.get_results">[docs]</a>    <span class="k">def</span> <span class="nf">get_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetches the results via the form.</span>
+
+<span class="sd">        Returns an empty list if there&#39;s no query to search with.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">search</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="SearchView.build_page"><a class="viewcode-back" href="../../auto_modules.html#haystack.views.SearchView.build_page">[docs]</a>    <span class="k">def</span> <span class="nf">build_page</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Paginates the results appropriately.</span>
+
+<span class="sd">        In case someone does not want to use Django&#39;s built-in pagination, it</span>
+<span class="sd">        should be a simple matter to override this method to do what they would</span>
+<span class="sd">        like.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">page_no</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;page&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">Http404</span><span class="p">(</span><span class="s">&quot;Not a valid number for page.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">page_no</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Http404</span><span class="p">(</span><span class="s">&quot;Pages should be 1 or greater.&quot;</span><span class="p">)</span>
+
+        <span class="n">start_offset</span> <span class="o">=</span> <span class="p">(</span><span class="n">page_no</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">results_per_page</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">start_offset</span><span class="p">:</span><span class="n">start_offset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">results_per_page</span><span class="p">]</span>
+
+        <span class="n">paginator</span> <span class="o">=</span> <span class="n">Paginator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">results_per_page</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">page</span> <span class="o">=</span> <span class="n">paginator</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="n">page_no</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">InvalidPage</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Http404</span><span class="p">(</span><span class="s">&quot;No such page!&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">paginator</span><span class="p">,</span> <span class="n">page</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SearchView.extra_context"><a class="viewcode-back" href="../../auto_modules.html#haystack.views.SearchView.extra_context">[docs]</a>    <span class="k">def</span> <span class="nf">extra_context</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Allows the addition of more context variables as needed.</span>
+
+<span class="sd">        Must return a dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{}</span>
+</div>
+<div class="viewcode-block" id="SearchView.create_response"><a class="viewcode-back" href="../../auto_modules.html#haystack.views.SearchView.create_response">[docs]</a>    <span class="k">def</span> <span class="nf">create_response</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates the actual HttpResponse to send back to the user.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="p">(</span><span class="n">paginator</span><span class="p">,</span> <span class="n">page</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_page</span><span class="p">()</span>
+
+        <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;query&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">,</span>
+            <span class="s">&#39;form&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">,</span>
+            <span class="s">&#39;page&#39;</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span>
+            <span class="s">&#39;paginator&#39;</span><span class="p">:</span> <span class="n">paginator</span><span class="p">,</span>
+            <span class="s">&#39;suggestion&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">,</span> <span class="s">&#39;query&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">include_spelling</span><span class="p">:</span>
+            <span class="n">context</span><span class="p">[</span><span class="s">&#39;suggestion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get_suggestion</span><span class="p">()</span>
+
+        <span class="n">context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extra_context</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">context_instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">context_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">))</span>
+
+</div></div>
+<div class="viewcode-block" id="search_view_factory"><a class="viewcode-back" href="../../auto_modules.html#haystack.views.search_view_factory">[docs]</a><span class="k">def</span> <span class="nf">search_view_factory</span><span class="p">(</span><span class="n">view_class</span><span class="o">=</span><span class="n">SearchView</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">search_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">view_class</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">search_view</span>
+
+</div>
+<div class="viewcode-block" id="FacetedSearchView"><a class="viewcode-back" href="../../auto_modules.html#haystack.views.FacetedSearchView">[docs]</a><span class="k">class</span> <span class="nc">FacetedSearchView</span><span class="p">(</span><span class="n">SearchView</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c"># Needed to switch out the default form class.</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;form_class&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;form_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FacetedSearchForm</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">FacetedSearchView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FacetedSearchView.build_form"><a class="viewcode-back" href="../../auto_modules.html#haystack.views.FacetedSearchView.build_form">[docs]</a>    <span class="k">def</span> <span class="nf">build_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">form_kwargs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">form_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># This way the form can always receive a list containing zero or more</span>
+        <span class="c"># facet expressions:</span>
+        <span class="n">form_kwargs</span><span class="p">[</span><span class="s">&#39;selected_facets&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="s">&quot;selected_facets&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">FacetedSearchView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">build_form</span><span class="p">(</span><span class="n">form_kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FacetedSearchView.extra_context"><a class="viewcode-back" href="../../auto_modules.html#haystack.views.FacetedSearchView.extra_context">[docs]</a>    <span class="k">def</span> <span class="nf">extra_context</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">extra</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">FacetedSearchView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">extra_context</span><span class="p">()</span>
+        <span class="n">extra</span><span class="p">[</span><span class="s">&#39;request&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span>
+        <span class="n">extra</span><span class="p">[</span><span class="s">&#39;facets&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">facet_counts</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">extra</span>
+
+</div></div>
+<div class="viewcode-block" id="basic_search"><a class="viewcode-back" href="../../auto_modules.html#haystack.views.basic_search">[docs]</a><span class="k">def</span> <span class="nf">basic_search</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s">&#39;search/search.html&#39;</span><span class="p">,</span> <span class="n">load_all</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">form_class</span><span class="o">=</span><span class="n">ModelSearchForm</span><span class="p">,</span> <span class="n">searchqueryset</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">context_class</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">,</span> <span class="n">extra_context</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">results_per_page</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A more traditional view that also demonstrate an alternative</span>
+<span class="sd">    way to use Haystack.</span>
+
+<span class="sd">    Useful as an example of for basing heavily custom views off of.</span>
+
+<span class="sd">    Also has the benefit of thread-safety, which the ``SearchView`` class may</span>
+<span class="sd">    not be.</span>
+
+<span class="sd">    Template:: ``search/search.html``</span>
+<span class="sd">    Context::</span>
+<span class="sd">        * form</span>
+<span class="sd">          An instance of the ``form_class``. (default: ``ModelSearchForm``)</span>
+<span class="sd">        * page</span>
+<span class="sd">          The current page of search results.</span>
+<span class="sd">        * paginator</span>
+<span class="sd">          A paginator instance for the results.</span>
+<span class="sd">        * query</span>
+<span class="sd">          The query received by the form.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">EmptySearchQuerySet</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;q&#39;</span><span class="p">):</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">form_class</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="p">,</span> <span class="n">searchqueryset</span><span class="o">=</span><span class="n">searchqueryset</span><span class="p">,</span> <span class="n">load_all</span><span class="o">=</span><span class="n">load_all</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;q&#39;</span><span class="p">]</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">search</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">form_class</span><span class="p">(</span><span class="n">searchqueryset</span><span class="o">=</span><span class="n">searchqueryset</span><span class="p">,</span> <span class="n">load_all</span><span class="o">=</span><span class="n">load_all</span><span class="p">)</span>
+
+    <span class="n">paginator</span> <span class="o">=</span> <span class="n">Paginator</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">results_per_page</span> <span class="ow">or</span> <span class="n">RESULTS_PER_PAGE</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="n">paginator</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;page&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+    <span class="k">except</span> <span class="n">InvalidPage</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">Http404</span><span class="p">(</span><span class="s">&quot;No such page of results!&quot;</span><span class="p">)</span>
+
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+        <span class="s">&#39;page&#39;</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span>
+        <span class="s">&#39;paginator&#39;</span><span class="p">:</span> <span class="n">paginator</span><span class="p">,</span>
+        <span class="s">&#39;query&#39;</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span>
+        <span class="s">&#39;suggestion&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">results</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">include_spelling</span><span class="p">:</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;suggestion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">get_suggestion</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">extra_context</span><span class="p">:</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">extra_context</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">context_instance</span><span class="o">=</span><span class="n">context_class</span><span class="p">(</span><span class="n">request</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

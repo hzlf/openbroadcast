@@ -1,0 +1,311 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>djangorestframework.permissions &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for djangorestframework.permissions</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The :mod:`permissions` module bundles a set of  permission classes that are used </span>
+<span class="sd">for checking if a request passes a certain set of constraints. You can assign a permission </span>
+<span class="sd">class to your view by setting your View&#39;s :attr:`permissions` class attribute.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">django.core.cache</span> <span class="kn">import</span> <span class="n">cache</span>
+<span class="kn">from</span> <span class="nn">djangorestframework</span> <span class="kn">import</span> <span class="n">status</span>
+<span class="kn">from</span> <span class="nn">djangorestframework.response</span> <span class="kn">import</span> <span class="n">ErrorResponse</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s">&#39;BasePermission&#39;</span><span class="p">,</span>
+    <span class="s">&#39;FullAnonAccess&#39;</span><span class="p">,</span>
+    <span class="s">&#39;IsAuthenticated&#39;</span><span class="p">,</span>
+    <span class="s">&#39;IsAdminUser&#39;</span><span class="p">,</span>
+    <span class="s">&#39;IsUserOrIsAnonReadOnly&#39;</span><span class="p">,</span>
+    <span class="s">&#39;PerUserThrottling&#39;</span><span class="p">,</span>
+    <span class="s">&#39;PerViewThrottling&#39;</span><span class="p">,</span>
+    <span class="s">&#39;PerResourceThrottling&#39;</span>
+<span class="p">)</span>
+
+
+<span class="n">_403_FORBIDDEN_RESPONSE</span> <span class="o">=</span> <span class="n">ErrorResponse</span><span class="p">(</span>
+    <span class="n">status</span><span class="o">.</span><span class="n">HTTP_403_FORBIDDEN</span><span class="p">,</span>
+    <span class="p">{</span><span class="s">&#39;detail&#39;</span><span class="p">:</span> <span class="s">&#39;You do not have permission to access this resource. &#39;</span> <span class="o">+</span>
+               <span class="s">&#39;You may need to login or otherwise authenticate the request.&#39;</span><span class="p">})</span>
+
+<span class="n">_503_SERVICE_UNAVAILABLE</span> <span class="o">=</span> <span class="n">ErrorResponse</span><span class="p">(</span>
+    <span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+    <span class="p">{</span><span class="s">&#39;detail&#39;</span><span class="p">:</span> <span class="s">&#39;request was throttled&#39;</span><span class="p">})</span>
+
+
+<div class="viewcode-block" id="BasePermission"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.BasePermission">[docs]</a><span class="k">class</span> <span class="nc">BasePermission</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A base class from which all permission classes should inherit.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Permission classes are always passed the current view on creation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view</span> <span class="o">=</span> <span class="n">view</span>
+    
+<div class="viewcode-block" id="BasePermission.check_permission"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.BasePermission.check_permission">[docs]</a>    <span class="k">def</span> <span class="nf">check_permission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">auth</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Should simply return, or raise an :exc:`response.ErrorResponse`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+</div></div>
+<div class="viewcode-block" id="FullAnonAccess"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.FullAnonAccess">[docs]</a><span class="k">class</span> <span class="nc">FullAnonAccess</span><span class="p">(</span><span class="n">BasePermission</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allows full access.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FullAnonAccess.check_permission"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.FullAnonAccess.check_permission">[docs]</a>    <span class="k">def</span> <span class="nf">check_permission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+</div></div>
+<div class="viewcode-block" id="IsAuthenticated"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.IsAuthenticated">[docs]</a><span class="k">class</span> <span class="nc">IsAuthenticated</span><span class="p">(</span><span class="n">BasePermission</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allows access only to authenticated users.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="IsAuthenticated.check_permission"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.IsAuthenticated.check_permission">[docs]</a>    <span class="k">def</span> <span class="nf">check_permission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">_403_FORBIDDEN_RESPONSE</span> 
+
+</div></div>
+<div class="viewcode-block" id="IsAdminUser"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.IsAdminUser">[docs]</a><span class="k">class</span> <span class="nc">IsAdminUser</span><span class="p">(</span><span class="n">BasePermission</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allows access only to admin users.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="IsAdminUser.check_permission"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.IsAdminUser.check_permission">[docs]</a>    <span class="k">def</span> <span class="nf">check_permission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span><span class="o">.</span><span class="n">is_staff</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">_403_FORBIDDEN_RESPONSE</span>
+
+</div></div>
+<div class="viewcode-block" id="IsUserOrIsAnonReadOnly"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.IsUserOrIsAnonReadOnly">[docs]</a><span class="k">class</span> <span class="nc">IsUserOrIsAnonReadOnly</span><span class="p">(</span><span class="n">BasePermission</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The request is authenticated as a user, or is a read-only request.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="IsUserOrIsAnonReadOnly.check_permission"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.IsUserOrIsAnonReadOnly.check_permission">[docs]</a>    <span class="k">def</span> <span class="nf">check_permission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">()</span> <span class="ow">and</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">method</span> <span class="o">!=</span> <span class="s">&#39;GET&#39;</span> <span class="ow">and</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">method</span> <span class="o">!=</span> <span class="s">&#39;HEAD&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">_403_FORBIDDEN_RESPONSE</span>
+
+</div></div>
+<span class="k">class</span> <span class="nc">BaseThrottle</span><span class="p">(</span><span class="n">BasePermission</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rate throttling of requests.</span>
+
+<span class="sd">    The rate (requests / seconds) is set by a :attr:`throttle` attribute</span>
+<span class="sd">    on the :class:`.View` class.  The attribute is a string of the form &#39;number of</span>
+<span class="sd">    requests/period&#39;.</span>
+
+<span class="sd">    Period should be one of: (&#39;s&#39;, &#39;sec&#39;, &#39;m&#39;, &#39;min&#39;, &#39;h&#39;, &#39;hour&#39;, &#39;d&#39;, &#39;day&#39;)</span>
+
+<span class="sd">    Previous request information used for throttling is stored in the cache.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+
+    <span class="n">attr_name</span> <span class="o">=</span> <span class="s">&#39;throttle&#39;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;0/sec&#39;</span>
+    <span class="n">timer</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span>
+
+    <span class="k">def</span> <span class="nf">get_cache_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Should return a unique cache-key which can be used for throttling.</span>
+<span class="sd">        Muse be overridden. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">check_permission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">auth</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check the throttling.</span>
+<span class="sd">        Return `None` or raise an :exc:`.ErrorResponse`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">num</span><span class="p">,</span> <span class="n">period</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attr_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_requests</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;s&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span> <span class="s">&#39;h&#39;</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span> <span class="s">&#39;d&#39;</span><span class="p">:</span> <span class="mi">86400</span><span class="p">}[</span><span class="n">period</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auth</span> <span class="o">=</span> <span class="n">auth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_throttle</span><span class="p">()</span>
+        
+    <span class="k">def</span> <span class="nf">check_throttle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Implement the check to see if the request should be throttled.</span>
+
+<span class="sd">        On success calls :meth:`throttle_success`.</span>
+<span class="sd">        On failure calls :meth:`throttle_failure`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cache_key</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">now</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="p">()</span>
+        
+        <span class="c"># Drop any requests from the history which have now passed the</span>
+        <span class="c"># throttle duration</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_requests</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">throttle_failure</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">throttle_success</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">throttle_success</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inserts the current request&#39;s timestamp along with the key</span>
+<span class="sd">        into the cache.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
+        <span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="s">&#39;status=SUCCESS; next=</span><span class="si">%s</span><span class="s"> sec&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span><span class="s">&#39;X-Throttle&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">)</span>
+            
+    <span class="k">def</span> <span class="nf">throttle_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when a request to the API has failed due to throttling.</span>
+<span class="sd">        Raises a &#39;503 service unavailable&#39; response.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="s">&#39;status=FAILURE; next=</span><span class="si">%s</span><span class="s"> sec&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span><span class="s">&#39;X-Throttle&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">_503_SERVICE_UNAVAILABLE</span>
+    
+    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the recommended next request time in seconds.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">:</span>
+            <span class="n">remaining_duration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">remaining_duration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span>
+
+        <span class="n">available_requests</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_requests</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="s">&#39;</span><span class="si">%.2f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">remaining_duration</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">available_requests</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="PerUserThrottling"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.PerUserThrottling">[docs]</a><span class="k">class</span> <span class="nc">PerUserThrottling</span><span class="p">(</span><span class="n">BaseThrottle</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Limits the rate of API calls that may be made by a given user.</span>
+
+<span class="sd">    The user id will be used as a unique identifier if the user is</span>
+<span class="sd">    authenticated. For anonymous requests, the IP address of the client will</span>
+<span class="sd">    be used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PerUserThrottling.get_cache_key"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.PerUserThrottling.get_cache_key">[docs]</a>    <span class="k">def</span> <span class="nf">get_cache_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">():</span>
+            <span class="n">ident</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">auth</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ident</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;REMOTE_ADDR&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s">&#39;throttle_user_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">ident</span>
+
+</div></div>
+<div class="viewcode-block" id="PerViewThrottling"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.PerViewThrottling">[docs]</a><span class="k">class</span> <span class="nc">PerViewThrottling</span><span class="p">(</span><span class="n">BaseThrottle</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Limits the rate of API calls that may be used on a given view.</span>
+
+<span class="sd">    The class name of the view is used as a unique identifier to</span>
+<span class="sd">    throttle against.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PerViewThrottling.get_cache_key"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.PerViewThrottling.get_cache_key">[docs]</a>    <span class="k">def</span> <span class="nf">get_cache_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;throttle_view_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+
+  </div></div>
+<div class="viewcode-block" id="PerResourceThrottling"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.PerResourceThrottling">[docs]</a><span class="k">class</span> <span class="nc">PerResourceThrottling</span><span class="p">(</span><span class="n">BaseThrottle</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Limits the rate of API calls that may be used against all views on</span>
+<span class="sd">    a given resource.</span>
+
+<span class="sd">    The class name of the resource is used as a unique identifier to</span>
+<span class="sd">    throttle against.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PerResourceThrottling.get_cache_key"><a class="viewcode-back" href="../../auto_modules.html#djangorestframework.permissions.PerResourceThrottling.get_cache_key">[docs]</a>    <span class="k">def</span> <span class="nf">get_cache_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;throttle_resource_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">resource</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

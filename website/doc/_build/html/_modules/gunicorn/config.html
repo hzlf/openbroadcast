@@ -1,0 +1,929 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>gunicorn.config &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for gunicorn.config</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -</span>
+<span class="c">#</span>
+<span class="c"># This file is part of gunicorn released under the MIT license. </span>
+<span class="c"># See the NOTICE for more information.</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">grp</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">optparse</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pwd</span>
+<span class="kn">import</span> <span class="nn">textwrap</span>
+<span class="kn">import</span> <span class="nn">types</span>
+
+<span class="kn">from</span> <span class="nn">gunicorn</span> <span class="kn">import</span> <span class="n">__version__</span>
+<span class="kn">from</span> <span class="nn">gunicorn.errors</span> <span class="kn">import</span> <span class="n">ConfigError</span>
+<span class="kn">from</span> <span class="nn">gunicorn</span> <span class="kn">import</span> <span class="n">util</span>
+
+<span class="n">KNOWN_SETTINGS</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="wrap_method"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.wrap_method">[docs]</a><span class="k">def</span> <span class="nf">wrap_method</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_wrapped</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_wrapped</span>
+</div>
+<div class="viewcode-block" id="make_settings"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.make_settings">[docs]</a><span class="k">def</span> <span class="nf">make_settings</span><span class="p">(</span><span class="n">ignore</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">ignore</span> <span class="o">=</span> <span class="n">ignore</span> <span class="ow">or</span> <span class="p">()</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">KNOWN_SETTINGS</span><span class="p">:</span>
+        <span class="n">setting</span> <span class="o">=</span> <span class="n">s</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">setting</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">ignore</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">settings</span><span class="p">[</span><span class="n">setting</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">setting</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">settings</span>
+</div>
+<div class="viewcode-block" id="Config"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Config">[docs]</a><span class="k">class</span> <span class="nc">Config</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">usage</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">make_settings</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">usage</span> <span class="o">=</span> <span class="n">usage</span>
+        
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s">&quot;No configuration setting for: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s">&quot;settings&quot;</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s">&quot;Invalid access!&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="Config.set"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Config.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s">&quot;No configuration setting for: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Config.parser"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Config.parser">[docs]</a>    <span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&quot;usage&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">usage</span><span class="p">,</span>
+            <span class="s">&quot;version&quot;</span><span class="p">:</span> <span class="n">__version__</span>
+        <span class="p">}</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">optparse</span><span class="o">.</span><span class="n">OptionParser</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">def</span> <span class="nf">sorter</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">section</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
+        <span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">sorter</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">parser</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Config.worker_class"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Config.worker_class">[docs]</a>    <span class="k">def</span> <span class="nf">worker_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">uri</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s">&#39;worker_class&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="n">worker_class</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">load_class</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">worker_class</span><span class="p">,</span> <span class="s">&quot;setup&quot;</span><span class="p">):</span>
+            <span class="n">worker_class</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">worker_class</span>
+</div>
+    <span class="nd">@property</span>   
+<div class="viewcode-block" id="Config.workers"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Config.workers">[docs]</a>    <span class="k">def</span> <span class="nf">workers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s">&#39;workers&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Config.address"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Config.address">[docs]</a>    <span class="k">def</span> <span class="nf">address</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s">&#39;bind&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">parse_address</span><span class="p">(</span><span class="n">util</span><span class="o">.</span><span class="n">to_bytestring</span><span class="p">(</span><span class="n">bind</span><span class="p">))</span>
+        </div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Config.uid"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Config.uid">[docs]</a>    <span class="k">def</span> <span class="nf">uid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s">&#39;user&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+      </div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Config.gid"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Config.gid">[docs]</a>    <span class="k">def</span> <span class="nf">gid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s">&#39;group&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        </div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Config.proc_name"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Config.proc_name">[docs]</a>    <span class="k">def</span> <span class="nf">proc_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s">&#39;proc_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">pn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pn</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s">&#39;default_proc_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Config.logger_class"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Config.logger_class">[docs]</a>    <span class="k">def</span> <span class="nf">logger_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">uri</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s">&#39;logger_class&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="n">logger_class</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">load_class</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&quot;simple&quot;</span><span class="p">,</span>
+            <span class="n">section</span><span class="o">=</span><span class="s">&quot;gunicorn.loggers&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">logger_class</span><span class="p">,</span> <span class="s">&quot;install&quot;</span><span class="p">):</span>
+            <span class="n">logger_class</span><span class="o">.</span><span class="n">install</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">logger_class</span>
+
+            </div></div>
+<div class="viewcode-block" id="SettingMeta"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.SettingMeta">[docs]</a><span class="k">class</span> <span class="nc">SettingMeta</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="n">super_new</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">SettingMeta</span><span class="p">,</span> <span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">__new__</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bases</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">SettingMeta</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parents</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">super_new</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+    
+        <span class="n">attrs</span><span class="p">[</span><span class="s">&quot;order&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">KNOWN_SETTINGS</span><span class="p">)</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s">&quot;validator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wrap_method</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="s">&quot;validator&quot;</span><span class="p">])</span>
+        
+        <span class="n">new_class</span> <span class="o">=</span> <span class="n">super_new</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+        <span class="n">new_class</span><span class="o">.</span><span class="n">fmt_desc</span><span class="p">(</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;desc&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">))</span>
+        <span class="n">KNOWN_SETTINGS</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_class</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_class</span>
+
+<div class="viewcode-block" id="SettingMeta.fmt_desc"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.SettingMeta.fmt_desc">[docs]</a>    <span class="k">def</span> <span class="nf">fmt_desc</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="n">desc</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s">&quot;desc&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s">&quot;short&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+</div></div>
+<div class="viewcode-block" id="Setting"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Setting">[docs]</a><span class="k">class</span> <span class="nc">Setting</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">SettingMeta</span>
+    
+    <span class="n">name</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">short</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>    
+        
+<div class="viewcode-block" id="Setting.add_option"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Setting.add_option">[docs]</a>    <span class="k">def</span> <span class="nf">add_option</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cli</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cli</span><span class="p">)</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&quot;dest&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s">&quot;metavar&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta</span> <span class="ow">or</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">action</span> <span class="ow">or</span> <span class="s">&quot;store&quot;</span><span class="p">,</span>
+            <span class="s">&quot;type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="ow">or</span> <span class="s">&quot;string&quot;</span><span class="p">,</span>
+            <span class="s">&quot;default&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="s">&quot;help&quot;</span><span class="p">:</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> [</span><span class="si">%s</span><span class="s">]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">short</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&quot;store&quot;</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">)</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="Setting.copy"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Setting.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="Setting.get"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Setting.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+    </div>
+<div class="viewcode-block" id="Setting.set"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Setting.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validator</span><span class="p">),</span> <span class="s">&quot;Invalid validator: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validator</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="validate_bool"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.validate_bool">[docs]</a><span class="k">def</span> <span class="nf">validate_bool</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">BooleanType</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">val</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid type for casting: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">val</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;true&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="n">val</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;false&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Invalid boolean: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">val</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="validate_dict"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.validate_dict">[docs]</a><span class="k">def</span> <span class="nf">validate_dict</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Value is not a dictionary: </span><span class="si">%s</span><span class="s"> &quot;</span> <span class="o">%</span> <span class="n">val</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="validate_pos_int"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.validate_pos_int">[docs]</a><span class="k">def</span> <span class="nf">validate_pos_int</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">IntType</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">LongType</span><span class="p">)):</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># Booleans are ints!</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Value must be positive: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">val</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="validate_string"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.validate_string">[docs]</a><span class="k">def</span> <span class="nf">validate_string</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Not a string: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">val</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">val</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="validate_callable"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.validate_callable">[docs]</a><span class="k">def</span> <span class="nf">validate_callable</span><span class="p">(</span><span class="n">arity</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_validate_callable</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Value is not callable: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">arity</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">val</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Value must have an arity of: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">arity</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">val</span>
+    <span class="k">return</span> <span class="n">_validate_callable</span>
+
+</div>
+<div class="viewcode-block" id="validate_user"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.validate_user">[docs]</a><span class="k">def</span> <span class="nf">validate_user</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">geteuid</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">val</span>
+    <span class="k">elif</span> <span class="n">val</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pwd</span><span class="o">.</span><span class="n">getpwnam</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">pw_uid</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="s">&quot;No such user: &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">val</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="validate_group"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.validate_group">[docs]</a><span class="k">def</span> <span class="nf">validate_group</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">getegid</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">val</span>
+    <span class="k">elif</span> <span class="n">val</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">grp</span><span class="o">.</span><span class="n">getgrnam</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">gr_gid</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="s">&quot;No such group: &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">val</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="validate_post_request"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.validate_post_request">[docs]</a><span class="k">def</span> <span class="nf">validate_post_request</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+
+    <span class="c"># decorator</span>
+    <span class="k">def</span> <span class="nf">wrap_post_request</span><span class="p">(</span><span class="n">fun</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">_wrapped</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">environ</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">fun</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">req</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_wrapped</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Value isn&#39;t a callable: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="n">largs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">val</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">largs</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">val</span>
+    <span class="k">elif</span> <span class="n">largs</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">wrap_post_request</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Value must have an arity of: 3&quot;</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="ConfigFile"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.ConfigFile">[docs]</a><span class="k">class</span> <span class="nc">ConfigFile</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;config&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Config File&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;-c&quot;</span><span class="p">,</span> <span class="s">&quot;--config&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;FILE&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_string</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        The path to a Gunicorn config file.</span>
+<span class="s">        </span>
+<span class="s">        Only has an effect when specified on the command line or as part of an</span>
+<span class="s">        application specific configuration.    </span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="Bind"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Bind">[docs]</a><span class="k">class</span> <span class="nc">Bind</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;bind&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Socket&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;-b&quot;</span><span class="p">,</span> <span class="s">&quot;--bind&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;ADDRESS&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_string</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&quot;127.0.0.1:8000&quot;</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        The socket to bind.</span>
+<span class="s">        </span>
+<span class="s">        A string of the form: &#39;HOST&#39;, &#39;HOST:PORT&#39;, &#39;unix:PATH&#39;. An IP is a valid</span>
+<span class="s">        HOST.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+        </div>
+<div class="viewcode-block" id="Backlog"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Backlog">[docs]</a><span class="k">class</span> <span class="nc">Backlog</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;backlog&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Socket&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;--backlog&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;INT&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_pos_int</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;int&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">2048</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        The maximum number of pending connections.    </span>
+<span class="s">        </span>
+<span class="s">        This refers to the number of clients that can be waiting to be served.</span>
+<span class="s">        Exceeding this number results in the client getting an error when</span>
+<span class="s">        attempting to connect. It should only affect servers under significant</span>
+<span class="s">        load.</span>
+<span class="s">        </span>
+<span class="s">        Must be a positive integer. Generally set in the 64-2048 range.    </span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="Workers"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Workers">[docs]</a><span class="k">class</span> <span class="nc">Workers</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;workers&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Worker Processes&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;-w&quot;</span><span class="p">,</span> <span class="s">&quot;--workers&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;INT&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_pos_int</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;int&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        The number of worker process for handling requests.</span>
+<span class="s">        </span>
+<span class="s">        A positive integer generally in the 2-4 x $(NUM_CORES) range. You&#39;ll</span>
+<span class="s">        want to vary this a bit to find the best for your particular</span>
+<span class="s">        application&#39;s work load.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="WorkerClass"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.WorkerClass">[docs]</a><span class="k">class</span> <span class="nc">WorkerClass</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;worker_class&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Worker Processes&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;-k&quot;</span><span class="p">,</span> <span class="s">&quot;--worker-class&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;STRING&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_string</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&quot;sync&quot;</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        The type of workers to use.</span>
+<span class="s">        </span>
+<span class="s">        The default class (sync) should handle most &#39;normal&#39; types of workloads.</span>
+<span class="s">        You&#39;ll want to read http://gunicorn.org/design.html for information on</span>
+<span class="s">        when you might want to choose one of the other worker classes.</span>
+<span class="s">        </span>
+<span class="s">        A string referring to one of the following bundled classes:</span>
+<span class="s">        </span>
+<span class="s">        * ``sync``</span>
+<span class="s">        * ``eventlet`` - Requires eventlet &gt;= 0.9.7</span>
+<span class="s">        * ``gevent``   - Requires gevent &gt;= 0.12.2 (?)</span>
+<span class="s">        * ``tornado``  - Requires tornado &gt;= 0.2</span>
+<span class="s">        </span>
+<span class="s">        Optionally, you can provide your own worker by giving gunicorn a</span>
+<span class="s">        python path to a subclass of gunicorn.workers.base.Worker. This</span>
+<span class="s">        alternative syntax will load the gevent class:</span>
+<span class="s">        ``gunicorn.workers.ggevent.GeventWorker``. Alternatively the syntax</span>
+<span class="s">        can also load the gevent class with ``egg:gunicorn#gevent``</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="WorkerConnections"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.WorkerConnections">[docs]</a><span class="k">class</span> <span class="nc">WorkerConnections</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;worker_connections&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Worker Processes&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;--worker-connections&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;INT&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_pos_int</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;int&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">1000</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        The maximum number of simultaneous clients.</span>
+<span class="s">        </span>
+<span class="s">        This setting only affects the Eventlet and Gevent worker types.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="MaxRequests"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.MaxRequests">[docs]</a><span class="k">class</span> <span class="nc">MaxRequests</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;max_requests&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Worker Processes&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;--max-requests&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;INT&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_pos_int</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;int&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        The maximum number of requests a worker will process before restarting.</span>
+<span class="s">        </span>
+<span class="s">        Any value greater than zero will limit the number of requests a work</span>
+<span class="s">        will process before automatically restarting. This is a simple method</span>
+<span class="s">        to help limit the damage of memory leaks.</span>
+<span class="s">        </span>
+<span class="s">        If this is set to zero (the default) then the automatic worker</span>
+<span class="s">        restarts are disabled.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="Timeout"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Timeout">[docs]</a><span class="k">class</span> <span class="nc">Timeout</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;timeout&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Worker Processes&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;-t&quot;</span><span class="p">,</span> <span class="s">&quot;--timeout&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;INT&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_pos_int</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;int&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Workers silent for more than this many seconds are killed and restarted.</span>
+<span class="s">        </span>
+<span class="s">        Generally set to thirty seconds. Only set this noticeably higher if</span>
+<span class="s">        you&#39;re sure of the repercussions for sync workers. For the non sync</span>
+<span class="s">        workers it just means that the worker process is still communicating and</span>
+<span class="s">        is not tied to the length of time required to handle a single request.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="Keepalive"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Keepalive">[docs]</a><span class="k">class</span> <span class="nc">Keepalive</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;keepalive&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Worker Processes&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;--keep-alive&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;INT&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_pos_int</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;int&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        The number of seconds to wait for requests on a Keep-Alive connection.</span>
+<span class="s">        </span>
+<span class="s">        Generally set in the 1-5 seconds range.    </span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="Debug"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Debug">[docs]</a><span class="k">class</span> <span class="nc">Debug</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;debug&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Debugging&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;--debug&quot;</span><span class="p">]</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_bool</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="s">&quot;store_true&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Turn on debugging in the server.</span>
+<span class="s">        </span>
+<span class="s">        This limits the number of worker processes to 1 and changes some error</span>
+<span class="s">        handling that&#39;s sent to clients.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="Spew"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Spew">[docs]</a><span class="k">class</span> <span class="nc">Spew</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;spew&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Debugging&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;--spew&quot;</span><span class="p">]</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_bool</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="s">&quot;store_true&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Install a trace function that spews every line executed by the server.</span>
+<span class="s">        </span>
+<span class="s">        This is the nuclear option.    </span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="PreloadApp"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.PreloadApp">[docs]</a><span class="k">class</span> <span class="nc">PreloadApp</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;preload_app&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Mechanics&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;--preload&quot;</span><span class="p">]</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_bool</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="s">&quot;store_true&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Load application code before the worker processes are forked.</span>
+<span class="s">        </span>
+<span class="s">        By preloading an application you can save some RAM resources as well as</span>
+<span class="s">        speed up server boot times. Although, if you defer application loading</span>
+<span class="s">        to each worker process, you can reload your application code easily by</span>
+<span class="s">        restarting workers.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="Daemon"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Daemon">[docs]</a><span class="k">class</span> <span class="nc">Daemon</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;daemon&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Mechanics&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;-D&quot;</span><span class="p">,</span> <span class="s">&quot;--daemon&quot;</span><span class="p">]</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_bool</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="s">&quot;store_true&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Daemonize the Gunicorn process.</span>
+<span class="s">        </span>
+<span class="s">        Detaches the server from the controlling terminal and enters the</span>
+<span class="s">        background.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="Pidfile"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Pidfile">[docs]</a><span class="k">class</span> <span class="nc">Pidfile</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;pidfile&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Mechanics&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;-p&quot;</span><span class="p">,</span> <span class="s">&quot;--pid&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;FILE&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_string</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        A filename to use for the PID file.</span>
+<span class="s">        </span>
+<span class="s">        If not set, no PID file will be written.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="User"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.User">[docs]</a><span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;user&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Mechanics&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;-u&quot;</span><span class="p">,</span> <span class="s">&quot;--user&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;USER&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_user</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">geteuid</span><span class="p">()</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Switch worker processes to run as this user.</span>
+<span class="s">        </span>
+<span class="s">        A valid user id (as an integer) or the name of a user that can be</span>
+<span class="s">        retrieved with a call to pwd.getpwnam(value) or None to not change</span>
+<span class="s">        the worker process user.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="Group"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Group">[docs]</a><span class="k">class</span> <span class="nc">Group</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;group&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Mechanics&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;-g&quot;</span><span class="p">,</span> <span class="s">&quot;--group&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;GROUP&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_group</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getegid</span><span class="p">()</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Switch worker process to run as this group.</span>
+<span class="s">        </span>
+<span class="s">        A valid group id (as an integer) or the name of a user that can be</span>
+<span class="s">        retrieved with a call to pwd.getgrnam(value) or None to not change</span>
+<span class="s">        the worker processes group.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="Umask"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Umask">[docs]</a><span class="k">class</span> <span class="nc">Umask</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;umask&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Mechanics&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;-m&quot;</span><span class="p">,</span> <span class="s">&quot;--umask&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;INT&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_pos_int</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;int&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        A bit mask for the file mode on files written by Gunicorn.</span>
+<span class="s">        </span>
+<span class="s">        Note that this affects unix socket permissions.</span>
+<span class="s">        </span>
+<span class="s">        A valid value for the os.umask(mode) call or a string compatible with</span>
+<span class="s">        int(value, 0) (0 means Python guesses the base, so values like &quot;0&quot;,</span>
+<span class="s">        &quot;0xFF&quot;, &quot;0022&quot; are valid for decimal, hex, and octal representations)</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="TmpUploadDir"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.TmpUploadDir">[docs]</a><span class="k">class</span> <span class="nc">TmpUploadDir</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;tmp_upload_dir&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Mechanics&quot;</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;DIR&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_string</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Directory to store temporary request data as they are read.</span>
+<span class="s">        </span>
+<span class="s">        This may disappear in the near future.</span>
+<span class="s">        </span>
+<span class="s">        This path should be writable by the process permissions set for Gunicorn</span>
+<span class="s">        workers. If not specified, Gunicorn will choose a system generated</span>
+<span class="s">        temporary directory.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="SecureSchemeHeader"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.SecureSchemeHeader">[docs]</a><span class="k">class</span> <span class="nc">SecureSchemeHeader</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;secure_scheme_headers&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Mechanics&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_dict</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&quot;X-FORWARDED-PROTOCOL&quot;</span><span class="p">:</span> <span class="s">&quot;ssl&quot;</span><span class="p">,</span>
+        <span class="s">&quot;X-FORWARDED-SSL&quot;</span><span class="p">:</span> <span class="s">&quot;on&quot;</span>
+    <span class="p">}</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+
+<span class="s">        A dictionary containing headers and values that the front-end proxy</span>
+<span class="s">        uses to indicate HTTPS requests. These tell gunicorn to set</span>
+<span class="s">        wsgi.url_scheme to &quot;https&quot;, so your application can tell that the</span>
+<span class="s">        request is secure.</span>
+
+<span class="s">        The dictionary should map upper-case header names to exact string</span>
+<span class="s">        values. The value comparisons are case-sensitive, unlike the header</span>
+<span class="s">        names, so make sure they&#39;re exactly what your front-end proxy sends</span>
+<span class="s">        when handling HTTPS requests.</span>
+
+<span class="s">        It is important that your front-end proxy configuration ensures that</span>
+<span class="s">        the headers defined here can not be passed directly from the client.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="AccessLog"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.AccessLog">[docs]</a><span class="k">class</span> <span class="nc">AccessLog</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;accesslog&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Logging&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;--access-logfile&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;FILE&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_string</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">None</span>  
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        The Access log file to write to.</span>
+<span class="s">        </span>
+<span class="s">        &quot;-&quot; means log to stdout.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="AccessLogFormat"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.AccessLogFormat">[docs]</a><span class="k">class</span> <span class="nc">AccessLogFormat</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;access_log_format&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Logging&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;--access-logformat&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;STRING&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_string</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%(h)s</span><span class="s"> </span><span class="si">%(l)s</span><span class="s"> </span><span class="si">%(u)s</span><span class="s"> </span><span class="si">%(t)s</span><span class="s"> &quot;</span><span class="si">%(r)s</span><span class="s">&quot; </span><span class="si">%(s)s</span><span class="s"> </span><span class="si">%(b)s</span><span class="s"> &quot;</span><span class="si">%(f)s</span><span class="s">&quot; &quot;</span><span class="si">%(a)s</span><span class="s">&quot;&#39;</span>  
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        The Access log format .</span>
+
+<span class="s">        By default:</span>
+
+<span class="s">        </span><span class="si">%(h)s</span><span class="s"> </span><span class="si">%(l)s</span><span class="s"> </span><span class="si">%(u)s</span><span class="s"> </span><span class="si">%(t)s</span><span class="s"> &quot;</span><span class="si">%(r)s</span><span class="s">&quot; </span><span class="si">%(s)s</span><span class="s"> </span><span class="si">%(b)s</span><span class="s"> &quot;</span><span class="si">%(f)s</span><span class="s">&quot; &quot;</span><span class="si">%(a)s</span><span class="s">&quot;</span>
+
+
+<span class="s">        h: remote address</span>
+<span class="s">        t: date of the request</span>
+<span class="s">        r: status line (ex: GET / HTTP/1.1)</span>
+<span class="s">        s: status</span>
+<span class="s">        b: response length or &#39;-&#39;</span>
+<span class="s">        f: referer</span>
+<span class="s">        a: user agent</span>
+<span class="s">        T: request time in seconds</span>
+<span class="s">        D: request time in microseconds</span>
+
+<span class="s">        You can also pass any WSGI request header as a parameter. </span>
+<span class="s">        (ex &#39;</span><span class="si">%(HTTP_HOST)s</span><span class="s">&#39;).</span>
+<span class="s">        &quot;&quot;&quot;</span>
+
+</div>
+<div class="viewcode-block" id="ErrorLog"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.ErrorLog">[docs]</a><span class="k">class</span> <span class="nc">ErrorLog</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;errorlog&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Logging&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;--error-logfile&quot;</span><span class="p">,</span> <span class="s">&quot;--log-file&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;FILE&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_string</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&quot;-&quot;</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        The Error log file to write to.</span>
+<span class="s">        </span>
+<span class="s">        &quot;-&quot; means log to stdout.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="Loglevel"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Loglevel">[docs]</a><span class="k">class</span> <span class="nc">Loglevel</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;loglevel&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Logging&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;--log-level&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;LEVEL&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_string</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&quot;info&quot;</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        The granularity of Error log outputs.</span>
+<span class="s">        </span>
+<span class="s">        Valid level names are:</span>
+<span class="s">        </span>
+<span class="s">        * debug</span>
+<span class="s">        * info</span>
+<span class="s">        * warning</span>
+<span class="s">        * error</span>
+<span class="s">        * critical</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="LoggerClass"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.LoggerClass">[docs]</a><span class="k">class</span> <span class="nc">LoggerClass</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;logger_class&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Logging&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;--logger-class&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;STRING&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_string</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&quot;simple&quot;</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        The logger you want to use to log events in gunicorn.</span>
+
+<span class="s">        The default class (``gunicorn.glogging.Logger``) handle most of</span>
+<span class="s">        normal usages in logging. It provides error and access logging.</span>
+
+<span class="s">        You can provide your own worker by giving gunicorn a</span>
+<span class="s">        python path to a subclass like gunicorn.glogging.Logger. </span>
+<span class="s">        Alternatively the syntax can also load the Logger class </span>
+<span class="s">        with ``egg:gunicorn#simple`</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="Procname"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Procname">[docs]</a><span class="k">class</span> <span class="nc">Procname</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;proc_name&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Process Naming&quot;</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;-n&quot;</span><span class="p">,</span> <span class="s">&quot;--name&quot;</span><span class="p">]</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="s">&quot;STRING&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_string</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        A base to use with setproctitle for process naming.</span>
+<span class="s">        </span>
+<span class="s">        This affects things like ``ps`` and ``top``. If you&#39;re going to be</span>
+<span class="s">        running more than one instance of Gunicorn you&#39;ll probably want to set a</span>
+<span class="s">        name to tell them apart. This requires that you install the setproctitle</span>
+<span class="s">        module.</span>
+<span class="s">        </span>
+<span class="s">        It defaults to &#39;gunicorn&#39;.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="DefaultProcName"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.DefaultProcName">[docs]</a><span class="k">class</span> <span class="nc">DefaultProcName</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;default_proc_name&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Process Naming&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_string</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&quot;gunicorn&quot;</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Internal setting that is adjusted for each type of application.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="OnStarting"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.OnStarting">[docs]</a><span class="k">class</span> <span class="nc">OnStarting</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;on_starting&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Hooks&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_callable</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;callable&quot;</span>
+<div class="viewcode-block" id="OnStarting.on_starting"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.OnStarting.on_starting">[docs]</a>    <span class="k">def</span> <span class="nf">on_starting</span><span class="p">(</span><span class="n">server</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+    <span class="n">default</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">on_starting</span><span class="p">)</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Called just before the master process is initialized.</span>
+<span class="s">        </span>
+<span class="s">        The callable needs to accept a single instance variable for the Arbiter.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="OnReload"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.OnReload">[docs]</a><span class="k">class</span> <span class="nc">OnReload</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;on_reload&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Hooks&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_callable</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;callable&quot;</span>
+<div class="viewcode-block" id="OnReload.on_reload"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.OnReload.on_reload">[docs]</a>    <span class="k">def</span> <span class="nf">on_reload</span><span class="p">(</span><span class="n">server</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">workers</span><span class="p">):</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">spawn_worker</span><span class="p">()</span></div>
+    <span class="n">default</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">on_reload</span><span class="p">)</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Called to recycle workers during a reload via SIGHUP.</span>
+
+<span class="s">        The callable needs to accept a single instance variable for the Arbiter.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="WhenReady"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.WhenReady">[docs]</a><span class="k">class</span> <span class="nc">WhenReady</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;when_ready&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Hooks&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_callable</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;callable&quot;</span>
+<div class="viewcode-block" id="WhenReady.start_server"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.WhenReady.start_server">[docs]</a>    <span class="k">def</span> <span class="nf">start_server</span><span class="p">(</span><span class="n">server</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+    <span class="n">default</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">start_server</span><span class="p">)</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Called just after the server is started.</span>
+<span class="s">        </span>
+<span class="s">        The callable needs to accept a single instance variable for the Arbiter.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="Prefork"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Prefork">[docs]</a><span class="k">class</span> <span class="nc">Prefork</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;pre_fork&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Hooks&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_callable</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;callable&quot;</span>
+<div class="viewcode-block" id="Prefork.pre_fork"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Prefork.pre_fork">[docs]</a>    <span class="k">def</span> <span class="nf">pre_fork</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">worker</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+    <span class="n">default</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">pre_fork</span><span class="p">)</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Called just before a worker is forked.</span>
+<span class="s">        </span>
+<span class="s">        The callable needs to accept two instance variables for the Arbiter and</span>
+<span class="s">        new Worker.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+    </div>
+<div class="viewcode-block" id="Postfork"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Postfork">[docs]</a><span class="k">class</span> <span class="nc">Postfork</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;post_fork&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Hooks&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_callable</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;callable&quot;</span>
+<div class="viewcode-block" id="Postfork.post_fork"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.Postfork.post_fork">[docs]</a>    <span class="k">def</span> <span class="nf">post_fork</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">worker</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+    <span class="n">default</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">post_fork</span><span class="p">)</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Called just after a worker has been forked.</span>
+<span class="s">        </span>
+<span class="s">        The callable needs to accept two instance variables for the Arbiter and</span>
+<span class="s">        new Worker.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="PreExec"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.PreExec">[docs]</a><span class="k">class</span> <span class="nc">PreExec</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;pre_exec&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Hooks&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_callable</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;callable&quot;</span>
+<div class="viewcode-block" id="PreExec.pre_exec"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.PreExec.pre_exec">[docs]</a>    <span class="k">def</span> <span class="nf">pre_exec</span><span class="p">(</span><span class="n">server</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+    <span class="n">default</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">pre_exec</span><span class="p">)</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Called just before a new master process is forked.</span>
+<span class="s">        </span>
+<span class="s">        The callable needs to accept a single instance variable for the Arbiter.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="PreRequest"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.PreRequest">[docs]</a><span class="k">class</span> <span class="nc">PreRequest</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;pre_request&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Hooks&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_callable</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;callable&quot;</span>
+<div class="viewcode-block" id="PreRequest.pre_request"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.PreRequest.pre_request">[docs]</a>    <span class="k">def</span> <span class="nf">pre_request</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="n">req</span><span class="p">):</span>
+        <span class="n">worker</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">path</span><span class="p">))</span></div>
+    <span class="n">default</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">pre_request</span><span class="p">)</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Called just before a worker processes the request.</span>
+<span class="s">        </span>
+<span class="s">        The callable needs to accept two instance variables for the Worker and</span>
+<span class="s">        the Request.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="PostRequest"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.PostRequest">[docs]</a><span class="k">class</span> <span class="nc">PostRequest</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;post_request&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Hooks&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_post_request</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;callable&quot;</span>
+<div class="viewcode-block" id="PostRequest.post_request"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.PostRequest.post_request">[docs]</a>    <span class="k">def</span> <span class="nf">post_request</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">environ</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+    <span class="n">default</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">post_request</span><span class="p">)</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Called after a worker processes the request.</span>
+
+<span class="s">        The callable needs to accept two instance variables for the Worker and</span>
+<span class="s">        the Request.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="WorkerExit"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.WorkerExit">[docs]</a><span class="k">class</span> <span class="nc">WorkerExit</span><span class="p">(</span><span class="n">Setting</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;worker_exit&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="s">&quot;Server Hooks&quot;</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">validate_callable</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s">&quot;callable&quot;</span>
+<div class="viewcode-block" id="WorkerExit.worker_exit"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.config.WorkerExit.worker_exit">[docs]</a>    <span class="k">def</span> <span class="nf">worker_exit</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">worker</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+    <span class="n">default</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">worker_exit</span><span class="p">)</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Called just after a worker has been exited.</span>
+
+<span class="s">        The callable needs to accept two instance variables for the Arbiter and</span>
+<span class="s">        the just-exited Worker.</span>
+<span class="s">        &quot;&quot;&quot;</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

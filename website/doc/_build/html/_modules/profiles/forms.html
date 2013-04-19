@@ -1,0 +1,327 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>profiles.forms &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for profiles.forms</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.forms</span> <span class="kn">import</span> <span class="n">ModelForm</span>
+<span class="kn">from</span> <span class="nn">django.forms.models</span> <span class="kn">import</span> <span class="n">inlineformset_factory</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="kn">from</span> <span class="nn">crispy_forms.helper</span> <span class="kn">import</span> <span class="n">FormHelper</span>
+<span class="kn">from</span> <span class="nn">crispy_forms.layout</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">crispy_forms.bootstrap</span> <span class="kn">import</span> <span class="n">FormActions</span>
+
+<span class="kn">from</span> <span class="nn">pagedown.widgets</span> <span class="kn">import</span> <span class="n">PagedownWidget</span>
+
+
+<span class="kn">from</span> <span class="nn">tagging.forms</span> <span class="kn">import</span> <span class="n">TagField</span>
+<span class="kn">from</span> <span class="nn">ac_tagging.widgets</span> <span class="kn">import</span> <span class="n">TagAutocompleteTagIt</span>
+
+<span class="kn">from</span> <span class="nn">lib.fields.extra</span> <span class="kn">import</span> <span class="n">ExtraClearableFileInput</span><span class="p">,</span> <span class="n">PreviewImageInput</span><span class="p">,</span> <span class="n">AdvancedFileInput</span>
+
+<span class="kn">from</span> <span class="nn">profiles.models</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="n">ACTION_LAYOUT</span> <span class="o">=</span>  <span class="n">action_layout</span> <span class="o">=</span> <span class="n">FormActions</span><span class="p">(</span>
+                <span class="n">HTML</span><span class="p">(</span><span class="s">&#39;&lt;button type=&quot;submit&quot; name=&quot;save-i-classicon-arrow-upi&quot; value=&quot;save&quot; class=&quot;btn btn-primary pull-right ajax_submit&quot; id=&quot;submit-id-save-i-classicon-arrow-upi&quot;&gt;&lt;i class=&quot;icon-ok icon-white&quot;&gt;&lt;/i&gt; Save&lt;/button&gt;&#39;</span><span class="p">),</span>            
+                <span class="n">HTML</span><span class="p">(</span><span class="s">&#39;&lt;button type=&quot;reset&quot; name=&quot;reset&quot; value=&quot;reset&quot; class=&quot;reset resetButton btn btn-secondary pull-right&quot; id=&quot;reset-id-reset&quot;&gt;&lt;i class=&quot;icon-trash&quot;&gt;&lt;/i&gt; Cancel&lt;/button&gt;&#39;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="ActionForm"><a class="viewcode-back" href="../../auto_modules.html#profiles.forms.ActionForm">[docs]</a><span class="k">class</span> <span class="nc">ActionForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ActionForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span> <span class="o">=</span> <span class="n">FormHelper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_class</span> <span class="o">=</span> <span class="s">&#39;form-horizontal&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_tag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">ACTION_LAYOUT</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ProfileForm"><a class="viewcode-back" href="../../auto_modules.html#profiles.forms.ProfileForm">[docs]</a><span class="k">class</span> <span class="nc">ProfileForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    
+<div class="viewcode-block" id="ProfileForm.Meta"><a class="viewcode-back" href="../../auto_modules.html#profiles.forms.ProfileForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Profile</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;user&#39;</span><span class="p">,</span> <span class="p">)</span>
+
+        <span class="n">widgets</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;image&#39;</span><span class="p">:</span> <span class="n">AdvancedFileInput</span><span class="p">(</span><span class="n">image_width</span><span class="o">=</span><span class="mi">76</span><span class="p">),</span>
+            <span class="s">&#39;expertise&#39;</span><span class="p">:</span> <span class="n">forms</span><span class="o">.</span><span class="n">CheckboxSelectMultiple</span><span class="p">(),</span>
+        <span class="p">}</span>
+        
+        
+        </div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProfileForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span> <span class="o">=</span> <span class="n">FormHelper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_tag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">profile_layout</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
+            <span class="n">Fieldset</span><span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span><span class="s">&#39;Personal Information&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;gender&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;birth_date&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;description&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">Div</span><span class="p">(</span>
+                    <span class="n">Field</span><span class="p">(</span><span class="s">&#39;image&#39;</span><span class="p">),</span>
+                    <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-image&#39;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">contact_layout</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
+
+            <span class="n">Fieldset</span><span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span><span class="s">&#39;Contact&#39;</span><span class="p">),</span>
+                 <span class="n">Div</span><span class="p">(</span>
+                        <span class="n">HTML</span><span class="p">(</span><span class="s">&#39;&lt;h2&gt;</span><span class="si">%s</span><span class="s">&lt;/h2&gt;&lt;p&gt;</span><span class="si">%s</span><span class="s">&lt;/p&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39;lala&#39;</span><span class="p">,</span> <span class="s">&#39;blubbl askjdhg kajhsgd kajgs dkjahgs dkjahg sdkjahg sdkjahg sdkjahgs dkjahgs dkjahsgd kjahgdskjahgdkjahgs dkjahgds kjahgsd kjahgds kjah gsdkjag sdkja gub&#39;</span><span class="p">)),</span>
+                        <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;notes-form notes-inline notes-info&#39;</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;mobile&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;phone&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;fax&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;address1&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;address2&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;state&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;city&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;zip&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;country&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">account_layout</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
+
+            <span class="n">Fieldset</span><span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span><span class="s">&#39;Accounts&#39;</span><span class="p">),</span>
+                 <span class="n">Div</span><span class="p">(</span>
+                        <span class="n">HTML</span><span class="p">(</span><span class="s">&#39;&lt;h2&gt;</span><span class="si">%s</span><span class="s">&lt;/h2&gt;&lt;p&gt;</span><span class="si">%s</span><span class="s">&lt;/p&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39;Account data&#39;</span><span class="p">,</span> <span class="s">&#39;In case you see a reason to recieve some money from us :)&#39;</span><span class="p">)),</span>
+                        <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;notes-form notes-inline notes-info&#39;</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;iban&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;paypal&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">skills_layout</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
+
+            <span class="n">Fieldset</span><span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span><span class="s">&#39;Skills &amp; Knowledge&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;expertise&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+
+            <span class="p">)</span>
+        <span class="p">)</span>
+        
+        <span class="n">tagging_layout</span> <span class="o">=</span> <span class="n">Fieldset</span><span class="p">(</span>
+                <span class="s">&#39;Tags&#39;</span><span class="p">,</span>
+                <span class="s">&#39;d_tags&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+        
+
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
+                        <span class="n">profile_layout</span><span class="p">,</span>
+                        <span class="n">contact_layout</span><span class="p">,</span>
+                        <span class="n">tagging_layout</span><span class="p">,</span>
+                        <span class="n">skills_layout</span><span class="p">,</span>
+                        <span class="n">account_layout</span><span class="p">,</span>
+                        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+        
+        
+    <span class="kn">from</span> <span class="nn">floppyforms.widgets</span> <span class="kn">import</span> <span class="n">DateInput</span>
+    <span class="n">birth_date</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">DateField</span><span class="p">(</span><span class="n">widget</span><span class="o">=</span><span class="n">DateInput</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,)</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">widget</span><span class="o">=</span><span class="n">PagedownWidget</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Markdown enabled&#39;</span><span class="p">))</span>
+    <span class="n">d_tags</span> <span class="o">=</span> <span class="n">TagField</span><span class="p">(</span><span class="n">widget</span><span class="o">=</span><span class="n">TagAutocompleteTagIt</span><span class="p">(</span><span class="n">max_tags</span><span class="o">=</span><span class="mi">9</span><span class="p">),</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Tags&#39;</span><span class="p">))</span>
+    
+        
+<div class="viewcode-block" id="ProfileForm.clean_user"><a class="viewcode-back" href="../../auto_modules.html#profiles.forms.ProfileForm.clean_user">[docs]</a>    <span class="k">def</span> <span class="nf">clean_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">user</span>
+
+
+</div></div>
+<div class="viewcode-block" id="LinkForm"><a class="viewcode-back" href="../../auto_modules.html#profiles.forms.LinkForm">[docs]</a><span class="k">class</span> <span class="nc">LinkForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+
+<div class="viewcode-block" id="LinkForm.Meta"><a class="viewcode-back" href="../../auto_modules.html#profiles.forms.LinkForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Link</span>
+        <span class="n">parent_model</span> <span class="o">=</span> <span class="n">Profile</span>
+        
+        </div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LinkForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span> <span class="o">=</span> <span class="n">FormHelper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_tag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">layout_profile</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
+            <span class="n">Fieldset</span><span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span><span class="s">&#39;Link&#39;</span><span class="p">),</span>
+                <span class="s">&#39;url&#39;</span><span class="p">,</span>
+                <span class="s">&#39;title&#39;</span><span class="p">,</span>
+                <span class="s">&#39;DELETE&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        
+        <span class="n">base_layout</span> <span class="o">=</span> <span class="n">Row</span><span class="p">(</span>
+                <span class="n">Column</span><span class="p">(</span>
+                       <span class="n">Field</span><span class="p">(</span><span class="s">&#39;url&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-large&#39;</span><span class="p">),</span>
+                       <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;span4&#39;</span>
+                       <span class="p">),</span>
+                <span class="n">Column</span><span class="p">(</span>
+                       <span class="n">Field</span><span class="p">(</span><span class="s">&#39;title&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-medium&#39;</span><span class="p">),</span>
+                       <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;span2&#39;</span>
+                       <span class="p">),</span>
+                <span class="n">Column</span><span class="p">(</span>
+                       <span class="n">Field</span><span class="p">(</span><span class="s">&#39;DELETE&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-mini&#39;</span><span class="p">),</span>
+                       <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;span1&#39;</span>
+                       <span class="p">),</span>
+                <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;row link-row&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">base_layout</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ServiceForm"><a class="viewcode-back" href="../../auto_modules.html#profiles.forms.ServiceForm">[docs]</a><span class="k">class</span> <span class="nc">ServiceForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ServiceForm.Meta"><a class="viewcode-back" href="../../auto_modules.html#profiles.forms.ServiceForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Service</span>
+        <span class="n">parent_model</span> <span class="o">=</span> <span class="n">Profile</span>
+        
+        </div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ServiceForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span> <span class="o">=</span> <span class="n">FormHelper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_tag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">layout_profile</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
+            <span class="n">Fieldset</span><span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span><span class="s">&#39;Link&#39;</span><span class="p">),</span>
+                <span class="s">&#39;url&#39;</span><span class="p">,</span>
+                <span class="s">&#39;title&#39;</span><span class="p">,</span>
+                <span class="s">&#39;DELETE&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        
+        <span class="n">base_layout</span> <span class="o">=</span> <span class="n">Row</span><span class="p">(</span>
+                <span class="n">Column</span><span class="p">(</span>
+                       <span class="n">Field</span><span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-large&#39;</span><span class="p">),</span>
+                       <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;span4&#39;</span>
+                       <span class="p">),</span>
+                <span class="n">Column</span><span class="p">(</span>
+                       <span class="n">Field</span><span class="p">(</span><span class="s">&#39;service&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-medium&#39;</span><span class="p">),</span>
+                       <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;span2&#39;</span>
+                       <span class="p">),</span>
+                <span class="n">Column</span><span class="p">(</span>
+                       <span class="n">Field</span><span class="p">(</span><span class="s">&#39;DELETE&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-mini&#39;</span><span class="p">),</span>
+                       <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;span1&#39;</span>
+                       <span class="p">),</span>
+                <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;row service-row&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">base_layout</span><span class="p">)</span>
+        
+        
+
+</div>
+<span class="n">LinkFormSet</span> <span class="o">=</span> <span class="n">inlineformset_factory</span><span class="p">(</span><span class="n">Profile</span><span class="p">,</span> <span class="n">Link</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">LinkForm</span><span class="p">)</span>
+<span class="n">ServiceFormSet</span>  <span class="o">=</span> <span class="n">inlineformset_factory</span><span class="p">(</span><span class="n">Profile</span><span class="p">,</span> <span class="n">Service</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">ServiceForm</span><span class="p">)</span>
+
+<div class="viewcode-block" id="UserForm"><a class="viewcode-back" href="../../auto_modules.html#profiles.forms.UserForm">[docs]</a><span class="k">class</span> <span class="nc">UserForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    
+<div class="viewcode-block" id="UserForm.Meta"><a class="viewcode-back" href="../../auto_modules.html#profiles.forms.UserForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">User</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;first_name&#39;</span><span class="p">,</span> <span class="s">&#39;last_name&#39;</span><span class="p">)</span>
+        </div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span> <span class="o">=</span> <span class="n">FormHelper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
+            <span class="n">Fieldset</span><span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span><span class="s">&#39;User Details&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;first_name&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+                <span class="n">Field</span><span class="p">(</span><span class="s">&#39;last_name&#39;</span><span class="p">,</span> <span class="n">css_class</span><span class="o">=</span><span class="s">&#39;input-xlarge&#39;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UserForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

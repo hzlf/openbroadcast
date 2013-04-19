@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>shop.backends_pool &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for shop.backends_pool</h1><div class="highlight"><pre>
+<span class="c">#-*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">shop.payment.api</span> <span class="kn">import</span> <span class="n">PaymentAPI</span>
+<span class="kn">from</span> <span class="nn">shop.shipping.api</span> <span class="kn">import</span> <span class="n">ShippingAPI</span>
+<span class="kn">from</span> <span class="nn">shop.util.loader</span> <span class="kn">import</span> <span class="n">load_class</span>
+
+
+<div class="viewcode-block" id="BackendsPool"><a class="viewcode-back" href="../../auto_modules.html#shop.backends_pool.BackendsPool">[docs]</a><span class="k">class</span> <span class="nc">BackendsPool</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A pool for backends.</span>
+<span class="sd">    It handles loading backend modules (both shipping and payment backends),</span>
+<span class="sd">    and keeping a cached copy of the classes in-memory (so that the backends</span>
+<span class="sd">    aren&#39;t loaded from file every time one requests them)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">SHIPPING</span> <span class="o">=</span> <span class="s">&#39;SHOP_SHIPPING_BACKENDS&#39;</span>
+    <span class="n">PAYMENT</span> <span class="o">=</span> <span class="s">&#39;SHOP_PAYMENT_BACKENDS&#39;</span>
+
+    <span class="n">PAYMENT_SHOP_INTERFACE</span> <span class="o">=</span> <span class="n">PaymentAPI</span><span class="p">()</span>
+    <span class="n">SHIPPING_SHOP_INTERFACE</span> <span class="o">=</span> <span class="n">ShippingAPI</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_cache</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The use_cache parameter is mostly used for testing, since setting it</span>
+<span class="sd">        to false will trigger reloading from disk</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_payment_backends_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shippment_backends_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_cache</span> <span class="o">=</span> <span class="n">use_cache</span>
+
+<div class="viewcode-block" id="BackendsPool.get_payment_backends_list"><a class="viewcode-back" href="../../auto_modules.html#shop.backends_pool.BackendsPool.get_payment_backends_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_payment_backends_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the list of payment backends, as instances, from the list of</span>
+<span class="sd">        backends defined in settings.SHOP_PAYMENT_BACKENDS</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_payment_backends_list</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_cache</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_payment_backends_list</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_payment_backends_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_backends_list</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">PAYMENT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">PAYMENT_SHOP_INTERFACE</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_payment_backends_list</span>
+</div>
+<div class="viewcode-block" id="BackendsPool.get_shipping_backends_list"><a class="viewcode-back" href="../../auto_modules.html#shop.backends_pool.BackendsPool.get_shipping_backends_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_shipping_backends_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the list of shipping backends, as instances, from the list of</span>
+<span class="sd">        backends defined in settings.SHOP_SHIPPING_BACKENDS</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shippment_backends_list</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_cache</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shippment_backends_list</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_shippment_backends_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_backends_list</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">SHIPPING</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SHIPPING_SHOP_INTERFACE</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shippment_backends_list</span>
+</div>
+    <span class="k">def</span> <span class="nf">_check_backend_for_validity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend_instance</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This enforces having a valid name and url namespace defined.</span>
+<span class="sd">        Backends, both shipping and payment are namespaced in respectively</span>
+<span class="sd">        /pay/ and /ship/ URL spaces, so as to avoid name clashes.</span>
+
+<span class="sd">        &quot;Namespaces are one honking great idea -- let&#39;s do more of those!&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">backend_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">backend_instance</span><span class="p">,</span> <span class="s">&#39;backend_name&#39;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">backend_name</span><span class="p">:</span>
+            <span class="n">d_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">backend_instance</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">backend_instance</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s">&#39;One of your backends (&quot;</span><span class="si">%s</span><span class="s">&quot; of type &quot;</span><span class="si">%s</span><span class="s">&quot;) lacks a name, please&#39;</span>
+                <span class="s">&#39; define one.&#39;</span> <span class="o">%</span> <span class="n">d_tuple</span><span class="p">)</span>
+
+        <span class="n">url_namespace</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">backend_instance</span><span class="p">,</span> <span class="s">&#39;url_namespace&#39;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">url_namespace</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s">&#39;Please set a namespace for backend &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span>
+                    <span class="n">backend_instance</span><span class="o">.</span><span class="n">backend_name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_load_backends_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setting_name</span><span class="p">,</span> <span class="n">shop_object</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; This actually loads the backends from disk&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">setting_name</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">for</span> <span class="n">backend_path</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">setting_name</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="c"># The load_class function takes care of the classloading. It</span>
+            <span class="c"># returns a CLASS, not an INSTANCE!</span>
+            <span class="n">mod_class</span> <span class="o">=</span> <span class="n">load_class</span><span class="p">(</span><span class="n">backend_path</span><span class="p">,</span> <span class="n">setting_name</span><span class="p">)</span>
+
+            <span class="c"># Seems like it is a real, valid class - let&#39;s instanciate it!</span>
+            <span class="c"># This is where the backends receive their self.shop reference!</span>
+            <span class="n">mod_instance</span> <span class="o">=</span> <span class="n">mod_class</span><span class="p">(</span><span class="n">shop</span><span class="o">=</span><span class="n">shop_object</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_backend_for_validity</span><span class="p">(</span><span class="n">mod_instance</span><span class="p">)</span>
+
+            <span class="c"># The backend seems valid (nothing raised), let&#39;s add it to the</span>
+            <span class="c"># return list.</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mod_instance</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+</div>
+<span class="n">backends_pool</span> <span class="o">=</span> <span class="n">BackendsPool</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

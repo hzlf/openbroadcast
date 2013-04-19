@@ -1,0 +1,330 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>cms.cms_toolbar &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for cms.cms_toolbar</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">cms.toolbar.base</span> <span class="kn">import</span> <span class="n">Toolbar</span>
+<span class="kn">from</span> <span class="nn">cms.toolbar.constants</span> <span class="kn">import</span> <span class="n">LEFT</span><span class="p">,</span> <span class="n">RIGHT</span>
+<span class="kn">from</span> <span class="nn">cms.toolbar.items</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Anchor</span><span class="p">,</span> <span class="n">Switcher</span><span class="p">,</span> <span class="n">TemplateHTML</span><span class="p">,</span> <span class="n">ListItem</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> 
+    <span class="n">GetButton</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">cms.utils</span> <span class="kn">import</span> <span class="n">cms_static_url</span>
+<span class="kn">from</span> <span class="nn">cms.utils.moderator</span> <span class="kn">import</span> <span class="n">page_moderator_state</span><span class="p">,</span> <span class="n">I_APPROVE</span>
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth</span> <span class="kn">import</span> <span class="n">authenticate</span><span class="p">,</span> <span class="n">login</span><span class="p">,</span> <span class="n">logout</span>
+<span class="kn">from</span> <span class="nn">django.core.urlresolvers</span> <span class="kn">import</span> <span class="n">reverse</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponseRedirect</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+<span class="kn">from</span> <span class="nn">utils.permissions</span> <span class="kn">import</span> <span class="n">has_page_change_permission</span><span class="p">,</span> <span class="n">has_any_page_change_permissions</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+
+
+<span class="k">def</span> <span class="nf">_get_page_admin_url</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;admin:cms_page_change&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">toolbar</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="o">.</span><span class="n">pk</span><span class="p">,))</span>
+
+<span class="k">def</span> <span class="nf">_get_page_history_url</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;admin:cms_page_history&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">toolbar</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="o">.</span><span class="n">pk</span><span class="p">,))</span>
+
+<span class="k">def</span> <span class="nf">_get_add_child_url</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;position&#39;</span><span class="p">:</span> <span class="s">&#39;last-child&#39;</span><span class="p">,</span>
+        <span class="s">&#39;target&#39;</span><span class="p">:</span> <span class="n">toolbar</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlencode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">?</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">reverse</span><span class="p">(</span><span class="s">&#39;admin:cms_page_add&#39;</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_get_add_sibling_url</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;position&#39;</span><span class="p">:</span> <span class="s">&#39;last-child&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">toolbar</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="o">.</span><span class="n">parent_id</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;target&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">toolbar</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="o">.</span><span class="n">parent_id</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlencode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">?</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">reverse</span><span class="p">(</span><span class="s">&#39;admin:cms_page_add&#39;</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_get_delete_url</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;admin:cms_page_delete&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">toolbar</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="o">.</span><span class="n">pk</span><span class="p">,))</span>
+
+<span class="k">def</span> <span class="nf">_get_approve_url</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;admin:cms_page_approve_page&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">toolbar</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="o">.</span><span class="n">pk</span><span class="p">,))</span>
+
+<span class="k">def</span> <span class="nf">_get_publish_url</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;admin:cms_page_publish_page&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">toolbar</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="o">.</span><span class="n">pk</span><span class="p">,))</span>
+
+
+<div class="viewcode-block" id="CMSToolbarLoginForm"><a class="viewcode-back" href="../../auto_modules.html#cms.cms_toolbar.CMSToolbarLoginForm">[docs]</a><span class="k">class</span> <span class="nc">CMSToolbarLoginForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">cms_username</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">()</span>
+    <span class="n">cms_password</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="CMSToolbar"><a class="viewcode-back" href="../../auto_modules.html#cms.cms_toolbar.CMSToolbar">[docs]</a><span class="k">class</span> <span class="nc">CMSToolbar</span><span class="p">(</span><span class="n">Toolbar</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The default CMS Toolbar</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CMSToolbar</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+        
+<div class="viewcode-block" id="CMSToolbar.init"><a class="viewcode-back" href="../../auto_modules.html#cms.cms_toolbar.CMSToolbar.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_staff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_staff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">can_change</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span> <span class="ow">and</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="o">.</span><span class="n">has_change_permission</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edit_mode_switcher</span> <span class="o">=</span> <span class="n">Switcher</span><span class="p">(</span><span class="n">LEFT</span><span class="p">,</span> <span class="s">&#39;editmode&#39;</span><span class="p">,</span> <span class="s">&#39;edit&#39;</span><span class="p">,</span> <span class="s">&#39;edit-off&#39;</span><span class="p">,</span>
+                                           <span class="n">_</span><span class="p">(</span><span class="s">&#39;Edit mode&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edit_mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_staff</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit_mode_switcher</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_toolbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_staff</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit_mode_switcher</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="CMSToolbar.get_items"><a class="viewcode-back" href="../../auto_modules.html#cms.cms_toolbar.CMSToolbar.get_items">[docs]</a>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the CMS items on the toolbar</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">Anchor</span><span class="p">(</span><span class="n">LEFT</span><span class="p">,</span> <span class="s">&#39;logo&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;django CMS&#39;</span><span class="p">),</span> <span class="s">&#39;https://www.django-cms.org&#39;</span><span class="p">),</span>
+        <span class="p">]</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">page_states</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_staff</span><span class="p">:</span>
+            
+            <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">edit_mode_switcher</span>
+            <span class="p">)</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="p">:</span>
+                <span class="n">states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="o">.</span><span class="n">last_page_states</span><span class="p">()</span>
+                <span class="n">has_states</span> <span class="o">=</span> <span class="n">states</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">page_states</span> <span class="o">=</span> <span class="n">states</span>
+                <span class="k">if</span> <span class="n">has_states</span><span class="p">:</span>
+                    <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">TemplateHTML</span><span class="p">(</span><span class="n">LEFT</span><span class="p">,</span> <span class="s">&#39;status&#39;</span><span class="p">,</span>
+                                     <span class="s">&#39;cms/toolbar/items/status.html&#39;</span><span class="p">)</span>
+                    <span class="p">)</span>
+                
+                <span class="c"># publish button</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit_mode</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMS_MODERATOR</span><span class="p">:</span>
+                    <span class="n">moderator_state</span> <span class="o">=</span> <span class="n">page_moderator_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="p">)</span>
+                    <span class="n">should_approve</span> <span class="o">=</span> <span class="n">moderator_state</span><span class="p">[</span><span class="s">&#39;state&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">I_APPROVE</span>
+                    <span class="n">has_perms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="o">.</span><span class="n">has_moderate_permission</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">should_approve</span> <span class="ow">and</span> <span class="n">has_perms</span><span class="p">:</span>
+                        <span class="n">label</span> <span class="o">=</span> <span class="n">moderator_state</span><span class="p">[</span><span class="s">&#39;label&#39;</span><span class="p">]</span>
+                        <span class="n">urlgetter</span> <span class="o">=</span> <span class="n">_get_approve_url</span>
+                    <span class="k">elif</span> <span class="n">has_perms</span><span class="p">:</span>
+                        <span class="n">label</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&quot;Publish&quot;</span><span class="p">)</span>
+                        <span class="n">urlgetter</span> <span class="o">=</span> <span class="n">_get_publish_url</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">urlgetter</span> <span class="o">=</span> <span class="n">_get_approve_url</span>
+                        <span class="n">label</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&quot;Request Approval&quot;</span><span class="p">)</span>
+                    <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">GetButton</span><span class="p">(</span><span class="n">RIGHT</span><span class="p">,</span> <span class="s">&#39;moderator&#39;</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">urlgetter</span><span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="n">has_global_current_page_change_permission</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMS_PERMISSION</span><span class="p">:</span>
+                    <span class="n">has_global_current_page_change_permission</span> <span class="o">=</span> <span class="n">has_page_change_permission</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">)</span>
+                <span class="n">has_current_page_change_permission</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="o">.</span><span class="n">has_change_permission</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">)</span>
+
+                <span class="c"># The &#39;templates&#39; Menu</span>
+                <span class="k">if</span> <span class="n">has_global_current_page_change_permission</span> <span class="ow">or</span> <span class="n">has_current_page_change_permission</span><span class="p">:</span>
+                    <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_template_menu</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_change</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_staff</span><span class="p">))</span>
+                
+                <span class="c"># The &#39;page&#39; Menu</span>
+                <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_page_menu</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_change</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_staff</span><span class="p">))</span>
+            
+            <span class="c"># The &#39;Admin&#39; Menu</span>
+            <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_admin_menu</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_change</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_staff</span><span class="p">))</span>
+            
+            <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">GetButton</span><span class="p">(</span><span class="n">RIGHT</span><span class="p">,</span> <span class="s">&#39;logout&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Logout&#39;</span><span class="p">),</span> <span class="s">&#39;?cms-toolbar-logout&#39;</span><span class="p">,</span>
+                          <span class="n">cms_static_url</span><span class="p">(</span><span class="s">&#39;images/toolbar/icons/icon_lock.png&#39;</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">():</span>
+            <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">TemplateHTML</span><span class="p">(</span><span class="n">LEFT</span><span class="p">,</span> <span class="s">&#39;login&#39;</span><span class="p">,</span> <span class="s">&#39;cms/toolbar/items/login.html&#39;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">GetButton</span><span class="p">(</span><span class="n">RIGHT</span><span class="p">,</span> <span class="s">&#39;logout&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Logout&#39;</span><span class="p">),</span> <span class="s">&#39;?cms-toolbar-logout&#39;</span><span class="p">,</span>
+                          <span class="n">cms_static_url</span><span class="p">(</span><span class="s">&#39;images/toolbar/icons/icon_lock.png&#39;</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">items</span>
+    </div>
+<div class="viewcode-block" id="CMSToolbar.get_template_menu"><a class="viewcode-back" href="../../auto_modules.html#cms.cms_toolbar.CMSToolbar.get_template_menu">[docs]</a>    <span class="k">def</span> <span class="nf">get_template_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">can_change</span><span class="p">,</span> <span class="n">is_staff</span><span class="p">):</span>
+        <span class="n">menu_items</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;admin:cms_page_change_template&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="o">.</span><span class="n">pk</span><span class="p">,))</span>
+        <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMS_TEMPLATES</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlencode</span><span class="p">({</span><span class="s">&#39;template&#39;</span><span class="p">:</span> <span class="n">path</span><span class="p">})</span>
+            <span class="n">css</span> <span class="o">=</span> <span class="s">&#39;template&#39;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">current_page</span><span class="o">.</span><span class="n">get_template</span><span class="p">()</span> <span class="o">==</span> <span class="n">path</span><span class="p">:</span>
+                <span class="n">css</span> <span class="o">+=</span> <span class="s">&#39; active&#39;</span>
+            <span class="n">menu_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">ListItem</span><span class="p">(</span><span class="n">css</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">?</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">args</span><span class="p">),</span> <span class="s">&#39;POST&#39;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">List</span><span class="p">(</span><span class="n">RIGHT</span><span class="p">,</span> <span class="s">&#39;templates&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Template&#39;</span><span class="p">),</span>
+                    <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="n">menu_items</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="CMSToolbar.get_page_menu"><a class="viewcode-back" href="../../auto_modules.html#cms.cms_toolbar.CMSToolbar.get_page_menu">[docs]</a>    <span class="k">def</span> <span class="nf">get_page_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">can_change</span><span class="p">,</span> <span class="n">is_staff</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds the &#39;page menu&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">menu_items</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ListItem</span><span class="p">(</span><span class="s">&#39;overview&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Move/add Pages&#39;</span><span class="p">),</span>
+                     <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;admin:cms_page_changelist&#39;</span><span class="p">),</span>
+                     <span class="n">icon</span><span class="o">=</span><span class="n">cms_static_url</span><span class="p">(</span><span class="s">&#39;images/toolbar/icons/icon_sitemap.png&#39;</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="n">menu_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ListItem</span><span class="p">(</span><span class="s">&#39;addchild&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Add child page&#39;</span><span class="p">),</span>
+                     <span class="n">_get_add_child_url</span><span class="p">,</span>
+                     <span class="n">icon</span><span class="o">=</span><span class="n">cms_static_url</span><span class="p">(</span><span class="s">&#39;images/toolbar/icons/icon_child.png&#39;</span><span class="p">))</span>
+        <span class="p">)</span>
+        
+        <span class="n">menu_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ListItem</span><span class="p">(</span><span class="s">&#39;addsibling&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Add sibling page&#39;</span><span class="p">),</span>
+                     <span class="n">_get_add_sibling_url</span><span class="p">,</span>
+                     <span class="n">icon</span><span class="o">=</span><span class="n">cms_static_url</span><span class="p">(</span><span class="s">&#39;images/toolbar/icons/icon_sibling.png&#39;</span><span class="p">))</span>
+        <span class="p">)</span>
+            
+        <span class="n">menu_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ListItem</span><span class="p">(</span><span class="s">&#39;delete&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Delete Page&#39;</span><span class="p">),</span> <span class="n">_get_delete_url</span><span class="p">,</span>
+                     <span class="n">icon</span><span class="o">=</span><span class="n">cms_static_url</span><span class="p">(</span><span class="s">&#39;images/toolbar/icons/icon_delete.png&#39;</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">List</span><span class="p">(</span><span class="n">RIGHT</span><span class="p">,</span> <span class="s">&#39;page&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Page&#39;</span><span class="p">),</span>
+                    <span class="n">cms_static_url</span><span class="p">(</span><span class="s">&#39;images/toolbar/icons/icon_page.png&#39;</span><span class="p">),</span>
+                    <span class="n">items</span><span class="o">=</span><span class="n">menu_items</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="CMSToolbar.get_admin_menu"><a class="viewcode-back" href="../../auto_modules.html#cms.cms_toolbar.CMSToolbar.get_admin_menu">[docs]</a>    <span class="k">def</span> <span class="nf">get_admin_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">can_change</span><span class="p">,</span> <span class="n">is_staff</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds the &#39;admin menu&#39; (the one with the cogwheel)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">admin_items</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ListItem</span><span class="p">(</span><span class="s">&#39;admin&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Site Administration&#39;</span><span class="p">),</span>
+                     <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;admin:index&#39;</span><span class="p">),</span>
+                     <span class="n">icon</span><span class="o">=</span><span class="n">cms_static_url</span><span class="p">(</span><span class="s">&#39;images/toolbar/icons/icon_admin.png&#39;</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">can_change</span><span class="p">:</span>
+            <span class="n">admin_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">ListItem</span><span class="p">(</span><span class="s">&#39;settings&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Page Settings&#39;</span><span class="p">),</span>
+                         <span class="n">_get_page_admin_url</span><span class="p">,</span>
+                         <span class="n">icon</span><span class="o">=</span><span class="n">cms_static_url</span><span class="p">(</span><span class="s">&#39;images/toolbar/icons/icon_page.png&#39;</span><span class="p">))</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="s">&#39;reversion&#39;</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">INSTALLED_APPS</span><span class="p">:</span>
+                <span class="n">admin_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">ListItem</span><span class="p">(</span><span class="s">&#39;history&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;View History&#39;</span><span class="p">),</span>
+                             <span class="n">_get_page_history_url</span><span class="p">,</span>
+                             <span class="n">icon</span><span class="o">=</span><span class="n">cms_static_url</span><span class="p">(</span><span class="s">&#39;images/toolbar/icons/icon_history.png&#39;</span><span class="p">))</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">List</span><span class="p">(</span><span class="n">RIGHT</span><span class="p">,</span> <span class="s">&#39;admin&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Admin&#39;</span><span class="p">),</span>
+                    <span class="n">cms_static_url</span><span class="p">(</span><span class="s">&#39;images/toolbar/icons/icon_admin.png&#39;</span><span class="p">),</span>
+                    <span class="n">items</span><span class="o">=</span><span class="n">admin_items</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="CMSToolbar.request_hook"><a class="viewcode-back" href="../../auto_modules.html#cms.cms_toolbar.CMSToolbar.request_hook">[docs]</a>    <span class="k">def</span> <span class="nf">request_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">!=</span> <span class="s">&#39;POST&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request_hook_get</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request_hook_post</span><span class="p">()</span>
+        </div>
+    <span class="k">def</span> <span class="nf">_request_hook_get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s">&#39;cms-toolbar-logout&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="p">:</span>
+            <span class="n">logout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">_request_hook_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># login hook</span>
+        <span class="k">if</span> <span class="s">&#39;cms-toolbar-login&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="p">:</span>
+            <span class="n">login_form</span> <span class="o">=</span> <span class="n">CMSToolbarLoginForm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">login_form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+                <span class="n">username</span> <span class="o">=</span> <span class="n">login_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;cms_username&#39;</span><span class="p">]</span>
+                <span class="n">password</span> <span class="o">=</span> <span class="n">login_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;cms_password&#39;</span><span class="p">]</span>
+                <span class="n">user</span> <span class="o">=</span> <span class="n">authenticate</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+                    <span class="n">login</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

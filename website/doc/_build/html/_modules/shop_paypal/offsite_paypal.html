@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>shop_paypal.offsite_paypal &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for shop_paypal.offsite_paypal</h1><div class="highlight"><pre>
+<span class="c">#-*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">decimal</span> <span class="kn">import</span> <span class="n">Decimal</span>
+
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.conf.urls.defaults</span> <span class="kn">import</span> <span class="n">patterns</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">include</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sites.models</span> <span class="kn">import</span> <span class="n">get_current_site</span>
+<span class="kn">from</span> <span class="nn">django.core.urlresolvers</span> <span class="kn">import</span> <span class="n">reverse</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span>
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">RequestContext</span>
+<span class="kn">from</span> <span class="nn">django.views.decorators.csrf</span> <span class="kn">import</span> <span class="n">csrf_exempt</span>
+
+<span class="kn">from</span> <span class="nn">paypal.standard.forms</span> <span class="kn">import</span> <span class="n">PayPalPaymentsForm</span>
+<span class="kn">from</span> <span class="nn">paypal.standard.ipn.signals</span> <span class="kn">import</span> <span class="n">payment_was_successful</span> <span class="k">as</span> <span class="n">success_signal</span>
+
+<span class="c">#from shop.views.checkout import ThankYouView</span>
+
+
+
+
+<div class="viewcode-block" id="OffsitePaypalBackend"><a class="viewcode-back" href="../../auto_modules.html#shop_paypal.offsite_paypal.OffsitePaypalBackend">[docs]</a><span class="k">class</span> <span class="nc">OffsitePaypalBackend</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Glue code to let django-SHOP talk to django-paypal&#39;s.</span>
+<span class="sd">    </span>
+<span class="sd">    The django-paypal package already defines an IPN view, that logs everything</span>
+<span class="sd">    to the database (desirable), and fires up a signal.</span>
+<span class="sd">    It is therefore more convenient to listen to the signal instead of rewriting</span>
+<span class="sd">    the ipn view (and necessary tests)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="n">backend_name</span> <span class="o">=</span> <span class="s">&quot;Paypal&quot;</span>
+    <span class="n">url_namespace</span> <span class="o">=</span> <span class="s">&quot;paypal&quot;</span>
+    
+    <span class="c">#===========================================================================</span>
+    <span class="c"># Defined by the backends API</span>
+    <span class="c">#===========================================================================</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shop</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shop</span> <span class="o">=</span> <span class="n">shop</span>
+        <span class="c"># Hook the payment was successful listener on the appropriate signal sent</span>
+        <span class="c"># by django-paypal (success_signal)</span>
+        <span class="n">success_signal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">payment_was_successful</span><span class="p">,</span> <span class="n">weak</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">settings</span><span class="o">.</span><span class="n">PAYPAL_RECEIVER_EMAIL</span><span class="p">,</span> <span class="s">&quot;You need to define a PAYPAL_RECEIVER_EMAIL in settings with the money recipient&#39;s email addresss&quot;</span>
+        <span class="k">assert</span> <span class="n">settings</span><span class="o">.</span><span class="n">PAYPAL_CURRENCY_CODE</span><span class="p">,</span> <span class="s">&quot;You need to define a PAYPAL_CURRENCY_CODE in settings with the currency code&quot;</span>
+        
+<div class="viewcode-block" id="OffsitePaypalBackend.get_urls"><a class="viewcode-back" href="../../auto_modules.html#shop_paypal.offsite_paypal.OffsitePaypalBackend.get_urls">[docs]</a>    <span class="k">def</span> <span class="nf">get_urls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">urlpatterns</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">url</span><span class="p">(</span><span class="s">r&#39;^$&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view_that_asks_for_money</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;paypal&#39;</span> <span class="p">),</span>
+            <span class="n">url</span><span class="p">(</span><span class="s">r&#39;^success$&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paypal_successful_return_view</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;paypal_success&#39;</span> <span class="p">),</span>
+            <span class="c">#url(r&#39;^success$&#39;, ThankYouView.as_view(), name=&#39;paypal_success&#39;),</span>
+            <span class="n">url</span><span class="p">(</span><span class="s">r&#39;^sWheRuMMmxcx/avJmqTbGydfg/axjmGLSkgZdS/instantpaymentnotification/$&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s">&#39;paypal.standard.ipn.urls&#39;</span><span class="p">)),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">urlpatterns</span>
+    
+    <span class="c">#===========================================================================</span>
+    <span class="c"># Views</span>
+    <span class="c">#===========================================================================</span>
+    </div>
+<div class="viewcode-block" id="OffsitePaypalBackend.view_that_asks_for_money"><a class="viewcode-back" href="../../auto_modules.html#shop_paypal.offsite_paypal.OffsitePaypalBackend.view_that_asks_for_money">[docs]</a>    <span class="k">def</span> <span class="nf">view_that_asks_for_money</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        We need this to be a method and not a function, since we need to have</span>
+<span class="sd">        a reference to the shop interface</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shop</span><span class="o">.</span><span class="n">get_order</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="n">url_scheme</span> <span class="o">=</span> <span class="s">&#39;https&#39;</span> <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">is_secure</span><span class="p">()</span> <span class="k">else</span> <span class="s">&#39;http&#39;</span>
+        <span class="c"># get_current_site requires Django 1.3 - backward compatibility?</span>
+        <span class="n">url_domain</span> <span class="o">=</span> <span class="n">get_current_site</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="o">.</span><span class="n">domain</span>
+        <span class="n">paypal_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&quot;business&quot;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PAYPAL_RECEIVER_EMAIL</span><span class="p">,</span>
+        <span class="s">&quot;currency_code&quot;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PAYPAL_CURRENCY_CODE</span><span class="p">,</span>
+        <span class="s">&quot;amount&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">shop</span><span class="o">.</span><span class="n">get_order_total</span><span class="p">(</span><span class="n">order</span><span class="p">),</span>
+        <span class="s">&quot;item_name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">shop</span><span class="o">.</span><span class="n">get_order_short_name</span><span class="p">(</span><span class="n">order</span><span class="p">),</span>
+        <span class="s">&quot;invoice&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">shop</span><span class="o">.</span><span class="n">get_order_unique_id</span><span class="p">(</span><span class="n">order</span><span class="p">),</span>
+        <span class="s">&quot;notify_url&quot;</span><span class="p">:</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">://</span><span class="si">%s%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url_scheme</span><span class="p">,</span> 
+            <span class="n">url_domain</span><span class="p">,</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;paypal-ipn&#39;</span><span class="p">)),</span> <span class="c"># defined by django-paypal</span>
+                       
+                       
+        <span class="c">#&quot;return_url&quot;: &#39;%s://%s%s&#39; % (url_scheme,</span>
+        <span class="c">#    url_domain, reverse(&#39;paypal_success&#39;)), # That&#39;s this classe&#39;s view</span>
+                       
+        <span class="c"># override with default success view             </span>
+        <span class="s">&quot;return_url&quot;</span><span class="p">:</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">://</span><span class="si">%s%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url_scheme</span><span class="p">,</span>
+            <span class="n">url_domain</span><span class="p">,</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;thank_you_for_your_order&#39;</span><span class="p">)),</span> <span class="c"># That&#39;s this classe&#39;s view</span>
+                       
+                       
+        <span class="s">&quot;cancel_return&quot;</span><span class="p">:</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">://</span><span class="si">%s%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url_scheme</span><span class="p">,</span>
+            <span class="n">url_domain</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shop</span><span class="o">.</span><span class="n">get_cancel_url</span><span class="p">()),</span> <span class="c"># A generic one</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;PAYPAL_LC&#39;</span><span class="p">):</span>
+            <span class="n">paypal_dict</span><span class="p">[</span><span class="s">&#39;lc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">PAYPAL_LC</span>
+
+        <span class="c"># Create the instance.</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">PayPalPaymentsForm</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="n">paypal_dict</span><span class="p">)</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;form&quot;</span><span class="p">:</span> <span class="n">form</span><span class="p">}</span>
+        <span class="n">rc</span> <span class="o">=</span> <span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&quot;shop_paypal/payment.html&quot;</span><span class="p">,</span> <span class="n">rc</span><span class="p">)</span>
+    </div>
+    <span class="nd">@csrf_exempt</span>
+<div class="viewcode-block" id="OffsitePaypalBackend.paypal_successful_return_view"><a class="viewcode-back" href="../../auto_modules.html#shop_paypal.offsite_paypal.OffsitePaypalBackend.paypal_successful_return_view">[docs]</a>    <span class="k">def</span> <span class="nf">paypal_successful_return_view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&quot;shop_paypal/success.html&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    
+    <span class="c">#===========================================================================</span>
+    <span class="c"># Signal listeners</span>
+    <span class="c">#===========================================================================</span>
+    </div>
+<div class="viewcode-block" id="OffsitePaypalBackend.payment_was_successful"><a class="viewcode-back" href="../../auto_modules.html#shop_paypal.offsite_paypal.OffsitePaypalBackend.payment_was_successful">[docs]</a>    <span class="k">def</span> <span class="nf">payment_was_successful</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        This listens to the signal emitted by django-paypal&#39;s IPN view and in turn</span>
+<span class="sd">        asks the shop system to record a successful payment.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">ipn_obj</span> <span class="o">=</span> <span class="n">sender</span>
+        <span class="n">order_id</span> <span class="o">=</span> <span class="n">ipn_obj</span><span class="o">.</span><span class="n">invoice</span> <span class="c"># That&#39;s the &quot;invoice ID we passed to paypal</span>
+        <span class="n">amount</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">ipn_obj</span><span class="o">.</span><span class="n">mc_gross</span><span class="p">)</span>
+        <span class="n">transaction_id</span> <span class="o">=</span> <span class="n">ipn_obj</span><span class="o">.</span><span class="n">txn_id</span>
+        <span class="c"># The actual request to the shop system</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shop</span><span class="o">.</span><span class="n">confirm_payment</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shop</span><span class="o">.</span><span class="n">get_order_for_id</span><span class="p">(</span><span class="n">order_id</span><span class="p">),</span> <span class="n">amount</span><span class="p">,</span> <span class="n">transaction_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend_name</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

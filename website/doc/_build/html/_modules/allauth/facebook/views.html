@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>allauth.facebook.views &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for allauth.facebook.views</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.core.urlresolvers</span> <span class="kn">import</span> <span class="n">reverse</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponseRedirect</span>
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">RequestContext</span>
+<span class="kn">from</span> <span class="nn">django.utils.cache</span> <span class="kn">import</span> <span class="n">patch_response_headers</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth</span> <span class="kn">import</span> <span class="n">login</span><span class="p">,</span> <span class="n">authenticate</span><span class="p">,</span> <span class="n">logout</span> <span class="k">as</span> <span class="n">auth_logout</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span><span class="p">,</span> <span class="n">render</span>
+<span class="kn">from</span> <span class="nn">django.views.decorators.csrf</span> <span class="kn">import</span> <span class="n">csrf_exempt</span>
+
+<span class="kn">from</span> <span class="nn">allauth.utils</span> <span class="kn">import</span> <span class="n">get_login_redirect_url</span>
+<span class="kn">from</span> <span class="nn">allauth.socialaccount.helpers</span> <span class="kn">import</span> <span class="n">complete_social_login</span>
+<span class="kn">from</span> <span class="nn">allauth.socialaccount.helpers</span> <span class="kn">import</span> <span class="n">render_authentication_error</span>
+<span class="kn">from</span> <span class="nn">allauth.socialaccount.oauth</span> <span class="kn">import</span> <span class="n">OAuthClient</span>
+
+<span class="kn">from</span> <span class="nn">facebook</span> <span class="kn">import</span> <span class="n">GraphAPI</span><span class="p">,</span> <span class="n">GraphAPIError</span>
+
+<span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">FacebookApp</span><span class="p">,</span> <span class="n">FacebookAccount</span>
+<span class="kn">from</span> <span class="nn">forms</span> <span class="kn">import</span> <span class="n">FacebookConnectForm</span>
+
+<span class="kn">from</span> <span class="nn">allauth.utils</span> <span class="kn">import</span> <span class="n">valid_email_or_none</span>
+
+<div class="viewcode-block" id="login"><a class="viewcode-back" href="../../../auto_modules.html#allauth.facebook.views.login">[docs]</a><span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">FacebookConnectForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">token</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;access_token&#39;</span><span class="p">]</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="n">GraphAPI</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+                <span class="n">facebook_me</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="s">&quot;me&quot;</span><span class="p">)</span>
+                <span class="n">email</span> <span class="o">=</span> <span class="n">valid_email_or_none</span><span class="p">(</span><span class="n">facebook_me</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;email&#39;</span><span class="p">))</span>
+                <span class="n">social_id</span> <span class="o">=</span> <span class="n">facebook_me</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">account</span> <span class="o">=</span> <span class="n">FacebookAccount</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">social_id</span><span class="o">=</span><span class="n">social_id</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">FacebookAccount</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                    <span class="n">account</span> <span class="o">=</span> <span class="n">FacebookAccount</span><span class="p">(</span><span class="n">social_id</span><span class="o">=</span><span class="n">social_id</span><span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="p">,</span>
+                            <span class="n">facebook_access_token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
+                            <span class="n">facebook_me</span><span class="o">=</span><span class="n">facebook_me</span><span class="p">)</span>
+                <span class="c"># some facebook accounts don&#39;t have this data</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">facebook_me</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> 
+                            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;first_name&#39;</span><span class="p">,</span> <span class="s">&#39;last_name&#39;</span><span class="p">])</span>
+                <span class="c"># Don&#39;t save partial/temporary accounts that haven&#39;t</span>
+                <span class="c"># gone through the full signup yet, as there is no</span>
+                <span class="c"># User attached yet.</span>
+                <span class="k">if</span> <span class="n">account</span><span class="o">.</span><span class="n">pk</span><span class="p">:</span>
+                    <span class="n">account</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">complete_social_login</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">account</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="n">GraphAPIError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">):</span>
+                <span class="k">pass</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ret</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">render_authentication_error</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ret</span>
+</div>
+<div class="viewcode-block" id="channel"><a class="viewcode-back" href="../../../auto_modules.html#allauth.facebook.views.channel">[docs]</a><span class="k">def</span> <span class="nf">channel</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&#39;facebook/channel.html&#39;</span><span class="p">)</span>
+    <span class="n">cache_expire</span> <span class="o">=</span> <span class="mi">60</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">24</span><span class="o">*</span><span class="mi">365</span>
+    <span class="n">patch_response_headers</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">cache_expire</span><span class="p">)</span>
+    <span class="n">response</span><span class="p">[</span><span class="s">&#39;Pragma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Public&#39;</span>
+    <span class="k">return</span> <span class="n">response</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

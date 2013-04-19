@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django_countries.fields &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for django_countries.fields</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.db.models.fields</span> <span class="kn">import</span> <span class="n">CharField</span>
+<span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">force_unicode</span><span class="p">,</span> <span class="n">StrAndUnicode</span>
+<span class="kn">from</span> <span class="nn">django_countries</span> <span class="kn">import</span> <span class="n">settings</span>
+
+
+<div class="viewcode-block" id="Country"><a class="viewcode-back" href="../../auto_modules.html#django_countries.fields.Country">[docs]</a><span class="k">class</span> <span class="nc">Country</span><span class="p">(</span><span class="n">StrAndUnicode</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span>
+    
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">force_unicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="ow">or</span> <span class="s">u&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="n">force_unicode</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">force_unicode</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">(code=</span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__nonzero__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+    
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Country.name"><a class="viewcode-back" href="../../auto_modules.html#django_countries.fields.Country.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Local import so the countries aren&#39;t loaded unless they are needed. </span>
+        <span class="kn">from</span> <span class="nn">django_countries.countries</span> <span class="kn">import</span> <span class="n">COUNTRIES</span>
+        <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">COUNTRIES</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">code</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">name</span>
+        <span class="k">return</span> <span class="s">&#39;&#39;</span>
+    </div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Country.flag"><a class="viewcode-back" href="../../auto_modules.html#django_countries.fields.Country.flag">[docs]</a>    <span class="k">def</span> <span class="nf">flag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">settings</span><span class="o">.</span><span class="n">FLAG_URL</span> <span class="o">%</span> <span class="p">{</span><span class="s">&#39;code_upper&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+                                    <span class="s">&#39;code&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="o">.</span><span class="n">lower</span><span class="p">()}</span>
+
+</div></div>
+<div class="viewcode-block" id="CountryDescriptor"><a class="viewcode-back" href="../../auto_modules.html#django_countries.fields.CountryDescriptor">[docs]</a><span class="k">class</span> <span class="nc">CountryDescriptor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A descriptor for country fields on a model instance. Returns a Country when</span>
+<span class="sd">    accessed so you can do stuff like::</span>
+
+<span class="sd">        &gt;&gt;&gt; instance.country.name</span>
+<span class="sd">        u&#39;New Zealand&#39;</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; instance.country.flag</span>
+<span class="sd">        &#39;/static/flags/nz.gif&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">=</span> <span class="n">field</span>
+
+    <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">owner</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">instance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                <span class="s">&quot;The &#39;</span><span class="si">%s</span><span class="s">&#39; attribute can only be accessed from </span><span class="si">%s</span><span class="s"> instances.&quot;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">owner</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Country</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">force_unicode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+</div>
+<div class="viewcode-block" id="CountryField"><a class="viewcode-back" href="../../auto_modules.html#django_countries.fields.CountryField">[docs]</a><span class="k">class</span> <span class="nc">CountryField</span><span class="p">(</span><span class="n">CharField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A country field for Django models that provides all ISO 3166-1 countries as</span>
+<span class="sd">    choices.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">descriptor_class</span> <span class="o">=</span> <span class="n">CountryDescriptor</span>
+ 
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c"># Local import so the countries aren&#39;t loaded unless they are needed. </span>
+        <span class="kn">from</span> <span class="nn">django_countries.countries</span> <span class="kn">import</span> <span class="n">COUNTRIES</span> 
+
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;max_length&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> 
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;choices&#39;</span><span class="p">,</span> <span class="n">COUNTRIES</span><span class="p">)</span> 
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">CharField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> 
+
+<div class="viewcode-block" id="CountryField.get_internal_type"><a class="viewcode-back" href="../../auto_modules.html#django_countries.fields.CountryField.get_internal_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_internal_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="k">return</span> <span class="s">&quot;CharField&quot;</span>
+</div>
+<div class="viewcode-block" id="CountryField.contribute_to_class"><a class="viewcode-back" href="../../auto_modules.html#django_countries.fields.CountryField.contribute_to_class">[docs]</a>    <span class="k">def</span> <span class="nf">contribute_to_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CountryField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">contribute_to_class</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_class</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="CountryField.get_prep_lookup"><a class="viewcode-back" href="../../auto_modules.html#django_countries.fields.CountryField.get_prep_lookup">[docs]</a>    <span class="k">def</span> <span class="nf">get_prep_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lookup_type</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s">&#39;code&#39;</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">code</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">CountryField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_prep_lookup</span><span class="p">(</span><span class="n">lookup_type</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CountryField.pre_save"><a class="viewcode-back" href="../../auto_modules.html#django_countries.fields.CountryField.pre_save">[docs]</a>    <span class="k">def</span> <span class="nf">pre_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="s">&quot;Returns field&#39;s value just before saving.&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">CharField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">pre_save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_prep_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CountryField.get_prep_value"><a class="viewcode-back" href="../../auto_modules.html#django_countries.fields.CountryField.get_prep_value">[docs]</a>    <span class="k">def</span> <span class="nf">get_prep_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="s">&quot;Returns field&#39;s value prepared for saving into a database.&quot;</span>
+        <span class="c"># Convert the Country to unicode for database insertion.</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="c"># If south is installed, ensure that CountryField will be introspected just</span>
+<span class="c"># like a normal CharField.</span></div></div>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">south.modelsinspector</span> <span class="kn">import</span> <span class="n">add_introspection_rules</span>
+    <span class="n">add_introspection_rules</span><span class="p">([],</span> <span class="p">[</span><span class="s">&#39;^django_countries\.fields\.CountryField&#39;</span><span class="p">])</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

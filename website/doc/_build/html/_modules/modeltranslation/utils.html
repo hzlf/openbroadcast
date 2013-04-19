@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>modeltranslation.utils &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for modeltranslation.utils</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">global_settings</span>
+<span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">force_unicode</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">get_language</span> <span class="k">as</span> <span class="n">_get_language</span>
+<span class="kn">from</span> <span class="nn">django.utils.functional</span> <span class="kn">import</span> <span class="n">lazy</span>
+
+<span class="kn">from</span> <span class="nn">modeltranslation</span> <span class="kn">import</span> <span class="n">settings</span>
+
+
+<div class="viewcode-block" id="get_language"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.utils.get_language">[docs]</a><span class="k">def</span> <span class="nf">get_language</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return an active language code that is guaranteed to be in</span>
+<span class="sd">    settings.LANGUAGES (Django does not seem to guarantee this for us).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lang</span> <span class="o">=</span> <span class="n">_get_language</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">lang</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">AVAILABLE_LANGUAGES</span> <span class="ow">and</span> <span class="s">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">lang</span><span class="p">:</span>
+        <span class="n">lang</span> <span class="o">=</span> <span class="n">lang</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">lang</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">AVAILABLE_LANGUAGES</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">lang</span>
+    <span class="k">return</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEFAULT_LANGUAGE</span>
+
+</div>
+<div class="viewcode-block" id="get_translation_fields"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.utils.get_translation_fields">[docs]</a><span class="k">def</span> <span class="nf">get_translation_fields</span><span class="p">(</span><span class="n">field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a list of localized fieldnames for a given field.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">build_localized_fieldname</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">AVAILABLE_LANGUAGES</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="build_localized_fieldname"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.utils.build_localized_fieldname">[docs]</a><span class="k">def</span> <span class="nf">build_localized_fieldname</span><span class="p">(</span><span class="n">field_name</span><span class="p">,</span> <span class="n">lang</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">field_name</span><span class="p">,</span> <span class="n">lang</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">,</span> <span class="s">&#39;_&#39;</span><span class="p">)))</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_build_localized_verbose_name</span><span class="p">(</span><span class="n">verbose_name</span><span class="p">,</span> <span class="n">lang</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s">u&#39;</span><span class="si">%s</span><span class="s"> [</span><span class="si">%s</span><span class="s">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">force_unicode</span><span class="p">(</span><span class="n">verbose_name</span><span class="p">),</span> <span class="n">lang</span><span class="p">)</span>
+<span class="n">build_localized_verbose_name</span> <span class="o">=</span> <span class="n">lazy</span><span class="p">(</span><span class="n">_build_localized_verbose_name</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_join_css_class</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s">&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bits</span><span class="p">[</span><span class="o">-</span><span class="n">offset</span><span class="p">:])</span> <span class="ow">in</span> <span class="p">[</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">global_settings</span><span class="o">.</span><span class="n">LANGUAGES</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bits</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span> <span class="o">-</span> <span class="n">offset</span><span class="p">]),</span> <span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bits</span><span class="p">[</span><span class="o">-</span><span class="n">offset</span><span class="p">:]))</span>
+    <span class="k">return</span> <span class="s">&#39;&#39;</span>
+
+
+<div class="viewcode-block" id="build_css_class"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.utils.build_css_class">[docs]</a><span class="k">def</span> <span class="nf">build_css_class</span><span class="p">(</span><span class="n">localized_fieldname</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a css class based on ``localized_fieldname`` which is easily</span>
+<span class="sd">    splitable and capable of regionalized language codes.</span>
+
+<span class="sd">    Takes an optional ``prefix`` which is prepended to the returned string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bits</span> <span class="o">=</span> <span class="n">localized_fieldname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)</span>
+    <span class="n">css_class</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">css_class</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">localized_fieldname</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="c"># Fieldname without underscore and short language code</span>
+        <span class="c"># Examples:</span>
+        <span class="c"># &#39;foo_de&#39; --&gt; &#39;foo-de&#39;,</span>
+        <span class="c"># &#39;bar_en&#39; --&gt; &#39;bar-en&#39;</span>
+        <span class="n">css_class</span> <span class="o">=</span> <span class="s">&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="c"># Try regionalized language code</span>
+        <span class="c"># Examples:</span>
+        <span class="c"># &#39;foo_es_ar&#39; --&gt; &#39;foo-es_ar&#39;,</span>
+        <span class="c"># &#39;foo_bar_zh_tw&#39; --&gt; &#39;foo_bar-zh_tw&#39;</span>
+        <span class="n">css_class</span> <span class="o">=</span> <span class="n">_join_css_class</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">css_class</span><span class="p">:</span>
+            <span class="c"># Try short language code</span>
+            <span class="c"># Examples:</span>
+            <span class="c"># &#39;foo_bar_de&#39; --&gt; &#39;foo_bar-de&#39;,</span>
+            <span class="c"># &#39;foo_bar_baz_de&#39; --&gt; &#39;foo_bar_baz-de&#39;</span>
+            <span class="n">css_class</span> <span class="o">=</span> <span class="n">_join_css_class</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">css_class</span><span class="p">)</span> <span class="k">if</span> <span class="n">prefix</span> <span class="k">else</span> <span class="n">css_class</span>
+
+</div>
+<div class="viewcode-block" id="unique"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.utils.unique">[docs]</a><span class="k">def</span> <span class="nf">unique</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; list(unique([1, 2, 3, 2, 2, 4, 1]))</span>
+<span class="sd">    [1, 2, 3, 4]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">seq</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="resolution_order"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.utils.resolution_order">[docs]</a><span class="k">def</span> <span class="nf">resolution_order</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">override</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return order of languages which should be checked for parameter language.</span>
+<span class="sd">    First is always the parameter language, later are fallback languages.</span>
+<span class="sd">    Override parameter has priority over FALLBACK_LANGUAGES.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">override</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">override</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">fallback_for_lang</span> <span class="o">=</span> <span class="n">override</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">FALLBACK_LANGUAGES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="p">()))</span>
+    <span class="n">fallback_def</span> <span class="o">=</span> <span class="n">override</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;default&#39;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">FALLBACK_LANGUAGES</span><span class="p">[</span><span class="s">&#39;default&#39;</span><span class="p">])</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="p">(</span><span class="n">lang</span><span class="p">,)</span> <span class="o">+</span> <span class="n">fallback_for_lang</span> <span class="o">+</span> <span class="n">fallback_def</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">order</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

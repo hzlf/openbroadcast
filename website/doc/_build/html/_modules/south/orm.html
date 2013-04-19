@@ -1,0 +1,492 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>south.orm &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for south.orm</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">South&#39;s fake ORM; lets you not have to write SQL inside migrations.</span>
+<span class="sd">Roughly emulates the real Django ORM, to a point.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">inspect</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.db.models.loading</span> <span class="kn">import</span> <span class="n">cache</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ImproperlyConfigured</span>
+
+<span class="kn">from</span> <span class="nn">south.db</span> <span class="kn">import</span> <span class="n">db</span>
+<span class="kn">from</span> <span class="nn">south.utils</span> <span class="kn">import</span> <span class="n">ask_for_it_by_name</span><span class="p">,</span> <span class="n">datetime_utils</span>
+<span class="kn">from</span> <span class="nn">south.hacks</span> <span class="kn">import</span> <span class="n">hacks</span>
+<span class="kn">from</span> <span class="nn">south.exceptions</span> <span class="kn">import</span> <span class="n">UnfreezeMeLater</span><span class="p">,</span> <span class="n">ORMBaseNotIncluded</span><span class="p">,</span> <span class="n">ImpossibleORMUnfreeze</span>
+
+
+<div class="viewcode-block" id="ModelsLocals"><a class="viewcode-back" href="../../auto_modules.html#south.orm.ModelsLocals">[docs]</a><span class="k">class</span> <span class="nc">ModelsLocals</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Custom dictionary-like class to be locals();</span>
+<span class="sd">    falls back to lowercase search for items that don&#39;t exist</span>
+<span class="sd">    (because we store model names as lowercase).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+    
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+
+
+<span class="c"># Stores already-created ORMs.</span></div>
+<span class="n">_orm_cache</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="FakeORM"><a class="viewcode-back" href="../../auto_modules.html#south.orm.FakeORM">[docs]</a><span class="k">def</span> <span class="nf">FakeORM</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a Fake Django ORM.</span>
+<span class="sd">    This is actually a memoised constructor; the real class is _FakeORM.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span> <span class="ow">in</span> <span class="n">_orm_cache</span><span class="p">:</span>
+        <span class="n">_orm_cache</span><span class="p">[</span><span class="n">args</span><span class="p">]</span> <span class="o">=</span> <span class="n">_FakeORM</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>  
+    <span class="k">return</span> <span class="n">_orm_cache</span><span class="p">[</span><span class="n">args</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="LazyFakeORM"><a class="viewcode-back" href="../../auto_modules.html#south.orm.LazyFakeORM">[docs]</a><span class="k">class</span> <span class="nc">LazyFakeORM</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    In addition to memoising the ORM call, this function lazily generates them</span>
+<span class="sd">    for a Migration class. Assign the result of this to (for example)</span>
+<span class="sd">    .orm, and as soon as .orm is accessed the ORM will be created.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orm</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">orm</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">orm</span> <span class="o">=</span> <span class="n">FakeORM</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">orm</span>
+
+</div>
+<span class="k">class</span> <span class="nc">_FakeORM</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simulates the Django ORM at some point in time,</span>
+<span class="sd">    using a frozen definition on the Migration class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">app</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_app</span> <span class="o">=</span> <span class="n">app</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cls</span> <span class="o">=</span> <span class="n">cls</span>
+        <span class="c"># Try loading the models off the migration class; default to no models.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">models_source</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">models</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="c"># Start a &#39;new&#39; AppCache</span>
+        <span class="n">hacks</span><span class="o">.</span><span class="n">clear_app_cache</span><span class="p">()</span>
+        
+        <span class="c"># Now, make each model&#39;s data into a FakeModel</span>
+        <span class="c"># We first make entries for each model that are just its name</span>
+        <span class="c"># This allows us to have circular model dependency loops</span>
+        <span class="n">model_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_source</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c"># Make sure there&#39;s some kind of Meta</span>
+            <span class="k">if</span> <span class="s">&quot;Meta&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;Meta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">app_label</span><span class="p">,</span> <span class="n">model_name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">app_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_app</span>
+                <span class="n">model_name</span> <span class="o">=</span> <span class="n">name</span>
+            
+            <span class="c"># If there&#39;s an object_name in the Meta, use it and remove it</span>
+            <span class="k">if</span> <span class="s">&quot;object_name&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;Meta&#39;</span><span class="p">]:</span>
+                <span class="n">model_name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;Meta&#39;</span><span class="p">][</span><span class="s">&#39;object_name&#39;</span><span class="p">]</span>
+                <span class="k">del</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;Meta&#39;</span><span class="p">][</span><span class="s">&#39;object_name&#39;</span><span class="p">]</span>
+            
+            <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">app_label</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="n">model_names</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">app_label</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+        
+        <span class="c"># Loop until model_names is entry, or hasn&#39;t shrunk in size since</span>
+        <span class="c"># last iteration.</span>
+        <span class="c"># The make_model method can ask to postpone a model; it&#39;s then pushed</span>
+        <span class="c"># to the back of the queue. Because this is currently only used for</span>
+        <span class="c"># inheritance, it should thus theoretically always decrease by one.</span>
+        <span class="n">last_size</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">while</span> <span class="n">model_names</span><span class="p">:</span>
+            <span class="c"># First, make sure we&#39;ve shrunk.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model_names</span><span class="p">)</span> <span class="o">==</span> <span class="n">last_size</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ImpossibleORMUnfreeze</span><span class="p">()</span>
+            <span class="n">last_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model_names</span><span class="p">)</span>
+            <span class="c"># Make one run through</span>
+            <span class="n">postponed_model_names</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">app_label</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">model_names</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_model</span><span class="p">(</span><span class="n">app_label</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">UnfreezeMeLater</span><span class="p">:</span>
+                    <span class="n">postponed_model_names</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">app_label</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+            <span class="c"># Reset</span>
+            <span class="n">model_names</span> <span class="o">=</span> <span class="n">postponed_model_names</span>
+        
+        <span class="c"># And perform the second run to iron out any circular/backwards depends.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retry_failed_fields</span><span class="p">()</span>
+        
+        <span class="c"># Force evaluation of relations on the models now</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_all_field_names</span><span class="p">()</span>
+        
+        <span class="c"># Reset AppCache</span>
+        <span class="n">hacks</span><span class="o">.</span><span class="n">unclear_app_cache</span><span class="p">()</span>
+    
+    
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="n">fullname</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_app</span><span class="o">+</span><span class="s">&quot;.&quot;</span><span class="o">+</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">fullname</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s">&quot;The model &#39;</span><span class="si">%s</span><span class="s">&#39; from the app &#39;</span><span class="si">%s</span><span class="s">&#39; is not available in this migration. (Did you use orm.ModelName, not orm[&#39;app.ModelName&#39;]?)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_app</span><span class="p">))</span>
+    
+    
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="c"># Detect if they asked for a field on a model or not.</span>
+        <span class="k">if</span> <span class="s">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+            <span class="n">key</span><span class="p">,</span> <span class="n">fname</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;:&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c"># Now, try getting the model</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">app</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&quot;The model &#39;</span><span class="si">%s</span><span class="s">&#39; is not in appname.modelname format.&quot;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&quot;The model &#39;</span><span class="si">%s</span><span class="s">&#39; from the app &#39;</span><span class="si">%s</span><span class="s">&#39; is not available in this migration.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">app</span><span class="p">))</span>
+        <span class="c"># If they asked for a field, get it.</span>
+        <span class="k">if</span> <span class="n">fname</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field_by_name</span><span class="p">(</span><span class="n">fname</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">model</span>
+    
+    
+    <span class="k">def</span> <span class="nf">eval_in_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">extra_imports</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="s">&quot;Evaluates the given code in the context of the migration file.&quot;</span>
+        
+        <span class="c"># Drag in the migration module&#39;s locals (hopefully including models.py)</span>
+        <span class="n">fake_locals</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getmodule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+        
+        <span class="c"># Remove all models from that (i.e. from modern models.py), to stop pollution</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">fake_locals</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s">&quot;_meta&quot;</span><span class="p">):</span>
+                <span class="k">del</span> <span class="n">fake_locals</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        
+        <span class="c"># We add our models into the locals for the eval</span>
+        <span class="n">fake_locals</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">([</span>
+            <span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">model</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">]))</span>
+        
+        <span class="c"># Make sure the ones for this app override.</span>
+        <span class="n">fake_locals</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">([</span>
+            <span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">model</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">app</span>
+        <span class="p">]))</span>
+        
+        <span class="c"># Ourselves as orm, to allow non-fail cross-app referencing</span>
+        <span class="n">fake_locals</span><span class="p">[</span><span class="s">&#39;orm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+        
+        <span class="c"># And a fake _ function</span>
+        <span class="n">fake_locals</span><span class="p">[</span><span class="s">&#39;_&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>
+        
+        <span class="c"># Datetime; there should be no datetime direct accesses</span>
+        <span class="n">fake_locals</span><span class="p">[</span><span class="s">&#39;datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime_utils</span>
+        
+        <span class="c"># Now, go through the requested imports and import them.</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">extra_imports</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c"># First, try getting it out of locals.</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">obj</span> <span class="o">=</span> <span class="n">fake_locals</span><span class="p">[</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                    <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">part</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fake_locals</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+                <span class="k">continue</span>
+            <span class="c"># OK, try to import it directly</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fake_locals</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ask_for_it_by_name</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s">&quot;SouthFieldClass&quot;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot import the required field &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="s">&quot;WARNING: Cannot import &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">value</span>
+        
+        <span class="c"># Use ModelsLocals to make lookups work right for CapitalisedModels</span>
+        <span class="n">fake_locals</span> <span class="o">=</span> <span class="n">ModelsLocals</span><span class="p">(</span><span class="n">fake_locals</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="n">fake_locals</span><span class="p">)</span>
+    
+    
+    <span class="k">def</span> <span class="nf">make_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">stub</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="s">&quot;Makes a Meta class out of a dict of eval-able arguments.&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;app_label&#39;</span><span class="p">:</span> <span class="n">app</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c"># Some things we never want to use.</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;_bases&quot;</span><span class="p">,</span> <span class="s">&quot;_ormbases&quot;</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="c"># Some things we don&#39;t want with stubs.</span>
+            <span class="k">if</span> <span class="n">stub</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;order_with_respect_to&quot;</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="c"># OK, add it.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_in_context</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">app</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">NameError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">),</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot successfully create meta field &#39;</span><span class="si">%s</span><span class="s">&#39; for model &#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;: </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">key</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">e</span>
+                <span class="p">))</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="s">&quot;Meta&quot;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(),</span> <span class="n">results</span><span class="p">)</span> 
+    
+    
+    <span class="k">def</span> <span class="nf">make_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="s">&quot;Makes a Model class out of the given app name, model name and pickled data.&quot;</span>
+        
+        <span class="c"># Extract any bases out of Meta</span>
+        <span class="k">if</span> <span class="s">&quot;_ormbases&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;Meta&#39;</span><span class="p">]:</span>
+            <span class="c"># Make sure everything we depend on is done already; otherwise, wait.</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;Meta&#39;</span><span class="p">][</span><span class="s">&#39;_ormbases&#39;</span><span class="p">]:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ORMBaseNotIncluded</span><span class="p">(</span><span class="s">&quot;Cannot find ORM base </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">basestring</span><span class="p">):</span>
+                    <span class="c"># Then the other model hasn&#39;t been unfrozen yet.</span>
+                    <span class="c"># We postpone ourselves; the situation will eventually resolve.</span>
+                    <span class="k">raise</span> <span class="n">UnfreezeMeLater</span><span class="p">()</span>
+            <span class="n">bases</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;Meta&#39;</span><span class="p">][</span><span class="s">&#39;_ormbases&#39;</span><span class="p">]]</span>
+        <span class="c"># Perhaps the old style?</span>
+        <span class="k">elif</span> <span class="s">&quot;_bases&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;Meta&#39;</span><span class="p">]:</span>
+            <span class="n">bases</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">ask_for_it_by_name</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;Meta&#39;</span><span class="p">][</span><span class="s">&#39;_bases&#39;</span><span class="p">])</span>
+        <span class="c"># Ah, bog standard, then.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bases</span> <span class="o">=</span> <span class="p">[</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">]</span>
+        
+        <span class="c"># Turn the Meta dict into a basic class</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_meta</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;Meta&#39;</span><span class="p">],</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;_stub&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">))</span>
+        
+        <span class="n">failed_fields</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">stub</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="c"># Now, make some fields!</span>
+        <span class="k">for</span> <span class="n">fname</span><span class="p">,</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c"># If it&#39;s the stub marker, ignore it.</span>
+            <span class="k">if</span> <span class="n">fname</span> <span class="o">==</span> <span class="s">&quot;_stub&quot;</span><span class="p">:</span>
+                <span class="n">stub</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">fname</span> <span class="o">==</span> <span class="s">&quot;Meta&quot;</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">params</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Field &#39;</span><span class="si">%s</span><span class="s">&#39; on model &#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39; has no definition.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">)):</span>
+                <span class="c"># It&#39;s a premade definition string! Let&#39;s hope it works...</span>
+                <span class="n">code</span> <span class="o">=</span> <span class="n">params</span>
+                <span class="n">extra_imports</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># If there&#39;s only one parameter (backwards compat), make it 3.</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">params</span> <span class="o">=</span> <span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[],</span> <span class="p">{})</span>
+                <span class="c"># There should be 3 parameters. Code is a tuple of (code, what-to-import)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">code</span> <span class="o">=</span> <span class="s">&quot;SouthFieldClass(</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="s">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span>
+                        <span class="p">[</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+                    <span class="p">)</span>
+                    <span class="n">extra_imports</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;SouthFieldClass&quot;</span><span class="p">:</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]}</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Field &#39;</span><span class="si">%s</span><span class="s">&#39; on model &#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39; has a weird definition length (should be 1 or 3 items).&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+            
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c"># Execute it in a probably-correct context.</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_in_context</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">extra_imports</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">NameError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>
+                <span class="c"># It might rely on other models being around. Add it to the</span>
+                <span class="c"># model for the second pass.</span>
+                <span class="n">failed_fields</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">extra_imports</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fields</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span>
+        
+        <span class="c"># Find the app in the Django core, and get its module</span>
+        <span class="n">more_kwds</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">app_module</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">get_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+            <span class="n">more_kwds</span><span class="p">[</span><span class="s">&#39;__module__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">app_module</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="k">except</span> <span class="n">ImproperlyConfigured</span><span class="p">:</span>
+            <span class="c"># The app this belonged to has vanished, but thankfully we can still</span>
+            <span class="c"># make a mock model, so ignore the error.</span>
+            <span class="n">more_kwds</span><span class="p">[</span><span class="s">&#39;__module__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;_south_mock&#39;</span>
+        
+        <span class="n">more_kwds</span><span class="p">[</span><span class="s">&#39;Meta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">meta</span>
+        
+        <span class="c"># Make our model</span>
+        <span class="n">fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">more_kwds</span><span class="p">)</span>
+        
+        <span class="n">model</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">bases</span><span class="p">),</span>
+            <span class="n">fields</span><span class="p">,</span>
+        <span class="p">)</span>
+        
+        <span class="c"># If this is a stub model, change Objects to a whiny class</span>
+        <span class="k">if</span> <span class="n">stub</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="n">WhinyManager</span><span class="p">()</span>
+            <span class="c"># Also, make sure they can&#39;t instantiate it</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">__init__</span> <span class="o">=</span> <span class="n">whiny_method</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="n">NoDryRunManager</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">objects</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">failed_fields</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">_failed_fields</span> <span class="o">=</span> <span class="n">failed_fields</span>
+        
+        <span class="k">return</span> <span class="n">model</span>
+    
+    <span class="k">def</span> <span class="nf">retry_failed_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;Tries to re-evaluate the _failed_fields for each model.&quot;</span>
+        <span class="k">for</span> <span class="n">modelkey</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">app</span><span class="p">,</span> <span class="n">modelname</span> <span class="o">=</span> <span class="n">modelkey</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s">&quot;_failed_fields&quot;</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">fname</span><span class="p">,</span> <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">extra_imports</span><span class="p">)</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">_failed_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_in_context</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">extra_imports</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="p">(</span><span class="ne">NameError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">),</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="c"># It&#39;s failed again. Complain.</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot successfully create field &#39;</span><span class="si">%s</span><span class="s">&#39; for model &#39;</span><span class="si">%s</span><span class="s">&#39;: </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">fname</span><span class="p">,</span> <span class="n">modelname</span><span class="p">,</span> <span class="n">e</span>
+                        <span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c"># Startup that field.</span>
+                        <span class="n">model</span><span class="o">.</span><span class="n">add_to_class</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="WhinyManager"><a class="viewcode-back" href="../../auto_modules.html#south.orm.WhinyManager">[docs]</a><span class="k">class</span> <span class="nc">WhinyManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="s">&quot;A fake manager that whines whenever you try to touch it. For stub models.&quot;</span>
+    
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s">&quot;You cannot use items from a stub model.&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="NoDryRunManager"><a class="viewcode-back" href="../../auto_modules.html#south.orm.NoDryRunManager">[docs]</a><span class="k">class</span> <span class="nc">NoDryRunManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A manager that always proxies through to the real manager,</span>
+<span class="sd">    unless a dry run is in progress.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">real</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">real</span> <span class="o">=</span> <span class="n">real</span>
+    
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">db</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s">&quot;You are in a dry run, and cannot access the ORM.</span><span class="se">\n</span><span class="s">Wrap ORM sections in &#39;if not db.dry_run:&#39;, or if the whole migration is only a data migration, set no_dry_run = True on the Migration class.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="whiny_method"><a class="viewcode-back" href="../../auto_modules.html#south.orm.whiny_method">[docs]</a><span class="k">def</span> <span class="nf">whiny_method</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;You cannot instantiate a stub model.&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

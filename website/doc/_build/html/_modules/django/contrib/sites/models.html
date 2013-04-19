@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django.contrib.sites.models &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for django.contrib.sites.models</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+
+
+<span class="n">SITE_CACHE</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<div class="viewcode-block" id="SiteManager"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sites.models.SiteManager">[docs]</a><span class="k">class</span> <span class="nc">SiteManager</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SiteManager.get_current"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sites.models.SiteManager.get_current">[docs]</a>    <span class="k">def</span> <span class="nf">get_current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the current ``Site`` based on the SITE_ID in the</span>
+<span class="sd">        project&#39;s settings. The ``Site`` object is cached the first</span>
+<span class="sd">        time it&#39;s retrieved from the database.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sid</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SITE_ID</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ImproperlyConfigured</span>
+            <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="s">&quot;You&#39;re using the Django </span><span class="se">\&quot;</span><span class="s">sites framework</span><span class="se">\&quot;</span><span class="s"> without having set the SITE_ID setting. Create a site in your database and set the SITE_ID setting to fix this error.&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">current_site</span> <span class="o">=</span> <span class="n">SITE_CACHE</span><span class="p">[</span><span class="n">sid</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">current_site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">sid</span><span class="p">)</span>
+            <span class="n">SITE_CACHE</span><span class="p">[</span><span class="n">sid</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_site</span>
+        <span class="k">return</span> <span class="n">current_site</span>
+</div>
+<div class="viewcode-block" id="SiteManager.clear_cache"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sites.models.SiteManager.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Clears the ``Site`` object cache.&quot;&quot;&quot;</span>
+        <span class="k">global</span> <span class="n">SITE_CACHE</span>
+        <span class="n">SITE_CACHE</span> <span class="o">=</span> <span class="p">{}</span>
+
+</div></div>
+<div class="viewcode-block" id="Site"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sites.models.Site">[docs]</a><span class="k">class</span> <span class="nc">Site</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+
+    <span class="n">domain</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;domain name&#39;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;display name&#39;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">SiteManager</span><span class="p">()</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s">&#39;django_site&#39;</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;site&#39;</span><span class="p">)</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;sites&#39;</span><span class="p">)</span>
+        <span class="n">ordering</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;domain&#39;</span><span class="p">,)</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span>
+
+<div class="viewcode-block" id="Site.save"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sites.models.Site.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Site</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c"># Cached information will likely be incorrect now.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="n">SITE_CACHE</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">SITE_CACHE</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="Site.delete"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sites.models.Site.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pk</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Site</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">SITE_CACHE</span><span class="p">[</span><span class="n">pk</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+</div></div>
+<div class="viewcode-block" id="RequestSite"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sites.models.RequestSite">[docs]</a><span class="k">class</span> <span class="nc">RequestSite</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class that shares the primary interface of Site (i.e., it has</span>
+<span class="sd">    ``domain`` and ``name`` attributes) but gets its data from a Django</span>
+<span class="sd">    HttpRequest object rather than from a database.</span>
+
+<span class="sd">    The save() and delete() methods raise NotImplementedError.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get_host</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span>
+
+<div class="viewcode-block" id="RequestSite.save"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sites.models.RequestSite.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_insert</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">force_update</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&#39;RequestSite cannot be saved.&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="RequestSite.delete"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sites.models.RequestSite.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&#39;RequestSite cannot be deleted.&#39;</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="get_current_site"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sites.models.get_current_site">[docs]</a><span class="k">def</span> <span class="nf">get_current_site</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks if contrib.sites is installed and returns either the current</span>
+<span class="sd">    ``Site`` object or a ``RequestSite`` object based on the request.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">Site</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">installed</span><span class="p">:</span>
+        <span class="n">current_site</span> <span class="o">=</span> <span class="n">Site</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_current</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">current_site</span> <span class="o">=</span> <span class="n">RequestSite</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">current_site</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

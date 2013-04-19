@@ -1,0 +1,691 @@
+form select, form file
+  -webkit-appearance: button
+  -webkit-border-radius: 0px
+  -webkit-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1)
+  -webkit-padding-end: 24px
+  -webkit-padding-start: 4px
+  -webkit-user-select: none
+  background-image: url(/static/img/css/arrow.updown.png), -webkit-linear-gradient(#fafafa, #f4f4f4 40%, #e5e5e5) !important
+  background-position: center right !important
+  background-repeat: no-repeat !important
+  border: 1px solid #CCC
+  line-height: 17px
+  color: #555
+  font-size: inherit
+  margin: 0
+  overflow: hidden
+  //padding-top: 2px
+  //padding-bottom: 2px
+  text-overflow: ellipsis
+  white-space: nowrap
+  
+  &.autocompletewidget
+    background: yellow
+  
+form input
+  &.autocompletewidget    
+    background-image: url(/static/img/css/autocomplete.png) !important
+    background-position: center right !important
+    background-repeat: no-repeat !important
+
+
+
+
+// Horizontal-specific styles / Overrides
+// --------------------------
+
+form.form-horizontal
+  // Increase spacing between groups
+  .control-group
+    margin-bottom: $baseLineHeight / 2
+    +clearfix
+  // Float the labels left
+  .control-label
+    float: left
+    width: auto
+    padding-top: 2px
+    text-align: left
+  // Move over all input controls and content
+  .controls
+    margin-left: 120px
+    select
+      height: 20px
+    input
+      height: 17px
+      padding: 1px 0 0 4px
+      line-height: 11px
+  // Move over buttons in .form-actions to align with .controls
+  .form-actions
+    padding-left: 160px
+    border-top: none
+    
+  .span2
+    .controls
+      margin-left: 50px
+    &.unpadded
+      padding-left: 0px
+      margin-left: 0px
+      
+  > .formRow
+    margin-bottom: 9px
+    margin-top: 9px
+    padding-top: 9px
+    
+    margin-left: 5px
+    
+    &:nth-child(odd)
+      background: #fafafa
+    
+    > .formColumn
+      //border-bottom: 1px solid #ccc
+      
+    &.relation-row
+      padding: 0 0 0 0
+      margin-top: 0
+      margin-bottom: 0
+      .controls
+        // margin-left: 40px
+        
+    &.releasemedia-row
+      margin-left: 0px
+    
+    
+form.form_horizontal
+
+form.form-horizontal
+  .controls
+    &.field-lookup
+    
+      input, .field-lookup-holder
+        float: left
+        
+      .field-lookup-holder
+        float: right
+        margin: 0 0 0 30px
+        background-color: #efefef
+        
+        border: 1px solid #efefef
+        
+        max-width: 220px
+        
+        display: none
+        padding: 0px 4px 0px 24px
+        
+
+        background-image: url(/static/img/icons/forms/compare.png)
+        background-position: 4px center 
+        background-repeat: no-repeat
+        
+        &.hover
+          border: 1px solid #999
+          cursor: pointer
+        
+        
+        // border: 1px solid #ccc
+        color: #5a5a5a
+        
+        &.lookup-match
+          
+          // border-color: #0b0
+          background-color: #ddffd9
+        &.lookup-diff
+          background-color: #fff4d9
+
+          
+form.form-horizontal
+  &.form-compact
+    //background: yellow
+    
+    
+    fieldset
+      // padding: 0 0 0 7px
+      padding: 0 0 0 0
+    
+    fieldset
+      background-color: #fafafa
+      
+      margin-top: 20px
+      
+      .control-group
+        padding-left: 7px
+      
+    legend
+      width: 816px
+      padding: 6px 7px
+      line-height: 14px
+      background-color: #f2f2f2
+    
+    legend
+      //display: none
+      margin-bottom: 7px
+      font-size: 100%
+      font-weight: bold
+      border-bottom: none
+    
+    legend + .control-group
+      margin-bottom: 4px 
+      margin-top: 4px 
+    
+    .control-group
+      margin-bottom: 2px      
+
+
+
+body
+  &.api_lookup-progress
+    opacity: 0.2
+
+
+// lookup form / providers
+
+
+.lookup.provider
+
+  &.listing
+    &.fixed
+      position: fixed
+      width: 260px
+      top: 120px
+
+  .item
+    padding: 2px 2px 0px 2px
+    background-color: #efefef
+
+    &.available
+      background-color: #DDFFD9
+    
+    &.hover
+      background-color: red
+      
+      
+// bulk apply form
+div.bulk_edit
+  padding: 20px
+  background: #DDFFD9
+
+
+ul.links.external
+
+  li.name
+    margin-left: 12px
+  
+  li.action
+    margin-left: 12px
+
+  li.icon
+    height: 16px
+    width: 16px
+    display: block
+    background-image: url(/static/img/base/listview.iconset.links_external.png)
+    &:hover
+      background-position: 0 -16px
+    /* individual links (icon sprite)
+    &.unknown
+      background-image: none
+
+    &.discogs
+      background-position: 0 0
+      &.available
+        background-position: 0 16px
+    &.wikipedia
+      background-position: -16px 0
+      &:hover
+        background-position: -16px 16px
+    &.lastfm
+      background-position: -32px 0
+      &:hover
+        background-position: -32px 16px
+    &.musicbrainz
+      background-position: -48px 0
+      &:hover
+        background-position: -48px 16px
+    &.soundcloud
+      background-position: -64px 0
+      &:hover
+        background-position: -64px 16px
+    &.facebook
+      background-position: -80px 0
+      &:hover
+        background-position: -80px 16px
+    &.youtube
+      background-position: -96px 0
+      &:hover
+        background-position: -96px 16px
+    &.myspace
+      background-position: -112px 0
+      &:hover
+        background-position: -112px 16px
+
+
+// clearable file/image input
+form.form-horizontal
+  .input-image, .input-file
+    .control-group
+      .control-label
+        // color: green
+      .controls
+        ul
+          margin-left: 0
+          list-style-type: none
+          li input[type="checkbox"] 
+            float: left
+            margin-right: 10px
+
+
+
+// inline notes, hints, info etc
+form.form-horizontal
+  
+  fieldset
+  
+    div.notes-inline
+      color: $grayDark
+      padding: 5px 10px
+      margin-bottom: 10px
+      h1, h2, h3
+        color: $grayDark
+        font-weight: bold
+        font-size: $baseFontSize
+        line-height: $baseLineHeight
+      p
+        color: $grayDark
+        width: 80%
+        
+      // type dependent
+      &.notes-info
+        background-color: $infoBackground
+        color: $infoText
+        h1, h2, h3
+          color: $infoText
+        p
+          color: $infoText
+          
+      &.notes-warning
+        background-color: $warningBackground
+        color: $warningText
+        h1, h2, h3
+          color: $warningText
+        p
+          color: $warningText
+          
+      &.notes-error
+        background-color: $errorBackground
+        color: $errorText
+        h1, h2, h3
+          color: $errorText
+        p
+          color: $errorText
+          
+      &.notes-success
+        background-color: $successBackground
+        color: $successText
+        h1, h2, h3
+          color: $successText
+        p
+          color: $successText
+      
+      
+
+
+// hackish here, think about integration
+
+form
+  div.form-help
+    padding-bottom: 7px
+    h4
+      font-size: 100%
+      text-transform: none
+    p
+      color: #a5a5a5
+
+.ui-combo-button
+  border: 1px solid green
+  background: white
+  margin-left: 4px
+  height: 20px
+  width: 16px
+
+ul.selectable-deck
+  width: 296px
+  margin: 10px 0 4px 0
+  background-color: transparent !important
+  
+  > li
+  
+    .selectable-deck-remove
+      background: green
+      .ui-button-text
+        display: block
+        width: 16px
+        height: 16px
+    
+
+.control-group
+  &.error
+    // background: red
+    label
+      color: $errorText
+    input
+      color: #999
+      border-color: $errorText
+      background-color: $errorBackground
+    span.help-inline
+      > strong
+        color: $errorText
+        font-weight: normal
+
+
+
+
+
+
+// Playlist editing
+form.form-playlist
+  // target duration
+  div.target-duration div.controls
+    label
+      float: left
+      width: 30px
+      padding: 0 0 0 20px
+      &.selected
+        background-color: #ddffd9
+      input
+        padding: 0
+        //display: none
+        
+  // target seasons
+  div.seasons div.controls, 
+  div.weather div.controls
+    label
+      float: left
+      width: auto
+      padding: 1px 10px 1px 10px
+      border: 1px solid #cccccc
+      margin-right: 5px
+      &.selected
+        background-color: #ddffd9
+      input
+        padding: 0
+        //display: none
+        
+        
+  // target duration
+  div.dayparts div.controls
+  
+    ul
+      padding: 4px 0px 0
+      
+      li
+        margin: 0 2px 2px 0
+        padding: 1px 4px 0 4px
+        height: 18px
+        border: 1px solid #ccc
+        
+        &:hover
+          border-color: #555
+        
+        &.selected
+          background-color: #D4F3DA !important
+          border-color: #555
+          &:hover
+            border-color: #ccc
+          
+        &:nth-child(2)
+          background-color: #FBD1FF
+        &:nth-child(3)
+          background-color: #FFD8BF
+        &:nth-child(4)
+          background-color: #FFF9BF
+        &:nth-child(5)
+          background-color: #CCFFBF
+        &:nth-child(6)
+          background-color: #BFFFEB
+        &:nth-child(7)
+          background-color: #BFE9FF
+        &:nth-child(8)
+          background-color: #BFC7FF
+        
+      li.title
+        color: #5a5a5a
+        // font-weight: bold
+        border: none
+        background-color: $white
+        border: 1px solid #ccc
+        text-align: center 
+  
+    label
+      //float: left
+      //width: 30px
+      //padding: 0 0 0 20px
+      input
+        //padding: 0
+        //display: none
+
+
+
+// also in playlist form [but outside from-tag]
+
+.listview.editable.media
+  &.condensed
+    .item
+      height: 35px !important
+      li.small, span
+        display: none
+
+      &.drop-placeholder
+        height: 65px !important
+    .waveform
+      display: none
+
+.listview.editable.media
+
+  // background: green !important
+  margin: 20px 0
+  
+  .list_header
+      
+    .row-fluid
+      background-color: #fff
+      border-bottom: 1px solid #efefef !important
+      > div
+        padding: 5px
+        margin: 1px 0
+        
+        
+    ul#editor_mode_switch
+      
+      > li
+        margin-left: 10px
+        a:hover
+          text-decoration: none
+          color: $green
+        i
+          // border: 1px solid red
+          // padding: 2px 0px 1px 1px
+  
+  .item
+  
+    border-bottom: 1px solid #efefef !important
+    
+    
+    // display: block
+    height: 100px
+    
+    > div
+      background-color: #efefef
+  
+    &.hover
+      //background-color: #efefef
+  
+    &.drop-placeholder
+      height: 130px
+      width: 100%
+      background-color: #ddffd9 !important
+      
+    &.ui-sortable-helper
+      opacity: 0.8
+      > div
+        background: #f3f0fb !important
+      
+    .row-fluid.base
+      //background-color: #fff 
+      > div
+        padding: 5px
+        margin: 1px 0
+      
+    .row-fluid.playhead
+      > div
+        // padding: 5px
+      .waveform
+        background-color: #a5a5a5
+        background-size: 100% 30px
+        height: 30px
+      .envelope
+        opacity: 0.6
+        border-bottom: 30px solid transparent
+        border-left: 30px solid #efefef
+        border-right: 70px solid #efefef
+        height: 0
+        // width: 423px
+        
+    &.hover
+      background: transparent
+      a
+        // border: 5px solid red
+      .row-fluid.playhead
+        .waveform
+          background-color: #ddffd9
+        .envelope
+          opacity: 0.5
+          border-bottom-color: #ddffd9
+          border-left-color: transparent
+          border-right-color: transparent
+        
+    .waveform
+      width: 100%
+      height: 40px
+        
+    .fade-cue
+      .row-fluid > div
+        text-align: right
+        padding: 0 0 0 0
+        margin-left: 4px
+        input
+          margin: 0
+          
+        span
+          text-align: right
+          color: #5a5a5a
+          padding-right: 2px
+      input
+        font-size: 11px
+        width: 60px
+        height: 14px
+        margin-right: 4px
+        background-color: transparent
+        border: 1px dotted transparent
+        text-align: right
+        padding: 1px 2px 1px 0
+        
+        
+  [class^="visible-while-"], [class*=" visible-while-"]
+    display: none
+    
+  .paused
+    .visible-while-paused
+      display: inline-block
+        
+  .playing
+    // override
+    background-color: transparent
+    a
+      color: #00bb00 !important
+    .visible-while-playing
+      display: inline-block
+    .hidden-while-playing
+      display: none
+      
+  .hover .fade-cue
+
+    input
+      background-color: white
+      border: 1px dotted #bbb
+    
+    
+    
+  
+  .summary
+  
+    &.error
+      background-color: $warningBackground
+  
+  
+    border-top: 1px solid #efefef !important
+      
+    .row-fluid
+      //background-color: #fff 
+      > div
+        padding: 5px
+        margin: 1px 0
+
+        
+    span
+      text-align: right
+      color: #5a5a5a
+      padding-right: 2px
+      
+      &.duration-total
+        font-weight: bold
+        // color: green
+      
+      &.duration-difference
+        color: red
+
+    
+
+// sidebar
+.playlist-edit.transform
+
+  &.listing
+    &.fixed
+      position: fixed
+      width: 260px
+      top: 120px
+
+  .item
+    padding: 4px 4px 4px 4px
+    margin: 5px 0 5px 0
+    border-bottom: 1px solid #efefef
+    //background-color: #efefef
+
+    a.toggle
+      color: #333
+      &:hover
+        text-decoration: none
+
+
+    .information
+      display: none
+  
+    &.warning
+      background-color: $warningBackground
+      color: $warningText
+      .information
+        display: block
+  
+    &.success
+      background-color: $successBackground
+      color: $successText
+
+    
+
+    &.hover
+      &.done
+        background-color: #DDFFD9
+        
+      &.duplicate
+        // background-color: $duplicateBackground
+  
+      &.ready
+        background-color: #DDFFD9
+

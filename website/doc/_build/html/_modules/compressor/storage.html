@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>compressor.storage &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for compressor.storage</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="kn">from</span> <span class="nn">django.core.files.storage</span> <span class="kn">import</span> <span class="n">FileSystemStorage</span><span class="p">,</span> <span class="n">get_storage_class</span>
+<span class="kn">from</span> <span class="nn">django.utils.functional</span> <span class="kn">import</span> <span class="n">LazyObject</span><span class="p">,</span> <span class="n">SimpleLazyObject</span>
+
+<span class="kn">from</span> <span class="nn">compressor.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+
+
+<div class="viewcode-block" id="CompressorFileStorage"><a class="viewcode-back" href="../../auto_modules.html#compressor.storage.CompressorFileStorage">[docs]</a><span class="k">class</span> <span class="nc">CompressorFileStorage</span><span class="p">(</span><span class="n">FileSystemStorage</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Standard file system storage for files handled by django-compressor.</span>
+
+<span class="sd">    The defaults for ``location`` and ``base_url`` are ``COMPRESS_ROOT`` and</span>
+<span class="sd">    ``COMPRESS_URL``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">location</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">location</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">COMPRESS_ROOT</span>
+        <span class="k">if</span> <span class="n">base_url</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">base_url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">COMPRESS_URL</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CompressorFileStorage</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">base_url</span><span class="p">,</span>
+                                                    <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CompressorFileStorage.accessed_time"><a class="viewcode-back" href="../../auto_modules.html#compressor.storage.CompressorFileStorage.accessed_time">[docs]</a>    <span class="k">def</span> <span class="nf">accessed_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">getatime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">name</span><span class="p">)))</span>
+</div>
+<div class="viewcode-block" id="CompressorFileStorage.created_time"><a class="viewcode-back" href="../../auto_modules.html#compressor.storage.CompressorFileStorage.created_time">[docs]</a>    <span class="k">def</span> <span class="nf">created_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">getctime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">name</span><span class="p">)))</span>
+</div>
+<div class="viewcode-block" id="CompressorFileStorage.modified_time"><a class="viewcode-back" href="../../auto_modules.html#compressor.storage.CompressorFileStorage.modified_time">[docs]</a>    <span class="k">def</span> <span class="nf">modified_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">name</span><span class="p">)))</span>
+</div>
+<div class="viewcode-block" id="CompressorFileStorage.get_available_name"><a class="viewcode-back" href="../../auto_modules.html#compressor.storage.CompressorFileStorage.get_available_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_available_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Deletes the given file if it exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">name</span>
+
+</div></div>
+<span class="n">compressor_file_storage</span> <span class="o">=</span> <span class="n">SimpleLazyObject</span><span class="p">(</span>
+    <span class="k">lambda</span><span class="p">:</span> <span class="n">get_storage_class</span><span class="p">(</span><span class="s">&#39;compressor.storage.CompressorFileStorage&#39;</span><span class="p">)())</span>
+
+
+<div class="viewcode-block" id="GzipCompressorFileStorage"><a class="viewcode-back" href="../../auto_modules.html#compressor.storage.GzipCompressorFileStorage">[docs]</a><span class="k">class</span> <span class="nc">GzipCompressorFileStorage</span><span class="p">(</span><span class="n">CompressorFileStorage</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The standard compressor file system storage that gzips storage files</span>
+<span class="sd">    additionally to the usual files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="GzipCompressorFileStorage.save"><a class="viewcode-back" href="../../auto_modules.html#compressor.storage.GzipCompressorFileStorage.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">GzipCompressorFileStorage</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">u&#39;</span><span class="si">%s</span><span class="s">.gz&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="s">&#39;rb&#39;</span><span class="p">))</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="DefaultStorage"><a class="viewcode-back" href="../../auto_modules.html#compressor.storage.DefaultStorage">[docs]</a><span class="k">class</span> <span class="nc">DefaultStorage</span><span class="p">(</span><span class="n">LazyObject</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrapped</span> <span class="o">=</span> <span class="n">get_storage_class</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">COMPRESS_STORAGE</span><span class="p">)()</span>
+</div>
+<span class="n">default_storage</span> <span class="o">=</span> <span class="n">DefaultStorage</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

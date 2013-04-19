@@ -1,0 +1,569 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>guardian.shortcuts &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for guardian.shortcuts</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Convenient shortcuts to manage or check object permissions.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">Permission</span><span class="p">,</span> <span class="n">User</span><span class="p">,</span> <span class="n">Group</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes.models</span> <span class="kn">import</span> <span class="n">ContentType</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">_get_queryset</span>
+<span class="kn">from</span> <span class="nn">guardian.core</span> <span class="kn">import</span> <span class="n">ObjectPermissionChecker</span>
+<span class="kn">from</span> <span class="nn">guardian.exceptions</span> <span class="kn">import</span> <span class="n">MixedContentTypeError</span>
+<span class="kn">from</span> <span class="nn">guardian.exceptions</span> <span class="kn">import</span> <span class="n">WrongAppError</span>
+<span class="kn">from</span> <span class="nn">guardian.models</span> <span class="kn">import</span> <span class="n">UserObjectPermission</span><span class="p">,</span> <span class="n">GroupObjectPermission</span>
+<span class="kn">from</span> <span class="nn">guardian.utils</span> <span class="kn">import</span> <span class="n">get_identity</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">groupby</span>
+
+<div class="viewcode-block" id="assign"><a class="viewcode-back" href="../../auto_modules.html#guardian.shortcuts.assign">[docs]</a><span class="k">def</span> <span class="nf">assign</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="n">user_or_group</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assigns permission to user/group and object pair.</span>
+
+<span class="sd">    :param perm: proper permission for given ``obj``, as string (in format:</span>
+<span class="sd">      ``app_label.codename`` or ``codename``). If ``obj`` is not given, must</span>
+<span class="sd">      be in format ``app_label.codename``.</span>
+
+<span class="sd">    :param user_or_group: instance of ``User``, ``AnonymousUser`` or ``Group``;</span>
+<span class="sd">      passing any other object would raise</span>
+<span class="sd">      ``guardian.exceptions.NotUserNorGroup`` exception</span>
+
+<span class="sd">    :param obj: persisted Django&#39;s ``Model`` instance or ``None`` if assigning</span>
+<span class="sd">      global permission. Default is ``None``.</span>
+
+<span class="sd">    We can assign permission for ``Model`` instance for specific user:</span>
+
+<span class="sd">    &gt;&gt;&gt; from django.contrib.sites.models import Site</span>
+<span class="sd">    &gt;&gt;&gt; from django.contrib.auth.models import User, Group</span>
+<span class="sd">    &gt;&gt;&gt; from guardian.shortcuts import assign</span>
+<span class="sd">    &gt;&gt;&gt; site = Site.objects.get_current()</span>
+<span class="sd">    &gt;&gt;&gt; user = User.objects.create(username=&#39;joe&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; assign(&quot;change_site&quot;, user, site)</span>
+<span class="sd">    &lt;UserObjectPermission: example.com | joe | change_site&gt;</span>
+<span class="sd">    &gt;&gt;&gt; user.has_perm(&quot;change_site&quot;, site)</span>
+<span class="sd">    True</span>
+
+<span class="sd">    ... or we can assign permission for group:</span>
+
+<span class="sd">    &gt;&gt;&gt; group = Group.objects.create(name=&#39;joe-group&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; user.groups.add(group)</span>
+<span class="sd">    &gt;&gt;&gt; assign(&quot;delete_site&quot;, group, site)</span>
+<span class="sd">    &lt;GroupObjectPermission: example.com | joe-group | delete_site&gt;</span>
+<span class="sd">    &gt;&gt;&gt; user.has_perm(&quot;delete_site&quot;, site)</span>
+<span class="sd">    True</span>
+
+<span class="sd">    **Global permissions**</span>
+
+<span class="sd">    This function may also be used to assign standard, *global* permissions if</span>
+<span class="sd">    ``obj`` parameter is omitted. Added Permission would be returned in that</span>
+<span class="sd">    case:</span>
+
+<span class="sd">    &gt;&gt;&gt; assign(&quot;sites.change_site&quot;, user)</span>
+<span class="sd">    &lt;Permission: sites | site | Can change site&gt;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">user</span><span class="p">,</span> <span class="n">group</span> <span class="o">=</span> <span class="n">get_identity</span><span class="p">(</span><span class="n">user_or_group</span><span class="p">)</span>
+    <span class="c"># If obj is None we try to operate on global permissions</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">app_label</span><span class="p">,</span> <span class="n">codename</span> <span class="o">=</span> <span class="n">perm</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;For global permissions, first argument must be in&quot;</span>
+                <span class="s">&quot; format: &#39;app_label.codename&#39; (is </span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="n">perm</span><span class="p">)</span>
+        <span class="n">perm</span> <span class="o">=</span> <span class="n">Permission</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">content_type__app_label</span><span class="o">=</span><span class="n">app_label</span><span class="p">,</span>
+            <span class="n">codename</span><span class="o">=</span><span class="n">codename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">user</span><span class="o">.</span><span class="n">user_permissions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">perm</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">perm</span>
+        <span class="k">if</span> <span class="n">group</span><span class="p">:</span>
+            <span class="n">group</span><span class="o">.</span><span class="n">permissions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">perm</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">perm</span>
+    <span class="n">perm</span> <span class="o">=</span> <span class="n">perm</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">UserObjectPermission</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">group</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">GroupObjectPermission</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="remove_perm"><a class="viewcode-back" href="../../auto_modules.html#guardian.shortcuts.remove_perm">[docs]</a><span class="k">def</span> <span class="nf">remove_perm</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="n">user_or_group</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes permission from user/group and object pair.</span>
+
+<span class="sd">    :param perm: proper permission for given ``obj``, as string (in format:</span>
+<span class="sd">      ``app_label.codename`` or ``codename``). If ``obj`` is not given, must</span>
+<span class="sd">      be in format ``app_label.codename``.</span>
+
+<span class="sd">    :param user_or_group: instance of ``User``, ``AnonymousUser`` or ``Group``;</span>
+<span class="sd">      passing any other object would raise</span>
+<span class="sd">      ``guardian.exceptions.NotUserNorGroup`` exception</span>
+
+<span class="sd">    :param obj: persisted Django&#39;s ``Model`` instance or ``None`` if assigning</span>
+<span class="sd">      global permission. Default is ``None``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user</span><span class="p">,</span> <span class="n">group</span> <span class="o">=</span> <span class="n">get_identity</span><span class="p">(</span><span class="n">user_or_group</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">app_label</span><span class="p">,</span> <span class="n">codename</span> <span class="o">=</span> <span class="n">perm</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;For global permissions, first argument must be in&quot;</span>
+                <span class="s">&quot; format: &#39;app_label.codename&#39; (is </span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="n">perm</span><span class="p">)</span>
+        <span class="n">perm</span> <span class="o">=</span> <span class="n">Permission</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">content_type__app_label</span><span class="o">=</span><span class="n">app_label</span><span class="p">,</span>
+            <span class="n">codename</span><span class="o">=</span><span class="n">codename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">user</span><span class="o">.</span><span class="n">user_permissions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">perm</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">elif</span> <span class="n">group</span><span class="p">:</span>
+            <span class="n">group</span><span class="o">.</span><span class="n">permissions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">perm</span><span class="p">)</span>
+            <span class="k">return</span>
+    <span class="n">perm</span> <span class="o">=</span> <span class="n">perm</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+        <span class="n">UserObjectPermission</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">remove_perm</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">group</span><span class="p">:</span>
+        <span class="n">GroupObjectPermission</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">remove_perm</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="get_perms"><a class="viewcode-back" href="../../auto_modules.html#guardian.shortcuts.get_perms">[docs]</a><span class="k">def</span> <span class="nf">get_perms</span><span class="p">(</span><span class="n">user_or_group</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns permissions for given user/group and object pair, as list of</span>
+<span class="sd">    strings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check</span> <span class="o">=</span> <span class="n">ObjectPermissionChecker</span><span class="p">(</span><span class="n">user_or_group</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">check</span><span class="o">.</span><span class="n">get_perms</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="get_perms_for_model"><a class="viewcode-back" href="../../auto_modules.html#guardian.shortcuts.get_perms_for_model">[docs]</a><span class="k">def</span> <span class="nf">get_perms_for_model</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns queryset of all Permission objects for the given class. It is</span>
+<span class="sd">    possible to pass Model as class or instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">app_label</span><span class="p">,</span> <span class="n">model_name</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="n">app_label</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">cls</span>
+    <span class="n">ctype</span> <span class="o">=</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Permission</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">content_type</span><span class="o">=</span><span class="n">ctype</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="get_users_with_perms"><a class="viewcode-back" href="../../auto_modules.html#guardian.shortcuts.get_users_with_perms">[docs]</a><span class="k">def</span> <span class="nf">get_users_with_perms</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">attach_perms</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">with_superusers</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="n">with_group_users</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns queryset of all ``User`` objects with *any* object permissions for</span>
+<span class="sd">    the given ``obj``.</span>
+
+<span class="sd">    :param obj: persisted Django&#39;s ``Model`` instance</span>
+
+<span class="sd">    :param attach_perms: Default: ``False``. If set to ``True`` result would be</span>
+<span class="sd">      dictionary of ``User`` instances with permissions&#39; codenames list as</span>
+<span class="sd">      values. This would fetch users eagerly!</span>
+
+<span class="sd">    :param with_superusers: Default: ``False``. If set to ``True`` result would</span>
+<span class="sd">      contain all superusers.</span>
+
+<span class="sd">    :param with_group_users: Default: ``True``. If set to ``False`` result would</span>
+<span class="sd">      **not** contain those users who have only group permissions for given</span>
+<span class="sd">      ``obj``.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        &gt;&gt;&gt; from django.contrib.auth.models import User</span>
+<span class="sd">        &gt;&gt;&gt; from django.contrib.flatpages.models import FlatPage</span>
+<span class="sd">        &gt;&gt;&gt; from guardian.shortcuts import assign, get_users_with_perms</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; page = FlatPage.objects.create(title=&#39;Some page&#39;, path=&#39;/some/page/&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; joe = User.objects.create_user(&#39;joe&#39;, &#39;joe@example.com&#39;, &#39;joesecret&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; assign(&#39;change_flatpage&#39;, joe, page)</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; get_users_with_perms(page)</span>
+<span class="sd">        [&lt;User: joe&gt;]</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; get_users_with_perms(page, attach_perms=True)</span>
+<span class="sd">        {&lt;User: joe&gt;: [u&#39;change_flatpage&#39;]}</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ctype</span> <span class="o">=</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">attach_perms</span><span class="p">:</span>
+        <span class="c"># It&#39;s much easier without attached perms so we do it first if that is</span>
+        <span class="c"># the case</span>
+        <span class="n">qset</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span>
+            <span class="n">userobjectpermission__content_type</span><span class="o">=</span><span class="n">ctype</span><span class="p">,</span>
+            <span class="n">userobjectpermission__object_pk</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">with_group_users</span><span class="p">:</span>
+            <span class="n">qset</span> <span class="o">=</span> <span class="n">qset</span> <span class="o">|</span> <span class="n">Q</span><span class="p">(</span>
+                <span class="n">groups__groupobjectpermission__content_type</span><span class="o">=</span><span class="n">ctype</span><span class="p">,</span>
+                <span class="n">groups__groupobjectpermission__object_pk</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">with_superusers</span><span class="p">:</span>
+            <span class="n">qset</span> <span class="o">=</span> <span class="n">qset</span> <span class="o">|</span> <span class="n">Q</span><span class="p">(</span><span class="n">is_superuser</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">qset</span><span class="p">)</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># TODO: Do not hit db for each user!</span>
+        <span class="n">users</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">get_users_with_perms</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span>
+                <span class="n">with_group_users</span><span class="o">=</span><span class="n">with_group_users</span><span class="p">):</span>
+            <span class="n">users</span><span class="p">[</span><span class="n">user</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_perms</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">users</span>
+</div>
+<div class="viewcode-block" id="get_groups_with_perms"><a class="viewcode-back" href="../../auto_modules.html#guardian.shortcuts.get_groups_with_perms">[docs]</a><span class="k">def</span> <span class="nf">get_groups_with_perms</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">attach_perms</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns queryset of all ``Group`` objects with *any* object permissions for</span>
+<span class="sd">    the given ``obj``.</span>
+
+<span class="sd">    :param obj: persisted Django&#39;s ``Model`` instance</span>
+
+<span class="sd">    :param attach_perms: Default: ``False``. If set to ``True`` result would be</span>
+<span class="sd">      dictionary of ``Group`` instances with permissions&#39; codenames list as</span>
+<span class="sd">      values. This would fetch groups eagerly!</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        &gt;&gt;&gt; from django.contrib.auth.models import Group</span>
+<span class="sd">        &gt;&gt;&gt; from django.contrib.flatpages.models import FlatPage</span>
+<span class="sd">        &gt;&gt;&gt; from guardian.shortcuts import assign, get_groups_with_perms</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; page = FlatPage.objects.create(title=&#39;Some page&#39;, path=&#39;/some/page/&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; admins = Group.objects.create(name=&#39;Admins&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; assign(&#39;change_flatpage&#39;, group, page)</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; get_groups_with_perms(page)</span>
+<span class="sd">        [&lt;Group: admins&gt;]</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; get_groups_with_perms(page, attach_perms=True)</span>
+<span class="sd">        {&lt;Group: admins&gt;: [u&#39;change_flatpage&#39;]}</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ctype</span> <span class="o">=</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">attach_perms</span><span class="p">:</span>
+        <span class="c"># It&#39;s much easier without attached perms so we do it first if that is</span>
+        <span class="c"># the case</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="n">Group</span><span class="o">.</span><span class="n">objects</span>\
+            <span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                <span class="n">groupobjectpermission__content_type</span><span class="o">=</span><span class="n">ctype</span><span class="p">,</span>
+                <span class="n">groupobjectpermission__object_pk</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span>
+            <span class="p">)</span>\
+            <span class="o">.</span><span class="n">distinct</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">groups</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># TODO: Do not hit db for each group!</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">get_groups_with_perms</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+                <span class="n">groups</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_perms</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">groups</span>
+</div>
+<div class="viewcode-block" id="get_objects_for_user"><a class="viewcode-back" href="../../auto_modules.html#guardian.shortcuts.get_objects_for_user">[docs]</a><span class="k">def</span> <span class="nf">get_objects_for_user</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">perms</span><span class="p">,</span> <span class="n">klass</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">use_groups</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">any_perm</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns queryset of objects for which a given ``user`` has *all*</span>
+<span class="sd">    permissions present at ``perms``.</span>
+
+<span class="sd">    :param user: ``User`` instance for which objects would be returned</span>
+<span class="sd">    :param perms: single permission string, or sequence of permission strings </span>
+<span class="sd">      which should be checked.</span>
+<span class="sd">      If ``klass`` parameter is not given, those should be full permission</span>
+<span class="sd">      names rather than only codenames (i.e. ``auth.change_user``). If more than</span>
+<span class="sd">      one permission is present within sequence, their content type **must** be</span>
+<span class="sd">      the same or ``MixedContentTypeError`` exception would be raised.</span>
+<span class="sd">    :param klass: may be a Model, Manager or QuerySet object. If not given</span>
+<span class="sd">      this parameter would be computed based on given ``params``.</span>
+<span class="sd">    :param use_groups: if ``False``, wouldn&#39;t check user&#39;s groups object</span>
+<span class="sd">      permissions. Default is ``True``.</span>
+<span class="sd">    :param any_perm: if True, any of permission in sequence is accepted</span>
+
+<span class="sd">    :raises MixedContentTypeError: when computed content type for ``perms``</span>
+<span class="sd">      and/or ``klass`` clashes.</span>
+<span class="sd">    :raises WrongAppError: if cannot compute app label for given ``perms``/</span>
+<span class="sd">      ``klass``.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        &gt;&gt;&gt; from guardian.shortcuts import get_objects_for_user</span>
+<span class="sd">        &gt;&gt;&gt; joe = User.objects.get(username=&#39;joe&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; get_objects_for_user(joe, &#39;auth.change_group&#39;)</span>
+<span class="sd">        []</span>
+<span class="sd">        &gt;&gt;&gt; from guardian.shortcuts import assign</span>
+<span class="sd">        &gt;&gt;&gt; group = Group.objects.create(&#39;some group&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; assign(&#39;auth.change_group&#39;, joe, group)</span>
+<span class="sd">        &gt;&gt;&gt; get_objects_for_user(joe, &#39;auth.change_group&#39;)</span>
+<span class="sd">        [&lt;Group some group&gt;]</span>
+<span class="sd">        </span>
+<span class="sd">    The permission string can also be an iterable. Continuing with the previous example:</span>
+<span class="sd">      </span>
+<span class="sd">        &gt;&gt;&gt; get_objects_for_user(joe, [&#39;auth.change_group&#39;, &#39;auth.delete_group&#39;])</span>
+<span class="sd">        []</span>
+<span class="sd">        &gt;&gt;&gt; get_objects_for_user(joe, [&#39;auth.change_group&#39;, &#39;auth.delete_group&#39;], any_perm=True)</span>
+<span class="sd">        [&lt;Group some group&gt;]</span>
+<span class="sd">        &gt;&gt;&gt; assign(&#39;auth.delete_group&#39;, joe, group)</span>
+<span class="sd">        &gt;&gt;&gt; get_objects_for_user(joe, [&#39;auth.change_group&#39;, &#39;auth.delete_group&#39;])</span>
+<span class="sd">        [&lt;Group some group&gt;]        </span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">perms</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="n">perms</span> <span class="o">=</span> <span class="p">[</span><span class="n">perms</span><span class="p">]</span>
+    <span class="n">ctype</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">app_label</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">codenames</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="c"># Compute codenames set and ctype if possible</span>
+    <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">perms</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">perm</span><span class="p">:</span>
+            <span class="n">new_app_label</span><span class="p">,</span> <span class="n">codename</span> <span class="o">=</span> <span class="n">perm</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">app_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">app_label</span> <span class="o">!=</span> <span class="n">new_app_label</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">MixedContentTypeError</span><span class="p">(</span><span class="s">&quot;Given perms must have same app &quot;</span>
+                    <span class="s">&quot;label (</span><span class="si">%s</span><span class="s"> != </span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">app_label</span><span class="p">,</span> <span class="n">new_app_label</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">app_label</span> <span class="o">=</span> <span class="n">new_app_label</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">codename</span> <span class="o">=</span> <span class="n">perm</span>
+        <span class="n">codenames</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">codename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">app_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">new_ctype</span> <span class="o">=</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">app_label</span><span class="o">=</span><span class="n">app_label</span><span class="p">,</span>
+                <span class="n">permission__codename</span><span class="o">=</span><span class="n">codename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ctype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">ctype</span> <span class="o">!=</span> <span class="n">new_ctype</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">MixedContentTypeError</span><span class="p">(</span><span class="s">&quot;ContentType was once computed &quot;</span>
+                    <span class="s">&quot;to be </span><span class="si">%s</span><span class="s"> and another one </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ctype</span><span class="p">,</span> <span class="n">new_ctype</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ctype</span> <span class="o">=</span> <span class="n">new_ctype</span>
+
+    <span class="c"># Compute queryset and ctype if still missing</span>
+    <span class="k">if</span> <span class="n">ctype</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">klass</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">WrongAppError</span><span class="p">(</span><span class="s">&quot;Cannot determine content type&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ctype</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">klass</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">_get_queryset</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
+        <span class="n">ctype</span> <span class="o">=</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">queryset</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ctype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">klass</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">_get_queryset</span><span class="p">(</span><span class="n">ctype</span><span class="o">.</span><span class="n">model_class</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">_get_queryset</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ctype</span><span class="o">.</span><span class="n">model_class</span><span class="p">()</span> <span class="o">!=</span> <span class="n">queryset</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MixedContentTypeError</span><span class="p">(</span><span class="s">&quot;Content type for given perms and &quot;</span>
+                <span class="s">&quot;klass differs&quot;</span><span class="p">)</span>
+
+    <span class="c"># At this point, we should have both ctype and queryset and they should</span>
+    <span class="c"># match which means: ctype.model_class() == queryset.model</span>
+    <span class="c"># we should also have ``codenames`` list</span>
+
+    <span class="c"># First check if user is superuser and if so, return queryset immediately</span>
+    <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">is_superuser</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">queryset</span>
+
+    <span class="c"># Now we should extract list of pk values for which we would filter queryset</span>
+    <span class="n">user_obj_perms</span> <span class="o">=</span> <span class="n">UserObjectPermission</span><span class="o">.</span><span class="n">objects</span>\
+        <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>\
+        <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">permission__content_type</span><span class="o">=</span><span class="n">ctype</span><span class="p">)</span>\
+        <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">permission__codename__in</span><span class="o">=</span><span class="n">codenames</span><span class="p">)</span>\
+        <span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s">&#39;object_pk&#39;</span><span class="p">,</span> <span class="s">&#39;permission__codename&#39;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">user_obj_perms</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">use_groups</span><span class="p">:</span>
+        <span class="n">groups_obj_perms</span> <span class="o">=</span> <span class="n">GroupObjectPermission</span><span class="o">.</span><span class="n">objects</span>\
+            <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">group__user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">permission__content_type</span><span class="o">=</span><span class="n">ctype</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">permission__codename__in</span><span class="o">=</span><span class="n">codenames</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s">&#39;object_pk&#39;</span><span class="p">,</span> <span class="s">&#39;permission__codename&#39;</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">groups_obj_perms</span><span class="p">)</span>
+    <span class="n">keyfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c"># sorting/grouping by pk (first in result tuple)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">keyfunc</span><span class="p">)</span>
+    <span class="n">pk_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">pk</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groupby</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">keyfunc</span><span class="p">):</span>
+        <span class="n">obj_codenames</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">group</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">any_perm</span> <span class="ow">or</span> <span class="n">codenames</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">obj_codenames</span><span class="p">):</span>
+            <span class="n">pk_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pk</span><span class="p">)</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">queryset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pk__in</span><span class="o">=</span><span class="n">pk_list</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">objects</span>
+</div>
+<div class="viewcode-block" id="get_objects_for_group"><a class="viewcode-back" href="../../auto_modules.html#guardian.shortcuts.get_objects_for_group">[docs]</a><span class="k">def</span> <span class="nf">get_objects_for_group</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">perms</span><span class="p">,</span> <span class="n">klass</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">any_perm</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns queryset of objects for which a given ``group`` has *all*</span>
+<span class="sd">    permissions present at ``perms``.</span>
+
+<span class="sd">    :param group: ``Group`` instance for which objects would be returned.</span>
+<span class="sd">    :param perms: single permission string, or sequence of permission strings </span>
+<span class="sd">      which should be checked.</span>
+<span class="sd">      If ``klass`` parameter is not given, those should be full permission</span>
+<span class="sd">      names rather than only codenames (i.e. ``auth.change_user``). If more than</span>
+<span class="sd">      one permission is present within sequence, their content type **must** be</span>
+<span class="sd">      the same or ``MixedContentTypeError`` exception would be raised.</span>
+<span class="sd">    :param klass: may be a Model, Manager or QuerySet object. If not given</span>
+<span class="sd">      this parameter would be computed based on given ``params``.</span>
+<span class="sd">    :param any_perm: if True, any of permission in sequence is accepted</span>
+
+<span class="sd">    :raises MixedContentTypeError: when computed content type for ``perms``</span>
+<span class="sd">      and/or ``klass`` clashes.</span>
+<span class="sd">    :raises WrongAppError: if cannot compute app label for given ``perms``/</span>
+<span class="sd">      ``klass``.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    </span>
+<span class="sd">    Let&#39;s assume we have a ``Task`` model belonging to the ``tasker`` app with </span>
+<span class="sd">    the default add_task, change_task and delete_task permissions provided </span>
+<span class="sd">    by Django::</span>
+
+<span class="sd">        &gt;&gt;&gt; from guardian.shortcuts import get_objects_for_group</span>
+<span class="sd">        &gt;&gt;&gt; from tasker import Task</span>
+<span class="sd">        &gt;&gt;&gt; group = Group.objects.create(&#39;some group&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; task = Task.objects.create(&#39;some task&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; get_objects_for_group(group, &#39;tasker.add_task&#39;)</span>
+<span class="sd">        []</span>
+<span class="sd">        &gt;&gt;&gt; from guardian.shortcuts import assign</span>
+<span class="sd">        &gt;&gt;&gt; assign(&#39;tasker.add_task&#39;, group, task)</span>
+<span class="sd">        &gt;&gt;&gt; get_objects_for_group(group, &#39;tasker.add_task&#39;)</span>
+<span class="sd">        [&lt;Task some task&gt;]</span>
+
+<span class="sd">    The permission string can also be an iterable. Continuing with the previous example:</span>
+<span class="sd">        &gt;&gt;&gt; get_objects_for_group(group, [&#39;tasker.add_task&#39;, &#39;tasker.delete_task&#39;])</span>
+<span class="sd">        []</span>
+<span class="sd">        &gt;&gt;&gt; assign(&#39;tasker.delete_task&#39;, group, task)</span>
+<span class="sd">        &gt;&gt;&gt; get_objects_for_group(group, [&#39;tasker.add_task&#39;, &#39;tasker.delete_task&#39;])</span>
+<span class="sd">        [&lt;Task some task&gt;]</span>
+<span class="sd">                </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">perms</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="n">perms</span> <span class="o">=</span> <span class="p">[</span><span class="n">perms</span><span class="p">]</span>
+    <span class="n">ctype</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">app_label</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">codenames</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="c"># Compute codenames set and ctype if possible</span>
+    <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">perms</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">perm</span><span class="p">:</span>
+            <span class="n">new_app_label</span><span class="p">,</span> <span class="n">codename</span> <span class="o">=</span> <span class="n">perm</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">app_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">app_label</span> <span class="o">!=</span> <span class="n">new_app_label</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">MixedContentTypeError</span><span class="p">(</span><span class="s">&quot;Given perms must have same app &quot;</span>
+                    <span class="s">&quot;label (</span><span class="si">%s</span><span class="s"> != </span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">app_label</span><span class="p">,</span> <span class="n">new_app_label</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">app_label</span> <span class="o">=</span> <span class="n">new_app_label</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">codename</span> <span class="o">=</span> <span class="n">perm</span>
+        <span class="n">codenames</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">codename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">app_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">new_ctype</span> <span class="o">=</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">app_label</span><span class="o">=</span><span class="n">app_label</span><span class="p">,</span>
+                <span class="n">permission__codename</span><span class="o">=</span><span class="n">codename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ctype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">ctype</span> <span class="o">!=</span> <span class="n">new_ctype</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">MixedContentTypeError</span><span class="p">(</span><span class="s">&quot;ContentType was once computed &quot;</span>
+                    <span class="s">&quot;to be </span><span class="si">%s</span><span class="s"> and another one </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ctype</span><span class="p">,</span> <span class="n">new_ctype</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ctype</span> <span class="o">=</span> <span class="n">new_ctype</span>
+
+    <span class="c"># Compute queryset and ctype if still missing</span>
+    <span class="k">if</span> <span class="n">ctype</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">klass</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">WrongAppError</span><span class="p">(</span><span class="s">&quot;Cannot determine content type&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ctype</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">klass</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">_get_queryset</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
+        <span class="n">ctype</span> <span class="o">=</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">queryset</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ctype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">klass</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">_get_queryset</span><span class="p">(</span><span class="n">ctype</span><span class="o">.</span><span class="n">model_class</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">_get_queryset</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ctype</span><span class="o">.</span><span class="n">model_class</span><span class="p">()</span> <span class="o">!=</span> <span class="n">queryset</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MixedContentTypeError</span><span class="p">(</span><span class="s">&quot;Content type for given perms and &quot;</span>
+                <span class="s">&quot;klass differs&quot;</span><span class="p">)</span>
+
+    <span class="c"># At this point, we should have both ctype and queryset and they should</span>
+    <span class="c"># match which means: ctype.model_class() == queryset.model</span>
+    <span class="c"># we should also have ``codenames`` list</span>
+
+    <span class="c"># Now we should extract list of pk values for which we would filter queryset</span>
+    <span class="n">groups_obj_perms</span> <span class="o">=</span> <span class="n">GroupObjectPermission</span><span class="o">.</span><span class="n">objects</span>\
+        <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)</span>\
+        <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">permission__content_type</span><span class="o">=</span><span class="n">ctype</span><span class="p">)</span>\
+        <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">permission__codename__in</span><span class="o">=</span><span class="n">codenames</span><span class="p">)</span>\
+        <span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s">&#39;object_pk&#39;</span><span class="p">,</span> <span class="s">&#39;permission__codename&#39;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">groups_obj_perms</span><span class="p">)</span>
+
+    <span class="n">keyfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c"># sorting/grouping by pk (first in result tuple)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">keyfunc</span><span class="p">)</span>
+    <span class="n">pk_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">pk</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groupby</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">keyfunc</span><span class="p">):</span>
+        <span class="n">obj_codenames</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">group</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">any_perm</span> <span class="ow">or</span> <span class="n">codenames</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">obj_codenames</span><span class="p">):</span>
+            <span class="n">pk_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pk</span><span class="p">)</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">queryset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pk__in</span><span class="o">=</span><span class="n">pk_list</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">objects</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

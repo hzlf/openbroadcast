@@ -96,18 +96,33 @@
 
 	</section>
 
+	
 	<section class="description">
-
+		<h4>{% trans "Artist description" %}</h4>
 		<div class="description markdown padded-h">
-			{% wikify object.name %}
+			{% wikify object.biography %}
 		</div>
 
 	</section>
+	
+	
+	{% if object.relations.generic.count > 0 %}
+	<section class="relations">
+		<h4>{% trans "More relations" %}</h4>
+			<ul class="unstyled">
+			{% for relation in object.relations.generic %}
+			<li><a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.url }}">{{ relation.url }}</a></li>
+			
+			{% endfor %}
+			</ul>
+		
+	</section>
+	{% endif %}
 
 </div>
 
 {% endblock %}
 
 {% block sidebar %}
-{% include "alibrary/release/sidebar/_detail.html" %}
+{% include "alibrary/artist/sidebar/_detail.html" %}
 {% endblock %}

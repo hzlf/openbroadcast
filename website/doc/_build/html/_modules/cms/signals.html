@@ -1,0 +1,379 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>cms.signals &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for cms.signals</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ObjectDoesNotExist</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">signals</span>
+<span class="kn">from</span> <span class="nn">django.dispatch</span> <span class="kn">import</span> <span class="n">Signal</span>
+
+<span class="kn">from</span> <span class="nn">cms.cache.permissions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">clear_user_permission_cache</span><span class="p">,</span> <span class="n">clear_permission_cache</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">cms.models</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Page</span><span class="p">,</span> <span class="n">Title</span><span class="p">,</span> <span class="n">CMSPlugin</span><span class="p">,</span> <span class="n">PagePermission</span><span class="p">,</span> 
+    <span class="n">GlobalPagePermission</span><span class="p">,</span> <span class="n">PageUser</span><span class="p">,</span> <span class="n">PageUserGroup</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">menus.menu_pool</span> <span class="kn">import</span> <span class="n">menu_pool</span>
+
+<span class="c"># fired after page location is changed - is moved from one node to other</span>
+<span class="n">page_moved</span> <span class="o">=</span> <span class="n">Signal</span><span class="p">(</span><span class="n">providing_args</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;instance&quot;</span><span class="p">])</span>
+
+<span class="c"># fired when some of nodes (Title) with applications gets saved</span>
+<span class="n">application_post_changed</span> <span class="o">=</span> <span class="n">Signal</span><span class="p">(</span><span class="n">providing_args</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;instance&quot;</span><span class="p">])</span>
+
+<span class="c"># fired after page gets published - copied to public model - there may be more</span>
+<span class="c"># than one instances published before this signal gets called</span>
+<span class="n">post_publish</span> <span class="o">=</span> <span class="n">Signal</span><span class="p">(</span><span class="n">providing_args</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;instance&quot;</span><span class="p">])</span>
+        
+<div class="viewcode-block" id="update_plugin_positions"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.update_plugin_positions">[docs]</a><span class="k">def</span> <span class="nf">update_plugin_positions</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">plugin</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;instance&#39;</span><span class="p">]</span>
+    <span class="n">plugins</span> <span class="o">=</span> <span class="n">CMSPlugin</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">language</span><span class="o">=</span><span class="n">plugin</span><span class="o">.</span><span class="n">language</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="n">plugin</span><span class="o">.</span><span class="n">placeholder</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s">&quot;position&quot;</span><span class="p">)</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">plugins</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">position</span> <span class="o">!=</span> <span class="n">last</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">last</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">last</span> <span class="o">+=</span> <span class="mi">1</span>
+</div>
+<span class="n">signals</span><span class="o">.</span><span class="n">post_delete</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">update_plugin_positions</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">CMSPlugin</span><span class="p">,</span> <span class="n">dispatch_uid</span><span class="o">=</span><span class="s">&quot;cms.plugin.update_position&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="update_title_paths"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.update_title_paths">[docs]</a><span class="k">def</span> <span class="nf">update_title_paths</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Update child pages paths in case when page was moved.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">title</span> <span class="ow">in</span> <span class="n">instance</span><span class="o">.</span><span class="n">title_set</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="n">title</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        </div>
+<span class="n">page_moved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">update_title_paths</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Page</span><span class="p">,</span> <span class="n">dispatch_uid</span><span class="o">=</span><span class="s">&quot;cms.title.update_path&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="update_title"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.update_title">[docs]</a><span class="k">def</span> <span class="nf">update_title</span><span class="p">(</span><span class="n">title</span><span class="p">):</span>
+    <span class="n">parent_page_id</span> <span class="o">=</span> <span class="n">title</span><span class="o">.</span><span class="n">page</span><span class="o">.</span><span class="n">parent_id</span>
+    <span class="n">slug</span> <span class="o">=</span> <span class="s">u&#39;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">title</span><span class="o">.</span><span class="n">slug</span>
+    
+    <span class="k">if</span> <span class="n">title</span><span class="o">.</span><span class="n">page</span><span class="o">.</span><span class="n">is_home</span><span class="p">():</span>
+        <span class="n">title</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">title</span><span class="o">.</span><span class="n">has_url_overwrite</span><span class="p">:</span>
+        <span class="n">title</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s">u&#39;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">slug</span>
+
+        <span class="k">if</span> <span class="n">parent_page_id</span><span class="p">:</span>
+            <span class="n">parent_title</span> <span class="o">=</span> <span class="n">Title</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_title</span><span class="p">(</span><span class="n">parent_page_id</span><span class="p">,</span>
+                <span class="n">language</span><span class="o">=</span><span class="n">title</span><span class="o">.</span><span class="n">language</span><span class="p">,</span> <span class="n">language_fallback</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">parent_title</span><span class="p">:</span>
+                <span class="n">title</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="p">(</span><span class="s">u&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parent_title</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">slug</span><span class="p">))</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="pre_save_title"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.pre_save_title">[docs]</a><span class="k">def</span> <span class="nf">pre_save_title</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Save old state to instance and setup path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">menu_pool</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">page</span><span class="o">.</span><span class="n">site_id</span><span class="p">)</span>
+    
+    <span class="n">instance</span><span class="o">.</span><span class="n">tmp_path</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">tmp_application_urls</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">if</span> <span class="n">instance</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tmp_title</span> <span class="o">=</span> <span class="n">Title</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+            <span class="n">instance</span><span class="o">.</span><span class="n">tmp_path</span> <span class="o">=</span> <span class="n">tmp_title</span><span class="o">.</span><span class="n">path</span>
+            <span class="n">instance</span><span class="o">.</span><span class="n">tmp_application_urls</span> <span class="o">=</span> <span class="n">tmp_title</span><span class="o">.</span><span class="n">application_urls</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span> <span class="c"># no Titles exist for this page yet</span>
+    
+    <span class="c"># Build path from parent page&#39;s path and slug</span>
+    <span class="k">if</span> <span class="n">instance</span><span class="o">.</span><span class="n">has_url_overwrite</span> <span class="ow">and</span> <span class="n">instance</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&quot; /&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">update_title</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+        </div>
+<span class="n">signals</span><span class="o">.</span><span class="n">pre_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_save_title</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Title</span><span class="p">,</span> <span class="n">dispatch_uid</span><span class="o">=</span><span class="s">&quot;cms.title.presave&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="post_save_title"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.post_save_title">[docs]</a><span class="k">def</span> <span class="nf">post_save_title</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">created</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="c"># Update descendants only if path changed</span>
+    <span class="n">application_changed</span> <span class="o">=</span> <span class="bp">False</span>
+    
+    <span class="k">if</span> <span class="n">instance</span><span class="o">.</span><span class="n">path</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span><span class="s">&#39;tmp_path&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="s">&#39;tmp_prevent_descendant_update&#39;</span><span class="p">):</span>
+        <span class="n">descendant_titles</span> <span class="o">=</span> <span class="n">Title</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">page__lft__gt</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">page</span><span class="o">.</span><span class="n">lft</span><span class="p">,</span> 
+            <span class="n">page__rght__lt</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">page</span><span class="o">.</span><span class="n">rght</span><span class="p">,</span> 
+            <span class="n">page__tree_id__exact</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">page</span><span class="o">.</span><span class="n">tree_id</span><span class="p">,</span>
+            <span class="n">language</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">language</span><span class="p">,</span>
+            <span class="n">has_url_overwrite</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s">&#39;page__tree_id&#39;</span><span class="p">,</span> <span class="s">&#39;page__parent&#39;</span><span class="p">,</span> <span class="s">&#39;page__lft&#39;</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">descendant_title</span> <span class="ow">in</span> <span class="n">descendant_titles</span><span class="p">:</span>
+            <span class="n">descendant_title</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s">&#39;&#39;</span> <span class="c"># just reset path</span>
+            <span class="n">descendant_title</span><span class="o">.</span><span class="n">tmp_prevent_descendant_update</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">if</span> <span class="n">descendant_title</span><span class="o">.</span><span class="n">application_urls</span><span class="p">:</span>
+                <span class="n">application_changed</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">descendant_title</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="s">&#39;tmp_prevent_descendant_update&#39;</span><span class="p">)</span> <span class="ow">and</span> \
+        <span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">application_urls</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="s">&#39;tmp_application_urls&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">application_changed</span><span class="p">):</span>
+        <span class="c"># fire it if we have some application linked to this page or some descendant</span>
+        <span class="n">application_post_changed</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">sender</span><span class="o">=</span><span class="n">Title</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">)</span>
+    
+    <span class="c"># remove temporary attributes</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span> <span class="n">instance</span><span class="p">,</span> <span class="s">&#39;tmp_path&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="k">del</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">tmp_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span> <span class="n">instance</span><span class="p">,</span> <span class="s">&#39;tmp_application_urls&#39;</span> <span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="k">del</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">tmp_application_urls</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">del</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">tmp_prevent_descendant_update</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+</div>
+<span class="n">signals</span><span class="o">.</span><span class="n">post_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">post_save_title</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Title</span><span class="p">,</span> <span class="n">dispatch_uid</span><span class="o">=</span><span class="s">&quot;cms.title.postsave&quot;</span><span class="p">)</span>        
+
+
+<div class="viewcode-block" id="post_save_user"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.post_save_user">[docs]</a><span class="k">def</span> <span class="nf">post_save_user</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">created</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Signal called when new user is created, required only when CMS_PERMISSION.</span>
+<span class="sd">    Asignes creator of the user to PageUserInfo model, so we now who had created </span>
+<span class="sd">    this user account.</span>
+<span class="sd">    </span>
+<span class="sd">    requires: CurrentUserMiddleware</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">cms.utils.permissions</span> <span class="kn">import</span> <span class="n">get_current_user</span>
+    <span class="c"># read current user from thread locals</span>
+    <span class="n">creator</span> <span class="o">=</span> <span class="n">get_current_user</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">creator</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">created</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">creator</span><span class="p">,</span> <span class="s">&#39;pk&#39;</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">connection</span>
+    
+    <span class="c"># i&#39;m not sure if there is a workaround for this, somebody any ideas? What</span>
+    <span class="c"># we are doing here is creating PageUser on Top of existing user, i&#39;ll do it </span>
+    <span class="c"># through plain SQL, its not nice, but...</span>
+    
+    <span class="c"># TODO: find a better way than an raw sql !!</span>
+    
+    <span class="n">cursor</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="s">&quot;INSERT INTO </span><span class="si">%s</span><span class="s"> (user_ptr_id, created_by_id) VALUES (</span><span class="si">%d</span><span class="s">, </span><span class="si">%d</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">PageUser</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">db_table</span><span class="p">,</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> 
+        <span class="n">creator</span><span class="o">.</span><span class="n">pk</span>
+    <span class="p">)</span>
+    <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span> 
+    <span class="n">cursor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    </div>
+<div class="viewcode-block" id="post_save_user_group"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.post_save_user_group">[docs]</a><span class="k">def</span> <span class="nf">post_save_user_group</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">created</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The same like post_save_user, but for Group, required only when </span>
+<span class="sd">    CMS_PERMISSION.</span>
+<span class="sd">    Asignes creator of the group to PageUserGroupInfo model, so we now who had</span>
+<span class="sd">    created this user account.</span>
+<span class="sd">    </span>
+<span class="sd">    requires: CurrentUserMiddleware</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">cms.utils.permissions</span> <span class="kn">import</span> <span class="n">get_current_user</span>
+    <span class="c"># read current user from thread locals</span>
+    <span class="n">creator</span> <span class="o">=</span> <span class="n">get_current_user</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">creator</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">created</span> <span class="ow">or</span> <span class="n">creator</span><span class="o">.</span><span class="n">is_anonymous</span><span class="p">():</span>
+        <span class="k">return</span>
+    <span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">connection</span>
+    
+    <span class="c"># TODO: same as in post_save_user - raw sql is just not nice - workaround...?</span>
+    
+    <span class="n">cursor</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="s">&quot;INSERT INTO </span><span class="si">%s</span><span class="s"> (group_ptr_id, created_by_id) VALUES (</span><span class="si">%d</span><span class="s">, </span><span class="si">%d</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">PageUserGroup</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">db_table</span><span class="p">,</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> 
+        <span class="n">creator</span><span class="o">.</span><span class="n">pk</span>
+    <span class="p">)</span>
+    <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span> 
+    <span class="n">cursor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    </div>
+<span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMS_PERMISSION</span><span class="p">:</span>
+    <span class="c"># only if permissions are in use</span>
+    <span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span><span class="p">,</span> <span class="n">Group</span>
+    <span class="c"># regster signals to user related models</span>
+    <span class="n">signals</span><span class="o">.</span><span class="n">post_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">post_save_user</span><span class="p">,</span> <span class="n">User</span><span class="p">)</span>
+    <span class="n">signals</span><span class="o">.</span><span class="n">post_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">post_save_user_group</span><span class="p">,</span> <span class="n">Group</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="pre_save_page"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.pre_save_page">[docs]</a><span class="k">def</span> <span class="nf">pre_save_page</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper pre save signal, assigns old_page attribute, so we can still</span>
+<span class="sd">    compare changes. Currently used only if CMS_PUBLISHER</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">old_page</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">old_page</span> <span class="o">=</span> <span class="n">Page</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">ObjectDoesNotExist</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="post_save_page_moderator"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.post_save_page_moderator">[docs]</a><span class="k">def</span> <span class="nf">post_save_page_moderator</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">created</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>   
+    <span class="sd">&quot;&quot;&quot;Helper post save signal, cleans old_page attribute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">old_page</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">old_page</span>
+    <span class="k">del</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">old_page</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMS_MODERATOR</span><span class="p">:</span>
+        <span class="c"># tell moderator something was happen with this page</span>
+        <span class="kn">from</span> <span class="nn">cms.utils.moderator</span> <span class="kn">import</span> <span class="n">page_changed</span>
+        <span class="n">page_changed</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">old_page</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="post_save_page"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.post_save_page">[docs]</a><span class="k">def</span> <span class="nf">post_save_page</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="n">instance</span><span class="o">.</span><span class="n">get_descendants</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">title</span> <span class="ow">in</span> <span class="n">page</span><span class="o">.</span><span class="n">title_set</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">update_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+            <span class="n">title</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="update_placeholders"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.update_placeholders">[docs]</a><span class="k">def</span> <span class="nf">update_placeholders</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">rescan_placeholders</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="invalidate_menu_cache"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.invalidate_menu_cache">[docs]</a><span class="k">def</span> <span class="nf">invalidate_menu_cache</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">menu_pool</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">site_id</span><span class="p">)</span>
+</div>
+<span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMS_MODERATOR</span><span class="p">:</span>
+    <span class="c"># tell moderator, there is something happening with this page</span>
+    <span class="n">signals</span><span class="o">.</span><span class="n">pre_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_save_page</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Page</span><span class="p">,</span> <span class="n">dispatch_uid</span><span class="o">=</span><span class="s">&quot;cms.page.presave&quot;</span><span class="p">)</span>
+    <span class="n">signals</span><span class="o">.</span><span class="n">post_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">post_save_page_moderator</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Page</span><span class="p">,</span> <span class="n">dispatch_uid</span><span class="o">=</span><span class="s">&quot;cms.page.postsave&quot;</span><span class="p">)</span>
+<span class="n">signals</span><span class="o">.</span><span class="n">post_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">post_save_page</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Page</span><span class="p">)</span>
+<span class="n">signals</span><span class="o">.</span><span class="n">post_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">update_placeholders</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Page</span><span class="p">)</span>
+<span class="n">signals</span><span class="o">.</span><span class="n">pre_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">invalidate_menu_cache</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Page</span><span class="p">)</span>
+<span class="n">signals</span><span class="o">.</span><span class="n">pre_delete</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">invalidate_menu_cache</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Page</span><span class="p">)</span>
+
+<div class="viewcode-block" id="pre_save_user"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.pre_save_user">[docs]</a><span class="k">def</span> <span class="nf">pre_save_user</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">clear_user_permission_cache</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="pre_delete_user"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.pre_delete_user">[docs]</a><span class="k">def</span> <span class="nf">pre_delete_user</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">clear_user_permission_cache</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="pre_save_group"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.pre_save_group">[docs]</a><span class="k">def</span> <span class="nf">pre_save_group</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">instance</span><span class="o">.</span><span class="n">pk</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">instance</span><span class="o">.</span><span class="n">user_set</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">clear_user_permission_cache</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="pre_delete_group"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.pre_delete_group">[docs]</a><span class="k">def</span> <span class="nf">pre_delete_group</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">instance</span><span class="o">.</span><span class="n">user_set</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="n">clear_user_permission_cache</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="pre_save_pagepermission"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.pre_save_pagepermission">[docs]</a><span class="k">def</span> <span class="nf">pre_save_pagepermission</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">instance</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+        <span class="n">clear_user_permission_cache</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="pre_delete_pagepermission"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.pre_delete_pagepermission">[docs]</a><span class="k">def</span> <span class="nf">pre_delete_pagepermission</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">instance</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+        <span class="n">clear_user_permission_cache</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="pre_save_globalpagepermission"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.pre_save_globalpagepermission">[docs]</a><span class="k">def</span> <span class="nf">pre_save_globalpagepermission</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">instance</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+        <span class="n">clear_user_permission_cache</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+    <span class="n">menu_pool</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="nb">all</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="pre_delete_globalpagepermission"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.pre_delete_globalpagepermission">[docs]</a><span class="k">def</span> <span class="nf">pre_delete_globalpagepermission</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">instance</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+        <span class="n">clear_user_permission_cache</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="pre_save_delete_page"><a class="viewcode-back" href="../../auto_modules.html#cms.signals.pre_save_delete_page">[docs]</a><span class="k">def</span> <span class="nf">pre_save_delete_page</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">clear_permission_cache</span><span class="p">()</span>
+</div>
+<span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMS_PERMISSION</span><span class="p">:</span>
+    <span class="n">signals</span><span class="o">.</span><span class="n">pre_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_save_user</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">User</span><span class="p">)</span>
+    <span class="n">signals</span><span class="o">.</span><span class="n">pre_delete</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_delete_user</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">User</span><span class="p">)</span>
+
+    <span class="n">signals</span><span class="o">.</span><span class="n">pre_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_save_user</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">PageUser</span><span class="p">)</span>
+    <span class="n">signals</span><span class="o">.</span><span class="n">pre_delete</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_delete_user</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">PageUser</span><span class="p">)</span>
+    
+    <span class="n">signals</span><span class="o">.</span><span class="n">pre_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_save_group</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Group</span><span class="p">)</span>
+    <span class="n">signals</span><span class="o">.</span><span class="n">pre_delete</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_delete_group</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Group</span><span class="p">)</span>
+
+    <span class="n">signals</span><span class="o">.</span><span class="n">pre_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_save_group</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">PageUserGroup</span><span class="p">)</span>
+    <span class="n">signals</span><span class="o">.</span><span class="n">pre_delete</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_delete_group</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">PageUserGroup</span><span class="p">)</span>
+    
+    <span class="n">signals</span><span class="o">.</span><span class="n">pre_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_save_pagepermission</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">PagePermission</span><span class="p">)</span>
+    <span class="n">signals</span><span class="o">.</span><span class="n">pre_delete</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_delete_pagepermission</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">PagePermission</span><span class="p">)</span>
+    
+    <span class="n">signals</span><span class="o">.</span><span class="n">pre_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_save_globalpagepermission</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">GlobalPagePermission</span><span class="p">)</span>
+    <span class="n">signals</span><span class="o">.</span><span class="n">pre_delete</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_delete_globalpagepermission</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">GlobalPagePermission</span><span class="p">)</span>
+    
+    <span class="n">signals</span><span class="o">.</span><span class="n">pre_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_save_delete_page</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Page</span><span class="p">)</span>
+    <span class="n">signals</span><span class="o">.</span><span class="n">pre_delete</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pre_save_delete_page</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Page</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

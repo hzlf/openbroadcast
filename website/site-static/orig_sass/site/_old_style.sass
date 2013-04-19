@@ -1,0 +1,279 @@
+// Core variables and mixins
+@import site/variables
+
+body
+  position: relative
+  padding-top: 90px
+  
+  background-color: $siteColor
+  
+.container
+  section, header
+    color: $white
+    h1, h2, h3
+      color: $grayLighter
+    
+  footer
+    color: $grayLighter
+  
+  
+.post_teaser
+  background: yellow
+
+#cms_toolbar .cms_toolbar
+  top: 40px !important
+
+// fonts
+  font-family:'MuseoSlabW01-100Italic';
+  font-family:'Museo Slab W01 100';
+  font-family:'MuseoSlabW01-1000Italic';
+  font-family:'Museo Slab W01 1000';
+  font-family:'MuseoSlabW01-300Italic';
+  font-family:'Museo Slab W01 300';
+  font-family:'MuseoSlabW01-500Italic';
+  font-family:'Museo Slab W01 500';
+  font-family:'MuseoSlabW01-700Italic';
+  font-family:'Museo Slab W01 700';
+  font-family:'MuseoSlabW01-900Italic';
+  font-family:'Museo Slab W01 900';
+
+
+h1
+  
+h1, h2
+  font-family: 'Museo Slab W01 100', sans-serif
+
+
+
+
+
+.footer
+  margin-top: 20px 
+  padding: 4px 2px 20px
+  border-top: 1px solid #e5e5e5
+  p
+    margin-bottom: 0
+    color: #555
+    
+.container, .span8 
+  header
+    &:first-child
+      @extend .first-header
+
+
+.textplugin_holder
+  h1
+    &:first-child
+      // font-family: 'MuseoSlabW01-700Italic', sans-serif
+ 
+ul.thumbnails
+  a
+    background-color: $grayDark
+    h4, h5, h6, p
+      text-align: right
+
+    h4, h5, h6
+      padding: 4px 10px
+      color: $grayLighter
+    p
+      padding: 0px 10px
+      color: $grayLight
+
+
+ 
+.permalink
+  display: none     
+      
+// fix
+dl
+  margin-bottom: 18px
+dt, dd
+  line-height: 18px
+dt
+  font-weight: bold
+  line-height: 17px
+dd
+  margin-left: 9px
+
+.dl-horizontal
+  dt
+    float: left
+    clear: left
+    width: 120px
+    text-align: right
+
+  dd
+    margin-left: 130px
+    
+@import "compass/utilities/general/clearfix"   
+ul, ol, dl
+  &.horizontal
+    +clearfix()
+    > *
+      float: left
+    
+  &.taggy // content should appear as tags
+    > *
+      a
+        text-transform: uppercase
+        padding: 1px 4px 1px
+        margin-right: 1px
+        color: $white
+        background-color: $linkColor
+        &:hover
+          text-decoration: none
+          background-color: $linkColorHover
+      span
+        text-transform: uppercase
+        padding: 1px 4px 1px
+        margin-right: 1px
+        color: $white
+        background-color: $grayLight
+  
+dl.dl-horizontal
+  &.a-left
+    // background: yellow
+    dt
+      width: auto
+      padding-right: 10px
+    dd
+      margin-left: 80px
+      padding-left: 4px
+      
+.article-list > li
+  margin-bottom: 30px
+  
+  
+// newsletter subscription (hack)
+.cmssubscriptionformplugin_holder
+  form div.controls
+    margin-left: 0px
+    input#id_email
+      width: 264px
+      padding-right: 0px
+    input.btn-primary
+      width: 100px
+      padding-left: 0px
+  
+// Article (Plug-In) style
+.article, .event
+  &.hover
+    background-color: $linkColor
+    color: $white
+    *
+      color: white
+    .article-header .date, .event-header .date
+      background-color: transparent
+
+  .article-header, .event-header
+    padding: 10px 0 0
+    .date
+      margin-right: 18px
+      background-color: $grayDark
+      span
+        color: $white
+      float: left
+      .day, .month
+        font-size: 130%
+        font-weight: bold
+      // height: 24px
+      min-width: 24px
+      padding: 2px 4px 0
+      .year
+        font-size: 80%
+        text-align: right
+      
+    .title
+      float: left
+      h4
+        padding-bottom: 4px
+    .clear
+      clear: both
+  
+  .dl-horizontal
+    margin-top: 0px
+    dt, dd
+
+
+.jumbotron, .xl-head
+  position: relative
+  h1
+    font-family: 'MuseoSlabW01-700Italic', sans-serif
+    margin-bottom: 9px
+    font-size: 81px
+    letter-spacing: -1px
+    line-height: 1
+  p
+    margin-bottom: 18px
+    font-weight: 300
+    
+.masthead
+  padding-top: 36px
+  margin-bottom: 72px
+  h1, p
+    text-align: center
+  h1
+    margin-bottom: 18px
+  p
+    margin-left: 5%
+    margin-right: 5%
+    font-size: 30px
+    line-height: 36px
+
+.subhead
+  padding-bottom: 0
+  margin-bottom: 9px
+  h1
+    font-size: 54px
+
+
+
+// buttons
+.btn
+  text-transform: uppercase
+
+// navbar
+.navbar
+  text-transform: uppercase
+  
+
+span.asteriskField
+  color: $red
+    
+// allauth
+div.socialaccount.providers
+  ul
+    padding: 10px 0 10px 0
+    
+    > li
+      padding: 0px
+      margin-right: 10px
+      
+      > a 
+        display: block
+        height: 24px
+        width: 120px
+        // background-color: white
+        background-repeat: no-repeat
+        background-position: 0 0
+        padding: 4px 2px 0 28px
+        
+        text-transform: uppercase
+        // font-weight: bold
+        background-position: 1px 2px
+        
+        &.facebook
+          //background-color: blue
+          background-image: url(#{$static-url}img/icons/allauth24/icon.login.facebook.png)
+        &.google
+          //background-color: green
+          background-image: url(#{$static-url}img/icons/allauth24/icon.login.google.png)
+        &.yahoo
+          //background-color: green
+          background-image: url(#{$static-url}img/icons/allauth24/icon.login.yahoo.png)
+        &.openid
+          //background-color: green
+          background-image: url(#{$static-url}img/icons/allauth24/icon.login.openid.png)
+          
+        &:hover, &:active
+          // background-color: white

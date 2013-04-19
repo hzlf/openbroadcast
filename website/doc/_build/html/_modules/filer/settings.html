@@ -1,0 +1,268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>filer.settings &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for filer.settings</h1><div class="highlight"><pre>
+<span class="c">#-*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.core.files.storage</span> <span class="kn">import</span> <span class="n">get_storage_class</span>
+<span class="kn">from</span> <span class="nn">filer.utils.loader</span> <span class="kn">import</span> <span class="n">load_object</span>
+<span class="kn">from</span> <span class="nn">filer.utils.recursive_dictionary</span> <span class="kn">import</span> <span class="n">RecursiveDictionaryWithExcludes</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">urlparse</span>
+
+<span class="n">FILER_DEBUG</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;FILER_DEBUG&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="c"># When True makes</span>
+
+<span class="n">FILER_ENABLE_LOGGING</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;FILER_ENABLE_LOGGING&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">FILER_ENABLE_LOGGING</span><span class="p">:</span>
+    <span class="n">FILER_ENABLE_LOGGING</span> <span class="o">=</span> <span class="p">(</span><span class="n">FILER_ENABLE_LOGGING</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span><span class="s">&#39;LOGGING&#39;</span><span class="p">)</span> <span class="ow">and</span>
+                                                  <span class="p">(</span><span class="s">&#39;&#39;</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">LOGGING</span><span class="p">[</span><span class="s">&#39;loggers&#39;</span><span class="p">]</span> <span class="ow">or</span>
+                                                   <span class="s">&#39;filer&#39;</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">LOGGING</span><span class="p">[</span><span class="s">&#39;loggers&#39;</span><span class="p">])))</span>
+
+<span class="n">FILER_ENABLE_PERMISSIONS</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;FILER_ENABLE_PERMISSIONS&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+<span class="n">FILER_ALLOW_REGULAR_USERS_TO_ADD_ROOT_FOLDERS</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;FILER_ALLOW_REGULAR_USERS_TO_ADD_ROOT_FOLDERS&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+<span class="n">FILER_PAGINATE_BY</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;FILER_PAGINATE_BY&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+<span class="n">FILER_SUBJECT_LOCATION_IMAGE_DEBUG</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;FILER_SUBJECT_LOCATION_IMAGE_DEBUG&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+<span class="n">FILER_IS_PUBLIC_DEFAULT</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;FILER_IS_PUBLIC_DEFAULT&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+
+<span class="n">FILER_STATICMEDIA_PREFIX</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;FILER_STATICMEDIA_PREFIX&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">FILER_STATICMEDIA_PREFIX</span><span class="p">:</span>
+    <span class="n">FILER_STATICMEDIA_PREFIX</span> <span class="o">=</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;STATIC_URL&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEDIA_URL</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;filer/&#39;</span>
+
+<span class="n">FILER_ADMIN_ICON_SIZES</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span><span class="s">&quot;FILER_ADMIN_ICON_SIZES&quot;</span><span class="p">,(</span>
+        <span class="s">&#39;16&#39;</span><span class="p">,</span> <span class="s">&#39;32&#39;</span><span class="p">,</span> <span class="s">&#39;48&#39;</span><span class="p">,</span> <span class="s">&#39;64&#39;</span><span class="p">,</span>
+<span class="p">))</span>
+
+<span class="c"># This is an ordered iterable that describes a list of </span>
+<span class="c"># classes that I should check for when adding files</span>
+<span class="n">FILER_FILE_MODELS</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;FILER_FILE_MODELS&#39;</span><span class="p">,</span>
+    <span class="p">(</span>
+        <span class="s">&#39;filer.models.imagemodels.Image&#39;</span><span class="p">,</span>
+        <span class="s">&#39;filer.models.audiomodels.Audio&#39;</span><span class="p">,</span>
+        <span class="s">&#39;filer.models.filemodels.File&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">MINIMAL_FILER_STORAGES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;public&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;main&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="s">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s">&#39;UPLOAD_TO&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="s">&#39;thumbnails&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="s">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="s">&#39;private&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;main&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="s">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s">&#39;UPLOAD_TO&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="s">&#39;thumbnails&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="s">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+
+<span class="n">DEFAULT_FILER_STORAGES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;public&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;main&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s">&#39;filer.storage.PublicFileSystemStorage&#39;</span><span class="p">,</span>
+            <span class="s">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;location&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MEDIA_ROOT</span><span class="p">,</span> <span class="s">&#39;filer/&#39;</span><span class="p">)),</span>
+                <span class="s">&#39;base_url&#39;</span><span class="p">:</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urljoin</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MEDIA_URL</span><span class="p">,</span> <span class="s">&#39;filer/&#39;</span><span class="p">),</span>
+            <span class="p">},</span>
+            <span class="s">&#39;UPLOAD_TO&#39;</span><span class="p">:</span> <span class="s">&#39;filer.utils.generate_filename.by_date&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s">&#39;thumbnails&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s">&#39;filer.storage.PublicFileSystemStorage&#39;</span><span class="p">,</span>
+            <span class="s">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;location&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MEDIA_ROOT</span><span class="p">,</span> <span class="s">&#39;filer_thumbnails/&#39;</span><span class="p">)),</span>
+                <span class="s">&#39;base_url&#39;</span><span class="p">:</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urljoin</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MEDIA_URL</span><span class="p">,</span> <span class="s">&#39;filer_thumbnails/&#39;</span><span class="p">),</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="s">&#39;private&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;main&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s">&#39;filer.storage.PublicFileSystemStorage&#39;</span><span class="p">,</span>
+            <span class="s">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;location&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MEDIA_ROOT</span><span class="p">,</span> <span class="s">&#39;../smedia/filer&#39;</span><span class="p">)),</span>
+                <span class="s">&#39;base_url&#39;</span><span class="p">:</span> <span class="s">&#39;/smedia/filer/&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s">&#39;UPLOAD_TO&#39;</span><span class="p">:</span> <span class="s">&#39;filer.utils.generate_filename.by_date&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s">&#39;thumbnails&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s">&#39;filer.storage.PublicFileSystemStorage&#39;</span><span class="p">,</span>
+            <span class="s">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;location&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MEDIA_ROOT</span><span class="p">,</span> <span class="s">&#39;../smedia/filer_thumbnails&#39;</span><span class="p">)),</span>
+                <span class="s">&#39;base_url&#39;</span><span class="p">:</span> <span class="s">&#39;/smedia/filer_thumbnails/&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+
+<span class="n">MINIMAL_FILER_SERVERS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;private&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;main&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="s">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="p">},</span>
+        <span class="s">&#39;thumbnails&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="s">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="n">DEFAULT_FILER_SERVERS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;private&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;main&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s">&#39;filer.server.backends.default.DefaultServer&#39;</span><span class="p">,</span>
+            <span class="s">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="p">},</span>
+        <span class="s">&#39;thumbnails&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s">&#39;filer.server.backends.default.DefaultServer&#39;</span><span class="p">,</span>
+            <span class="s">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="n">FILER_STORAGES</span> <span class="o">=</span> <span class="n">RecursiveDictionaryWithExcludes</span><span class="p">(</span><span class="n">MINIMAL_FILER_STORAGES</span><span class="p">,</span> <span class="n">rec_excluded_keys</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;OPTIONS&#39;</span><span class="p">,))</span>
+<span class="n">FILER_STORAGES</span><span class="o">.</span><span class="n">rec_update</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;FILER_STORAGES&#39;</span><span class="p">,</span> <span class="p">{}))</span>
+
+<div class="viewcode-block" id="update_storage_settings"><a class="viewcode-back" href="../../auto_modules.html#filer.settings.update_storage_settings">[docs]</a><span class="k">def</span> <span class="nf">update_storage_settings</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">defaults</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s">&#39;ENGINE&#39;</span><span class="p">]:</span>
+        <span class="n">settings</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s">&#39;ENGINE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaults</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s">&#39;ENGINE&#39;</span><span class="p">]</span>
+        <span class="n">settings</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s">&#39;OPTIONS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaults</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s">&#39;OPTIONS&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="s">&#39;main&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">settings</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s">&#39;UPLOAD_TO&#39;</span><span class="p">]:</span>
+        <span class="n">settings</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s">&#39;UPLOAD_TO&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaults</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s">&#39;UPLOAD_TO&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">settings</span>
+</div>
+<span class="n">update_storage_settings</span><span class="p">(</span><span class="n">FILER_STORAGES</span><span class="p">,</span> <span class="n">DEFAULT_FILER_STORAGES</span><span class="p">,</span> <span class="s">&#39;public&#39;</span><span class="p">,</span> <span class="s">&#39;main&#39;</span><span class="p">)</span>
+<span class="n">update_storage_settings</span><span class="p">(</span><span class="n">FILER_STORAGES</span><span class="p">,</span> <span class="n">DEFAULT_FILER_STORAGES</span><span class="p">,</span> <span class="s">&#39;public&#39;</span><span class="p">,</span> <span class="s">&#39;thumbnails&#39;</span><span class="p">)</span>
+<span class="n">update_storage_settings</span><span class="p">(</span><span class="n">FILER_STORAGES</span><span class="p">,</span> <span class="n">DEFAULT_FILER_STORAGES</span><span class="p">,</span> <span class="s">&#39;private&#39;</span><span class="p">,</span> <span class="s">&#39;main&#39;</span><span class="p">)</span>
+<span class="n">update_storage_settings</span><span class="p">(</span><span class="n">FILER_STORAGES</span><span class="p">,</span> <span class="n">DEFAULT_FILER_STORAGES</span><span class="p">,</span> <span class="s">&#39;private&#39;</span><span class="p">,</span> <span class="s">&#39;thumbnails&#39;</span><span class="p">)</span>
+
+<span class="n">FILER_SERVERS</span> <span class="o">=</span> <span class="n">RecursiveDictionaryWithExcludes</span><span class="p">(</span><span class="n">MINIMAL_FILER_SERVERS</span><span class="p">,</span> <span class="n">rec_excluded_keys</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;OPTIONS&#39;</span><span class="p">,))</span>
+<span class="n">FILER_SERVERS</span><span class="o">.</span><span class="n">rec_update</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;FILER_SERVERS&#39;</span><span class="p">,</span> <span class="p">{}))</span>
+
+<div class="viewcode-block" id="update_server_settings"><a class="viewcode-back" href="../../auto_modules.html#filer.settings.update_server_settings">[docs]</a><span class="k">def</span> <span class="nf">update_server_settings</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">defaults</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s">&#39;ENGINE&#39;</span><span class="p">]:</span>
+        <span class="n">settings</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s">&#39;ENGINE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaults</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s">&#39;ENGINE&#39;</span><span class="p">]</span>
+        <span class="n">settings</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s">&#39;OPTIONS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaults</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s">&#39;OPTIONS&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">settings</span>
+</div>
+<span class="n">update_server_settings</span><span class="p">(</span><span class="n">FILER_SERVERS</span><span class="p">,</span> <span class="n">DEFAULT_FILER_SERVERS</span><span class="p">,</span> <span class="s">&#39;private&#39;</span><span class="p">,</span> <span class="s">&#39;main&#39;</span><span class="p">)</span>
+<span class="n">update_server_settings</span><span class="p">(</span><span class="n">FILER_SERVERS</span><span class="p">,</span> <span class="n">DEFAULT_FILER_SERVERS</span><span class="p">,</span> <span class="s">&#39;private&#39;</span><span class="p">,</span> <span class="s">&#39;thumbnails&#39;</span><span class="p">)</span>
+
+
+
+<span class="c"># Public media (media accessible without any permission checks)</span>
+<span class="n">FILER_PUBLICMEDIA_STORAGE</span> <span class="o">=</span> <span class="n">get_storage_class</span><span class="p">(</span><span class="n">FILER_STORAGES</span><span class="p">[</span><span class="s">&#39;public&#39;</span><span class="p">][</span><span class="s">&#39;main&#39;</span><span class="p">][</span><span class="s">&#39;ENGINE&#39;</span><span class="p">])(</span><span class="o">**</span><span class="n">FILER_STORAGES</span><span class="p">[</span><span class="s">&#39;public&#39;</span><span class="p">][</span><span class="s">&#39;main&#39;</span><span class="p">][</span><span class="s">&#39;OPTIONS&#39;</span><span class="p">])</span>
+<span class="n">FILER_PUBLICMEDIA_UPLOAD_TO</span> <span class="o">=</span> <span class="n">load_object</span><span class="p">(</span><span class="n">FILER_STORAGES</span><span class="p">[</span><span class="s">&#39;public&#39;</span><span class="p">][</span><span class="s">&#39;main&#39;</span><span class="p">][</span><span class="s">&#39;UPLOAD_TO&#39;</span><span class="p">])</span>
+<span class="n">FILER_PUBLICMEDIA_THUMBNAIL_STORAGE</span> <span class="o">=</span> <span class="n">get_storage_class</span><span class="p">(</span><span class="n">FILER_STORAGES</span><span class="p">[</span><span class="s">&#39;public&#39;</span><span class="p">][</span><span class="s">&#39;thumbnails&#39;</span><span class="p">][</span><span class="s">&#39;ENGINE&#39;</span><span class="p">])(</span><span class="o">**</span><span class="n">FILER_STORAGES</span><span class="p">[</span><span class="s">&#39;public&#39;</span><span class="p">][</span><span class="s">&#39;thumbnails&#39;</span><span class="p">][</span><span class="s">&#39;OPTIONS&#39;</span><span class="p">])</span>
+
+
+<span class="c"># Private media (media accessible through permissions checks)</span>
+<span class="n">FILER_PRIVATEMEDIA_STORAGE</span> <span class="o">=</span> <span class="n">get_storage_class</span><span class="p">(</span><span class="n">FILER_STORAGES</span><span class="p">[</span><span class="s">&#39;private&#39;</span><span class="p">][</span><span class="s">&#39;main&#39;</span><span class="p">][</span><span class="s">&#39;ENGINE&#39;</span><span class="p">])(</span><span class="o">**</span><span class="n">FILER_STORAGES</span><span class="p">[</span><span class="s">&#39;private&#39;</span><span class="p">][</span><span class="s">&#39;main&#39;</span><span class="p">][</span><span class="s">&#39;OPTIONS&#39;</span><span class="p">])</span>
+<span class="n">FILER_PRIVATEMEDIA_UPLOAD_TO</span> <span class="o">=</span> <span class="n">load_object</span><span class="p">(</span><span class="n">FILER_STORAGES</span><span class="p">[</span><span class="s">&#39;private&#39;</span><span class="p">][</span><span class="s">&#39;main&#39;</span><span class="p">][</span><span class="s">&#39;UPLOAD_TO&#39;</span><span class="p">])</span>
+<span class="n">FILER_PRIVATEMEDIA_THUMBNAIL_STORAGE</span> <span class="o">=</span> <span class="n">get_storage_class</span><span class="p">(</span><span class="n">FILER_STORAGES</span><span class="p">[</span><span class="s">&#39;private&#39;</span><span class="p">][</span><span class="s">&#39;thumbnails&#39;</span><span class="p">][</span><span class="s">&#39;ENGINE&#39;</span><span class="p">])(</span><span class="o">**</span><span class="n">FILER_STORAGES</span><span class="p">[</span><span class="s">&#39;private&#39;</span><span class="p">][</span><span class="s">&#39;thumbnails&#39;</span><span class="p">][</span><span class="s">&#39;OPTIONS&#39;</span><span class="p">])</span>
+<span class="n">FILER_PRIVATEMEDIA_SERVER</span> <span class="o">=</span> <span class="n">load_object</span><span class="p">(</span><span class="n">FILER_SERVERS</span><span class="p">[</span><span class="s">&#39;private&#39;</span><span class="p">][</span><span class="s">&#39;main&#39;</span><span class="p">][</span><span class="s">&#39;ENGINE&#39;</span><span class="p">])(</span><span class="o">**</span><span class="n">FILER_SERVERS</span><span class="p">[</span><span class="s">&#39;private&#39;</span><span class="p">][</span><span class="s">&#39;main&#39;</span><span class="p">][</span><span class="s">&#39;OPTIONS&#39;</span><span class="p">])</span>
+<span class="n">FILER_PRIVATEMEDIA_THUMBNAIL_SERVER</span> <span class="o">=</span> <span class="n">load_object</span><span class="p">(</span><span class="n">FILER_SERVERS</span><span class="p">[</span><span class="s">&#39;private&#39;</span><span class="p">][</span><span class="s">&#39;thumbnails&#39;</span><span class="p">][</span><span class="s">&#39;ENGINE&#39;</span><span class="p">])(</span><span class="o">**</span><span class="n">FILER_SERVERS</span><span class="p">[</span><span class="s">&#39;private&#39;</span><span class="p">][</span><span class="s">&#39;thumbnails&#39;</span><span class="p">][</span><span class="s">&#39;OPTIONS&#39;</span><span class="p">])</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

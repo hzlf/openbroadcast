@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fluent_comments.api &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for fluent_comments.api</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">Count</span>
+
+<span class="kn">from</span> <span class="nn">tastypie</span> <span class="kn">import</span> <span class="n">fields</span>
+<span class="kn">from</span> <span class="nn">tastypie.authentication</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">tastypie.authorization</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">tastypie.resources</span> <span class="kn">import</span> <span class="n">ModelResource</span><span class="p">,</span> <span class="n">Resource</span><span class="p">,</span> <span class="n">ALL</span><span class="p">,</span> <span class="n">ALL_WITH_RELATIONS</span>
+
+
+
+<span class="kn">from</span> <span class="nn">tastypie.cache</span> <span class="kn">import</span> <span class="n">SimpleCache</span>
+
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">comments</span>
+
+<span class="kn">from</span> <span class="nn">django.contrib.comments.models</span> <span class="kn">import</span> <span class="n">Comment</span>
+
+<span class="kn">from</span> <span class="nn">tastypie.contrib.contenttypes.fields</span> <span class="kn">import</span> <span class="n">GenericForeignKeyField</span>
+
+<span class="kn">from</span> <span class="nn">alibrary.models</span> <span class="kn">import</span> <span class="n">Release</span>
+<span class="kn">from</span> <span class="nn">alibrary.api</span> <span class="kn">import</span> <span class="n">ReleaseResource</span>
+
+<span class="kn">from</span> <span class="nn">abcast.models</span> <span class="kn">import</span> <span class="n">Channel</span>
+<span class="kn">from</span> <span class="nn">abcast.api</span> <span class="kn">import</span> <span class="n">ChannelResource</span>
+
+<span class="kn">from</span> <span class="nn">django.contrib.sites.models</span> <span class="kn">import</span> <span class="n">Site</span> 
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">class ReleaseResource(ModelResource):</span>
+<span class="sd">    class Meta:</span>
+<span class="sd">        queryset = Release.objects.all()</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SiteResource"><a class="viewcode-back" href="../../auto_modules.html#fluent_comments.api.SiteResource">[docs]</a><span class="k">class</span> <span class="nc">SiteResource</span><span class="p">(</span><span class="n">ModelResource</span><span class="p">):</span>
+<div class="viewcode-block" id="SiteResource.Meta"><a class="viewcode-back" href="../../auto_modules.html#fluent_comments.api.SiteResource.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">Site</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+     </div></div>
+<div class="viewcode-block" id="CommentResource"><a class="viewcode-back" href="../../auto_modules.html#fluent_comments.api.CommentResource">[docs]</a><span class="k">class</span> <span class="nc">CommentResource</span><span class="p">(</span><span class="n">ModelResource</span><span class="p">):</span>
+    
+    <span class="n">site</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s">&#39;fluent_comments.api.SiteResource&#39;</span><span class="p">,</span> <span class="s">&#39;site&#39;</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    
+    
+    <span class="n">co_to</span> <span class="o">=</span> <span class="p">{</span>
+             <span class="n">Release</span><span class="p">:</span> <span class="n">ReleaseResource</span><span class="p">,</span>
+             <span class="n">Channel</span><span class="p">:</span> <span class="n">ChannelResource</span><span class="p">,</span>
+             <span class="p">}</span>
+    
+    <span class="n">content_object</span> <span class="o">=</span> <span class="n">GenericForeignKeyField</span><span class="p">(</span><span class="n">to</span><span class="o">=</span><span class="n">co_to</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s">&#39;content_object&#39;</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    curl --dump-header - -H &quot;Content-Type: application/json&quot; -X POST --data &#39;{&quot;comment&quot;:&quot;sdfsdfsdf&quot;, &quot;content_object&quot;: &quot;/de/api/v1/release/1963/&quot;}&#39; http://localhost:8080/api/v1/comment/</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="CommentResource.Meta"><a class="viewcode-back" href="../../auto_modules.html#fluent_comments.api.CommentResource.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">Comment</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">list_allowed_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;get&#39;</span><span class="p">,</span><span class="s">&#39;put&#39;</span><span class="p">,</span><span class="s">&#39;post&#39;</span><span class="p">]</span>
+        <span class="n">detail_allowed_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;get&#39;</span><span class="p">,]</span>
+        <span class="n">resource_name</span> <span class="o">=</span> <span class="s">&#39;comment&#39;</span>
+        <span class="n">excludes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ip_address&#39;</span><span class="p">,</span> <span class="s">&#39;user_email&#39;</span><span class="p">,</span> <span class="s">&#39;user_url&#39;</span><span class="p">,</span> <span class="s">&#39;object_pk&#39;</span><span class="p">]</span>
+        <span class="c">#include_absolute_url = True</span>
+        <span class="n">authentication</span> <span class="o">=</span>  <span class="n">MultiAuthentication</span><span class="p">(</span><span class="n">ApiKeyAuthentication</span><span class="p">(),</span> <span class="n">Authentication</span><span class="p">())</span>
+        <span class="n">authorization</span> <span class="o">=</span> <span class="n">Authorization</span><span class="p">()</span>
+        <span class="n">filtering</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="c">#&#39;channel&#39;: ALL_WITH_RELATIONS,</span>
+            <span class="s">&#39;created&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;exact&#39;</span><span class="p">,</span> <span class="s">&#39;range&#39;</span><span class="p">,</span> <span class="s">&#39;gt&#39;</span><span class="p">,</span> <span class="s">&#39;gte&#39;</span><span class="p">,</span> <span class="s">&#39;lt&#39;</span><span class="p">,</span> <span class="s">&#39;lte&#39;</span><span class="p">],</span>
+        <span class="p">}</span>
+        <span class="c">#cache = SimpleCache(timeout=120)</span>
+        </div>
+<div class="viewcode-block" id="CommentResource.obj_create"><a class="viewcode-back" href="../../auto_modules.html#fluent_comments.api.CommentResource.obj_create">[docs]</a>    <span class="k">def</span> <span class="nf">obj_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundle</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        
+                 
+        <span class="n">bundle</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;site&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Site</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        
+        
+        <span class="k">print</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+        
+        <span class="n">bundle</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;user&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+        
+        <span class="k">print</span> <span class="n">Site</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_related</span><span class="p">(</span><span class="n">bundle</span><span class="p">)</span>
+        
+        <span class="k">print</span> <span class="n">bundle</span><span class="o">.</span><span class="n">data</span>
+        
+        <span class="c">#print request</span>
+        
+
+        
+        
+        
+        <span class="n">bundle</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">CommentResource</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">obj_create</span><span class="p">(</span><span class="n">bundle</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+  
+        <span class="k">print</span> <span class="s">&quot;OBJ&quot;</span>
+        <span class="k">print</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+        <span class="k">print</span> <span class="s">&#39;E OBJ&#39;</span>      
+        
+        
+        <span class="kn">from</span> <span class="nn">django.contrib.comments</span> <span class="kn">import</span> <span class="n">signals</span>
+        
+        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="n">signals</span><span class="o">.</span><span class="n">comment_was_posted</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
+            <span class="n">sender</span>  <span class="o">=</span> <span class="n">bundle</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span>
+            <span class="n">comment</span> <span class="o">=</span> <span class="n">bundle</span><span class="o">.</span><span class="n">obj</span><span class="p">,</span>
+            <span class="n">request</span> <span class="o">=</span> <span class="n">request</span><span class="p">,</span>
+        <span class="p">)</span>
+        
+        
+        
+        <span class="k">return</span> <span class="n">bundle</span>
+        
+        <span class="c"># return super(CommentResource, self).obj_create(bundle, request, **kwargs)</span>
+
+</div>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    def dehydrate(self, bundle):</span>
+<span class="sd">        </span>
+<span class="sd">        bundle.data[&#39;comment&#39;] = &#39;session&#39;</span>
+<span class="sd">        return bundle</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    </div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

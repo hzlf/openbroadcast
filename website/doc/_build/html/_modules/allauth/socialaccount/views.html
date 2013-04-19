@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>allauth.socialaccount.views &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for allauth.socialaccount.views</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext</span><span class="p">,</span> <span class="n">ugettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">messages</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponseRedirect</span>
+<span class="kn">from</span> <span class="nn">django.core.urlresolvers</span> <span class="kn">import</span> <span class="n">reverse</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sites.models</span> <span class="kn">import</span> <span class="n">Site</span>
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">RequestContext</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.decorators</span> <span class="kn">import</span> <span class="n">login_required</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext</span><span class="p">,</span> <span class="n">ugettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sites.models</span> <span class="kn">import</span> <span class="n">Site</span>
+
+<span class="kn">from</span> <span class="nn">allauth.utils</span> <span class="kn">import</span> <span class="n">get_login_redirect_url</span>
+<span class="kn">from</span> <span class="nn">allauth.account.views</span> <span class="kn">import</span> <span class="n">signup</span> <span class="k">as</span> <span class="n">account_signup</span>
+
+<span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">SocialAccount</span>
+<span class="kn">from</span> <span class="nn">forms</span> <span class="kn">import</span> <span class="n">DisconnectForm</span><span class="p">,</span> <span class="n">SignupForm</span>
+
+<span class="kn">import</span> <span class="nn">helpers</span>
+
+<div class="viewcode-block" id="signup"><a class="viewcode-back" href="../../../auto_modules.html#allauth.socialaccount.views.signup">[docs]</a><span class="k">def</span> <span class="nf">signup</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="n">reverse</span><span class="p">(</span><span class="n">connections</span><span class="p">))</span>
+    <span class="n">signup</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;socialaccount_signup&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">signup</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="n">reverse</span><span class="p">(</span><span class="s">&#39;account_login&#39;</span><span class="p">))</span>
+    <span class="n">form_class</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;form_class&quot;</span><span class="p">,</span> <span class="n">SignupForm</span><span class="p">)</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;template_name&quot;</span><span class="p">,</span> 
+                               <span class="s">&#39;socialaccount/signup.html&#39;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">signup</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">form_class</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+            <span class="n">user</span><span class="o">.</span><span class="n">last_name</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;last_name&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">user</span><span class="o">.</span><span class="n">first_name</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;first_name&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">account</span> <span class="o">=</span> <span class="n">signup</span><span class="p">[</span><span class="s">&#39;account&#39;</span><span class="p">]</span>
+            <span class="n">account</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">user</span>
+            <span class="n">account</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">helpers</span><span class="o">.</span><span class="n">complete_social_signup</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">account</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">form_class</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">dictionary</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">Site</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_current</span><span class="p">(),</span>
+                      <span class="n">account</span><span class="o">=</span><span class="n">signup</span><span class="p">[</span><span class="s">&#39;account&#39;</span><span class="p">],</span>
+                      <span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="n">template_name</span><span class="p">,</span> 
+                              <span class="n">dictionary</span><span class="p">,</span> 
+                              <span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="login_cancelled"><a class="viewcode-back" href="../../../auto_modules.html#allauth.socialaccount.views.login_cancelled">[docs]</a><span class="k">def</span> <span class="nf">login_cancelled</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{</span> <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&#39;socialaccount/login_cancelled.html&#39;</span><span class="p">,</span> 
+                              <span class="n">d</span><span class="p">,</span> <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="login_error"><a class="viewcode-back" href="../../../auto_modules.html#allauth.socialaccount.views.login_error">[docs]</a><span class="k">def</span> <span class="nf">login_error</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">helpers</span><span class="o">.</span><span class="n">render_authentication_error</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+</div>
+<span class="nd">@login_required</span>
+<div class="viewcode-block" id="connections"><a class="viewcode-back" href="../../../auto_modules.html#allauth.socialaccount.views.connections">[docs]</a><span class="k">def</span> <span class="nf">connections</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">DisconnectForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">add_message</span> \
+            <span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">messages</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> 
+             <span class="n">_</span><span class="p">(</span><span class="s">&#39;The social account has been disconnected&#39;</span><span class="p">))</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">form</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">DisconnectForm</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span>
+            <span class="s">&#39;socialaccount/connections.html&#39;</span><span class="p">,</span>
+            <span class="n">d</span><span class="p">,</span>
+            <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

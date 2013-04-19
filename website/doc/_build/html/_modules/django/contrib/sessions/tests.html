@@ -1,0 +1,527 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django.contrib.sessions.tests &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for django.contrib.sessions.tests</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">with_statement</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sessions.backends.db</span> <span class="kn">import</span> <span class="n">SessionStore</span> <span class="k">as</span> <span class="n">DatabaseSession</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sessions.backends.cache</span> <span class="kn">import</span> <span class="n">SessionStore</span> <span class="k">as</span> <span class="n">CacheSession</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sessions.backends.cached_db</span> <span class="kn">import</span> <span class="n">SessionStore</span> <span class="k">as</span> <span class="n">CacheDBSession</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sessions.backends.file</span> <span class="kn">import</span> <span class="n">SessionStore</span> <span class="k">as</span> <span class="n">FileSession</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sessions.backends.signed_cookies</span> <span class="kn">import</span> <span class="n">SessionStore</span> <span class="k">as</span> <span class="n">CookieSession</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sessions.models</span> <span class="kn">import</span> <span class="n">Session</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sessions.middleware</span> <span class="kn">import</span> <span class="n">SessionMiddleware</span>
+<span class="kn">from</span> <span class="nn">django.core.cache.backends.base</span> <span class="kn">import</span> <span class="n">CacheKeyWarning</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ImproperlyConfigured</span><span class="p">,</span> <span class="n">SuspiciousOperation</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponse</span>
+<span class="kn">from</span> <span class="nn">django.test</span> <span class="kn">import</span> <span class="n">TestCase</span><span class="p">,</span> <span class="n">RequestFactory</span>
+<span class="kn">from</span> <span class="nn">django.test.utils</span> <span class="kn">import</span> <span class="n">override_settings</span><span class="p">,</span> <span class="n">get_warnings_state</span><span class="p">,</span> <span class="n">restore_warnings_state</span>
+<span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">timezone</span>
+<span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">unittest</span>
+
+
+<div class="viewcode-block" id="SessionTestsMixin"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin">[docs]</a><span class="k">class</span> <span class="nc">SessionTestsMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="c"># This does not inherit from TestCase to avoid any tests being run with this</span>
+    <span class="c"># class, which wouldn&#39;t work, and to allow different TestCase subclasses to</span>
+    <span class="c"># be used.</span>
+
+    <span class="n">backend</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># subclasses must specify</span>
+
+<div class="viewcode-block" id="SessionTestsMixin.setUp"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.tearDown"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.tearDown">[docs]</a>    <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># NB: be careful to delete any sessions created; stale sessions fill up</span>
+        <span class="c"># the /tmp (with some backends) and eventually overwhelm it after lots</span>
+        <span class="c"># of runs (think buildbots)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_new_session"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_new_session">[docs]</a>    <span class="k">def</span> <span class="nf">test_new_session</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_get_empty"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_get_empty">[docs]</a>    <span class="k">def</span> <span class="nf">test_get_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;cat&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_store"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_store">[docs]</a>    <span class="k">def</span> <span class="nf">test_store</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;cat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;dog&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;cat&#39;</span><span class="p">),</span> <span class="s">&#39;dog&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_pop"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_pop">[docs]</a>    <span class="k">def</span> <span class="nf">test_pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;some key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;exists&#39;</span>
+        <span class="c"># Need to reset these to pretend we haven&#39;t accessed it:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accessed</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modified</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;some key&#39;</span><span class="p">),</span> <span class="s">&#39;exists&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;some key&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_pop_default"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_pop_default">[docs]</a>    <span class="k">def</span> <span class="nf">test_pop_default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;some key&#39;</span><span class="p">,</span> <span class="s">&#39;does not exist&#39;</span><span class="p">),</span>
+                         <span class="s">&#39;does not exist&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_setdefault"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_setdefault">[docs]</a>    <span class="k">def</span> <span class="nf">test_setdefault</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">),</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;baz&#39;</span><span class="p">),</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_update"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_update">[docs]</a>    <span class="k">def</span> <span class="nf">test_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s">&#39;update key&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;update key&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_has_key"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_has_key">[docs]</a>    <span class="k">def</span> <span class="nf">test_has_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;some key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;some key&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_values"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_values">[docs]</a>    <span class="k">def</span> <span class="nf">test_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;some key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_iterkeys"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_iterkeys">[docs]</a>    <span class="k">def</span> <span class="nf">test_iterkeys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s">&#39;__iter__&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_itervalues"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_itervalues">[docs]</a>    <span class="k">def</span> <span class="nf">test_itervalues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s">&#39;__iter__&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_iteritems"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_iteritems">[docs]</a>    <span class="k">def</span> <span class="nf">test_iteritems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s">&#39;__iter__&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="p">[(</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_clear"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_clear">[docs]</a>    <span class="k">def</span> <span class="nf">test_clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="p">[(</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_save"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_save">[docs]</a>    <span class="k">def</span> <span class="nf">test_save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">session_key</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_delete"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_delete">[docs]</a>    <span class="k">def</span> <span class="nf">test_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">session_key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">session_key</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_flush"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_flush">[docs]</a>    <span class="k">def</span> <span class="nf">test_flush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;foo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;bar&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">prev_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">session_key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">prev_key</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertNotEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">session_key</span><span class="p">,</span> <span class="n">prev_key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">accessed</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_cycle"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_cycle">[docs]</a>    <span class="k">def</span> <span class="nf">test_cycle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;b&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;c&#39;</span><span class="p">,</span> <span class="s">&#39;d&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">prev_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">session_key</span>
+        <span class="n">prev_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">cycle_key</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertNotEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">session_key</span><span class="p">,</span> <span class="n">prev_key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">prev_data</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_invalid_key"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_invalid_key">[docs]</a>    <span class="k">def</span> <span class="nf">test_invalid_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Submitting an invalid session key (either by guessing, or if the db has</span>
+        <span class="c"># removed the key) results in a new key being generated.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="p">(</span><span class="s">&#39;1&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">session</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fail</span><span class="p">(</span><span class="s">&quot;The session object did not save properly.  Middleware may be saving cache items without namespaces.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertNotEqual</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">session_key</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;cat&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c"># Some backends leave a stale cache entry for the invalid</span>
+            <span class="c"># session key; make sure that entry is manually deleted</span>
+            <span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s">&#39;1&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_session_key_is_read_only"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_session_key_is_read_only">[docs]</a>    <span class="k">def</span> <span class="nf">test_session_key_is_read_only</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">set_session_key</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+            <span class="n">session</span><span class="o">.</span><span class="n">session_key</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">_get_new_session_key</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="n">set_session_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
+
+    <span class="c"># Custom session expiry</span></div>
+<div class="viewcode-block" id="SessionTestsMixin.test_default_expiry"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_default_expiry">[docs]</a>    <span class="k">def</span> <span class="nf">test_default_expiry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># A normal session has a max age equal to settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_expiry_age</span><span class="p">(),</span> <span class="n">settings</span><span class="o">.</span><span class="n">SESSION_COOKIE_AGE</span><span class="p">)</span>
+
+        <span class="c"># So does a custom session with an idle expiration time of 0 (but it&#39;ll</span>
+        <span class="c"># expire at browser close)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">set_expiry</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_expiry_age</span><span class="p">(),</span> <span class="n">settings</span><span class="o">.</span><span class="n">SESSION_COOKIE_AGE</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_custom_expiry_seconds"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_custom_expiry_seconds">[docs]</a>    <span class="k">def</span> <span class="nf">test_custom_expiry_seconds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Using seconds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">set_expiry</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_expiry_date</span><span class="p">()</span> <span class="o">-</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">delta</span><span class="o">.</span><span class="n">seconds</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+        <span class="n">age</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_expiry_age</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">age</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_custom_expiry_timedelta"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_custom_expiry_timedelta">[docs]</a>    <span class="k">def</span> <span class="nf">test_custom_expiry_timedelta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Using timedelta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">set_expiry</span><span class="p">(</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_expiry_date</span><span class="p">()</span> <span class="o">-</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">delta</span><span class="o">.</span><span class="n">seconds</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+        <span class="n">age</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_expiry_age</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">age</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_custom_expiry_datetime"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_custom_expiry_datetime">[docs]</a>    <span class="k">def</span> <span class="nf">test_custom_expiry_datetime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Using fixed datetime</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">set_expiry</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_expiry_date</span><span class="p">()</span> <span class="o">-</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">delta</span><span class="o">.</span><span class="n">seconds</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+        <span class="n">age</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_expiry_age</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">age</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_custom_expiry_reset"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_custom_expiry_reset">[docs]</a>    <span class="k">def</span> <span class="nf">test_custom_expiry_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">set_expiry</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">set_expiry</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">set_expiry</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_expiry_age</span><span class="p">(),</span> <span class="n">settings</span><span class="o">.</span><span class="n">SESSION_COOKIE_AGE</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_get_expire_at_browser_close"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_get_expire_at_browser_close">[docs]</a>    <span class="k">def</span> <span class="nf">test_get_expire_at_browser_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Tests get_expire_at_browser_close with different settings and different</span>
+        <span class="c"># set_expiry calls</span>
+        <span class="k">with</span> <span class="n">override_settings</span><span class="p">(</span><span class="n">SESSION_EXPIRE_AT_BROWSER_CLOSE</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">set_expiry</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_expire_at_browser_close</span><span class="p">())</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">set_expiry</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_expire_at_browser_close</span><span class="p">())</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">set_expiry</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_expire_at_browser_close</span><span class="p">())</span>
+
+        <span class="k">with</span> <span class="n">override_settings</span><span class="p">(</span><span class="n">SESSION_EXPIRE_AT_BROWSER_CLOSE</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">set_expiry</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_expire_at_browser_close</span><span class="p">())</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">set_expiry</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_expire_at_browser_close</span><span class="p">())</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">set_expiry</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_expire_at_browser_close</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="SessionTestsMixin.test_decode"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionTestsMixin.test_decode">[docs]</a>    <span class="k">def</span> <span class="nf">test_decode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Ensure we can decode what we encode</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;a test key&#39;</span><span class="p">:</span> <span class="s">&#39;a test value&#39;</span><span class="p">}</span>
+        <span class="n">encoded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoded</span><span class="p">),</span> <span class="n">data</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="DatabaseSessionTests"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.DatabaseSessionTests">[docs]</a><span class="k">class</span> <span class="nc">DatabaseSessionTests</span><span class="p">(</span><span class="n">SessionTestsMixin</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">DatabaseSession</span>
+
+<div class="viewcode-block" id="DatabaseSessionTests.test_session_get_decoded"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.DatabaseSessionTests.test_session_get_decoded">[docs]</a>    <span class="k">def</span> <span class="nf">test_session_get_decoded</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test we can use Session.get_decoded to retrieve data stored</span>
+<span class="sd">        in normal way</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Session</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">session_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">session_key</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">get_decoded</span><span class="p">(),</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+</div>
+<div class="viewcode-block" id="DatabaseSessionTests.test_sessionmanager_save"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.DatabaseSessionTests.test_sessionmanager_save">[docs]</a>    <span class="k">def</span> <span class="nf">test_sessionmanager_save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test SessionManager.save method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Create a session</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Session</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">session_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">session_key</span><span class="p">)</span>
+        <span class="c"># Change it</span>
+        <span class="n">Session</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">session_key</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="n">s</span><span class="o">.</span><span class="n">expire_date</span><span class="p">)</span>
+        <span class="c"># Clear cache, so that it will be retrieved from DB</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_session_cache</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;y&#39;</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+
+</div></div>
+<span class="n">DatabaseSessionWithTimeZoneTests</span> <span class="o">=</span> <span class="n">override_settings</span><span class="p">(</span><span class="n">USE_TZ</span><span class="o">=</span><span class="bp">True</span><span class="p">)(</span><span class="n">DatabaseSessionTests</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="CacheDBSessionTests"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.CacheDBSessionTests">[docs]</a><span class="k">class</span> <span class="nc">CacheDBSessionTests</span><span class="p">(</span><span class="n">SessionTestsMixin</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">CacheDBSession</span>
+
+<div class="viewcode-block" id="CacheDBSessionTests.test_exists_searches_cache_first"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.CacheDBSessionTests.test_exists_searches_cache_first">[docs]</a>    <span class="k">def</span> <span class="nf">test_exists_searches_cache_first</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertNumQueries</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">session_key</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="CacheDBSessionTests.test_load_overlong_key"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.CacheDBSessionTests.test_load_overlong_key">[docs]</a>    <span class="k">def</span> <span class="nf">test_load_overlong_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">warnings_state</span> <span class="o">=</span> <span class="n">get_warnings_state</span><span class="p">()</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s">&#39;ignore&#39;</span><span class="p">,</span>
+                                <span class="n">category</span><span class="o">=</span><span class="n">CacheKeyWarning</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_session_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span> <span class="o">*</span> <span class="mi">20</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">load</span><span class="p">(),</span> <span class="p">{})</span>
+        <span class="n">restore_warnings_state</span><span class="p">(</span><span class="n">warnings_state</span><span class="p">)</span>
+
+</div></div>
+<span class="n">CacheDBSessionWithTimeZoneTests</span> <span class="o">=</span> <span class="n">override_settings</span><span class="p">(</span><span class="n">USE_TZ</span><span class="o">=</span><span class="bp">True</span><span class="p">)(</span><span class="n">CacheDBSessionTests</span><span class="p">)</span>
+
+
+<span class="c"># Don&#39;t need DB flushing for these tests, so can use unittest.TestCase as base class</span>
+<div class="viewcode-block" id="FileSessionTests"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.FileSessionTests">[docs]</a><span class="k">class</span> <span class="nc">FileSessionTests</span><span class="p">(</span><span class="n">SessionTestsMixin</span><span class="p">,</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">FileSession</span>
+
+<div class="viewcode-block" id="FileSessionTests.setUp"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.FileSessionTests.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FileSessionTests</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="c"># Do file session tests in an isolated directory, and kill it after we&#39;re done.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_session_file_path</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SESSION_FILE_PATH</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temp_session_store</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SESSION_FILE_PATH</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="FileSessionTests.tearDown"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.FileSessionTests.tearDown">[docs]</a>    <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">SESSION_FILE_PATH</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_session_file_path</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temp_session_store</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FileSessionTests</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">tearDown</span><span class="p">()</span>
+</div>
+    <span class="nd">@override_settings</span><span class="p">(</span>
+        <span class="n">SESSION_FILE_PATH</span><span class="o">=</span><span class="s">&quot;/if/this/directory/exists/you/have/a/weird/computer&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="FileSessionTests.test_configuration_check"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.FileSessionTests.test_configuration_check">[docs]</a>    <span class="k">def</span> <span class="nf">test_configuration_check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Make sure the file backend checks for a good storage dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">ImproperlyConfigured</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FileSessionTests.test_invalid_key_backslash"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.FileSessionTests.test_invalid_key_backslash">[docs]</a>    <span class="k">def</span> <span class="nf">test_invalid_key_backslash</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Ensure we don&#39;t allow directory-traversal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">SuspiciousOperation</span><span class="p">,</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="p">(</span><span class="s">&quot;a</span><span class="se">\\</span><span class="s">b</span><span class="se">\\</span><span class="s">c&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FileSessionTests.test_invalid_key_forwardslash"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.FileSessionTests.test_invalid_key_forwardslash">[docs]</a>    <span class="k">def</span> <span class="nf">test_invalid_key_forwardslash</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Ensure we don&#39;t allow directory-traversal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">SuspiciousOperation</span><span class="p">,</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="p">(</span><span class="s">&quot;a/b/c&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="CacheSessionTests"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.CacheSessionTests">[docs]</a><span class="k">class</span> <span class="nc">CacheSessionTests</span><span class="p">(</span><span class="n">SessionTestsMixin</span><span class="p">,</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">CacheSession</span>
+
+<div class="viewcode-block" id="CacheSessionTests.test_load_overlong_key"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.CacheSessionTests.test_load_overlong_key">[docs]</a>    <span class="k">def</span> <span class="nf">test_load_overlong_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">warnings_state</span> <span class="o">=</span> <span class="n">get_warnings_state</span><span class="p">()</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s">&#39;ignore&#39;</span><span class="p">,</span>
+                                <span class="n">category</span><span class="o">=</span><span class="n">CacheKeyWarning</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_session_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span> <span class="o">*</span> <span class="mi">20</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">load</span><span class="p">(),</span> <span class="p">{})</span>
+        <span class="n">restore_warnings_state</span><span class="p">(</span><span class="n">warnings_state</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="SessionMiddlewareTests"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionMiddlewareTests">[docs]</a><span class="k">class</span> <span class="nc">SessionMiddlewareTests</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="nd">@override_settings</span><span class="p">(</span><span class="n">SESSION_COOKIE_SECURE</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<div class="viewcode-block" id="SessionMiddlewareTests.test_secure_session_cookie"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionMiddlewareTests.test_secure_session_cookie">[docs]</a>    <span class="k">def</span> <span class="nf">test_secure_session_cookie</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">RequestFactory</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s">&#39;Session test&#39;</span><span class="p">)</span>
+        <span class="n">middleware</span> <span class="o">=</span> <span class="n">SessionMiddleware</span><span class="p">()</span>
+
+        <span class="c"># Simulate a request the modifies the session</span>
+        <span class="n">middleware</span><span class="o">.</span><span class="n">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;hello&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;world&#39;</span>
+
+        <span class="c"># Handle the response through the middleware</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">middleware</span><span class="o">.</span><span class="n">process_response</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">cookies</span><span class="p">[</span><span class="n">settings</span><span class="o">.</span><span class="n">SESSION_COOKIE_NAME</span><span class="p">][</span><span class="s">&#39;secure&#39;</span><span class="p">])</span>
+</div>
+    <span class="nd">@override_settings</span><span class="p">(</span><span class="n">SESSION_COOKIE_HTTPONLY</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<div class="viewcode-block" id="SessionMiddlewareTests.test_httponly_session_cookie"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionMiddlewareTests.test_httponly_session_cookie">[docs]</a>    <span class="k">def</span> <span class="nf">test_httponly_session_cookie</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">RequestFactory</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s">&#39;Session test&#39;</span><span class="p">)</span>
+        <span class="n">middleware</span> <span class="o">=</span> <span class="n">SessionMiddleware</span><span class="p">()</span>
+
+        <span class="c"># Simulate a request the modifies the session</span>
+        <span class="n">middleware</span><span class="o">.</span><span class="n">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;hello&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;world&#39;</span>
+
+        <span class="c"># Handle the response through the middleware</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">middleware</span><span class="o">.</span><span class="n">process_response</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">cookies</span><span class="p">[</span><span class="n">settings</span><span class="o">.</span><span class="n">SESSION_COOKIE_NAME</span><span class="p">][</span><span class="s">&#39;httponly&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIn</span><span class="p">(</span><span class="s">&#39;httponly&#39;</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">cookies</span><span class="p">[</span><span class="n">settings</span><span class="o">.</span><span class="n">SESSION_COOKIE_NAME</span><span class="p">]))</span>
+</div>
+    <span class="nd">@override_settings</span><span class="p">(</span><span class="n">SESSION_COOKIE_HTTPONLY</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<div class="viewcode-block" id="SessionMiddlewareTests.test_no_httponly_session_cookie"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.SessionMiddlewareTests.test_no_httponly_session_cookie">[docs]</a>    <span class="k">def</span> <span class="nf">test_no_httponly_session_cookie</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">RequestFactory</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s">&#39;Session test&#39;</span><span class="p">)</span>
+        <span class="n">middleware</span> <span class="o">=</span> <span class="n">SessionMiddleware</span><span class="p">()</span>
+
+        <span class="c"># Simulate a request the modifies the session</span>
+        <span class="n">middleware</span><span class="o">.</span><span class="n">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s">&#39;hello&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;world&#39;</span>
+
+        <span class="c"># Handle the response through the middleware</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">middleware</span><span class="o">.</span><span class="n">process_response</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+        <span class="c"># If it isn&#39;t in the cookie, that&#39;s fine (Python 2.5)</span>
+        <span class="k">if</span> <span class="s">&#39;httponly&#39;</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">SESSION_COOKIE_NAME</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span>
+               <span class="n">response</span><span class="o">.</span><span class="n">cookies</span><span class="p">[</span><span class="n">settings</span><span class="o">.</span><span class="n">SESSION_COOKIE_NAME</span><span class="p">][</span><span class="s">&#39;httponly&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertNotIn</span><span class="p">(</span><span class="s">&#39;httponly&#39;</span><span class="p">,</span>
+                         <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">cookies</span><span class="p">[</span><span class="n">settings</span><span class="o">.</span><span class="n">SESSION_COOKIE_NAME</span><span class="p">]))</span>
+
+</div></div>
+<div class="viewcode-block" id="CookieSessionTests"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.CookieSessionTests">[docs]</a><span class="k">class</span> <span class="nc">CookieSessionTests</span><span class="p">(</span><span class="n">SessionTestsMixin</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">CookieSession</span>
+
+<div class="viewcode-block" id="CookieSessionTests.test_save"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.CookieSessionTests.test_save">[docs]</a>    <span class="k">def</span> <span class="nf">test_save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This test tested exists() in the other session backends, but that</span>
+<span class="sd">        doesn&#39;t make sense for us.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="CookieSessionTests.test_cycle"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sessions.tests.CookieSessionTests.test_cycle">[docs]</a>    <span class="k">def</span> <span class="nf">test_cycle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This test tested cycle_key() which would create a new session</span>
+<span class="sd">        key for the same session data. But we can&#39;t invalidate previously</span>
+<span class="sd">        signed cookies (other than letting them expire naturally) so</span>
+<span class="sd">        testing for this behavior is meaningless.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,47 +1,35 @@
-/*!
- *
- * asite v1.0.0
- * Extending Bootstrap  
- *
- * Bootstrap v2.0.1
- *
- * Copyright 2012 Twitter, Inc
- * Licensed under the Apache License v2.0
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Designed and built with all the love in the world @twitter by @mdo and @fat.
- *
- * Converted to Sass by @johnwlong / @m5o.
- *
- * Date: @DATE
-
-
 @import vars
 
-@import skeleton
-@import control
-@import style
-@import toolbar
-@import mixins
-@import content
-@import listview
-@import itemview
-@import element
-@import sidebar
-@import search
-@import pplayer_inline
-@import blog
-@import cms
 
-@import addons 
-@import sm2 
-@import playable 
-@import sitemessages 
-@import markdown
-@import dialog
+@import element/skeleton
+@import util/control
+@import element/style
+@import element/toolbar
+//@import element/mixins
 
-/* additional library css */
-@import colorbox
+@import element/listview
+@import element/itemview
+
+@import element/element
+@import element/sidebar
+@import element/search
+@import element/pplayer_inline
+@import element/cms
+
+@import element/addons 
+@import element/sitemessages 
+@import element/markdown
+@import element/dialog
+
+/* legacy styles */
+@import element/legacy/colorbox
+//@import element/legacy/sm2 
+//@import element/legacy/playable 
+//@import element/legacy/blog
+//@import element/legacy/content
+
+
+
 
 
 // Core variables and mixins

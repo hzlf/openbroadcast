@@ -1,0 +1,397 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>gunicorn.util &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for gunicorn.util</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -</span>
+<span class="c">#</span>
+<span class="c"># This file is part of gunicorn released under the MIT license. </span>
+<span class="c"># See the NOTICE for more information.</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">ctypes</span>
+<span class="k">except</span> <span class="ne">MemoryError</span><span class="p">:</span>
+    <span class="c"># selinux execmem denial</span>
+    <span class="c"># https://bugzilla.redhat.com/show_bug.cgi?id=488396</span>
+    <span class="n">ctypes</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c"># Python on Solaris compiled with Sun Studio doesn&#39;t have ctypes</span>
+    <span class="n">ctypes</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="kn">import</span> <span class="nn">fcntl</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pkg_resources</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">resource</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">textwrap</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+
+<span class="n">MAXFD</span> <span class="o">=</span> <span class="mi">1024</span>
+<span class="k">if</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s">&quot;devnull&quot;</span><span class="p">)):</span>
+   <span class="n">REDIRECT_TO</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">devnull</span>
+<span class="k">else</span><span class="p">:</span>
+   <span class="n">REDIRECT_TO</span> <span class="o">=</span> <span class="s">&quot;/dev/null&quot;</span>
+
+<span class="n">timeout_default</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+
+<span class="n">CHUNK_SIZE</span> <span class="o">=</span> <span class="p">(</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">)</span>
+
+<span class="n">MAX_BODY</span> <span class="o">=</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">132</span>
+
+<span class="n">weekdayname</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Mon&#39;</span><span class="p">,</span> <span class="s">&#39;Tue&#39;</span><span class="p">,</span> <span class="s">&#39;Wed&#39;</span><span class="p">,</span> <span class="s">&#39;Thu&#39;</span><span class="p">,</span> <span class="s">&#39;Fri&#39;</span><span class="p">,</span> <span class="s">&#39;Sat&#39;</span><span class="p">,</span> <span class="s">&#39;Sun&#39;</span><span class="p">]</span>
+<span class="n">monthname</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span>
+             <span class="s">&#39;Jan&#39;</span><span class="p">,</span> <span class="s">&#39;Feb&#39;</span><span class="p">,</span> <span class="s">&#39;Mar&#39;</span><span class="p">,</span> <span class="s">&#39;Apr&#39;</span><span class="p">,</span> <span class="s">&#39;May&#39;</span><span class="p">,</span> <span class="s">&#39;Jun&#39;</span><span class="p">,</span>
+             <span class="s">&#39;Jul&#39;</span><span class="p">,</span> <span class="s">&#39;Aug&#39;</span><span class="p">,</span> <span class="s">&#39;Sep&#39;</span><span class="p">,</span> <span class="s">&#39;Oct&#39;</span><span class="p">,</span> <span class="s">&#39;Nov&#39;</span><span class="p">,</span> <span class="s">&#39;Dec&#39;</span><span class="p">]</span>
+
+<span class="c"># Server and Date aren&#39;t technically hop-by-hop</span>
+<span class="c"># headers, but they are in the purview of the</span>
+<span class="c"># origin server which the WSGI spec says we should</span>
+<span class="c"># act like. So we drop them and add our own.</span>
+<span class="c">#</span>
+<span class="c"># In the future, concatenation server header values</span>
+<span class="c"># might be better, but nothing else does it and</span>
+<span class="c"># dropping them is easier.</span>
+<span class="n">hop_headers</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">    connection keep-alive proxy-authenticate proxy-authorization</span>
+<span class="s">    te trailers transfer-encoding upgrade</span>
+<span class="s">    server date</span>
+<span class="s">    &quot;&quot;&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+            
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">setproctitle</span> <span class="kn">import</span> <span class="n">setproctitle</span>
+    <span class="k">def</span> <span class="nf">_setproctitle</span><span class="p">(</span><span class="n">title</span><span class="p">):</span>
+        <span class="n">setproctitle</span><span class="p">(</span><span class="s">&quot;gunicorn: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">title</span><span class="p">)</span> 
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_setproctitle</span><span class="p">(</span><span class="n">title</span><span class="p">):</span>
+        <span class="k">return</span>
+
+<div class="viewcode-block" id="load_class"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.load_class">[docs]</a><span class="k">def</span> <span class="nf">load_class</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&quot;sync&quot;</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="s">&quot;gunicorn.workers&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">uri</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;egg:&quot;</span><span class="p">):</span>
+        <span class="c"># uses entry points</span>
+        <span class="n">entry_str</span> <span class="o">=</span> <span class="n">uri</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;egg:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dist</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">entry_str</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&quot;#&quot;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">entry_str</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">default</span>
+
+        <span class="k">return</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">load_entry_point</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="n">uri</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">components</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">uri</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;#&quot;</span><span class="p">):</span>
+                    <span class="n">uri</span> <span class="o">=</span> <span class="n">uri</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+                <span class="k">return</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">load_entry_point</span><span class="p">(</span><span class="s">&quot;gunicorn&quot;</span><span class="p">,</span> 
+                            <span class="n">section</span><span class="p">,</span> <span class="n">uri</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span> 
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;class uri invalid or not found&quot;</span><span class="p">)</span>
+        <span class="n">klass</span> <span class="o">=</span> <span class="n">components</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">mod</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">components</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">components</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">mod</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">comp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">klass</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="set_owner_process"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.set_owner_process">[docs]</a><span class="k">def</span> <span class="nf">set_owner_process</span><span class="p">(</span><span class="n">uid</span><span class="p">,</span><span class="n">gid</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; set user and group of workers processes &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">gid</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">setgid</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ctypes</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="c"># versions of python &lt; 2.6.2 don&#39;t manage unsigned int for</span>
+            <span class="c"># groups like on osx or fedora</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">setgid</span><span class="p">(</span><span class="o">-</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="o">-</span><span class="n">gid</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            
+    <span class="k">if</span> <span class="n">uid</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">setuid</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="chown"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.chown">[docs]</a><span class="k">def</span> <span class="nf">chown</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">gid</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chown</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">gid</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ctypes</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chown</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="o">-</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="o">-</span><span class="n">gid</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="is_ipv6"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.is_ipv6">[docs]</a><span class="k">def</span> <span class="nf">is_ipv6</span><span class="p">(</span><span class="n">addr</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">socket</span><span class="o">.</span><span class="n">inet_pton</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET6</span><span class="p">,</span> <span class="n">addr</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">:</span> <span class="c"># not a valid address</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="bp">True</span>
+        </div>
+<div class="viewcode-block" id="parse_address"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.parse_address">[docs]</a><span class="k">def</span> <span class="nf">parse_address</span><span class="p">(</span><span class="n">netloc</span><span class="p">,</span> <span class="n">default_port</span><span class="o">=</span><span class="mi">8000</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">netloc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;unix:&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">netloc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;unix:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c"># get host</span>
+    <span class="k">if</span> <span class="s">&#39;[&#39;</span> <span class="ow">in</span> <span class="n">netloc</span> <span class="ow">and</span> <span class="s">&#39;]&#39;</span> <span class="ow">in</span> <span class="n">netloc</span><span class="p">:</span>
+        <span class="n">host</span> <span class="o">=</span> <span class="n">netloc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;]&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="s">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">netloc</span><span class="p">:</span>
+        <span class="n">host</span> <span class="o">=</span> <span class="n">netloc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">netloc</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">host</span> <span class="o">=</span> <span class="s">&quot;0.0.0.0&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">host</span> <span class="o">=</span> <span class="n">netloc</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    
+    <span class="c">#get port</span>
+    <span class="n">netloc</span> <span class="o">=</span> <span class="n">netloc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;]&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">netloc</span><span class="p">:</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">netloc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">port</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%r</span><span class="s"> is not a valid port number.&quot;</span> <span class="o">%</span> <span class="n">port</span><span class="p">)</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">default_port</span> 
+    <span class="k">return</span> <span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="get_maxfd"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.get_maxfd">[docs]</a><span class="k">def</span> <span class="nf">get_maxfd</span><span class="p">():</span>
+    <span class="n">maxfd</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrlimit</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RLIMIT_NOFILE</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">maxfd</span> <span class="o">==</span> <span class="n">resource</span><span class="o">.</span><span class="n">RLIM_INFINITY</span><span class="p">):</span>
+        <span class="n">maxfd</span> <span class="o">=</span> <span class="n">MAXFD</span>
+    <span class="k">return</span> <span class="n">maxfd</span>
+</div>
+<div class="viewcode-block" id="close_on_exec"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.close_on_exec">[docs]</a><span class="k">def</span> <span class="nf">close_on_exec</span><span class="p">(</span><span class="n">fd</span><span class="p">):</span>
+    <span class="n">flags</span> <span class="o">=</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">fcntl</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">F_GETFD</span><span class="p">)</span>
+    <span class="n">flags</span> <span class="o">|=</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">FD_CLOEXEC</span>
+    <span class="n">fcntl</span><span class="o">.</span><span class="n">fcntl</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">F_SETFD</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="set_non_blocking"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.set_non_blocking">[docs]</a><span class="k">def</span> <span class="nf">set_non_blocking</span><span class="p">(</span><span class="n">fd</span><span class="p">):</span>
+    <span class="n">flags</span> <span class="o">=</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">fcntl</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">F_GETFL</span><span class="p">)</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">O_NONBLOCK</span>
+    <span class="n">fcntl</span><span class="o">.</span><span class="n">fcntl</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">F_SETFL</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="close"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.close">[docs]</a><span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="n">sock</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sock</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+        <span class="k">pass</span>
+</div>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">closerange</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">closerange</span><span class="p">(</span><span class="n">fd_low</span><span class="p">,</span> <span class="n">fd_high</span><span class="p">):</span>
+        <span class="c"># Iterate through and close all file descriptors.</span>
+        <span class="k">for</span> <span class="n">fd</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">fd_low</span><span class="p">,</span> <span class="n">fd_high</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>	<span class="c"># ERROR, fd wasn&#39;t open to begin with (ignored)</span>
+                <span class="k">pass</span>
+
+<div class="viewcode-block" id="write_chunk"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.write_chunk">[docs]</a><span class="k">def</span> <span class="nf">write_chunk</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">chunk</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s">&quot;</span><span class="si">%X</span><span class="se">\r\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">data</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">))</span>
+    <span class="n">sock</span><span class="o">.</span><span class="n">sendall</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="write"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.write">[docs]</a><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">chunked</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">chunked</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">write_chunk</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">sock</span><span class="o">.</span><span class="n">sendall</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="write_nonblock"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.write_nonblock">[docs]</a><span class="k">def</span> <span class="nf">write_nonblock</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">chunked</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="n">timeout</span> <span class="o">=</span> <span class="n">sock</span><span class="o">.</span><span class="n">gettimeout</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">timeout</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sock</span><span class="o">.</span><span class="n">setblocking</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">write</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">chunked</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">sock</span><span class="o">.</span><span class="n">setblocking</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">write</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">chunked</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="writelines"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.writelines">[docs]</a><span class="k">def</span> <span class="nf">writelines</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">chunked</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+        <span class="n">write</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">chunked</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="write_error"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.write_error">[docs]</a><span class="k">def</span> <span class="nf">write_error</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">status_int</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">mesg</span><span class="p">):</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">    &lt;html&gt;</span>
+<span class="s">      &lt;head&gt;</span>
+<span class="s">        &lt;title&gt;</span><span class="si">%(reason)s</span><span class="s">&lt;/title&gt;</span>
+<span class="s">      &lt;/head&gt;</span>
+<span class="s">      &lt;body&gt;</span>
+<span class="s">        &lt;h1&gt;</span><span class="si">%(reason)s</span><span class="s">&lt;/h1&gt;</span>
+<span class="s">        </span><span class="si">%(mesg)s</span><span class="s"></span>
+<span class="s">      &lt;/body&gt;</span>
+<span class="s">    &lt;/html&gt;</span>
+<span class="s">    &quot;&quot;&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="p">{</span><span class="s">&quot;reason&quot;</span><span class="p">:</span> <span class="n">reason</span><span class="p">,</span> <span class="s">&quot;mesg&quot;</span><span class="p">:</span> <span class="n">mesg</span><span class="p">}</span>
+
+    <span class="n">http</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">    HTTP/1.1 </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="se">\r</span><span class="s"></span>
+<span class="s">    Connection: close</span><span class="se">\r</span><span class="s"></span>
+<span class="s">    Content-Type: text/html</span><span class="se">\r</span><span class="s"></span>
+<span class="s">    Content-Length: </span><span class="si">%d</span><span class="se">\r</span><span class="s"></span>
+<span class="s">    </span><span class="se">\r</span><span class="s"></span>
+<span class="s">    </span><span class="si">%s</span><span class="s"></span>
+<span class="s">    &quot;&quot;&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">status_int</span><span class="p">),</span> <span class="n">reason</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">html</span><span class="p">),</span> <span class="n">html</span><span class="p">)</span>
+    <span class="n">write_nonblock</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">http</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="normalize_name"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.normalize_name">[docs]</a><span class="k">def</span> <span class="nf">normalize_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">return</span>  <span class="s">&quot;-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;-&quot;</span><span class="p">)])</span>
+    </div>
+<div class="viewcode-block" id="import_app"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.import_app">[docs]</a><span class="k">def</span> <span class="nf">import_app</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">module</span><span class="p">,</span> <span class="n">obj</span> <span class="o">=</span> <span class="n">module</span><span class="p">,</span> <span class="s">&quot;application&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">module</span><span class="p">,</span> <span class="n">obj</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">__import__</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&quot;.py&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s">&quot;Failed to find application, did &quot;</span>
+                <span class="s">&quot;you mean &#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&#39;?&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">obj</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span>
+
+    <span class="n">mod</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">module</span><span class="p">]</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">mod</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">app</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s">&quot;Failed to find application object: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">obj</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">app</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Application object must be callable.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">app</span>
+</div>
+<div class="viewcode-block" id="http_date"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.http_date">[docs]</a><span class="k">def</span> <span class="nf">http_date</span><span class="p">(</span><span class="n">timestamp</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the current date and time formatted for a message header.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">timestamp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">hh</span><span class="p">,</span> <span class="n">mm</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">wd</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">gmtime</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">, </span><span class="si">%02d</span><span class="s"> </span><span class="si">%3s</span><span class="s"> </span><span class="si">%4d</span><span class="s"> </span><span class="si">%02d</span><span class="s">:</span><span class="si">%02d</span><span class="s">:</span><span class="si">%02d</span><span class="s"> GMT&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">weekdayname</span><span class="p">[</span><span class="n">wd</span><span class="p">],</span>
+            <span class="n">day</span><span class="p">,</span> <span class="n">monthname</span><span class="p">[</span><span class="n">month</span><span class="p">],</span> <span class="n">year</span><span class="p">,</span>
+            <span class="n">hh</span><span class="p">,</span> <span class="n">mm</span><span class="p">,</span> <span class="n">ss</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span>
+    </div>
+<div class="viewcode-block" id="to_bytestring"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.to_bytestring">[docs]</a><span class="k">def</span> <span class="nf">to_bytestring</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; convert to bytestring an unicode &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">s</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span>
+</div>
+<div class="viewcode-block" id="is_hoppish"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.is_hoppish">[docs]</a><span class="k">def</span> <span class="nf">is_hoppish</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">header</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">in</span> <span class="n">hop_headers</span>
+</div>
+<div class="viewcode-block" id="daemonize"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.daemonize">[docs]</a><span class="k">def</span> <span class="nf">daemonize</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;\</span>
+<span class="sd">    Standard daemonization of a process.</span>
+<span class="sd">    http://www.svbug.com/documentation/comp.unix.programmer-FAQ/faq_2.html#SEC16</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="s">&#39;GUNICORN_FD&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">fork</span><span class="p">():</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">_exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">setsid</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">fork</span><span class="p">():</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">_exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">maxfd</span> <span class="o">=</span> <span class="n">get_maxfd</span><span class="p">()</span>
+        <span class="n">closerange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxfd</span><span class="p">)</span>
+        
+        <span class="n">os</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">REDIRECT_TO</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">O_RDWR</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">dup2</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">dup2</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="seed"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.util.seed">[docs]</a><span class="k">def</span> <span class="nf">seed</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="mi">64</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">NotImplementedError</span><span class="p">:</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">())</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,423 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>djcelery.models &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for djcelery.models</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">mktime</span>
+
+<span class="kn">import</span> <span class="nn">django</span>
+
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">MultipleObjectsReturned</span><span class="p">,</span> <span class="n">ValidationError</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">signals</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="kn">from</span> <span class="nn">picklefield.fields</span> <span class="kn">import</span> <span class="n">PickledObjectField</span>
+
+<span class="kn">from</span> <span class="nn">celery</span> <span class="kn">import</span> <span class="n">schedules</span>
+<span class="kn">from</span> <span class="nn">celery</span> <span class="kn">import</span> <span class="n">states</span>
+<span class="kn">from</span> <span class="nn">celery.utils.timeutils</span> <span class="kn">import</span> <span class="n">timedelta_seconds</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">managers</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">now</span>
+
+<span class="n">HEARTBEAT_EXPIRE</span> <span class="o">=</span> <span class="mi">150</span>      <span class="c"># 2 minutes, 30 seconds</span>
+<span class="n">TASK_STATE_CHOICES</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">states</span><span class="o">.</span><span class="n">ALL_STATES</span><span class="p">,</span> <span class="n">states</span><span class="o">.</span><span class="n">ALL_STATES</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TaskMeta"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.TaskMeta">[docs]</a><span class="k">class</span> <span class="nc">TaskMeta</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Task result/status.&quot;&quot;&quot;</span>
+    <span class="n">task_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;task id&quot;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;task status&quot;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="n">states</span><span class="o">.</span><span class="n">PENDING</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">TASK_STATE_CHOICES</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">PickledObjectField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">date_done</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;done at&quot;</span><span class="p">),</span> <span class="n">auto_now</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">traceback</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;traceback&quot;</span><span class="p">),</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">hidden</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">editable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">db_index</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">managers</span><span class="o">.</span><span class="n">TaskManager</span><span class="p">()</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Model meta-data.&quot;&quot;&quot;</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;task meta&quot;</span><span class="p">)</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;task meta&quot;</span><span class="p">)</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s">&quot;celery_taskmeta&quot;</span>
+
+<div class="viewcode-block" id="TaskMeta.to_dict"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.TaskMeta.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;task_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_id</span><span class="p">,</span>
+                <span class="s">&quot;status&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+                <span class="s">&quot;result&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">,</span>
+                <span class="s">&quot;date_done&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">date_done</span><span class="p">,</span>
+                <span class="s">&quot;traceback&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceback</span><span class="p">}</span>
+</div>
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&quot;&lt;Task: </span><span class="si">%s</span><span class="s"> state-&gt;</span><span class="si">%s</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">task_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="TaskSetMeta"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.TaskSetMeta">[docs]</a><span class="k">class</span> <span class="nc">TaskSetMeta</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;TaskSet result&quot;&quot;&quot;</span>
+    <span class="n">taskset_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;task id&quot;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">PickledObjectField</span><span class="p">()</span>
+    <span class="n">date_done</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;done at&quot;</span><span class="p">),</span> <span class="n">auto_now</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">hidden</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">editable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">db_index</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">managers</span><span class="o">.</span><span class="n">TaskSetManager</span><span class="p">()</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Model meta-data.&quot;&quot;&quot;</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;taskset meta&quot;</span><span class="p">)</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;taskset meta&quot;</span><span class="p">)</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s">&quot;celery_tasksetmeta&quot;</span>
+
+<div class="viewcode-block" id="TaskSetMeta.to_dict"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.TaskSetMeta.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;taskset_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">taskset_id</span><span class="p">,</span>
+                <span class="s">&quot;result&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">,</span>
+                <span class="s">&quot;date_done&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">date_done</span><span class="p">}</span>
+</div>
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&quot;&lt;TaskSet: </span><span class="si">%s</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">taskset_id</span><span class="p">)</span>
+
+</div>
+<span class="n">PERIOD_CHOICES</span> <span class="o">=</span> <span class="p">((</span><span class="s">&quot;days&quot;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;Days&quot;</span><span class="p">)),</span>
+                  <span class="p">(</span><span class="s">&quot;hours&quot;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;Hours&quot;</span><span class="p">)),</span>
+                  <span class="p">(</span><span class="s">&quot;minutes&quot;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;Minutes&quot;</span><span class="p">)),</span>
+                  <span class="p">(</span><span class="s">&quot;seconds&quot;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;Seconds&quot;</span><span class="p">)),</span>
+                  <span class="p">(</span><span class="s">&quot;microseconds&quot;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;Microseconds&quot;</span><span class="p">)))</span>
+
+
+<div class="viewcode-block" id="IntervalSchedule"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.IntervalSchedule">[docs]</a><span class="k">class</span> <span class="nc">IntervalSchedule</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">every</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;every&quot;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">period</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;period&quot;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span>
+                                            <span class="n">choices</span><span class="o">=</span><span class="n">PERIOD_CHOICES</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;interval&quot;</span><span class="p">)</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;intervals&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="IntervalSchedule.schedule"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.IntervalSchedule.schedule">[docs]</a>    <span class="k">def</span> <span class="nf">schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">schedules</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">timedelta</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">every</span><span class="p">}))</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="IntervalSchedule.from_schedule"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.IntervalSchedule.from_schedule">[docs]</a>    <span class="k">def</span> <span class="nf">from_schedule</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">schedule</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s">&quot;seconds&quot;</span><span class="p">):</span>
+        <span class="n">every</span> <span class="o">=</span> <span class="n">timedelta_seconds</span><span class="p">(</span><span class="n">schedule</span><span class="o">.</span><span class="n">run_every</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">every</span><span class="o">=</span><span class="n">every</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">cls</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">every</span><span class="o">=</span><span class="n">every</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">MultipleObjectsReturned</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">every</span><span class="o">=</span><span class="n">every</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">every</span><span class="o">=</span><span class="n">every</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">every</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;every </span><span class="si">%(period)s</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="p">{</span><span class="s">&quot;period&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]}</span>
+        <span class="k">return</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;every </span><span class="si">%(every)s</span><span class="s"> </span><span class="si">%(period)s</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="p">{</span><span class="s">&quot;every&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">every</span><span class="p">,</span>
+                                                   <span class="s">&quot;period&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">}</span>
+
+</div>
+<div class="viewcode-block" id="CrontabSchedule"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.CrontabSchedule">[docs]</a><span class="k">class</span> <span class="nc">CrontabSchedule</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">minute</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;minute&quot;</span><span class="p">),</span>
+                        <span class="n">max_length</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s">&quot;*&quot;</span><span class="p">)</span>
+    <span class="n">hour</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;hour&quot;</span><span class="p">),</span>
+                        <span class="n">max_length</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s">&quot;*&quot;</span><span class="p">)</span>
+    <span class="n">day_of_week</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;day of week&quot;</span><span class="p">),</span>
+                        <span class="n">max_length</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s">&quot;*&quot;</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;crontab&quot;</span><span class="p">)</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;crontabs&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rfield</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">:</span> <span class="n">f</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s">&quot;*&quot;</span>
+        <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> (m/h/d)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">rfield</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minute</span><span class="p">),</span>
+                                      <span class="n">rfield</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hour</span><span class="p">),</span>
+                                      <span class="n">rfield</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">day_of_week</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="CrontabSchedule.schedule"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.CrontabSchedule.schedule">[docs]</a>    <span class="k">def</span> <span class="nf">schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">schedules</span><span class="o">.</span><span class="n">crontab</span><span class="p">(</span><span class="n">minute</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">minute</span><span class="p">,</span>
+                                <span class="n">hour</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span>
+                                <span class="n">day_of_week</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">day_of_week</span><span class="p">,</span>
+                                <span class="n">nowfun</span><span class="o">=</span><span class="n">now</span><span class="p">)</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="CrontabSchedule.from_schedule"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.CrontabSchedule.from_schedule">[docs]</a>    <span class="k">def</span> <span class="nf">from_schedule</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">schedule</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">minute</span><span class="o">=</span><span class="n">schedule</span><span class="o">.</span><span class="n">_orig_minute</span><span class="p">,</span>
+                   <span class="n">hour</span><span class="o">=</span><span class="n">schedule</span><span class="o">.</span><span class="n">_orig_hour</span><span class="p">,</span>
+                   <span class="n">day_of_week</span><span class="o">=</span><span class="n">schedule</span><span class="o">.</span><span class="n">_orig_day_of_week</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="PeriodicTasks"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.PeriodicTasks">[docs]</a><span class="k">class</span> <span class="nc">PeriodicTasks</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">ident</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">SmallIntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">last_update</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">managers</span><span class="o">.</span><span class="n">ExtendedManager</span><span class="p">()</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="PeriodicTasks.changed"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.PeriodicTasks.changed">[docs]</a>    <span class="k">def</span> <span class="nf">changed</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">instance</span><span class="o">.</span><span class="n">no_changes</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">update_or_create</span><span class="p">(</span><span class="n">ident</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                         <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s">&quot;last_update&quot;</span><span class="p">:</span> <span class="n">now</span><span class="p">()})</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="PeriodicTasks.last_change"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.PeriodicTasks.last_change">[docs]</a>    <span class="k">def</span> <span class="nf">last_change</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ident</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">last_update</span>
+        <span class="k">except</span> <span class="n">cls</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+</div></div>
+<div class="viewcode-block" id="PeriodicTask"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.PeriodicTask">[docs]</a><span class="k">class</span> <span class="nc">PeriodicTask</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;name&quot;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                            <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;Useful description&quot;</span><span class="p">))</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;task name&quot;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">interval</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">IntervalSchedule</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                 <span class="n">verbose_name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;interval&quot;</span><span class="p">))</span>
+    <span class="n">crontab</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">CrontabSchedule</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                <span class="n">verbose_name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;crontab&quot;</span><span class="p">),</span>
+                                <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;Use one of interval/crontab&quot;</span><span class="p">))</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;Arguments&quot;</span><span class="p">),</span>
+                            <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&quot;[]&quot;</span><span class="p">,</span>
+                            <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;JSON encoded positional arguments&quot;</span><span class="p">))</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;Keyword arguments&quot;</span><span class="p">),</span>
+                              <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&quot;{}&quot;</span><span class="p">,</span>
+                              <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&quot;JSON encoded keyword arguments&quot;</span><span class="p">))</span>
+    <span class="n">queue</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&quot;queue&quot;</span><span class="p">),</span>
+                             <span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                             <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                             <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;Queue defined in CELERY_QUEUES&quot;</span><span class="p">))</span>
+    <span class="n">exchange</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;exchange&quot;</span><span class="p">),</span>
+                              <span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                              <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">routing_key</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;routing key&quot;</span><span class="p">),</span>
+                              <span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                              <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">expires</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;expires&quot;</span><span class="p">),</span>
+                              <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">enabled</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;enabled&quot;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">last_run_at</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span>
+                              <span class="n">auto_now</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">auto_now_add</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                              <span class="n">editable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">total_run_count</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">PositiveIntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">editable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">date_changed</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&quot;description&quot;</span><span class="p">),</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">managers</span><span class="o">.</span><span class="n">PeriodicTaskManager</span><span class="p">()</span>
+    <span class="n">no_changes</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;periodic task&quot;</span><span class="p">)</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;periodic tasks&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PeriodicTask.validate_unique"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.PeriodicTask.validate_unique">[docs]</a>    <span class="k">def</span> <span class="nf">validate_unique</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PeriodicTask</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">validate_unique</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">crontab</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span>
+                <span class="p">{</span><span class="s">&quot;interval&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;One of interval or crontab must be set.&quot;</span><span class="p">]})</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">crontab</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span>
+                <span class="p">{</span><span class="s">&quot;crontab&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Only one of interval or crontab must be set&quot;</span><span class="p">]})</span>
+</div>
+<div class="viewcode-block" id="PeriodicTask.save"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.PeriodicTask.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exchange</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exchange</span> <span class="ow">or</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">routing_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">routing_key</span> <span class="ow">or</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="ow">or</span> <span class="bp">None</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PeriodicTask</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crontab</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crontab</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s">: {no schedule}&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">)</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="PeriodicTask.schedule"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.PeriodicTask.schedule">[docs]</a>    <span class="k">def</span> <span class="nf">schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="o">.</span><span class="n">schedule</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crontab</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">crontab</span><span class="o">.</span><span class="n">schedule</span>
+</div></div>
+<span class="n">signals</span><span class="o">.</span><span class="n">pre_delete</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">PeriodicTasks</span><span class="o">.</span><span class="n">changed</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">PeriodicTask</span><span class="p">)</span>
+<span class="n">signals</span><span class="o">.</span><span class="n">pre_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">PeriodicTasks</span><span class="o">.</span><span class="n">changed</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">PeriodicTask</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="WorkerState"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.WorkerState">[docs]</a><span class="k">class</span> <span class="nc">WorkerState</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">hostname</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;hostname&quot;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">last_heartbeat</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;last heartbeat&quot;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                          <span class="n">db_index</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">managers</span><span class="o">.</span><span class="n">ExtendedManager</span><span class="p">()</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Model meta-data.&quot;&quot;&quot;</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;worker&quot;</span><span class="p">)</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;workers&quot;</span><span class="p">)</span>
+        <span class="n">get_latest_by</span> <span class="o">=</span> <span class="s">&quot;last_heartbeat&quot;</span>
+        <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;-last_heartbeat&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hostname</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;WorkerState: </span><span class="si">%s</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hostname</span><span class="p">,</span> <span class="p">)</span>
+
+<div class="viewcode-block" id="WorkerState.is_alive"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.WorkerState.is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_heartbeat</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">time</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">heartbeat_timestamp</span> <span class="o">+</span> <span class="n">HEARTBEAT_EXPIRE</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="WorkerState.heartbeat_timestamp"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.WorkerState.heartbeat_timestamp">[docs]</a>    <span class="k">def</span> <span class="nf">heartbeat_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">mktime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_heartbeat</span><span class="o">.</span><span class="n">timetuple</span><span class="p">())</span>
+
+</div></div>
+<div class="viewcode-block" id="TaskState"><a class="viewcode-back" href="../../auto_modules.html#djcelery.models.TaskState">[docs]</a><span class="k">class</span> <span class="nc">TaskState</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;state&quot;</span><span class="p">),</span>
+                <span class="n">max_length</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+                <span class="n">choices</span><span class="o">=</span><span class="n">TASK_STATE_CHOICES</span><span class="p">,</span> <span class="n">db_index</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">task_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;UUID&quot;</span><span class="p">),</span>
+                <span class="n">max_length</span><span class="o">=</span><span class="mi">36</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;name&quot;</span><span class="p">),</span>
+                <span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">db_index</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">tstamp</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;event received at&quot;</span><span class="p">),</span> <span class="n">db_index</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;Arguments&quot;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;Keyword arguments&quot;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">eta</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;ETA&quot;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">help_text</span><span class="o">=</span><span class="s">u&quot;date to execute&quot;</span><span class="p">)</span>
+    <span class="n">expires</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;expires&quot;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;result&quot;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">traceback</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;traceback&quot;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">runtime</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;execution time&quot;</span><span class="p">),</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;in seconds if task successful&quot;</span><span class="p">))</span>
+    <span class="n">retries</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;number of retries&quot;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">worker</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">WorkerState</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                               <span class="n">verbose_name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&quot;worker&quot;</span><span class="p">))</span>
+    <span class="n">hidden</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">editable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">db_index</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">managers</span><span class="o">.</span><span class="n">TaskStateManager</span><span class="p">()</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Model meta-data.&quot;&quot;&quot;</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;task&quot;</span><span class="p">)</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;tasks&quot;</span><span class="p">)</span>
+        <span class="n">get_latest_by</span> <span class="o">=</span> <span class="s">&quot;tstamp&quot;</span>
+        <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;-tstamp&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="s">&quot;UNKNOWN&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">task_id</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">36</span><span class="p">),</span>
+                           <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eta</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s">u&quot; eta:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eta</span><span class="p">,</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;TaskState: </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">(</span><span class="si">%s</span><span class="s">) ts:</span><span class="si">%s</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="s">&quot;UNKNOWN&quot;</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">task_id</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">tstamp</span><span class="p">)</span>
+</div>
+<span class="k">if</span> <span class="p">(</span><span class="n">django</span><span class="o">.</span><span class="n">VERSION</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">django</span><span class="o">.</span><span class="n">VERSION</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="c"># Keep models away from syncdb/reset if Django database</span>
+    <span class="c"># backend is not being used.</span>
+    <span class="k">if</span> <span class="s">&quot;database&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span>
+                            <span class="s">&quot;CELERY_RESULT_BACKEND&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="s">&quot;database&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">result_model</span> <span class="ow">in</span> <span class="p">(</span><span class="n">TaskMeta</span><span class="p">,</span> <span class="n">TaskSetMeta</span><span class="p">):</span>
+            <span class="n">result_model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">managed</span> <span class="o">=</span> <span class="bp">False</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

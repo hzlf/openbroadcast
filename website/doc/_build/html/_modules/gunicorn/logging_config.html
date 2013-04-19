@@ -1,0 +1,438 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>gunicorn.logging_config &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for gunicorn.logging_config</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -</span>
+<span class="c">#</span>
+<span class="c"># This file is part of gunicorn released under the MIT license. </span>
+<span class="c"># See the NOTICE for more information.</span>
+<span class="c">#</span>
+<span class="c"># Copyright 2001-2005 by Vinay Sajip. All Rights Reserved.</span>
+<span class="c">#</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Configuration functions for the logging package for Python. The core package</span>
+<span class="sd">is based on PEP 282 and comments thereto in comp.lang.python, and influenced</span>
+<span class="sd">by Apache&#39;s log4j system.</span>
+
+<span class="sd">Should work under Python versions &gt;= 1.5.2, except that source line</span>
+<span class="sd">information is not available unless &#39;sys._getframe()&#39; is.</span>
+
+<span class="sd">Copyright (C) 2001-2004 Vinay Sajip. All Rights Reserved.</span>
+
+<span class="sd">To use, simply &#39;import logging&#39; and log away!</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">logging.handlers</span><span class="o">,</span> <span class="nn">string</span><span class="o">,</span> <span class="nn">socket</span><span class="o">,</span> <span class="nn">struct</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">traceback</span><span class="o">,</span> <span class="nn">types</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">thread</span>
+    <span class="kn">import</span> <span class="nn">threading</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">thread</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="kn">from</span> <span class="nn">SocketServer</span> <span class="kn">import</span> <span class="n">ThreadingTCPServer</span><span class="p">,</span> <span class="n">StreamRequestHandler</span>
+
+
+<span class="n">DEFAULT_LOGGING_CONFIG_PORT</span> <span class="o">=</span> <span class="mi">9030</span>
+
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s">&quot;win32&quot;</span><span class="p">:</span>
+    <span class="n">RESET_ERROR</span> <span class="o">=</span> <span class="mi">10054</span>   <span class="c">#WSAECONNRESET</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">RESET_ERROR</span> <span class="o">=</span> <span class="mi">104</span>     <span class="c">#ECONNRESET</span>
+
+<span class="c">#</span>
+<span class="c">#   The following code implements a socket listener for on-the-fly</span>
+<span class="c">#   reconfiguration of logging.</span>
+<span class="c">#</span>
+<span class="c">#   _listener holds the server object doing the listening</span>
+<span class="n">_listener</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="fileConfig"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.logging_config.fileConfig">[docs]</a><span class="k">def</span> <span class="nf">fileConfig</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read the logging configuration from a ConfigParser-format file.</span>
+
+<span class="sd">    This can be called several times from an application, allowing an end user</span>
+<span class="sd">    the ability to select from various pre-canned configurations (if the</span>
+<span class="sd">    developer provides a mechanism to present the choices and load the chosen</span>
+<span class="sd">    configuration).</span>
+<span class="sd">    In versions of ConfigParser which have the readfp method [typically</span>
+<span class="sd">    shipped in 2.x versions of Python], you can pass in a file-like object</span>
+<span class="sd">    rather than a filename, in which case the file-like object will be read</span>
+<span class="sd">    using readfp.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">ConfigParser</span>
+
+    <span class="n">cp</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cp</span><span class="p">,</span> <span class="s">&#39;readfp&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s">&#39;readline&#39;</span><span class="p">):</span>
+        <span class="n">cp</span><span class="o">.</span><span class="n">readfp</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cp</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+    <span class="n">formatters</span> <span class="o">=</span> <span class="n">_create_formatters</span><span class="p">(</span><span class="n">cp</span><span class="p">)</span>
+
+    <span class="c"># critical section</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">_acquireLock</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">_handlers</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="s">&#39;_handlerList&#39;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="n">logging</span><span class="o">.</span><span class="n">_handlerList</span><span class="p">[:]</span>
+        <span class="c"># Handlers add themselves to logging._handlers</span>
+        <span class="n">handlers</span> <span class="o">=</span> <span class="n">_install_handlers</span><span class="p">(</span><span class="n">cp</span><span class="p">,</span> <span class="n">formatters</span><span class="p">)</span>
+        <span class="n">_install_loggers</span><span class="p">(</span><span class="n">cp</span><span class="p">,</span> <span class="n">handlers</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">_releaseLock</span><span class="p">()</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_resolve</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Resolve a dotted name to a global object.&quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">used</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">used</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+        <span class="n">used</span> <span class="o">=</span> <span class="n">used</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">n</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">found</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="nb">__import__</span><span class="p">(</span><span class="n">used</span><span class="p">)</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">found</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">found</span>
+
+
+<span class="k">def</span> <span class="nf">_create_formatters</span><span class="p">(</span><span class="n">cp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create and return formatters&quot;&quot;&quot;</span>
+    <span class="n">flist</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;formatters&quot;</span><span class="p">,</span> <span class="s">&quot;keys&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">flist</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="n">flist</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">flist</span><span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">)</span>
+    <span class="n">formatters</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">form</span> <span class="ow">in</span> <span class="n">flist</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+        <span class="n">sectname</span> <span class="o">=</span> <span class="s">&quot;formatter_</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">form</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="n">sectname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;format&quot;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+            <span class="n">fs</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sectname</span><span class="p">,</span> <span class="s">&quot;format&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fs</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="s">&quot;datefmt&quot;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+            <span class="n">dfs</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sectname</span><span class="p">,</span> <span class="s">&quot;datefmt&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dfs</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span>
+        <span class="k">if</span> <span class="s">&quot;class&quot;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+            <span class="n">class_name</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sectname</span><span class="p">,</span> <span class="s">&quot;class&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">class_name</span><span class="p">:</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">class_name</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">c</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">dfs</span><span class="p">)</span>
+        <span class="n">formatters</span><span class="p">[</span><span class="n">form</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span>
+    <span class="k">return</span> <span class="n">formatters</span>
+
+
+<span class="k">def</span> <span class="nf">_install_handlers</span><span class="p">(</span><span class="n">cp</span><span class="p">,</span> <span class="n">formatters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Install and return handlers&quot;&quot;&quot;</span>
+    <span class="n">hlist</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;handlers&quot;</span><span class="p">,</span> <span class="s">&quot;keys&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">hlist</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="n">hlist</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">hlist</span><span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">)</span>
+    <span class="n">handlers</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">fixups</span> <span class="o">=</span> <span class="p">[]</span> <span class="c">#for inter-handler references</span>
+    <span class="k">for</span> <span class="n">hand</span> <span class="ow">in</span> <span class="n">hlist</span><span class="p">:</span>
+        <span class="n">hand</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">hand</span><span class="p">)</span>
+        <span class="n">sectname</span> <span class="o">=</span> <span class="s">&quot;handler_</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">hand</span>
+        <span class="n">klass</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sectname</span><span class="p">,</span> <span class="s">&quot;class&quot;</span><span class="p">)</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="n">sectname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;formatter&quot;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+            <span class="n">fmt</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sectname</span><span class="p">,</span> <span class="s">&quot;formatter&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fmt</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">klass</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="nb">vars</span><span class="p">(</span><span class="n">logging</span><span class="p">))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">NameError</span><span class="p">):</span>
+            <span class="n">klass</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sectname</span><span class="p">,</span> <span class="s">&quot;args&quot;</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="nb">vars</span><span class="p">(</span><span class="n">logging</span><span class="p">))</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="nb">apply</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;level&quot;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sectname</span><span class="p">,</span> <span class="s">&quot;level&quot;</span><span class="p">)</span>
+            <span class="n">h</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">_levelNames</span><span class="p">[</span><span class="n">level</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fmt</span><span class="p">):</span>
+            <span class="n">h</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatters</span><span class="p">[</span><span class="n">fmt</span><span class="p">])</span>
+        <span class="c">#temporary hack for FileHandler and MemoryHandler.</span>
+        <span class="k">if</span> <span class="n">klass</span> <span class="o">==</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">MemoryHandler</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&quot;target&quot;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sectname</span><span class="p">,</span><span class="s">&quot;target&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">):</span> <span class="c">#the target handler may not be loaded yet, so keep for later...</span>
+                <span class="n">fixups</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">h</span><span class="p">,</span> <span class="n">target</span><span class="p">))</span>
+        <span class="n">handlers</span><span class="p">[</span><span class="n">hand</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span>
+    <span class="c">#now all handlers are loaded, fixup inter-handler references...</span>
+    <span class="k">for</span> <span class="n">h</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">fixups</span><span class="p">:</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">setTarget</span><span class="p">(</span><span class="n">handlers</span><span class="p">[</span><span class="n">t</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">handlers</span>
+
+
+<span class="k">def</span> <span class="nf">_install_loggers</span><span class="p">(</span><span class="n">cp</span><span class="p">,</span> <span class="n">handlers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create and install loggers&quot;&quot;&quot;</span>
+
+    <span class="c"># configure the root first</span>
+    <span class="n">llist</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;loggers&quot;</span><span class="p">,</span> <span class="s">&quot;keys&quot;</span><span class="p">)</span>
+    <span class="n">llist</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">llist</span><span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">)</span>
+    <span class="n">llist</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">string</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">llist</span><span class="p">)</span>
+    <span class="n">llist</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&quot;root&quot;</span><span class="p">)</span>
+    <span class="n">sectname</span> <span class="o">=</span> <span class="s">&quot;logger_root&quot;</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">root</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">root</span>
+    <span class="n">opts</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="n">sectname</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s">&quot;level&quot;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sectname</span><span class="p">,</span> <span class="s">&quot;level&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">_levelNames</span><span class="p">[</span><span class="n">level</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">handlers</span><span class="p">[:]:</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+    <span class="n">hlist</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sectname</span><span class="p">,</span> <span class="s">&quot;handlers&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">hlist</span><span class="p">):</span>
+        <span class="n">hlist</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">hlist</span><span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">hand</span> <span class="ow">in</span> <span class="n">hlist</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handlers</span><span class="p">[</span><span class="n">string</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">hand</span><span class="p">)])</span>
+
+    <span class="c">#and now the others...</span>
+    <span class="c">#we don&#39;t want to lose the existing loggers,</span>
+    <span class="c">#since other threads may have pointers to them.</span>
+    <span class="c">#existing is set to contain all existing loggers,</span>
+    <span class="c">#and as we go through the new configuration we</span>
+    <span class="c">#remove any which are configured. At the end,</span>
+    <span class="c">#what&#39;s left in existing is the set of loggers</span>
+    <span class="c">#which were in the previous configuration but</span>
+    <span class="c">#which are not in the new configuration.</span>
+    <span class="n">existing</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">loggerDict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="c">#now set up the new ones...</span>
+    <span class="k">for</span> <span class="n">log</span> <span class="ow">in</span> <span class="n">llist</span><span class="p">:</span>
+        <span class="n">sectname</span> <span class="o">=</span> <span class="s">&quot;logger_</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">log</span>
+        <span class="n">qn</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sectname</span><span class="p">,</span> <span class="s">&quot;qualname&quot;</span><span class="p">)</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="n">sectname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;propagate&quot;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+            <span class="n">propagate</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">getint</span><span class="p">(</span><span class="n">sectname</span><span class="p">,</span> <span class="s">&quot;propagate&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">propagate</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">qn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">qn</span> <span class="ow">in</span> <span class="n">existing</span><span class="p">:</span>
+            <span class="n">existing</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">qn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;level&quot;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sectname</span><span class="p">,</span> <span class="s">&quot;level&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">_levelNames</span><span class="p">[</span><span class="n">level</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">[:]:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="n">propagate</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">hlist</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sectname</span><span class="p">,</span> <span class="s">&quot;handlers&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">hlist</span><span class="p">):</span>
+            <span class="n">hlist</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">hlist</span><span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">hand</span> <span class="ow">in</span> <span class="n">hlist</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handlers</span><span class="p">[</span><span class="n">string</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">hand</span><span class="p">)])</span>
+
+    <span class="c">#Disable any old loggers. There&#39;s no point deleting</span>
+    <span class="c">#them as other threads may continue to hold references</span>
+    <span class="c">#and by disabling them, you stop them doing any logging.</span>
+    <span class="k">for</span> <span class="n">log</span> <span class="ow">in</span> <span class="n">existing</span><span class="p">:</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">loggerDict</span><span class="p">[</span><span class="n">log</span><span class="p">]</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+<div class="viewcode-block" id="listen"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.logging_config.listen">[docs]</a><span class="k">def</span> <span class="nf">listen</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">DEFAULT_LOGGING_CONFIG_PORT</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Start up a socket server on the specified port, and listen for new</span>
+<span class="sd">    configurations.</span>
+
+<span class="sd">    These will be sent as a file suitable for processing by fileConfig().</span>
+<span class="sd">    Returns a Thread object on which you can call start() to start the server,</span>
+<span class="sd">    and which you can join() when appropriate. To stop the server, call</span>
+<span class="sd">    stopListening().</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">thread</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">,</span> <span class="s">&quot;listen() needs threading to work&quot;</span>
+
+    <span class="k">class</span> <span class="nc">ConfigStreamHandler</span><span class="p">(</span><span class="n">StreamRequestHandler</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handler for a logging configuration request.</span>
+
+<span class="sd">        It expects a completely new logging configuration and uses fileConfig</span>
+<span class="sd">        to install it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Handle a request.</span>
+
+<span class="sd">            Each request is expected to be a 4-byte length, packed using</span>
+<span class="sd">            struct.pack(&quot;&gt;L&quot;, n), followed by the config file.</span>
+<span class="sd">            Uses fileConfig() to do the grunt work.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="kn">import</span> <span class="nn">tempfile</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">conn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span>
+                <span class="n">chunk</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="n">slen</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&quot;&gt;L&quot;</span><span class="p">,</span> <span class="n">chunk</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">slen</span><span class="p">)</span>
+                    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">slen</span><span class="p">:</span>
+                        <span class="n">chunk</span> <span class="o">=</span> <span class="n">chunk</span> <span class="o">+</span> <span class="n">conn</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">slen</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">))</span>
+                    <span class="c">#Apply new configuration. We&#39;d like to be able to</span>
+                    <span class="c">#create a StringIO and pass that in, but unfortunately</span>
+                    <span class="c">#1.5.2 ConfigParser does not support reading file</span>
+                    <span class="c">#objects, only actual files. So we create a temporary</span>
+                    <span class="c">#file and remove it later.</span>
+                    <span class="nb">file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mktemp</span><span class="p">(</span><span class="s">&quot;.ini&quot;</span><span class="p">)</span>
+                    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">fileConfig</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="p">(</span><span class="ne">KeyboardInterrupt</span><span class="p">,</span> <span class="ne">SystemExit</span><span class="p">):</span>
+                        <span class="k">raise</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">!=</span> <span class="n">types</span><span class="o">.</span><span class="n">TupleType</span><span class="p">:</span>
+                    <span class="k">raise</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">errcode</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">errcode</span> <span class="o">!=</span> <span class="n">RESET_ERROR</span><span class="p">:</span>
+                        <span class="k">raise</span>
+
+    <span class="k">class</span> <span class="nc">ConfigSocketReceiver</span><span class="p">(</span><span class="n">ThreadingTCPServer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A simple TCP socket-based logging config receiver.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">allow_reuse_address</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">DEFAULT_LOGGING_CONFIG_PORT</span><span class="p">,</span>
+                     <span class="n">handler</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+            <span class="n">ThreadingTCPServer</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">),</span> <span class="n">handler</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">_acquireLock</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">abort</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">_releaseLock</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">def</span> <span class="nf">serve_until_stopped</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="kn">import</span> <span class="nn">select</span>
+            <span class="n">abort</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">abort</span><span class="p">:</span>
+                <span class="n">rd</span><span class="p">,</span> <span class="n">wr</span><span class="p">,</span> <span class="n">ex</span> <span class="o">=</span> <span class="n">select</span><span class="o">.</span><span class="n">select</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">fileno</span><span class="p">()],</span>
+                                           <span class="p">[],</span> <span class="p">[],</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">rd</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">handle_request</span><span class="p">()</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">_acquireLock</span><span class="p">()</span>
+                <span class="n">abort</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">abort</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">_releaseLock</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">serve</span><span class="p">(</span><span class="n">rcvr</span><span class="p">,</span> <span class="n">hdlr</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+        <span class="n">server</span> <span class="o">=</span> <span class="n">rcvr</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">handler</span><span class="o">=</span><span class="n">hdlr</span><span class="p">)</span>
+        <span class="k">global</span> <span class="n">_listener</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">_acquireLock</span><span class="p">()</span>
+        <span class="n">_listener</span> <span class="o">=</span> <span class="n">server</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">_releaseLock</span><span class="p">()</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">serve_until_stopped</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">serve</span><span class="p">,</span>
+                            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">ConfigSocketReceiver</span><span class="p">,</span>
+                                  <span class="n">ConfigStreamHandler</span><span class="p">,</span> <span class="n">port</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="stopListening"><a class="viewcode-back" href="../../auto_modules.html#gunicorn.logging_config.stopListening">[docs]</a><span class="k">def</span> <span class="nf">stopListening</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Stop the listening server which was created with a call to listen().</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_listener</span>
+    <span class="k">if</span> <span class="n">_listener</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">_acquireLock</span><span class="p">()</span>
+        <span class="n">_listener</span><span class="o">.</span><span class="n">abort</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">_listener</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">_releaseLock</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

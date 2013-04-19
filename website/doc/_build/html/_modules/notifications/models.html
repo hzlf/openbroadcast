@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>notifications.models &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for notifications.models</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes.models</span> <span class="kn">import</span> <span class="n">ContentType</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes</span> <span class="kn">import</span> <span class="n">generic</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.utils.timezone</span> <span class="kn">import</span> <span class="n">utc</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">id2slug</span>
+
+<span class="kn">from</span> <span class="nn">notifications.signals</span> <span class="kn">import</span> <span class="n">notify</span>
+
+<span class="kn">from</span> <span class="nn">model_utils</span> <span class="kn">import</span> <span class="n">managers</span><span class="p">,</span> <span class="n">Choices</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">timezone</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span>
+
+<div class="viewcode-block" id="NotificationQuerySet"><a class="viewcode-back" href="../../auto_modules.html#notifications.models.NotificationQuerySet">[docs]</a><span class="k">class</span> <span class="nc">NotificationQuerySet</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">QuerySet</span><span class="p">):</span>
+    
+<div class="viewcode-block" id="NotificationQuerySet.unread"><a class="viewcode-back" href="../../auto_modules.html#notifications.models.NotificationQuerySet.unread">[docs]</a>    <span class="k">def</span> <span class="nf">unread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;Return only unread items in the current queryset&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">unread</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="NotificationQuerySet.read"><a class="viewcode-back" href="../../auto_modules.html#notifications.models.NotificationQuerySet.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;Return only read items in the current queryset&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">unread</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="NotificationQuerySet.mark_all_as_read"><a class="viewcode-back" href="../../auto_modules.html#notifications.models.NotificationQuerySet.mark_all_as_read">[docs]</a>    <span class="k">def</span> <span class="nf">mark_all_as_read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recipient</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Mark as read any unread messages in the current queryset.</span>
+<span class="sd">        </span>
+<span class="sd">        Optionally, filter these by recipient first.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># We want to filter out read ones, as later we will store </span>
+        <span class="c"># the time they were marked as read.</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unread</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">recipient</span><span class="p">:</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">recipient</span><span class="o">=</span><span class="n">recipient</span><span class="p">)</span>
+        
+        <span class="n">qs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unread</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="NotificationQuerySet.mark_all_as_unread"><a class="viewcode-back" href="../../auto_modules.html#notifications.models.NotificationQuerySet.mark_all_as_unread">[docs]</a>    <span class="k">def</span> <span class="nf">mark_all_as_unread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recipient</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Mark as unread any read messages in the current queryset.</span>
+<span class="sd">        </span>
+<span class="sd">        Optionally, filter these by recipient first.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">recipient</span><span class="p">:</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">recipient</span><span class="o">=</span><span class="n">recipient</span><span class="p">)</span>
+            
+        <span class="n">qs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unread</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="Notification"><a class="viewcode-back" href="../../auto_modules.html#notifications.models.Notification">[docs]</a><span class="k">class</span> <span class="nc">Notification</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Action model describing the actor acting out a verb (on an optional</span>
+<span class="sd">    target).</span>
+<span class="sd">    Nomenclature based on http://activitystrea.ms/specs/atom/1.0/</span>
+
+<span class="sd">    Generalized Format::</span>
+
+<span class="sd">        &lt;actor&gt; &lt;verb&gt; &lt;time&gt;</span>
+<span class="sd">        &lt;actor&gt; &lt;verb&gt; &lt;target&gt; &lt;time&gt;</span>
+<span class="sd">        &lt;actor&gt; &lt;verb&gt; &lt;action_object&gt; &lt;target&gt; &lt;time&gt;</span>
+
+<span class="sd">    Examples::</span>
+
+<span class="sd">        &lt;justquick&gt; &lt;reached level 60&gt; &lt;1 minute ago&gt;</span>
+<span class="sd">        &lt;brosner&gt; &lt;commented on&gt; &lt;pinax/pinax&gt; &lt;2 hours ago&gt;</span>
+<span class="sd">        &lt;washingtontimes&gt; &lt;started follow&gt; &lt;justquick&gt; &lt;8 minutes ago&gt;</span>
+<span class="sd">        &lt;mitsuhiko&gt; &lt;closed&gt; &lt;issue 70&gt; on &lt;mitsuhiko/flask&gt; &lt;about 2 hours ago&gt;</span>
+
+<span class="sd">    Unicode Representation::</span>
+
+<span class="sd">        justquick reached level 60 1 minute ago</span>
+<span class="sd">        mitsuhiko closed issue 70 on mitsuhiko/flask 3 hours ago</span>
+
+<span class="sd">    HTML Representation::</span>
+
+<span class="sd">        &lt;a href=&quot;http://oebfare.com/&quot;&gt;brosner&lt;/a&gt; commented on &lt;a href=&quot;http://github.com/pinax/pinax&quot;&gt;pinax/pinax&lt;/a&gt; 2 hours ago</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">LEVELS</span> <span class="o">=</span> <span class="n">Choices</span><span class="p">(</span><span class="s">&#39;success&#39;</span><span class="p">,</span> <span class="s">&#39;info&#39;</span><span class="p">,</span> <span class="s">&#39;warning&#39;</span><span class="p">,</span> <span class="s">&#39;error&#39;</span><span class="p">)</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">LEVELS</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;info&#39;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    
+    <span class="n">recipient</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s">&#39;notifications&#39;</span><span class="p">)</span>
+    <span class="n">unread</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">actor_content_type</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">ContentType</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s">&#39;notify_actor&#39;</span><span class="p">)</span>
+    <span class="n">actor_object_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">actor</span> <span class="o">=</span> <span class="n">generic</span><span class="o">.</span><span class="n">GenericForeignKey</span><span class="p">(</span><span class="s">&#39;actor_content_type&#39;</span><span class="p">,</span> <span class="s">&#39;actor_object_id&#39;</span><span class="p">)</span>
+
+    <span class="n">verb</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">target_content_type</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">ContentType</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s">&#39;notify_target&#39;</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">target_object_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">generic</span><span class="o">.</span><span class="n">GenericForeignKey</span><span class="p">(</span><span class="s">&#39;target_content_type&#39;</span><span class="p">,</span>
+        <span class="s">&#39;target_object_id&#39;</span><span class="p">)</span>
+
+    <span class="n">action_object_content_type</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">ContentType</span><span class="p">,</span>
+        <span class="n">related_name</span><span class="o">=</span><span class="s">&#39;notify_action_object&#39;</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">action_object_object_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">action_object</span> <span class="o">=</span> <span class="n">generic</span><span class="o">.</span><span class="n">GenericForeignKey</span><span class="p">(</span><span class="s">&#39;action_object_content_type&#39;</span><span class="p">,</span>
+        <span class="s">&#39;action_object_object_id&#39;</span><span class="p">)</span>
+
+    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">now</span><span class="p">)</span>
+
+    <span class="n">public</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">managers</span><span class="o">.</span><span class="n">PassThroughManager</span><span class="o">.</span><span class="n">for_queryset_class</span><span class="p">(</span><span class="n">NotificationQuerySet</span><span class="p">)()</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">ordering</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;-timestamp&#39;</span><span class="p">,</span> <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ctx</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;actor&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">,</span>
+            <span class="s">&#39;verb&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">verb</span><span class="p">,</span>
+            <span class="s">&#39;action_object&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_object</span><span class="p">,</span>
+            <span class="s">&#39;target&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span>
+            <span class="s">&#39;timesince&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">timesince</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_object</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s">u&#39;</span><span class="si">%(actor)s</span><span class="s"> </span><span class="si">%(verb)s</span><span class="s"> </span><span class="si">%(action_object)s</span><span class="s"> on </span><span class="si">%(target)s</span><span class="s"> </span><span class="si">%(timesince)s</span><span class="s"> ago&#39;</span> <span class="o">%</span> <span class="n">ctx</span>
+            <span class="k">return</span> <span class="s">u&#39;</span><span class="si">%(actor)s</span><span class="s"> </span><span class="si">%(verb)s</span><span class="s"> </span><span class="si">%(target)s</span><span class="s"> </span><span class="si">%(timesince)s</span><span class="s"> ago&#39;</span> <span class="o">%</span> <span class="n">ctx</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_object</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">u&#39;</span><span class="si">%(actor)s</span><span class="s"> </span><span class="si">%(verb)s</span><span class="s"> </span><span class="si">%(action_object)s</span><span class="s"> </span><span class="si">%(timesince)s</span><span class="s"> ago&#39;</span> <span class="o">%</span> <span class="n">ctx</span>
+        <span class="k">return</span> <span class="s">u&#39;</span><span class="si">%(actor)s</span><span class="s"> </span><span class="si">%(verb)s</span><span class="s"> </span><span class="si">%(timesince)s</span><span class="s"> ago&#39;</span> <span class="o">%</span> <span class="n">ctx</span>
+
+<div class="viewcode-block" id="Notification.timesince"><a class="viewcode-back" href="../../auto_modules.html#notifications.models.Notification.timesince">[docs]</a>    <span class="k">def</span> <span class="nf">timesince</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">now</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shortcut for the ``django.utils.timesince.timesince`` function of the</span>
+<span class="sd">        current timestamp.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">django.utils.timesince</span> <span class="kn">import</span> <span class="n">timesince</span> <span class="k">as</span> <span class="n">timesince_</span>
+        <span class="k">return</span> <span class="n">timesince_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Notification.slug"><a class="viewcode-back" href="../../auto_modules.html#notifications.models.Notification.slug">[docs]</a>    <span class="k">def</span> <span class="nf">slug</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">id2slug</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Notification.mark_as_read"><a class="viewcode-back" href="../../auto_modules.html#notifications.models.Notification.mark_as_read">[docs]</a>    <span class="k">def</span> <span class="nf">mark_as_read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unread</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unread</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</div></div>
+<span class="n">EXTRA_DATA</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;NOTIFY_USE_JSONFIELD&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">jsonfield.fields</span> <span class="kn">import</span> <span class="n">JSONField</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="s">&quot;You must have a suitable JSONField installed&quot;</span><span class="p">)</span>
+    
+    <span class="n">JSONField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">contribute_to_class</span><span class="p">(</span><span class="n">Notification</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">)</span>
+    <span class="n">EXTRA_DATA</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+<div class="viewcode-block" id="notify_handler"><a class="viewcode-back" href="../../auto_modules.html#notifications.models.notify_handler">[docs]</a><span class="k">def</span> <span class="nf">notify_handler</span><span class="p">(</span><span class="n">verb</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handler function to create Notification instance upon action signal call.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;signal&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">recipient</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;recipient&#39;</span><span class="p">)</span>
+    <span class="n">actor</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;sender&#39;</span><span class="p">)</span>
+    <span class="n">newnotify</span> <span class="o">=</span> <span class="n">Notification</span><span class="p">(</span>
+        <span class="n">recipient</span> <span class="o">=</span> <span class="n">recipient</span><span class="p">,</span>
+        <span class="n">actor_content_type</span><span class="o">=</span><span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">actor</span><span class="p">),</span>
+        <span class="n">actor_object_id</span><span class="o">=</span><span class="n">actor</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span>
+        <span class="n">verb</span><span class="o">=</span><span class="nb">unicode</span><span class="p">(</span><span class="n">verb</span><span class="p">),</span>
+        <span class="n">public</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;public&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)),</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;description&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+        <span class="n">timestamp</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;timestamp&#39;</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">utc</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;target&#39;</span><span class="p">,</span> <span class="s">&#39;action_object&#39;</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">newnotify</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">_object_id&#39;</span> <span class="o">%</span> <span class="n">opt</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">newnotify</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">_content_type&#39;</span> <span class="o">%</span> <span class="n">opt</span><span class="p">,</span>
+                    <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="ow">and</span> <span class="n">EXTRA_DATA</span><span class="p">:</span>
+        <span class="n">newnotify</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+    <span class="n">newnotify</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+
+<span class="c"># connect the signal</span></div>
+<span class="n">notify</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">notify_handler</span><span class="p">,</span> <span class="n">dispatch_uid</span><span class="o">=</span><span class="s">&#39;notifications.models.notification&#39;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

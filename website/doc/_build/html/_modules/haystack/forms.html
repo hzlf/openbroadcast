@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>haystack.forms &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for haystack.forms</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.utils.text</span> <span class="kn">import</span> <span class="n">capfirst</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">smart_unicode</span>
+<span class="kn">from</span> <span class="nn">haystack</span> <span class="kn">import</span> <span class="n">connections</span>
+<span class="kn">from</span> <span class="nn">haystack.constants</span> <span class="kn">import</span> <span class="n">DEFAULT_ALIAS</span>
+<span class="kn">from</span> <span class="nn">haystack.query</span> <span class="kn">import</span> <span class="n">SearchQuerySet</span><span class="p">,</span> <span class="n">EmptySearchQuerySet</span>
+
+
+<div class="viewcode-block" id="model_choices"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.model_choices">[docs]</a><span class="k">def</span> <span class="nf">model_choices</span><span class="p">(</span><span class="n">using</span><span class="o">=</span><span class="n">DEFAULT_ALIAS</span><span class="p">):</span>
+    <span class="n">choices</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">module_name</span><span class="p">),</span> <span class="n">capfirst</span><span class="p">(</span><span class="n">smart_unicode</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">verbose_name_plural</span><span class="p">)))</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">connections</span><span class="p">[</span><span class="n">using</span><span class="p">]</span><span class="o">.</span><span class="n">get_unified_index</span><span class="p">()</span><span class="o">.</span><span class="n">get_indexed_models</span><span class="p">()]</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">choices</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="SearchForm"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.SearchForm">[docs]</a><span class="k">class</span> <span class="nc">SearchForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Search&#39;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searchqueryset</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;searchqueryset&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_all</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;load_all&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchqueryset</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">searchqueryset</span> <span class="o">=</span> <span class="n">SearchQuerySet</span><span class="p">()</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">SearchForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SearchForm.no_query_found"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.SearchForm.no_query_found">[docs]</a>    <span class="k">def</span> <span class="nf">no_query_found</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determines the behavior when no query was found.</span>
+
+<span class="sd">        By default, no results are returned (``EmptySearchQuerySet``).</span>
+
+<span class="sd">        Should you want to show all results, override this method in your</span>
+<span class="sd">        own ``SearchForm`` subclass and do ``return self.searchqueryset.all()``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">EmptySearchQuerySet</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="SearchForm.search"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.SearchForm.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_query_found</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;q&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_query_found</span><span class="p">()</span>
+
+        <span class="n">sqs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchqueryset</span><span class="o">.</span><span class="n">auto_query</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;q&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_all</span><span class="p">:</span>
+            <span class="n">sqs</span> <span class="o">=</span> <span class="n">sqs</span><span class="o">.</span><span class="n">load_all</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">sqs</span>
+</div>
+<div class="viewcode-block" id="SearchForm.get_suggestion"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.SearchForm.get_suggestion">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchqueryset</span><span class="o">.</span><span class="n">spelling_suggestion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;q&#39;</span><span class="p">])</span>
+
+</div></div>
+<div class="viewcode-block" id="HighlightedSearchForm"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.HighlightedSearchForm">[docs]</a><span class="k">class</span> <span class="nc">HighlightedSearchForm</span><span class="p">(</span><span class="n">SearchForm</span><span class="p">):</span>
+<div class="viewcode-block" id="HighlightedSearchForm.search"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.HighlightedSearchForm.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">HighlightedSearchForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">()</span><span class="o">.</span><span class="n">highlight</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="FacetedSearchForm"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.FacetedSearchForm">[docs]</a><span class="k">class</span> <span class="nc">FacetedSearchForm</span><span class="p">(</span><span class="n">SearchForm</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_facets</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;selected_facets&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FacetedSearchForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FacetedSearchForm.search"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.FacetedSearchForm.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sqs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">FacetedSearchForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">()</span>
+
+        <span class="c"># We need to process each facet to ensure that the field name and the</span>
+        <span class="c"># value are quoted correctly and separately:</span>
+        <span class="k">for</span> <span class="n">facet</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_facets</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&quot;:&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">facet</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">field</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">facet</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+                <span class="n">sqs</span> <span class="o">=</span> <span class="n">sqs</span><span class="o">.</span><span class="n">narrow</span><span class="p">(</span><span class="s">u&#39;</span><span class="si">%s</span><span class="s">:&quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">sqs</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">clean</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">sqs</span>
+
+</div></div>
+<div class="viewcode-block" id="ModelSearchForm"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.ModelSearchForm">[docs]</a><span class="k">class</span> <span class="nc">ModelSearchForm</span><span class="p">(</span><span class="n">SearchForm</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ModelSearchForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s">&#39;models&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">MultipleChoiceField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">model_choices</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Search In&#39;</span><span class="p">),</span> <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">CheckboxSelectMultiple</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ModelSearchForm.get_models"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.ModelSearchForm.get_models">[docs]</a>    <span class="k">def</span> <span class="nf">get_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return an alphabetical list of model classes in the index.&quot;&quot;&quot;</span>
+        <span class="n">search_models</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;models&#39;</span><span class="p">]:</span>
+                <span class="n">search_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="o">*</span><span class="n">model</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">search_models</span>
+</div>
+<div class="viewcode-block" id="ModelSearchForm.search"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.ModelSearchForm.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sqs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ModelSearchForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">sqs</span><span class="o">.</span><span class="n">models</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">get_models</span><span class="p">())</span>
+
+</div></div>
+<div class="viewcode-block" id="HighlightedModelSearchForm"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.HighlightedModelSearchForm">[docs]</a><span class="k">class</span> <span class="nc">HighlightedModelSearchForm</span><span class="p">(</span><span class="n">ModelSearchForm</span><span class="p">):</span>
+<div class="viewcode-block" id="HighlightedModelSearchForm.search"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.HighlightedModelSearchForm.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">HighlightedModelSearchForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">()</span><span class="o">.</span><span class="n">highlight</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="FacetedModelSearchForm"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.FacetedModelSearchForm">[docs]</a><span class="k">class</span> <span class="nc">FacetedModelSearchForm</span><span class="p">(</span><span class="n">ModelSearchForm</span><span class="p">):</span>
+    <span class="n">selected_facets</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">HiddenInput</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FacetedModelSearchForm.search"><a class="viewcode-back" href="../../auto_modules.html#haystack.forms.FacetedModelSearchForm.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sqs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">FacetedModelSearchForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;cleaned_data&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;selected_facets&#39;</span><span class="p">]:</span>
+            <span class="n">sqs</span> <span class="o">=</span> <span class="n">sqs</span><span class="o">.</span><span class="n">narrow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;selected_facets&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">sqs</span><span class="o">.</span><span class="n">models</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">get_models</span><span class="p">())</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

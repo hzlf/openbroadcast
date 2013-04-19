@@ -42,6 +42,9 @@ from filer.fields.file import FilerFileField
 from django_countries import CountryField
 from easy_thumbnails.files import get_thumbnailer
 
+import tagging
+import reversion 
+
 
 
 # logging
@@ -71,9 +74,14 @@ class Artist(MigrationMixin):
     name = models.CharField(max_length=200, db_index=True)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
-    main_image = FilerImageField(null=True, blank=True, related_name="artist_main_image", rel='')
     
+    type = models.CharField(verbose_name="Artist type", max_length=120, blank=True, null=True)
+    main_image = FilerImageField(null=True, blank=True, related_name="artist_main_image", rel='')
     real_name = models.CharField(max_length=200, blank=True, null=True)
+    disambiguation = models.CharField(max_length=256, blank=True, null=True)
+    
+    date_start = models.DateField(null=True, blank=True)
+    date_end = models.DateField(null=True, blank=True)
     
     
     PRIORITY_CHOICES = (
@@ -105,9 +113,21 @@ class Artist(MigrationMixin):
     
     folder = models.ForeignKey(Folder, blank=True, null=True, related_name='artist_folder', on_delete=models.SET_NULL)
     
+    # relations a.k.a. links
     relations = generic.GenericRelation(Relation)
     
+    # tagging (d_tags = "display tags")
+    d_tags = tagging.fields.TagField(verbose_name="Tags", blank=True, null=True)
+ 
+    
     professions = models.ManyToManyField(Profession, through='ArtistProfessions')
+    
+    # user relations
+    owner = models.ForeignKey(User, blank=True, null=True, related_name="artists_owner", on_delete=models.SET_NULL)
+    creator = models.ForeignKey(User, blank=True, null=True, related_name="artists_creator", on_delete=models.SET_NULL)
+    publisher = models.ForeignKey(User, blank=True, null=True, related_name="artists_publisher", on_delete=models.SET_NULL)
+
+    
     
     # tagging
     #tags = TaggableManager(blank=True)
@@ -210,8 +230,25 @@ class Artist(MigrationMixin):
         
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
+        
+        # update d_tags
+        t_tags = ''
+        for tag in self.tags:
+            t_tags += '%s, ' % tag    
+        
+        self.tags = t_tags;
+        self.d_tags = t_tags;
+        
         super(Artist, self).save(*args, **kwargs)
     
+    
+
+
+try:
+    tagging.register(Artist)
+except:
+    pass
+
 # register
 post_save.connect(library_post_save, sender=Artist)      
 

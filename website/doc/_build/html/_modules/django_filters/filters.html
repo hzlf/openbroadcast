@@ -1,0 +1,253 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django_filters.filters &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for django_filters.filters</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">django.db.models.sql.constants</span> <span class="kn">import</span> <span class="n">QUERY_TERMS</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="kn">from</span> <span class="nn">django_filters.fields</span> <span class="kn">import</span> <span class="n">RangeField</span><span class="p">,</span> <span class="n">LookupTypeField</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&#39;Filter&#39;</span><span class="p">,</span> <span class="s">&#39;CharFilter&#39;</span><span class="p">,</span> <span class="s">&#39;BooleanFilter&#39;</span><span class="p">,</span> <span class="s">&#39;ChoiceFilter&#39;</span><span class="p">,</span>
+    <span class="s">&#39;MultipleChoiceFilter&#39;</span><span class="p">,</span> <span class="s">&#39;DateFilter&#39;</span><span class="p">,</span> <span class="s">&#39;DateTimeFilter&#39;</span><span class="p">,</span> <span class="s">&#39;TimeFilter&#39;</span><span class="p">,</span>
+    <span class="s">&#39;ModelChoiceFilter&#39;</span><span class="p">,</span> <span class="s">&#39;ModelMultipleChoiceFilter&#39;</span><span class="p">,</span> <span class="s">&#39;NumberFilter&#39;</span><span class="p">,</span>
+    <span class="s">&#39;RangeFilter&#39;</span><span class="p">,</span> <span class="s">&#39;DateRangeFilter&#39;</span><span class="p">,</span> <span class="s">&#39;AllValuesFilter&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">LOOKUP_TYPES</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">QUERY_TERMS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<div class="viewcode-block" id="Filter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.Filter">[docs]</a><span class="k">class</span> <span class="nc">Filter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">creation_counter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">field_class</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">Field</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">lookup_type</span><span class="o">=</span><span class="s">&#39;exact&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="k">if</span> <span class="n">action</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filter</span> <span class="o">=</span> <span class="n">action</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lookup_type</span> <span class="o">=</span> <span class="n">lookup_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="n">required</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extra</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">creation_counter</span> <span class="o">=</span> <span class="n">Filter</span><span class="o">.</span><span class="n">creation_counter</span>
+        <span class="n">Filter</span><span class="o">.</span><span class="n">creation_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Filter.field"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.Filter.field">[docs]</a>    <span class="k">def</span> <span class="nf">field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_field&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_type</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lookup_type</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_type</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">lookup</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">LOOKUP_TYPES</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">lookup</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">LOOKUP_TYPES</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_type</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_field</span> <span class="o">=</span> <span class="n">LookupTypeField</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_class</span><span class="p">(</span>
+                    <span class="n">required</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">required</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">),</span>
+                    <span class="n">lookup</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">required</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_class</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">required</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field</span>
+</div>
+<div class="viewcode-block" id="Filter.filter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.Filter.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qs</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">qs</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">lookup</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">lookup</span><span class="p">:</span>
+                <span class="n">lookup</span> <span class="o">=</span> <span class="s">&#39;exact&#39;</span> <span class="c"># we fallback to exact if no choice for lookup is provided</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lookup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_type</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">__</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">lookup</span><span class="p">):</span> <span class="n">value</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">qs</span>
+</div></div>
+<div class="viewcode-block" id="CharFilter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.CharFilter">[docs]</a><span class="k">class</span> <span class="nc">CharFilter</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
+    <span class="n">field_class</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span>
+</div>
+<div class="viewcode-block" id="BooleanFilter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.BooleanFilter">[docs]</a><span class="k">class</span> <span class="nc">BooleanFilter</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
+    <span class="n">field_class</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">NullBooleanField</span>
+
+<div class="viewcode-block" id="BooleanFilter.filter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.BooleanFilter.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qs</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">qs</span>
+</div></div>
+<div class="viewcode-block" id="ChoiceFilter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.ChoiceFilter">[docs]</a><span class="k">class</span> <span class="nc">ChoiceFilter</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
+    <span class="n">field_class</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span>
+</div>
+<div class="viewcode-block" id="MultipleChoiceFilter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.MultipleChoiceFilter">[docs]</a><span class="k">class</span> <span class="nc">MultipleChoiceFilter</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This filter preforms an OR query on the selected options.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">field_class</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">MultipleChoiceField</span>
+
+<div class="viewcode-block" id="MultipleChoiceFilter.filter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.MultipleChoiceFilter.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qs</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="ow">or</span> <span class="p">()</span>
+        <span class="c"># TODO: this is a bit of a hack, but ModelChoiceIterator doesn&#39;t have a</span>
+        <span class="c"># __len__ method</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">choices</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">qs</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">Q</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">|=</span> <span class="n">Q</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">v</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span>
+</div></div>
+<div class="viewcode-block" id="DateFilter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.DateFilter">[docs]</a><span class="k">class</span> <span class="nc">DateFilter</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
+    <span class="n">field_class</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">DateField</span>
+</div>
+<div class="viewcode-block" id="DateTimeFilter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.DateTimeFilter">[docs]</a><span class="k">class</span> <span class="nc">DateTimeFilter</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
+    <span class="n">field_class</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">DateTimeField</span>
+</div>
+<div class="viewcode-block" id="TimeFilter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.TimeFilter">[docs]</a><span class="k">class</span> <span class="nc">TimeFilter</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
+    <span class="n">field_class</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">TimeField</span>
+</div>
+<div class="viewcode-block" id="ModelChoiceFilter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.ModelChoiceFilter">[docs]</a><span class="k">class</span> <span class="nc">ModelChoiceFilter</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
+    <span class="n">field_class</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ModelChoiceField</span>
+</div>
+<div class="viewcode-block" id="ModelMultipleChoiceFilter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.ModelMultipleChoiceFilter">[docs]</a><span class="k">class</span> <span class="nc">ModelMultipleChoiceFilter</span><span class="p">(</span><span class="n">MultipleChoiceFilter</span><span class="p">):</span>
+    <span class="n">field_class</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ModelMultipleChoiceField</span>
+</div>
+<div class="viewcode-block" id="NumberFilter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.NumberFilter">[docs]</a><span class="k">class</span> <span class="nc">NumberFilter</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
+    <span class="n">field_class</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">DecimalField</span>
+</div>
+<div class="viewcode-block" id="RangeFilter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.RangeFilter">[docs]</a><span class="k">class</span> <span class="nc">RangeFilter</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
+    <span class="n">field_class</span> <span class="o">=</span> <span class="n">RangeField</span>
+
+<div class="viewcode-block" id="RangeFilter.filter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.RangeFilter.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qs</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">__range&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">stop</span><span class="p">)})</span>
+        <span class="k">return</span> <span class="n">qs</span>
+</div></div>
+<div class="viewcode-block" id="DateRangeFilter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.DateRangeFilter">[docs]</a><span class="k">class</span> <span class="nc">DateRangeFilter</span><span class="p">(</span><span class="n">ChoiceFilter</span><span class="p">):</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Any Date&#39;</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">qs</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">qs</span><span class="o">.</span><span class="n">all</span><span class="p">()),</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Today&#39;</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">qs</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="p">{</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s">__year&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">year</span><span class="p">,</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s">__month&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">month</span><span class="p">,</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s">__day&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">day</span>
+        <span class="p">})),</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Past 7 days&#39;</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">qs</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="p">{</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s">__gte&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">:</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">7</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s">&#39;</span><span class="p">),</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s">__lt&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">:</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">+</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s">&#39;</span><span class="p">),</span>
+        <span class="p">})),</span>
+        <span class="mi">3</span><span class="p">:</span> <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;This month&#39;</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">qs</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="p">{</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s">__year&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">year</span><span class="p">,</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s">__month&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">month</span>
+        <span class="p">})),</span>
+        <span class="mi">4</span><span class="p">:</span> <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;This year&#39;</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">qs</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="p">{</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s">__year&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">year</span><span class="p">,</span>
+        <span class="p">})),</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;choices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()]</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DateRangeFilter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DateRangeFilter.filter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.DateRangeFilter.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qs</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">value</span><span class="p">][</span><span class="mi">1</span><span class="p">](</span><span class="n">qs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="AllValuesFilter"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.AllValuesFilter">[docs]</a><span class="k">class</span> <span class="nc">AllValuesFilter</span><span class="p">(</span><span class="n">ChoiceFilter</span><span class="p">):</span>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="AllValuesFilter.field"><a class="viewcode-back" href="../../auto_modules.html#django_filters.filters.AllValuesFilter.field">[docs]</a>    <span class="k">def</span> <span class="nf">field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_default_manager</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">[</span><span class="s">&#39;choices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">o</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">qs</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">AllValuesFilter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">field</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

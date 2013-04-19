@@ -11,8 +11,10 @@ def get_models():
     Only call this right before you need to inspect the models
     """
     models = {}
+    """"""
     for model in SETTINGS.get('MODELS', ('auth.User',)):
         models[model.lower()] = get_model(*model.split('.'))
+    
     return models
 
 def get_action_manager():

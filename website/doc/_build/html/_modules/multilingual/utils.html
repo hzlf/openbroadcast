@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>multilingual.utils &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for multilingual.utils</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">multilingual.languages</span> <span class="kn">import</span> <span class="n">get_default_language</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">django.utils.decorators</span> <span class="kn">import</span> <span class="n">auto_adapt_to_methods</span> <span class="k">as</span> <span class="n">method_decorator</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">django.utils.decorators</span> <span class="kn">import</span> <span class="n">method_decorator</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">local</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">django.utils._threading_local</span> <span class="kn">import</span> <span class="n">local</span>
+
+<span class="n">_thread_locals</span> <span class="o">=</span> <span class="n">local</span><span class="p">()</span>
+<span class="n">_thread_locals</span><span class="o">.</span><span class="n">gll_language_code</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="is_multilingual_model"><a class="viewcode-back" href="../../auto_modules.html#multilingual.utils.is_multilingual_model">[docs]</a><span class="k">def</span> <span class="nf">is_multilingual_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return True if `model` is a multilingual model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span> <span class="s">&#39;translation_model&#39;</span><span class="p">)</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_get_language_code</span><span class="p">():</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">_thread_locals</span><span class="p">,</span> <span class="s">&#39;gll_language_code&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_set_language_code</span><span class="p">(</span><span class="n">lang</span><span class="p">):</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">_thread_locals</span><span class="p">,</span> <span class="s">&#39;gll_language_code&#39;</span><span class="p">,</span> <span class="n">lang</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="GLLError"><a class="viewcode-back" href="../../auto_modules.html#multilingual.utils.GLLError">[docs]</a><span class="k">class</span> <span class="nc">GLLError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span> <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="GlobalLanguageLock"><a class="viewcode-back" href="../../auto_modules.html#multilingual.utils.GlobalLanguageLock">[docs]</a><span class="k">class</span> <span class="nc">GlobalLanguageLock</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Global Language Lock can be used to force django-multilingual-ng to use</span>
+<span class="sd">    a specific language and not try to fall back.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="GlobalLanguageLock.lock"><a class="viewcode-back" href="../../auto_modules.html#multilingual.utils.GlobalLanguageLock.lock">[docs]</a>    <span class="k">def</span> <span class="nf">lock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">language_code</span><span class="p">):</span>
+        <span class="n">_set_language_code</span><span class="p">(</span><span class="n">language_code</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="GlobalLanguageLock.release"><a class="viewcode-back" href="../../auto_modules.html#multilingual.utils.GlobalLanguageLock.release">[docs]</a>    <span class="k">def</span> <span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">_set_language_code</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        </div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="GlobalLanguageLock.language_code"><a class="viewcode-back" href="../../auto_modules.html#multilingual.utils.GlobalLanguageLock.language_code">[docs]</a>    <span class="k">def</span> <span class="nf">language_code</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">lang_code</span> <span class="o">=</span> <span class="n">_get_language_code</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">lang_code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lang_code</span>
+        <span class="k">raise</span> <span class="n">GLLError</span><span class="p">(</span><span class="s">&quot;The Global Language Lock is not active&quot;</span><span class="p">)</span>
+        </div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="GlobalLanguageLock.is_active"><a class="viewcode-back" href="../../auto_modules.html#multilingual.utils.GlobalLanguageLock.is_active">[docs]</a>    <span class="k">def</span> <span class="nf">is_active</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_get_language_code</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        </div></div>
+<span class="n">GLL</span> <span class="o">=</span> <span class="n">GlobalLanguageLock</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="gll_unlock_decorator"><a class="viewcode-back" href="../../auto_modules.html#multilingual.utils.gll_unlock_decorator">[docs]</a><span class="k">def</span> <span class="nf">gll_unlock_decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_decorated</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">GLL</span><span class="o">.</span><span class="n">is_active</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">language_code</span> <span class="o">=</span> <span class="n">GLL</span><span class="o">.</span><span class="n">language_code</span>
+        <span class="n">GLL</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">GLL</span><span class="o">.</span><span class="n">lock</span><span class="p">(</span><span class="n">language_code</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="n">_decorated</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">__name__</span>
+    <span class="n">_decorated</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">__doc__</span>
+    <span class="k">return</span> <span class="n">_decorated</span></div>
+<span class="n">gll_unlock</span> <span class="o">=</span> <span class="n">method_decorator</span><span class="p">(</span><span class="n">gll_unlock_decorator</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

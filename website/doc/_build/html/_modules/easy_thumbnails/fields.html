@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>easy_thumbnails.fields &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for easy_thumbnails.fields</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.db.models.fields.files</span> <span class="kn">import</span> <span class="n">FileField</span><span class="p">,</span> <span class="n">ImageField</span>
+<span class="kn">from</span> <span class="nn">easy_thumbnails</span> <span class="kn">import</span> <span class="n">files</span>
+
+
+<div class="viewcode-block" id="ThumbnailerField"><a class="viewcode-back" href="../../auto_modules.html#easy_thumbnails.fields.ThumbnailerField">[docs]</a><span class="k">class</span> <span class="nc">ThumbnailerField</span><span class="p">(</span><span class="n">FileField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A file field which provides easier access for retrieving (and generating)</span>
+<span class="sd">    thumbnails.</span>
+
+<span class="sd">    To use a different file storage for thumbnails, provide the</span>
+<span class="sd">    ``thumbnail_storage`` keyword argument.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">attr_class</span> <span class="o">=</span> <span class="n">files</span><span class="o">.</span><span class="n">ThumbnailerFieldFile</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c"># Arguments not explicitly defined so that the normal ImageField</span>
+        <span class="c"># positional arguments can be used.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thumbnail_storage</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;thumbnail_storage&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ThumbnailerField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ThumbnailerField.south_field_triple"><a class="viewcode-back" href="../../auto_modules.html#easy_thumbnails.fields.ThumbnailerField.south_field_triple">[docs]</a>    <span class="k">def</span> <span class="nf">south_field_triple</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a suitable description of this field for South.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">south.modelsinspector</span> <span class="kn">import</span> <span class="n">introspector</span>
+        <span class="n">field_class</span> <span class="o">=</span> <span class="s">&#39;django.db.models.fields.files.FileField&#39;</span>
+        <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="n">introspector</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">field_class</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="ThumbnailerImageField"><a class="viewcode-back" href="../../auto_modules.html#easy_thumbnails.fields.ThumbnailerImageField">[docs]</a><span class="k">class</span> <span class="nc">ThumbnailerImageField</span><span class="p">(</span><span class="n">ThumbnailerField</span><span class="p">,</span> <span class="n">ImageField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An image field which provides easier access for retrieving (and generating)</span>
+<span class="sd">    thumbnails.</span>
+
+<span class="sd">    To use a different file storage for thumbnails, provide the</span>
+<span class="sd">    ``thumbnail_storage`` keyword argument.</span>
+
+<span class="sd">    To thumbnail the original source image before saving, provide the</span>
+<span class="sd">    ``resize_source`` keyword argument, passing it a usual thumbnail option</span>
+<span class="sd">    dictionary. For example::</span>
+
+<span class="sd">        ThumbnailField(..., resize_source=dict(size=(100, 100), sharpen=True))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">attr_class</span> <span class="o">=</span> <span class="n">files</span><span class="o">.</span><span class="n">ThumbnailerImageFieldFile</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c"># Arguments not explicitly defined so that the normal ImageField</span>
+        <span class="c"># positional arguments can be used.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resize_source</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;resize_source&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ThumbnailerImageField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ThumbnailerImageField.south_field_triple"><a class="viewcode-back" href="../../auto_modules.html#easy_thumbnails.fields.ThumbnailerImageField.south_field_triple">[docs]</a>    <span class="k">def</span> <span class="nf">south_field_triple</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a suitable description of this field for South.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">south.modelsinspector</span> <span class="kn">import</span> <span class="n">introspector</span>
+        <span class="n">field_class</span> <span class="o">=</span> <span class="s">&#39;django.db.models.fields.files.ImageField&#39;</span>
+        <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="n">introspector</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">field_class</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

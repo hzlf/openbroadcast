@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>actstream.settings &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for actstream.settings</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">django</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">get_model</span>
+
+
+<span class="n">SETTINGS</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;ACTSTREAM_SETTINGS&#39;</span><span class="p">,</span> <span class="p">{})</span>
+
+<div class="viewcode-block" id="get_models"><a class="viewcode-back" href="../../auto_modules.html#actstream.settings.get_models">[docs]</a><span class="k">def</span> <span class="nf">get_models</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a lookup of &#39;app_label.model&#39;: &lt;model class&gt; from ACTSTREAM_SETTINGS[&#39;MODELS&#39;]</span>
+<span class="sd">    Only call this right before you need to inspect the models</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">SETTINGS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;MODELS&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;auth.User&#39;</span><span class="p">,)):</span>
+        <span class="n">models</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">get_model</span><span class="p">(</span><span class="o">*</span><span class="n">model</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">models</span>
+</div>
+<div class="viewcode-block" id="get_action_manager"><a class="viewcode-back" href="../../auto_modules.html#actstream.settings.get_action_manager">[docs]</a><span class="k">def</span> <span class="nf">get_action_manager</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the class of the action manager to use from ACTSTREAM_SETTINGS[&#39;MANAGER&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mod</span> <span class="o">=</span> <span class="n">SETTINGS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;MANAGER&#39;</span><span class="p">,</span> <span class="s">&#39;actstream.managers.ActionManager&#39;</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="s">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">__import__</span><span class="p">(</span><span class="n">j</span><span class="p">(</span><span class="n">a</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="p">{},</span> <span class="p">{},</span> <span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]),</span> <span class="n">a</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])()</span>
+</div>
+<span class="n">USE_PREFETCH</span> <span class="o">=</span> <span class="n">SETTINGS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;USE_PREFETCH&#39;</span><span class="p">,</span>
+                            <span class="n">django</span><span class="o">.</span><span class="n">VERSION</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">django</span><span class="o">.</span><span class="n">VERSION</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">)</span>
+
+<span class="n">FETCH_RELATIONS</span> <span class="o">=</span> <span class="n">SETTINGS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;FETCH_RELATIONS&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+
+<span class="n">GFK_FETCH_DEPTH</span> <span class="o">=</span> <span class="n">SETTINGS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;GFK_FETCH_DEPTH&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">USE_JSONFIELD</span> <span class="o">=</span> <span class="n">SETTINGS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;USE_JSONFIELD&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

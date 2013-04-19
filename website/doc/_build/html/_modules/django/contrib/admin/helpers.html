@@ -1,0 +1,444 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django.contrib.admin.helpers &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for django.contrib.admin.helpers</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.contrib.admin.util</span> <span class="kn">import</span> <span class="p">(</span><span class="n">flatten_fieldsets</span><span class="p">,</span> <span class="n">lookup_field</span><span class="p">,</span>
+    <span class="n">display_for_field</span><span class="p">,</span> <span class="n">label_for_field</span><span class="p">,</span> <span class="n">help_text_for_field</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">django.contrib.admin.templatetags.admin_static</span> <span class="kn">import</span> <span class="n">static</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes.models</span> <span class="kn">import</span> <span class="n">ContentType</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ObjectDoesNotExist</span>
+<span class="kn">from</span> <span class="nn">django.db.models.fields.related</span> <span class="kn">import</span> <span class="n">ManyToManyRel</span>
+<span class="kn">from</span> <span class="nn">django.forms.util</span> <span class="kn">import</span> <span class="n">flatatt</span>
+<span class="kn">from</span> <span class="nn">django.template.defaultfilters</span> <span class="kn">import</span> <span class="n">capfirst</span>
+<span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">force_unicode</span><span class="p">,</span> <span class="n">smart_unicode</span>
+<span class="kn">from</span> <span class="nn">django.utils.html</span> <span class="kn">import</span> <span class="n">escape</span><span class="p">,</span> <span class="n">conditional_escape</span>
+<span class="kn">from</span> <span class="nn">django.utils.safestring</span> <span class="kn">import</span> <span class="n">mark_safe</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+
+
+<span class="n">ACTION_CHECKBOX_NAME</span> <span class="o">=</span> <span class="s">&#39;_selected_action&#39;</span>
+
+<div class="viewcode-block" id="ActionForm"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.ActionForm">[docs]</a><span class="k">class</span> <span class="nc">ActionForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Action:&#39;</span><span class="p">))</span>
+    <span class="n">select_across</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">initial</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">HiddenInput</span><span class="p">({</span><span class="s">&#39;class&#39;</span><span class="p">:</span> <span class="s">&#39;select-across&#39;</span><span class="p">}))</span>
+</div>
+<span class="n">checkbox</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CheckboxInput</span><span class="p">({</span><span class="s">&#39;class&#39;</span><span class="p">:</span> <span class="s">&#39;action-select&#39;</span><span class="p">},</span> <span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="bp">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AdminForm"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.AdminForm">[docs]</a><span class="k">class</span> <span class="nc">AdminForm</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">fieldsets</span><span class="p">,</span> <span class="n">prepopulated_fields</span><span class="p">,</span> <span class="n">readonly_fields</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">model_admin</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldsets</span> <span class="o">=</span> <span class="n">form</span><span class="p">,</span> <span class="n">normalize_fieldsets</span><span class="p">(</span><span class="n">fieldsets</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prepopulated_fields</span> <span class="o">=</span> <span class="p">[{</span>
+            <span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">[</span><span class="n">field_name</span><span class="p">],</span>
+            <span class="s">&#39;dependencies&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">form</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dependencies</span><span class="p">]</span>
+        <span class="p">}</span> <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">dependencies</span> <span class="ow">in</span> <span class="n">prepopulated_fields</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_admin</span> <span class="o">=</span> <span class="n">model_admin</span>
+        <span class="k">if</span> <span class="n">readonly_fields</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">readonly_fields</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">readonly_fields</span> <span class="o">=</span> <span class="n">readonly_fields</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldsets</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">Fieldset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
+                <span class="n">readonly_fields</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">readonly_fields</span><span class="p">,</span>
+                <span class="n">model_admin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_admin</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">options</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="AdminForm.first_field"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.AdminForm.first_field">[docs]</a>    <span class="k">def</span> <span class="nf">first_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fieldset_name</span><span class="p">,</span> <span class="n">fieldset_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldsets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">field_name</span> <span class="o">=</span> <span class="n">fieldset_options</span><span class="p">[</span><span class="s">&#39;fields&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_name</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+                <span class="n">field_name</span> <span class="o">=</span> <span class="n">field_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+</div>
+    <span class="k">def</span> <span class="nf">_media</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">media</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">media</span>
+        <span class="k">for</span> <span class="n">fs</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">media</span> <span class="o">=</span> <span class="n">media</span> <span class="o">+</span> <span class="n">fs</span><span class="o">.</span><span class="n">media</span>
+        <span class="k">return</span> <span class="n">media</span>
+    <span class="n">media</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_media</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Fieldset"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.Fieldset">[docs]</a><span class="k">class</span> <span class="nc">Fieldset</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">readonly_fields</span><span class="o">=</span><span class="p">(),</span> <span class="n">fields</span><span class="o">=</span><span class="p">(),</span> <span class="n">classes</span><span class="o">=</span><span class="p">(),</span>
+      <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">model_admin</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">=</span> <span class="n">form</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="n">name</span><span class="p">,</span> <span class="n">fields</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="s">u&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_admin</span> <span class="o">=</span> <span class="n">model_admin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">readonly_fields</span> <span class="o">=</span> <span class="n">readonly_fields</span>
+
+    <span class="k">def</span> <span class="nf">_media</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s">&#39;collapse&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">:</span>
+            <span class="n">extra</span> <span class="o">=</span> <span class="s">&#39;&#39;</span> <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">else</span> <span class="s">&#39;.min&#39;</span>
+            <span class="n">js</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;jquery</span><span class="si">%s</span><span class="s">.js&#39;</span> <span class="o">%</span> <span class="n">extra</span><span class="p">,</span>
+                  <span class="s">&#39;jquery.init.js&#39;</span><span class="p">,</span>
+                  <span class="s">&#39;collapse</span><span class="si">%s</span><span class="s">.js&#39;</span> <span class="o">%</span> <span class="n">extra</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">forms</span><span class="o">.</span><span class="n">Media</span><span class="p">(</span><span class="n">js</span><span class="o">=</span><span class="p">[</span><span class="n">static</span><span class="p">(</span><span class="s">&#39;admin/js/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">url</span><span class="p">)</span> <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">js</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">forms</span><span class="o">.</span><span class="n">Media</span><span class="p">()</span>
+    <span class="n">media</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_media</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">Fieldline</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly_fields</span><span class="p">,</span> <span class="n">model_admin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_admin</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Fieldline"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.Fieldline">[docs]</a><span class="k">class</span> <span class="nc">Fieldline</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">readonly_fields</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">model_admin</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">=</span> <span class="n">form</span> <span class="c"># A django.forms.Form instance</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="s">&quot;__iter__&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">field</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="n">field</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_admin</span> <span class="o">=</span> <span class="n">model_admin</span>
+        <span class="k">if</span> <span class="n">readonly_fields</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">readonly_fields</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">readonly_fields</span> <span class="o">=</span> <span class="n">readonly_fields</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly_fields</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">AdminReadonlyField</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">is_first</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span>
+                    <span class="n">model_admin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_admin</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">AdminField</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">is_first</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Fieldline.errors"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.Fieldline.errors">[docs]</a>    <span class="k">def</span> <span class="nf">errors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">as_ul</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly_fields</span><span class="p">])</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">))</span>
+</div></div>
+<div class="viewcode-block" id="AdminField"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.AdminField">[docs]</a><span class="k">class</span> <span class="nc">AdminField</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">is_first</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">=</span> <span class="n">form</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="c"># A django.forms.BoundField instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_first</span> <span class="o">=</span> <span class="n">is_first</span> <span class="c"># Whether this field is first on the line</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_checkbox</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">CheckboxInput</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AdminField.label_tag"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.AdminField.label_tag">[docs]</a>    <span class="k">def</span> <span class="nf">label_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">contents</span> <span class="o">=</span> <span class="n">conditional_escape</span><span class="p">(</span><span class="n">force_unicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">label</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_checkbox</span><span class="p">:</span>
+            <span class="n">classes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">u&#39;vCheckboxLabel&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">contents</span> <span class="o">+=</span> <span class="s">u&#39;:&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+            <span class="n">classes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">u&#39;required&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_first</span><span class="p">:</span>
+            <span class="n">classes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">u&#39;inline&#39;</span><span class="p">)</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="n">classes</span> <span class="ow">and</span> <span class="p">{</span><span class="s">&#39;class&#39;</span><span class="p">:</span> <span class="s">u&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">classes</span><span class="p">)}</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">label_tag</span><span class="p">(</span><span class="n">contents</span><span class="o">=</span><span class="n">mark_safe</span><span class="p">(</span><span class="n">contents</span><span class="p">),</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AdminField.errors"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.AdminField.errors">[docs]</a>    <span class="k">def</span> <span class="nf">errors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">as_ul</span><span class="p">())</span>
+</div></div>
+<div class="viewcode-block" id="AdminReadonlyField"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.AdminReadonlyField">[docs]</a><span class="k">class</span> <span class="nc">AdminReadonlyField</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">is_first</span><span class="p">,</span> <span class="n">model_admin</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">label_for_field</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">form</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">model_admin</span><span class="p">)</span>
+        <span class="c"># Make self.field look a little bit like a field. This means that</span>
+        <span class="c"># {{ field.name }} must be a useful class name to identify the field.</span>
+        <span class="c"># For convenience, store other field-related data here too.</span>
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">field</span><span class="p">):</span>
+            <span class="n">class_name</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">__name__</span> <span class="o">!=</span> <span class="s">&#39;&lt;lambda&gt;&#39;</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">__name__</span> <span class="ow">or</span> <span class="s">&#39;&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">class_name</span> <span class="o">=</span> <span class="n">field</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="n">class_name</span><span class="p">,</span>
+            <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span>
+            <span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span>
+            <span class="s">&#39;help_text&#39;</span><span class="p">:</span> <span class="n">help_text_for_field</span><span class="p">(</span><span class="n">class_name</span><span class="p">,</span> <span class="n">form</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">=</span> <span class="n">form</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_admin</span> <span class="o">=</span> <span class="n">model_admin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_first</span> <span class="o">=</span> <span class="n">is_first</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_checkbox</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_readonly</span> <span class="o">=</span> <span class="bp">True</span>
+
+<div class="viewcode-block" id="AdminReadonlyField.label_tag"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.AdminReadonlyField.label_tag">[docs]</a>    <span class="k">def</span> <span class="nf">label_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_first</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="s">&quot;class&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;inline&quot;</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="p">[</span><span class="s">&#39;label&#39;</span><span class="p">]</span>
+        <span class="n">contents</span> <span class="o">=</span> <span class="n">capfirst</span><span class="p">(</span><span class="n">force_unicode</span><span class="p">(</span><span class="n">escape</span><span class="p">(</span><span class="n">label</span><span class="p">)))</span> <span class="o">+</span> <span class="s">u&quot;:&quot;</span>
+        <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="s">&#39;&lt;label</span><span class="si">%(attrs)s</span><span class="s">&gt;</span><span class="si">%(contents)s</span><span class="s">&lt;/label&gt;&#39;</span> <span class="o">%</span> <span class="p">{</span>
+            <span class="s">&quot;attrs&quot;</span><span class="p">:</span> <span class="n">flatatt</span><span class="p">(</span><span class="n">attrs</span><span class="p">),</span>
+            <span class="s">&quot;contents&quot;</span><span class="p">:</span> <span class="n">contents</span><span class="p">,</span>
+        <span class="p">})</span>
+</div>
+<div class="viewcode-block" id="AdminReadonlyField.contents"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.AdminReadonlyField.contents">[docs]</a>    <span class="k">def</span> <span class="nf">contents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">django.contrib.admin.templatetags.admin_list</span> <span class="kn">import</span> <span class="n">_boolean_icon</span>
+        <span class="kn">from</span> <span class="nn">django.contrib.admin.views.main</span> <span class="kn">import</span> <span class="n">EMPTY_CHANGELIST_VALUE</span>
+        <span class="n">field</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">model_admin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="p">[</span><span class="s">&#39;field&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">instance</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_admin</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">lookup_field</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">model_admin</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">ObjectDoesNotExist</span><span class="p">):</span>
+            <span class="n">result_repr</span> <span class="o">=</span> <span class="n">EMPTY_CHANGELIST_VALUE</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">boolean</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="s">&quot;boolean&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">boolean</span><span class="p">:</span>
+                    <span class="n">result_repr</span> <span class="o">=</span> <span class="n">_boolean_icon</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">result_repr</span> <span class="o">=</span> <span class="n">smart_unicode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="s">&quot;allow_tags&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+                        <span class="n">result_repr</span> <span class="o">=</span> <span class="n">mark_safe</span><span class="p">(</span><span class="n">result_repr</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">result_repr</span> <span class="o">=</span> <span class="n">EMPTY_CHANGELIST_VALUE</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">rel</span><span class="p">,</span> <span class="n">ManyToManyRel</span><span class="p">):</span>
+                    <span class="n">result_repr</span> <span class="o">=</span> <span class="s">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">unicode</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">all</span><span class="p">()))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">result_repr</span> <span class="o">=</span> <span class="n">display_for_field</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">conditional_escape</span><span class="p">(</span><span class="n">result_repr</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="InlineAdminFormSet"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.InlineAdminFormSet">[docs]</a><span class="k">class</span> <span class="nc">InlineAdminFormSet</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A wrapper around an inline formset for use in the admin system.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inline</span><span class="p">,</span> <span class="n">formset</span><span class="p">,</span> <span class="n">fieldsets</span><span class="p">,</span> <span class="n">prepopulated_fields</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">readonly_fields</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">model_admin</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opts</span> <span class="o">=</span> <span class="n">inline</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formset</span> <span class="o">=</span> <span class="n">formset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fieldsets</span> <span class="o">=</span> <span class="n">fieldsets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_admin</span> <span class="o">=</span> <span class="n">model_admin</span>
+        <span class="k">if</span> <span class="n">readonly_fields</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">readonly_fields</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">readonly_fields</span> <span class="o">=</span> <span class="n">readonly_fields</span>
+        <span class="k">if</span> <span class="n">prepopulated_fields</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">prepopulated_fields</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prepopulated_fields</span> <span class="o">=</span> <span class="n">prepopulated_fields</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">form</span><span class="p">,</span> <span class="n">original</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="o">.</span><span class="n">initial_forms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="o">.</span><span class="n">get_queryset</span><span class="p">()):</span>
+            <span class="k">yield</span> <span class="n">InlineAdminForm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldsets</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">prepopulated_fields</span><span class="p">,</span> <span class="n">original</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly_fields</span><span class="p">,</span>
+                <span class="n">model_admin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">form</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="o">.</span><span class="n">extra_forms</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">InlineAdminForm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldsets</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">prepopulated_fields</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly_fields</span><span class="p">,</span>
+                <span class="n">model_admin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">InlineAdminForm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="o">.</span><span class="n">empty_form</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fieldsets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepopulated_fields</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">readonly_fields</span><span class="p">,</span> <span class="n">model_admin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="p">)</span>
+
+<div class="viewcode-block" id="InlineAdminFormSet.fields"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.InlineAdminFormSet.fields">[docs]</a>    <span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fk</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="p">,</span> <span class="s">&quot;fk&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">flatten_fieldsets</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fieldsets</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">fk</span> <span class="ow">and</span> <span class="n">fk</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">field</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly_fields</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="p">{</span>
+                    <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="n">label_for_field</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="p">),</span>
+                    <span class="s">&#39;widget&#39;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s">&#39;is_hidden&#39;</span><span class="p">:</span> <span class="bp">False</span>
+                    <span class="p">},</span>
+                    <span class="s">&#39;required&#39;</span><span class="p">:</span> <span class="bp">False</span>
+                <span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">base_fields</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+</div>
+    <span class="k">def</span> <span class="nf">_media</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">media</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">media</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="o">.</span><span class="n">media</span>
+        <span class="k">for</span> <span class="n">fs</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">media</span> <span class="o">=</span> <span class="n">media</span> <span class="o">+</span> <span class="n">fs</span><span class="o">.</span><span class="n">media</span>
+        <span class="k">return</span> <span class="n">media</span>
+    <span class="n">media</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_media</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="InlineAdminForm"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.InlineAdminForm">[docs]</a><span class="k">class</span> <span class="nc">InlineAdminForm</span><span class="p">(</span><span class="n">AdminForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A wrapper around an inline form for use in the admin system.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formset</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">fieldsets</span><span class="p">,</span> <span class="n">prepopulated_fields</span><span class="p">,</span> <span class="n">original</span><span class="p">,</span>
+      <span class="n">readonly_fields</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">model_admin</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formset</span> <span class="o">=</span> <span class="n">formset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_admin</span> <span class="o">=</span> <span class="n">model_admin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original</span> <span class="o">=</span> <span class="n">original</span>
+        <span class="k">if</span> <span class="n">original</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">original_content_type_id</span> <span class="o">=</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">original</span><span class="p">)</span><span class="o">.</span><span class="n">pk</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_url</span> <span class="o">=</span> <span class="n">original</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="s">&#39;get_absolute_url&#39;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">InlineAdminForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">fieldsets</span><span class="p">,</span> <span class="n">prepopulated_fields</span><span class="p">,</span>
+            <span class="n">readonly_fields</span><span class="p">,</span> <span class="n">model_admin</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldsets</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">InlineFieldset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">readonly_fields</span><span class="p">,</span> <span class="n">model_admin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_admin</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+
+<div class="viewcode-block" id="InlineAdminForm.has_auto_field"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.InlineAdminForm.has_auto_field">[docs]</a>    <span class="k">def</span> <span class="nf">has_auto_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">has_auto_field</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="c"># Also search any parents for an auto field.</span>
+        <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_parent_list</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">has_auto_field</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="InlineAdminForm.field_count"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.InlineAdminForm.field_count">[docs]</a>    <span class="k">def</span> <span class="nf">field_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># tabular.html uses this function for colspan value.</span>
+        <span class="n">num_of_fields</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_auto_field</span><span class="p">():</span>
+            <span class="n">num_of_fields</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">num_of_fields</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fieldsets</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;fields&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="o">.</span><span class="n">can_order</span><span class="p">:</span>
+            <span class="n">num_of_fields</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="o">.</span><span class="n">can_delete</span><span class="p">:</span>
+            <span class="n">num_of_fields</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">num_of_fields</span>
+</div>
+<div class="viewcode-block" id="InlineAdminForm.pk_field"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.InlineAdminForm.pk_field">[docs]</a>    <span class="k">def</span> <span class="nf">pk_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">AdminField</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="o">.</span><span class="n">_pk_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="InlineAdminForm.fk_field"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.InlineAdminForm.fk_field">[docs]</a>    <span class="k">def</span> <span class="nf">fk_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fk</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="p">,</span> <span class="s">&quot;fk&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fk</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">AdminField</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">,</span> <span class="n">fk</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="InlineAdminForm.deletion_field"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.InlineAdminForm.deletion_field">[docs]</a>    <span class="k">def</span> <span class="nf">deletion_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">django.forms.formsets</span> <span class="kn">import</span> <span class="n">DELETION_FIELD_NAME</span>
+        <span class="k">return</span> <span class="n">AdminField</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">,</span> <span class="n">DELETION_FIELD_NAME</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="InlineAdminForm.ordering_field"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.InlineAdminForm.ordering_field">[docs]</a>    <span class="k">def</span> <span class="nf">ordering_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">django.forms.formsets</span> <span class="kn">import</span> <span class="n">ORDERING_FIELD_NAME</span>
+        <span class="k">return</span> <span class="n">AdminField</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">,</span> <span class="n">ORDERING_FIELD_NAME</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="InlineFieldset"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.InlineFieldset">[docs]</a><span class="k">class</span> <span class="nc">InlineFieldset</span><span class="p">(</span><span class="n">Fieldset</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formset</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formset</span> <span class="o">=</span> <span class="n">formset</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">InlineFieldset</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fk</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formset</span><span class="p">,</span> <span class="s">&quot;fk&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fk</span> <span class="ow">and</span> <span class="n">fk</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">field</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">yield</span> <span class="n">Fieldline</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly_fields</span><span class="p">,</span>
+                <span class="n">model_admin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_admin</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AdminErrorList"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.AdminErrorList">[docs]</a><span class="k">class</span> <span class="nc">AdminErrorList</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">ErrorList</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Stores all errors for the form/formsets in an add/change stage view.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">inline_formsets</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_bound</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">inline_formset</span> <span class="ow">in</span> <span class="n">inline_formsets</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">inline_formset</span><span class="o">.</span><span class="n">non_form_errors</span><span class="p">())</span>
+                <span class="k">for</span> <span class="n">errors_in_inline_form</span> <span class="ow">in</span> <span class="n">inline_formset</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">errors_in_inline_form</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="normalize_fieldsets"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.normalize_fieldsets">[docs]</a><span class="k">def</span> <span class="nf">normalize_fieldsets</span><span class="p">(</span><span class="n">fieldsets</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make sure the keys in fieldset dictionaries are strings. Returns the</span>
+<span class="sd">    normalized data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span> <span class="ow">in</span> <span class="n">fieldsets</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">normalize_dictionary</span><span class="p">(</span><span class="n">options</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">result</span>
+</div>
+<div class="viewcode-block" id="normalize_dictionary"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.helpers.normalize_dictionary">[docs]</a><span class="k">def</span> <span class="nf">normalize_dictionary</span><span class="p">(</span><span class="n">data_dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts all the keys in &quot;data_dict&quot; to strings. The keys must be</span>
+<span class="sd">    convertible using str().</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">del</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">data_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">data_dict</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

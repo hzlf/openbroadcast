@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>exporter.menu &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for exporter.menu</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">django.core.urlresolvers</span> <span class="kn">import</span> <span class="n">reverse</span>
+
+<span class="kn">from</span> <span class="nn">menus.base</span> <span class="kn">import</span> <span class="n">Modifier</span><span class="p">,</span> <span class="n">Menu</span><span class="p">,</span> <span class="n">NavigationNode</span>
+<span class="kn">from</span> <span class="nn">menus.menu_pool</span> <span class="kn">import</span> <span class="n">menu_pool</span>
+<span class="kn">from</span> <span class="nn">cms.menu_bases</span> <span class="kn">import</span> <span class="n">CMSAttachMenu</span>
+
+<span class="kn">from</span> <span class="nn">exporter.models</span> <span class="kn">import</span> <span class="n">Export</span>
+
+<div class="viewcode-block" id="ExportMenu"><a class="viewcode-back" href="../../auto_modules.html#exporter.menu.ExportMenu">[docs]</a><span class="k">class</span> <span class="nc">ExportMenu</span><span class="p">(</span><span class="n">CMSAttachMenu</span><span class="p">):</span>
+    
+    <span class="n">name</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&quot;Export Menu&quot;</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="ExportMenu.get_nodes"><a class="viewcode-back" href="../../auto_modules.html#exporter.menu.ExportMenu.get_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">get_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">NavigationNode</span><span class="p">(</span>
+            <span class="n">_</span><span class="p">(</span><span class="s">&#39;My Exports&#39;</span><span class="p">),</span>
+            <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;exporter-export-list&#39;</span><span class="p">),</span>
+            <span class="mi">191</span>
+        <span class="p">)</span>
+        <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        
+        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">NavigationNode</span><span class="p">(</span>
+            <span class="n">_</span><span class="p">(</span><span class="s">&#39;Help&#39;</span><span class="p">),</span>
+            <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;exporter-export-list&#39;</span><span class="p">),</span>
+            <span class="mi">192</span>
+        <span class="p">)</span>
+        <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        
+        
+        <span class="k">return</span> <span class="n">nodes</span>
+    </div></div>
+<span class="n">menu_pool</span><span class="o">.</span><span class="n">register_menu</span><span class="p">(</span><span class="n">ExportMenu</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

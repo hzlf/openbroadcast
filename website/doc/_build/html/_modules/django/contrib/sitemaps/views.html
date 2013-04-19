@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django.contrib.sitemaps.views &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for django.contrib.sitemaps.views</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.contrib.sites.models</span> <span class="kn">import</span> <span class="n">get_current_site</span>
+<span class="kn">from</span> <span class="nn">django.core</span> <span class="kn">import</span> <span class="n">urlresolvers</span>
+<span class="kn">from</span> <span class="nn">django.core.paginator</span> <span class="kn">import</span> <span class="n">EmptyPage</span><span class="p">,</span> <span class="n">PageNotAnInteger</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">Http404</span>
+<span class="kn">from</span> <span class="nn">django.template.response</span> <span class="kn">import</span> <span class="n">TemplateResponse</span>
+
+<div class="viewcode-block" id="index"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sitemaps.views.index">[docs]</a><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">sitemaps</span><span class="p">,</span>
+          <span class="n">template_name</span><span class="o">=</span><span class="s">&#39;sitemap_index.xml&#39;</span><span class="p">,</span> <span class="n">mimetype</span><span class="o">=</span><span class="s">&#39;application/xml&#39;</span><span class="p">,</span>
+          <span class="n">sitemap_url_name</span><span class="o">=</span><span class="s">&#39;django.contrib.sitemaps.views.sitemap&#39;</span><span class="p">):</span>
+    <span class="n">req_protocol</span> <span class="o">=</span> <span class="s">&#39;https&#39;</span> <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">is_secure</span><span class="p">()</span> <span class="k">else</span> <span class="s">&#39;http&#39;</span>
+    <span class="n">req_site</span> <span class="o">=</span> <span class="n">get_current_site</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="n">sites</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">section</span><span class="p">,</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">sitemaps</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">site</span><span class="p">):</span>
+            <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="p">()</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">req_protocol</span> <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">protocol</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">site</span><span class="o">.</span><span class="n">protocol</span>
+        <span class="n">sitemap_url</span> <span class="o">=</span> <span class="n">urlresolvers</span><span class="o">.</span><span class="n">reverse</span><span class="p">(</span>
+                <span class="n">sitemap_url_name</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;section&#39;</span><span class="p">:</span> <span class="n">section</span><span class="p">})</span>
+        <span class="n">absolute_url</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">://</span><span class="si">%s%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">req_site</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="n">sitemap_url</span><span class="p">)</span>
+        <span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">absolute_url</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">site</span><span class="o">.</span><span class="n">paginator</span><span class="o">.</span><span class="n">num_pages</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">?p=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">absolute_url</span><span class="p">,</span> <span class="n">page</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">TemplateResponse</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">template_name</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;sitemaps&#39;</span><span class="p">:</span> <span class="n">sites</span><span class="p">},</span>
+                            <span class="n">content_type</span><span class="o">=</span><span class="n">mimetype</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="sitemap"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.sitemaps.views.sitemap">[docs]</a><span class="k">def</span> <span class="nf">sitemap</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">sitemaps</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">template_name</span><span class="o">=</span><span class="s">&#39;sitemap.xml&#39;</span><span class="p">,</span> <span class="n">mimetype</span><span class="o">=</span><span class="s">&#39;application/xml&#39;</span><span class="p">):</span>
+    <span class="n">req_protocol</span> <span class="o">=</span> <span class="s">&#39;https&#39;</span> <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">is_secure</span><span class="p">()</span> <span class="k">else</span> <span class="s">&#39;http&#39;</span>
+    <span class="n">req_site</span> <span class="o">=</span> <span class="n">get_current_site</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">section</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">section</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sitemaps</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Http404</span><span class="p">(</span><span class="s">&quot;No sitemap available for section: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">section</span><span class="p">)</span>
+        <span class="n">maps</span> <span class="o">=</span> <span class="p">[</span><span class="n">sitemaps</span><span class="p">[</span><span class="n">section</span><span class="p">]]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">maps</span> <span class="o">=</span> <span class="n">sitemaps</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;p&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">urls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">maps</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">site</span><span class="p">):</span>
+                <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="p">()</span>
+            <span class="n">urls</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">get_urls</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="n">page</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">req_site</span><span class="p">,</span>
+                                      <span class="n">protocol</span><span class="o">=</span><span class="n">req_protocol</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">EmptyPage</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Http404</span><span class="p">(</span><span class="s">&quot;Page </span><span class="si">%s</span><span class="s"> empty&quot;</span> <span class="o">%</span> <span class="n">page</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">PageNotAnInteger</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Http404</span><span class="p">(</span><span class="s">&quot;No page &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">page</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">TemplateResponse</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">template_name</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;urlset&#39;</span><span class="p">:</span> <span class="n">urls</span><span class="p">},</span>
+                            <span class="n">content_type</span><span class="o">=</span><span class="n">mimetype</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

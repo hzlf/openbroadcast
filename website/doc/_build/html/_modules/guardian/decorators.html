@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>guardian.decorators &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for guardian.decorators</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth</span> <span class="kn">import</span> <span class="n">REDIRECT_FIELD_NAME</span>
+<span class="kn">from</span> <span class="nn">django.utils.functional</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">get_model</span>
+<span class="kn">from</span> <span class="nn">django.db.models.base</span> <span class="kn">import</span> <span class="n">ModelBase</span>
+<span class="kn">from</span> <span class="nn">django.db.models.query</span> <span class="kn">import</span> <span class="n">QuerySet</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">get_object_or_404</span>
+<span class="kn">from</span> <span class="nn">guardian.exceptions</span> <span class="kn">import</span> <span class="n">GuardianError</span>
+<span class="kn">from</span> <span class="nn">guardian.utils</span> <span class="kn">import</span> <span class="n">get_403_or_None</span>
+
+
+<div class="viewcode-block" id="permission_required"><a class="viewcode-back" href="../../auto_modules.html#guardian.decorators.permission_required">[docs]</a><span class="k">def</span> <span class="nf">permission_required</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="n">lookup_variables</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorator for views that checks whether a user has a particular permission</span>
+<span class="sd">    enabled.</span>
+
+<span class="sd">    Optionally, instances for which check should be made may be passed as an</span>
+<span class="sd">    second argument or as a tuple parameters same as those passed to</span>
+<span class="sd">    ``get_object_or_404`` but must be provided as pairs of strings.</span>
+
+<span class="sd">    :param login_url: if denied, user would be redirected to location set by</span>
+<span class="sd">      this parameter. Defaults to ``django.conf.settings.LOGIN_URL``.</span>
+<span class="sd">    :param redirect_field_name: name of the parameter passed if redirected.</span>
+<span class="sd">      Defaults to ``django.contrib.auth.REDIRECT_FIELD_NAME``.</span>
+<span class="sd">    :param return_403: if set to ``True`` then instead of redirecting to the</span>
+<span class="sd">      login page, response with status code 403 is returned (</span>
+<span class="sd">      ``django.http.HttpResponseForbidden`` instance or rendered template -</span>
+<span class="sd">      see :setting:`GUARDIAN_RENDER_403`). Defaults to ``False``.</span>
+<span class="sd">    :param accept_global_perms: if set to ``True``, then *object level</span>
+<span class="sd">      permission* would be required **only if user does NOT have global</span>
+<span class="sd">      permission** for target *model*. If turned on, makes this decorator</span>
+<span class="sd">      like an extension over standard</span>
+<span class="sd">      ``django.contrib.admin.decorators.permission_required`` as it would</span>
+<span class="sd">      check for global permissions first. Defaults to ``False``.</span>
+
+<span class="sd">    Examples::</span>
+
+<span class="sd">        @permission_required(&#39;auth.change_user&#39;, return_403=True)</span>
+<span class="sd">        def my_view(request):</span>
+<span class="sd">            return HttpResponse(&#39;Hello&#39;)</span>
+
+<span class="sd">        @permission_required(&#39;auth.change_user&#39;, (User, &#39;username&#39;, &#39;username&#39;))</span>
+<span class="sd">        def my_view(request, username):</span>
+<span class="sd">            user = get_object_or_404(User, username=username)</span>
+<span class="sd">            return user.get_absolute_url()</span>
+
+<span class="sd">        @permission_required(&#39;auth.change_user&#39;,</span>
+<span class="sd">            (User, &#39;username&#39;, &#39;username&#39;, &#39;groups__name&#39;, &#39;group_name&#39;))</span>
+<span class="sd">        def my_view(request, username, group_name):</span>
+<span class="sd">            user = get_object_or_404(User, username=username,</span>
+<span class="sd">                group__name=group_name)</span>
+<span class="sd">            return user.get_absolute_url()</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">login_url</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;login_url&#39;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">LOGIN_URL</span><span class="p">)</span>
+    <span class="n">redirect_field_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;redirect_field_name&#39;</span><span class="p">,</span> <span class="n">REDIRECT_FIELD_NAME</span><span class="p">)</span>
+    <span class="n">return_403</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;return_403&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+    <span class="n">accept_global_perms</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;accept_global_perms&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+    <span class="c"># Check if perm is given as string in order not to decorate</span>
+    <span class="c"># view function itself which makes debugging harder</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">GuardianError</span><span class="p">(</span><span class="s">&quot;First argument must be in format: &quot;</span>
+            <span class="s">&quot;&#39;app_label.codename or a callable which return similar string&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">view_func</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">_wrapped_view</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="c"># if more than one parameter is passed to the decorator we try to</span>
+            <span class="c"># fetch object for which check would be made</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">if</span> <span class="n">lookup_variables</span><span class="p">:</span>
+                <span class="n">model</span><span class="p">,</span> <span class="n">lookups</span> <span class="o">=</span> <span class="n">lookup_variables</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lookup_variables</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="c"># Parse model</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+                    <span class="n">splitted</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">splitted</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">GuardianError</span><span class="p">(</span><span class="s">&quot;If model should be looked up from &quot;</span>
+                            <span class="s">&quot;string it needs format: &#39;app_label.ModelClass&#39;&quot;</span><span class="p">)</span>
+                    <span class="n">model</span> <span class="o">=</span> <span class="n">get_model</span><span class="p">(</span><span class="o">*</span><span class="n">splitted</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Model</span><span class="p">,</span> <span class="n">ModelBase</span><span class="p">,</span> <span class="n">QuerySet</span><span class="p">):</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">GuardianError</span><span class="p">(</span><span class="s">&quot;First lookup argument must always be &quot;</span>
+                        <span class="s">&quot;a model, string pointing at app/model or queryset. &quot;</span>
+                        <span class="s">&quot;Given: </span><span class="si">%s</span><span class="s"> (type: </span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">model</span><span class="p">)))</span>
+                <span class="c"># Parse lookups</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lookups</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">GuardianError</span><span class="p">(</span><span class="s">&quot;Lookup variables must be provided &quot;</span>
+                        <span class="s">&quot;as pairs of lookup_string and view_arg&quot;</span><span class="p">)</span>
+                <span class="n">lookup_dict</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">lookup</span><span class="p">,</span> <span class="n">view_arg</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">lookups</span><span class="p">[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">lookups</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="n">view_arg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">GuardianError</span><span class="p">(</span><span class="s">&quot;Argument </span><span class="si">%s</span><span class="s"> was not passed &quot;</span>
+                            <span class="s">&quot;into view function&quot;</span> <span class="o">%</span> <span class="n">view_arg</span><span class="p">)</span>
+                    <span class="n">lookup_dict</span><span class="p">[</span><span class="n">lookup</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">view_arg</span><span class="p">]</span>
+                <span class="n">obj</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">**</span><span class="n">lookup_dict</span><span class="p">)</span>
+
+            <span class="n">response</span> <span class="o">=</span> <span class="n">get_403_or_None</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">perms</span><span class="o">=</span><span class="p">[</span><span class="n">perm</span><span class="p">],</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span>
+                <span class="n">login_url</span><span class="o">=</span><span class="n">login_url</span><span class="p">,</span> <span class="n">redirect_field_name</span><span class="o">=</span><span class="n">redirect_field_name</span><span class="p">,</span>
+                <span class="n">return_403</span><span class="o">=</span><span class="n">return_403</span><span class="p">,</span> <span class="n">accept_global_perms</span><span class="o">=</span><span class="n">accept_global_perms</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">response</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">response</span>
+            <span class="k">return</span> <span class="n">view_func</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wraps</span><span class="p">(</span><span class="n">view_func</span><span class="p">)(</span><span class="n">_wrapped_view</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">decorator</span>
+
+</div>
+<div class="viewcode-block" id="permission_required_or_403"><a class="viewcode-back" href="../../auto_modules.html#guardian.decorators.permission_required_or_403">[docs]</a><span class="k">def</span> <span class="nf">permission_required_or_403</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simple wrapper for permission_required decorator.</span>
+
+<span class="sd">    Standard Django&#39;s permission_required decorator redirects user to login page</span>
+<span class="sd">    in case permission check failed. This decorator may be used to return</span>
+<span class="sd">    HttpResponseForbidden (status 403) instead of redirection.</span>
+
+<span class="sd">    The only difference between ``permission_required`` decorator is that this</span>
+<span class="sd">    one always set ``return_403`` parameter to ``True``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;return_403&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="n">permission_required</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,632 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>eav.models &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for eav.models</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># vim: ai ts=4 sts=4 et sw=4 coding=utf-8</span>
+<span class="c">#</span>
+<span class="c">#    This software is derived from EAV-Django originally written and</span>
+<span class="c">#    copyrighted by Andrey Mikhaylenko &lt;http://pypi.python.org/pypi/eav-django&gt;</span>
+<span class="c">#</span>
+<span class="c">#    This is free software: you can redistribute it and/or modify</span>
+<span class="c">#    it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c">#    by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">#    (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">#    This software is distributed in the hope that it will be useful,</span>
+<span class="c">#    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#    GNU Lesser General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c">#    You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c">#    along with EAV-Django.  If not, see &lt;http://gnu.org/licenses/&gt;.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">******</span>
+<span class="sd">models</span>
+<span class="sd">******</span>
+<span class="sd">This module defines the four concrete, non-abstract models:</span>
+
+<span class="sd">* :class:`Value`</span>
+<span class="sd">* :class:`Attribute`</span>
+<span class="sd">* :class:`EnumValue`</span>
+<span class="sd">* :class:`EnumGroup`</span>
+
+<span class="sd">Along with the :class:`Entity` helper class.</span>
+
+<span class="sd">Classes</span>
+<span class="sd">-------</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ValidationError</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes.models</span> <span class="kn">import</span> <span class="n">ContentType</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes</span> <span class="kn">import</span> <span class="n">generic</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sites.models</span> <span class="kn">import</span> <span class="n">Site</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sites.managers</span> <span class="kn">import</span> <span class="n">CurrentSiteManager</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+
+<span class="kn">from</span> <span class="nn">.validators</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.fields</span> <span class="kn">import</span> <span class="n">EavSlugField</span><span class="p">,</span> <span class="n">EavDatatypeField</span>
+
+
+<div class="viewcode-block" id="EnumValue"><a class="viewcode-back" href="../../auto_modules.html#eav.models.EnumValue">[docs]</a><span class="k">class</span> <span class="nc">EnumValue</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    *EnumValue* objects are the value &#39;choices&#39; to multiple choice</span>
+<span class="sd">    *TYPE_ENUM* :class:`Attribute` objects.</span>
+
+<span class="sd">    They have only one field, *value*, a``CharField`` that must be unique.</span>
+
+<span class="sd">    For example:</span>
+
+<span class="sd">    &gt;&gt;&gt; yes = EnumValue.objects.create(value=&#39;yes&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; no = EnumValue.objects.create(value=&#39;no&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; unkown = EnumValue.objects.create(value=&#39;unkown&#39;)</span>
+
+<span class="sd">    &gt;&gt;&gt; ynu = EnumGroup.objects.create(name=&#39;Yes / No / Unkown&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; ynu.enums.add(yes, no, unkown)</span>
+
+<span class="sd">    &gt;&gt;&gt; Atrribute.objects.create(name=&#39;Has Fever?&#39;,</span>
+<span class="sd">    ...                          datatype=Attribute.TYPE_ENUM,</span>
+<span class="sd">    ...                          enum_group=ynu)</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">       The same *EnumValue* objects should be reused within multiple</span>
+<span class="sd">       *EnumGroups*.  For example, if you have one *EnumGroup*</span>
+<span class="sd">       called: *Yes / No / Unkown* and another called *Yes / No /</span>
+<span class="sd">       Not applicable*, you should only have a total of four *EnumValues*</span>
+<span class="sd">       objects, as you should have used the same *Yes* and *No* *EnumValues*</span>
+<span class="sd">       for both *EnumGroups*.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;value&quot;</span><span class="p">),</span> <span class="n">db_index</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                             <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+
+</div>
+<div class="viewcode-block" id="EnumGroup"><a class="viewcode-back" href="../../auto_modules.html#eav.models.EnumGroup">[docs]</a><span class="k">class</span> <span class="nc">EnumGroup</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    *EnumGroup* objects have two fields- a *name* ``CharField`` and *enums*,</span>
+<span class="sd">    a ``ManyToManyField`` to :class:`EnumValue`. :class:`Attribute` classes</span>
+<span class="sd">    with datatype *TYPE_ENUM* have a ``ForeignKey`` field to *EnumGroup*.</span>
+
+<span class="sd">    See :class:`EnumValue` for an example.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;name&quot;</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="n">enums</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span><span class="n">EnumValue</span><span class="p">,</span> <span class="n">verbose_name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;enum group&quot;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+</div>
+<div class="viewcode-block" id="Attribute"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Attribute">[docs]</a><span class="k">class</span> <span class="nc">Attribute</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Putting the **A** in *EAV*. This holds the attributes, or concepts.</span>
+<span class="sd">    Examples of possible *Attributes*: color, height, weight,</span>
+<span class="sd">    number of children, number of patients, has fever?, etc...</span>
+
+<span class="sd">    Each attribute has a name, and a description, along with a slug that must</span>
+<span class="sd">    be unique.  If you don&#39;t provide a slug, a default slug (derived from</span>
+<span class="sd">    name), will be created.</span>
+
+<span class="sd">    The *required* field is a boolean that indicates whether this EAV attribute</span>
+<span class="sd">    is required for entities to which it applies. It defaults to *False*.</span>
+
+<span class="sd">    .. warning::</span>
+<span class="sd">       Just like a normal model field that is required, you will not be able</span>
+<span class="sd">       to save or create any entity object for which this attribute applies,</span>
+<span class="sd">       without first setting this EAV attribute.</span>
+
+<span class="sd">    There are 7 possible values for datatype:</span>
+
+<span class="sd">        * int (TYPE_INT)</span>
+<span class="sd">        * float (TYPE_FLOAT)</span>
+<span class="sd">        * text (TYPE_TEXT)</span>
+<span class="sd">        * date (TYPE_DATE)</span>
+<span class="sd">        * bool (TYPE_BOOLEAN)</span>
+<span class="sd">        * object (TYPE_OBJECT)</span>
+<span class="sd">        * enum (TYPE_ENUM)</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">    &gt;&gt;&gt; Attribute.objects.create(name=&#39;Height&#39;, datatype=Attribute.TYPE_INT)</span>
+<span class="sd">    &lt;Attribute: Height (Integer)&gt;</span>
+
+<span class="sd">    &gt;&gt;&gt; Attribute.objects.create(name=&#39;Color&#39;, datatype=Attribute.TYPE_TEXT)</span>
+<span class="sd">    &lt;Attribute: Color (Text)&gt;</span>
+
+<span class="sd">    &gt;&gt;&gt; yes = EnumValue.objects.create(value=&#39;yes&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; no = EnumValue.objects.create(value=&#39;no&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; unkown = EnumValue.objects.create(value=&#39;unkown&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; ynu = EnumGroup.objects.create(name=&#39;Yes / No / Unkown&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; ynu.enums.add(yes, no, unkown)</span>
+<span class="sd">    &gt;&gt;&gt; Atrribute.objects.create(name=&#39;Has Fever?&#39;,</span>
+<span class="sd">    ...                          datatype=Attribute.TYPE_ENUM,</span>
+<span class="sd">    ...                          enum_group=ynu)</span>
+<span class="sd">    &lt;Attribute: Has Fever? (Multiple Choice)&gt;</span>
+
+<span class="sd">    .. warning:: Once an Attribute has been used by an entity, you can not</span>
+<span class="sd">                 change it&#39;s datatype.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">unique_together</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;site&#39;</span><span class="p">,</span> <span class="s">&#39;slug&#39;</span><span class="p">)</span>
+
+    <span class="n">TYPE_TEXT</span> <span class="o">=</span> <span class="s">&#39;text&#39;</span>
+    <span class="n">TYPE_FLOAT</span> <span class="o">=</span> <span class="s">&#39;float&#39;</span>
+    <span class="n">TYPE_INT</span> <span class="o">=</span> <span class="s">&#39;int&#39;</span>
+    <span class="n">TYPE_DATE</span> <span class="o">=</span> <span class="s">&#39;date&#39;</span>
+    <span class="n">TYPE_BOOLEAN</span> <span class="o">=</span> <span class="s">&#39;bool&#39;</span>
+    <span class="n">TYPE_OBJECT</span> <span class="o">=</span> <span class="s">&#39;object&#39;</span>
+    <span class="n">TYPE_ENUM</span> <span class="o">=</span> <span class="s">&#39;enum&#39;</span>
+
+    <span class="n">DATATYPE_CHOICES</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">TYPE_TEXT</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;Text&quot;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">TYPE_FLOAT</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;Float&quot;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">TYPE_INT</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;Integer&quot;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">TYPE_DATE</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;Date&quot;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">TYPE_BOOLEAN</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;True / False&quot;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">TYPE_OBJECT</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;Django Object&quot;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">TYPE_ENUM</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;Multiple Choice&quot;</span><span class="p">)),</span>
+    <span class="p">)</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;name&quot;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                            <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;User-friendly attribute name&quot;</span><span class="p">))</span>
+
+    <span class="n">site</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Site</span><span class="p">,</span> <span class="n">verbose_name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;site&quot;</span><span class="p">),</span>
+                             <span class="n">default</span><span class="o">=</span><span class="n">Site</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_current</span><span class="p">)</span>
+
+    <span class="n">slug</span> <span class="o">=</span> <span class="n">EavSlugField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;slug&quot;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">db_index</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                          <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;Short unique attribute label&quot;</span><span class="p">))</span>
+
+    <span class="n">description</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;description&quot;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+                                     <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                     <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;Short description&quot;</span><span class="p">))</span>
+
+    <span class="n">enum_group</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">EnumGroup</span><span class="p">,</span> <span class="n">verbose_name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;choice group&quot;</span><span class="p">),</span>
+                                   <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;type&quot;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Attribute.help_text"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Attribute.help_text">[docs]</a>    <span class="k">def</span> <span class="nf">help_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span>
+</div>
+    <span class="n">datatype</span> <span class="o">=</span> <span class="n">EavDatatypeField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;data type&quot;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                                <span class="n">choices</span><span class="o">=</span><span class="n">DATATYPE_CHOICES</span><span class="p">)</span>
+
+    <span class="n">created</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;created&quot;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span>
+                                   <span class="n">editable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">modified</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;modified&quot;</span><span class="p">),</span> <span class="n">auto_now</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">required</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;required&quot;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span>
+    <span class="n">on_site</span> <span class="o">=</span> <span class="n">CurrentSiteManager</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Attribute.get_validators"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Attribute.get_validators">[docs]</a>    <span class="k">def</span> <span class="nf">get_validators</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns the appropriate validator function from :mod:`~eav.validators`</span>
+<span class="sd">        as a list (of length one) for the datatype.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">           The reason it returns it as a list, is eventually we may want this</span>
+<span class="sd">           method to look elsewhere for additional attribute specific</span>
+<span class="sd">           validators to return as well as the default, built-in one.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">DATATYPE_VALIDATORS</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="n">validate_text</span><span class="p">,</span>
+            <span class="s">&#39;float&#39;</span><span class="p">:</span> <span class="n">validate_float</span><span class="p">,</span>
+            <span class="s">&#39;int&#39;</span><span class="p">:</span> <span class="n">validate_int</span><span class="p">,</span>
+            <span class="s">&#39;date&#39;</span><span class="p">:</span> <span class="n">validate_date</span><span class="p">,</span>
+            <span class="s">&#39;bool&#39;</span><span class="p">:</span> <span class="n">validate_bool</span><span class="p">,</span>
+            <span class="s">&#39;object&#39;</span><span class="p">:</span> <span class="n">validate_object</span><span class="p">,</span>
+            <span class="s">&#39;enum&#39;</span><span class="p">:</span> <span class="n">validate_enum</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">validation_function</span> <span class="o">=</span> <span class="n">DATATYPE_VALIDATORS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">validation_function</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="Attribute.validate_value"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Attribute.validate_value">[docs]</a>    <span class="k">def</span> <span class="nf">validate_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Check *value* against the validators returned by</span>
+<span class="sd">        :meth:`get_validators` for this attribute.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">validator</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_validators</span><span class="p">():</span>
+            <span class="n">validator</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">TYPE_ENUM</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">enum_group</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;</span><span class="si">%(enum)s</span><span class="s"> is not a valid choice &quot;</span>
+                                        <span class="s">u&quot;for </span><span class="si">%(attr)s</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">%</span> \
+                                       <span class="p">{</span><span class="s">&#39;enum&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span> <span class="s">&#39;attr&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="p">})</span>
+</div>
+<div class="viewcode-block" id="Attribute.save"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Attribute.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Saves the Attribute and auto-generates a slug field if one wasn&#39;t</span>
+<span class="sd">        provided.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">slug</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">slug</span> <span class="o">=</span> <span class="n">EavSlugField</span><span class="o">.</span><span class="n">create_slug_from_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">full_clean</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Attribute</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Attribute.clean"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Attribute.clean">[docs]</a>    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Validates the attribute.  Will raise ``ValidationError`` if</span>
+<span class="sd">        the attribute&#39;s datatype is *TYPE_ENUM* and enum_group is not set,</span>
+<span class="sd">        or if the attribute is not *TYPE_ENUM* and the enum group is set.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">TYPE_ENUM</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">enum_group</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                <span class="s">u&quot;You must set the choice group for multiple choice&quot;</span> \
+                <span class="s">u&quot;attributes&quot;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TYPE_ENUM</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">enum_group</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                <span class="s">u&quot;You can only assign a choice group to multiple choice &quot;</span> \
+                <span class="s">u&quot;attributes&quot;</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Attribute.get_choices"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Attribute.get_choices">[docs]</a>    <span class="k">def</span> <span class="nf">get_choices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns a query set of :class:`EnumValue` objects for this attribute.</span>
+<span class="sd">        Returns None if the datatype of this attribute is not *TYPE_ENUM*.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span> <span class="o">==</span> <span class="n">Attribute</span><span class="o">.</span><span class="n">TYPE_ENUM</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">enum_group</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Attribute.save_value"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Attribute.save_value">[docs]</a>    <span class="k">def</span> <span class="nf">save_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Called with *entity*, any django object registered with eav, and</span>
+<span class="sd">        *value*, the :class:`Value` this attribute for *entity* should</span>
+<span class="sd">        be set to.</span>
+
+<span class="sd">        If a :class:`Value` object for this *entity* and attribute doesn&#39;t</span>
+<span class="sd">        exist, one will be created.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">           If *value* is None and a :class:`Value` object exists for this</span>
+<span class="sd">            Attribute and *entity*, it will delete that :class:`Value` object.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">value_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_set</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">entity_ct</span><span class="o">=</span><span class="n">ct</span><span class="p">,</span>
+                                           <span class="n">entity_id</span><span class="o">=</span><span class="n">entity</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span>
+                                           <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">Value</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">value_obj</span> <span class="o">=</span> <span class="n">Value</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">entity_ct</span><span class="o">=</span><span class="n">ct</span><span class="p">,</span>
+                                             <span class="n">entity_id</span><span class="o">=</span><span class="n">entity</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span>
+                                             <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">value_obj</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">value_obj</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">value_obj</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">value_obj</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_datatype_display</span><span class="p">())</span>
+
+</div>
+<div class="viewcode-block" id="Value"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Value">[docs]</a><span class="k">class</span> <span class="nc">Value</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Putting the **V** in *EAV*. This model stores the value for one particular</span>
+<span class="sd">    :class:`Attribute` for some entity.</span>
+
+<span class="sd">    As with most EAV implementations, most of the columns of this model will</span>
+<span class="sd">    be blank, as onle one *value_* field will be used.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    &gt;&gt;&gt; import eav</span>
+<span class="sd">    &gt;&gt;&gt; from django.contrib.auth.models import User</span>
+<span class="sd">    &gt;&gt;&gt; eav.register(User)</span>
+<span class="sd">    &gt;&gt;&gt; u = User.objects.create(username=&#39;crazy_dev_user&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; a = Attribute.objects.create(name=&#39;Favorite Drink&#39;, datatype=&#39;text&#39;,</span>
+<span class="sd">    ... slug=&#39;fav_drink&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; Value.objects.create(entity=u, attribute=a, value_text=&#39;red bull&#39;)</span>
+<span class="sd">    &lt;Value: crazy_dev_user - Favorite Drink: &quot;red bull&quot;&gt;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">entity_ct</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">ContentType</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s">&#39;value_entities&#39;</span><span class="p">)</span>
+    <span class="n">entity_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">entity</span> <span class="o">=</span> <span class="n">generic</span><span class="o">.</span><span class="n">GenericForeignKey</span><span class="p">(</span><span class="n">ct_field</span><span class="o">=</span><span class="s">&#39;entity_ct&#39;</span><span class="p">,</span>
+                                       <span class="n">fk_field</span><span class="o">=</span><span class="s">&#39;entity_id&#39;</span><span class="p">)</span>
+
+    <span class="n">value_text</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">value_float</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">value_int</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">value_date</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">value_bool</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">NullBooleanField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">value_enum</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">EnumValue</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                   <span class="n">related_name</span><span class="o">=</span><span class="s">&#39;eav_values&#39;</span><span class="p">)</span>
+
+    <span class="n">generic_value_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">generic_value_ct</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">ContentType</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                         <span class="n">related_name</span><span class="o">=</span><span class="s">&#39;value_values&#39;</span><span class="p">)</span>
+    <span class="n">value_object</span> <span class="o">=</span> <span class="n">generic</span><span class="o">.</span><span class="n">GenericForeignKey</span><span class="p">(</span><span class="n">ct_field</span><span class="o">=</span><span class="s">&#39;generic_value_ct&#39;</span><span class="p">,</span>
+                                             <span class="n">fk_field</span><span class="o">=</span><span class="s">&#39;generic_value_id&#39;</span><span class="p">)</span>
+
+    <span class="n">created</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;created&quot;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
+    <span class="n">modified</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;modified&quot;</span><span class="p">),</span> <span class="n">auto_now</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">attribute</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Attribute</span><span class="p">,</span> <span class="n">db_index</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                  <span class="n">verbose_name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;attribute&quot;</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Value.save"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Value.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Validate and save this value</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">full_clean</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Value</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Value.clean"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Value.clean">[docs]</a>    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Raises ``ValidationError`` if this value&#39;s attribute is *TYPE_ENUM*</span>
+<span class="sd">        and value_enum is not a valid choice for this value&#39;s attribute.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span> <span class="o">==</span> <span class="n">Attribute</span><span class="o">.</span><span class="n">TYPE_ENUM</span> <span class="ow">and</span> \
+           <span class="bp">self</span><span class="o">.</span><span class="n">value_enum</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_enum</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="o">.</span><span class="n">enum_group</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;</span><span class="si">%(choice)s</span><span class="s"> is not a valid &quot;</span> \
+                                        <span class="s">u&quot;choice for </span><span class="si">%s</span><span class="s">(attribute)&quot;</span><span class="p">)</span> <span class="o">%</span> \
+                                        <span class="p">{</span><span class="s">&#39;choice&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_enum</span><span class="p">,</span>
+                                         <span class="s">&#39;attribute&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="p">})</span>
+</div>
+    <span class="k">def</span> <span class="nf">_get_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the python object this value is holding</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;value_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Set the object this value is holding</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;value_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
+
+    <span class="n">value</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get_value</span><span class="p">,</span> <span class="n">_set_value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s"> - </span><span class="si">%s</span><span class="s">: </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Entity"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Entity">[docs]</a><span class="k">class</span> <span class="nc">Entity</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The helper class that will be attached to any entity registered with</span>
+<span class="sd">    eav.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Set self.model equal to the instance of the model that we&#39;re attached</span>
+<span class="sd">        to.  Also, store the content type of that instance.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ct</span> <span class="o">=</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Tha magic getattr helper.  This is called whenevery you do</span>
+<span class="sd">        this_instance.&lt;whatever&gt;</span>
+
+<span class="sd">        Checks if *name* is a valid slug for attributes available to this</span>
+<span class="sd">        instances. If it is, tries to lookup the :class:`Value` with that</span>
+<span class="sd">        attribute slug. If there is one, it returns the value of the</span>
+<span class="sd">        class:`Value` object, otherwise it hasn&#39;t been set, so it returns</span>
+<span class="sd">        None.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">attribute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_attribute_by_slug</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">Attribute</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;</span><span class="si">%(obj)s</span><span class="s"> has no EAV attribute named &quot;</span> \
+                                       <span class="s">u&quot;&#39;</span><span class="si">%(attr)s</span><span class="s">&#39;&quot;</span><span class="p">)</span> <span class="o">%</span> \
+                                     <span class="p">{</span><span class="s">&#39;obj&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s">&#39;attr&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">})</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_value_by_attribute</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">except</span> <span class="n">Value</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">Entity</span><span class="p">,</span> <span class="bp">self</span><span class="p">),</span> <span class="n">name</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Entity.get_all_attributes"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Entity.get_all_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">get_all_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return a query set of all :class:`Attribute` objects that can be set</span>
+<span class="sd">        for this entity.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_eav_config_cls</span><span class="o">.</span><span class="n">get_attributes</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Entity.save"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Entity.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Saves all the EAV values that have been set on this entity.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_attributes</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="o">.</span><span class="n">slug</span><span class="p">):</span>
+                <span class="n">attribute_value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="o">.</span><span class="n">slug</span><span class="p">)</span>
+                <span class="n">attribute</span><span class="o">.</span><span class="n">save_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">attribute_value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Entity.validate_attributes"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Entity.validate_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">validate_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Called before :meth:`save`, first validate all the entity values to</span>
+<span class="sd">        make sure they can be created / saved cleanly.</span>
+
+<span class="sd">        Raise ``ValidationError`` if they can&#39;t be.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_attributes</span><span class="p">():</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="o">.</span><span class="n">slug</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">attribute</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;</span><span class="si">%(attr)s</span><span class="s"> EAV field cannot &quot;</span> \
+                                            <span class="s">u&quot;be blank&quot;</span><span class="p">)</span> <span class="o">%</span> \
+                                            <span class="p">{</span><span class="s">&#39;attr&#39;</span><span class="p">:</span> <span class="n">attribute</span><span class="o">.</span><span class="n">slug</span><span class="p">})</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">attribute</span><span class="o">.</span><span class="n">validate_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&quot;</span><span class="si">%(attr)s</span><span class="s"> EAV field </span><span class="si">%(err)s</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">%</span> \
+                                            <span class="p">{</span><span class="s">&#39;attr&#39;</span><span class="p">:</span> <span class="n">attribute</span><span class="o">.</span><span class="n">slug</span><span class="p">,</span>
+                                             <span class="s">&#39;err&#39;</span><span class="p">:</span> <span class="n">e</span><span class="p">})</span>
+</div>
+<div class="viewcode-block" id="Entity.get_values"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Entity.get_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get all set :class:`Value` objects for self.model</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">Value</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">entity_ct</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ct</span><span class="p">,</span>
+                                    <span class="n">entity_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span><span class="o">.</span><span class="n">select_related</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Entity.get_all_attribute_slugs"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Entity.get_all_attribute_slugs">[docs]</a>    <span class="k">def</span> <span class="nf">get_all_attribute_slugs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns a list of slugs for all attributes available to this entity.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_attributes</span><span class="p">()</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s">&#39;slug&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Entity.get_attribute_by_slug"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Entity.get_attribute_by_slug">[docs]</a>    <span class="k">def</span> <span class="nf">get_attribute_by_slug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slug</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns a single :class:`Attribute` with *slug*</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_attributes</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">slug</span><span class="o">=</span><span class="n">slug</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Entity.get_value_by_attribute"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Entity.get_value_by_attribute">[docs]</a>    <span class="k">def</span> <span class="nf">get_value_by_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns a single :class:`Value` for *attribute*</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_values</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attribute</span><span class="o">=</span><span class="n">attribute</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Iterate over set eav values.</span>
+
+<span class="sd">        This would allow you to do:</span>
+
+<span class="sd">        &gt;&gt;&gt; for i in m.eav: print i</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_values</span><span class="p">())</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Entity.post_save_handler"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Entity.post_save_handler">[docs]</a>    <span class="k">def</span> <span class="nf">post_save_handler</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Post save handler attached to self.model.  Calls :meth:`save` when</span>
+<span class="sd">        the model instance we are attached to is saved.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">instance</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;instance&#39;</span><span class="p">]</span>
+        <span class="n">entity</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">instance</span><span class="o">.</span><span class="n">_eav_config_cls</span><span class="o">.</span><span class="n">eav_attr</span><span class="p">)</span>
+        <span class="n">entity</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Entity.pre_save_handler"><a class="viewcode-back" href="../../auto_modules.html#eav.models.Entity.pre_save_handler">[docs]</a>    <span class="k">def</span> <span class="nf">pre_save_handler</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Pre save handler attached to self.model.  Called before the</span>
+<span class="sd">        model instance we are attached to is saved. This allows us to call</span>
+<span class="sd">        :meth:`validate_attributes` before the entity is saved.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">instance</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;instance&#39;</span><span class="p">]</span>
+        <span class="n">entity</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;instance&#39;</span><span class="p">],</span> <span class="n">instance</span><span class="o">.</span><span class="n">_eav_config_cls</span><span class="o">.</span><span class="n">eav_attr</span><span class="p">)</span>
+        <span class="n">entity</span><span class="o">.</span><span class="n">validate_attributes</span><span class="p">()</span>
+</div></div>
+<span class="k">if</span> <span class="s">&#39;django_nose&#39;</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">INSTALLED_APPS</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The django_nose test runner won&#39;t automatically create our Patient model</span>
+<span class="sd">    database table which is required for tests, unless we import it here.</span>
+
+<span class="sd">    Please, someone tell me a better way to do this.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="kn">from</span> <span class="nn">.tests.models</span> <span class="kn">import</span> <span class="n">Patient</span><span class="p">,</span> <span class="n">Encounter</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django.contrib.humanize.tests &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for django.contrib.humanize.tests</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">with_statement</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">new</span>
+
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">Template</span><span class="p">,</span> <span class="n">Context</span><span class="p">,</span> <span class="n">defaultfilters</span>
+<span class="kn">from</span> <span class="nn">django.test</span> <span class="kn">import</span> <span class="n">TestCase</span>
+<span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">translation</span><span class="p">,</span> <span class="n">tzinfo</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">django.utils.html</span> <span class="kn">import</span> <span class="n">escape</span>
+<span class="kn">from</span> <span class="nn">django.utils.timezone</span> <span class="kn">import</span> <span class="n">utc</span>
+
+
+<div class="viewcode-block" id="HumanizeTests"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.humanize.tests.HumanizeTests">[docs]</a><span class="k">class</span> <span class="nc">HumanizeTests</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HumanizeTests.humanize_tester"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.humanize.tests.HumanizeTests.humanize_tester">[docs]</a>    <span class="k">def</span> <span class="nf">humanize_tester</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_list</span><span class="p">,</span> <span class="n">result_list</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+        <span class="c"># Using max below ensures we go through both lists</span>
+        <span class="c"># However, if the lists are not equal length, this raises an exception</span>
+        <span class="k">for</span> <span class="n">test_content</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">test_list</span><span class="p">,</span> <span class="n">result_list</span><span class="p">):</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s">&#39;{</span><span class="si">%%</span><span class="s"> load humanize </span><span class="si">%%</span><span class="s">}{{ test_content|</span><span class="si">%s</span><span class="s"> }}&#39;</span> <span class="o">%</span> <span class="n">method</span><span class="p">)</span>
+            <span class="n">rendered</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">Context</span><span class="p">(</span><span class="nb">locals</span><span class="p">()))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">rendered</span><span class="p">,</span> <span class="n">escape</span><span class="p">(</span><span class="n">result</span><span class="p">),</span>
+                             <span class="n">msg</span><span class="o">=</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> test failed, produced &#39;</span><span class="si">%s</span><span class="s">&#39;, should&#39;ve produced &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">rendered</span><span class="p">,</span> <span class="n">result</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="HumanizeTests.test_ordinal"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.humanize.tests.HumanizeTests.test_ordinal">[docs]</a>    <span class="k">def</span> <span class="nf">test_ordinal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">test_list</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="s">&#39;2&#39;</span><span class="p">,</span> <span class="s">&#39;3&#39;</span><span class="p">,</span> <span class="s">&#39;4&#39;</span><span class="p">,</span> <span class="s">&#39;11&#39;</span><span class="p">,</span> <span class="s">&#39;12&#39;</span><span class="p">,</span>
+                     <span class="s">&#39;13&#39;</span><span class="p">,</span> <span class="s">&#39;101&#39;</span><span class="p">,</span> <span class="s">&#39;102&#39;</span><span class="p">,</span> <span class="s">&#39;103&#39;</span><span class="p">,</span> <span class="s">&#39;111&#39;</span><span class="p">,</span>
+                     <span class="s">&#39;something else&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">result_list</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;1st&#39;</span><span class="p">,</span> <span class="s">&#39;2nd&#39;</span><span class="p">,</span> <span class="s">&#39;3rd&#39;</span><span class="p">,</span> <span class="s">&#39;4th&#39;</span><span class="p">,</span> <span class="s">&#39;11th&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;12th&#39;</span><span class="p">,</span> <span class="s">&#39;13th&#39;</span><span class="p">,</span> <span class="s">&#39;101st&#39;</span><span class="p">,</span> <span class="s">&#39;102nd&#39;</span><span class="p">,</span> <span class="s">&#39;103rd&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;111th&#39;</span><span class="p">,</span> <span class="s">&#39;something else&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">humanize_tester</span><span class="p">(</span><span class="n">test_list</span><span class="p">,</span> <span class="n">result_list</span><span class="p">,</span> <span class="s">&#39;ordinal&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HumanizeTests.test_intcomma"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.humanize.tests.HumanizeTests.test_intcomma">[docs]</a>    <span class="k">def</span> <span class="nf">test_intcomma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">test_list</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">10123</span><span class="p">,</span> <span class="mi">10311</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">,</span> <span class="mf">1234567.25</span><span class="p">,</span>
+                     <span class="s">&#39;100&#39;</span><span class="p">,</span> <span class="s">&#39;1000&#39;</span><span class="p">,</span> <span class="s">&#39;10123&#39;</span><span class="p">,</span> <span class="s">&#39;10311&#39;</span><span class="p">,</span> <span class="s">&#39;1000000&#39;</span><span class="p">,</span> <span class="s">&#39;1234567.1234567&#39;</span><span class="p">,</span>
+                     <span class="bp">None</span><span class="p">)</span>
+        <span class="n">result_list</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;100&#39;</span><span class="p">,</span> <span class="s">&#39;1,000&#39;</span><span class="p">,</span> <span class="s">&#39;10,123&#39;</span><span class="p">,</span> <span class="s">&#39;10,311&#39;</span><span class="p">,</span> <span class="s">&#39;1,000,000&#39;</span><span class="p">,</span> <span class="s">&#39;1,234,567.25&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;100&#39;</span><span class="p">,</span> <span class="s">&#39;1,000&#39;</span><span class="p">,</span> <span class="s">&#39;10,123&#39;</span><span class="p">,</span> <span class="s">&#39;10,311&#39;</span><span class="p">,</span> <span class="s">&#39;1,000,000&#39;</span><span class="p">,</span> <span class="s">&#39;1,234,567.1234567&#39;</span><span class="p">,</span>
+                     <span class="bp">None</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">humanize_tester</span><span class="p">(</span><span class="n">test_list</span><span class="p">,</span> <span class="n">result_list</span><span class="p">,</span> <span class="s">&#39;intcomma&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HumanizeTests.test_l10n_intcomma"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.humanize.tests.HumanizeTests.test_l10n_intcomma">[docs]</a>    <span class="k">def</span> <span class="nf">test_l10n_intcomma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">test_list</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">10123</span><span class="p">,</span> <span class="mi">10311</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">,</span> <span class="mf">1234567.25</span><span class="p">,</span>
+                     <span class="s">&#39;100&#39;</span><span class="p">,</span> <span class="s">&#39;1000&#39;</span><span class="p">,</span> <span class="s">&#39;10123&#39;</span><span class="p">,</span> <span class="s">&#39;10311&#39;</span><span class="p">,</span> <span class="s">&#39;1000000&#39;</span><span class="p">,</span> <span class="s">&#39;1234567.1234567&#39;</span><span class="p">,</span>
+                     <span class="bp">None</span><span class="p">)</span>
+        <span class="n">result_list</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;100&#39;</span><span class="p">,</span> <span class="s">&#39;1,000&#39;</span><span class="p">,</span> <span class="s">&#39;10,123&#39;</span><span class="p">,</span> <span class="s">&#39;10,311&#39;</span><span class="p">,</span> <span class="s">&#39;1,000,000&#39;</span><span class="p">,</span> <span class="s">&#39;1,234,567.25&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;100&#39;</span><span class="p">,</span> <span class="s">&#39;1,000&#39;</span><span class="p">,</span> <span class="s">&#39;10,123&#39;</span><span class="p">,</span> <span class="s">&#39;10,311&#39;</span><span class="p">,</span> <span class="s">&#39;1,000,000&#39;</span><span class="p">,</span> <span class="s">&#39;1,234,567.1234567&#39;</span><span class="p">,</span>
+                     <span class="bp">None</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">(</span><span class="n">USE_L10N</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">USE_THOUSAND_SEPARATOR</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">humanize_tester</span><span class="p">(</span><span class="n">test_list</span><span class="p">,</span> <span class="n">result_list</span><span class="p">,</span> <span class="s">&#39;intcomma&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HumanizeTests.test_intcomma_without_number_grouping"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.humanize.tests.HumanizeTests.test_intcomma_without_number_grouping">[docs]</a>    <span class="k">def</span> <span class="nf">test_intcomma_without_number_grouping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Regression for #17414</span>
+        <span class="k">with</span> <span class="n">translation</span><span class="o">.</span><span class="n">override</span><span class="p">(</span><span class="s">&#39;ja&#39;</span><span class="p">):</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">(</span><span class="n">USE_L10N</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">humanize_tester</span><span class="p">([</span><span class="mi">100</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;100&#39;</span><span class="p">],</span> <span class="s">&#39;intcomma&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HumanizeTests.test_intword"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.humanize.tests.HumanizeTests.test_intword">[docs]</a>    <span class="k">def</span> <span class="nf">test_intword</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">test_list</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;100&#39;</span><span class="p">,</span> <span class="s">&#39;1000000&#39;</span><span class="p">,</span> <span class="s">&#39;1200000&#39;</span><span class="p">,</span> <span class="s">&#39;1290000&#39;</span><span class="p">,</span>
+                     <span class="s">&#39;1000000000&#39;</span><span class="p">,</span> <span class="s">&#39;2000000000&#39;</span><span class="p">,</span> <span class="s">&#39;6000000000000&#39;</span><span class="p">,</span>
+                     <span class="s">&#39;1300000000000000&#39;</span><span class="p">,</span> <span class="s">&#39;3500000000000000000000&#39;</span><span class="p">,</span>
+                     <span class="s">&#39;8100000000000000000000000000000000&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">result_list</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;100&#39;</span><span class="p">,</span> <span class="s">&#39;1.0 million&#39;</span><span class="p">,</span> <span class="s">&#39;1.2 million&#39;</span><span class="p">,</span> <span class="s">&#39;1.3 million&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;1.0 billion&#39;</span><span class="p">,</span> <span class="s">&#39;2.0 billion&#39;</span><span class="p">,</span> <span class="s">&#39;6.0 trillion&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;1.3 quadrillion&#39;</span><span class="p">,</span> <span class="s">&#39;3.5 sextillion&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;8.1 decillion&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">humanize_tester</span><span class="p">(</span><span class="n">test_list</span><span class="p">,</span> <span class="n">result_list</span><span class="p">,</span> <span class="s">&#39;intword&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HumanizeTests.test_i18n_intcomma"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.humanize.tests.HumanizeTests.test_i18n_intcomma">[docs]</a>    <span class="k">def</span> <span class="nf">test_i18n_intcomma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">test_list</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">10123</span><span class="p">,</span> <span class="mi">10311</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">,</span> <span class="mf">1234567.25</span><span class="p">,</span>
+                     <span class="s">&#39;100&#39;</span><span class="p">,</span> <span class="s">&#39;1000&#39;</span><span class="p">,</span> <span class="s">&#39;10123&#39;</span><span class="p">,</span> <span class="s">&#39;10311&#39;</span><span class="p">,</span> <span class="s">&#39;1000000&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">result_list</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;100&#39;</span><span class="p">,</span> <span class="s">&#39;1.000&#39;</span><span class="p">,</span> <span class="s">&#39;10.123&#39;</span><span class="p">,</span> <span class="s">&#39;10.311&#39;</span><span class="p">,</span> <span class="s">&#39;1.000.000&#39;</span><span class="p">,</span> <span class="s">&#39;1.234.567,25&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;100&#39;</span><span class="p">,</span> <span class="s">&#39;1.000&#39;</span><span class="p">,</span> <span class="s">&#39;10.123&#39;</span><span class="p">,</span> <span class="s">&#39;10.311&#39;</span><span class="p">,</span> <span class="s">&#39;1.000.000&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">(</span><span class="n">USE_L10N</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">USE_THOUSAND_SEPARATOR</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">translation</span><span class="o">.</span><span class="n">override</span><span class="p">(</span><span class="s">&#39;de&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">humanize_tester</span><span class="p">(</span><span class="n">test_list</span><span class="p">,</span> <span class="n">result_list</span><span class="p">,</span> <span class="s">&#39;intcomma&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HumanizeTests.test_i18n_intword"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.humanize.tests.HumanizeTests.test_i18n_intword">[docs]</a>    <span class="k">def</span> <span class="nf">test_i18n_intword</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">test_list</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;100&#39;</span><span class="p">,</span> <span class="s">&#39;1000000&#39;</span><span class="p">,</span> <span class="s">&#39;1200000&#39;</span><span class="p">,</span> <span class="s">&#39;1290000&#39;</span><span class="p">,</span>
+                     <span class="s">&#39;1000000000&#39;</span><span class="p">,</span> <span class="s">&#39;2000000000&#39;</span><span class="p">,</span> <span class="s">&#39;6000000000000&#39;</span><span class="p">)</span>
+        <span class="n">result_list</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;100&#39;</span><span class="p">,</span> <span class="s">&#39;1,0 Million&#39;</span><span class="p">,</span> <span class="s">&#39;1,2 Millionen&#39;</span><span class="p">,</span> <span class="s">&#39;1,3 Millionen&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;1,0 Milliarde&#39;</span><span class="p">,</span> <span class="s">&#39;2,0 Milliarden&#39;</span><span class="p">,</span> <span class="s">&#39;6,0 Billionen&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">(</span><span class="n">USE_L10N</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">USE_THOUSAND_SEPARATOR</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">translation</span><span class="o">.</span><span class="n">override</span><span class="p">(</span><span class="s">&#39;de&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">humanize_tester</span><span class="p">(</span><span class="n">test_list</span><span class="p">,</span> <span class="n">result_list</span><span class="p">,</span> <span class="s">&#39;intword&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HumanizeTests.test_apnumber"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.humanize.tests.HumanizeTests.test_apnumber">[docs]</a>    <span class="k">def</span> <span class="nf">test_apnumber</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">test_list</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">)]</span>
+        <span class="n">test_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        <span class="n">result_list</span> <span class="o">=</span> <span class="p">(</span><span class="s">u&#39;one&#39;</span><span class="p">,</span> <span class="s">u&#39;two&#39;</span><span class="p">,</span> <span class="s">u&#39;three&#39;</span><span class="p">,</span> <span class="s">u&#39;four&#39;</span><span class="p">,</span> <span class="s">u&#39;five&#39;</span><span class="p">,</span> <span class="s">u&#39;six&#39;</span><span class="p">,</span>
+                       <span class="s">u&#39;seven&#39;</span><span class="p">,</span> <span class="s">u&#39;eight&#39;</span><span class="p">,</span> <span class="s">u&#39;nine&#39;</span><span class="p">,</span> <span class="s">u&#39;10&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">humanize_tester</span><span class="p">(</span><span class="n">test_list</span><span class="p">,</span> <span class="n">result_list</span><span class="p">,</span> <span class="s">&#39;apnumber&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HumanizeTests.test_naturalday"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.humanize.tests.HumanizeTests.test_naturalday">[docs]</a>    <span class="k">def</span> <span class="nf">test_naturalday</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">today</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+        <span class="n">yesterday</span> <span class="o">=</span> <span class="n">today</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">tomorrow</span> <span class="o">=</span> <span class="n">today</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">someday</span> <span class="o">=</span> <span class="n">today</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">notdate</span> <span class="o">=</span> <span class="s">u&quot;I&#39;m not a date value&quot;</span>
+
+        <span class="n">test_list</span> <span class="o">=</span> <span class="p">(</span><span class="n">today</span><span class="p">,</span> <span class="n">yesterday</span><span class="p">,</span> <span class="n">tomorrow</span><span class="p">,</span> <span class="n">someday</span><span class="p">,</span> <span class="n">notdate</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">someday_result</span> <span class="o">=</span> <span class="n">defaultfilters</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="n">someday</span><span class="p">)</span>
+        <span class="n">result_list</span> <span class="o">=</span> <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">u&#39;today&#39;</span><span class="p">),</span> <span class="n">_</span><span class="p">(</span><span class="s">u&#39;yesterday&#39;</span><span class="p">),</span> <span class="n">_</span><span class="p">(</span><span class="s">u&#39;tomorrow&#39;</span><span class="p">),</span>
+                       <span class="n">someday_result</span><span class="p">,</span> <span class="s">u&quot;I&#39;m not a date value&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">humanize_tester</span><span class="p">(</span><span class="n">test_list</span><span class="p">,</span> <span class="n">result_list</span><span class="p">,</span> <span class="s">&#39;naturalday&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HumanizeTests.test_naturalday_tz"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.humanize.tests.HumanizeTests.test_naturalday_tz">[docs]</a>    <span class="k">def</span> <span class="nf">test_naturalday_tz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">django.contrib.humanize.templatetags.humanize</span> <span class="kn">import</span> <span class="n">naturalday</span>
+
+        <span class="n">today</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+        <span class="n">tz_one</span> <span class="o">=</span> <span class="n">tzinfo</span><span class="o">.</span><span class="n">FixedOffset</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=-</span><span class="mi">12</span><span class="p">))</span>
+        <span class="n">tz_two</span> <span class="o">=</span> <span class="n">tzinfo</span><span class="o">.</span><span class="n">FixedOffset</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">12</span><span class="p">))</span>
+
+        <span class="c"># Can be today or yesterday</span>
+        <span class="n">date_one</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">today</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">today</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">today</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">tz_one</span><span class="p">)</span>
+        <span class="n">naturalday_one</span> <span class="o">=</span> <span class="n">naturalday</span><span class="p">(</span><span class="n">date_one</span><span class="p">)</span>
+        <span class="c"># Can be today or tomorrow</span>
+        <span class="n">date_two</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">today</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">today</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">today</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">tz_two</span><span class="p">)</span>
+        <span class="n">naturalday_two</span> <span class="o">=</span> <span class="n">naturalday</span><span class="p">(</span><span class="n">date_two</span><span class="p">)</span>
+
+        <span class="c"># As 24h of difference they will never be the same</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertNotEqual</span><span class="p">(</span><span class="n">naturalday_one</span><span class="p">,</span> <span class="n">naturalday_two</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HumanizeTests.test_naturaltime"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.humanize.tests.HumanizeTests.test_naturaltime">[docs]</a>    <span class="k">def</span> <span class="nf">test_naturaltime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">class</span> <span class="nc">naive</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">tzinfo</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">utcoffset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">None</span>
+        <span class="c"># we&#39;re going to mock datetime.datetime, so use a fixed datetime</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2011</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+        <span class="n">test_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">now</span><span class="p">,</span>
+            <span class="n">now</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">now</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">30</span><span class="p">),</span>
+            <span class="n">now</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mi">30</span><span class="p">),</span>
+            <span class="n">now</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">now</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">minutes</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mi">30</span><span class="p">),</span>
+            <span class="n">now</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">23</span><span class="p">,</span> <span class="n">minutes</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mi">50</span><span class="p">),</span>
+            <span class="n">now</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">now</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">500</span><span class="p">),</span>
+            <span class="n">now</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">now</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">30</span><span class="p">),</span>
+            <span class="n">now</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mi">30</span><span class="p">),</span>
+            <span class="n">now</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">now</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">minutes</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mi">30</span><span class="p">),</span>
+            <span class="n">now</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">23</span><span class="p">,</span> <span class="n">minutes</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mi">50</span><span class="p">),</span>
+            <span class="n">now</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">now</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">500</span><span class="p">),</span>
+            <span class="n">now</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">naive</span><span class="p">()),</span>
+            <span class="n">now</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">utc</span><span class="p">),</span>
+        <span class="p">]</span>
+        <span class="n">result_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s">&#39;now&#39;</span><span class="p">,</span>
+            <span class="s">&#39;a second ago&#39;</span><span class="p">,</span>
+            <span class="s">&#39;30 seconds ago&#39;</span><span class="p">,</span>
+            <span class="s">&#39;a minute ago&#39;</span><span class="p">,</span>
+            <span class="s">&#39;2 minutes ago&#39;</span><span class="p">,</span>
+            <span class="s">&#39;an hour ago&#39;</span><span class="p">,</span>
+            <span class="s">&#39;23 hours ago&#39;</span><span class="p">,</span>
+            <span class="s">&#39;1 day ago&#39;</span><span class="p">,</span>
+            <span class="s">&#39;1 year, 4 months ago&#39;</span><span class="p">,</span>
+            <span class="s">&#39;a second from now&#39;</span><span class="p">,</span>
+            <span class="s">&#39;30 seconds from now&#39;</span><span class="p">,</span>
+            <span class="s">&#39;a minute from now&#39;</span><span class="p">,</span>
+            <span class="s">&#39;2 minutes from now&#39;</span><span class="p">,</span>
+            <span class="s">&#39;an hour from now&#39;</span><span class="p">,</span>
+            <span class="s">&#39;23 hours from now&#39;</span><span class="p">,</span>
+            <span class="s">&#39;1 day from now&#39;</span><span class="p">,</span>
+            <span class="s">&#39;1 year, 4 months from now&#39;</span><span class="p">,</span>
+            <span class="s">&#39;now&#39;</span><span class="p">,</span>
+            <span class="s">&#39;now&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="c"># mock out datetime so these tests don&#39;t fail occasionally when the</span>
+        <span class="c"># test runs too slow</span>
+        <span class="k">class</span> <span class="nc">MockDateTime</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+            <span class="nd">@classmethod</span>
+            <span class="k">def</span> <span class="nf">now</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">tz</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">tz</span><span class="o">.</span><span class="n">utcoffset</span><span class="p">(</span><span class="n">now</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">now</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># equals now.replace(tzinfo=utc)</span>
+                    <span class="k">return</span> <span class="n">now</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">tz</span><span class="p">)</span> <span class="o">+</span> <span class="n">tz</span><span class="o">.</span><span class="n">utcoffset</span><span class="p">(</span><span class="n">now</span><span class="p">)</span>
+
+        <span class="c"># naturaltime also calls timesince/timeuntil</span>
+        <span class="kn">from</span> <span class="nn">django.contrib.humanize.templatetags</span> <span class="kn">import</span> <span class="n">humanize</span>
+        <span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">timesince</span>
+        <span class="n">orig_humanize_datetime</span> <span class="o">=</span> <span class="n">humanize</span><span class="o">.</span><span class="n">datetime</span>
+        <span class="n">orig_timesince_datetime</span> <span class="o">=</span> <span class="n">timesince</span><span class="o">.</span><span class="n">datetime</span>
+        <span class="n">humanize</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="n">MockDateTime</span>
+        <span class="n">timesince</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">module</span><span class="p">(</span><span class="s">&quot;mock_datetime&quot;</span><span class="p">)</span>
+        <span class="n">timesince</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="n">MockDateTime</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">humanize_tester</span><span class="p">(</span><span class="n">test_list</span><span class="p">,</span> <span class="n">result_list</span><span class="p">,</span> <span class="s">&#39;naturaltime&#39;</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">humanize</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="n">orig_humanize_datetime</span>
+            <span class="n">timesince</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="n">orig_timesince_datetime</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

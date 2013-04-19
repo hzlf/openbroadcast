@@ -1,0 +1,313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>actstream.feeds &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for actstream.feeds</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">get_object_or_404</span>
+<span class="kn">from</span> <span class="nn">django.core.urlresolvers</span> <span class="kn">import</span> <span class="n">reverse</span>
+<span class="kn">from</span> <span class="nn">django.utils.feedgenerator</span> <span class="kn">import</span> <span class="n">Atom1Feed</span><span class="p">,</span> <span class="n">rfc3339_date</span><span class="p">,</span> <span class="n">get_tag_uri</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes.models</span> <span class="kn">import</span> <span class="n">ContentType</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">django.contrib.syndication.views</span> <span class="kn">import</span> <span class="n">Feed</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>   <span class="c"># Pre 1.2</span>
+    <span class="kn">from</span> <span class="nn">django.contrib.syndication.feeds</span> <span class="kn">import</span> <span class="n">Feed</span>
+
+<span class="kn">from</span> <span class="nn">actstream.models</span> <span class="kn">import</span> <span class="n">model_stream</span><span class="p">,</span> <span class="n">user_stream</span><span class="p">,</span> <span class="n">action_object_stream</span>
+
+
+<div class="viewcode-block" id="AtomWithContentFeed"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.AtomWithContentFeed">[docs]</a><span class="k">class</span> <span class="nc">AtomWithContentFeed</span><span class="p">(</span><span class="n">Atom1Feed</span><span class="p">):</span>
+
+<div class="viewcode-block" id="AtomWithContentFeed.add_item_elements"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.AtomWithContentFeed.add_item_elements">[docs]</a>    <span class="k">def</span> <span class="nf">add_item_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handler</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AtomWithContentFeed</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add_item_elements</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&#39;content&#39;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">addQuickElement</span><span class="p">(</span><span class="s">u&quot;content&quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="s">&#39;content&#39;</span><span class="p">],</span>
+                <span class="p">{</span><span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;html&#39;</span><span class="p">})</span>
+
+</div></div>
+<div class="viewcode-block" id="ObjectActivityFeed"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ObjectActivityFeed">[docs]</a><span class="k">class</span> <span class="nc">ObjectActivityFeed</span><span class="p">(</span><span class="n">Feed</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Feed of Activity for a given object (where the object is the Object or</span>
+<span class="sd">    Target).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ObjectActivityFeed.get_object"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ObjectActivityFeed.get_object">[docs]</a>    <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">content_type_id</span><span class="p">,</span> <span class="n">object_id</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">ContentType</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">content_type_id</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">get_object_for_this_type</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">object_id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ObjectActivityFeed.title"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ObjectActivityFeed.title">[docs]</a>    <span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;Activity for </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">obj</span>
+</div>
+<div class="viewcode-block" id="ObjectActivityFeed.link"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ObjectActivityFeed.link">[docs]</a>    <span class="k">def</span> <span class="nf">link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;get_absolute_url&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_absolute_url</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;actstream_actor&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">pk</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ObjectActivityFeed.description"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ObjectActivityFeed.description">[docs]</a>    <span class="k">def</span> <span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;Activity for </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">obj</span>
+</div>
+<div class="viewcode-block" id="ObjectActivityFeed.items"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ObjectActivityFeed.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">action_object_stream</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">i</span><span class="p">[:</span><span class="mi">30</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="ObjectActivityFeed.item_extra_kwargs"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ObjectActivityFeed.item_extra_kwargs">[docs]</a>    <span class="k">def</span> <span class="nf">item_extra_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span>  <span class="p">{</span>
+            <span class="s">&#39;content&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+        <span class="p">}</span>
+
+</div></div>
+<div class="viewcode-block" id="AtomObjectActivityFeed"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.AtomObjectActivityFeed">[docs]</a><span class="k">class</span> <span class="nc">AtomObjectActivityFeed</span><span class="p">(</span><span class="n">ObjectActivityFeed</span><span class="p">):</span>
+    <span class="n">feed_type</span> <span class="o">=</span> <span class="n">AtomWithContentFeed</span>
+    <span class="n">subtitle</span> <span class="o">=</span> <span class="n">ObjectActivityFeed</span><span class="o">.</span><span class="n">description</span>
+
+</div>
+<div class="viewcode-block" id="ActivityStreamsFeed"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ActivityStreamsFeed">[docs]</a><span class="k">class</span> <span class="nc">ActivityStreamsFeed</span><span class="p">(</span><span class="n">AtomWithContentFeed</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Custom feed generator for Activity Stream feeds</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ActivityStreamsFeed.root_attributes"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ActivityStreamsFeed.root_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">root_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ActivityStreamsFeed</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">root_attributes</span><span class="p">()</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s">&#39;xmlns: activity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;http: //activitystrea.ms/spec/1.0/&#39;</span>
+        <span class="k">return</span> <span class="n">attrs</span>
+</div>
+<div class="viewcode-block" id="ActivityStreamsFeed.add_root_elements"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ActivityStreamsFeed.add_root_elements">[docs]</a>    <span class="k">def</span> <span class="nf">add_root_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ActivityStreamsFeed</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add_root_elements</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ActivityStreamsFeed.add_item_elements"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ActivityStreamsFeed.add_item_elements">[docs]</a>    <span class="k">def</span> <span class="nf">add_item_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handler</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ActivityStreamsFeed</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add_item_elements</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="n">handler</span><span class="o">.</span><span class="n">addQuickElement</span><span class="p">(</span><span class="s">u&quot;activity: verb&quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="s">&#39;verb&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="s">&#39;actor&#39;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">startElement</span><span class="p">(</span><span class="s">&#39;author&#39;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">addQuickElement</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="s">&#39;actor&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">display_name</span><span class="p">)</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">addQuickElement</span><span class="p">(</span><span class="s">&#39;uri&#39;</span><span class="p">,</span> <span class="n">get_tag_uri</span><span class="p">(</span>
+                <span class="n">item</span><span class="p">[</span><span class="s">&#39;actor&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_absolute_url</span><span class="p">(),</span> <span class="bp">None</span><span class="p">))</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">addQuickElement</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="s">&#39;actor&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_absolute_url</span><span class="p">())</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">addQuickElement</span><span class="p">(</span><span class="s">&#39;activity: object-type&#39;</span><span class="p">,</span> <span class="s">&#39;person&#39;</span><span class="p">)</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">addQuickElement</span><span class="p">(</span><span class="s">&#39;link&#39;</span><span class="p">,</span> <span class="n">get_tag_uri</span><span class="p">(</span>
+                <span class="n">item</span><span class="p">[</span><span class="s">&#39;actor&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_absolute_url</span><span class="p">(),</span> <span class="bp">None</span><span class="p">),</span> <span class="p">{</span><span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;text/html&#39;</span><span class="p">})</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">endElement</span><span class="p">(</span><span class="s">&#39;author&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&#39;object&#39;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">startElement</span><span class="p">(</span><span class="s">&#39;activity: object&#39;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">addQuickElement</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="s">&#39;object_id&#39;</span><span class="p">])</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">addQuickElement</span><span class="p">(</span><span class="s">&#39;title&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="s">&#39;object_title&#39;</span><span class="p">])</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">addQuickElement</span><span class="p">(</span><span class="s">&#39;published&#39;</span><span class="p">,</span>
+                <span class="n">rfc3339_date</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s">&#39;object_timestamp&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">addQuickElement</span><span class="p">(</span><span class="s">&#39;link&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="s">&#39;object&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_absolute_url</span><span class="p">(),</span>
+                <span class="p">{</span><span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;text/html&#39;</span><span class="p">})</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">addQuickElement</span><span class="p">(</span><span class="s">&#39;activity: object-type&#39;</span><span class="p">,</span>
+                <span class="n">item</span><span class="p">[</span><span class="s">&#39;object_object_type&#39;</span><span class="p">])</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">endElement</span><span class="p">(</span><span class="s">&#39;activity: object&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&#39;target&#39;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">startElement</span><span class="p">(</span><span class="s">&#39;activity: target&#39;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">addQuickElement</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="s">&#39;target_id&#39;</span><span class="p">])</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">addQuickElement</span><span class="p">(</span><span class="s">&#39;title&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="s">&#39;target_title&#39;</span><span class="p">])</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">addQuickElement</span><span class="p">(</span><span class="s">&#39;activity: object-type&#39;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s">&#39;target_object_type&#39;</span><span class="p">]))</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">endElement</span><span class="p">(</span><span class="s">&#39;activity: target&#39;</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="ActivityStreamsObjectActivityFeed"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ActivityStreamsObjectActivityFeed">[docs]</a><span class="k">class</span> <span class="nc">ActivityStreamsObjectActivityFeed</span><span class="p">(</span><span class="n">AtomObjectActivityFeed</span><span class="p">):</span>
+    <span class="n">feed_type</span> <span class="o">=</span> <span class="n">ActivityStreamsFeed</span>
+
+<div class="viewcode-block" id="ActivityStreamsObjectActivityFeed.feed_extra_kwargs"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ActivityStreamsObjectActivityFeed.feed_extra_kwargs">[docs]</a>    <span class="k">def</span> <span class="nf">feed_extra_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an extra keyword arguments dictionary that is used when</span>
+<span class="sd">        initializing the feed generator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{}</span>
+</div>
+<div class="viewcode-block" id="ActivityStreamsObjectActivityFeed.item_extra_kwargs"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ActivityStreamsObjectActivityFeed.item_extra_kwargs">[docs]</a>    <span class="k">def</span> <span class="nf">item_extra_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an extra keyword arguments dictionary that is used with</span>
+<span class="sd">        the `add_item` call of the feed generator.</span>
+<span class="sd">        Add the &#39;content&#39; field of the &#39;Entry&#39; item, to be used by the custom</span>
+<span class="sd">        feed generator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">object_id</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">action_object</span><span class="o">.</span><span class="n">get_absolute_url</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">object_id</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">action_object_content_type</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">action_object</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+        <span class="n">object_id</span> <span class="o">=</span> <span class="n">get_tag_uri</span><span class="p">(</span><span class="n">object_id</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="n">item</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;content&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="s">&#39;actor&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">actor</span><span class="p">,</span>
+            <span class="s">&#39;verb&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">verb_uri_prefix</span> <span class="o">+</span> <span class="n">obj</span><span class="o">.</span><span class="n">verb</span><span class="p">,</span>
+            <span class="c"># action object</span>
+            <span class="s">&#39;object_timestamp&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="s">&#39;object&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">action_object</span><span class="p">,</span>
+            <span class="s">&#39;object_id&#39;</span><span class="p">:</span> <span class="n">object_id</span><span class="p">,</span>
+            <span class="s">&#39;object_title&#39;</span><span class="p">:</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">action_object</span><span class="p">),</span>
+            <span class="s">&#39;object_object_type&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">action_object_content_type</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">target</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">target_id</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">get_absolute_url</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">target_id</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">target_content_type</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">action_object</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+            <span class="n">target_id</span> <span class="o">=</span> <span class="n">get_tag_uri</span><span class="p">(</span><span class="n">target_id</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
+
+            <span class="n">item</span><span class="p">[</span><span class="s">&#39;target&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">target</span>
+            <span class="n">item</span><span class="p">[</span><span class="s">&#39;target_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_id</span>
+            <span class="n">item</span><span class="p">[</span><span class="s">&#39;target_title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+            <span class="n">item</span><span class="p">[</span><span class="s">&#39;target_object_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">target_content_type</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="k">return</span> <span class="n">item</span>
+
+</div></div>
+<div class="viewcode-block" id="ModelActivityFeed"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ModelActivityFeed">[docs]</a><span class="k">class</span> <span class="nc">ModelActivityFeed</span><span class="p">(</span><span class="n">Feed</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ModelActivityFeed.get_object"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ModelActivityFeed.get_object">[docs]</a>    <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">content_type_id</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">ContentType</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">content_type_id</span><span class="p">)</span><span class="o">.</span><span class="n">model_class</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ModelActivityFeed.title"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ModelActivityFeed.title">[docs]</a>    <span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;Activity feed from </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">model</span>
+</div>
+<div class="viewcode-block" id="ModelActivityFeed.link"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ModelActivityFeed.link">[docs]</a>    <span class="k">def</span> <span class="nf">link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;actstream_model&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">pk</span><span class="p">,))</span>
+</div>
+<div class="viewcode-block" id="ModelActivityFeed.description"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ModelActivityFeed.description">[docs]</a>    <span class="k">def</span> <span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;Public activities of </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">model</span>
+</div>
+<div class="viewcode-block" id="ModelActivityFeed.items"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.ModelActivityFeed.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">model_stream</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">i</span><span class="p">[:</span><span class="mi">30</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+</div></div>
+<div class="viewcode-block" id="AtomModelActivityFeed"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.AtomModelActivityFeed">[docs]</a><span class="k">class</span> <span class="nc">AtomModelActivityFeed</span><span class="p">(</span><span class="n">ModelActivityFeed</span><span class="p">):</span>
+    <span class="n">feed_type</span> <span class="o">=</span> <span class="n">Atom1Feed</span>
+    <span class="n">subtitle</span> <span class="o">=</span> <span class="n">ModelActivityFeed</span><span class="o">.</span><span class="n">description</span>
+
+</div>
+<div class="viewcode-block" id="UserActivityFeed"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.UserActivityFeed">[docs]</a><span class="k">class</span> <span class="nc">UserActivityFeed</span><span class="p">(</span><span class="n">Feed</span><span class="p">):</span>
+
+<div class="viewcode-block" id="UserActivityFeed.get_object"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.UserActivityFeed.get_object">[docs]</a>    <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+</div>
+<div class="viewcode-block" id="UserActivityFeed.title"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.UserActivityFeed.title">[docs]</a>    <span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;Activity feed for your followed actors&#39;</span>
+</div>
+<div class="viewcode-block" id="UserActivityFeed.link"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.UserActivityFeed.link">[docs]</a>    <span class="k">def</span> <span class="nf">link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;actstream&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s">&#39;get_absolute_url&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">user</span><span class="o">.</span><span class="n">get_absolute_url</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;actstream_actor&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">pk</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="UserActivityFeed.description"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.UserActivityFeed.description">[docs]</a>    <span class="k">def</span> <span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;Public activities of actors you follow&#39;</span>
+</div>
+<div class="viewcode-block" id="UserActivityFeed.items"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.UserActivityFeed.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">user_stream</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">i</span><span class="p">[:</span><span class="mi">30</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+</div></div>
+<div class="viewcode-block" id="AtomUserActivityFeed"><a class="viewcode-back" href="../../auto_modules.html#actstream.feeds.AtomUserActivityFeed">[docs]</a><span class="k">class</span> <span class="nc">AtomUserActivityFeed</span><span class="p">(</span><span class="n">UserActivityFeed</span><span class="p">):</span>
+    <span class="n">feed_type</span> <span class="o">=</span> <span class="n">Atom1Feed</span>
+    <span class="n">subtitle</span> <span class="o">=</span> <span class="n">UserActivityFeed</span><span class="o">.</span><span class="n">description</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>south.exceptions &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for south.exceptions</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">traceback</span> <span class="kn">import</span> <span class="n">format_exception</span>
+
+<div class="viewcode-block" id="SouthError"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.SouthError">[docs]</a><span class="k">class</span> <span class="nc">SouthError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="SouthWarning"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.SouthWarning">[docs]</a><span class="k">class</span> <span class="nc">SouthWarning</span><span class="p">(</span><span class="ne">RuntimeWarning</span><span class="p">):</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="BrokenMigration"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.BrokenMigration">[docs]</a><span class="k">class</span> <span class="nc">BrokenMigration</span><span class="p">(</span><span class="n">SouthError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">migration</span><span class="p">,</span> <span class="n">exc_info</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">migration</span> <span class="o">=</span> <span class="n">migration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exc_info</span> <span class="o">=</span> <span class="n">exc_info</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exc_info</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceback</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">format_exception</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">exc_info</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s">&quot;While loading migration &#39;</span><span class="si">%(migration)s</span><span class="s">&#39;:</span><span class="se">\n</span><span class="s">&quot;</span>
+                <span class="s">&#39;</span><span class="si">%(traceback)s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="UnknownMigration"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.UnknownMigration">[docs]</a><span class="k">class</span> <span class="nc">UnknownMigration</span><span class="p">(</span><span class="n">BrokenMigration</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s">&quot;Migration &#39;</span><span class="si">%(migration)s</span><span class="s">&#39; probably doesn&#39;t exist.</span><span class="se">\n</span><span class="s">&quot;</span>
+                <span class="s">&#39;</span><span class="si">%(traceback)s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="InvalidMigrationModule"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.InvalidMigrationModule">[docs]</a><span class="k">class</span> <span class="nc">InvalidMigrationModule</span><span class="p">(</span><span class="n">SouthError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">,</span> <span class="n">module</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s">&#39;The migration module specified for </span><span class="si">%(application)s</span><span class="s">, </span><span class="si">%(module)r</span><span class="s">, is invalid; the parent module does not exist.&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="NoMigrations"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.NoMigrations">[docs]</a><span class="k">class</span> <span class="nc">NoMigrations</span><span class="p">(</span><span class="n">SouthError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Application &#39;</span><span class="si">%(application)s</span><span class="s">&#39; has no migrations.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+
+</div>
+<div class="viewcode-block" id="MultiplePrefixMatches"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.MultiplePrefixMatches">[docs]</a><span class="k">class</span> <span class="nc">MultiplePrefixMatches</span><span class="p">(</span><span class="n">SouthError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">matches</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">prefix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matches</span> <span class="o">=</span> <span class="n">matches</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matches_list</span> <span class="o">=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">    &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">unicode</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matches</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s">&quot;Prefix &#39;</span><span class="si">%(prefix)s</span><span class="s">&#39; matches more than one migration:</span><span class="se">\n</span><span class="s">&quot;</span>
+                <span class="s">&quot;    </span><span class="si">%(matches_list)s</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+
+</div>
+<div class="viewcode-block" id="GhostMigrations"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.GhostMigrations">[docs]</a><span class="k">class</span> <span class="nc">GhostMigrations</span><span class="p">(</span><span class="n">SouthError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ghosts</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ghosts</span> <span class="o">=</span> <span class="n">ghosts</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ghosts_list</span> <span class="o">=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">    &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">unicode</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ghosts</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s">&quot;</span><span class="se">\n\n</span><span class="s"> ! These migrations are in the database but not on disk:</span><span class="se">\n</span><span class="s">&quot;</span>
+                <span class="s">&quot;    </span><span class="si">%(ghosts_list)s</span><span class="se">\n</span><span class="s">&quot;</span>
+                <span class="s">&quot; ! I&#39;m not trusting myself; either fix this yourself by fiddling</span><span class="se">\n</span><span class="s">&quot;</span>
+                <span class="s">&quot; ! with the south_migrationhistory table, or pass --delete-ghost-migrations</span><span class="se">\n</span><span class="s">&quot;</span>
+                <span class="s">&quot; ! to South to have it delete ALL of these records (this may not be good).&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+
+</div>
+<div class="viewcode-block" id="CircularDependency"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.CircularDependency">[docs]</a><span class="k">class</span> <span class="nc">CircularDependency</span><span class="p">(</span><span class="n">SouthError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trace</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span> <span class="o">=</span> <span class="n">trace</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="s">&quot; -&gt; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">unicode</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s">&quot;Found circular dependency:</span><span class="se">\n</span><span class="s">&quot;</span>
+                <span class="s">&quot;    </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="n">trace</span>
+
+</div>
+<div class="viewcode-block" id="InconsistentMigrationHistory"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.InconsistentMigrationHistory">[docs]</a><span class="k">class</span> <span class="nc">InconsistentMigrationHistory</span><span class="p">(</span><span class="n">SouthError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">problems</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">problems</span> <span class="o">=</span> <span class="n">problems</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s">&#39;Inconsistent migration history</span><span class="se">\n</span><span class="s">&#39;</span>
+                <span class="s">&#39;The following options are available:</span><span class="se">\n</span><span class="s">&#39;</span>
+                <span class="s">&#39;    --merge: will just attempt the migration ignoring any potential dependency conflicts.&#39;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="DependsOnHigherMigration"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.DependsOnHigherMigration">[docs]</a><span class="k">class</span> <span class="nc">DependsOnHigherMigration</span><span class="p">(</span><span class="n">SouthError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">migration</span><span class="p">,</span> <span class="n">depends_on</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">migration</span> <span class="o">=</span> <span class="n">migration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">depends_on</span> <span class="o">=</span> <span class="n">depends_on</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Lower migration &#39;</span><span class="si">%(migration)s</span><span class="s">&#39; depends on a higher migration &#39;</span><span class="si">%(depends_on)s</span><span class="s">&#39; in the same app.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+
+</div>
+<div class="viewcode-block" id="DependsOnUnknownMigration"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.DependsOnUnknownMigration">[docs]</a><span class="k">class</span> <span class="nc">DependsOnUnknownMigration</span><span class="p">(</span><span class="n">SouthError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">migration</span><span class="p">,</span> <span class="n">depends_on</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">migration</span> <span class="o">=</span> <span class="n">migration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">depends_on</span> <span class="o">=</span> <span class="n">depends_on</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&quot;Migration &#39;</span><span class="si">%(migration)s</span><span class="s">&#39; depends on unknown migration &#39;</span><span class="si">%(depends_on)s</span><span class="s">&#39;.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+
+</div>
+<div class="viewcode-block" id="DependsOnUnmigratedApplication"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.DependsOnUnmigratedApplication">[docs]</a><span class="k">class</span> <span class="nc">DependsOnUnmigratedApplication</span><span class="p">(</span><span class="n">SouthError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">migration</span><span class="p">,</span> <span class="n">application</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">migration</span> <span class="o">=</span> <span class="n">migration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Migration &#39;</span><span class="si">%(migration)s</span><span class="s">&#39; depends on unmigrated application &#39;</span><span class="si">%(application)s</span><span class="s">&#39;.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+
+</div>
+<div class="viewcode-block" id="FailedDryRun"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.FailedDryRun">[docs]</a><span class="k">class</span> <span class="nc">FailedDryRun</span><span class="p">(</span><span class="n">SouthError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">migration</span><span class="p">,</span> <span class="n">exc_info</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">migration</span> <span class="o">=</span> <span class="n">migration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">migration</span><span class="o">.</span><span class="n">name</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exc_info</span> <span class="o">=</span> <span class="n">exc_info</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceback</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">format_exception</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">exc_info</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s">&quot; ! Error found during dry run of &#39;</span><span class="si">%(name)s</span><span class="s">&#39;! Aborting.</span><span class="se">\n</span><span class="s">&quot;</span>
+                <span class="s">&quot;</span><span class="si">%(traceback)s</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+
+</div>
+<div class="viewcode-block" id="ORMBaseNotIncluded"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.ORMBaseNotIncluded">[docs]</a><span class="k">class</span> <span class="nc">ORMBaseNotIncluded</span><span class="p">(</span><span class="n">SouthError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when a frozen model has something in _ormbases which isn&#39;t frozen.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="UnfreezeMeLater"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.UnfreezeMeLater">[docs]</a><span class="k">class</span> <span class="nc">UnfreezeMeLater</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An exception, which tells the ORM unfreezer to postpone this model.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="ImpossibleORMUnfreeze"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.ImpossibleORMUnfreeze">[docs]</a><span class="k">class</span> <span class="nc">ImpossibleORMUnfreeze</span><span class="p">(</span><span class="n">SouthError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised if the ORM can&#39;t manage to unfreeze all the models in a linear fashion.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="ConstraintDropped"><a class="viewcode-back" href="../../auto_modules.html#south.exceptions.ConstraintDropped">[docs]</a><span class="k">class</span> <span class="nc">ConstraintDropped</span><span class="p">(</span><span class="n">SouthWarning</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraint</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
+        <span class="k">if</span> <span class="n">column</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">column</span> <span class="o">=</span> <span class="s">&quot;.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">column</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">column</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraint</span> <span class="o">=</span> <span class="n">constraint</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Constraint </span><span class="si">%(constraint)s</span><span class="s"> was dropped from </span><span class="si">%(table)s%(column)s</span><span class="s"> -- was this intended?&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>  </div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

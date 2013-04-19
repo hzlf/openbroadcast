@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django.contrib.auth.middleware &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for django.contrib.auth.middleware</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">auth</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ImproperlyConfigured</span>
+<span class="kn">from</span> <span class="nn">django.utils.functional</span> <span class="kn">import</span> <span class="n">SimpleLazyObject</span>
+
+
+<div class="viewcode-block" id="get_user"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.auth.middleware.get_user">[docs]</a><span class="k">def</span> <span class="nf">get_user</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&#39;_cached_user&#39;</span><span class="p">):</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">_cached_user</span> <span class="o">=</span> <span class="n">auth</span><span class="o">.</span><span class="n">get_user</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">_cached_user</span>
+
+</div>
+<div class="viewcode-block" id="AuthenticationMiddleware"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.auth.middleware.AuthenticationMiddleware">[docs]</a><span class="k">class</span> <span class="nc">AuthenticationMiddleware</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="AuthenticationMiddleware.process_request"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.auth.middleware.AuthenticationMiddleware.process_request">[docs]</a>    <span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&#39;session&#39;</span><span class="p">),</span> <span class="s">&quot;The Django authentication middleware requires session middleware to be installed. Edit your MIDDLEWARE_CLASSES setting to insert &#39;django.contrib.sessions.middleware.SessionMiddleware&#39;.&quot;</span>
+
+        <span class="n">request</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">SimpleLazyObject</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">get_user</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+
+</div></div>
+<div class="viewcode-block" id="RemoteUserMiddleware"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.auth.middleware.RemoteUserMiddleware">[docs]</a><span class="k">class</span> <span class="nc">RemoteUserMiddleware</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Middleware for utilizing Web-server-provided authentication.</span>
+
+<span class="sd">    If request.user is not authenticated, then this middleware attempts to</span>
+<span class="sd">    authenticate the username passed in the ``REMOTE_USER`` request header.</span>
+<span class="sd">    If authentication is successful, the user is automatically logged in to</span>
+<span class="sd">    persist the user in the session.</span>
+
+<span class="sd">    The header used is configurable and defaults to ``REMOTE_USER``.  Subclass</span>
+<span class="sd">    this class and change the ``header`` attribute if you need to use a</span>
+<span class="sd">    different header.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Name of request header to grab username from.  This will be the key as</span>
+    <span class="c"># used in the request.META dictionary, i.e. the normalization of headers to</span>
+    <span class="c"># all uppercase and the addition of &quot;HTTP_&quot; prefix apply.</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="s">&quot;REMOTE_USER&quot;</span>
+
+<div class="viewcode-block" id="RemoteUserMiddleware.process_request"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.auth.middleware.RemoteUserMiddleware.process_request">[docs]</a>    <span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="c"># AuthenticationMiddleware is required so that request.user exists.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&#39;user&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span>
+                <span class="s">&quot;The Django remote user auth middleware requires the&quot;</span>
+                <span class="s">&quot; authentication middleware to be installed.  Edit your&quot;</span>
+                <span class="s">&quot; MIDDLEWARE_CLASSES setting to insert&quot;</span>
+                <span class="s">&quot; &#39;django.contrib.auth.middleware.AuthenticationMiddleware&#39;&quot;</span>
+                <span class="s">&quot; before the RemoteUserMiddleware class.&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">username</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c"># If specified header doesn&#39;t exist then return (leaving</span>
+            <span class="c"># request.user set to AnonymousUser by the</span>
+            <span class="c"># AuthenticationMiddleware).</span>
+            <span class="k">return</span>
+        <span class="c"># If the user is already authenticated and that user is the user we are</span>
+        <span class="c"># getting passed in the headers, then the correct user is already</span>
+        <span class="c"># persisted in the session and we don&#39;t need to continue.</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_username</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+                <span class="k">return</span>
+        <span class="c"># We are seeing this user for the first time in this session, attempt</span>
+        <span class="c"># to authenticate the user.</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">auth</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">remote_user</span><span class="o">=</span><span class="n">username</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="c"># User is valid.  Set request.user and persist user in the session</span>
+            <span class="c"># by logging the user in.</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">user</span>
+            <span class="n">auth</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="RemoteUserMiddleware.clean_username"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.auth.middleware.RemoteUserMiddleware.clean_username">[docs]</a>    <span class="k">def</span> <span class="nf">clean_username</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Allows the backend to clean the username, if the backend defines a</span>
+<span class="sd">        clean_username method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">backend_str</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="n">auth</span><span class="o">.</span><span class="n">BACKEND_SESSION_KEY</span><span class="p">]</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="n">auth</span><span class="o">.</span><span class="n">load_backend</span><span class="p">(</span><span class="n">backend_str</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">username</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">clean_username</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span> <span class="c"># Backend has no clean_username method.</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">username</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

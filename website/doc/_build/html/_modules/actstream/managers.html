@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>actstream.managers &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for actstream.managers</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">get_model</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes.models</span> <span class="kn">import</span> <span class="n">ContentType</span>
+
+<span class="kn">from</span> <span class="nn">actstream.gfk</span> <span class="kn">import</span> <span class="n">GFKManager</span>
+<span class="kn">from</span> <span class="nn">actstream.decorators</span> <span class="kn">import</span> <span class="n">stream</span>
+
+
+<div class="viewcode-block" id="ActionManager"><a class="viewcode-back" href="../../auto_modules.html#actstream.managers.ActionManager">[docs]</a><span class="k">class</span> <span class="nc">ActionManager</span><span class="p">(</span><span class="n">GFKManager</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Default manager for Actions, accessed through Action.objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ActionManager.public"><a class="viewcode-back" href="../../auto_modules.html#actstream.managers.ActionManager.public">[docs]</a>    <span class="k">def</span> <span class="nf">public</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Only return public actions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;public&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+    <span class="nd">@stream</span>
+<div class="viewcode-block" id="ActionManager.actor"><a class="viewcode-back" href="../../auto_modules.html#actstream.managers.ActionManager.actor">[docs]</a>    <span class="k">def</span> <span class="nf">actor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stream of most recent actions where object is the actor.</span>
+<span class="sd">        Keyword arguments will be passed to Action.objects.filter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">object</span><span class="o">.</span><span class="n">actor_actions</span><span class="o">.</span><span class="n">public</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+    <span class="nd">@stream</span>
+<div class="viewcode-block" id="ActionManager.target"><a class="viewcode-back" href="../../auto_modules.html#actstream.managers.ActionManager.target">[docs]</a>    <span class="k">def</span> <span class="nf">target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stream of most recent actions where object is the target.</span>
+<span class="sd">        Keyword arguments will be passed to Action.objects.filter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">object</span><span class="o">.</span><span class="n">target_actions</span><span class="o">.</span><span class="n">public</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+    <span class="nd">@stream</span>
+<div class="viewcode-block" id="ActionManager.action_object"><a class="viewcode-back" href="../../auto_modules.html#actstream.managers.ActionManager.action_object">[docs]</a>    <span class="k">def</span> <span class="nf">action_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stream of most recent actions where object is the action_object.</span>
+<span class="sd">        Keyword arguments will be passed to Action.objects.filter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">object</span><span class="o">.</span><span class="n">action_object_actions</span><span class="o">.</span><span class="n">public</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+    <span class="nd">@stream</span>
+<div class="viewcode-block" id="ActionManager.model_actions"><a class="viewcode-back" href="../../auto_modules.html#actstream.managers.ActionManager.model_actions">[docs]</a>    <span class="k">def</span> <span class="nf">model_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stream of most recent actions by any particular model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ctype</span> <span class="o">=</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">public</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">Q</span><span class="p">(</span><span class="n">target_content_type</span><span class="o">=</span><span class="n">ctype</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">Q</span><span class="p">(</span><span class="n">action_object_content_type</span><span class="o">=</span><span class="n">ctype</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">Q</span><span class="p">(</span><span class="n">actor_content_type</span><span class="o">=</span><span class="n">ctype</span><span class="p">)),</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+</div>
+    <span class="nd">@stream</span>
+<div class="viewcode-block" id="ActionManager.user"><a class="viewcode-back" href="../../auto_modules.html#actstream.managers.ActionManager.user">[docs]</a>    <span class="k">def</span> <span class="nf">user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stream of most recent actions by objects that the passed User object is</span>
+<span class="sd">        following.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">Q</span><span class="p">()</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">public</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">actors_by_content_type</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[])</span>
+        <span class="n">others_by_content_type</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[])</span>
+
+        <span class="n">follow_gfks</span> <span class="o">=</span> <span class="n">get_model</span><span class="p">(</span><span class="s">&#39;actstream&#39;</span><span class="p">,</span> <span class="s">&#39;follow&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">user</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s">&#39;content_type_id&#39;</span><span class="p">,</span>
+                                     <span class="s">&#39;object_id&#39;</span><span class="p">,</span> <span class="s">&#39;actor_only&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">follow_gfks</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">qs</span><span class="o">.</span><span class="n">none</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">content_type_id</span><span class="p">,</span> <span class="n">object_id</span><span class="p">,</span> <span class="n">actor_only</span> <span class="ow">in</span> <span class="n">follow_gfks</span><span class="o">.</span><span class="n">iterator</span><span class="p">():</span>
+            <span class="n">actors_by_content_type</span><span class="p">[</span><span class="n">content_type_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">object_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">actor_only</span><span class="p">:</span>
+                <span class="n">others_by_content_type</span><span class="p">[</span><span class="n">content_type_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">object_id</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">content_type_id</span><span class="p">,</span> <span class="n">object_ids</span> <span class="ow">in</span> <span class="n">actors_by_content_type</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span> <span class="o">|</span> <span class="n">Q</span><span class="p">(</span>
+                <span class="n">actor_content_type</span><span class="o">=</span><span class="n">content_type_id</span><span class="p">,</span>
+                <span class="n">actor_object_id__in</span><span class="o">=</span><span class="n">object_ids</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">content_type_id</span><span class="p">,</span> <span class="n">object_ids</span> <span class="ow">in</span> <span class="n">others_by_content_type</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span> <span class="o">|</span> <span class="n">Q</span><span class="p">(</span>
+                <span class="n">target_content_type</span><span class="o">=</span><span class="n">content_type_id</span><span class="p">,</span>
+                <span class="n">target_object_id__in</span><span class="o">=</span><span class="n">object_ids</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">|</span> <span class="n">Q</span><span class="p">(</span>
+                <span class="n">action_object_content_type</span><span class="o">=</span><span class="n">content_type_id</span><span class="p">,</span>
+                <span class="n">action_object_object_id__in</span><span class="o">=</span><span class="n">object_ids</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">qs</span>
+
+</div></div>
+<div class="viewcode-block" id="FollowManager"><a class="viewcode-back" href="../../auto_modules.html#actstream.managers.FollowManager">[docs]</a><span class="k">class</span> <span class="nc">FollowManager</span><span class="p">(</span><span class="n">GFKManager</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Manager for Follow model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FollowManager.for_object"><a class="viewcode-back" href="../../auto_modules.html#actstream.managers.FollowManager.for_object">[docs]</a>    <span class="k">def</span> <span class="nf">for_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Filter to a specific instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">content_type</span> <span class="o">=</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span><span class="o">.</span><span class="n">pk</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">content_type</span><span class="o">=</span><span class="n">content_type</span><span class="p">,</span> <span class="n">object_id</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FollowManager.is_following"><a class="viewcode-back" href="../../auto_modules.html#actstream.managers.FollowManager.is_following">[docs]</a>    <span class="k">def</span> <span class="nf">is_following</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if a user is following an instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span> <span class="ow">or</span> <span class="n">user</span><span class="o">.</span><span class="n">is_anonymous</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">for_object</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">queryset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="FollowManager.followers"><a class="viewcode-back" href="../../auto_modules.html#actstream.managers.FollowManager.followers">[docs]</a>    <span class="k">def</span> <span class="nf">followers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of User objects who are following the given actor (eg my followers).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">follow</span><span class="o">.</span><span class="n">user</span> <span class="k">for</span> <span class="n">follow</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">content_type</span><span class="o">=</span><span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">actor</span><span class="p">),</span>
+            <span class="n">object_id</span><span class="o">=</span><span class="n">actor</span><span class="o">.</span><span class="n">pk</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">select_related</span><span class="p">(</span><span class="s">&#39;user&#39;</span><span class="p">)]</span>
+</div>
+<div class="viewcode-block" id="FollowManager.following"><a class="viewcode-back" href="../../auto_modules.html#actstream.managers.FollowManager.following">[docs]</a>    <span class="k">def</span> <span class="nf">following</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="o">*</span><span class="n">models</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of actors that the given user is following (eg who im following).</span>
+<span class="sd">        Items in the list can be of any model unless a list of restricted models are passed.</span>
+<span class="sd">        Eg following(user, User) will only return users following the given user</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">):</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">content_type__in</span><span class="o">=</span><span class="p">(</span>
+                <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">follow</span><span class="o">.</span><span class="n">follow_object</span> <span class="k">for</span> <span class="n">follow</span> <span class="ow">in</span> <span class="n">qs</span><span class="o">.</span><span class="n">fetch_generic_relations</span><span class="p">()]</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

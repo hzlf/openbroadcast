@@ -1,0 +1,297 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>wikisyntax.fix_unicode &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for wikisyntax.fix_unicode</h1><div class="highlight"><pre>
+<span class="c"># If the character doesn&#39;t exist in the dictionary, add it as None</span>
+<span class="c"># and also return None.  This tells the translate to delete the character</span>
+<span class="c"># and makes the next lookup for that character faster.</span>
+<span class="k">class</span> <span class="nc">XLate</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">dict</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+<span class="c"># Define the translation table.  I needed to hammer unicode going to</span>
+<span class="c"># NCBI&#39;s web services (for Biopython&#39;s EUtils package) so I used the</span>
+<span class="c"># table defined at</span>
+<span class="c">#  http://www.nlm.nih.gov/databases/dtd/medline_character_database.utf8</span>
+<span class="c"># This is not as extensive as the original conversion set.</span>
+<div class="viewcode-block" id="XLate"><a class="viewcode-back" href="../../auto_modules.html#wikisyntax.fix_unicode.XLate">[docs]</a><span class="k">class</span> <span class="nc">XLate</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">dict</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+<span class="c"># Convert these unicode characters into ASCII</span></div>
+<span class="n">xlate</span> <span class="o">=</span> <span class="n">XLate</span><span class="p">({</span>
+    <span class="c"># The note at the bottom of the page says &quot;the inverted question</span>
+    <span class="c"># mark represents a questionable character found as a result of</span>
+    <span class="c"># NLM&#39;s conversion from its legacy extended EBCDIC character set</span>
+    <span class="c"># to UNICODE UTF-8.&quot;  I do not use it but leave it here for</span>
+    <span class="c"># completeness.</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{INVERTED QUESTION MARK}</span><span class="s">&quot;</span><span class="p">):</span> <span class="bp">None</span><span class="p">,</span>
+
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER O WITH STROKE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;O&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER A WITH GRAVE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;a&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER A WITH ACUTE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;a&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER A WITH CIRCUMFLEX}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;a&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER A WITH TILDE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;a&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER A WITH DIAERESIS}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;a&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER A WITH RING ABOVE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;a&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER C WITH CEDILLA}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;c&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER E WITH GRAVE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;e&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER E WITH ACUTE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;e&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER E WITH CIRCUMFLEX}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;e&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER E WITH DIAERESIS}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;e&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER I WITH GRAVE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;i&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER I WITH ACUTE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;i&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER I WITH CIRCUMFLEX}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;i&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER I WITH DIAERESIS}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;i&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER N WITH TILDE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;n&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER O WITH GRAVE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;o&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER O WITH ACUTE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;o&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER O WITH CIRCUMFLEX}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;o&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER O WITH TILDE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;o&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER O WITH DIAERESIS}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;o&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER O WITH STROKE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;o&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER U WITH GRAVE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;u&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER U WITH ACUTE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;u&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER U WITH CIRCUMFLEX}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;u&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER U WITH DIAERESIS}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;u&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER Y WITH ACUTE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;y&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER Y WITH DIAERESIS}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;y&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER A WITH MACRON}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;a&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER A WITH BREVE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;a&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER C WITH ACUTE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;c&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER C WITH CIRCUMFLEX}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;c&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER E WITH MACRON}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;e&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER E WITH BREVE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;e&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER G WITH CIRCUMFLEX}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;g&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER G WITH BREVE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;g&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER G WITH CEDILLA}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;g&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER H WITH CIRCUMFLEX}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;h&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER I WITH TILDE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;i&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER I WITH MACRON}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;i&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER I WITH BREVE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;i&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER J WITH CIRCUMFLEX}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;j&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER K WITH CEDILLA}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;k&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER L WITH ACUTE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;l&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER L WITH CEDILLA}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;l&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER L WITH STROKE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;L&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER L WITH STROKE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;l&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER N WITH ACUTE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;n&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER N WITH CEDILLA}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;n&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER O WITH MACRON}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;o&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER O WITH BREVE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;o&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER R WITH ACUTE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;r&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER R WITH CEDILLA}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;r&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER S WITH ACUTE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;s&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER S WITH CIRCUMFLEX}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;s&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER S WITH CEDILLA}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;s&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER T WITH CEDILLA}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;t&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER U WITH TILDE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;u&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER U WITH MACRON}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;u&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER U WITH BREVE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;u&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER U WITH RING ABOVE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;u&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER W WITH CIRCUMFLEX}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;w&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER Y WITH CIRCUMFLEX}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;y&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER Z WITH ACUTE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;z&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER W WITH GRAVE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;w&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER W WITH ACUTE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;w&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER W WITH DIAERESIS}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;w&quot;</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER Y WITH GRAVE}</span><span class="s">&quot;</span><span class="p">):</span> <span class="s">u&quot;y&quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+
+<span class="c"># These are the ASCII characters NCBI knows about.  Note that I&#39;m</span>
+<span class="c"># building one unicode string here, and not a tuple of unicode</span>
+<span class="c"># characters.</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="s">u&quot;</span><span class="se">\N{SPACE}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{EXCLAMATION MARK}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{QUOTATION MARK}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{NUMBER SIGN}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{DOLLAR SIGN}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{PERCENT SIGN}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{AMPERSAND}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{APOSTROPHE}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LEFT PARENTHESIS}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{RIGHT PARENTHESIS}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{ASTERISK}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{PLUS SIGN}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{COMMA}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{HYPHEN-MINUS}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{FULL STOP}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{SOLIDUS}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{DIGIT ZERO}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{DIGIT ONE}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{DIGIT TWO}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{DIGIT THREE}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{DIGIT FOUR}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{DIGIT FIVE}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{DIGIT SIX}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{DIGIT SEVEN}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{DIGIT EIGHT}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{DIGIT NINE}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{COLON}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{SEMICOLON}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LESS-THAN SIGN}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{EQUALS SIGN}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{GREATER-THAN SIGN}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{QUESTION MARK}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{COMMERCIAL AT}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER A}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER B}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER C}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER D}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER E}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER F}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER G}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER H}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER I}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER J}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER K}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER L}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER M}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER N}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER O}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER P}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER Q}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER R}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER S}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER T}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER U}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER V}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER W}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER X}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER Y}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN CAPITAL LETTER Z}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LEFT SQUARE BRACKET}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{REVERSE SOLIDUS}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{RIGHT SQUARE BRACKET}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LOW LINE}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER A}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER B}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER C}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER D}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER E}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER F}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER G}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER H}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER I}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER J}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER K}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER L}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER M}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER N}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER O}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER P}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER Q}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER R}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER S}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER T}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER U}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER V}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER W}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER X}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER Y}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{LATIN SMALL LETTER Z}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{VERTICAL LINE}</span><span class="s">&quot;</span>
+          <span class="s">u&quot;</span><span class="se">\N{TILDE}</span><span class="s">&quot;</span><span class="p">):</span>
+    <span class="n">xlate</span><span class="p">[</span><span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)]</span> <span class="o">=</span> <span class="n">c</span>
+    
+<div class="viewcode-block" id="fix_unicode"><a class="viewcode-back" href="../../auto_modules.html#wikisyntax.fix_unicode.fix_unicode">[docs]</a><span class="k">def</span> <span class="nf">fix_unicode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+       <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">xlate</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+       <span class="k">return</span> <span class="n">s</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>modeltranslation.models &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for modeltranslation.models</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+
+<div class="viewcode-block" id="autodiscover"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.models.autodiscover">[docs]</a><span class="k">def</span> <span class="nf">autodiscover</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Auto-discover INSTALLED_APPS translation.py modules and fail silently when</span>
+<span class="sd">    not present. This forces an import on them to register.</span>
+<span class="sd">    Also import explicit modules.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">import</span> <span class="nn">copy</span>
+    <span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+    <span class="kn">from</span> <span class="nn">django.utils.importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+    <span class="kn">from</span> <span class="nn">django.utils.module_loading</span> <span class="kn">import</span> <span class="n">module_has_submodule</span>
+    <span class="kn">from</span> <span class="nn">modeltranslation.translator</span> <span class="kn">import</span> <span class="n">translator</span>
+    <span class="kn">from</span> <span class="nn">modeltranslation.settings</span> <span class="kn">import</span> <span class="n">TRANSLATION_FILES</span><span class="p">,</span> <span class="n">DEBUG</span>
+
+    <span class="k">for</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">INSTALLED_APPS</span><span class="p">:</span>
+        <span class="n">mod</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+        <span class="c"># Attempt to import the app&#39;s translation module.</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.translation&#39;</span> <span class="o">%</span> <span class="n">app</span>
+        <span class="n">before_import_registry</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">translator</span><span class="o">.</span><span class="n">_registry</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c"># Reset the model registry to the state before the last import as</span>
+            <span class="c"># this import will have to reoccur on the next request and this</span>
+            <span class="c"># could raise NotRegistered and AlreadyRegistered exceptions</span>
+            <span class="n">translator</span><span class="o">.</span><span class="n">_registry</span> <span class="o">=</span> <span class="n">before_import_registry</span>
+
+            <span class="c"># Decide whether to bubble up this error. If the app just</span>
+            <span class="c"># doesn&#39;t have an translation module, we can ignore the error</span>
+            <span class="c"># attempting to import it, otherwise we want it to bubble up.</span>
+            <span class="k">if</span> <span class="n">module_has_submodule</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="s">&#39;translation&#39;</span><span class="p">):</span>
+                <span class="k">raise</span>
+
+    <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">TRANSLATION_FILES</span><span class="p">:</span>
+        <span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+
+    <span class="c"># In debug mode, print a list of registered models and pid to stdout.</span>
+    <span class="c"># Note: Differing model order is fine, _registry is just a dict and we</span>
+    <span class="c"># don&#39;t rely on a particular order.</span>
+    <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;runserver&#39;</span><span class="p">,</span> <span class="s">&#39;runserver_plus&#39;</span><span class="p">):</span>
+                <span class="n">translated_model_names</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">__name__</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">translator</span><span class="o">.</span><span class="n">_registry</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;modeltranslation: Registered </span><span class="si">%d</span><span class="s"> models for translation (</span><span class="si">%s</span><span class="s">) [pid:</span><span class="si">%d</span><span class="s">].&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">translator</span><span class="o">.</span><span class="n">_registry</span><span class="p">),</span> <span class="n">translated_model_names</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()))</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="handle_translation_registrations"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.models.handle_translation_registrations">[docs]</a><span class="k">def</span> <span class="nf">handle_translation_registrations</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ensures that any configuration of the TranslationOption(s) are handled when</span>
+<span class="sd">    importing modeltranslation.</span>
+
+<span class="sd">    This makes it possible for scripts/management commands that affect models</span>
+<span class="sd">    but know nothing of modeltranslation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">modeltranslation.settings</span> <span class="kn">import</span> <span class="n">ENABLE_REGISTRATIONS</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ENABLE_REGISTRATIONS</span><span class="p">:</span>
+        <span class="c"># If the user really wants to disable this, they can, possibly at their</span>
+        <span class="c"># own expense. This is generally only required in cases where other</span>
+        <span class="c"># apps generate import errors and requires extra work on the user&#39;s</span>
+        <span class="c"># part to make things work.</span>
+        <span class="k">return</span>
+
+    <span class="c"># Trigger autodiscover, causing any TranslationOption initialization</span>
+    <span class="c"># code to execute.</span>
+    <span class="n">autodiscover</span><span class="p">()</span>
+
+</div>
+<span class="n">handle_translation_registrations</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

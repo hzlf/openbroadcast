@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>guardian.forms &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for guardian.forms</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="kn">from</span> <span class="nn">guardian.shortcuts</span> <span class="kn">import</span> <span class="n">assign</span>
+<span class="kn">from</span> <span class="nn">guardian.shortcuts</span> <span class="kn">import</span> <span class="n">remove_perm</span>
+<span class="kn">from</span> <span class="nn">guardian.shortcuts</span> <span class="kn">import</span> <span class="n">get_perms</span>
+<span class="kn">from</span> <span class="nn">guardian.shortcuts</span> <span class="kn">import</span> <span class="n">get_perms_for_model</span>
+
+
+<div class="viewcode-block" id="BaseObjectPermissionsForm"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.BaseObjectPermissionsForm">[docs]</a><span class="k">class</span> <span class="nc">BaseObjectPermissionsForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base form for object permissions management. Needs to be extended for usage</span>
+<span class="sd">    with users and/or groups.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param obj: Any instance which form would use to manage object</span>
+<span class="sd">          permissions&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obj</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BaseObjectPermissionsForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">field_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_field_name</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_field</span><span class="p">()</span>
+
+<div class="viewcode-block" id="BaseObjectPermissionsForm.get_obj_perms_field"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.BaseObjectPermissionsForm.get_obj_perms_field">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns field instance for object permissions management. May be</span>
+<span class="sd">        replaced entirely.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">field_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_field_class</span><span class="p">()</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">field_class</span><span class="p">(</span>
+            <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_field_label</span><span class="p">(),</span>
+            <span class="n">choices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_field_choices</span><span class="p">(),</span>
+            <span class="n">initial</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_field_initial</span><span class="p">(),</span>
+            <span class="n">widget</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_field_widget</span><span class="p">(),</span>
+            <span class="n">required</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">are_obj_perms_required</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">field</span>
+</div>
+<div class="viewcode-block" id="BaseObjectPermissionsForm.get_obj_perms_field_name"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.BaseObjectPermissionsForm.get_obj_perms_field_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_field_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns name of the object permissions management field. Default:</span>
+<span class="sd">        ``permission``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">&#39;permissions&#39;</span>
+</div>
+<div class="viewcode-block" id="BaseObjectPermissionsForm.get_obj_perms_field_label"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.BaseObjectPermissionsForm.get_obj_perms_field_label">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_field_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns label of the object permissions management field. Defualt:</span>
+<span class="sd">        ``_(&quot;Permissions&quot;)`` (marked to be translated).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">_</span><span class="p">(</span><span class="s">&quot;Permissions&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BaseObjectPermissionsForm.get_obj_perms_field_choices"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.BaseObjectPermissionsForm.get_obj_perms_field_choices">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_field_choices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns choices for object permissions management field. Default:</span>
+<span class="sd">        list of tuples ``(codename, name)`` for each ``Permission`` instance</span>
+<span class="sd">        for the managed object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="p">[(</span><span class="n">p</span><span class="o">.</span><span class="n">codename</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">get_perms_for_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">choices</span>
+</div>
+<div class="viewcode-block" id="BaseObjectPermissionsForm.get_obj_perms_field_initial"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.BaseObjectPermissionsForm.get_obj_perms_field_initial">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_field_initial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns initial object permissions management field choices. Default:</span>
+<span class="sd">        ``[]`` (empty list).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="BaseObjectPermissionsForm.get_obj_perms_field_class"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.BaseObjectPermissionsForm.get_obj_perms_field_class">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_field_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns object permissions management field&#39;s base class. Default:</span>
+<span class="sd">        ``django.forms.MultipleChoiceField``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">forms</span><span class="o">.</span><span class="n">MultipleChoiceField</span>
+</div>
+<div class="viewcode-block" id="BaseObjectPermissionsForm.get_obj_perms_field_widget"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.BaseObjectPermissionsForm.get_obj_perms_field_widget">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_field_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns object permissions management field&#39;s widget base class.</span>
+<span class="sd">        Default: ``django.forms.SelectMultiple``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">forms</span><span class="o">.</span><span class="n">SelectMultiple</span>
+</div>
+<div class="viewcode-block" id="BaseObjectPermissionsForm.are_obj_perms_required"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.BaseObjectPermissionsForm.are_obj_perms_required">[docs]</a>    <span class="k">def</span> <span class="nf">are_obj_perms_required</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Indicates if at least one object permission should be required. Default:</span>
+<span class="sd">        ``False``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="BaseObjectPermissionsForm.save_obj_perms"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.BaseObjectPermissionsForm.save_obj_perms">[docs]</a>    <span class="k">def</span> <span class="nf">save_obj_perms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Must be implemented in concrete form class. This method should store</span>
+<span class="sd">        selected object permissions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div></div>
+<div class="viewcode-block" id="UserObjectPermissionsForm"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.UserObjectPermissionsForm">[docs]</a><span class="k">class</span> <span class="nc">UserObjectPermissionsForm</span><span class="p">(</span><span class="n">BaseObjectPermissionsForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Object level permissions management form for usage with ``User`` instances.</span>
+
+<span class="sd">    Example usage::</span>
+
+<span class="sd">        from django.contrib.auth.models import User</span>
+<span class="sd">        from django.shortcuts import get_object_or_404</span>
+<span class="sd">        from myapp.models import Post</span>
+<span class="sd">        from guardian.forms import UserObjectPermissionsForm</span>
+
+<span class="sd">        def my_view(request, post_slug, user_id):</span>
+<span class="sd">            user = get_object_or_404(User, id=user_id)</span>
+<span class="sd">            post = get_object_or_404(Post, slug=post_slug)</span>
+<span class="sd">            form = UserObjectPermissionsForm(user, post, request.POST or None)</span>
+<span class="sd">            if request.method == &#39;POST&#39; and form.is_valid():</span>
+<span class="sd">                form.save_obj_perms()</span>
+<span class="sd">            ...</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">user</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UserObjectPermissionsForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="UserObjectPermissionsForm.get_obj_perms_field_initial"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.UserObjectPermissionsForm.get_obj_perms_field_initial">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_field_initial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">perms</span> <span class="o">=</span> <span class="n">get_perms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">perms</span>
+</div>
+<div class="viewcode-block" id="UserObjectPermissionsForm.save_obj_perms"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.UserObjectPermissionsForm.save_obj_perms">[docs]</a>    <span class="k">def</span> <span class="nf">save_obj_perms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves selected object permissions by creating new ones and removing</span>
+<span class="sd">        those which were not selected but already exists.</span>
+
+<span class="sd">        Should be called *after* form is validated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">perms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_field_name</span><span class="p">()]</span>
+        <span class="n">model_perms</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_field_choices</span><span class="p">()]</span>
+
+        <span class="n">to_remove</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model_perms</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">perms</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">to_remove</span><span class="p">:</span>
+            <span class="n">remove_perm</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">perms</span><span class="p">:</span>
+            <span class="n">assign</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="GroupObjectPermissionsForm"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.GroupObjectPermissionsForm">[docs]</a><span class="k">class</span> <span class="nc">GroupObjectPermissionsForm</span><span class="p">(</span><span class="n">BaseObjectPermissionsForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Object level permissions management form for usage with ``Group`` instances.</span>
+
+<span class="sd">    Example usage::</span>
+
+<span class="sd">        from django.contrib.auth.models import Group</span>
+<span class="sd">        from django.shortcuts import get_object_or_404</span>
+<span class="sd">        from myapp.models import Post</span>
+<span class="sd">        from guardian.forms import GroupObjectPermissionsForm</span>
+
+<span class="sd">        def my_view(request, post_slug, group_id):</span>
+<span class="sd">            group = get_object_or_404(Group, id=group_id)</span>
+<span class="sd">            post = get_object_or_404(Post, slug=post_slug)</span>
+<span class="sd">            form = GroupObjectPermissionsForm(group, post, request.POST or None)</span>
+<span class="sd">            if request.method == &#39;POST&#39; and form.is_valid():</span>
+<span class="sd">                form.save_obj_perms()</span>
+<span class="sd">            ...</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">group</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GroupObjectPermissionsForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GroupObjectPermissionsForm.get_obj_perms_field_initial"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.GroupObjectPermissionsForm.get_obj_perms_field_initial">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_field_initial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">perms</span> <span class="o">=</span> <span class="n">get_perms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">perms</span>
+</div>
+<div class="viewcode-block" id="GroupObjectPermissionsForm.save_obj_perms"><a class="viewcode-back" href="../../auto_modules.html#guardian.forms.GroupObjectPermissionsForm.save_obj_perms">[docs]</a>    <span class="k">def</span> <span class="nf">save_obj_perms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves selected object permissions by creating new ones and removing</span>
+<span class="sd">        those which were not selected but already exists.</span>
+
+<span class="sd">        Should be called *after* form is validated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">perms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_field_name</span><span class="p">()]</span>
+        <span class="n">model_perms</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_field_choices</span><span class="p">()]</span>
+
+        <span class="n">to_remove</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model_perms</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">perms</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">to_remove</span><span class="p">:</span>
+            <span class="n">remove_perm</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">perms</span><span class="p">:</span>
+            <span class="n">assign</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">)</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

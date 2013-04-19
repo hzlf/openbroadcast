@@ -102,14 +102,14 @@
 					
 					{% if stats.ready.count > 0 %}
 					<li style="width: 44px;" rel="tooltip" class="tooltipable" title="{{ stats.ready.count }} {% trans "files ready for import" %}" >
-						<i class="icon-check-empty"></i> 
+						<i class="icon-thumbs-up"></i> 
 						{{ stats.ready.count }}
 					</li>
 					{% endif %}
 					
 					{% if stats.done.count > 0 %}
 					<li style="width: 44px;" rel="tooltip" class="tooltipable" title="{{ stats.done.count }} {% trans "files completed" %}" >
-						<i class="icon-check"></i> 
+						<i class="icon-ok-sign"></i> 
 						{{ stats.done.count }}
 					</li>
 					{% endif %}
@@ -130,7 +130,7 @@
 					
 					{% if stats.error.count > 0 %}
 					<li style="width: 44px;" rel="tooltip" class="tooltipable" title="{{ stats.error.count }} {% trans "files with errors" %}" >
-						<i class="icon-warning-sign"></i> 
+						<i class="icon-thumbs-down"></i> 
 						{{ stats.error.count }}
 					</li>
 					{% endif %}

@@ -48,15 +48,20 @@ def merge_selected(modeladmin,request,queryset): #This is an admin/
         master = model.objects.get(id=request.POST['master'])
         queryset = model.objects.filter(pk__in=ids)
         for q in queryset.exclude(pk=master.pk):
-            model_merge(master,q)
-        messages.success(request,"All " + model_name + " records have been merged into the selected " + model_name + ".")
+            try:
+                model_merge(master,q)
+            except:
+                pass
+        # messages.success(request,"All " + model_name + " records have been merged into the selected " + model_name + ".")
         return HttpResponseRedirect(return_url)
 
     #Build the display_table... This is just for the template.
     #----------------------------------------
     display_table = []
-    try: list_display.remove('action_checkbox')
-    except ValueError: pass
+    try:
+        list_display.remove('action_checkbox')
+    except Exception:
+        pass
 
     titles = []
     for ld in list_display:
@@ -117,7 +122,7 @@ class LabelInline(admin.TabularInline):
 
 class MediaInline(admin.TabularInline):
     model = Media
-    exclude = ['description','slug','processed','echoprint_status','conversion_status',]
+    exclude = ['description','slug','processed','echoprint_status','conversion_status', 'd_tags']
     extra = 1
     
 class FormatAdmin(BaseAdmin):
@@ -156,15 +161,15 @@ class ReleaseAdmin(BaseAdmin):
     #inlines = [RelationsInline, MediaInline, ReleaseExtraartistsInline, DownloadreleaseInline, HardwarereleaseInline]
     inlines = [RelationsInline, MediaInline, ReleaseExtraartistsInline]
     #prepopulated_fields = {"slug": ("name",)}
-    readonly_fields = ['slug', 'license']
+    readonly_fields = ['slug', 'license', 'd_tags']
     
     actions = [merge_selected]
     
     """"""
     fieldsets = [
-        (None,               {'fields': ['name', 'slug', ('main_image', 'cover_image',), ('label', 'catalognumber'), ('releasedate', 'release_country', 'license'), ('releasetype', 'pressings'), 'publish_date', 'enable_comments', 'main_format', 'excerpt', 'description']}),
+        (None,               {'fields': ['name', 'slug', ('main_image', 'cover_image',), ('label', 'catalognumber'), ('releasedate', 'release_country', 'license'), ('releasetype', 'pressings'), 'publish_date', 'enable_comments', 'main_format', 'd_tags', 'excerpt', 'description']}),
         #('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
-        ('Users', {'fields' : ['owner', 'publisher']})
+        ('Users', {'fields' : ['owner', 'creator', 'publisher']})
     ]
     
 admin.site.register(Release, ReleaseAdmin)
@@ -195,7 +200,7 @@ class MediaExtraartistsInline(admin.TabularInline):
 class ArtistAdmin(PlaceholderAdmin, BaseAdmin):
     
 
-    list_display   = ('name', 'listed',)
+    list_display   = ('name', 'type', 'disambiguation', 'listed',)
     search_fields = ['name', 'media__name',]
     list_filter = ('listed',)
     
@@ -208,7 +213,8 @@ class ArtistAdmin(PlaceholderAdmin, BaseAdmin):
     
     """"""
     fieldsets = [
-        (None,               {'fields': ['name', 'slug', 'main_image', 'aliases', 'real_name', ('listed', 'disable_link',), 'enable_comments', 'excerpt', 'folder', ]}),
+        (None,               {'fields': ['name', 'slug', 'main_image', 'aliases', 'real_name', ('listed', 'disable_link',), 'enable_comments', 'biography', 'excerpt', 'folder', ]}),
+        ('Users', {'fields' : ['owner', 'creator', 'publisher']}),
         ('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
     ]
     
@@ -243,20 +249,22 @@ admin.site.register(Profession, ProfessionAdmin)
     
 class MediaAdmin(BaseAdmin):
     
-    list_display   = ('name', 'release_link', 'artist', 'mediatype', 'tracknumber', 'duration', 'processed', 'echoprint_status', 'conversion_status')
+    list_display   = ('name', 'created', 'release_link', 'artist', 'mediatype', 'tracknumber', 'duration', 'processed', 'echoprint_status', 'conversion_status')
     search_fields = ['artist__name', 'release__name']
     list_filter = ('mediatype', 'license__name', 'processed', 'echoprint_status', 'conversion_status')
     
     inlines = [RelationsInline, MediaExtraartistsInline]
 
-    readonly_fields = ['slug', 'folder', 'uuid', 'base_format', 'base_filesize', 'base_duration','base_samplerate', 'base_bitrate', 'release_link', 'master_sha1']
+    readonly_fields = ['slug', 'folder', 'uuid', 'base_format', 'base_filesize', 'base_duration','base_samplerate', 'base_bitrate', 'release_link', 'master_sha1', 'd_tags']
     
     
     """"""
     fieldsets = [
         (None,  {'fields': 
-                 ['name', 'slug', 'isrc', 'uuid', 'tracknumber', 'mediatype', ('release', 'release_link'), 'artist', 'license',]
+                 ['name', 'slug', 'isrc', 'uuid', 'tracknumber', 'mediatype', ('release', 'release_link'), 'artist', 'license', 'd_tags']
                  }),
+                 
+        ('Users', {'fields' : ['owner', 'creator', 'publisher']}),
                  
         ('Storage related',  {
                 'fields': ['master', 'master_sha1', 'folder', ('base_format', 'base_filesize', 'base_duration',), ('base_samplerate', 'base_bitrate')]
@@ -283,6 +291,8 @@ class LabelAdmin(PlaceholderAdmin, BaseAdmin):
     """"""
     fieldsets = [
         (None,               {'fields': ['name', 'slug']}),
+        
+        ('Users', {'fields' : ['owner', 'creator', 'publisher']}),
         
         ('Relations', {'fields': ['parent'], 'classes': ['']}),
         

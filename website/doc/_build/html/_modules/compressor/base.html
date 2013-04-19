@@ -1,0 +1,362 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>compressor.base &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for compressor.base</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">with_statement</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">codecs</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+
+<span class="kn">from</span> <span class="nn">django.core.files.base</span> <span class="kn">import</span> <span class="n">ContentFile</span>
+<span class="kn">from</span> <span class="nn">django.core.files.storage</span> <span class="kn">import</span> <span class="n">get_storage_class</span>
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">Context</span>
+<span class="kn">from</span> <span class="nn">django.template.loader</span> <span class="kn">import</span> <span class="n">render_to_string</span>
+<span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">smart_unicode</span>
+
+<span class="kn">from</span> <span class="nn">compressor.cache</span> <span class="kn">import</span> <span class="n">get_hexdigest</span><span class="p">,</span> <span class="n">get_mtime</span>
+
+<span class="kn">from</span> <span class="nn">compressor.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">compressor.exceptions</span> <span class="kn">import</span> <span class="n">CompressorError</span><span class="p">,</span> <span class="n">UncompressableFileError</span>
+<span class="kn">from</span> <span class="nn">compressor.filters</span> <span class="kn">import</span> <span class="n">CompilerFilter</span>
+<span class="kn">from</span> <span class="nn">compressor.storage</span> <span class="kn">import</span> <span class="n">default_storage</span><span class="p">,</span> <span class="n">compressor_file_storage</span>
+<span class="kn">from</span> <span class="nn">compressor.signals</span> <span class="kn">import</span> <span class="n">post_compress</span>
+<span class="kn">from</span> <span class="nn">compressor.utils</span> <span class="kn">import</span> <span class="n">get_class</span><span class="p">,</span> <span class="n">staticfiles</span>
+<span class="kn">from</span> <span class="nn">compressor.utils.decorators</span> <span class="kn">import</span> <span class="n">cached_property</span>
+
+<span class="c"># Some constants for nicer handling.</span>
+<span class="n">SOURCE_HUNK</span><span class="p">,</span> <span class="n">SOURCE_FILE</span> <span class="o">=</span> <span class="s">&#39;inline&#39;</span><span class="p">,</span> <span class="s">&#39;file&#39;</span>
+<span class="n">METHOD_INPUT</span><span class="p">,</span> <span class="n">METHOD_OUTPUT</span> <span class="o">=</span> <span class="s">&#39;input&#39;</span><span class="p">,</span> <span class="s">&#39;output&#39;</span>
+
+
+<div class="viewcode-block" id="Compressor"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor">[docs]</a><span class="k">class</span> <span class="nc">Compressor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base compressor object to be subclassed for content type</span>
+<span class="sd">    depending implementations details.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">output_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">content</span> <span class="ow">or</span> <span class="s">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_prefix</span> <span class="o">=</span> <span class="n">output_prefix</span> <span class="ow">or</span> <span class="s">&quot;compressed&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">COMPRESS_OUTPUT_DIR</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">charset</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEFAULT_CHARSET</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">default_storage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">split_content</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">context</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extra_context</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_mimetypes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">COMPRESS_PRECOMPILERS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">finders</span> <span class="o">=</span> <span class="n">staticfiles</span><span class="o">.</span><span class="n">finders</span>
+
+<div class="viewcode-block" id="Compressor.split_contents"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.split_contents">[docs]</a>    <span class="k">def</span> <span class="nf">split_contents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        To be implemented in a subclass, should return an</span>
+<span class="sd">        iterable with four values: kind, value, basename, element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="Compressor.get_basename"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.get_basename">[docs]</a>    <span class="k">def</span> <span class="nf">get_basename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">base_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">base_url</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">base_url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">COMPRESS_URL</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">base_url</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">UncompressableFileError</span><span class="p">(</span><span class="s">&quot;&#39;</span><span class="si">%s</span><span class="s">&#39; isn&#39;t accesible via &quot;</span>
+                                          <span class="s">&quot;COMPRESS_URL (&#39;</span><span class="si">%s</span><span class="s">&#39;) and can&#39;t be &quot;</span>
+                                          <span class="s">&quot;compressed&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">base_url</span><span class="p">))</span>
+        <span class="n">basename</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">base_url</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c"># drop the querystring, which is used for non-compressed cache-busting.</span>
+        <span class="k">return</span> <span class="n">basename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;?&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="Compressor.get_filepath"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.get_filepath">[docs]</a>    <span class="k">def</span> <span class="nf">get_filepath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">get_hexdigest</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_prefix</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Compressor.get_filename"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.get_filename">[docs]</a>    <span class="k">def</span> <span class="nf">get_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basename</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c"># first try finding the file in the root</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">basename</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">basename</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">NotImplementedError</span><span class="p">:</span>
+                <span class="c"># remote storages don&#39;t implement path, access the file locally</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">compressor_file_storage</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">basename</span><span class="p">)</span>
+        <span class="c"># secondly try to find it with staticfiles (in debug mode)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">finders</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">finders</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">url2pathname</span><span class="p">(</span><span class="n">basename</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">filename</span>
+        <span class="c"># or just raise an exception as the last resort</span>
+        <span class="k">raise</span> <span class="n">UncompressableFileError</span><span class="p">(</span>
+            <span class="s">&quot;&#39;</span><span class="si">%s</span><span class="s">&#39; could not be found in the COMPRESS_ROOT &#39;</span><span class="si">%s</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span>
+            <span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">COMPRESS_ROOT</span><span class="p">,</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">finders</span> <span class="ow">and</span> <span class="s">&quot; or with staticfiles.&quot;</span> <span class="ow">or</span> <span class="s">&quot;.&quot;</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Compressor.get_filecontent"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.get_filecontent">[docs]</a>    <span class="k">def</span> <span class="nf">get_filecontent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">charset</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">codecs</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">,</span> <span class="n">charset</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">fd</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">IOError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">UncompressableFileError</span><span class="p">(</span><span class="s">&quot;IOError while processing &quot;</span>
+                                               <span class="s">&quot;&#39;</span><span class="si">%s</span><span class="s">&#39;: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">UncompressableFileError</span><span class="p">(</span><span class="s">&quot;UnicodeDecodeError while &quot;</span>
+                                              <span class="s">&quot;processing &#39;</span><span class="si">%s</span><span class="s">&#39; with &quot;</span>
+                                              <span class="s">&quot;charset </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span>
+                                              <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">charset</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+</div>
+    <span class="nd">@cached_property</span>
+<div class="viewcode-block" id="Compressor.parser"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.parser">[docs]</a>    <span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">get_class</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">COMPRESS_PARSER</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</div>
+    <span class="nd">@cached_property</span>
+<div class="viewcode-block" id="Compressor.cached_filters"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.cached_filters">[docs]</a>    <span class="k">def</span> <span class="nf">cached_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">get_class</span><span class="p">(</span><span class="n">filter_cls</span><span class="p">)</span> <span class="k">for</span> <span class="n">filter_cls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">]</span>
+</div>
+    <span class="nd">@cached_property</span>
+<div class="viewcode-block" id="Compressor.mtimes"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.mtimes">[docs]</a>    <span class="k">def</span> <span class="nf">mtimes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">get_mtime</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">kind</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_contents</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">SOURCE_FILE</span><span class="p">]</span>
+</div>
+    <span class="nd">@cached_property</span>
+<div class="viewcode-block" id="Compressor.cachekey"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.cachekey">[docs]</a>    <span class="k">def</span> <span class="nf">cachekey</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">get_hexdigest</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">content</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mtimes</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">charset</span><span class="p">),</span> <span class="mi">12</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Compressor.hunks"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.hunks">[docs]</a>    <span class="k">def</span> <span class="nf">hunks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;file&#39;</span><span class="p">,</span> <span class="n">forced</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The heart of content parsing, iterates of the</span>
+<span class="sd">        list of split contents and looks at its kind</span>
+<span class="sd">        to decide what to do with it. Should yield a</span>
+<span class="sd">        bunch of precompiled and/or rendered hunks.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">enabled</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">COMPRESS_ENABLED</span> <span class="ow">or</span> <span class="n">forced</span>
+
+        <span class="k">for</span> <span class="n">kind</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_contents</span><span class="p">():</span>
+            <span class="n">precompiled</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">attribs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">elem_attribs</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+            <span class="n">charset</span> <span class="o">=</span> <span class="n">attribs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;charset&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">charset</span><span class="p">)</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s">&#39;method&#39;</span><span class="p">:</span> <span class="n">METHOD_INPUT</span><span class="p">,</span>
+                <span class="s">&#39;elem&#39;</span><span class="p">:</span> <span class="n">elem</span><span class="p">,</span>
+                <span class="s">&#39;kind&#39;</span><span class="p">:</span> <span class="n">kind</span><span class="p">,</span>
+                <span class="s">&#39;basename&#39;</span><span class="p">:</span> <span class="n">basename</span><span class="p">,</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">SOURCE_FILE</span><span class="p">:</span>
+                <span class="n">options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_filecontent</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">charset</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_mimetypes</span><span class="p">:</span>
+                <span class="n">precompiled</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precompile</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">enabled</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+                <span class="k">yield</span> <span class="n">mode</span><span class="p">,</span> <span class="n">smart_unicode</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">charset</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">precompiled</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_output</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">forced</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                    <span class="k">yield</span> <span class="s">&quot;verbatim&quot;</span><span class="p">,</span> <span class="n">smart_unicode</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">charset</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">elem_str</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Compressor.filtered_output"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.filtered_output">[docs]</a>    <span class="k">def</span> <span class="nf">filtered_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Passes the concatenated content to the &#39;output&#39; methods</span>
+<span class="sd">        of the compressor filters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">METHOD_OUTPUT</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Compressor.filtered_input"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.filtered_input">[docs]</a>    <span class="k">def</span> <span class="nf">filtered_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;file&#39;</span><span class="p">,</span> <span class="n">forced</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Passes each hunk (file or code) to the &#39;input&#39; methods</span>
+<span class="sd">        of the compressor filters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">verbatim_content</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">rendered_content</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">mode</span><span class="p">,</span> <span class="n">hunk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hunks</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">forced</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s">&#39;verbatim&#39;</span><span class="p">:</span>
+                <span class="n">verbatim_content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hunk</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rendered_content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hunk</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">verbatim_content</span><span class="p">,</span> <span class="n">rendered_content</span>
+</div>
+<div class="viewcode-block" id="Compressor.precompile"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.precompile">[docs]</a>    <span class="k">def</span> <span class="nf">precompile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">elem</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kind</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span><span class="p">,</span> <span class="n">content</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">elem_attribs</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+        <span class="n">mimetype</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mimetype</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_mimetypes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mimetype</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">command</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">mimetype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;text/css&quot;</span><span class="p">,</span> <span class="s">&quot;text/javascript&quot;</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">CompressorError</span><span class="p">(</span><span class="s">&quot;Couldn&#39;t find any precompiler in &quot;</span>
+                                          <span class="s">&quot;COMPRESS_PRECOMPILERS setting for &quot;</span>
+                                          <span class="s">&quot;mimetype &#39;</span><span class="si">%s</span><span class="s">&#39;.&quot;</span> <span class="o">%</span> <span class="n">mimetype</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span><span class="p">,</span> <span class="n">CompilerFilter</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">filter_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                    <span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">input</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">False</span><span class="p">,</span> <span class="n">content</span>
+</div>
+<div class="viewcode-block" id="Compressor.filter"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">filter_cls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached_filters</span><span class="p">:</span>
+            <span class="n">filter_func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+                <span class="n">filter_cls</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">filter_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">),</span> <span class="n">method</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">filter_func</span><span class="p">):</span>
+                    <span class="n">content</span> <span class="o">=</span> <span class="n">filter_func</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">NotImplementedError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">content</span>
+</div>
+<div class="viewcode-block" id="Compressor.output"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.output">[docs]</a>    <span class="k">def</span> <span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;file&#39;</span><span class="p">,</span> <span class="n">forced</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The general output method, override in subclass if you need to do</span>
+<span class="sd">        any custom modification. Calls other mode specific methods or simply</span>
+<span class="sd">        returns the content directly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">verbatim_content</span><span class="p">,</span> <span class="n">rendered_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_input</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">forced</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">verbatim_content</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rendered_content</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">COMPRESS_ENABLED</span> <span class="ow">or</span> <span class="n">forced</span><span class="p">:</span>
+            <span class="n">filtered_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_output</span><span class="p">(</span>
+                <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">c</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">charset</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">rendered_content</span><span class="p">)))</span>
+            <span class="n">finished_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_output</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">filtered_content</span><span class="p">,</span> <span class="n">forced</span><span class="p">)</span>
+            <span class="n">verbatim_content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">finished_content</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbatim_content</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">verbatim_content</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">content</span>
+</div>
+<div class="viewcode-block" id="Compressor.handle_output"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.handle_output">[docs]</a>    <span class="k">def</span> <span class="nf">handle_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">forced</span><span class="p">):</span>
+        <span class="c"># Then check for the appropriate output method and call it</span>
+        <span class="n">output_func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;output_</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">mode</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">output_func</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">output_func</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">forced</span><span class="p">)</span>
+        <span class="c"># Total failure, raise a general exception</span>
+        <span class="k">raise</span> <span class="n">CompressorError</span><span class="p">(</span>
+            <span class="s">&quot;Couldn&#39;t find output method for mode &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">mode</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Compressor.output_file"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.output_file">[docs]</a>    <span class="k">def</span> <span class="nf">output_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">forced</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The output method that saves the content to a file and renders</span>
+<span class="sd">        the appropriate template with the file&#39;s URL.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_filepath</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">new_filepath</span><span class="p">)</span> <span class="ow">or</span> <span class="n">forced</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">new_filepath</span><span class="p">,</span> <span class="n">ContentFile</span><span class="p">(</span><span class="n">content</span><span class="p">))</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="n">new_filepath</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_output</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="n">url</span><span class="p">})</span>
+</div>
+<div class="viewcode-block" id="Compressor.output_inline"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.output_inline">[docs]</a>    <span class="k">def</span> <span class="nf">output_inline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">forced</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The output method that directly returns the content for inline</span>
+<span class="sd">        display.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_output</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;content&quot;</span><span class="p">:</span> <span class="n">content</span><span class="p">})</span>
+</div>
+<div class="viewcode-block" id="Compressor.render_output"><a class="viewcode-back" href="../../auto_modules.html#compressor.base.Compressor.render_output">[docs]</a>    <span class="k">def</span> <span class="nf">render_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Renders the compressor output with the appropriate template for</span>
+<span class="sd">        the given mode and template context.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">final_context</span> <span class="o">=</span> <span class="n">Context</span><span class="p">()</span>
+        <span class="n">final_context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+        <span class="n">final_context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="n">final_context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extra_context</span><span class="p">)</span>
+        <span class="n">post_compress</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">sender</span><span class="o">=</span><span class="s">&#39;django-compressor&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                           <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">final_context</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">render_to_string</span><span class="p">(</span><span class="s">&quot;compressor/</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">.html&quot;</span> <span class="o">%</span>
+                                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">mode</span><span class="p">),</span> <span class="n">final_context</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

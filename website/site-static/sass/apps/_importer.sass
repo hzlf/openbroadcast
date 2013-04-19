@@ -11,7 +11,7 @@ i.icon-id3
   background-position: 0 0
   width: 22px
   height: 22px
-i.icon-musicbrainz
+i.icon-musicbrainz_
   background-image: url(/static/img/icons/metadata.providers/musicbrainz.png) !important
   background-position: 0 0
   width: 22px
@@ -72,8 +72,9 @@ section.importer-importfiles
         color: $infoText
           
       &.warning
-        background-color: $warningBackground
-        color: $warningText
+        h3
+          background-color: $warningBackground
+          // color: $warningText
           
       &.error
         background-color: $errorBackground
@@ -210,6 +211,10 @@ section.importer-importfiles
             
       // result form
       form.form-result
+      
+        .missing input
+          background-color: $warningBackground
+      
         .base
           padding-top: 0 !important
         .ac-result

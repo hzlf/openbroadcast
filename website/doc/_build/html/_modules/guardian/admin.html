@@ -1,0 +1,474 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>guardian.admin &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for guardian.admin</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.conf.urls.defaults</span> <span class="kn">import</span> <span class="n">patterns</span><span class="p">,</span> <span class="n">url</span>
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">messages</span>
+<span class="kn">from</span> <span class="nn">django.contrib.admin.widgets</span> <span class="kn">import</span> <span class="n">FilteredSelectMultiple</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span><span class="p">,</span> <span class="n">Group</span>
+<span class="kn">from</span> <span class="nn">django.core.urlresolvers</span> <span class="kn">import</span> <span class="n">reverse</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span><span class="p">,</span> <span class="n">get_object_or_404</span><span class="p">,</span> <span class="n">redirect</span>
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">RequestContext</span>
+<span class="kn">from</span> <span class="nn">django.utils.datastructures</span> <span class="kn">import</span> <span class="n">SortedDict</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext</span><span class="p">,</span> <span class="n">ugettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="kn">from</span> <span class="nn">guardian.forms</span> <span class="kn">import</span> <span class="n">UserObjectPermissionsForm</span>
+<span class="kn">from</span> <span class="nn">guardian.forms</span> <span class="kn">import</span> <span class="n">GroupObjectPermissionsForm</span>
+<span class="kn">from</span> <span class="nn">guardian.shortcuts</span> <span class="kn">import</span> <span class="n">get_perms</span>
+<span class="kn">from</span> <span class="nn">guardian.shortcuts</span> <span class="kn">import</span> <span class="n">get_users_with_perms</span>
+<span class="kn">from</span> <span class="nn">guardian.shortcuts</span> <span class="kn">import</span> <span class="n">get_groups_with_perms</span>
+<span class="kn">from</span> <span class="nn">guardian.shortcuts</span> <span class="kn">import</span> <span class="n">get_perms_for_model</span>
+
+
+<div class="viewcode-block" id="AdminUserObjectPermissionsForm"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.AdminUserObjectPermissionsForm">[docs]</a><span class="k">class</span> <span class="nc">AdminUserObjectPermissionsForm</span><span class="p">(</span><span class="n">UserObjectPermissionsForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extends :form:`UserObjectPermissionsForm`. It only overrides</span>
+<span class="sd">    ``get_obj_perms_field_widget`` method so it return</span>
+<span class="sd">    ``django.contrib.admin.widgets.FilteredSelectMultiple`` widget.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="AdminUserObjectPermissionsForm.get_obj_perms_field_widget"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.AdminUserObjectPermissionsForm.get_obj_perms_field_widget">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_field_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">FilteredSelectMultiple</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&quot;Permissions&quot;</span><span class="p">),</span> <span class="bp">False</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="AdminGroupObjectPermissionsForm"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.AdminGroupObjectPermissionsForm">[docs]</a><span class="k">class</span> <span class="nc">AdminGroupObjectPermissionsForm</span><span class="p">(</span><span class="n">GroupObjectPermissionsForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extends :form:`GroupObjectPermissionsForm`. It only overrides</span>
+<span class="sd">    ``get_obj_perms_field_widget`` method so it return</span>
+<span class="sd">    ``django.contrib.admin.widgets.FilteredSelectMultiple`` widget.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="AdminGroupObjectPermissionsForm.get_obj_perms_field_widget"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.AdminGroupObjectPermissionsForm.get_obj_perms_field_widget">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_field_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">FilteredSelectMultiple</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&quot;Permissions&quot;</span><span class="p">),</span> <span class="bp">False</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="GuardedModelAdmin"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.GuardedModelAdmin">[docs]</a><span class="k">class</span> <span class="nc">GuardedModelAdmin</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">ModelAdmin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extends ``django.contrib.admin.ModelAdmin`` class. Provides some extra</span>
+<span class="sd">    views for object permissions management at admin panel. It also changes</span>
+<span class="sd">    default ``change_form_template`` option to</span>
+<span class="sd">    ``&#39;admin/guardian/model/change_form.html&#39;`` which is required for proper</span>
+<span class="sd">    url (object permissions related) being shown at the model pages.</span>
+
+<span class="sd">    **Extra options**</span>
+
+<span class="sd">    ``GuardedModelAdmin.obj_perms_manage_template``</span>
+
+<span class="sd">        *Default*: ``admin/guardian/model/obj_perms_manage.html``</span>
+
+<span class="sd">    ``GuardedModelAdmin.obj_perms_manage_user_template``</span>
+
+<span class="sd">        *Default*: ``admin/guardian/model/obj_perms_manage_user.html``</span>
+
+<span class="sd">    ``GuardedModelAdmin.obj_perms_manage_group_template``</span>
+
+<span class="sd">        *Default*: ``admin/guardian/model/obj_perms_manage_group.html``</span>
+
+<span class="sd">    ``GuardedModelAdmin.user_can_access_owned_objects_only``</span>
+
+<span class="sd">        *Default*: ``False``</span>
+
+<span class="sd">        If this would be set to ``True``, ``request.user`` would be used to</span>
+<span class="sd">        filter out objects he or she doesn&#39;t own (checking ``user`` field</span>
+<span class="sd">        of used model - field name may be overridden by</span>
+<span class="sd">        ``user_owned_objects_field`` option.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">           Please remember that this will **NOT** affect superusers!</span>
+<span class="sd">           Admins would still see all items.</span>
+
+<span class="sd">    ``GuardedModelAdmin.user_owned_objects_field``</span>
+
+<span class="sd">        *Default*: ``user``</span>
+
+<span class="sd">    **Usage example**</span>
+
+<span class="sd">    Just use :admin:`GuardedModelAdmin` instead of</span>
+<span class="sd">    ``django.contrib.admin.ModelAdmin``.</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from django.contrib import admin</span>
+<span class="sd">        from guardian.admin import GuardedModelAdmin</span>
+<span class="sd">        from myapp.models import Author</span>
+
+<span class="sd">        class AuthorAdmin(GuardedModelAdmin):</span>
+<span class="sd">            pass</span>
+
+<span class="sd">        admin.site.register(Author, AuthorAdmin)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">change_form_template</span> <span class="o">=</span> \
+        <span class="s">&#39;admin/guardian/model/change_form.html&#39;</span>
+    <span class="n">obj_perms_manage_template</span> <span class="o">=</span> \
+        <span class="s">&#39;admin/guardian/model/obj_perms_manage.html&#39;</span>
+    <span class="n">obj_perms_manage_user_template</span> <span class="o">=</span> \
+        <span class="s">&#39;admin/guardian/model/obj_perms_manage_user.html&#39;</span>
+    <span class="n">obj_perms_manage_group_template</span> <span class="o">=</span> \
+        <span class="s">&#39;admin/guardian/model/obj_perms_manage_group.html&#39;</span>
+    <span class="n">user_can_access_owned_objects_only</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">user_owned_objects_field</span> <span class="o">=</span> <span class="s">&#39;user&#39;</span>
+
+<div class="viewcode-block" id="GuardedModelAdmin.queryset"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.GuardedModelAdmin.queryset">[docs]</a>    <span class="k">def</span> <span class="nf">queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">GuardedModelAdmin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">queryset</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_can_access_owned_objects_only</span> <span class="ow">and</span> \
+            <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_superuser</span><span class="p">:</span>
+            <span class="n">filters</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_owned_objects_field</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">}</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">filters</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">qs</span>
+</div>
+<div class="viewcode-block" id="GuardedModelAdmin.get_urls"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.GuardedModelAdmin.get_urls">[docs]</a>    <span class="k">def</span> <span class="nf">get_urls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extends standard admin model urls with the following:</span>
+
+<span class="sd">        - ``.../permissions/``</span>
+<span class="sd">        - ``.../permissions/user-manage/&lt;user_id&gt;/``</span>
+<span class="sd">        - ``.../permissions/group-manage/&lt;group_id&gt;/``</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">           ``...`` above are standard, instance detail url (i.e.</span>
+<span class="sd">           ``/admin/flatpages/1/``)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">urls</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">GuardedModelAdmin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_urls</span><span class="p">()</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">module_name</span>
+        <span class="n">myurls</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">url</span><span class="p">(</span><span class="s">r&#39;^(?P&lt;object_pk&gt;.+)/permissions/$&#39;</span><span class="p">,</span>
+                <span class="n">view</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">admin_view</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_perms_manage_view</span><span class="p">),</span>
+                <span class="n">name</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">_permissions&#39;</span> <span class="o">%</span> <span class="n">info</span><span class="p">),</span>
+            <span class="n">url</span><span class="p">(</span><span class="s">r&#39;^(?P&lt;object_pk&gt;.+)/permissions/user-manage/(?P&lt;user_id&gt;\-?\d+)/$&#39;</span><span class="p">,</span>
+                <span class="n">view</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">admin_view</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">obj_perms_manage_user_view</span><span class="p">),</span>
+                <span class="n">name</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">_permissions_manage_user&#39;</span> <span class="o">%</span> <span class="n">info</span><span class="p">),</span>
+            <span class="n">url</span><span class="p">(</span><span class="s">r&#39;^(?P&lt;object_pk&gt;.+)/permissions/group-manage/(?P&lt;group_id&gt;\-?\d+)/$&#39;</span><span class="p">,</span>
+                <span class="n">view</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">admin_view</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">obj_perms_manage_group_view</span><span class="p">),</span>
+                <span class="n">name</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">_permissions_manage_group&#39;</span> <span class="o">%</span> <span class="n">info</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">myurls</span> <span class="o">+</span> <span class="n">urls</span>
+</div>
+<div class="viewcode-block" id="GuardedModelAdmin.get_obj_perms_base_context"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.GuardedModelAdmin.get_obj_perms_base_context">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_base_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns context dictionary with common admin and object permissions</span>
+<span class="sd">        related content.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;adminform&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;model_admin&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="p">},</span>
+            <span class="s">&#39;object&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="p">,</span>
+            <span class="s">&#39;app_label&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span>
+            <span class="s">&#39;opts&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span>
+            <span class="s">&#39;original&#39;</span><span class="p">:</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;__unicode__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">__unicode__</span><span class="p">()</span> <span class="ow">or</span>\
+                <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span>
+            <span class="s">&#39;has_change_permission&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_change_permission</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">),</span>
+            <span class="s">&#39;model_perms&#39;</span><span class="p">:</span> <span class="n">get_perms_for_model</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span>
+            <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s">&quot;Object permissions&quot;</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">context</span>
+</div>
+<div class="viewcode-block" id="GuardedModelAdmin.obj_perms_manage_view"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.GuardedModelAdmin.obj_perms_manage_view">[docs]</a>    <span class="k">def</span> <span class="nf">obj_perms_manage_view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">object_pk</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main object permissions view. Presents all users and groups with any</span>
+<span class="sd">        object permissions for the current model *instance*. Users or groups</span>
+<span class="sd">        without object permissions for related *instance* would **not** be</span>
+<span class="sd">        shown. In order to add or manage user or group one should use links or</span>
+<span class="sd">        forms presented within the page.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queryset</span><span class="p">(</span><span class="n">request</span><span class="p">),</span> <span class="n">pk</span><span class="o">=</span><span class="n">object_pk</span><span class="p">)</span>
+        <span class="n">users_perms</span> <span class="o">=</span> <span class="n">SortedDict</span><span class="p">(</span>
+            <span class="n">get_users_with_perms</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">attach_perms</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">with_group_users</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+        <span class="n">users_perms</span><span class="o">.</span><span class="n">keyOrder</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">user</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+        <span class="n">groups_perms</span> <span class="o">=</span> <span class="n">SortedDict</span><span class="p">(</span>
+            <span class="n">get_groups_with_perms</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">attach_perms</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+        <span class="n">groups_perms</span><span class="o">.</span><span class="n">keyOrder</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">group</span><span class="p">:</span> <span class="n">group</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;POST&#39;</span> <span class="ow">and</span> <span class="s">&#39;submit_manage_user&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">:</span>
+            <span class="n">user_form</span> <span class="o">=</span> <span class="n">UserManage</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+            <span class="n">group_form</span> <span class="o">=</span> <span class="n">GroupManage</span><span class="p">()</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">module_name</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">user_form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+                <span class="n">user_id</span> <span class="o">=</span> <span class="n">user_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;user&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">reverse</span><span class="p">(</span>
+                    <span class="s">&#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">_permissions_manage_user&#39;</span> <span class="o">%</span> <span class="n">info</span><span class="p">,</span>
+                    <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">user_id</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;POST&#39;</span> <span class="ow">and</span> <span class="s">&#39;submit_manage_group&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">:</span>
+            <span class="n">user_form</span> <span class="o">=</span> <span class="n">UserManage</span><span class="p">()</span>
+            <span class="n">group_form</span> <span class="o">=</span> <span class="n">GroupManage</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">module_name</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">group_form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+                <span class="n">group_id</span> <span class="o">=</span> <span class="n">group_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;group&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">reverse</span><span class="p">(</span>
+                    <span class="s">&#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">_permissions_manage_group&#39;</span> <span class="o">%</span> <span class="n">info</span><span class="p">,</span>
+                    <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">group_id</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">user_form</span> <span class="o">=</span> <span class="n">UserManage</span><span class="p">()</span>
+            <span class="n">group_form</span> <span class="o">=</span> <span class="n">GroupManage</span><span class="p">()</span>
+
+        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_base_context</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;users_perms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">users_perms</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;groups_perms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">groups_perms</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;user_form&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user_form</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;group_form&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_form</span>
+
+        <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_manage_template</span><span class="p">(),</span>
+            <span class="n">context</span><span class="p">,</span> <span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">current_app</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="GuardedModelAdmin.get_obj_perms_manage_template"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.GuardedModelAdmin.get_obj_perms_manage_template">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_manage_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns main object permissions admin template.  May be overridden if</span>
+<span class="sd">        need to change it dynamically.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">           If ``INSTALLED_APPS`` contains ``grappelli`` this function would</span>
+<span class="sd">           return ``&quot;admin/guardian/grappelli/obj_perms_manage.html&quot;``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s">&#39;grappelli&#39;</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">INSTALLED_APPS</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;admin/guardian/contrib/grappelli/obj_perms_manage.html&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_perms_manage_template</span>
+</div>
+<div class="viewcode-block" id="GuardedModelAdmin.obj_perms_manage_user_view"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.GuardedModelAdmin.obj_perms_manage_user_view">[docs]</a>    <span class="k">def</span> <span class="nf">obj_perms_manage_user_view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">object_pk</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Manages selected users&#39; permissions for current object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queryset</span><span class="p">(</span><span class="n">request</span><span class="p">),</span> <span class="n">pk</span><span class="o">=</span><span class="n">object_pk</span><span class="p">)</span>
+        <span class="n">form_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_manage_user_form</span><span class="p">()</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">form_class</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span> <span class="ow">or</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;POST&#39;</span> <span class="ow">and</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">save_obj_perms</span><span class="p">()</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">ugettext</span><span class="p">(</span><span class="s">&quot;Permissions saved.&quot;</span><span class="p">)</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">module_name</span>
+            <span class="p">)</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">reverse</span><span class="p">(</span>
+                <span class="s">&#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">_permissions_manage_user&#39;</span> <span class="o">%</span> <span class="n">info</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_base_context</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;user_obj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;user_perms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_perms</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;form&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">form</span>
+
+        <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_manage_user_template</span><span class="p">(),</span>
+            <span class="n">context</span><span class="p">,</span> <span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">current_app</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="GuardedModelAdmin.get_obj_perms_manage_user_template"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.GuardedModelAdmin.get_obj_perms_manage_user_template">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_manage_user_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns object permissions for user admin template.  May be overridden</span>
+<span class="sd">        if need to change it dynamically.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">           If ``INSTALLED_APPS`` contains ``grappelli`` this function would</span>
+<span class="sd">           return ``&quot;admin/guardian/grappelli/obj_perms_manage_user.html&quot;``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s">&#39;grappelli&#39;</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">INSTALLED_APPS</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;admin/guardian/contrib/grappelli/obj_perms_manage_user.html&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_perms_manage_user_template</span>
+</div>
+<div class="viewcode-block" id="GuardedModelAdmin.get_obj_perms_manage_user_form"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.GuardedModelAdmin.get_obj_perms_manage_user_form">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_manage_user_form</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns form class for user object permissions management.  By default</span>
+<span class="sd">        :form:`AdminUserObjectPermissionsForm` is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">AdminUserObjectPermissionsForm</span>
+</div>
+<div class="viewcode-block" id="GuardedModelAdmin.obj_perms_manage_group_view"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.GuardedModelAdmin.obj_perms_manage_group_view">[docs]</a>    <span class="k">def</span> <span class="nf">obj_perms_manage_group_view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">object_pk</span><span class="p">,</span> <span class="n">group_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Manages selected groups&#39; permissions for current object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Group</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">group_id</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queryset</span><span class="p">(</span><span class="n">request</span><span class="p">),</span> <span class="n">pk</span><span class="o">=</span><span class="n">object_pk</span><span class="p">)</span>
+        <span class="n">form_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_manage_group_form</span><span class="p">()</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">form_class</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span> <span class="ow">or</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;POST&#39;</span> <span class="ow">and</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">save_obj_perms</span><span class="p">()</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">ugettext</span><span class="p">(</span><span class="s">&quot;Permissions saved.&quot;</span><span class="p">)</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">module_name</span>
+            <span class="p">)</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">reverse</span><span class="p">(</span>
+                <span class="s">&#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">_permissions_manage_group&#39;</span> <span class="o">%</span> <span class="n">info</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_base_context</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;group_obj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;group_perms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_perms</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;form&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">form</span>
+
+        <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_obj_perms_manage_group_template</span><span class="p">(),</span>
+            <span class="n">context</span><span class="p">,</span> <span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">current_app</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="GuardedModelAdmin.get_obj_perms_manage_group_template"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.GuardedModelAdmin.get_obj_perms_manage_group_template">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_manage_group_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns object permissions for group admin template.  May be overridden</span>
+<span class="sd">        if need to change it dynamically.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">           If ``INSTALLED_APPS`` contains ``grappelli`` this function would</span>
+<span class="sd">           return ``&quot;admin/guardian/grappelli/obj_perms_manage_group.html&quot;``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s">&#39;grappelli&#39;</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">INSTALLED_APPS</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;admin/guardian/contrib/grappelli/obj_perms_manage_group.html&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_perms_manage_group_template</span>
+</div>
+<div class="viewcode-block" id="GuardedModelAdmin.get_obj_perms_manage_group_form"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.GuardedModelAdmin.get_obj_perms_manage_group_form">[docs]</a>    <span class="k">def</span> <span class="nf">get_obj_perms_manage_group_form</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns form class for group object permissions management.  By default</span>
+<span class="sd">        :form:`AdminGroupObjectPermissionsForm` is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">AdminGroupObjectPermissionsForm</span>
+
+</div></div>
+<div class="viewcode-block" id="UserManage"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.UserManage">[docs]</a><span class="k">class</span> <span class="nc">UserManage</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">RegexField</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&quot;Username&quot;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">regex</span><span class="o">=</span><span class="s">r&#39;^[\w.@+-]+$&#39;</span><span class="p">,</span>
+        <span class="n">error_messages</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;invalid&#39;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s">&quot;This value may contain only letters, numbers and &quot;</span>
+                         <span class="s">&quot;@/./+/-/_ characters.&quot;</span><span class="p">),</span>
+            <span class="s">&#39;does_not_exist&#39;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s">&quot;This user does not exist&quot;</span><span class="p">)})</span>
+
+<div class="viewcode-block" id="UserManage.clean_user"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.UserManage.clean_user">[docs]</a>    <span class="k">def</span> <span class="nf">clean_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns ``User`` instance based on the given username.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;user&#39;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">user</span>
+        <span class="k">except</span> <span class="n">User</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s">&#39;user&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">error_messages</span><span class="p">[</span><span class="s">&#39;does_not_exist&#39;</span><span class="p">])</span>
+
+</div></div>
+<div class="viewcode-block" id="GroupManage"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.GroupManage">[docs]</a><span class="k">class</span> <span class="nc">GroupManage</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">group</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;does_not_exist&#39;</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">(</span><span class="s">&quot;This group does not exist&quot;</span><span class="p">)})</span>
+
+<div class="viewcode-block" id="GroupManage.clean_group"><a class="viewcode-back" href="../../auto_modules.html#guardian.admin.GroupManage.clean_group">[docs]</a>    <span class="k">def</span> <span class="nf">clean_group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns ``Group`` instance based on the given group name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s">&#39;group&#39;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="n">Group</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">group</span>
+        <span class="k">except</span> <span class="n">Group</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s">&#39;group&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">error_messages</span><span class="p">[</span><span class="s">&#39;does_not_exist&#39;</span><span class="p">])</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

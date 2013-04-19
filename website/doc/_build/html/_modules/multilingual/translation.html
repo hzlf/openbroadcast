@@ -1,0 +1,500 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>multilingual.translation &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for multilingual.translation</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Support for models&#39; internal Translation class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c">##TODO: this is messy and needs to be cleaned up</span>
+
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ObjectDoesNotExist</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">signals</span>
+<span class="kn">from</span> <span class="nn">django.db.models.base</span> <span class="kn">import</span> <span class="n">ModelBase</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">get_language</span>
+<span class="kn">from</span> <span class="nn">multilingual.languages</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">multilingual.exceptions</span> <span class="kn">import</span> <span class="n">TranslationDoesNotExist</span>
+<span class="kn">from</span> <span class="nn">multilingual.fields</span> <span class="kn">import</span> <span class="n">TranslationForeignKey</span>
+<span class="kn">from</span> <span class="nn">multilingual</span> <span class="kn">import</span> <span class="n">manager</span>
+<span class="kn">from</span> <span class="nn">multilingual.utils</span> <span class="kn">import</span> <span class="n">GLL</span>
+<span class="c"># To Be Depricated</span>
+<span class="c">#from multilingual.utils import install_multilingual_modeladmin_new</span>
+
+<span class="kn">from</span> <span class="nn">new</span> <span class="kn">import</span> <span class="n">instancemethod</span>
+
+<div class="viewcode-block" id="translation_save_translated_fields"><a class="viewcode-back" href="../../auto_modules.html#multilingual.translation.translation_save_translated_fields">[docs]</a><span class="k">def</span> <span class="nf">translation_save_translated_fields</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save all the translations of instance in post_save signal handler.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="s">&#39;_translation_cache&#39;</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="k">for</span> <span class="n">l_id</span><span class="p">,</span> <span class="n">translation</span> <span class="ow">in</span> <span class="n">instance</span><span class="o">.</span><span class="n">_translation_cache</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="c"># set the translation ID just in case the translation was</span>
+        <span class="c"># created while instance was not stored in the DB yet</span>
+
+        <span class="c"># note: we&#39;re using _get_pk_val here even though it is</span>
+        <span class="c"># private, since that&#39;s the most reliable way to get the value</span>
+        <span class="c"># on older Django (pk property did not exist yet)</span>
+        <span class="n">translation</span><span class="o">.</span><span class="n">master_id</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">_get_pk_val</span><span class="p">()</span>
+        <span class="n">translation</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="fill_translation_cache"><a class="viewcode-back" href="../../auto_modules.html#multilingual.translation.fill_translation_cache">[docs]</a><span class="k">def</span> <span class="nf">fill_translation_cache</span><span class="p">(</span><span class="n">instance</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fill the translation cache using information received in the</span>
+<span class="sd">    instance objects as extra fields.</span>
+
+<span class="sd">    You can not do this in post_init because the extra fields are</span>
+<span class="sd">    assigned by QuerySet.iterator after model initialization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="s">&#39;_translation_cache&#39;</span><span class="p">):</span>
+        <span class="c"># do not refill the cache</span>
+        <span class="k">return</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">_translation_cache</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c"># unsafed instances cannot have translations</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">instance</span><span class="o">.</span><span class="n">pk</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">for</span> <span class="n">language_code</span> <span class="ow">in</span> <span class="n">get_language_code_list</span><span class="p">():</span>
+        <span class="c"># see if translation for language_code was in the query</span>
+        <span class="n">field_alias</span> <span class="o">=</span> <span class="n">get_translated_field_alias</span><span class="p">(</span><span class="s">&#39;code&#39;</span><span class="p">,</span> <span class="n">language_code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">field_alias</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">field_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">attname</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">instance</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">translation_model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">fields</span><span class="p">]</span>
+
+            <span class="c"># if so, create a translation object and put it in the cache</span>
+            <span class="n">field_data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">field_names</span><span class="p">:</span>
+                <span class="n">field_data</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span>
+                                            <span class="n">get_translated_field_alias</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">language_code</span><span class="p">))</span>
+
+            <span class="n">translation</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">translation_model</span><span class="p">(</span><span class="o">**</span><span class="n">field_data</span><span class="p">)</span>
+            <span class="n">instance</span><span class="o">.</span><span class="n">_translation_cache</span><span class="p">[</span><span class="n">language_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">translation</span>
+
+    <span class="c"># In some situations an (existing in the DB) object is loaded</span>
+    <span class="c"># without using the normal QuerySet.  In such case fallback to</span>
+    <span class="c"># loading the translations using a separate query.</span>
+
+    <span class="c"># Unfortunately, this is indistinguishable from the situation when</span>
+    <span class="c"># an object does not have any translations.  Oh well, we&#39;ll have</span>
+    <span class="c"># to live with this for the time being.</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">_translation_cache</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">translation</span> <span class="ow">in</span> <span class="n">instance</span><span class="o">.</span><span class="n">translations</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">instance</span><span class="o">.</span><span class="n">_translation_cache</span><span class="p">[</span><span class="n">translation</span><span class="o">.</span><span class="n">language_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">translation</span>
+</div>
+<div class="viewcode-block" id="TranslatedFieldProxy"><a class="viewcode-back" href="../../auto_modules.html#multilingual.translation.TranslatedFieldProxy">[docs]</a><span class="k">class</span> <span class="nc">TranslatedFieldProxy</span><span class="p">(</span><span class="nb">property</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a proxy field to be set onto the main class to proxy to a translation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">alias</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">language_code</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">fallback</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field_name</span> <span class="o">=</span> <span class="n">field_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">=</span> <span class="n">field</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">admin_order_field</span> <span class="o">=</span> <span class="n">alias</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_language_code</span> <span class="o">=</span> <span class="n">language_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fallback</span> <span class="o">=</span> <span class="n">fallback</span>
+        
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="TranslatedFieldProxy.language_code"><a class="viewcode-back" href="../../auto_modules.html#multilingual.translation.TranslatedFieldProxy.language_code">[docs]</a>    <span class="k">def</span> <span class="nf">language_code</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If _language_code is None we are the _current field, so we use the</span>
+<span class="sd">        currently used language for lookups.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_language_code</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_language_code</span>
+        <span class="k">return</span> <span class="n">get_language</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">objtype</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;get_&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_name</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">language_code</span><span class="p">,</span>
+                                                      <span class="bp">self</span><span class="o">.</span><span class="n">fallback</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">language_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">language_code</span>
+
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;set_&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_name</span><span class="p">)(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">language_code</span><span class="p">)</span>
+
+    <span class="n">short_description</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">self</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">short_description</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="getter_generator"><a class="viewcode-back" href="../../auto_modules.html#multilingual.translation.getter_generator">[docs]</a><span class="k">def</span> <span class="nf">getter_generator</span><span class="p">(</span><span class="n">field_name</span><span class="p">,</span> <span class="n">short_description</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate get_&#39;field name&#39; method for field field_name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">get_translation_field</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">language_code</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">get_translation</span><span class="p">(</span><span class="n">language_code</span><span class="p">,</span>
+                                       <span class="n">fallback</span><span class="o">=</span><span class="n">fallback</span><span class="p">,</span>
+                                       <span class="n">field</span><span class="o">=</span><span class="n">field_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">TranslationDoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+    <span class="n">get_translation_field</span><span class="o">.</span><span class="n">short_description</span> <span class="o">=</span> <span class="n">short_description</span>
+    <span class="k">return</span> <span class="n">get_translation_field</span>
+</div>
+<div class="viewcode-block" id="setter_generator"><a class="viewcode-back" href="../../auto_modules.html#multilingual.translation.setter_generator">[docs]</a><span class="k">def</span> <span class="nf">setter_generator</span><span class="p">(</span><span class="n">field_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate set_&#39;field name&#39; method for field field_name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">set_translation_field</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">language_code</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">get_translation</span><span class="p">(</span><span class="n">language_code</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span>
+                <span class="n">field_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="n">set_translation_field</span><span class="o">.</span><span class="n">short_description</span> <span class="o">=</span> <span class="s">&quot;set &quot;</span> <span class="o">+</span> <span class="n">field_name</span>
+    <span class="k">return</span> <span class="n">set_translation_field</span>
+</div>
+<div class="viewcode-block" id="get_translation"><a class="viewcode-back" href="../../auto_modules.html#multilingual.translation.get_translation">[docs]</a><span class="k">def</span> <span class="nf">get_translation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">language_code</span><span class="p">,</span> <span class="n">create_if_necessary</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                    <span class="n">fallback</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a translation instance for the given `language_id_or_code`.</span>
+
+<span class="sd">    If the translation does not exist:</span>
+
+<span class="sd">    1. if `create_if_necessary` is True, this function will create one</span>
+<span class="sd">    2. otherwise, if `fallback` is True, this function will search the</span>
+<span class="sd">       list of languages looking for the first existing translation</span>
+<span class="sd">    3. if all of the above fails to find a translation, raise the</span>
+<span class="sd">    TranslationDoesNotExist exception</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># fill the cache if necessary</span>
+    <span class="n">cls</span><span class="o">.</span><span class="n">fill_translation_cache</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">language_code</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">language_code</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s">&#39;_default_language&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">language_code</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">language_code</span> <span class="o">=</span> <span class="n">get_default_language</span><span class="p">()</span>
+
+    <span class="n">force</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">GLL</span><span class="o">.</span><span class="n">is_active</span><span class="p">:</span>
+        <span class="n">language_code</span> <span class="o">=</span> <span class="n">GLL</span><span class="o">.</span><span class="n">language_code</span>
+        <span class="n">force</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">if</span> <span class="n">language_code</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">_translation_cache</span><span class="p">:</span>
+        <span class="n">transobj</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_translation_cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">language_code</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">field</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">transobj</span>    
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">transobj</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">or</span> <span class="n">force</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">fallback</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">if</span> <span class="n">create_if_necessary</span><span class="p">:</span>
+        <span class="n">new_translation</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">translation_model</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="n">cls</span><span class="p">,</span>
+                                                      <span class="n">language_code</span><span class="o">=</span><span class="n">language_code</span><span class="p">)</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">_translation_cache</span><span class="p">[</span><span class="n">language_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_translation</span>
+        <span class="k">return</span> <span class="n">new_translation</span>
+    <span class="c"># only fall backif we&#39;re not in &#39;force&#39; mode (GLL)</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="n">force</span><span class="p">)</span> <span class="ow">and</span> <span class="n">fallback</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">fb_lang_code</span> <span class="ow">in</span> <span class="n">get_fallbacks</span><span class="p">(</span><span class="n">language_code</span><span class="p">):</span>
+            <span class="n">transobj</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_translation_cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fb_lang_code</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">transobj</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">field</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">transobj</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">transobj</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">raise</span> <span class="n">TranslationDoesNotExist</span><span class="p">(</span><span class="n">language_code</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="TranslationModel"><a class="viewcode-back" href="../../auto_modules.html#multilingual.translation.TranslationModel">[docs]</a><span class="k">class</span> <span class="nc">TranslationModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A superclass for translatablemodel.Translation inner classes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TranslationModel.contribute_to_class"><a class="viewcode-back" href="../../auto_modules.html#multilingual.translation.TranslationModel.contribute_to_class">[docs]</a>    <span class="k">def</span> <span class="nf">contribute_to_class</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">main_cls</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handle the inner &#39;Translation&#39; class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># delay the creation of the *Translation until the master model is</span>
+        <span class="c"># fully created</span>
+        <span class="n">signals</span><span class="o">.</span><span class="n">class_prepared</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">finish_multilingual_class</span><span class="p">,</span>
+                <span class="n">sender</span><span class="o">=</span><span class="n">main_cls</span><span class="p">,</span> <span class="n">weak</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="c"># connect the post_save signal on master class to a handler</span>
+        <span class="c"># that saves translations</span>
+        <span class="n">signals</span><span class="o">.</span><span class="n">post_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">translation_save_translated_fields</span><span class="p">,</span>
+                <span class="n">sender</span><span class="o">=</span><span class="n">main_cls</span><span class="p">)</span>
+</div>
+    <span class="n">contribute_to_class</span> <span class="o">=</span> <span class="nb">classmethod</span><span class="p">(</span><span class="n">contribute_to_class</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TranslationModel.create_translation_attrs"><a class="viewcode-back" href="../../auto_modules.html#multilingual.translation.TranslationModel.create_translation_attrs">[docs]</a>    <span class="k">def</span> <span class="nf">create_translation_attrs</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">main_cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates get_&#39;field name&#39;(language_code) and set_&#39;field</span>
+<span class="sd">        name&#39;(language_id) methods for all the translation fields.</span>
+<span class="sd">        Adds the &#39;field name&#39; properties too.</span>
+
+<span class="sd">        Returns the translated_fields hash used in field lookups, see</span>
+<span class="sd">        multilingual.query.  It maps field names to (field,</span>
+<span class="sd">        language_id) tuples.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">translated_fields</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">fname</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">Field</span><span class="p">):</span>
+                <span class="n">translated_fields</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+                <span class="c"># add get_&#39;fname&#39; and set_&#39;fname&#39; methods to main_cls</span>
+                <span class="n">getter</span> <span class="o">=</span> <span class="n">getter_generator</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="s">&#39;verbose_name&#39;</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">main_cls</span><span class="p">,</span> <span class="s">&#39;get_&#39;</span> <span class="o">+</span> <span class="n">fname</span><span class="p">,</span> <span class="n">getter</span><span class="p">)</span>
+
+                <span class="n">setter</span> <span class="o">=</span> <span class="n">setter_generator</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">main_cls</span><span class="p">,</span> <span class="s">&#39;set_&#39;</span> <span class="o">+</span> <span class="n">fname</span><span class="p">,</span> <span class="n">setter</span><span class="p">)</span>
+
+                <span class="c"># add the &#39;fname&#39; proxy property that allows reads</span>
+                <span class="c"># from and writing to the appropriate translation</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">main_cls</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span>
+                        <span class="n">TranslatedFieldProxy</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+
+                <span class="c"># add the &#39;fname&#39;_any fallback</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">main_cls</span><span class="p">,</span> <span class="n">fname</span> <span class="o">+</span> <span class="n">FALLBACK_FIELD_SUFFIX</span><span class="p">,</span>
+                        <span class="n">TranslatedFieldProxy</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+
+                <span class="c"># create the &#39;fname&#39;_&#39;language_code&#39; proxy properties</span>
+                <span class="k">for</span> <span class="n">language_code</span> <span class="ow">in</span> <span class="n">get_language_code_list</span><span class="p">():</span>
+                    <span class="n">fname_lng</span> <span class="o">=</span> <span class="n">fname</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="n">language_code</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">,</span> <span class="s">&#39;_&#39;</span><span class="p">)</span>
+                    <span class="n">translated_fields</span><span class="p">[</span><span class="n">fname_lng</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">language_code</span><span class="p">)</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">main_cls</span><span class="p">,</span> <span class="n">fname_lng</span><span class="p">,</span>
+                            <span class="n">TranslatedFieldProxy</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fname_lng</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span>
+                                                 <span class="n">language_code</span><span class="p">))</span>
+                    <span class="c"># add the &#39;fname&#39;_&#39;language_code&#39;_any fallback proxy</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">main_cls</span><span class="p">,</span> <span class="n">fname_lng</span> <span class="o">+</span> <span class="n">FALLBACK_FIELD_SUFFIX</span><span class="p">,</span>
+                            <span class="n">TranslatedFieldProxy</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fname_lng</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span>
+                                                 <span class="n">language_code</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+                <span class="n">fname_current</span> <span class="o">=</span> <span class="n">fname</span> <span class="o">+</span> <span class="s">&#39;_current&#39;</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">main_cls</span><span class="p">,</span> <span class="n">fname_current</span><span class="p">,</span>
+                        <span class="n">TranslatedFieldProxy</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fname_current</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">main_cls</span><span class="p">,</span> <span class="n">fname_current</span> <span class="o">+</span> <span class="n">FALLBACK_FIELD_SUFFIX</span><span class="p">,</span>
+                        <span class="n">TranslatedFieldProxy</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fname_current</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">translated_fields</span></div>
+    <span class="n">create_translation_attrs</span> <span class="o">=</span> <span class="nb">classmethod</span><span class="p">(</span><span class="n">create_translation_attrs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TranslationModel.get_unique_fields"><a class="viewcode-back" href="../../auto_modules.html#multilingual.translation.TranslationModel.get_unique_fields">[docs]</a>    <span class="k">def</span> <span class="nf">get_unique_fields</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a list of fields with &quot;unique&quot; attribute, which needs to</span>
+<span class="sd">        be augmented by the language.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">unique_fields</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">fname</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">Field</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="s">&#39;unique&#39;</span><span class="p">,</span><span class="bp">False</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">field</span><span class="o">.</span><span class="n">unique</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                        <span class="c"># newer Django defines unique as a property</span>
+                        <span class="c"># that uses _unique to store data.  We&#39;re</span>
+                        <span class="c"># jumping over the fence by setting _unique,</span>
+                        <span class="c"># so this sucks, but this happens early enough</span>
+                        <span class="c"># to be safe.</span>
+                        <span class="n">field</span><span class="o">.</span><span class="n">_unique</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="n">unique_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">unique_fields</span></div>
+    <span class="n">get_unique_fields</span> <span class="o">=</span> <span class="nb">classmethod</span><span class="p">(</span><span class="n">get_unique_fields</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TranslationModel.finish_multilingual_class"><a class="viewcode-back" href="../../auto_modules.html#multilingual.translation.TranslationModel.finish_multilingual_class">[docs]</a>    <span class="k">def</span> <span class="nf">finish_multilingual_class</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a model with translations of a multilingual class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">main_cls</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;sender&#39;</span><span class="p">]</span>
+        <span class="n">translation_model_name</span> <span class="o">=</span> <span class="n">main_cls</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s">&quot;Translation&quot;</span>
+
+        <span class="c"># create the model with all the translatable fields</span>
+        <span class="n">unique</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;language_code&#39;</span><span class="p">,</span> <span class="s">&#39;master&#39;</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">get_unique_fields</span><span class="p">():</span>
+            <span class="n">unique</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;language_code&#39;</span><span class="p">,</span><span class="n">f</span><span class="p">))</span>
+
+        <span class="k">class</span> <span class="nc">TransMeta</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">meta</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">Meta</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">meta</span> <span class="o">=</span> <span class="n">TransMeta</span>
+
+        <span class="n">meta</span><span class="o">.</span><span class="n">ordering</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;language_code&#39;</span><span class="p">,)</span>
+        <span class="n">meta</span><span class="o">.</span><span class="n">unique_together</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">unique</span><span class="p">)</span>
+        <span class="n">meta</span><span class="o">.</span><span class="n">app_label</span> <span class="o">=</span> <span class="n">main_cls</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="s">&#39;db_table&#39;</span><span class="p">):</span>
+            <span class="n">meta</span><span class="o">.</span><span class="n">db_table</span> <span class="o">=</span> <span class="n">main_cls</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">db_table</span> <span class="o">+</span> <span class="s">&#39;_translation&#39;</span>
+
+        <span class="n">trans_attrs</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">trans_attrs</span><span class="p">[</span><span class="s">&#39;Meta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">meta</span>
+        <span class="c"># TODO: increase the length of this field, but to what???</span>
+        <span class="n">trans_attrs</span><span class="p">[</span><span class="s">&#39;language_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                                        <span class="n">choices</span><span class="o">=</span><span class="n">get_language_choices</span><span class="p">(),</span>
+                                                        <span class="n">db_index</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        
+        <span class="n">related_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="s">&#39;related_name&#39;</span><span class="p">,</span> <span class="s">&#39;translations&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="s">&#39;related_name&#39;</span><span class="p">):</span>
+            <span class="nb">delattr</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="s">&#39;related_name&#39;</span><span class="p">)</span>
+        
+        <span class="n">edit_inline</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="n">trans_attrs</span><span class="p">[</span><span class="s">&#39;master&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">TranslationForeignKey</span><span class="p">(</span><span class="n">main_cls</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                                      <span class="n">related_name</span><span class="o">=</span><span class="n">related_name</span><span class="p">,)</span>
+        <span class="n">trans_attrs</span><span class="p">[</span><span class="s">&#39;__str__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">:</span> <span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> object, language_code=</span><span class="si">%s</span><span class="s">&quot;</span>
+                                               <span class="o">%</span> <span class="p">(</span><span class="n">translation_model_name</span><span class="p">,</span>
+                                                  <span class="bp">self</span><span class="o">.</span><span class="n">language_code</span><span class="p">))</span>
+
+        <span class="n">trans_model</span> <span class="o">=</span> <span class="n">ModelBase</span><span class="p">(</span><span class="n">translation_model_name</span><span class="p">,</span> <span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">,),</span> <span class="n">trans_attrs</span><span class="p">)</span>
+        <span class="n">trans_model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">translated_fields</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">create_translation_attrs</span><span class="p">(</span><span class="n">main_cls</span><span class="p">)</span>
+        <span class="n">trans_model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">related_name</span> <span class="o">=</span> <span class="n">related_name</span>
+
+        <span class="n">_old_init_name_map</span> <span class="o">=</span> <span class="n">main_cls</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">init_name_map</span>
+        <span class="k">def</span> <span class="nf">init_name_map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">cache</span> <span class="o">=</span> <span class="n">_old_init_name_map</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">field_and_lang_id</span> <span class="ow">in</span> <span class="n">trans_model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">translated_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c">#import sys; sys.stderr.write(&#39;TM %r\n&#39; % trans_model)</span>
+                <span class="n">cache</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">field_and_lang_id</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">trans_model</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">cache</span>
+        <span class="n">main_cls</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">init_name_map</span> <span class="o">=</span> <span class="n">instancemethod</span><span class="p">(</span><span class="n">init_name_map</span><span class="p">,</span>
+                                                      <span class="n">main_cls</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span>
+                                                      <span class="n">main_cls</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span>
+
+        <span class="n">main_cls</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">translation_model</span> <span class="o">=</span> <span class="n">trans_model</span>
+        <span class="n">main_cls</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">force_language</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">main_cls</span><span class="o">.</span><span class="n">Translation</span> <span class="o">=</span> <span class="n">trans_model</span>
+        <span class="n">main_cls</span><span class="o">.</span><span class="n">get_translation</span> <span class="o">=</span> <span class="n">get_translation</span>
+        <span class="n">main_cls</span><span class="o">.</span><span class="n">fill_translation_cache</span> <span class="o">=</span> <span class="n">fill_translation_cache</span>
+
+        <span class="c"># Note: don&#39;t fill the translation cache in post_init, as all</span>
+        <span class="c"># the extra values selected by QAddTranslationData will be</span>
+        <span class="c"># assigned AFTER init()</span>
+<span class="c">#        signals.post_init.connect(fill_translation_cache,</span>
+<span class="c">#                sender=main_cls)</span>
+</div>
+    <span class="n">finish_multilingual_class</span> <span class="o">=</span> <span class="nb">classmethod</span><span class="p">(</span><span class="n">finish_multilingual_class</span><span class="p">)</span>
+<span class="c"># The following will be deprecated:</span></div>
+<span class="n">Translation</span> <span class="o">=</span> <span class="n">TranslationModel</span>
+
+<div class="viewcode-block" id="install_translation_library"><a class="viewcode-back" href="../../auto_modules.html#multilingual.translation.install_translation_library">[docs]</a><span class="k">def</span> <span class="nf">install_translation_library</span><span class="p">():</span>
+    <span class="c"># modify ModelBase.__new__ so that it understands how to handle the</span>
+    <span class="c"># &#39;Translation&#39; inner class</span>
+
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ModelBase</span><span class="p">,</span> <span class="s">&#39;_multilingual_installed&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="c"># don&#39;t install it twice</span>
+        <span class="k">return</span>
+
+    <span class="n">_old_new</span> <span class="o">=</span> <span class="n">ModelBase</span><span class="o">.</span><span class="n">__new__</span>
+
+    <span class="k">def</span> <span class="nf">multilingual_modelbase_new</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s">&#39;Translation&#39;</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="s">&#39;Translation&#39;</span><span class="p">],</span> <span class="n">Translation</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">.Translation must be a subclass &quot;</span>
+                                   <span class="o">+</span> <span class="s">&quot; of multilingual.Translation.&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,)</span>
+
+            <span class="c"># Make sure that if the class specifies objects then it is</span>
+            <span class="c"># a subclass of our Manager.</span>
+            <span class="c">#</span>
+            <span class="c"># Don&#39;t check other managers since someone might want to</span>
+            <span class="c"># have a non-multilingual manager, but assigning a</span>
+            <span class="c"># non-multilingual manager to objects would be a common</span>
+            <span class="c"># mistake.</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s">&#39;objects&#39;</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="s">&#39;objects&#39;</span><span class="p">],</span> <span class="n">manager</span><span class="o">.</span><span class="n">Manager</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="p">(</span><span class="s">&quot;Model </span><span class="si">%s</span><span class="s"> specifies translations, &quot;</span> <span class="o">+</span>
+                                   <span class="s">&quot;so its &#39;objects&#39; manager must be &quot;</span> <span class="o">+</span>
+                                   <span class="s">&quot;a subclass of multilingual.Manager.&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,)</span>
+
+            <span class="c"># Change the default manager to multilingual.Manager.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="s">&#39;objects&#39;</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+                <span class="n">attrs</span><span class="p">[</span><span class="s">&#39;objects&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">_old_new</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+    <span class="n">ModelBase</span><span class="o">.</span><span class="n">__new__</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">multilingual_modelbase_new</span><span class="p">)</span>
+    <span class="n">ModelBase</span><span class="o">.</span><span class="n">_multilingual_installed</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="c"># To Be Deprecated</span>
+    <span class="c">#install_multilingual_modeladmin_new()</span>
+
+<span class="c"># install the library</span></div>
+<span class="n">install_translation_library</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

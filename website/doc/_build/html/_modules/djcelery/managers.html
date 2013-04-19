@@ -1,0 +1,322 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>djcelery.managers &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for djcelery.managers</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">transaction</span><span class="p">,</span> <span class="n">connection</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">connections</span><span class="p">,</span> <span class="n">router</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c"># pre-Django 1.2</span>
+    <span class="n">connections</span> <span class="o">=</span> <span class="n">router</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># noqa</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.db.models.query</span> <span class="kn">import</span> <span class="n">QuerySet</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+
+<span class="kn">from</span> <span class="nn">celery.utils.timeutils</span> <span class="kn">import</span> <span class="n">maybe_timedelta</span>
+
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">now</span>
+
+
+<div class="viewcode-block" id="TxIsolationWarning"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.TxIsolationWarning">[docs]</a><span class="k">class</span> <span class="nc">TxIsolationWarning</span><span class="p">(</span><span class="ne">UserWarning</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="transaction_retry"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.transaction_retry">[docs]</a><span class="k">def</span> <span class="nf">transaction_retry</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decorator for methods doing database operations.</span>
+
+<span class="sd">    If the database operation fails, it will retry the operation</span>
+<span class="sd">    at most ``max_retries`` times.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_outer</span><span class="p">(</span><span class="n">fun</span><span class="p">):</span>
+
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">_inner</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">_max_retries</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;exception_retry_count&quot;</span><span class="p">,</span> <span class="n">max_retries</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">retries</span> <span class="ow">in</span> <span class="n">count</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">fun</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>   <span class="c"># pragma: no cover</span>
+                    <span class="c"># Depending on the database backend used we can experience</span>
+                    <span class="c"># various exceptions. E.g. psycopg2 raises an exception</span>
+                    <span class="c"># if some operation breaks the transaction, so saving</span>
+                    <span class="c"># the task result won&#39;t be possible until we rollback</span>
+                    <span class="c"># the transaction.</span>
+                    <span class="k">if</span> <span class="n">retries</span> <span class="o">&gt;=</span> <span class="n">_max_retries</span><span class="p">:</span>
+                        <span class="k">raise</span>
+                    <span class="n">transaction</span><span class="o">.</span><span class="n">rollback_unless_managed</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">_inner</span>
+
+    <span class="k">return</span> <span class="n">_outer</span>
+
+</div>
+<div class="viewcode-block" id="update_model_with_dict"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.update_model_with_dict">[docs]</a><span class="k">def</span> <span class="nf">update_model_with_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">fields</span><span class="p">):</span>
+    <span class="p">[</span><span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span> <span class="ow">in</span> <span class="n">fields</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">obj</span>
+
+</div>
+<div class="viewcode-block" id="ExtendedQuerySet"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.ExtendedQuerySet">[docs]</a><span class="k">class</span> <span class="nc">ExtendedQuerySet</span><span class="p">(</span><span class="n">QuerySet</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ExtendedQuerySet.update_or_create"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.ExtendedQuerySet.update_or_create">[docs]</a>    <span class="k">def</span> <span class="nf">update_or_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">obj</span><span class="p">,</span> <span class="n">created</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">created</span><span class="p">:</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;defaults&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+            <span class="n">fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">update_model_with_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">fields</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">obj</span>
+
+</div></div>
+<div class="viewcode-block" id="ExtendedManager"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.ExtendedManager">[docs]</a><span class="k">class</span> <span class="nc">ExtendedManager</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ExtendedManager.get_query_set"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.ExtendedManager.get_query_set">[docs]</a>    <span class="k">def</span> <span class="nf">get_query_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ExtendedQuerySet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ExtendedManager.update_or_create"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.ExtendedManager.update_or_create">[docs]</a>    <span class="k">def</span> <span class="nf">update_or_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_query_set</span><span class="p">()</span><span class="o">.</span><span class="n">update_or_create</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ExtendedManager.connection_for_write"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.ExtendedManager.connection_for_write">[docs]</a>    <span class="k">def</span> <span class="nf">connection_for_write</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">connections</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">connections</span><span class="p">[</span><span class="n">router</span><span class="o">.</span><span class="n">db_for_write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">connection</span>
+</div>
+<div class="viewcode-block" id="ExtendedManager.connection_for_read"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.ExtendedManager.connection_for_read">[docs]</a>    <span class="k">def</span> <span class="nf">connection_for_read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">connections</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">connections</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">connection</span>
+</div>
+<div class="viewcode-block" id="ExtendedManager.current_engine"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.ExtendedManager.current_engine">[docs]</a>    <span class="k">def</span> <span class="nf">current_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">settings</span><span class="o">.</span><span class="n">DATABASES</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">][</span><span class="s">&quot;ENGINE&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">settings</span><span class="o">.</span><span class="n">DATABASE_ENGINE</span>
+
+</div></div>
+<div class="viewcode-block" id="ResultManager"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.ResultManager">[docs]</a><span class="k">class</span> <span class="nc">ResultManager</span><span class="p">(</span><span class="n">ExtendedManager</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ResultManager.get_all_expired"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.ResultManager.get_all_expired">[docs]</a>    <span class="k">def</span> <span class="nf">get_all_expired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expires</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get all expired task results.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">date_done__lt</span><span class="o">=</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">maybe_timedelta</span><span class="p">(</span><span class="n">expires</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ResultManager.delete_expired"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.ResultManager.delete_expired">[docs]</a>    <span class="k">def</span> <span class="nf">delete_expired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expires</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete all expired taskset results.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_all_expired</span><span class="p">(</span><span class="n">expires</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">hidden</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection_for_write</span><span class="p">()</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;DELETE FROM </span><span class="si">%s</span><span class="s"> WHERE hidden=</span><span class="si">%%</span><span class="s">s&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">db_table</span><span class="p">,</span> <span class="p">),</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="p">))</span>
+        <span class="n">transaction</span><span class="o">.</span><span class="n">commit_unless_managed</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="PeriodicTaskManager"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.PeriodicTaskManager">[docs]</a><span class="k">class</span> <span class="nc">PeriodicTaskManager</span><span class="p">(</span><span class="n">ExtendedManager</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PeriodicTaskManager.enabled"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.PeriodicTaskManager.enabled">[docs]</a>    <span class="k">def</span> <span class="nf">enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="TaskManager"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.TaskManager">[docs]</a><span class="k">class</span> <span class="nc">TaskManager</span><span class="p">(</span><span class="n">ResultManager</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Manager for :class:`celery.models.Task` models.&quot;&quot;&quot;</span>
+    <span class="n">_last_id</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="TaskManager.get_task"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.TaskManager.get_task">[docs]</a>    <span class="k">def</span> <span class="nf">get_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get task meta for task by ``task_id``.</span>
+
+<span class="sd">        :keyword exception_retry_count: How many times to retry by</span>
+<span class="sd">            transaction rollback on exception. This could theoretically</span>
+<span class="sd">            happen in a race condition if another worker is trying to</span>
+<span class="sd">            create the same task. The default is to retry once.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task_id</span><span class="o">=</span><span class="n">task_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_id</span> <span class="o">==</span> <span class="n">task_id</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">warn_if_repeatable_read</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_id</span> <span class="o">=</span> <span class="n">task_id</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">task_id</span><span class="o">=</span><span class="n">task_id</span><span class="p">)</span>
+</div>
+    <span class="nd">@transaction_retry</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<div class="viewcode-block" id="TaskManager.store_result"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.TaskManager.store_result">[docs]</a>    <span class="k">def</span> <span class="nf">store_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">traceback</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Store the result and status of a task.</span>
+
+<span class="sd">        :param task_id: task id</span>
+
+<span class="sd">        :param result: The return value of the task, or an exception</span>
+<span class="sd">            instance raised by the task.</span>
+
+<span class="sd">        :param status: Task status. See</span>
+<span class="sd">            :meth:`celery.result.AsyncResult.get_status` for a list of</span>
+<span class="sd">            possible status values.</span>
+
+<span class="sd">        :keyword traceback: The traceback at the point of exception (if the</span>
+<span class="sd">            task failed).</span>
+
+<span class="sd">        :keyword exception_retry_count: How many times to retry by</span>
+<span class="sd">            transaction rollback on exception. This could theoretically</span>
+<span class="sd">            happen in a race condition if another worker is trying to</span>
+<span class="sd">            create the same task. The default is to retry twice.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_or_create</span><span class="p">(</span><span class="n">task_id</span><span class="o">=</span><span class="n">task_id</span><span class="p">,</span>
+                                     <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s">&quot;status&quot;</span><span class="p">:</span> <span class="n">status</span><span class="p">,</span>
+                                               <span class="s">&quot;result&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">,</span>
+                                               <span class="s">&quot;traceback&quot;</span><span class="p">:</span> <span class="n">traceback</span><span class="p">})</span>
+</div>
+<div class="viewcode-block" id="TaskManager.warn_if_repeatable_read"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.TaskManager.warn_if_repeatable_read">[docs]</a>    <span class="k">def</span> <span class="nf">warn_if_repeatable_read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s">&quot;mysql&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_engine</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection_for_read</span><span class="p">()</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;SELECT @@tx_isolation&quot;</span><span class="p">):</span>
+                <span class="n">isolation</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">isolation</span> <span class="o">==</span> <span class="s">&#39;REPEATABLE-READ&#39;</span><span class="p">:</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">TxIsolationWarning</span><span class="p">(</span>
+                        <span class="s">&quot;Polling results with transaction isolation level &quot;</span>
+                        <span class="s">&quot;repeatable-read within the same transaction &quot;</span>
+                        <span class="s">&quot;may give outdated results. Be sure to commit the &quot;</span>
+                        <span class="s">&quot;transaction for each poll iteration.&quot;</span><span class="p">))</span>
+
+</div></div>
+<div class="viewcode-block" id="TaskSetManager"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.TaskSetManager">[docs]</a><span class="k">class</span> <span class="nc">TaskSetManager</span><span class="p">(</span><span class="n">ResultManager</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Manager for :class:`celery.models.TaskSet` models.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TaskSetManager.restore_taskset"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.TaskSetManager.restore_taskset">[docs]</a>    <span class="k">def</span> <span class="nf">restore_taskset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskset_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the async result instance by taskset id.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">taskset_id</span><span class="o">=</span><span class="n">taskset_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="TaskSetManager.delete_taskset"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.TaskSetManager.delete_taskset">[docs]</a>    <span class="k">def</span> <span class="nf">delete_taskset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskset_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete a saved taskset result.&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">restore_taskset</span><span class="p">(</span><span class="n">taskset_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+</div>
+    <span class="nd">@transaction_retry</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<div class="viewcode-block" id="TaskSetManager.store_result"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.TaskSetManager.store_result">[docs]</a>    <span class="k">def</span> <span class="nf">store_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskset_id</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Store the async result instance of a taskset.</span>
+
+<span class="sd">        :param taskset_id: task set id</span>
+
+<span class="sd">        :param result: The return value of the taskset</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_or_create</span><span class="p">(</span><span class="n">taskset_id</span><span class="o">=</span><span class="n">taskset_id</span><span class="p">,</span>
+                                     <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s">&quot;result&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">})</span>
+
+</div></div>
+<div class="viewcode-block" id="TaskStateManager"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.TaskStateManager">[docs]</a><span class="k">class</span> <span class="nc">TaskStateManager</span><span class="p">(</span><span class="n">ExtendedManager</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TaskStateManager.active"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.TaskStateManager.active">[docs]</a>    <span class="k">def</span> <span class="nf">active</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">hidden</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="TaskStateManager.expired"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.TaskStateManager.expired">[docs]</a>    <span class="k">def</span> <span class="nf">expired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">expires</span><span class="p">,</span> <span class="n">nowfun</span><span class="o">=</span><span class="n">now</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">state__in</span><span class="o">=</span><span class="n">states</span><span class="p">,</span>
+                           <span class="n">tstamp__lte</span><span class="o">=</span><span class="n">nowfun</span><span class="p">()</span> <span class="o">-</span> <span class="n">maybe_timedelta</span><span class="p">(</span><span class="n">expires</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="TaskStateManager.expire_by_states"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.TaskStateManager.expire_by_states">[docs]</a>    <span class="k">def</span> <span class="nf">expire_by_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">expires</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">expires</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">expired</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="n">expires</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">hidden</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="TaskStateManager.purge"><a class="viewcode-back" href="../../auto_modules.html#djcelery.managers.TaskStateManager.purge">[docs]</a>    <span class="k">def</span> <span class="nf">purge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection_for_write</span><span class="p">()</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;DELETE FROM </span><span class="si">%s</span><span class="s"> WHERE hidden=</span><span class="si">%%</span><span class="s">s&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">db_table</span><span class="p">,</span> <span class="p">),</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="p">))</span>
+        <span class="n">transaction</span><span class="o">.</span><span class="n">commit_unless_managed</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -231,7 +231,7 @@ class PlaylistForm(ModelForm):
     
  
 
-  
+""" 
 class BaseReleaseMediaFormSet(BaseInlineFormSet): 
         
 
@@ -362,12 +362,13 @@ class BaseReleaseReleationForm(ModelForm):
 
     #name = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False)
     #tracknumber =  forms.CharField(label=_('No.'))  
-
+"""
 
 # Compose Formsets
+"""
 ReleaseMediaFormSet = inlineformset_factory(Release, Media, form=BaseReleaseMediaForm, formset=BaseReleaseMediaFormSet, can_delete=False, extra=0, fields=('name', 'tracknumber', 'isrc', 'artist', 'license', 'mediatype',), can_order=False)
 ReleaseRelationFormSet = generic_inlineformset_factory(Relation, form=BaseReleaseReleationForm, formset=BaseReleaseReleationFormSet, extra=3, exclude=('action',), can_delete=True)
-
+"""
 
 
 

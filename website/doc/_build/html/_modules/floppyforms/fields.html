@@ -1,0 +1,268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>floppyforms.fields &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for floppyforms.fields</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="kn">from</span> <span class="nn">.widgets</span> <span class="kn">import</span> <span class="p">(</span><span class="n">TextInput</span><span class="p">,</span> <span class="n">HiddenInput</span><span class="p">,</span> <span class="n">CheckboxInput</span><span class="p">,</span> <span class="n">Select</span><span class="p">,</span>
+                      <span class="n">ClearableFileInput</span><span class="p">,</span> <span class="n">SelectMultiple</span><span class="p">,</span> <span class="n">DateInput</span><span class="p">,</span>
+                      <span class="n">DateTimeInput</span><span class="p">,</span> <span class="n">TimeInput</span><span class="p">,</span> <span class="n">URLInput</span><span class="p">,</span> <span class="n">NumberInput</span><span class="p">,</span>
+                      <span class="n">EmailInput</span><span class="p">,</span> <span class="n">NullBooleanSelect</span><span class="p">,</span> <span class="n">SlugInput</span><span class="p">,</span> <span class="n">IPAddressInput</span><span class="p">,</span>
+                      <span class="n">SplitDateTimeWidget</span><span class="p">,</span> <span class="n">SplitHiddenDateTimeWidget</span><span class="p">,</span>
+                      <span class="n">FILE_INPUT_CONTRADICTION</span><span class="p">)</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s">&#39;Field&#39;</span><span class="p">,</span> <span class="s">&#39;CharField&#39;</span><span class="p">,</span> <span class="s">&#39;IntegerField&#39;</span><span class="p">,</span> <span class="s">&#39;DateField&#39;</span><span class="p">,</span> <span class="s">&#39;TimeField&#39;</span><span class="p">,</span>
+    <span class="s">&#39;DateTimeField&#39;</span><span class="p">,</span> <span class="s">&#39;EmailField&#39;</span><span class="p">,</span> <span class="s">&#39;FileField&#39;</span><span class="p">,</span> <span class="s">&#39;ImageField&#39;</span><span class="p">,</span> <span class="s">&#39;URLField&#39;</span><span class="p">,</span>
+    <span class="s">&#39;BooleanField&#39;</span><span class="p">,</span> <span class="s">&#39;NullBooleanField&#39;</span><span class="p">,</span> <span class="s">&#39;ChoiceField&#39;</span><span class="p">,</span> <span class="s">&#39;MultipleChoiceField&#39;</span><span class="p">,</span>
+    <span class="s">&#39;FloatField&#39;</span><span class="p">,</span> <span class="s">&#39;DecimalField&#39;</span><span class="p">,</span> <span class="s">&#39;SlugField&#39;</span><span class="p">,</span> <span class="s">&#39;RegexField&#39;</span><span class="p">,</span> <span class="s">&#39;IPAddressField&#39;</span><span class="p">,</span>
+    <span class="s">&#39;TypedChoiceField&#39;</span><span class="p">,</span> <span class="s">&#39;FilePathField&#39;</span><span class="p">,</span> <span class="s">&#39;TypedMultipleChoiceField&#39;</span><span class="p">,</span>
+    <span class="s">&#39;ComboField&#39;</span><span class="p">,</span> <span class="s">&#39;MultiValueField&#39;</span><span class="p">,</span> <span class="s">&#39;SplitDateTimeField&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="Field"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.Field">[docs]</a><span class="k">class</span> <span class="nc">Field</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Field</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">TextInput</span>
+    <span class="n">hidden_widget</span> <span class="o">=</span> <span class="n">HiddenInput</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">is_required</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">required</span>  <span class="c"># fallback to support</span>
+                                                 <span class="c"># is_required with</span>
+                                                 <span class="c"># Django &lt; 1.3</span>
+
+</div>
+<div class="viewcode-block" id="CharField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.CharField">[docs]</a><span class="k">class</span> <span class="nc">CharField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">TextInput</span>
+
+<div class="viewcode-block" id="CharField.widget_attrs"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.CharField.widget_attrs">[docs]</a>    <span class="k">def</span> <span class="nf">widget_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">CharField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">widget_attrs</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">attrs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="p">(</span><span class="n">TextInput</span><span class="p">,</span> <span class="n">HiddenInput</span><span class="p">)):</span>
+            <span class="c"># The HTML attribute is maxlength, not max_length.</span>
+            <span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s">&#39;maxlength&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_length</span><span class="p">)})</span>
+        <span class="k">return</span> <span class="n">attrs</span>
+
+</div></div>
+<div class="viewcode-block" id="BooleanField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.BooleanField">[docs]</a><span class="k">class</span> <span class="nc">BooleanField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">CheckboxInput</span>
+
+</div>
+<div class="viewcode-block" id="NullBooleanField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.NullBooleanField">[docs]</a><span class="k">class</span> <span class="nc">NullBooleanField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">NullBooleanField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">NullBooleanSelect</span>
+
+</div>
+<div class="viewcode-block" id="ChoiceField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.ChoiceField">[docs]</a><span class="k">class</span> <span class="nc">ChoiceField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">Select</span>
+
+</div>
+<div class="viewcode-block" id="TypedChoiceField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.TypedChoiceField">[docs]</a><span class="k">class</span> <span class="nc">TypedChoiceField</span><span class="p">(</span><span class="n">ChoiceField</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">TypedChoiceField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">Select</span>
+
+</div>
+<div class="viewcode-block" id="FilePathField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.FilePathField">[docs]</a><span class="k">class</span> <span class="nc">FilePathField</span><span class="p">(</span><span class="n">ChoiceField</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">FilePathField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">Select</span>
+
+</div>
+<div class="viewcode-block" id="FileField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.FileField">[docs]</a><span class="k">class</span> <span class="nc">FileField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">FileField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">ClearableFileInput</span>
+    <span class="n">default_error_messages</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;invalid&#39;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;No file was submitted. Check the encoding type on the form.&quot;</span><span class="p">),</span>
+        <span class="s">&#39;missing&#39;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;No file was submitted.&quot;</span><span class="p">),</span>
+        <span class="s">&#39;empty&#39;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s">u&quot;The submitted file is empty.&quot;</span><span class="p">),</span>
+        <span class="s">&#39;max_length&#39;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s">u&#39;Ensure this filename has at most </span><span class="si">%(max)d</span><span class="s"> characters (it has </span><span class="si">%(length)d</span><span class="s">).&#39;</span><span class="p">),</span>
+        <span class="s">&#39;contradiction&#39;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s">u&#39;Please either submit a file or check the clear checkbox, not both.&#39;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;max_length&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allow_empty_file</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;allow_empty_file&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FileField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FileField.clean"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.FileField.clean">[docs]</a>    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">initial</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="n">FILE_INPUT_CONTRADICTION</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_messages</span><span class="p">[</span><span class="s">&#39;contradiction&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">initial</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">initial</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">FileField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">clean</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="ImageField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.ImageField">[docs]</a><span class="k">class</span> <span class="nc">ImageField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">ImageField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">ClearableFileInput</span>
+
+</div>
+<div class="viewcode-block" id="MultipleChoiceField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.MultipleChoiceField">[docs]</a><span class="k">class</span> <span class="nc">MultipleChoiceField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">MultipleChoiceField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">SelectMultiple</span>
+
+</div>
+<div class="viewcode-block" id="TypedMultipleChoiceField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.TypedMultipleChoiceField">[docs]</a><span class="k">class</span> <span class="nc">TypedMultipleChoiceField</span><span class="p">(</span><span class="n">MultipleChoiceField</span><span class="p">,</span>
+                               <span class="n">forms</span><span class="o">.</span><span class="n">TypedMultipleChoiceField</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="DateField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.DateField">[docs]</a><span class="k">class</span> <span class="nc">DateField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">DateField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">DateInput</span>
+
+</div>
+<div class="viewcode-block" id="DateTimeField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.DateTimeField">[docs]</a><span class="k">class</span> <span class="nc">DateTimeField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">DateTimeInput</span>
+
+</div>
+<div class="viewcode-block" id="TimeField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.TimeField">[docs]</a><span class="k">class</span> <span class="nc">TimeField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">TimeField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">TimeInput</span>
+
+</div>
+<div class="viewcode-block" id="DecimalField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.DecimalField">[docs]</a><span class="k">class</span> <span class="nc">DecimalField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">NumberInput</span>
+
+</div>
+<div class="viewcode-block" id="FloatField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.FloatField">[docs]</a><span class="k">class</span> <span class="nc">FloatField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">FloatField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">NumberInput</span>
+
+</div>
+<div class="viewcode-block" id="IntegerField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.IntegerField">[docs]</a><span class="k">class</span> <span class="nc">IntegerField</span><span class="p">(</span><span class="n">FloatField</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">NumberInput</span>
+
+</div>
+<div class="viewcode-block" id="EmailField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.EmailField">[docs]</a><span class="k">class</span> <span class="nc">EmailField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">EmailField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">EmailInput</span>
+
+</div>
+<div class="viewcode-block" id="URLField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.URLField">[docs]</a><span class="k">class</span> <span class="nc">URLField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">URLField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">URLInput</span>
+
+</div>
+<div class="viewcode-block" id="SlugField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.SlugField">[docs]</a><span class="k">class</span> <span class="nc">SlugField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">SlugField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">SlugInput</span>
+
+</div>
+<div class="viewcode-block" id="RegexField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.RegexField">[docs]</a><span class="k">class</span> <span class="nc">RegexField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">RegexField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">TextInput</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">regex</span><span class="p">,</span> <span class="n">js_regex</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">min_length</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">error_message</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">js_regex</span> <span class="o">=</span> <span class="n">js_regex</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RegexField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">max_length</span><span class="p">,</span> <span class="n">min_length</span><span class="p">,</span>
+                                         <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RegexField.widget_attrs"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.RegexField.widget_attrs">[docs]</a>    <span class="k">def</span> <span class="nf">widget_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">RegexField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">widget_attrs</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">js_regex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="s">&#39;pattern&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">js_regex</span>
+        <span class="k">return</span> <span class="n">attrs</span>
+
+</div></div>
+<div class="viewcode-block" id="IPAddressField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.IPAddressField">[docs]</a><span class="k">class</span> <span class="nc">IPAddressField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">IPAddressField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">IPAddressInput</span>
+
+</div>
+<div class="viewcode-block" id="ComboField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.ComboField">[docs]</a><span class="k">class</span> <span class="nc">ComboField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">ComboField</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="MultiValueField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.MultiValueField">[docs]</a><span class="k">class</span> <span class="nc">MultiValueField</span><span class="p">(</span><span class="n">Field</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">MultiValueField</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="SplitDateTimeField"><a class="viewcode-back" href="../../auto_modules.html#floppyforms.fields.SplitDateTimeField">[docs]</a><span class="k">class</span> <span class="nc">SplitDateTimeField</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">SplitDateTimeField</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">SplitDateTimeWidget</span>
+    <span class="n">hidden_widget</span> <span class="o">=</span> <span class="n">SplitHiddenDateTimeWidget</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SplitDateTimeField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">widgets</span><span class="p">:</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">is_required</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">required</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

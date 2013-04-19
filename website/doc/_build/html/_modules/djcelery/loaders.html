@@ -1,0 +1,252 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>djcelery.loaders &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for djcelery.loaders</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">imp</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">celery</span> <span class="kn">import</span> <span class="n">signals</span>
+<span class="kn">from</span> <span class="nn">celery.loaders.base</span> <span class="kn">import</span> <span class="n">BaseLoader</span>
+<span class="kn">from</span> <span class="nn">celery.datastructures</span> <span class="kn">import</span> <span class="n">DictAttribute</span>
+
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">db</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.core</span> <span class="kn">import</span> <span class="n">cache</span>
+<span class="kn">from</span> <span class="nn">django.core.mail</span> <span class="kn">import</span> <span class="n">mail_admins</span>
+
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">DATABASE_ERRORS</span><span class="p">,</span> <span class="n">now</span>
+
+<span class="n">_RACE_PROTECTION</span> <span class="o">=</span> <span class="bp">False</span>
+
+
+<div class="viewcode-block" id="DjangoLoader"><a class="viewcode-back" href="../../auto_modules.html#djcelery.loaders.DjangoLoader">[docs]</a><span class="k">class</span> <span class="nc">DjangoLoader</span><span class="p">(</span><span class="n">BaseLoader</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The Django loader.&quot;&quot;&quot;</span>
+    <span class="n">_db_reuse</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">override_backends</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&quot;database&quot;</span><span class="p">:</span> <span class="s">&quot;djcelery.backends.database.DatabaseBackend&quot;</span><span class="p">,</span>
+            <span class="s">&quot;cache&quot;</span><span class="p">:</span> <span class="s">&quot;djcelery.backends.cache.CacheBackend&quot;</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DjangoLoader</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_install_signal_handlers</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_install_signal_handlers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Need to close any open database connection after</span>
+        <span class="c"># any embedded celerybeat process forks.</span>
+        <span class="n">signals</span><span class="o">.</span><span class="n">beat_embedded_init</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">close_database</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DjangoLoader.now"><a class="viewcode-back" href="../../auto_modules.html#djcelery.loaders.DjangoLoader.now">[docs]</a>    <span class="k">def</span> <span class="nf">now</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">now</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="DjangoLoader.read_configuration"><a class="viewcode-back" href="../../auto_modules.html#djcelery.loaders.DjangoLoader.read_configuration">[docs]</a>    <span class="k">def</span> <span class="nf">read_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load configuration from Django settings.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configured</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c"># Default backend needs to be the database backend for backward</span>
+        <span class="c"># compatibility.</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&quot;CELERY_RESULT_BACKEND&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> \
+                    <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&quot;CELERY_BACKEND&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">backend</span><span class="p">:</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">CELERY_RESULT_BACKEND</span> <span class="o">=</span> <span class="s">&quot;database&quot;</span>
+        <span class="k">return</span> <span class="n">DictAttribute</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_close_database</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">funs</span> <span class="o">=</span> <span class="p">[</span><span class="n">conn</span><span class="o">.</span><span class="n">close</span> <span class="k">for</span> <span class="n">conn</span> <span class="ow">in</span> <span class="n">db</span><span class="o">.</span><span class="n">connections</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">funs</span> <span class="o">=</span> <span class="p">[</span><span class="n">db</span><span class="o">.</span><span class="n">close_connection</span><span class="p">]</span>  <span class="c"># pre multidb</span>
+
+        <span class="k">for</span> <span class="n">close</span> <span class="ow">in</span> <span class="n">funs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">DATABASE_ERRORS</span><span class="p">,</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s">&quot;closed&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">):</span>
+                    <span class="k">raise</span>
+
+<div class="viewcode-block" id="DjangoLoader.close_database"><a class="viewcode-back" href="../../auto_modules.html#djcelery.loaders.DjangoLoader.close_database">[docs]</a>    <span class="k">def</span> <span class="nf">close_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">db_reuse_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;CELERY_DB_REUSE_MAX&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">db_reuse_max</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_close_database</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_db_reuse</span> <span class="o">&gt;=</span> <span class="n">db_reuse_max</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_db_reuse</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_close_database</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_db_reuse</span> <span class="o">+=</span> <span class="mi">1</span>
+</div>
+<div class="viewcode-block" id="DjangoLoader.close_cache"><a class="viewcode-back" href="../../auto_modules.html#djcelery.loaders.DjangoLoader.close_cache">[docs]</a>    <span class="k">def</span> <span class="nf">close_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cache</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+            <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="DjangoLoader.on_process_cleanup"><a class="viewcode-back" href="../../auto_modules.html#djcelery.loaders.DjangoLoader.on_process_cleanup">[docs]</a>    <span class="k">def</span> <span class="nf">on_process_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Does everything necessary for Django to work in a long-living,</span>
+<span class="sd">        multiprocessing environment.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># See http://groups.google.com/group/django-users/</span>
+        <span class="c">#            browse_thread/thread/78200863d0c07c6d/</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close_database</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close_cache</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="DjangoLoader.on_task_init"><a class="viewcode-back" href="../../auto_modules.html#djcelery.loaders.DjangoLoader.on_task_init">[docs]</a>    <span class="k">def</span> <span class="nf">on_task_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called before every task.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">is_eager</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">is_eager</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">is_eager</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_eager</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">close_database</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="DjangoLoader.on_worker_init"><a class="viewcode-back" href="../../auto_modules.html#djcelery.loaders.DjangoLoader.on_worker_init">[docs]</a>    <span class="k">def</span> <span class="nf">on_worker_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called when the worker starts.</span>
+
+<span class="sd">        Automatically discovers any ``tasks.py`` files in the applications</span>
+<span class="sd">        listed in ``INSTALLED_APPS``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Using settings.DEBUG leads to a memory leak, never &quot;</span>
+                          <span class="s">&quot;use this setting in production environments!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">import_default_modules</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">close_database</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close_cache</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="DjangoLoader.import_default_modules"><a class="viewcode-back" href="../../auto_modules.html#djcelery.loaders.DjangoLoader.import_default_modules">[docs]</a>    <span class="k">def</span> <span class="nf">import_default_modules</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DjangoLoader</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">import_default_modules</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autodiscover</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="DjangoLoader.autodiscover"><a class="viewcode-back" href="../../auto_modules.html#djcelery.loaders.DjangoLoader.autodiscover">[docs]</a>    <span class="k">def</span> <span class="nf">autodiscover</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_modules</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mod</span><span class="o">.</span><span class="n">__name__</span> <span class="k">for</span> <span class="n">mod</span> <span class="ow">in</span> <span class="n">autodiscover</span><span class="p">()</span> <span class="ow">or</span> <span class="p">())</span>
+</div>
+<div class="viewcode-block" id="DjangoLoader.on_worker_process_init"><a class="viewcode-back" href="../../auto_modules.html#djcelery.loaders.DjangoLoader.on_worker_process_init">[docs]</a>    <span class="k">def</span> <span class="nf">on_worker_process_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># the parent process may have established these,</span>
+        <span class="c"># so need to close them.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close_database</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close_cache</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="DjangoLoader.mail_admins"><a class="viewcode-back" href="../../auto_modules.html#djcelery.loaders.DjangoLoader.mail_admins">[docs]</a>    <span class="k">def</span> <span class="nf">mail_admins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">fail_silently</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">mail_admins</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">fail_silently</span><span class="o">=</span><span class="n">fail_silently</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="autodiscover"><a class="viewcode-back" href="../../auto_modules.html#djcelery.loaders.autodiscover">[docs]</a><span class="k">def</span> <span class="nf">autodiscover</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Include tasks for all applications in ``INSTALLED_APPS``.&quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_RACE_PROTECTION</span>
+
+    <span class="k">if</span> <span class="n">_RACE_PROTECTION</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">_RACE_PROTECTION</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">filter</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">[</span><span class="n">find_related_module</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="s">&quot;tasks&quot;</span><span class="p">)</span>
+                                <span class="k">for</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">INSTALLED_APPS</span><span class="p">])</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">_RACE_PROTECTION</span> <span class="o">=</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="find_related_module"><a class="viewcode-back" href="../../auto_modules.html#djcelery.loaders.find_related_module">[docs]</a><span class="k">def</span> <span class="nf">find_related_module</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">related_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given an application name and a module name, tries to find that</span>
+<span class="sd">    module in the application.&quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">app_path</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">app</span><span class="p">)</span><span class="o">.</span><span class="n">__path__</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">imp</span><span class="o">.</span><span class="n">find_module</span><span class="p">(</span><span class="n">related_name</span><span class="p">,</span> <span class="n">app_path</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">related_name</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

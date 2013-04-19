@@ -1,0 +1,409 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django.contrib.admin.widgets &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for django.contrib.admin.widgets</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Form Widget classes specific to the Django admin site.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.contrib.admin.templatetags.admin_static</span> <span class="kn">import</span> <span class="n">static</span>
+<span class="kn">from</span> <span class="nn">django.core.urlresolvers</span> <span class="kn">import</span> <span class="n">reverse</span>
+<span class="kn">from</span> <span class="nn">django.forms.widgets</span> <span class="kn">import</span> <span class="n">RadioFieldRenderer</span>
+<span class="kn">from</span> <span class="nn">django.forms.util</span> <span class="kn">import</span> <span class="n">flatatt</span>
+<span class="kn">from</span> <span class="nn">django.utils.html</span> <span class="kn">import</span> <span class="n">escape</span>
+<span class="kn">from</span> <span class="nn">django.utils.text</span> <span class="kn">import</span> <span class="n">Truncator</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">django.utils.safestring</span> <span class="kn">import</span> <span class="n">mark_safe</span>
+<span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">force_unicode</span>
+
+
+<div class="viewcode-block" id="FilteredSelectMultiple"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.FilteredSelectMultiple">[docs]</a><span class="k">class</span> <span class="nc">FilteredSelectMultiple</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">SelectMultiple</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A SelectMultiple with a JavaScript filter interface.</span>
+
+<span class="sd">    Note that the resulting JavaScript assumes that the jsi18n</span>
+<span class="sd">    catalog has been loaded in the page</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="FilteredSelectMultiple.media"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.FilteredSelectMultiple.media">[docs]</a>    <span class="k">def</span> <span class="nf">media</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">js</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;core.js&quot;</span><span class="p">,</span> <span class="s">&quot;SelectBox.js&quot;</span><span class="p">,</span> <span class="s">&quot;SelectFilter2.js&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">forms</span><span class="o">.</span><span class="n">Media</span><span class="p">(</span><span class="n">js</span><span class="o">=</span><span class="p">[</span><span class="n">static</span><span class="p">(</span><span class="s">&quot;admin/js/</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">js</span><span class="p">])</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose_name</span><span class="p">,</span> <span class="n">is_stacked</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">()):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose_name</span> <span class="o">=</span> <span class="n">verbose_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_stacked</span> <span class="o">=</span> <span class="n">is_stacked</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FilteredSelectMultiple</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">attrs</span><span class="p">,</span> <span class="n">choices</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FilteredSelectMultiple.render"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.FilteredSelectMultiple.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">attrs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s">&#39;class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;selectfilter&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_stacked</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="s">&#39;class&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;stacked&#39;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="nb">super</span><span class="p">(</span><span class="n">FilteredSelectMultiple</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="n">choices</span><span class="p">)]</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">u&#39;&lt;script type=&quot;text/javascript&quot;&gt;addEvent(window, &quot;load&quot;, function(e) {&#39;</span><span class="p">)</span>
+        <span class="c"># TODO: &quot;id_&quot; is hard-coded here. This should instead use the correct</span>
+        <span class="c"># API to determine the ID dynamically.</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">u&#39;SelectFilter.init(&quot;id_</span><span class="si">%s</span><span class="s">&quot;, &quot;</span><span class="si">%s</span><span class="s">&quot;, </span><span class="si">%s</span><span class="s">, &quot;</span><span class="si">%s</span><span class="s">&quot;); });&lt;/script&gt;</span><span class="se">\n</span><span class="s">&#39;</span>
+            <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\\</span><span class="s">&quot;&#39;</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_stacked</span><span class="p">),</span> <span class="n">static</span><span class="p">(</span><span class="s">&#39;admin/&#39;</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="s">u&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+</div></div>
+<div class="viewcode-block" id="AdminDateWidget"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.AdminDateWidget">[docs]</a><span class="k">class</span> <span class="nc">AdminDateWidget</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">DateInput</span><span class="p">):</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="AdminDateWidget.media"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.AdminDateWidget.media">[docs]</a>    <span class="k">def</span> <span class="nf">media</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">js</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;calendar.js&quot;</span><span class="p">,</span> <span class="s">&quot;admin/DateTimeShortcuts.js&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">forms</span><span class="o">.</span><span class="n">Media</span><span class="p">(</span><span class="n">js</span><span class="o">=</span><span class="p">[</span><span class="n">static</span><span class="p">(</span><span class="s">&quot;admin/js/</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">js</span><span class="p">])</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">final_attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;class&#39;</span><span class="p">:</span> <span class="s">&#39;vDateField&#39;</span><span class="p">,</span> <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="s">&#39;10&#39;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">final_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AdminDateWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="n">final_attrs</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="n">format</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AdminTimeWidget"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.AdminTimeWidget">[docs]</a><span class="k">class</span> <span class="nc">AdminTimeWidget</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">TimeInput</span><span class="p">):</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="AdminTimeWidget.media"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.AdminTimeWidget.media">[docs]</a>    <span class="k">def</span> <span class="nf">media</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">js</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;calendar.js&quot;</span><span class="p">,</span> <span class="s">&quot;admin/DateTimeShortcuts.js&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">forms</span><span class="o">.</span><span class="n">Media</span><span class="p">(</span><span class="n">js</span><span class="o">=</span><span class="p">[</span><span class="n">static</span><span class="p">(</span><span class="s">&quot;admin/js/</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">js</span><span class="p">])</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">final_attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;class&#39;</span><span class="p">:</span> <span class="s">&#39;vTimeField&#39;</span><span class="p">,</span> <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="s">&#39;8&#39;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">final_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AdminTimeWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="n">final_attrs</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="n">format</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AdminSplitDateTime"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.AdminSplitDateTime">[docs]</a><span class="k">class</span> <span class="nc">AdminSplitDateTime</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">SplitDateTimeWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A SplitDateTime Widget that has some admin-specific styling.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">widgets</span> <span class="o">=</span> <span class="p">[</span><span class="n">AdminDateWidget</span><span class="p">,</span> <span class="n">AdminTimeWidget</span><span class="p">]</span>
+        <span class="c"># Note that we&#39;re calling MultiWidget, not SplitDateTimeWidget, because</span>
+        <span class="c"># we want to define widgets.</span>
+        <span class="n">forms</span><span class="o">.</span><span class="n">MultiWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widgets</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AdminSplitDateTime.format_output"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.AdminSplitDateTime.format_output">[docs]</a>    <span class="k">def</span> <span class="nf">format_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rendered_widgets</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="s">u&#39;&lt;p class=&quot;datetime&quot;&gt;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&lt;br /&gt;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&lt;/p&gt;&#39;</span> <span class="o">%</span> \
+            <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Date:&#39;</span><span class="p">),</span> <span class="n">rendered_widgets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Time:&#39;</span><span class="p">),</span> <span class="n">rendered_widgets</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+</div></div>
+<div class="viewcode-block" id="AdminRadioFieldRenderer"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.AdminRadioFieldRenderer">[docs]</a><span class="k">class</span> <span class="nc">AdminRadioFieldRenderer</span><span class="p">(</span><span class="n">RadioFieldRenderer</span><span class="p">):</span>
+<div class="viewcode-block" id="AdminRadioFieldRenderer.render"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.AdminRadioFieldRenderer.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Outputs a &lt;ul&gt; for this set of radio fields.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="s">u&#39;&lt;ul</span><span class="si">%s</span><span class="s">&gt;</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s">&lt;/ul&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">flatatt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attrs</span><span class="p">),</span>
+            <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">u&#39;&lt;li&gt;</span><span class="si">%s</span><span class="s">&lt;/li&gt;&#39;</span> <span class="o">%</span> <span class="n">force_unicode</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]))</span>
+        <span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="AdminRadioSelect"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.AdminRadioSelect">[docs]</a><span class="k">class</span> <span class="nc">AdminRadioSelect</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">RadioSelect</span><span class="p">):</span>
+    <span class="n">renderer</span> <span class="o">=</span> <span class="n">AdminRadioFieldRenderer</span>
+</div>
+<div class="viewcode-block" id="AdminFileWidget"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.AdminFileWidget">[docs]</a><span class="k">class</span> <span class="nc">AdminFileWidget</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">ClearableFileInput</span><span class="p">):</span>
+    <span class="n">template_with_initial</span> <span class="o">=</span> <span class="p">(</span><span class="s">u&#39;&lt;p class=&quot;file-upload&quot;&gt;</span><span class="si">%s</span><span class="s">&lt;/p&gt;&#39;</span>
+                            <span class="o">%</span> <span class="n">forms</span><span class="o">.</span><span class="n">ClearableFileInput</span><span class="o">.</span><span class="n">template_with_initial</span><span class="p">)</span>
+    <span class="n">template_with_clear</span> <span class="o">=</span> <span class="p">(</span><span class="s">u&#39;&lt;span class=&quot;clearable-file-input&quot;&gt;</span><span class="si">%s</span><span class="s">&lt;/span&gt;&#39;</span>
+                           <span class="o">%</span> <span class="n">forms</span><span class="o">.</span><span class="n">ClearableFileInput</span><span class="o">.</span><span class="n">template_with_clear</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="url_params_from_lookup_dict"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.url_params_from_lookup_dict">[docs]</a><span class="k">def</span> <span class="nf">url_params_from_lookup_dict</span><span class="p">(</span><span class="n">lookups</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts the type of lookups specified in a ForeignKey limit_choices_to</span>
+<span class="sd">    attribute to a dictionary of query parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">lookups</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">lookups</span><span class="p">,</span> <span class="s">&#39;items&#39;</span><span class="p">):</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">lookups</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="s">u&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">v</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="c"># See django.db.fields.BooleanField.get_prep_lookup</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;0&#39;</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">)[</span><span class="n">v</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">items</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">params</span>
+</div>
+<div class="viewcode-block" id="ForeignKeyRawIdWidget"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.ForeignKeyRawIdWidget">[docs]</a><span class="k">class</span> <span class="nc">ForeignKeyRawIdWidget</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Widget for displaying ForeignKeys in the &quot;raw_id&quot; interface rather than</span>
+<span class="sd">    in a &lt;select&gt; box.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rel</span><span class="p">,</span> <span class="n">admin_site</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">using</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rel</span> <span class="o">=</span> <span class="n">rel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span> <span class="o">=</span> <span class="n">admin_site</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">using</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ForeignKeyRawIdWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ForeignKeyRawIdWidget.render"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.ForeignKeyRawIdWidget.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">rel_to</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">to</span>
+        <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">attrs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">extra</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">rel_to</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">_registry</span><span class="p">:</span>
+            <span class="c"># The related object is registered with the same AdminSite</span>
+            <span class="n">related_url</span> <span class="o">=</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;admin:</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">_changelist&#39;</span> <span class="o">%</span>
+                                    <span class="p">(</span><span class="n">rel_to</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span>
+                                    <span class="n">rel_to</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">module_name</span><span class="p">),</span>
+                                    <span class="n">current_app</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url_parameters</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">params</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="s">u&#39;?&#39;</span> <span class="o">+</span> <span class="s">u&#39;&amp;amp;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">u&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="s">u&#39;&#39;</span>
+            <span class="k">if</span> <span class="s">&quot;class&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+                <span class="n">attrs</span><span class="p">[</span><span class="s">&#39;class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;vForeignKeyRawIdAdminField&#39;</span> <span class="c"># The JavaScript code looks for this hook.</span>
+            <span class="c"># TODO: &quot;lookup_id_&quot; is hard-coded here. This should instead use</span>
+            <span class="c"># the correct API to determine the ID dynamically.</span>
+            <span class="n">extra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">u&#39;&lt;a href=&quot;</span><span class="si">%s%s</span><span class="s">&quot; class=&quot;related-lookup&quot; id=&quot;lookup_id_</span><span class="si">%s</span><span class="s">&quot; onclick=&quot;return showRelatedObjectLookupPopup(this);&quot;&gt; &#39;</span>
+                            <span class="o">%</span> <span class="p">(</span><span class="n">related_url</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+            <span class="n">extra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">u&#39;&lt;img src=&quot;</span><span class="si">%s</span><span class="s">&quot; width=&quot;16&quot; height=&quot;16&quot; alt=&quot;</span><span class="si">%s</span><span class="s">&quot; /&gt;&lt;/a&gt;&#39;</span>
+                            <span class="o">%</span> <span class="p">(</span><span class="n">static</span><span class="p">(</span><span class="s">&#39;admin/img/selector-search.gif&#39;</span><span class="p">),</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Lookup&#39;</span><span class="p">)))</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="nb">super</span><span class="p">(</span><span class="n">ForeignKeyRawIdWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)]</span> <span class="o">+</span> <span class="n">extra</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_for_value</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="s">u&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ForeignKeyRawIdWidget.base_url_parameters"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.ForeignKeyRawIdWidget.base_url_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">base_url_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">url_params_from_lookup_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">limit_choices_to</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ForeignKeyRawIdWidget.url_parameters"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.ForeignKeyRawIdWidget.url_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">url_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">django.contrib.admin.views.main</span> <span class="kn">import</span> <span class="n">TO_FIELD_VAR</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_url_parameters</span><span class="p">()</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">TO_FIELD_VAR</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">get_related_field</span><span class="p">()</span><span class="o">.</span><span class="n">name</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">params</span>
+</div>
+<div class="viewcode-block" id="ForeignKeyRawIdWidget.label_for_value"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.ForeignKeyRawIdWidget.label_for_value">[docs]</a>    <span class="k">def</span> <span class="nf">label_for_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">get_related_field</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">_default_manager</span><span class="o">.</span><span class="n">using</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+            <span class="k">return</span> <span class="s">&#39;&amp;nbsp;&lt;strong&gt;</span><span class="si">%s</span><span class="s">&lt;/strong&gt;&#39;</span> <span class="o">%</span> <span class="n">escape</span><span class="p">(</span><span class="n">Truncator</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="s">&#39;...&#39;</span><span class="p">))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&#39;&#39;</span>
+</div></div>
+<div class="viewcode-block" id="ManyToManyRawIdWidget"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.ManyToManyRawIdWidget">[docs]</a><span class="k">class</span> <span class="nc">ManyToManyRawIdWidget</span><span class="p">(</span><span class="n">ForeignKeyRawIdWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Widget for displaying ManyToMany ids in the &quot;raw_id&quot; interface rather than</span>
+<span class="sd">    in a &lt;select multiple&gt; box.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ManyToManyRawIdWidget.render"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.ManyToManyRawIdWidget.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">attrs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">to</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">_registry</span><span class="p">:</span>
+            <span class="c"># The related object is registered with the same AdminSite</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="s">&#39;class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;vManyToManyRawIdAdminField&#39;</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">force_unicode</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ManyToManyRawIdWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ManyToManyRawIdWidget.url_parameters"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.ManyToManyRawIdWidget.url_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">url_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_url_parameters</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ManyToManyRawIdWidget.label_for_value"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.ManyToManyRawIdWidget.label_for_value">[docs]</a>    <span class="k">def</span> <span class="nf">label_for_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;&#39;</span>
+</div>
+<div class="viewcode-block" id="ManyToManyRawIdWidget.value_from_datadict"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.ManyToManyRawIdWidget.value_from_datadict">[docs]</a>    <span class="k">def</span> <span class="nf">value_from_datadict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_has_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">initial</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">initial</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">initial</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">for</span> <span class="n">pk1</span><span class="p">,</span> <span class="n">pk2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">initial</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">force_unicode</span><span class="p">(</span><span class="n">pk1</span><span class="p">)</span> <span class="o">!=</span> <span class="n">force_unicode</span><span class="p">(</span><span class="n">pk2</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="RelatedFieldWidgetWrapper"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.RelatedFieldWidgetWrapper">[docs]</a><span class="k">class</span> <span class="nc">RelatedFieldWidgetWrapper</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Widget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is a wrapper to a given widget to add the add icon for the</span>
+<span class="sd">    admin interface.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">rel</span><span class="p">,</span> <span class="n">admin_site</span><span class="p">,</span> <span class="n">can_add_related</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_hidden</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">is_hidden</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">needs_multipart_form</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">needs_multipart_form</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">attrs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">choices</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rel</span> <span class="o">=</span> <span class="n">rel</span>
+        <span class="c"># Backwards compatible check for whether a user can add related</span>
+        <span class="c"># objects.</span>
+        <span class="k">if</span> <span class="n">can_add_related</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">can_add_related</span> <span class="o">=</span> <span class="n">rel</span><span class="o">.</span><span class="n">to</span> <span class="ow">in</span> <span class="n">admin_site</span><span class="o">.</span><span class="n">_registry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">can_add_related</span> <span class="o">=</span> <span class="n">can_add_related</span>
+        <span class="c"># so we can check if the related object is registered with this AdminSite</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span> <span class="o">=</span> <span class="n">admin_site</span>
+
+    <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">memo</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">attrs</span>
+        <span class="n">memo</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)]</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="k">return</span> <span class="n">obj</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="RelatedFieldWidgetWrapper.media"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.RelatedFieldWidgetWrapper.media">[docs]</a>    <span class="k">def</span> <span class="nf">media</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">media</span>
+</div>
+<div class="viewcode-block" id="RelatedFieldWidgetWrapper.render"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.RelatedFieldWidgetWrapper.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">rel_to</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rel</span><span class="o">.</span><span class="n">to</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="p">(</span><span class="n">rel_to</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span> <span class="n">rel_to</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">object_name</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_add_related</span><span class="p">:</span>
+            <span class="n">related_url</span> <span class="o">=</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;admin:</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">_add&#39;</span> <span class="o">%</span> <span class="n">info</span><span class="p">,</span> <span class="n">current_app</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="c"># TODO: &quot;add_id_&quot; is hard-coded here. This should instead use the</span>
+            <span class="c"># correct API to determine the ID dynamically.</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">u&#39;&lt;a href=&quot;</span><span class="si">%s</span><span class="s">&quot; class=&quot;add-another&quot; id=&quot;add_id_</span><span class="si">%s</span><span class="s">&quot; onclick=&quot;return showAddAnotherPopup(this);&quot;&gt; &#39;</span>
+                          <span class="o">%</span> <span class="p">(</span><span class="n">related_url</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">u&#39;&lt;img src=&quot;</span><span class="si">%s</span><span class="s">&quot; width=&quot;10&quot; height=&quot;10&quot; alt=&quot;</span><span class="si">%s</span><span class="s">&quot;/&gt;&lt;/a&gt;&#39;</span>
+                          <span class="o">%</span> <span class="p">(</span><span class="n">static</span><span class="p">(</span><span class="s">&#39;admin/img/icon_addlink.gif&#39;</span><span class="p">),</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Add Another&#39;</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="s">u&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="RelatedFieldWidgetWrapper.build_attrs"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.RelatedFieldWidgetWrapper.build_attrs">[docs]</a>    <span class="k">def</span> <span class="nf">build_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="s">&quot;Helper function for building an attribute dictionary.&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">build_attrs</span><span class="p">(</span><span class="n">extra_attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span>
+</div>
+<div class="viewcode-block" id="RelatedFieldWidgetWrapper.value_from_datadict"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.RelatedFieldWidgetWrapper.value_from_datadict">[docs]</a>    <span class="k">def</span> <span class="nf">value_from_datadict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">value_from_datadict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_has_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">_has_changed</span><span class="p">(</span><span class="n">initial</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RelatedFieldWidgetWrapper.id_for_label"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.RelatedFieldWidgetWrapper.id_for_label">[docs]</a>    <span class="k">def</span> <span class="nf">id_for_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">id_for_label</span><span class="p">(</span><span class="n">id_</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="AdminTextareaWidget"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.AdminTextareaWidget">[docs]</a><span class="k">class</span> <span class="nc">AdminTextareaWidget</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Textarea</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">final_attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;class&#39;</span><span class="p">:</span> <span class="s">&#39;vLargeTextField&#39;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">final_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AdminTextareaWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="n">final_attrs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AdminTextInputWidget"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.AdminTextInputWidget">[docs]</a><span class="k">class</span> <span class="nc">AdminTextInputWidget</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">final_attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;class&#39;</span><span class="p">:</span> <span class="s">&#39;vTextField&#39;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">final_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AdminTextInputWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="n">final_attrs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AdminURLFieldWidget"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.AdminURLFieldWidget">[docs]</a><span class="k">class</span> <span class="nc">AdminURLFieldWidget</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">final_attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;class&#39;</span><span class="p">:</span> <span class="s">&#39;vURLField&#39;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">final_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AdminURLFieldWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="n">final_attrs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AdminIntegerFieldWidget"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.AdminIntegerFieldWidget">[docs]</a><span class="k">class</span> <span class="nc">AdminIntegerFieldWidget</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">final_attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;class&#39;</span><span class="p">:</span> <span class="s">&#39;vIntegerField&#39;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">final_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AdminIntegerFieldWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="n">final_attrs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AdminCommaSeparatedIntegerFieldWidget"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.admin.widgets.AdminCommaSeparatedIntegerFieldWidget">[docs]</a><span class="k">class</span> <span class="nc">AdminCommaSeparatedIntegerFieldWidget</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">final_attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;class&#39;</span><span class="p">:</span> <span class="s">&#39;vCommaSeparatedIntegerField&#39;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">final_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AdminCommaSeparatedIntegerFieldWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="n">final_attrs</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

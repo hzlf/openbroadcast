@@ -1,6 +1,46 @@
 <div id="{{ object.uuid }}" class="importfile item {{ object.status }}">
 
-	<h3>{{ object.status }} <i class="icon-blank"></i> {{ object.filename }} <small>[{{ object.mimetype }}]</small>{% if object.status == 'duplicate' %}<span class="warning pull-right">Duplicate</span>{% endif %}</h3>
+	<h3>
+		<!--
+		{{ object.id }}
+		-->
+		{% if object.status == 'init' %}
+		<i class="icon-time"></i>
+		{% endif %}
+		
+		{% if object.status == 'done' %}
+		<i class="icon-ok-sign"></i>
+		{% endif %}
+		
+		{% if object.status == 'ready' %}
+		<i class="icon-thumbs-up"></i>
+		{% endif %}
+		
+		{% if object.status == 'working' %}
+		<i class="icon-refresh icon-spin"></i>
+		{% endif %}
+		
+		{% if object.status == 'warning' %}
+		<i class="icon-thumbs-down"></i>
+		{% endif %}
+		
+		{% if object.status == 'duplicate' %}
+		<i class="icon-copy"></i>
+		{% endif %}
+		
+		{% if object.status == 'queued' %}
+		<i class="icon-refresh icon-spin"></i>
+		{% endif %}
+		
+		{% if object.status == 'importing' %}
+		<i class="icon-asterisk icon-spin"></i>
+		{% endif %}
+		
+		
+		{{ object.filename }} <small>[{{ object.mimetype }}] {{ object.id }}</small>
+		{% if object.status == 'duplicate' %}<span class="warning pull-right">Duplicate</span>{% endif %}
+		
+	</h3>
 	
 	
 	
@@ -11,8 +51,9 @@
 
 		<div class="span8 information">
 
-			<h4>Importing <i class="icon icon-padded icon-cogs"></i></h4>
+			<!--<h4>Importing <i class="icon icon-padded icon-cogs"></i></h4>-->
 			<p>File placed in the import-queue.<br />Please be patient for a while.</p>
+			<p>Depending on server-load and available metadata it can take several minutes per track to complete it's information.</p>
 			
 		</div>
 		
@@ -79,7 +120,7 @@
 				<li><strong><a href="{{ object.media.absolute_url }}">{{ object.media.name }}</a>{% if object.media.artist.name %} by <a href="{{ object.media.artist.absolute_url }}">{{ object.media.artist.name }}</a>{% endif %}</strong></li>
 
 				{% if object.media.release.name %}
-				<li><a href="{{ object.media.release.absolute_url }}">{{ object.media.release.name|truncate_chars_inner(20) }}</a></li>
+				<li><a href="{{ object.media.release.absolute_url }}">{{ object.media.release.name|truncate_chars_inner(50) }}</a></li>
 				{% else %}
 				<li>No Release</li>
 				{% endif %}
@@ -106,7 +147,7 @@
 
 
 
-	{% if object.status == 'ready' %}
+	{% if object.status == 'ready' or object.status == 'warning' %}
 	<div class="row-fluid result-set hoverable provider-tag">
 
 		<div class="span1">
@@ -124,7 +165,7 @@
 
 				<ul class="horizontal unstyled">
 					<li class="key">Release</li>
-					<li class="value">{{ object.results_tag.release_name|truncate_chars_inner(38) }}</li>
+					<li class="value" title="{{ object.results_tag.release_name }}">{{ object.results_tag.release_name|truncate_chars_inner(38) }}</li>
 				</ul>
 
 		</div>
@@ -137,7 +178,7 @@
 					<li class="key">
 						Artist
 					</li>
-					<li class="value">{{ object.results_tag.artist_name|truncate_chars_inner(38) }}</li>
+					<li class="value" title="{{ object.results_tag.artist_name }}">{{ object.results_tag.artist_name|truncate_chars_inner(38) }}</li>
 				</ul> </label>
 			<div class="clearfix"></div>
 
@@ -181,8 +222,18 @@
 
 
 
-	{% if object.status == 'ready' %}
+	{% if object.status == 'ready' or object.status == 'warning' %}
 	<div class="musicbrainz-tag-holder">
+		
+		
+		{% if object.results_musicbrainz.length < 1 and object.results_tag.media_tracknumber %}
+		<!--
+		<p>
+			<strong>No results available.</strong> 
+			Would you like to try to <a class="rescan" href="#" data-settings="skip_tracknumber, another_setting">lookup again witouth including the tracknumber</a>?
+		</p>
+		-->
+		{% endif %}
 		
 		{% for item in object.results_musicbrainz %}
 		
@@ -215,7 +266,7 @@
 					<a class="external" href="http://musicbrainz.org/release/{{ item.mb_id }}">{{ item.name }}</a> 
 					<ul class="unstyled">
 						<li class="small">{{ item.country }} - {{ item.releasedate }}</li>
-						<li class="small">{{ item.label.name }} - {{ item.label.catalognumber }}</li>
+						<li class="small">{{ item.label.name }} - {{ item.catalognumber }}</li>
 					</ul>
 	
 			</div>
@@ -229,7 +280,6 @@
 			</div>
 		</div>
 
-
 		
 		{% endfor %}
 		
@@ -241,21 +291,21 @@
 
 
 
-	{% if object.status == 'ready' %}
+	{% if object.status == 'ready' or object.status == 'warning' %}
 	<div class="pull-righ result-actions">
 
 		<form class="form-horizontal form-result">
 			<h4>Result</h4>
 
 			<!-- name -->			
-			<div class="row-fluid base">
+			<div class="row-fluid base media {% if not object.import_tag.name %}missing{% endif %}">
 				
 				<div class="span6">
 
 					<div class="control-group">
-						<label class="control-label" for="inputEmail">Title</label>
+						<label class="control-label" for="inputEmail">Title <span class="required">*</span></label>
 						<div class="controls">
-							<input type="text" class="name" value="{{ object.import_tag.name }}">
+							<input type="text" class="release autoupdate"  data-ct="media" value="{{ object.import_tag.name }}">
 						</div>
 					</div>
 					
@@ -265,14 +315,14 @@
 			</div>
 
 			<!-- release -->			
-			<div class="row-fluid base release">
+			<div class="row-fluid base release {% if not object.import_tag.release %}missing{% endif %}">
 				
 				<div class="span5">
 					
 					<div class="control-group">
-						<label class="control-label" for="inputEmail">Release</label>
+						<label class="control-label" for="inputEmail">Release <span class="required">*</span></label>
 						<div class="controls">
-							<input type="text" class="release autocomplete" data-ac_ct="release" value="{{ object.import_tag.release }}">
+							<input type="text" class="release autocomplete" data-ct="release" value="{{ object.import_tag.release }}">
 							<div class="ac-result"></div>
 						</div>
 					</div>
@@ -300,21 +350,21 @@
 				</div>
 				
 				<div class="span3">
-					<a class="btn btn-mini pull-right"><i class="icon-repeat"></i> Apply Release to all</a>
+					<a class="btn btn-mini pull-right apply-to-all" data-ct="release"><i class="icon-repeat"></i> Apply Release to all</a>
 				</div>
 
 				
 			</div>
 
 			<!-- artist -->			
-			<div class="row-fluid base artist">
+			<div class="row-fluid base artist {% if not object.import_tag.artist %}missing{% endif %}">
 				
 				<div class="span5">
 					
 					<div class="control-group">
-						<label class="control-label" for="inputEmail">Artist</label>
+						<label class="control-label" for="inputEmail">Artist <span class="required">*</span></label>
 						<div class="controls">
-							<input type="text" class="artist autocomplete" data-ac_ct="artist" value="{{ object.import_tag.artist }}">
+							<input type="text" class="artist autocomplete" data-ct="artist" value="{{ object.import_tag.artist }}">
 							<div class="ac-result"></div>
 						</div>
 					</div>
@@ -342,7 +392,7 @@
 				</div>
 				
 				<div class="span3">
-					<a class="btn btn-mini pull-right"><i class="icon-repeat"></i> Apply Artist to all</a>
+					<a class="btn btn-mini pull-right apply-to-all" data-ct="artist"><i class="icon-repeat"></i> Apply Artist to all</a>
 				</div>
 
 				
@@ -475,13 +525,19 @@
 
 	<div class="row-fluid pull-righ result-actions">
 
-		<div class="span9">
+		<div class="span8">
 			&nbsp;
 		</div>
 
-		<div class="pull-right span3">
+		<div class="pull-right span4">
 			<a class="btn btn-secondary btn-small delete-importfile">Delete this File</a>
+			
+			<a class="btn btn-secondary btn-small rescan" data-settings="skip_tracknumber">Scan witouth tracknumber</a>
+			
+			<a class="btn btn-secondary btn-small rescan">Scan again</a>
+			{% if object.status == 'ready' or object.status == 'warning' %}
 			<a class="btn btn-primary btn-small start-import">Start Import</a>
+			{% endif %}
 		</div>
 	</div>
 	

@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>selectable.registry &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for selectable.registry</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">force_unicode</span>
+
+<span class="kn">from</span> <span class="nn">selectable.base</span> <span class="kn">import</span> <span class="n">LookupBase</span><span class="p">,</span> <span class="n">ModelLookup</span>
+<span class="kn">from</span> <span class="nn">selectable.exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">LookupAlreadyRegistered</span><span class="p">,</span> <span class="n">LookupNotRegistered</span><span class="p">,</span>
+                                    <span class="n">LookupInvalid</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="LookupRegistry"><a class="viewcode-back" href="../../auto_modules.html#selectable.registry.LookupRegistry">[docs]</a><span class="k">class</span> <span class="nc">LookupRegistry</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="LookupRegistry.validate"><a class="viewcode-back" href="../../auto_modules.html#selectable.registry.LookupRegistry.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lookup</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">lookup</span><span class="p">,</span> <span class="n">LookupBase</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">LookupInvalid</span><span class="p">(</span><span class="s">u&#39;Registered lookups must inherit from the LookupBase class&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">lookup</span><span class="p">,</span> <span class="n">ModelLookup</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">lookup</span><span class="p">,</span> <span class="s">&#39;search_field&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s">u&quot;ModelLookup.search_field is deprecated; Use ModelLookup.search_fields instead.&quot;</span><span class="p">,</span> 
+                <span class="ne">DeprecationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span>
+            <span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LookupRegistry.register"><a class="viewcode-back" href="../../auto_modules.html#selectable.registry.LookupRegistry.register">[docs]</a>    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lookup</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">lookup</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">force_unicode</span><span class="p">(</span><span class="n">lookup</span><span class="o">.</span><span class="n">name</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">LookupAlreadyRegistered</span><span class="p">(</span><span class="s">u&#39;The name </span><span class="si">%s</span><span class="s"> is already registered&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">lookup</span>
+</div>
+<div class="viewcode-block" id="LookupRegistry.unregister"><a class="viewcode-back" href="../../auto_modules.html#selectable.registry.LookupRegistry.unregister">[docs]</a>    <span class="k">def</span> <span class="nf">unregister</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lookup</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">lookup</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">force_unicode</span><span class="p">(</span><span class="n">lookup</span><span class="o">.</span><span class="n">name</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">:</span>
+           <span class="k">raise</span> <span class="n">LookupNotRegistered</span><span class="p">(</span><span class="s">u&#39;The name </span><span class="si">%s</span><span class="s"> is not registered&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="LookupRegistry.get"><a class="viewcode-back" href="../../auto_modules.html#selectable.registry.LookupRegistry.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+</div></div>
+<span class="n">registry</span> <span class="o">=</span> <span class="n">LookupRegistry</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="autodiscover"><a class="viewcode-back" href="../../auto_modules.html#selectable.registry.autodiscover">[docs]</a><span class="k">def</span> <span class="nf">autodiscover</span><span class="p">():</span>
+
+    <span class="kn">import</span> <span class="nn">copy</span>
+    <span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+    <span class="kn">from</span> <span class="nn">django.utils.importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+    <span class="kn">from</span> <span class="nn">django.utils.module_loading</span> <span class="kn">import</span> <span class="n">module_has_submodule</span>
+
+    <span class="k">for</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">INSTALLED_APPS</span><span class="p">:</span>
+        <span class="n">mod</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+        <span class="c"># Attempt to import the app&#39;s lookups module.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">before_import_registry</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">registry</span><span class="o">.</span><span class="n">_registry</span><span class="p">)</span>
+            <span class="n">import_module</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">.lookups&#39;</span> <span class="o">%</span> <span class="n">app</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">registry</span><span class="o">.</span><span class="n">_registry</span> <span class="o">=</span> <span class="n">before_import_registry</span>
+            <span class="k">if</span> <span class="n">module_has_submodule</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="s">&#39;lookups&#39;</span><span class="p">):</span>
+                <span class="k">raise</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

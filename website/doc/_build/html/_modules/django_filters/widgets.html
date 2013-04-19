@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django_filters.widgets &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for django_filters.widgets</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span>
+<span class="kn">from</span> <span class="nn">urllib</span> <span class="kn">import</span> <span class="n">urlencode</span>
+
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.db.models.fields</span> <span class="kn">import</span> <span class="n">BLANK_CHOICE_DASH</span>
+<span class="kn">from</span> <span class="nn">django.forms.widgets</span> <span class="kn">import</span> <span class="n">flatatt</span>
+<span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">force_unicode</span>
+<span class="kn">from</span> <span class="nn">django.utils.safestring</span> <span class="kn">import</span> <span class="n">mark_safe</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+
+<div class="viewcode-block" id="LinkWidget"><a class="viewcode-back" href="../../auto_modules.html#django_filters.widgets.LinkWidget">[docs]</a><span class="k">class</span> <span class="nc">LinkWidget</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Widget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">()):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LinkWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">choices</span>
+
+<div class="viewcode-block" id="LinkWidget.value_from_datadict"><a class="viewcode-back" href="../../auto_modules.html#django_filters.widgets.LinkWidget.value_from_datadict">[docs]</a>    <span class="k">def</span> <span class="nf">value_from_datadict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">LinkWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">value_from_datadict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">value</span>
+</div>
+<div class="viewcode-block" id="LinkWidget.render"><a class="viewcode-back" href="../../auto_modules.html#django_filters.widgets.LinkWidget.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="n">final_attrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_attrs</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="s">u&#39;&lt;ul</span><span class="si">%s</span><span class="s">&gt;&#39;</span> <span class="o">%</span> <span class="n">flatatt</span><span class="p">(</span><span class="n">final_attrs</span><span class="p">)]</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_options</span><span class="p">(</span><span class="n">choices</span><span class="p">,</span> <span class="p">[</span><span class="n">value</span><span class="p">],</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;&lt;/ul&gt;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="LinkWidget.render_options"><a class="viewcode-back" href="../../auto_modules.html#django_filters.widgets.LinkWidget.render_options">[docs]</a>    <span class="k">def</span> <span class="nf">render_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">choices</span><span class="p">,</span> <span class="n">selected_choices</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">selected_choices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">force_unicode</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">selected_choices</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">option_value</span><span class="p">,</span> <span class="n">option_label</span> <span class="ow">in</span> <span class="n">chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">choices</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option_label</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">option_label</span><span class="p">:</span>
+                    <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">render_option</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">selected_choices</span><span class="p">,</span> <span class="o">*</span><span class="n">option</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">render_option</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">selected_choices</span><span class="p">,</span> <span class="n">option_value</span><span class="p">,</span> <span class="n">option_label</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LinkWidget.render_option"><a class="viewcode-back" href="../../auto_modules.html#django_filters.widgets.LinkWidget.render_option">[docs]</a>    <span class="k">def</span> <span class="nf">render_option</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">selected_choices</span><span class="p">,</span> <span class="n">option_value</span><span class="p">,</span> <span class="n">option_label</span><span class="p">):</span>
+        <span class="n">option_value</span> <span class="o">=</span> <span class="n">force_unicode</span><span class="p">(</span><span class="n">option_value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">option_label</span> <span class="o">==</span> <span class="n">BLANK_CHOICE_DASH</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">option_label</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&quot;All&quot;</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">option_value</span>
+        <span class="n">selected</span> <span class="o">=</span> <span class="n">data</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">or</span> <span class="n">option_value</span> <span class="ow">in</span> <span class="n">selected_choices</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">urlencode</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">option_string</span><span class="p">()</span> <span class="o">%</span> <span class="p">{</span>
+             <span class="s">&#39;attrs&#39;</span><span class="p">:</span> <span class="n">selected</span> <span class="ow">and</span> <span class="s">&#39; class=&quot;selected&quot;&#39;</span> <span class="ow">or</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+             <span class="s">&#39;query_string&#39;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span>
+             <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="n">force_unicode</span><span class="p">(</span><span class="n">option_label</span><span class="p">)</span>
+        <span class="p">}</span>
+</div>
+<div class="viewcode-block" id="LinkWidget.option_string"><a class="viewcode-back" href="../../auto_modules.html#django_filters.widgets.LinkWidget.option_string">[docs]</a>    <span class="k">def</span> <span class="nf">option_string</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;&lt;li&gt;&lt;a</span><span class="si">%(attrs)s</span><span class="s"> href=&quot;?</span><span class="si">%(query_string)s</span><span class="s">&quot;&gt;</span><span class="si">%(label)s</span><span class="s">&lt;/a&gt;&lt;/li&gt;&#39;</span>
+</div></div>
+<div class="viewcode-block" id="RangeWidget"><a class="viewcode-back" href="../../auto_modules.html#django_filters.widgets.RangeWidget">[docs]</a><span class="k">class</span> <span class="nc">RangeWidget</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">MultiWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">widgets</span> <span class="o">=</span> <span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">),</span> <span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">))</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RangeWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">widgets</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RangeWidget.decompress"><a class="viewcode-back" href="../../auto_modules.html#django_filters.widgets.RangeWidget.decompress">[docs]</a>    <span class="k">def</span> <span class="nf">decompress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">value</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">stop</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="RangeWidget.format_output"><a class="viewcode-back" href="../../auto_modules.html#django_filters.widgets.RangeWidget.format_output">[docs]</a>    <span class="k">def</span> <span class="nf">format_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rendered_widgets</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rendered_widgets</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="LookupTypeWidget"><a class="viewcode-back" href="../../auto_modules.html#django_filters.widgets.LookupTypeWidget">[docs]</a><span class="k">class</span> <span class="nc">LookupTypeWidget</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">MultiWidget</span><span class="p">):</span>
+<div class="viewcode-block" id="LookupTypeWidget.decompress"><a class="viewcode-back" href="../../auto_modules.html#django_filters.widgets.LookupTypeWidget.decompress">[docs]</a>    <span class="k">def</span> <span class="nf">decompress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">value</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

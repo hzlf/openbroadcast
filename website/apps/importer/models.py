@@ -15,14 +15,13 @@ from django.utils.translation import ugettext as _
 from django.db.models.signals import post_delete, post_save
 from django.core.urlresolvers import reverse
 
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
+
 from django_extensions.db.fields.json import JSONField
 
 
 from alibrary.models import Release, Media, Artist, Relation
-
-
-from util.process import Process
-from util.importer import Importer
 
 
 import magic
@@ -30,7 +29,7 @@ from celery.task import task
 import logging
 log = logging.getLogger(__name__)
 
-USE_CELERYD = False    
+USE_CELERYD = True    
         
 GENERIC_STATUS_CHOICES = (
     (0, _('Init')),
@@ -171,6 +170,29 @@ class Import(BaseModel):
                         file.save(**kwargs)
                     
                 print
+                
+
+
+
+
+    # importitem handling
+    def add_importitem(self, item):
+        ctype = ContentType.objects.get_for_model(item)
+        
+        print 
+        print '*******'
+        print 'item: %s' % item
+        print 'ctype: %s' % ctype
+        print 'pk: %s' % item.pk
+        
+        print
+        
+        return ImportItem.objects.get_or_create(object_id=item.pk, content_type=ctype, import_session=self)
+    
+    def get_importitem_ids(self, ctype):
+        ii_ids = ImportItem.objects.filter(content_type=ctype, import_session=self).values_list('object_id', flat=True)
+        return ii_ids
+
         
     
     def save(self, *args, **kwargs):
@@ -201,7 +223,7 @@ class ImportFile(BaseModel):
     
     filename = models.CharField(max_length=256, blank=True, null=True)
     #file = models.FileField(upload_to='dummy')
-    file = models.FileField(upload_to=clean_upload_path)
+    file = models.FileField(max_length=256, upload_to=clean_upload_path)
 
     import_session = models.ForeignKey(Import, verbose_name=_('Import'), null=True, related_name='files')
     
@@ -212,6 +234,8 @@ class ImportFile(BaseModel):
     """
     Result sets. Not stored in foreign model - as they are rather fix.
     """
+    
+    settings = JSONField(blank=True, null=True)
     
     results_tag = JSONField(blank=True, null=True)
     results_tag_status = models.PositiveIntegerField(verbose_name=_('Result Tags (ID3 & co)'), default=0, choices=GENERIC_STATUS_CHOICES)
@@ -277,6 +301,9 @@ class ImportFile(BaseModel):
     @task
     def process_task(obj):
         
+        # to prevent circular import errors
+        from util.process import Process
+        
         processor = Process()
         
         # duplicate check by sha1
@@ -288,41 +315,69 @@ class ImportFile(BaseModel):
         
         metadata = processor.extract_metadata(obj.file)
         
+        
+        # try to get media by id returned from fingerprinter
+        media = None
         if media_id:
+            try:
+                media = Media.objects.get(pk=media_id)
+            except:
+                pass
+        
+        
+        if media:
             obj.results_tag = metadata
 
-            obj.media = Media.objects.get(pk=media_id)
+            obj.media = media
             
             print "DUPLICATE!!!"
-            obj.results_tag_status = True
-            obj.status = 5
-            obj.save()
+            # obj.results_tag_status = True
+            # obj.status = 5
+            # obj.save()
             
         else:
             
-    
-            #time.sleep(1)
-    
-            obj.results_tag = metadata
-            print "DONE!!!"
-            print metadata
-            print 
-            obj.status = 3
-            obj.results_tag_status = True
-            obj.save()
+            pass
             
-            
-            obj.results_acoustid = processor.get_aid(obj.file)
-            obj.results_acoustid_status = True
-            obj.save()
     
+        #time.sleep(1)
+
+        obj.results_tag = metadata
+        print "DONE!!!"
+        print metadata
+        print 
+        obj.status = 3
+        obj.results_tag_status = True
+        obj.save()
+        
+        
+        obj.results_acoustid = processor.get_aid(obj.file)
+        obj.results_acoustid_status = True
+        obj.save()
+
+        obj.results_musicbrainz = processor.get_musicbrainz(obj)
+        obj.results_discogs_status = True
+        obj.save()
+        
+        # requeue if no results yet
+        print 'MB YET!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        if len(obj.results_musicbrainz) < 1:
+            s = {'skip_tracknumber': True}
+            obj.settings = s
+            obj.save()
             obj.results_musicbrainz = processor.get_musicbrainz(obj)
-            obj.results_discogs_status = True
             obj.save()
             
-            obj.status = 2
-            obj.results_tag_status = True
-            obj.save()
+        
+        obj.status = 2
+        
+        if media:
+            obj.status = 5
+        
+        obj.results_tag_status = True
+        obj.save()
+    
+
     
     
     def do_import(self):
@@ -338,21 +393,27 @@ class ImportFile(BaseModel):
     @task
     def import_task(obj):
 
+
+
+        # to prevent circular import errors
+        from util.importer import Importer
         importer = Importer()
         
         media, status = importer.run(obj)
-        
+
+        """   """      
         if media:
+            print 'GOT MEDIA - SAVE IT'
+            print media
             obj.media = media
+            print obj.media
+            
             obj.status = 1
             
         else:
             obj.status = 99
-            
+        
         obj.save()
-
-
-
     
     def save(self, skip_apply_import_tag=False, *args, **kwargs):
         
@@ -363,16 +424,34 @@ class ImportFile(BaseModel):
             self.filename = self.file.name
             
         # check/update import_tag
-        if self.status == 2: # "Ready"
+        if self.status == 2: # ready
+            from util.importer import Importer
             importer = Importer()
             
-            self.import_tag = importer.complete_import_tag(self.import_tag)
+            self.import_tag = importer.complete_import_tag(self)
             
 
         if self.status == 2: # ready
             # try to apply import_tag to other files of this import session
             if not skip_apply_import_tag:
                 self.import_session.apply_import_tag(self)
+                
+        # check import_tag for completeness
+        if self.status == 2 or self.status == 4: # ready
+            media = self.import_tag.get('name', None)
+            artist = self.import_tag.get('artist', None)
+            release = self.import_tag.get('release', None)
+            
+            print 'media: %s' % media
+            print 'artist: %s' % artist
+            print 'release: %s' % release
+            
+            if media and artist and release:
+                print 'all ok'
+                self.status = 2
+            else:
+                print 'missing!'
+                self.status = 4
 
             
 
@@ -392,9 +471,7 @@ def post_save_importfile(sender, **kwargs):
         obj.process()
         
     
-        
     if obj.status == 6:
-        #pass
         obj.do_import()
       
 post_save.connect(post_save_importfile, sender=ImportFile)      
@@ -409,6 +486,63 @@ def post_delete_importfile(sender, **kwargs):
       
 post_delete.connect(post_delete_importfile, sender=ImportFile)
 
+
+
+
+
+
+
+
+
+
+
+
+"""
+ImportItem
+store relations to objects created/assigned during that specific import
+"""
+
+class ImportItem(BaseModel):
         
+    # limit to alibrary objects
+    ct_limit = models.Q(app_label = 'alibrary', model = 'media') | \
+    models.Q(app_label = 'alibrary', model = 'release') | \
+    models.Q(app_label = 'alibrary', model = 'artist') | \
+    models.Q(app_label = 'alibrary', model = 'label')
+    
+    import_session = models.ForeignKey(Import, verbose_name=_('Import'), null=True, related_name='importitem_set')
+    
+    content_type = models.ForeignKey(ContentType, limit_choices_to = ct_limit)
+    object_id = models.PositiveIntegerField()
+    content_object = generic.GenericForeignKey('content_type', 'object_id')
+
+    class Meta:
+        app_label = 'importer'
+        verbose_name = _('Import Item')
+        verbose_name_plural = _('Import Items')
+        #ordering = ('-created', )
+        
+    def __unicode__(self):
+        try:
+            return '%s | %s' % (ContentType.objects.get_for_model(self.content_object), self.content_object.name)
+        except:
+            return '%s' % (self.pk)
+            
+    
+    def save(self, *args, **kwargs):
+        super(ImportItem, self).save(*args, **kwargs) 
+
+
+
+
+
+
+
+
+
+
+
+
+
         
         

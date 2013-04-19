@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>eav.admin &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for eav.admin</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># vim: ai ts=4 sts=4 et sw=4 coding=utf-8</span>
+<span class="c">#</span>
+<span class="c">#    This software is derived from EAV-Django originally written and </span>
+<span class="c">#    copyrighted by Andrey Mikhaylenko &lt;http://pypi.python.org/pypi/eav-django&gt;</span>
+<span class="c">#</span>
+<span class="c">#    This is free software: you can redistribute it and/or modify</span>
+<span class="c">#    it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c">#    by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">#    (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">#    This software is distributed in the hope that it will be useful,</span>
+<span class="c">#    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#    GNU Lesser General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c">#    You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c">#    along with EAV-Django.  If not, see &lt;http://gnu.org/licenses/&gt;.</span>
+
+
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+<span class="kn">from</span> <span class="nn">django.contrib.admin.options</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ModelAdmin</span><span class="p">,</span> <span class="n">InlineModelAdmin</span><span class="p">,</span> <span class="n">StackedInline</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">django.forms.models</span> <span class="kn">import</span> <span class="n">BaseInlineFormSet</span>
+<span class="kn">from</span> <span class="nn">django.utils.safestring</span> <span class="kn">import</span> <span class="n">mark_safe</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Attribute</span><span class="p">,</span> <span class="n">Value</span><span class="p">,</span> <span class="n">EnumValue</span><span class="p">,</span> <span class="n">EnumGroup</span>
+
+<div class="viewcode-block" id="BaseEntityAdmin"><a class="viewcode-back" href="../../auto_modules.html#eav.admin.BaseEntityAdmin">[docs]</a><span class="k">class</span> <span class="nc">BaseEntityAdmin</span><span class="p">(</span><span class="n">ModelAdmin</span><span class="p">):</span>
+    
+<div class="viewcode-block" id="BaseEntityAdmin.render_change_form"><a class="viewcode-back" href="../../auto_modules.html#eav.admin.BaseEntityAdmin.render_change_form">[docs]</a>    <span class="k">def</span> <span class="nf">render_change_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">change</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">form_url</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper for ModelAdmin.render_change_form. Replaces standard static</span>
+<span class="sd">        AdminForm with an EAV-friendly one. The point is that our form generates</span>
+<span class="sd">        fields dynamically and fieldsets must be inferred from a prepared and</span>
+<span class="sd">        validated form instance, not just the form class. Django does not seem</span>
+<span class="sd">        to provide hooks for this purpose, so we simply wrap the view and</span>
+<span class="sd">        substitute some data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="s">&#39;adminform&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">form</span>
+
+        <span class="c"># infer correct data from the form</span>
+        <span class="n">fieldsets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldsets</span> <span class="ow">or</span> <span class="p">[(</span><span class="bp">None</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;fields&#39;</span><span class="p">:</span> <span class="n">form</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">keys</span><span class="p">()})]</span>
+        <span class="n">adminform</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">AdminForm</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">fieldsets</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">prepopulated_fields</span><span class="p">)</span>
+        <span class="n">media</span> <span class="o">=</span> <span class="n">mark_safe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">media</span> <span class="o">+</span> <span class="n">adminform</span><span class="o">.</span><span class="n">media</span><span class="p">)</span>
+
+        <span class="n">context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">adminform</span><span class="o">=</span><span class="n">adminform</span><span class="p">,</span> <span class="n">media</span><span class="o">=</span><span class="n">media</span><span class="p">)</span>
+
+        <span class="n">super_meth</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">BaseEntityAdmin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">render_change_form</span>
+        <span class="k">return</span> <span class="n">super_meth</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">add</span><span class="p">,</span> <span class="n">change</span><span class="p">,</span> <span class="n">form_url</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="BaseEntityInlineFormSet"><a class="viewcode-back" href="../../auto_modules.html#eav.admin.BaseEntityInlineFormSet">[docs]</a><span class="k">class</span> <span class="nc">BaseEntityInlineFormSet</span><span class="p">(</span><span class="n">BaseInlineFormSet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An inline formset that correctly initializes EAV forms.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="BaseEntityInlineFormSet.add_fields"><a class="viewcode-back" href="../../auto_modules.html#eav.admin.BaseEntityInlineFormSet.add_fields">[docs]</a>    <span class="k">def</span> <span class="nf">add_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">instance</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fk</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="p">)</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">_build_dynamic_fields</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BaseEntityInlineFormSet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add_fields</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="BaseEntityInline"><a class="viewcode-back" href="../../auto_modules.html#eav.admin.BaseEntityInline">[docs]</a><span class="k">class</span> <span class="nc">BaseEntityInline</span><span class="p">(</span><span class="n">InlineModelAdmin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inline model admin that works correctly with EAV attributes. You should mix</span>
+<span class="sd">    in the standard StackedInline or TabularInline classes in order to define</span>
+<span class="sd">    formset representation, e.g.::</span>
+
+<span class="sd">        class ItemInline(BaseEntityInline, StackedInline):</span>
+<span class="sd">            model = Item</span>
+<span class="sd">            form = forms.ItemForm</span>
+
+<span class="sd">    .. warning: TabularInline does *not* work out of the box. There is,</span>
+<span class="sd">        however, a patched template `admin/edit_inline/tabular.html` bundled</span>
+<span class="sd">        with EAV-Django. You can copy or symlink the `admin` directory to your</span>
+<span class="sd">        templates search path (see Django documentation).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">formset</span> <span class="o">=</span> <span class="n">BaseEntityInlineFormSet</span>
+
+<div class="viewcode-block" id="BaseEntityInline.get_fieldsets"><a class="viewcode-back" href="../../auto_modules.html#eav.admin.BaseEntityInline.get_fieldsets">[docs]</a>    <span class="k">def</span> <span class="nf">get_fieldsets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">declared_fieldsets</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">declared_fieldsets</span>
+
+        <span class="n">formset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formset</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="n">fk_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fk_name</span> <span class="ow">or</span> <span class="n">formset</span><span class="o">.</span><span class="n">fk</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">kw</span> <span class="o">=</span> <span class="p">{</span><span class="n">fk_name</span><span class="p">:</span> <span class="n">obj</span><span class="p">}</span> <span class="k">if</span> <span class="n">obj</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="n">instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">formset</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[(</span><span class="bp">None</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;fields&#39;</span><span class="p">:</span> <span class="n">form</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">keys</span><span class="p">()})]</span>
+</div></div>
+<div class="viewcode-block" id="AttributeAdmin"><a class="viewcode-back" href="../../auto_modules.html#eav.admin.AttributeAdmin">[docs]</a><span class="k">class</span> <span class="nc">AttributeAdmin</span><span class="p">(</span><span class="n">ModelAdmin</span><span class="p">):</span>
+    <span class="n">list_display</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;slug&#39;</span><span class="p">,</span> <span class="s">&#39;datatype&#39;</span><span class="p">,</span> <span class="s">&#39;description&#39;</span><span class="p">,</span> <span class="s">&#39;site&#39;</span><span class="p">)</span>
+    <span class="n">list_filter</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;site&#39;</span><span class="p">]</span>
+    <span class="n">prepopulated_fields</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;slug&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,)}</span>
+</div>
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Attribute</span><span class="p">,</span> <span class="n">AttributeAdmin</span><span class="p">)</span>
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Value</span><span class="p">)</span>
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">EnumValue</span><span class="p">)</span>
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">EnumGroup</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

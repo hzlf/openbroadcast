@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django.contrib.staticfiles.utils &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for django.contrib.staticfiles.utils</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">fnmatch</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ImproperlyConfigured</span>
+
+<div class="viewcode-block" id="matches_patterns"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.staticfiles.utils.matches_patterns">[docs]</a><span class="k">def</span> <span class="nf">matches_patterns</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">patterns</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return True or False depending on whether the ``path`` should be</span>
+<span class="sd">    ignored (if it matches any pattern in ``ignore_patterns``).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">patterns</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">patterns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatchcase</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="get_files"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.staticfiles.utils.get_files">[docs]</a><span class="k">def</span> <span class="nf">get_files</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="n">ignore_patterns</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recursively walk the storage directories yielding the paths</span>
+<span class="sd">    of all files that should be copied.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ignore_patterns</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">ignore_patterns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">directories</span><span class="p">,</span> <span class="n">files</span> <span class="o">=</span> <span class="n">storage</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">location</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">matches_patterns</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">ignore_patterns</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">location</span><span class="p">:</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">fn</span>
+    <span class="k">for</span> <span class="nb">dir</span> <span class="ow">in</span> <span class="n">directories</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">matches_patterns</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">ignore_patterns</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">location</span><span class="p">:</span>
+            <span class="nb">dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="nb">dir</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">get_files</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="n">ignore_patterns</span><span class="p">,</span> <span class="nb">dir</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">fn</span>
+</div>
+<div class="viewcode-block" id="check_settings"><a class="viewcode-back" href="../../../../auto_modules.html#django.contrib.staticfiles.utils.check_settings">[docs]</a><span class="k">def</span> <span class="nf">check_settings</span><span class="p">(</span><span class="n">base_url</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks if the staticfiles settings have sane values.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">base_url</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">base_url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">STATIC_URL</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">base_url</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span>
+            <span class="s">&quot;You&#39;re using the staticfiles app &quot;</span>
+            <span class="s">&quot;without having set the required STATIC_URL setting.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEDIA_URL</span> <span class="o">==</span> <span class="n">base_url</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="s">&quot;The MEDIA_URL and STATIC_URL &quot;</span>
+                                   <span class="s">&quot;settings must have different values&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">settings</span><span class="o">.</span><span class="n">MEDIA_ROOT</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">STATIC_ROOT</span><span class="p">)</span> <span class="ow">and</span>
+            <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MEDIA_ROOT</span> <span class="o">==</span> <span class="n">settings</span><span class="o">.</span><span class="n">STATIC_ROOT</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="s">&quot;The MEDIA_ROOT and STATIC_ROOT &quot;</span>
+                                   <span class="s">&quot;settings must have different values&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

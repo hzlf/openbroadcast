@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>modeltranslation.fields &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for modeltranslation.fields</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ImproperlyConfigured</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">fields</span>
+
+<span class="kn">from</span> <span class="nn">modeltranslation</span> <span class="kn">import</span> <span class="n">settings</span> <span class="k">as</span> <span class="n">mt_settings</span>
+<span class="kn">from</span> <span class="nn">modeltranslation.utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_language</span><span class="p">,</span> <span class="n">build_localized_fieldname</span><span class="p">,</span> <span class="n">build_localized_verbose_name</span><span class="p">,</span> <span class="n">resolution_order</span><span class="p">)</span>
+
+
+<span class="n">SUPPORTED_FIELDS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">CharField</span><span class="p">,</span>
+    <span class="c"># Above implies also CommaSeparatedIntegerField, EmailField, FilePathField, SlugField</span>
+    <span class="c"># and URLField as they are subclasses of CharField.</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">TextField</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">,</span>
+    <span class="c"># Above implies also BigIntegerField, SmallIntegerField, PositiveIntegerField and</span>
+    <span class="c"># PositiveSmallIntegerField, as they are subclasses of IntegerField.</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">NullBooleanField</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">FloatField</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">IPAddressField</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">DateField</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">TimeField</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">FileField</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">ImageField</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SUPPORTED_FIELDS</span> <span class="o">+=</span> <span class="p">(</span><span class="n">fields</span><span class="o">.</span><span class="n">GenericIPAddressField</span><span class="p">,)</span>  <span class="c"># Django 1.4+ only</span>
+<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="create_translation_field"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.fields.create_translation_field">[docs]</a><span class="k">def</span> <span class="nf">create_translation_field</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">lang</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Translation field factory. Returns a ``TranslationField`` based on a</span>
+<span class="sd">    fieldname and a language.</span>
+
+<span class="sd">    The list of supported fields can be extended by defining a tuple of field</span>
+<span class="sd">    names in the projects settings.py like this::</span>
+
+<span class="sd">        MODELTRANSLATION_CUSTOM_FIELDS = (&#39;MyField&#39;, &#39;MyOtherField&#39;,)</span>
+
+<span class="sd">    If the class is neither a subclass of fields in ``SUPPORTED_FIELDS``, nor</span>
+<span class="sd">    in ``CUSTOM_FIELDS`` an ``ImproperlyConfigured`` exception will be raised.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">field</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">field_name</span><span class="p">)</span>
+    <span class="n">cls_name</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">SUPPORTED_FIELDS</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cls_name</span> <span class="ow">in</span> <span class="n">mt_settings</span><span class="o">.</span><span class="n">CUSTOM_FIELDS</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s"> is not supported by modeltranslation.&#39;</span> <span class="o">%</span> <span class="n">cls_name</span><span class="p">)</span>
+    <span class="n">translation_class</span> <span class="o">=</span> <span class="n">field_factory</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">translation_class</span><span class="p">(</span><span class="n">translated_field</span><span class="o">=</span><span class="n">field</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="n">lang</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="field_factory"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.fields.field_factory">[docs]</a><span class="k">def</span> <span class="nf">field_factory</span><span class="p">(</span><span class="n">baseclass</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">TranslationFieldSpecific</span><span class="p">(</span><span class="n">TranslationField</span><span class="p">,</span> <span class="n">baseclass</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="c"># Reflect baseclass name of returned subclass</span>
+    <span class="n">TranslationFieldSpecific</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="s">&#39;Translation</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">baseclass</span><span class="o">.</span><span class="n">__name__</span>
+
+    <span class="k">return</span> <span class="n">TranslationFieldSpecific</span>
+
+</div>
+<div class="viewcode-block" id="TranslationField"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.fields.TranslationField">[docs]</a><span class="k">class</span> <span class="nc">TranslationField</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The translation field functions as a proxy to the original field which is</span>
+<span class="sd">    wrapped.</span>
+
+<span class="sd">    For every field defined in the model&#39;s ``TranslationOptions`` localized</span>
+<span class="sd">    versions of that field are added to the model depending on the languages</span>
+<span class="sd">    given in ``settings.LANGUAGES``.</span>
+
+<span class="sd">    If for example there is a model ``News`` with a field ``title`` which is</span>
+<span class="sd">    registered for translation and the ``settings.LANGUAGES`` contains the</span>
+<span class="sd">    ``de`` and ``en`` languages, the fields ``title_de`` and ``title_en`` will</span>
+<span class="sd">    be added to the model class. These fields are realized using this</span>
+<span class="sd">    descriptor.</span>
+
+<span class="sd">    The translation field needs to know which language it contains therefore</span>
+<span class="sd">    that needs to be specified when the field is created.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">translated_field</span><span class="p">,</span> <span class="n">language</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c"># Update the dict of this field with the content of the original one</span>
+        <span class="c"># This might be a bit radical?! Seems to work though...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">translated_field</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+
+        <span class="c"># Store the originally wrapped field for later</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">translated_field</span> <span class="o">=</span> <span class="n">translated_field</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="n">language</span>
+
+        <span class="c"># Translation are always optional (for now - maybe add some parameters</span>
+        <span class="c"># to the translation options for configuring this)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">):</span>
+            <span class="c"># TODO: Do we really want to enforce null *at all*? Shouldn&#39;t this</span>
+            <span class="c"># better honour the null setting of the translated field?</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">null</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blank</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="c"># Adjust the name of this field to reflect the language</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attname</span> <span class="o">=</span> <span class="n">build_localized_fieldname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">translated_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attname</span>
+
+        <span class="c"># Copy the verbose name and append a language suffix</span>
+        <span class="c"># (will show up e.g. in the admin).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose_name</span> <span class="o">=</span> <span class="n">build_localized_verbose_name</span><span class="p">(</span><span class="n">translated_field</span><span class="o">.</span><span class="n">verbose_name</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TranslationField.get_attname_column"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.fields.TranslationField.get_attname_column">[docs]</a>    <span class="k">def</span> <span class="nf">get_attname_column</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">attname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_attname</span><span class="p">()</span>
+        <span class="n">column</span> <span class="o">=</span> <span class="n">build_localized_fieldname</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">translated_field</span><span class="o">.</span><span class="n">db_column</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">translated_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">)</span> <span class="ow">or</span> <span class="n">attname</span>
+        <span class="k">return</span> <span class="n">attname</span><span class="p">,</span> <span class="n">column</span>
+</div>
+<div class="viewcode-block" id="TranslationField.south_field_triple"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.fields.TranslationField.south_field_triple">[docs]</a>    <span class="k">def</span> <span class="nf">south_field_triple</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a suitable description of this field for South.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># We&#39;ll just introspect the _actual_ field.</span>
+        <span class="kn">from</span> <span class="nn">south.modelsinspector</span> <span class="kn">import</span> <span class="n">introspector</span>
+        <span class="n">field_class</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">translated_field</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">translated_field</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="n">introspector</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c"># That&#39;s our definition!</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">field_class</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="TranslationFieldDescriptor"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.fields.TranslationFieldDescriptor">[docs]</a><span class="k">class</span> <span class="nc">TranslationFieldDescriptor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A descriptor used for the original translated field.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">fallback_value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fallback_languages</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The ``name`` is the name of the field (which is not available in the</span>
+<span class="sd">        descriptor by default - this is Python behaviour).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">=</span> <span class="n">field</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fallback_value</span> <span class="o">=</span> <span class="n">fallback_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fallback_languages</span> <span class="o">=</span> <span class="n">fallback_languages</span>
+
+    <span class="k">def</span> <span class="nf">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">lang</span> <span class="o">=</span> <span class="n">get_language</span><span class="p">()</span>
+        <span class="n">loc_field_name</span> <span class="o">=</span> <span class="n">build_localized_fieldname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">lang</span><span class="p">)</span>
+        <span class="c"># also update the translation field of the current language</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">loc_field_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">owner</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">instance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="n">langs</span> <span class="o">=</span> <span class="n">resolution_order</span><span class="p">(</span><span class="n">get_language</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">fallback_languages</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">lang</span> <span class="ow">in</span> <span class="n">langs</span><span class="p">:</span>
+            <span class="n">loc_field_name</span> <span class="o">=</span> <span class="n">build_localized_fieldname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">lang</span><span class="p">)</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">loc_field_name</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="c"># Here we check only for None and &#39;&#39;, because e.g. 0 should not fall back.</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">val</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">val</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fallback_value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fallback_value</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>actstream.views &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for actstream.views</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span><span class="p">,</span> <span class="n">get_object_or_404</span>
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">RequestContext</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponseRedirect</span><span class="p">,</span> <span class="n">HttpResponse</span>
+
+<span class="kn">from</span> <span class="nn">django.views.generic</span> <span class="kn">import</span> <span class="n">DetailView</span><span class="p">,</span> <span class="n">ListView</span><span class="p">,</span> <span class="n">FormView</span><span class="p">,</span> <span class="n">UpdateView</span>
+<span class="kn">from</span> <span class="nn">django.views.generic.detail</span> <span class="kn">import</span> <span class="n">SingleObjectTemplateResponseMixin</span>
+
+<span class="kn">from</span> <span class="nn">django.contrib.auth.decorators</span> <span class="kn">import</span> <span class="n">login_required</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes.models</span> <span class="kn">import</span> <span class="n">ContentType</span>
+<span class="kn">from</span> <span class="nn">django.views.decorators.csrf</span> <span class="kn">import</span> <span class="n">csrf_exempt</span>
+
+<span class="kn">from</span> <span class="nn">actstream</span> <span class="kn">import</span> <span class="n">actions</span><span class="p">,</span> <span class="n">models</span>
+
+<span class="kn">from</span> <span class="nn">actstream.models</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c">#from actstream.forms import *</span>
+
+
+<div class="viewcode-block" id="ActionListView"><a class="viewcode-back" href="../../auto_modules.html#actstream.views.ActionListView">[docs]</a><span class="k">class</span> <span class="nc">ActionListView</span><span class="p">(</span><span class="n">ListView</span><span class="p">):</span>
+    
+    <span class="n">context_object_name</span> <span class="o">=</span> <span class="s">&quot;action_list&quot;</span>
+    <span class="c"># template_name = &quot;alibrary/artist_list.html&quot;</span>
+    
+<div class="viewcode-block" id="ActionListView.get_queryset"><a class="viewcode-back" href="../../auto_modules.html#actstream.views.ActionListView.get_queryset">[docs]</a>    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="n">Action</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+</div>
+<div class="viewcode-block" id="ActionListView.get_context_data"><a class="viewcode-back" href="../../auto_modules.html#actstream.views.ActionListView.get_context_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_context_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ActionListView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;user_stream&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">actor_stream</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">context</span>
+
+</div></div>
+<div class="viewcode-block" id="ActionDetailView"><a class="viewcode-back" href="../../auto_modules.html#actstream.views.ActionDetailView">[docs]</a><span class="k">class</span> <span class="nc">ActionDetailView</span><span class="p">(</span><span class="n">DetailView</span><span class="p">):</span>
+
+    <span class="n">context_object_name</span> <span class="o">=</span> <span class="s">&quot;action&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Action</span>
+
+    
+<div class="viewcode-block" id="ActionDetailView.render_to_response"><a class="viewcode-back" href="../../auto_modules.html#actstream.views.ActionDetailView.render_to_response">[docs]</a>    <span class="k">def</span> <span class="nf">render_to_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ActionDetailView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">render_to_response</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">mimetype</span><span class="o">=</span><span class="s">&quot;text/html&quot;</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="ActionDetailView.get_context_data"><a class="viewcode-back" href="../../auto_modules.html#actstream.views.ActionDetailView.get_context_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_context_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ActionDetailView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">context</span>
+
+
+</div></div>
+<div class="viewcode-block" id="respond"><a class="viewcode-back" href="../../auto_modules.html#actstream.views.respond">[docs]</a><span class="k">def</span> <span class="nf">respond</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Responds to the request with the given response code.</span>
+<span class="sd">    If ``next`` is in the form, it will redirect instead.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s">&#39;next&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">[</span><span class="s">&#39;next&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="s">&#39;Response</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">code</span><span class="p">,</span> <span class="p">(</span><span class="n">HttpResponse</span><span class="p">,</span> <span class="p">),</span> <span class="p">{</span><span class="s">&#39;status_code&#39;</span><span class="p">:</span> <span class="n">code</span><span class="p">})()</span>
+
+</div>
+<span class="nd">@login_required</span>
+<span class="nd">@csrf_exempt</span>
+<div class="viewcode-block" id="follow_unfollow"><a class="viewcode-back" href="../../auto_modules.html#actstream.views.follow_unfollow">[docs]</a><span class="k">def</span> <span class="nf">follow_unfollow</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">content_type_id</span><span class="p">,</span> <span class="n">object_id</span><span class="p">,</span> <span class="n">do_follow</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">actor_only</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates or deletes the follow relationship between ``request.user`` and the</span>
+<span class="sd">    actor defined by ``content_type_id``, ``object_id``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ctype</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">ContentType</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">content_type_id</span><span class="p">)</span>
+    <span class="n">actor</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">ctype</span><span class="o">.</span><span class="n">model_class</span><span class="p">(),</span> <span class="n">pk</span><span class="o">=</span><span class="n">object_id</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">do_follow</span><span class="p">:</span>
+        <span class="n">actions</span><span class="o">.</span><span class="n">follow</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">actor</span><span class="p">,</span> <span class="n">actor_only</span><span class="o">=</span><span class="n">actor_only</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">respond</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="mi">201</span><span class="p">)</span>   <span class="c"># CREATED</span>
+    <span class="n">actions</span><span class="o">.</span><span class="n">unfollow</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">actor</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">respond</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="mi">204</span><span class="p">)</span>   <span class="c"># NO CONTENT</span>
+
+</div>
+<span class="nd">@login_required</span>
+<div class="viewcode-block" id="stream"><a class="viewcode-back" href="../../auto_modules.html#actstream.views.stream">[docs]</a><span class="k">def</span> <span class="nf">stream</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Index page for authenticated user&#39;s activity stream. (Eg: Your feed at</span>
+<span class="sd">    github.com)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">((</span><span class="s">&#39;actstream/actor.html&#39;</span><span class="p">,</span> <span class="s">&#39;activity/actor.html&#39;</span><span class="p">),</span> <span class="p">{</span>
+        <span class="s">&#39;ctype&#39;</span><span class="p">:</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">User</span><span class="p">),</span>
+        <span class="s">&#39;actor&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="s">&#39;action_list&#39;</span><span class="p">:</span> <span class="n">models</span><span class="o">.</span><span class="n">user_stream</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+    <span class="p">},</span> <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="followers"><a class="viewcode-back" href="../../auto_modules.html#actstream.views.followers">[docs]</a><span class="k">def</span> <span class="nf">followers</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">content_type_id</span><span class="p">,</span> <span class="n">object_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a listing of ``User``s that follow the actor defined by</span>
+<span class="sd">    ``content_type_id``, ``object_id``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ctype</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">ContentType</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">content_type_id</span><span class="p">)</span>
+    <span class="n">actor</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">ctype</span><span class="o">.</span><span class="n">model_class</span><span class="p">(),</span> <span class="n">pk</span><span class="o">=</span><span class="n">object_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">((</span><span class="s">&#39;actstream/followers.html&#39;</span><span class="p">,</span> <span class="s">&#39;activity/followers.html&#39;</span><span class="p">),</span> <span class="p">{</span>
+        <span class="s">&#39;followers&#39;</span><span class="p">:</span> <span class="n">models</span><span class="o">.</span><span class="n">followers</span><span class="p">(</span><span class="n">actor</span><span class="p">),</span> <span class="s">&#39;actor&#39;</span><span class="p">:</span> <span class="n">actor</span>
+    <span class="p">},</span> <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="following"><a class="viewcode-back" href="../../auto_modules.html#actstream.views.following">[docs]</a><span class="k">def</span> <span class="nf">following</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a list of actors that the user identified by ``user_id`` is following (eg who im following).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">((</span><span class="s">&#39;actstream/following.html&#39;</span><span class="p">,</span> <span class="s">&#39;activity/following.html&#39;</span><span class="p">),</span> <span class="p">{</span>
+        <span class="s">&#39;following&#39;</span><span class="p">:</span> <span class="n">models</span><span class="o">.</span><span class="n">following</span><span class="p">(</span><span class="n">user</span><span class="p">),</span> <span class="s">&#39;user&#39;</span><span class="p">:</span> <span class="n">user</span>
+    <span class="p">},</span> <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="user"><a class="viewcode-back" href="../../auto_modules.html#actstream.views.user">[docs]</a><span class="k">def</span> <span class="nf">user</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">username</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ``User`` focused activity stream. (Eg: Profile page twitter.com/justquick)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">is_active</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">((</span><span class="s">&#39;actstream/actor.html&#39;</span><span class="p">,</span> <span class="s">&#39;activity/actor.html&#39;</span><span class="p">),</span> <span class="p">{</span>
+        <span class="s">&#39;ctype&#39;</span><span class="p">:</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">User</span><span class="p">),</span>
+        <span class="s">&#39;actor&#39;</span><span class="p">:</span> <span class="n">user</span><span class="p">,</span> <span class="s">&#39;action_list&#39;</span><span class="p">:</span> <span class="n">models</span><span class="o">.</span><span class="n">user_stream</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+    <span class="p">},</span> <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="detail"><a class="viewcode-back" href="../../auto_modules.html#actstream.views.detail">[docs]</a><span class="k">def</span> <span class="nf">detail</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">action_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ``Action`` detail view (pretty boring, mainly used for get_absolute_url)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">((</span><span class="s">&#39;actstream/detail.html&#39;</span><span class="p">,</span> <span class="s">&#39;activity/detail.html&#39;</span><span class="p">),</span> <span class="p">{</span>
+        <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">action_id</span><span class="p">)</span>
+    <span class="p">},</span> <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="actor"><a class="viewcode-back" href="../../auto_modules.html#actstream.views.actor">[docs]</a><span class="k">def</span> <span class="nf">actor</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">content_type_id</span><span class="p">,</span> <span class="n">object_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ``Actor`` focused activity stream for actor defined by ``content_type_id``,</span>
+<span class="sd">    ``object_id``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ctype</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">ContentType</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">content_type_id</span><span class="p">)</span>
+    <span class="n">actor</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">ctype</span><span class="o">.</span><span class="n">model_class</span><span class="p">(),</span> <span class="n">pk</span><span class="o">=</span><span class="n">object_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">((</span><span class="s">&#39;actstream/actor.html&#39;</span><span class="p">,</span> <span class="s">&#39;activity/actor.html&#39;</span><span class="p">),</span> <span class="p">{</span>
+        <span class="s">&#39;action_list&#39;</span><span class="p">:</span> <span class="n">models</span><span class="o">.</span><span class="n">actor_stream</span><span class="p">(</span><span class="n">actor</span><span class="p">),</span> <span class="s">&#39;actor&#39;</span><span class="p">:</span> <span class="n">actor</span><span class="p">,</span>
+        <span class="s">&#39;ctype&#39;</span><span class="p">:</span> <span class="n">ctype</span>
+    <span class="p">},</span> <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="model"><a class="viewcode-back" href="../../auto_modules.html#actstream.views.model">[docs]</a><span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">content_type_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ``Actor`` focused activity stream for actor defined by ``content_type_id``,</span>
+<span class="sd">    ``object_id``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ctype</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">ContentType</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">content_type_id</span><span class="p">)</span>
+    <span class="n">actor</span> <span class="o">=</span> <span class="n">ctype</span><span class="o">.</span><span class="n">model_class</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">((</span><span class="s">&#39;actstream/actor.html&#39;</span><span class="p">,</span> <span class="s">&#39;activity/actor.html&#39;</span><span class="p">),</span> <span class="p">{</span>
+        <span class="s">&#39;action_list&#39;</span><span class="p">:</span> <span class="n">models</span><span class="o">.</span><span class="n">model_stream</span><span class="p">(</span><span class="n">actor</span><span class="p">),</span> <span class="s">&#39;ctype&#39;</span><span class="p">:</span> <span class="n">ctype</span><span class="p">,</span>
+        <span class="s">&#39;actor&#39;</span><span class="p">:</span> <span class="n">ctype</span>
+    <span class="p">},</span> <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

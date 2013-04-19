@@ -22,7 +22,6 @@ class UUIDField(CharField):
     """
 
     def __init__(self, verbose_name=None, name=None, auto=True, version=UUID_BASE_VERSION, node=None, clock_seq=None, namespace=None, **kwargs):
-        print 'uuid-init'
         kwargs['max_length'] = 36
         if auto:
             kwargs['blank'] = True

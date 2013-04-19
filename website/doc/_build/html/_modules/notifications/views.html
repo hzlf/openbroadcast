@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>notifications.views &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for notifications.views</h1><div class="highlight"><pre>
+<span class="c"># Create your views here.</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.decorators</span> <span class="kn">import</span> <span class="n">login_required</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.core.paginator</span> <span class="kn">import</span> <span class="n">Paginator</span><span class="p">,</span> <span class="n">EmptyPage</span><span class="p">,</span> <span class="n">PageNotAnInteger</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">get_object_or_404</span><span class="p">,</span> <span class="n">render</span><span class="p">,</span> <span class="n">redirect</span>
+<span class="kn">from</span> <span class="nn">django.template.context</span> <span class="kn">import</span> <span class="n">RequestContext</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">slug2id</span>
+<span class="kn">from</span> <span class="nn">notifications.models</span> <span class="kn">import</span> <span class="n">Notification</span>
+
+<span class="nd">@login_required</span>
+<div class="viewcode-block" id="all"><a class="viewcode-back" href="../../auto_modules.html#notifications.views.all">[docs]</a><span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Index page for authenticated user</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&#39;notifications/list.html&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s">&#39;notifications&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="p">})</span>
+    <span class="n">actions</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+    <span class="n">paginator</span> <span class="o">=</span> <span class="n">Paginator</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span> <span class="c"># Show 16 notifications per page</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;p&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">action_list</span> <span class="o">=</span> <span class="n">paginator</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">PageNotAnInteger</span><span class="p">:</span>
+        <span class="c"># If page is not an integer, deliver first page.</span>
+        <span class="n">action_list</span> <span class="o">=</span> <span class="n">paginator</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">EmptyPage</span><span class="p">:</span>
+        <span class="c"># If page is out of range (e.g. 9999), deliver last page of results.</span>
+        <span class="n">action_list</span> <span class="o">=</span> <span class="n">paginator</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="n">paginator</span><span class="o">.</span><span class="n">num_pages</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&#39;notifications/list.html&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s">&#39;member&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+        <span class="s">&#39;action_list&#39;</span><span class="p">:</span> <span class="n">action_list</span><span class="p">,</span>
+    <span class="p">},</span> <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+</div>
+<span class="nd">@login_required</span>
+<div class="viewcode-block" id="unread"><a class="viewcode-back" href="../../auto_modules.html#notifications.views.unread">[docs]</a><span class="k">def</span> <span class="nf">unread</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&#39;notifications/list.html&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s">&#39;notifications&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">unread</span><span class="p">()</span>
+    <span class="p">})</span>
+    </div>
+<span class="nd">@login_required</span>
+<div class="viewcode-block" id="mark_all_as_read"><a class="viewcode-back" href="../../auto_modules.html#notifications.views.mark_all_as_read">[docs]</a><span class="k">def</span> <span class="nf">mark_all_as_read</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">mark_all_as_read</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s">&#39;notifications:all&#39;</span><span class="p">)</span>
+</div>
+<span class="nd">@login_required</span>
+<div class="viewcode-block" id="mark_as_read"><a class="viewcode-back" href="../../auto_modules.html#notifications.views.mark_as_read">[docs]</a><span class="k">def</span> <span class="nf">mark_as_read</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">slug</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">slug2id</span><span class="p">(</span><span class="n">slug</span><span class="p">)</span>
+
+    <span class="n">notification</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Notification</span><span class="p">,</span> <span class="n">recipient</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
+    <span class="n">notification</span><span class="o">.</span><span class="n">mark_as_read</span><span class="p">()</span>
+
+    <span class="nb">next</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;next&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">next</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="nb">next</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s">&#39;notifications:all&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -8,6 +8,7 @@ import sys
 import tempfile
 import glob
 import sets
+import requests
 from zipfile import ZipFile
 
 # django
@@ -44,6 +45,8 @@ from filer.fields.audio import FilerAudioField
 from filer.fields.file import FilerFileField
 
 
+
+from django_date_extensions.fields import ApproximateDateField
 
 # modules
 #from taggit.managers import TaggableManager
@@ -98,7 +101,6 @@ class ReleaseManager(models.Manager):
 
 
 
-
 class Release(MigrationMixin):
     
     # core fields
@@ -121,7 +123,17 @@ class Release(MigrationMixin):
     else:
         catalognumber = models.CharField(max_length=50, blank=True, null=True)
         
+    
+    """
+    releasedate stores the 'real' time, approx is for inputs
+    lik 2012-12 etc.
+    """
     releasedate = models.DateField(blank=True, null=True)
+    releasedate_approx = ApproximateDateField(blank=True, null=True)
+    
+    
+    
+    
     pressings = models.PositiveIntegerField(max_length=12, default=0)
     
     totaltracks = models.IntegerField(null=True, blank=True)
@@ -137,7 +149,8 @@ class Release(MigrationMixin):
     
     releasestatus = models.CharField(max_length=60, blank=True, choices=RELEASESTATUS_CHOICES)
     
-    publish_date = models.DateTimeField(default=datetime.now, blank=True, null=True, help_text=_('If set this Release will not be published on the site before the given date.'))
+    #publish_date = models.DateTimeField(default=datetime.now, blank=True, null=True, help_text=_('If set this Release will not be published on the site before the given date.'))
+    publish_date = models.DateTimeField(blank=True, null=True, help_text=_('If set this Release will not be published on the site before the given date.'))
 
     main_format = models.ForeignKey(Mediaformat, null=True, blank=True, on_delete=models.SET_NULL)
     
@@ -183,10 +196,10 @@ class Release(MigrationMixin):
     label = models.ForeignKey(Label, blank=True, null=True, related_name='release_label', on_delete=models.SET_NULL)
     folder = models.ForeignKey(Folder, blank=True, null=True, related_name='release_folder', on_delete=models.SET_NULL)
 
-
     # user relations
-    owner = models.ForeignKey(User, blank=True, null=True, related_name="release_owner", on_delete=models.SET_NULL)
-    publisher = models.ForeignKey(User, blank=True, null=True, related_name="release_publisher", on_delete=models.SET_NULL)
+    owner = models.ForeignKey(User, blank=True, null=True, related_name="releases_owner", on_delete=models.SET_NULL)
+    creator = models.ForeignKey(User, blank=True, null=True, related_name="releases_creator", on_delete=models.SET_NULL)
+    publisher = models.ForeignKey(User, blank=True, null=True, related_name="releases_publisher", on_delete=models.SET_NULL)
 
     # extra-artists
     extra_artists = models.ManyToManyField('Artist', through='ReleaseExtraartists', blank=True, null=True)
@@ -526,20 +539,36 @@ class Release(MigrationMixin):
             
         return folder
     
+    
+    
+    # OBSOLETE
+    def complete_by_mb_id(self, mb_id):
+        
+        import pprint
+        pp = pprint.PrettyPrinter(indent=4)
+        
+        obj = self
+
+        log = logging.getLogger('alibrary.release.complete_by_mb_id')
+        log.info('complete release, r: %s | mb_id: %s' % (obj.name, mb_id))
+        
+        inc = ('artists', 'url-rels', 'aliases', 'tags', 'recording-rels', 'work-rels', 'work-level-rels', 'artist-credits')
+        url = 'http://%s/ws/2/release/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, mb_id, "+".join(inc))
+        
+        r = requests.get(url)
+        result = r.json()
+        
+        pp.pprint(result)
+        
+        return obj
+    
+    
 
     
     def save(self, *args, **kwargs):
 
-        """
-        clear release cache
-        """
-        self.clear_cache_file()
-        
+        self.clear_cache_file()        
         unique_slugify(self, self.name)
-        
-        """
-        Looks for common license
-        """
         
         # update d_tags
         t_tags = ''
@@ -550,6 +579,21 @@ class Release(MigrationMixin):
         self.d_tags = t_tags;
         
 
+        # convert approx date to real one
+        ad = self.releasedate_approx
+        try:
+            ad_y = ad.year
+            ad_m = ad.month
+            ad_d = ad.day
+            if ad_m == 0:
+                ad_m = 1        
+            if ad_d == 0:
+                ad_d = 1
+            
+            rd = datetime.strptime('%s/%s/%s' % (ad_y, ad_m, ad_d), '%Y/%m/%d')
+            self.releasedate = rd
+        except:
+            self.releasedate = None
         
         super(Release, self).save(*args, **kwargs)
 
@@ -559,7 +603,6 @@ except:
     pass
 
 
-#tagging.register(Release)
 arating.enable_voting_on(Release)
 post_save.connect(library_post_save, sender=Release)  
 
@@ -605,4 +648,5 @@ class ReleasePlugin(CMSPlugin):
     class Meta:
         app_label = 'alibrary'
         
-        
+  
+   

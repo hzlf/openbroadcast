@@ -1,0 +1,598 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>tastypie.authentication &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for tastypie.authentication</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">hmac</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth</span> <span class="kn">import</span> <span class="n">authenticate</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ImproperlyConfigured</span>
+<span class="kn">from</span> <span class="nn">django.middleware.csrf</span> <span class="kn">import</span> <span class="n">_sanitize_token</span><span class="p">,</span> <span class="n">constant_time_compare</span>
+<span class="kn">from</span> <span class="nn">django.utils.http</span> <span class="kn">import</span> <span class="n">same_origin</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">tastypie.http</span> <span class="kn">import</span> <span class="n">HttpUnauthorized</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">hashlib</span> <span class="kn">import</span> <span class="n">sha1</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sha</span>
+    <span class="n">sha1</span> <span class="o">=</span> <span class="n">sha</span><span class="o">.</span><span class="n">sha</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">python_digest</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">python_digest</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">oauth2</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">oauth2</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">oauth_provider</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">oauth_provider</span> <span class="o">=</span> <span class="bp">None</span>
+
+
+<div class="viewcode-block" id="Authentication"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.Authentication">[docs]</a><span class="k">class</span> <span class="nc">Authentication</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple base class to establish the protocol for auth.</span>
+
+<span class="sd">    By default, this indicates the user is always authenticated.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">require_active</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">require_active</span> <span class="o">=</span> <span class="n">require_active</span>
+
+<div class="viewcode-block" id="Authentication.is_authenticated"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.Authentication.is_authenticated">[docs]</a>    <span class="k">def</span> <span class="nf">is_authenticated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Identifies if the user is authenticated to continue or not.</span>
+
+<span class="sd">        Should return either ``True`` if allowed, ``False`` if not or an</span>
+<span class="sd">        ``HttpResponse`` if you need something custom.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="Authentication.get_identifier"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.Authentication.get_identifier">[docs]</a>    <span class="k">def</span> <span class="nf">get_identifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provides a unique string identifier for the requestor.</span>
+
+<span class="sd">        This implementation returns a combination of IP address and hostname.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;REMOTE_ADDR&#39;</span><span class="p">,</span> <span class="s">&#39;noaddr&#39;</span><span class="p">),</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;REMOTE_HOST&#39;</span><span class="p">,</span> <span class="s">&#39;nohost&#39;</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Authentication.check_active"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.Authentication.check_active">[docs]</a>    <span class="k">def</span> <span class="nf">check_active</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensures the user has an active account.</span>
+
+<span class="sd">        Optimized for the ``django.contrib.auth.models.User`` case.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">require_active</span><span class="p">:</span>
+            <span class="c"># Ignore &amp; move on.</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="n">user</span><span class="o">.</span><span class="n">is_active</span>
+
+</div></div>
+<div class="viewcode-block" id="BasicAuthentication"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.BasicAuthentication">[docs]</a><span class="k">class</span> <span class="nc">BasicAuthentication</span><span class="p">(</span><span class="n">Authentication</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handles HTTP Basic auth against a specific auth backend if provided,</span>
+<span class="sd">    or against all configured authentication backends using the</span>
+<span class="sd">    ``authenticate`` method from ``django.contrib.auth``.</span>
+
+<span class="sd">    Optional keyword arguments:</span>
+
+<span class="sd">    ``backend``</span>
+<span class="sd">        If specified, use a specific ``django.contrib.auth`` backend instead</span>
+<span class="sd">        of checking all backends specified in the ``AUTHENTICATION_BACKENDS``</span>
+<span class="sd">        setting.</span>
+<span class="sd">    ``realm``</span>
+<span class="sd">        The realm to use in the ``HttpUnauthorized`` response.  Default:</span>
+<span class="sd">        ``django-tastypie``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">realm</span><span class="o">=</span><span class="s">&#39;django-tastypie&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BasicAuthentication</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">realm</span> <span class="o">=</span> <span class="n">realm</span>
+
+    <span class="k">def</span> <span class="nf">_unauthorized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">HttpUnauthorized</span><span class="p">()</span>
+        <span class="c"># FIXME: Sanitize realm.</span>
+        <span class="n">response</span><span class="p">[</span><span class="s">&#39;WWW-Authenticate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Basic Realm=&quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">realm</span>
+        <span class="k">return</span> <span class="n">response</span>
+
+<div class="viewcode-block" id="BasicAuthentication.is_authenticated"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.BasicAuthentication.is_authenticated">[docs]</a>    <span class="k">def</span> <span class="nf">is_authenticated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks a user&#39;s basic auth credentials against the current</span>
+<span class="sd">        Django auth backend.</span>
+
+<span class="sd">        Should return either ``True`` if allowed, ``False`` if not or an</span>
+<span class="sd">        ``HttpResponse`` if you need something custom.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;HTTP_AUTHORIZATION&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unauthorized</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">auth_type</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="p">[</span><span class="s">&#39;HTTP_AUTHORIZATION&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">auth_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;basic&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unauthorized</span><span class="p">()</span>
+            <span class="n">user_pass</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unauthorized</span><span class="p">()</span>
+
+        <span class="n">bits</span> <span class="o">=</span> <span class="n">user_pass</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unauthorized</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="p">:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">bits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">password</span><span class="o">=</span><span class="n">bits</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">authenticate</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">bits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">password</span><span class="o">=</span><span class="n">bits</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unauthorized</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_active</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">request</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">user</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="BasicAuthentication.get_identifier"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.BasicAuthentication.get_identifier">[docs]</a>    <span class="k">def</span> <span class="nf">get_identifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provides a unique string identifier for the requestor.</span>
+
+<span class="sd">        This implementation returns the user&#39;s basic auth username.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;REMOTE_USER&#39;</span><span class="p">,</span> <span class="s">&#39;nouser&#39;</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="ApiKeyAuthentication"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.ApiKeyAuthentication">[docs]</a><span class="k">class</span> <span class="nc">ApiKeyAuthentication</span><span class="p">(</span><span class="n">Authentication</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handles API key auth, in which a user provides a username &amp; API key.</span>
+
+<span class="sd">    Uses the ``ApiKey`` model that ships with tastypie. If you wish to use</span>
+<span class="sd">    a different model, override the ``get_key`` method to perform the key check</span>
+<span class="sd">    as suits your needs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_unauthorized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">HttpUnauthorized</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ApiKeyAuthentication.extract_credentials"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.ApiKeyAuthentication.extract_credentials">[docs]</a>    <span class="k">def</span> <span class="nf">extract_credentials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;HTTP_AUTHORIZATION&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="p">[</span><span class="s">&#39;HTTP_AUTHORIZATION&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;apikey &#39;</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">auth_type</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="p">[</span><span class="s">&#39;HTTP_AUTHORIZATION&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">auth_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;apikey&#39;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Incorrect authorization header.&quot;</span><span class="p">)</span>
+
+            <span class="n">username</span><span class="p">,</span> <span class="n">api_key</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">username</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">)</span>
+            <span class="n">api_key</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;api_key&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;api_key&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">username</span><span class="p">,</span> <span class="n">api_key</span>
+</div>
+<div class="viewcode-block" id="ApiKeyAuthentication.is_authenticated"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.ApiKeyAuthentication.is_authenticated">[docs]</a>    <span class="k">def</span> <span class="nf">is_authenticated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finds the user and checks their API key.</span>
+
+<span class="sd">        Should return either ``True`` if allowed, ``False`` if not or an</span>
+<span class="sd">        ``HttpResponse`` if you need something custom.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">username</span><span class="p">,</span> <span class="n">api_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_credentials</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unauthorized</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">api_key</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unauthorized</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">User</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">,</span> <span class="n">User</span><span class="o">.</span><span class="n">MultipleObjectsReturned</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unauthorized</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_active</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">request</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">user</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_key</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">api_key</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ApiKeyAuthentication.get_key"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.ApiKeyAuthentication.get_key">[docs]</a>    <span class="k">def</span> <span class="nf">get_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">api_key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Attempts to find the API key for the user. Uses ``ApiKey`` by default</span>
+<span class="sd">        but can be overridden.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">tastypie.models</span> <span class="kn">import</span> <span class="n">ApiKey</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ApiKey</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ApiKey</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unauthorized</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="ApiKeyAuthentication.get_identifier"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.ApiKeyAuthentication.get_identifier">[docs]</a>    <span class="k">def</span> <span class="nf">get_identifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provides a unique string identifier for the requestor.</span>
+
+<span class="sd">        This implementation returns the user&#39;s username.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">username</span><span class="p">,</span> <span class="n">api_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_credentials</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">username</span> <span class="ow">or</span> <span class="s">&#39;nouser&#39;</span>
+
+</div></div>
+<div class="viewcode-block" id="SessionAuthentication"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.SessionAuthentication">[docs]</a><span class="k">class</span> <span class="nc">SessionAuthentication</span><span class="p">(</span><span class="n">Authentication</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An authentication mechanism that piggy-backs on Django sessions.</span>
+
+<span class="sd">    This is useful when the API is talking to Javascript on the same site.</span>
+<span class="sd">    Relies on the user being logged in through the standard Django login</span>
+<span class="sd">    setup.</span>
+
+<span class="sd">    Requires a valid CSRF token.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SessionAuthentication.is_authenticated"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.SessionAuthentication.is_authenticated">[docs]</a>    <span class="k">def</span> <span class="nf">is_authenticated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks to make sure the user is logged in &amp; has a Django session.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Cargo-culted from Django 1.3/1.4&#39;s ``django/middleware/csrf.py``.</span>
+        <span class="c"># We can&#39;t just use what&#39;s there, since the return values will be</span>
+        <span class="c"># wrong.</span>
+        <span class="c"># We also can&#39;t risk accessing ``request.POST``, which will break with</span>
+        <span class="c"># the serialized bodies.</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;GET&#39;</span><span class="p">,</span> <span class="s">&#39;HEAD&#39;</span><span class="p">,</span> <span class="s">&#39;OPTIONS&#39;</span><span class="p">,</span> <span class="s">&#39;TRACE&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&#39;_dont_enforce_csrf_checks&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">()</span>
+
+        <span class="n">csrf_token</span> <span class="o">=</span> <span class="n">_sanitize_token</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">COOKIES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CSRF_COOKIE_NAME</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">is_secure</span><span class="p">():</span>
+            <span class="n">referer</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;HTTP_REFERER&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">referer</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+
+            <span class="n">good_referer</span> <span class="o">=</span> <span class="s">&#39;https://</span><span class="si">%s</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="n">request</span><span class="o">.</span><span class="n">get_host</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">same_origin</span><span class="p">(</span><span class="n">referer</span><span class="p">,</span> <span class="n">good_referer</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">request_csrf_token</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;HTTP_X_CSRFTOKEN&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">constant_time_compare</span><span class="p">(</span><span class="n">request_csrf_token</span><span class="p">,</span> <span class="n">csrf_token</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="SessionAuthentication.get_identifier"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.SessionAuthentication.get_identifier">[docs]</a>    <span class="k">def</span> <span class="nf">get_identifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provides a unique string identifier for the requestor.</span>
+
+<span class="sd">        This implementation returns the user&#39;s username.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span>
+
+</div></div>
+<div class="viewcode-block" id="DigestAuthentication"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.DigestAuthentication">[docs]</a><span class="k">class</span> <span class="nc">DigestAuthentication</span><span class="p">(</span><span class="n">Authentication</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handles HTTP Digest auth against a specific auth backend if provided,</span>
+<span class="sd">    or against all configured authentication backends using the</span>
+<span class="sd">    ``authenticate`` method from ``django.contrib.auth``. However, instead of</span>
+<span class="sd">    the user&#39;s password, their API key should be used.</span>
+
+<span class="sd">    Optional keyword arguments:</span>
+
+<span class="sd">    ``backend``</span>
+<span class="sd">        If specified, use a specific ``django.contrib.auth`` backend instead</span>
+<span class="sd">        of checking all backends specified in the ``AUTHENTICATION_BACKENDS``</span>
+<span class="sd">        setting.</span>
+<span class="sd">    ``realm``</span>
+<span class="sd">        The realm to use in the ``HttpUnauthorized`` response.  Default:</span>
+<span class="sd">        ``django-tastypie``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">realm</span><span class="o">=</span><span class="s">&#39;django-tastypie&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DigestAuthentication</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">realm</span> <span class="o">=</span> <span class="n">realm</span>
+
+        <span class="k">if</span> <span class="n">python_digest</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="s">&quot;The &#39;python_digest&#39; package could not be imported. It is required for use with the &#39;DigestAuthentication&#39; class.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_unauthorized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">HttpUnauthorized</span><span class="p">()</span>
+        <span class="n">new_uuid</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span>
+        <span class="n">opaque</span> <span class="o">=</span> <span class="n">hmac</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">new_uuid</span><span class="p">),</span> <span class="n">digestmod</span><span class="o">=</span><span class="n">sha1</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="n">response</span><span class="p">[</span><span class="s">&#39;WWW-Authenticate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">python_digest</span><span class="o">.</span><span class="n">build_digest_challenge</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;SECRET_KEY&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">realm</span><span class="p">,</span> <span class="n">opaque</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">response</span>
+
+<div class="viewcode-block" id="DigestAuthentication.is_authenticated"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.DigestAuthentication.is_authenticated">[docs]</a>    <span class="k">def</span> <span class="nf">is_authenticated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finds the user and checks their API key.</span>
+
+<span class="sd">        Should return either ``True`` if allowed, ``False`` if not or an</span>
+<span class="sd">        ``HttpResponse`` if you need something custom.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;HTTP_AUTHORIZATION&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unauthorized</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">auth_type</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="p">[</span><span class="s">&#39;HTTP_AUTHORIZATION&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">auth_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;digest&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unauthorized</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unauthorized</span><span class="p">()</span>
+
+        <span class="n">digest_response</span> <span class="o">=</span> <span class="n">python_digest</span><span class="o">.</span><span class="n">parse_digest_credentials</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="p">[</span><span class="s">&#39;HTTP_AUTHORIZATION&#39;</span><span class="p">])</span>
+
+        <span class="c"># FIXME: Should the nonce be per-user?</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">python_digest</span><span class="o">.</span><span class="n">validate_nonce</span><span class="p">(</span><span class="n">digest_response</span><span class="o">.</span><span class="n">nonce</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;SECRET_KEY&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unauthorized</span><span class="p">()</span>
+
+        <span class="n">user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_user</span><span class="p">(</span><span class="n">digest_response</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+        <span class="n">api_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_key</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="bp">False</span> <span class="ow">or</span> <span class="n">api_key</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unauthorized</span><span class="p">()</span>
+
+        <span class="n">expected</span> <span class="o">=</span> <span class="n">python_digest</span><span class="o">.</span><span class="n">calculate_request_digest</span><span class="p">(</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">python_digest</span><span class="o">.</span><span class="n">calculate_partial_digest</span><span class="p">(</span><span class="n">digest_response</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">realm</span><span class="p">,</span> <span class="n">api_key</span><span class="p">),</span>
+            <span class="n">digest_response</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">digest_response</span><span class="o">.</span><span class="n">response</span> <span class="o">==</span> <span class="n">expected</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unauthorized</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_active</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">request</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">user</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="DigestAuthentication.get_user"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.DigestAuthentication.get_user">[docs]</a>    <span class="k">def</span> <span class="nf">get_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">User</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">,</span> <span class="n">User</span><span class="o">.</span><span class="n">MultipleObjectsReturned</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">return</span> <span class="n">user</span>
+</div>
+<div class="viewcode-block" id="DigestAuthentication.get_key"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.DigestAuthentication.get_key">[docs]</a>    <span class="k">def</span> <span class="nf">get_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Attempts to find the API key for the user. Uses ``ApiKey`` by default</span>
+<span class="sd">        but can be overridden.</span>
+
+<span class="sd">        Note that this behaves differently than the ``ApiKeyAuthentication``</span>
+<span class="sd">        method of the same name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">tastypie.models</span> <span class="kn">import</span> <span class="n">ApiKey</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">ApiKey</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ApiKey</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">return</span> <span class="n">key</span><span class="o">.</span><span class="n">key</span>
+</div>
+<div class="viewcode-block" id="DigestAuthentication.get_identifier"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.DigestAuthentication.get_identifier">[docs]</a>    <span class="k">def</span> <span class="nf">get_identifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provides a unique string identifier for the requestor.</span>
+
+<span class="sd">        This implementation returns the user&#39;s username.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&#39;user&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span>
+
+        <span class="k">return</span> <span class="s">&#39;nouser&#39;</span>
+
+</div></div>
+<div class="viewcode-block" id="OAuthAuthentication"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.OAuthAuthentication">[docs]</a><span class="k">class</span> <span class="nc">OAuthAuthentication</span><span class="p">(</span><span class="n">Authentication</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handles OAuth, which checks a user&#39;s credentials against a separate service.</span>
+<span class="sd">    Currently verifies against OAuth 1.0a services.</span>
+
+<span class="sd">    This does *NOT* provide OAuth authentication in your API, strictly</span>
+<span class="sd">    consumption.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">OAuthAuthentication</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">oauth2</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="s">&quot;The &#39;python-oauth2&#39; package could not be imported. It is required for use with the &#39;OAuthAuthentication&#39; class.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">oauth_provider</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="s">&quot;The &#39;django-oauth-plus&#39; package could not be imported. It is required for use with the &#39;OAuthAuthentication&#39; class.&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="OAuthAuthentication.is_authenticated"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.OAuthAuthentication.is_authenticated">[docs]</a>    <span class="k">def</span> <span class="nf">is_authenticated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">oauth_provider.store</span> <span class="kn">import</span> <span class="n">store</span><span class="p">,</span> <span class="n">InvalidTokenError</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+            <span class="n">oauth_request</span> <span class="o">=</span> <span class="n">oauth_provider</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_oauth_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+            <span class="n">consumer</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">get_consumer</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">oauth_request</span><span class="p">,</span> <span class="n">oauth_request</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s">&#39;oauth_consumer_key&#39;</span><span class="p">))</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">token</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">get_access_token</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">oauth_request</span><span class="p">,</span> <span class="n">consumer</span><span class="p">,</span> <span class="n">oauth_request</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s">&#39;oauth_token&#39;</span><span class="p">))</span>
+            <span class="k">except</span> <span class="n">oauth_provider</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">InvalidTokenError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">oauth_provider</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">send_oauth_error</span><span class="p">(</span><span class="n">oauth2</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Invalid access token: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">oauth_request</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s">&#39;oauth_token&#39;</span><span class="p">)))</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">validate_token</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">consumer</span><span class="p">,</span> <span class="n">token</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">oauth2</span><span class="o">.</span><span class="n">Error</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">oauth_provider</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">send_oauth_error</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">consumer</span> <span class="ow">and</span> <span class="n">token</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_active</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">user</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+
+                <span class="n">request</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">user</span>
+                <span class="k">return</span> <span class="bp">True</span>
+
+            <span class="k">return</span> <span class="n">oauth_provider</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">send_oauth_error</span><span class="p">(</span><span class="n">oauth2</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;You are not allowed to access this resource.&#39;</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">oauth_provider</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">send_oauth_error</span><span class="p">(</span><span class="n">oauth2</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Invalid request parameters.&#39;</span><span class="p">)))</span>
+</div>
+<div class="viewcode-block" id="OAuthAuthentication.is_in"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.OAuthAuthentication.is_in">[docs]</a>    <span class="k">def</span> <span class="nf">is_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks to ensure that all the OAuth parameter names are in the</span>
+<span class="sd">        provided ``params``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">oauth_provider.consts</span> <span class="kn">import</span> <span class="n">OAUTH_PARAMETERS_NAMES</span>
+
+        <span class="k">for</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">OAUTH_PARAMETERS_NAMES</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="OAuthAuthentication.is_valid_request"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.OAuthAuthentication.is_valid_request">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks whether the required parameters are either in the HTTP</span>
+<span class="sd">        ``Authorization`` header sent by some clients (the preferred method</span>
+<span class="sd">        according to OAuth spec) or fall back to ``GET/POST``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">auth_params</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;HTTP_AUTHORIZATION&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_in</span><span class="p">(</span><span class="n">auth_params</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_in</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OAuthAuthentication.validate_token"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.OAuthAuthentication.validate_token">[docs]</a>    <span class="k">def</span> <span class="nf">validate_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">consumer</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+        <span class="n">oauth_server</span><span class="p">,</span> <span class="n">oauth_request</span> <span class="o">=</span> <span class="n">oauth_provider</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">initialize_server_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">oauth_server</span><span class="o">.</span><span class="n">verify_request</span><span class="p">(</span><span class="n">oauth_request</span><span class="p">,</span> <span class="n">consumer</span><span class="p">,</span> <span class="n">token</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="MultiAuthentication"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.MultiAuthentication">[docs]</a><span class="k">class</span> <span class="nc">MultiAuthentication</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An authentication backend that tries a number of backends in order.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">backends</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MultiAuthentication</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backends</span> <span class="o">=</span> <span class="n">backends</span>
+
+<div class="viewcode-block" id="MultiAuthentication.is_authenticated"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.MultiAuthentication.is_authenticated">[docs]</a>    <span class="k">def</span> <span class="nf">is_authenticated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Identifies if the user is authenticated to continue or not.</span>
+
+<span class="sd">        Should return either ``True`` if allowed, ``False`` if not or an</span>
+<span class="sd">        ``HttpResponse`` if you need something custom.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">unauthorized</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">for</span> <span class="n">backend</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">backends</span><span class="p">:</span>
+            <span class="n">check</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">check</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">check</span><span class="p">,</span> <span class="n">HttpUnauthorized</span><span class="p">):</span>
+                    <span class="n">unauthorized</span> <span class="o">=</span> <span class="n">unauthorized</span> <span class="ow">or</span> <span class="n">check</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">request</span><span class="o">.</span><span class="n">_authentication_backend</span> <span class="o">=</span> <span class="n">backend</span>
+                    <span class="k">return</span> <span class="n">check</span>
+
+        <span class="k">return</span> <span class="n">unauthorized</span>
+</div>
+<div class="viewcode-block" id="MultiAuthentication.get_identifier"><a class="viewcode-back" href="../../auto_modules.html#tastypie.authentication.MultiAuthentication.get_identifier">[docs]</a>    <span class="k">def</span> <span class="nf">get_identifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provides a unique string identifier for the requestor.</span>
+
+<span class="sd">        This implementation returns a combination of IP address and hostname.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">_authentication_backend</span><span class="o">.</span><span class="n">get_identifier</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;nouser&#39;</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

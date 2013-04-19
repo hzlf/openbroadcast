@@ -1,0 +1,373 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>modeltranslation.translator &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for modeltranslation.translator</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">Manager</span>
+<span class="kn">from</span> <span class="nn">django.db.models.base</span> <span class="kn">import</span> <span class="n">ModelBase</span>
+
+<span class="kn">from</span> <span class="nn">modeltranslation.fields</span> <span class="kn">import</span> <span class="n">TranslationFieldDescriptor</span><span class="p">,</span> <span class="n">create_translation_field</span>
+<span class="kn">from</span> <span class="nn">modeltranslation.manager</span> <span class="kn">import</span> <span class="n">MultilingualManager</span><span class="p">,</span> <span class="n">rewrite_lookup_key</span>
+<span class="kn">from</span> <span class="nn">modeltranslation.utils</span> <span class="kn">import</span> <span class="n">build_localized_fieldname</span><span class="p">,</span> <span class="n">unique</span>
+
+
+<div class="viewcode-block" id="AlreadyRegistered"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.translator.AlreadyRegistered">[docs]</a><span class="k">class</span> <span class="nc">AlreadyRegistered</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="NotRegistered"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.translator.NotRegistered">[docs]</a><span class="k">class</span> <span class="nc">NotRegistered</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="FieldsAggregationMetaClass"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.translator.FieldsAggregationMetaClass">[docs]</a><span class="k">class</span> <span class="nc">FieldsAggregationMetaClass</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Metaclass to handle inheritance of fields between classes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bases</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">FieldsAggregationMetaClass</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parents</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">FieldsAggregationMetaClass</span><span class="p">,</span> <span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s">&#39;fields&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;fields&#39;</span><span class="p">,</span> <span class="p">()))</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">parents</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="s">&#39;fields&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s">&#39;fields&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="s">&#39;fields&#39;</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">FieldsAggregationMetaClass</span><span class="p">,</span> <span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="TranslationOptions"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.translator.TranslationOptions">[docs]</a><span class="k">class</span> <span class="nc">TranslationOptions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The TranslationOptions object is used to specify the fields to translate.</span>
+
+<span class="sd">    The options are registered in combination with a model class at the</span>
+<span class="sd">    ``modeltranslation.translator.translator`` instance.</span>
+
+<span class="sd">    It caches the content type of the translated model for faster lookup later</span>
+<span class="sd">    on.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">FieldsAggregationMetaClass</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">localized_fieldnames</span> <span class="o">=</span> <span class="p">[]</span>
+
+</div>
+<div class="viewcode-block" id="add_localized_fields"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.translator.add_localized_fields">[docs]</a><span class="k">def</span> <span class="nf">add_localized_fields</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Monkey patches the original model class to provide additional fields for</span>
+<span class="sd">    every language. Only do that for fields which are defined in the</span>
+<span class="sd">    translation options of the model.</span>
+
+<span class="sd">    Returns a dict mapping the original fieldname to a list containing the</span>
+<span class="sd">    names of the localized fields created for the original field.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">localized_fields</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">translation_opts</span> <span class="o">=</span> <span class="n">translator</span><span class="o">.</span><span class="n">get_options_for_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">translation_opts</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+        <span class="n">localized_fields</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">LANGUAGES</span><span class="p">:</span>
+            <span class="c"># Create a dynamic translation field</span>
+            <span class="n">translation_field</span> <span class="o">=</span> <span class="n">create_translation_field</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">field_name</span><span class="o">=</span><span class="n">field_name</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="c"># Construct the name for the localized field</span>
+            <span class="n">localized_field_name</span> <span class="o">=</span> <span class="n">build_localized_fieldname</span><span class="p">(</span><span class="n">field_name</span><span class="p">,</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="c"># Check if the model already has a field by that name</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">localized_field_name</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s">&quot;Error adding translation field. Model &#39;</span><span class="si">%s</span><span class="s">&#39; already contains a field named&quot;</span>
+                    <span class="s">&quot;&#39;</span><span class="si">%s</span><span class="s">&#39;.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">object_name</span><span class="p">,</span> <span class="n">localized_field_name</span><span class="p">))</span>
+            <span class="c"># This approach implements the translation fields as full valid</span>
+            <span class="c"># django model fields and therefore adds them via add_to_class</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">add_to_class</span><span class="p">(</span><span class="n">localized_field_name</span><span class="p">,</span> <span class="n">translation_field</span><span class="p">)</span>
+            <span class="n">localized_fields</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">localized_field_name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">localized_fields</span>
+
+</div>
+<div class="viewcode-block" id="add_manager"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.translator.add_manager">[docs]</a><span class="k">def</span> <span class="nf">add_manager</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Monkey patches the original model to use MultilingualManager instead of</span>
+<span class="sd">    default manager (``objects``).</span>
+
+<span class="sd">    If model has a custom manager, then merge it with MultilingualManager.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s">&#39;objects&#39;</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="n">current_manager</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">objects</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current_manager</span><span class="p">,</span> <span class="n">MultilingualManager</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">current_manager</span><span class="o">.</span><span class="n">__class__</span> <span class="ow">is</span> <span class="n">Manager</span><span class="p">:</span>
+        <span class="n">current_manager</span><span class="o">.</span><span class="n">__class__</span> <span class="o">=</span> <span class="n">MultilingualManager</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">class</span> <span class="nc">NewMultilingualManager</span><span class="p">(</span><span class="n">MultilingualManager</span><span class="p">,</span> <span class="n">current_manager</span><span class="o">.</span><span class="n">__class__</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="n">current_manager</span><span class="o">.</span><span class="n">__class__</span> <span class="o">=</span> <span class="n">NewMultilingualManager</span>
+
+</div>
+<div class="viewcode-block" id="patch_constructor"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.translator.patch_constructor">[docs]</a><span class="k">def</span> <span class="nf">patch_constructor</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Monkey patches the original model to rewrite fields names in __init__</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">old_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">__init__</span>
+
+    <span class="k">def</span> <span class="nf">new_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">new_key</span> <span class="o">=</span> <span class="n">rewrite_lookup_key</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="c"># Old key is intentionally left in case old_init wants to play with it</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">new_key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        <span class="n">old_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">__init__</span> <span class="o">=</span> <span class="n">new_init</span>
+
+
+<span class="c">#def translated_model_initialized(field_names, instance, **kwargs):</span>
+    <span class="c">#print &quot;translated_model_initialized instance:&quot;, \</span>
+          <span class="c">#instance, &quot;, field:&quot;, field_names</span>
+    <span class="c">#for field_name in field_names:</span>
+        <span class="c">#initial_val = getattr(instance, field_name)</span>
+        <span class="c">#print &quot;  field: %s, initialval: %s&quot; % (field_name, initial_val)</span>
+        <span class="c">#setattr(instance.__class__, field_name,</span>
+                <span class="c">#TranslationFieldDescriptor(field_name, initial_val))</span>
+
+
+<span class="c">#def translated_model_initializing(sender, args, kwargs, **signal_kwargs):</span>
+    <span class="c">#print &quot;translated_model_initializing&quot;, sender, args, kwargs</span>
+    <span class="c">#trans_opts = translator.get_options_for_model(sender)</span>
+    <span class="c">#for field_name in trans_opts.fields:</span>
+        <span class="c">#setattr(sender, field_name, TranslationFieldDescriptor(field_name))</span>
+
+</div>
+<div class="viewcode-block" id="delete_cache_fields"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.translator.delete_cache_fields">[docs]</a><span class="k">def</span> <span class="nf">delete_cache_fields</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">opts</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">opts</span><span class="o">.</span><span class="n">_field_cache</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">opts</span><span class="o">.</span><span class="n">_field_name_cache</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">opts</span><span class="o">.</span><span class="n">_name_map</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="Translator"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.translator.Translator">[docs]</a><span class="k">class</span> <span class="nc">Translator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Translator object encapsulates an instance of a translator. Models are</span>
+<span class="sd">    registered with the Translator using the register() method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># model_class class -&gt; translation_opts instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="Translator.register"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.translator.Translator.register">[docs]</a>    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_or_iterable</span><span class="p">,</span> <span class="n">translation_opts</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Registers the given model(s) with the given translation options.</span>
+
+<span class="sd">        The model(s) should be Model classes, not instances.</span>
+
+<span class="sd">        If a model is already registered for translation, this will raise</span>
+<span class="sd">        AlreadyRegistered.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_or_iterable</span><span class="p">,</span> <span class="n">ModelBase</span><span class="p">):</span>
+            <span class="n">model_or_iterable</span> <span class="o">=</span> <span class="p">[</span><span class="n">model_or_iterable</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">model_or_iterable</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">AlreadyRegistered</span><span class="p">(</span>
+                    <span class="s">&#39;The model </span><span class="si">%s</span><span class="s"> is already registered for translation&#39;</span> <span class="o">%</span> <span class="n">model</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+            <span class="c"># If we got **options then dynamically construct a subclass of</span>
+            <span class="c"># translation_opts with those **options.</span>
+            <span class="k">if</span> <span class="n">options</span><span class="p">:</span>
+                <span class="c"># For reasons I don&#39;t quite understand, without a __module__</span>
+                <span class="c"># the created class appears to &quot;live&quot; in the wrong place,</span>
+                <span class="c"># which causes issues later on.</span>
+                <span class="n">options</span><span class="p">[</span><span class="s">&#39;__module__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">__name__</span>
+                <span class="n">translation_opts</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span>
+                    <span class="s">&quot;</span><span class="si">%s</span><span class="s">TranslationOptions&quot;</span> <span class="o">%</span> <span class="n">model</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="p">(</span><span class="n">translation_opts</span><span class="p">,),</span> <span class="n">options</span><span class="p">)</span>
+
+            <span class="c"># Store the translation class associated to the model</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">[</span><span class="n">model</span><span class="p">]</span> <span class="o">=</span> <span class="n">translation_opts</span>
+
+            <span class="c"># Add the localized fields to the model and store the names of</span>
+            <span class="c"># these fields in the model&#39;s translation options for faster lookup</span>
+            <span class="c"># later on.</span>
+            <span class="n">translation_opts</span><span class="o">.</span><span class="n">localized_fieldnames</span> <span class="o">=</span> <span class="n">add_localized_fields</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+            <span class="c"># Create a reverse dict mapping the localized_fieldnames to the</span>
+            <span class="c"># original fieldname</span>
+            <span class="n">rev_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">orig_name</span><span class="p">,</span> <span class="n">loc_names</span> <span class="ow">in</span> <span class="n">translation_opts</span><span class="o">.</span><span class="n">localized_fieldnames</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">ln</span> <span class="ow">in</span> <span class="n">loc_names</span><span class="p">:</span>
+                    <span class="n">rev_dict</span><span class="p">[</span><span class="n">ln</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_name</span>
+            <span class="n">translation_opts</span><span class="o">.</span><span class="n">localized_fieldnames_rev</span> <span class="o">=</span> <span class="n">rev_dict</span>
+
+            <span class="c"># Delete all fields cache for related model (parent and children)</span>
+            <span class="k">for</span> <span class="n">related_obj</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_all_related_objects</span><span class="p">():</span>
+                <span class="n">delete_cache_fields</span><span class="p">(</span><span class="n">related_obj</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+
+            <span class="c"># Set MultilingualManager</span>
+            <span class="n">add_manager</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+            <span class="c"># Patch __init__ to rewrite fields</span>
+            <span class="n">patch_constructor</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+            <span class="c"># Substitute original field with descriptor</span>
+            <span class="n">model_fallback_values</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">translation_opts</span><span class="p">,</span> <span class="s">&#39;fallback_values&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">model_fallback_languages</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">translation_opts</span><span class="p">,</span> <span class="s">&#39;fallback_languages&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">translation_opts</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">model_fallback_values</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">field_fallback_value</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_fallback_values</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="n">field_fallback_value</span> <span class="o">=</span> <span class="n">model_fallback_values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field_name</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">field_fallback_value</span> <span class="o">=</span> <span class="n">model_fallback_values</span>
+                <span class="n">descriptor</span> <span class="o">=</span> <span class="n">TranslationFieldDescriptor</span><span class="p">(</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">field_name</span><span class="p">),</span>
+                    <span class="n">fallback_value</span><span class="o">=</span><span class="n">field_fallback_value</span><span class="p">,</span>
+                    <span class="n">fallback_languages</span><span class="o">=</span><span class="n">model_fallback_languages</span><span class="p">)</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">)</span>
+
+        <span class="c">#signals.pre_init.connect(translated_model_initializing, sender=model,</span>
+                                 <span class="c">#weak=False)</span>
+</div>
+<div class="viewcode-block" id="Translator.unregister"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.translator.Translator.unregister">[docs]</a>    <span class="k">def</span> <span class="nf">unregister</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_or_iterable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unregisters the given model(s).</span>
+
+<span class="sd">        If a model isn&#39;t already registered, this will raise NotRegistered.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_or_iterable</span><span class="p">,</span> <span class="n">ModelBase</span><span class="p">):</span>
+            <span class="n">model_or_iterable</span> <span class="o">=</span> <span class="p">[</span><span class="n">model_or_iterable</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">model_or_iterable</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">model</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NotRegistered</span><span class="p">(</span>
+                    <span class="s">&#39;The model &quot;</span><span class="si">%s</span><span class="s">&quot; is not registered for translation&#39;</span> <span class="o">%</span> <span class="n">model</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">[</span><span class="n">model</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="Translator.get_options_for_model"><a class="viewcode-back" href="../../auto_modules.html#modeltranslation.translator.Translator.get_options_for_model">[docs]</a>    <span class="k">def</span> <span class="nf">get_options_for_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the translation options for the given ``model``. If the</span>
+<span class="sd">        ``model`` is not registered a ``NotRegistered`` exception is raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">[</span><span class="n">model</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c"># Try to find a localized parent model and build a dedicated</span>
+            <span class="c"># translation options class with the parent info.</span>
+            <span class="c"># Useful when a ModelB inherits from ModelA and only ModelA fields</span>
+            <span class="c"># are localized. No need to register ModelB.</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="n">localized_fieldnames</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">localized_fieldnames_rev</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">parents</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">parent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">:</span>
+                    <span class="n">trans_opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">[</span><span class="n">parent</span><span class="p">]</span>
+                    <span class="n">fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">trans_opts</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+                    <span class="n">localized_fieldnames</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">trans_opts</span><span class="o">.</span><span class="n">localized_fieldnames</span><span class="p">)</span>
+                    <span class="n">localized_fieldnames_rev</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">trans_opts</span><span class="o">.</span><span class="n">localized_fieldnames_rev</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fields</span> <span class="ow">and</span> <span class="n">localized_fieldnames</span> <span class="ow">and</span> <span class="n">localized_fieldnames_rev</span><span class="p">:</span>
+                <span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s">&#39;__module__&#39;</span><span class="p">:</span> <span class="n">__name__</span><span class="p">,</span>
+                    <span class="s">&#39;fields&#39;</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">fields</span><span class="p">),</span>
+                    <span class="s">&#39;localized_fieldnames&#39;</span><span class="p">:</span> <span class="n">localized_fieldnames</span><span class="p">,</span>
+                    <span class="s">&#39;localized_fieldnames_rev&#39;</span><span class="p">:</span> <span class="n">localized_fieldnames_rev</span>
+                <span class="p">}</span>
+                <span class="n">translation_opts</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span>
+                    <span class="s">&quot;</span><span class="si">%s</span><span class="s">Translation&quot;</span> <span class="o">%</span> <span class="n">model</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="p">(</span><span class="n">TranslationOptions</span><span class="p">,),</span> <span class="n">options</span><span class="p">)</span>
+                <span class="c"># delete_cache_fields(model)</span>
+                <span class="k">return</span> <span class="n">translation_opts</span>
+            <span class="k">raise</span> <span class="n">NotRegistered</span><span class="p">(</span><span class="s">&#39;The model &quot;</span><span class="si">%s</span><span class="s">&quot; is not registered for translation&#39;</span> <span class="o">%</span> <span class="n">model</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<span class="c"># This global object represents the singleton translator object</span></div></div>
+<span class="n">translator</span> <span class="o">=</span> <span class="n">Translator</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

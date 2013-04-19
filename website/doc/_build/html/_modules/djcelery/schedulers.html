@@ -1,0 +1,302 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>djcelery.schedulers &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for djcelery.schedulers</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="kn">from</span> <span class="nn">anyjson</span> <span class="kn">import</span> <span class="n">deserialize</span><span class="p">,</span> <span class="n">serialize</span>
+<span class="kn">from</span> <span class="nn">celery</span> <span class="kn">import</span> <span class="n">schedules</span>
+<span class="kn">from</span> <span class="nn">celery.beat</span> <span class="kn">import</span> <span class="n">Scheduler</span><span class="p">,</span> <span class="n">ScheduleEntry</span>
+<span class="kn">from</span> <span class="nn">celery.utils.encoding</span> <span class="kn">import</span> <span class="n">safe_str</span><span class="p">,</span> <span class="n">safe_repr</span>
+<span class="kn">from</span> <span class="nn">kombu.utils.finalize</span> <span class="kn">import</span> <span class="n">Finalize</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">transaction</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ObjectDoesNotExist</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="p">(</span><span class="n">PeriodicTask</span><span class="p">,</span> <span class="n">PeriodicTasks</span><span class="p">,</span>
+                     <span class="n">CrontabSchedule</span><span class="p">,</span> <span class="n">IntervalSchedule</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">DATABASE_ERRORS</span><span class="p">,</span> <span class="n">now</span>
+
+
+<div class="viewcode-block" id="ModelEntry"><a class="viewcode-back" href="../../auto_modules.html#djcelery.schedulers.ModelEntry">[docs]</a><span class="k">class</span> <span class="nc">ModelEntry</span><span class="p">(</span><span class="n">ScheduleEntry</span><span class="p">):</span>
+    <span class="n">model_schedules</span> <span class="o">=</span> <span class="p">((</span><span class="n">schedules</span><span class="o">.</span><span class="n">crontab</span><span class="p">,</span> <span class="n">CrontabSchedule</span><span class="p">,</span> <span class="s">&quot;crontab&quot;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="n">schedules</span><span class="o">.</span><span class="n">schedule</span><span class="p">,</span> <span class="n">IntervalSchedule</span><span class="p">,</span> <span class="s">&quot;interval&quot;</span><span class="p">))</span>
+    <span class="n">save_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;last_run_at&quot;</span><span class="p">,</span> <span class="s">&quot;total_run_count&quot;</span><span class="p">,</span> <span class="s">&quot;no_changes&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">schedule</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">deserialize</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">args</span> <span class="ow">or</span> <span class="s">u&quot;[]&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">deserialize</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">kwargs</span> <span class="ow">or</span> <span class="s">u&quot;{}&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c"># disable because of error deserializing args/kwargs</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">no_changes</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="k">raise</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;queue&quot;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span>
+                        <span class="s">&quot;exchange&quot;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">exchange</span><span class="p">,</span>
+                        <span class="s">&quot;routing_key&quot;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">routing_key</span><span class="p">,</span>
+                        <span class="s">&quot;expires&quot;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">expires</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_run_count</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">total_run_count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">last_run_at</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">last_run_at</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_run_at</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">last_run_at</span>
+
+<div class="viewcode-block" id="ModelEntry.is_due"><a class="viewcode-back" href="../../auto_modules.html#djcelery.schedulers.ModelEntry.is_due">[docs]</a>    <span class="k">def</span> <span class="nf">is_due</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span><span class="p">,</span> <span class="mf">5.0</span>   <span class="c"># 5 second delay for re-enable.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="o">.</span><span class="n">is_due</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_run_at</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_default_now</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">now</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ModelEntry.next"><a class="viewcode-back" href="../../auto_modules.html#djcelery.schedulers.ModelEntry.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">last_run_at</span> <span class="o">=</span> <span class="n">now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">total_run_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">no_changes</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span></div>
+    <span class="n">__next__</span> <span class="o">=</span> <span class="nb">next</span>  <span class="c"># for 2to3</span>
+
+<div class="viewcode-block" id="ModelEntry.save"><a class="viewcode-back" href="../../auto_modules.html#djcelery.schedulers.ModelEntry.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Object may not be synchronized, so only</span>
+        <span class="c"># change the fields we care about.</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_default_manager</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_fields</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ModelEntry.to_model_schedule"><a class="viewcode-back" href="../../auto_modules.html#djcelery.schedulers.ModelEntry.to_model_schedule">[docs]</a>    <span class="k">def</span> <span class="nf">to_model_schedule</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">schedule</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">schedule_type</span><span class="p">,</span> <span class="n">model_type</span><span class="p">,</span> <span class="n">model_field</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">model_schedules</span><span class="p">:</span>
+            <span class="n">schedule</span> <span class="o">=</span> <span class="n">schedules</span><span class="o">.</span><span class="n">maybe_schedule</span><span class="p">(</span><span class="n">schedule</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schedule</span><span class="p">,</span> <span class="n">schedule_type</span><span class="p">):</span>
+                <span class="n">model_schedule</span> <span class="o">=</span> <span class="n">model_type</span><span class="o">.</span><span class="n">from_schedule</span><span class="p">(</span><span class="n">schedule</span><span class="p">)</span>
+                <span class="n">model_schedule</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">model_schedule</span><span class="p">,</span> <span class="n">model_field</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Can&#39;t convert schedule type </span><span class="si">%r</span><span class="s"> to model&quot;</span> <span class="o">%</span> <span class="n">schedule</span><span class="p">)</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ModelEntry.from_entry"><a class="viewcode-back" href="../../auto_modules.html#djcelery.schedulers.ModelEntry.from_entry">[docs]</a>    <span class="k">def</span> <span class="nf">from_entry</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">skip_fields</span><span class="o">=</span><span class="p">(</span><span class="s">&quot;relative&quot;</span><span class="p">,</span> <span class="s">&quot;options&quot;</span><span class="p">),</span> <span class="o">**</span><span class="n">entry</span><span class="p">):</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;options&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">skip_field</span> <span class="ow">in</span> <span class="n">skip_fields</span><span class="p">:</span>
+            <span class="n">fields</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">skip_field</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">schedule</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;schedule&quot;</span><span class="p">)</span>
+        <span class="n">model_schedule</span><span class="p">,</span> <span class="n">model_field</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">to_model_schedule</span><span class="p">(</span><span class="n">schedule</span><span class="p">)</span>
+        <span class="n">fields</span><span class="p">[</span><span class="n">model_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_schedule</span>
+        <span class="n">fields</span><span class="p">[</span><span class="s">&quot;args&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">serialize</span><span class="p">(</span><span class="n">fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;args&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span>
+        <span class="n">fields</span><span class="p">[</span><span class="s">&quot;kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">serialize</span><span class="p">(</span><span class="n">fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;kwargs&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span>
+        <span class="n">fields</span><span class="p">[</span><span class="s">&quot;queue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;queue&quot;</span><span class="p">)</span>
+        <span class="n">fields</span><span class="p">[</span><span class="s">&quot;exchange&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;exchange&quot;</span><span class="p">)</span>
+        <span class="n">fields</span><span class="p">[</span><span class="s">&quot;routing_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;routing_key&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">PeriodicTask</span><span class="o">.</span><span class="n">_default_manager</span><span class="o">.</span><span class="n">update_or_create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                                            <span class="n">defaults</span><span class="o">=</span><span class="n">fields</span><span class="p">))</span>
+</div>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;ModelEntry: </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">(*</span><span class="si">%s</span><span class="s">, **</span><span class="si">%s</span><span class="s">) {</span><span class="si">%s</span><span class="s">}&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">safe_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+                                                       <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">,</span>
+                                                       <span class="n">safe_repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">),</span>
+                                                       <span class="n">safe_repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">),</span>
+                                                       <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="DatabaseScheduler"><a class="viewcode-back" href="../../auto_modules.html#djcelery.schedulers.DatabaseScheduler">[docs]</a><span class="k">class</span> <span class="nc">DatabaseScheduler</span><span class="p">(</span><span class="n">Scheduler</span><span class="p">):</span>
+    <span class="n">Entry</span> <span class="o">=</span> <span class="n">ModelEntry</span>
+    <span class="n">Model</span> <span class="o">=</span> <span class="n">PeriodicTask</span>
+    <span class="n">Changes</span> <span class="o">=</span> <span class="n">PeriodicTasks</span>
+    <span class="n">_schedule</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">_last_timestamp</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dirty</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finalize</span> <span class="o">=</span> <span class="n">Finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync</span><span class="p">,</span> <span class="n">exitpriority</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">Scheduler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_interval</span> <span class="o">=</span> <span class="mi">5</span>
+
+<div class="viewcode-block" id="DatabaseScheduler.setup_schedule"><a class="viewcode-back" href="../../auto_modules.html#djcelery.schedulers.DatabaseScheduler.setup_schedule">[docs]</a>    <span class="k">def</span> <span class="nf">setup_schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">install_default_entries</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">CELERYBEAT_SCHEDULE</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DatabaseScheduler.all_as_schedule"><a class="viewcode-back" href="../../auto_modules.html#djcelery.schedulers.DatabaseScheduler.all_as_schedule">[docs]</a>    <span class="k">def</span> <span class="nf">all_as_schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;DatabaseScheduler: Fetching database schedule&quot;</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Model</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">enabled</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">s</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Entry</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">s</span>
+</div>
+<div class="viewcode-block" id="DatabaseScheduler.schedule_changed"><a class="viewcode-back" href="../../auto_modules.html#djcelery.schedulers.DatabaseScheduler.schedule_changed">[docs]</a>    <span class="k">def</span> <span class="nf">schedule_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_timestamp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c"># If MySQL is running with transaction isolation level</span>
+                <span class="c"># REPEATABLE-READ (default), then we won&#39;t see changes done by</span>
+                <span class="c"># other transactions until the current transaction is</span>
+                <span class="c"># committed (Issue #41).</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">transaction</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+                <span class="k">except</span> <span class="n">transaction</span><span class="o">.</span><span class="n">TransactionManagementError</span><span class="p">:</span>
+                    <span class="k">pass</span>  <span class="c"># not in transaction management.</span>
+
+                <span class="n">ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Changes</span><span class="o">.</span><span class="n">last_change</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">ts</span> <span class="ow">or</span> <span class="n">ts</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_timestamp</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">except</span> <span class="n">DATABASE_ERRORS</span><span class="p">,</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="ne">RuntimeWarning</span><span class="p">(</span><span class="s">&quot;Database gave error: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="p">)))</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_timestamp</span> <span class="o">=</span> <span class="n">now</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="DatabaseScheduler.reserve"><a class="viewcode-back" href="../../auto_modules.html#djcelery.schedulers.DatabaseScheduler.reserve">[docs]</a>    <span class="k">def</span> <span class="nf">reserve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entry</span><span class="p">):</span>
+        <span class="n">new_entry</span> <span class="o">=</span> <span class="n">Scheduler</span><span class="o">.</span><span class="n">reserve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entry</span><span class="p">)</span>
+        <span class="c"># Need to store entry by name, because the entry may change</span>
+        <span class="c"># in the mean time.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dirty</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_entry</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_entry</span>
+</div>
+    <span class="nd">@transaction.commit_manually</span>
+<div class="viewcode-block" id="DatabaseScheduler.sync"><a class="viewcode-back" href="../../auto_modules.html#djcelery.schedulers.DatabaseScheduler.sync">[docs]</a>    <span class="k">def</span> <span class="nf">sync</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Writing dirty entries...&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dirty</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dirty</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="n">ObjectDoesNotExist</span><span class="p">):</span>
+                    <span class="k">pass</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">transaction</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+            <span class="k">raise</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">transaction</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="DatabaseScheduler.update_from_dict"><a class="viewcode-back" href="../../auto_modules.html#djcelery.schedulers.DatabaseScheduler.update_from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">dict_</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">s</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Entry</span><span class="o">.</span><span class="n">from_entry</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">entry</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s">&quot;Couldn&#39;t add entry </span><span class="si">%r</span><span class="s"> to database schedule: </span><span class="si">%r</span><span class="s">. &quot;</span>
+                    <span class="s">&quot;Contents: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">entry</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DatabaseScheduler.install_default_entries"><a class="viewcode-back" href="../../auto_modules.html#djcelery.schedulers.DatabaseScheduler.install_default_entries">[docs]</a>    <span class="k">def</span> <span class="nf">install_default_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">entries</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">CELERY_TASK_RESULT_EXPIRES</span><span class="p">:</span>
+            <span class="n">entries</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&quot;celery.backend_cleanup&quot;</span><span class="p">,</span> <span class="p">{</span>
+                    <span class="s">&quot;task&quot;</span><span class="p">:</span> <span class="s">&quot;celery.backend_cleanup&quot;</span><span class="p">,</span>
+                    <span class="s">&quot;schedule&quot;</span><span class="p">:</span> <span class="n">schedules</span><span class="o">.</span><span class="n">crontab</span><span class="p">(</span><span class="s">&quot;0&quot;</span><span class="p">,</span> <span class="s">&quot;4&quot;</span><span class="p">,</span> <span class="s">&quot;*&quot;</span><span class="p">,</span> <span class="n">nowfun</span><span class="o">=</span><span class="n">now</span><span class="p">),</span>
+                    <span class="s">&quot;options&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;expires&quot;</span><span class="p">:</span> <span class="mi">12</span> <span class="o">*</span> <span class="mi">3600</span><span class="p">}})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DatabaseScheduler.get_schedule"><a class="viewcode-back" href="../../auto_modules.html#djcelery.schedulers.DatabaseScheduler.get_schedule">[docs]</a>    <span class="k">def</span> <span class="nf">get_schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedule_changed</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sync</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;DatabaseScheduler: Schedule changed.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_schedule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_as_schedule</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">isEnabledFor</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                        <span class="s">&quot;Current schedule:</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span>
+                        <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+                                    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schedule</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schedule</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

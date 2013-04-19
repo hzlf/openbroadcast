@@ -119,10 +119,33 @@ ImporterUi = function() {
 		
 		
 		$('.start-import-all', $('#import_summary')).live('click', function(e){
+			
+			
+			
+			var url = self.api_url + 'import-all/';
+			
+			
+			/**/
+			$.ajax({
+				type: "GET",
+				url: url,
+				dataType: "application/json",
+				contentType: 'application/json',
+				processData:  false,
+				success: function(data) {
+					debug.debug(data);					
+				}
+			});
+			
+			
+			
+			/*
 			$('.importfile.ready').each(function(i, el) {
 				id = $(this).attr('id').split('_')[2];			
 				self.import_by_id(id);
 			});
+			*/
+			
 		});
 		
 		

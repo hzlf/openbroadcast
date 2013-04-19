@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django_pdb.testrunners &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for django_pdb.testrunners</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">pdb</span>
+
+<span class="kn">from</span> <span class="nn">django.test.utils</span> <span class="kn">import</span> <span class="n">get_runner</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="c"># Django 1.3+</span>
+    <span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">unittest</span>
+    <span class="n">TextTestResult</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestResult</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c"># Django 1.2</span>
+    <span class="kn">import</span> <span class="nn">unittest</span>
+    <span class="n">TextTestResult</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">_TextTestResult</span>
+    <span class="kn">from</span> <span class="nn">django.test.simple</span> <span class="kn">import</span> <span class="n">DjangoTestRunner</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c"># Django 1.3+</span>
+    <span class="kn">from</span> <span class="nn">django.utils.unittest</span> <span class="kn">import</span> <span class="n">TextTestRunner</span> <span class="k">as</span> <span class="n">DjangoTestRunner</span>
+
+<span class="kn">from</span> <span class="nn">django_pdb.utils</span> <span class="kn">import</span> <span class="n">has_ipdb</span>
+
+
+<div class="viewcode-block" id="ExceptionTestResultMixin"><a class="viewcode-back" href="../../auto_modules.html#django_pdb.testrunners.ExceptionTestResultMixin">[docs]</a><span class="k">class</span> <span class="nc">ExceptionTestResultMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A mixin class that can be added to any test result class.</span>
+<span class="sd">    Drops into pdb on test errors/failures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pdb_type</span> <span class="o">=</span> <span class="s">&#39;pdb&#39;</span>
+
+<div class="viewcode-block" id="ExceptionTestResultMixin.get_pdb"><a class="viewcode-back" href="../../auto_modules.html#django_pdb.testrunners.ExceptionTestResultMixin.get_pdb">[docs]</a>    <span class="k">def</span> <span class="nf">get_pdb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdb_type</span> <span class="o">==</span> <span class="s">&#39;ipdb&#39;</span> <span class="ow">and</span> <span class="n">has_ipdb</span><span class="p">():</span>
+            <span class="kn">import</span> <span class="nn">ipdb</span>
+            <span class="k">return</span> <span class="n">ipdb</span>
+        <span class="k">return</span> <span class="n">pdb</span>
+</div>
+<div class="viewcode-block" id="ExceptionTestResultMixin.addError"><a class="viewcode-back" href="../../auto_modules.html#django_pdb.testrunners.ExceptionTestResultMixin.addError">[docs]</a>    <span class="k">def</span> <span class="nf">addError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">err</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ExceptionTestResultMixin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">addError</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+        <span class="n">exctype</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tb</span> <span class="o">=</span> <span class="n">err</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">writeln</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">writeln</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">separator1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">writeln</span><span class="p">(</span><span class="s">&quot;&gt;&gt;&gt; </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getDescription</span><span class="p">(</span><span class="n">test</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">writeln</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">separator2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">writeln</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exc_info_to_string</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">writeln</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">separator1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">writeln</span><span class="p">()</span>
+
+        <span class="c"># Skip test runner traceback levels</span>
+        <span class="c">#while tb and self._is_relevant_tb_level(tb):</span>
+        <span class="c">#    tb = tb.tb_next</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_pdb</span><span class="p">()</span><span class="o">.</span><span class="n">post_mortem</span><span class="p">(</span><span class="n">tb</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ExceptionTestResultMixin.addFailure"><a class="viewcode-back" href="../../auto_modules.html#django_pdb.testrunners.ExceptionTestResultMixin.addFailure">[docs]</a>    <span class="k">def</span> <span class="nf">addFailure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">err</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ExceptionTestResultMixin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">addFailure</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+        <span class="n">exctype</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tb</span> <span class="o">=</span> <span class="n">err</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">writeln</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">writeln</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">separator1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">writeln</span><span class="p">(</span><span class="s">&quot;&gt;&gt;&gt; </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getDescription</span><span class="p">(</span><span class="n">test</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">writeln</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">separator2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">writeln</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exc_info_to_string</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">writeln</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">separator1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">writeln</span><span class="p">()</span>
+
+        <span class="c">## Skip test runner traceback levels</span>
+        <span class="c">#while tb and self._is_relevant_tb_level(tb):</span>
+        <span class="c">#    tb = tb.tb_next</span>
+
+        <span class="c"># Really hacky way to jump up a couple of frames.</span>
+        <span class="c"># I&#39;m sure it&#39;s not that difficult to do properly,</span>
+        <span class="c"># but I havn&#39;t figured out how.</span>
+        <span class="c">#p = pdb.Pdb()</span>
+        <span class="c">#p.reset()</span>
+        <span class="c">#p.setup(None, tb)</span>
+        <span class="c">#p.do_up(None)</span>
+        <span class="c">#p.do_up(None)</span>
+        <span class="c">#p.cmdloop()</span>
+
+        <span class="c"># It would be good if we could make sure we&#39;re in the correct frame here</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_pdb</span><span class="p">()</span><span class="o">.</span><span class="n">post_mortem</span><span class="p">(</span><span class="n">tb</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="PdbTestResult"><a class="viewcode-back" href="../../auto_modules.html#django_pdb.testrunners.PdbTestResult">[docs]</a><span class="k">class</span> <span class="nc">PdbTestResult</span><span class="p">(</span><span class="n">ExceptionTestResultMixin</span><span class="p">,</span> <span class="n">TextTestResult</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="PdbTestRunner"><a class="viewcode-back" href="../../auto_modules.html#django_pdb.testrunners.PdbTestRunner">[docs]</a><span class="k">class</span> <span class="nc">PdbTestRunner</span><span class="p">(</span><span class="n">DjangoTestRunner</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Override the standard DjangoTestRunner to instead drop into pdb on test errors/failures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_makeResult</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">PdbTestResult</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="IPdbTestResult"><a class="viewcode-back" href="../../auto_modules.html#django_pdb.testrunners.IPdbTestResult">[docs]</a><span class="k">class</span> <span class="nc">IPdbTestResult</span><span class="p">(</span><span class="n">ExceptionTestResultMixin</span><span class="p">,</span> <span class="n">TextTestResult</span><span class="p">):</span>
+
+    <span class="n">pdb_type</span> <span class="o">=</span> <span class="s">&#39;ipdb&#39;</span>
+
+</div>
+<div class="viewcode-block" id="IPdbTestRunner"><a class="viewcode-back" href="../../auto_modules.html#django_pdb.testrunners.IPdbTestRunner">[docs]</a><span class="k">class</span> <span class="nc">IPdbTestRunner</span><span class="p">(</span><span class="n">DjangoTestRunner</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Override the standard DjangoTestRunner to instead drop into ipdb on test errors/failures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_makeResult</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">IPdbTestResult</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="make_suite_runner"><a class="viewcode-back" href="../../auto_modules.html#django_pdb.testrunners.make_suite_runner">[docs]</a><span class="k">def</span> <span class="nf">make_suite_runner</span><span class="p">(</span><span class="n">use_ipdb</span><span class="p">,</span> <span class="n">suite_runner</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">use_ipdb</span><span class="p">:</span>
+        <span class="n">runner</span> <span class="o">=</span> <span class="n">IPdbTestRunner</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">runner</span> <span class="o">=</span> <span class="n">PdbTestRunner</span>
+
+    <span class="k">if</span> <span class="n">suite_runner</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+        <span class="n">suite_runner</span> <span class="o">=</span> <span class="n">get_runner</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">PdbTestSuiteRunner</span><span class="p">(</span><span class="n">suite_runner</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Override the standard DjangoTestSuiteRunner to instead drop</span>
+<span class="sd">        into the debugger on test errors/failures.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">run_suite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">suite</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">runner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span><span class="p">,</span>
+                          <span class="n">failfast</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">failfast</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">PdbTestSuiteRunner</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

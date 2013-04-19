@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bcmon.api &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for bcmon.api</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">Count</span>
+
+<span class="kn">from</span> <span class="nn">tastypie</span> <span class="kn">import</span> <span class="n">fields</span>
+<span class="kn">from</span> <span class="nn">tastypie.authentication</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">tastypie.authorization</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">tastypie.resources</span> <span class="kn">import</span> <span class="n">ModelResource</span><span class="p">,</span> <span class="n">Resource</span><span class="p">,</span> <span class="n">ALL</span><span class="p">,</span> <span class="n">ALL_WITH_RELATIONS</span>
+
+<span class="kn">from</span> <span class="nn">bcmon.models</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="ChannelResource"><a class="viewcode-back" href="../../auto_modules.html#bcmon.api.ChannelResource">[docs]</a><span class="k">class</span> <span class="nc">ChannelResource</span><span class="p">(</span><span class="n">ModelResource</span><span class="p">):</span>
+    
+    <span class="c">#playout = fields.ToOneField(&#39;PlayoutResource&#39;, &#39;playout&#39;)</span>
+    
+<div class="viewcode-block" id="ChannelResource.Meta"><a class="viewcode-back" href="../../auto_modules.html#bcmon.api.ChannelResource.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">Channel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">resource_name</span> <span class="o">=</span> <span class="s">&#39;channel&#39;</span>
+        <span class="n">excludes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;updated&#39;</span><span class="p">,]</span>
+        <span class="c"># excludes = [&#39;email&#39;, &#39;password&#39;, &#39;is_superuser&#39;, &#39;is_active&#39;, &#39;is_staff&#39;, &#39;id&#39;]</span>
+        <span class="n">filtering</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;exact&#39;</span><span class="p">,</span> <span class="p">],</span>
+        <span class="p">}</span>
+</div></div>
+<div class="viewcode-block" id="PlayoutResource"><a class="viewcode-back" href="../../auto_modules.html#bcmon.api.PlayoutResource">[docs]</a><span class="k">class</span> <span class="nc">PlayoutResource</span><span class="p">(</span><span class="n">ModelResource</span><span class="p">):</span>
+    
+    <span class="c">#channel = fields.ForeignKey(ChannelResource, &#39;channel&#39;, null=True, full=True)</span>
+    <span class="n">channel</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">ChannelResource</span><span class="p">,</span> <span class="s">&#39;channel&#39;</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PlayoutResource.Meta"><a class="viewcode-back" href="../../auto_modules.html#bcmon.api.PlayoutResource.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">Playout</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">list_allowed_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;get&#39;</span><span class="p">,</span> <span class="s">&#39;post&#39;</span><span class="p">]</span>
+        <span class="n">detail_allowed_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;get&#39;</span><span class="p">,</span> <span class="s">&#39;post&#39;</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">,</span> <span class="s">&#39;delete&#39;</span><span class="p">]</span>
+        <span class="n">resource_name</span> <span class="o">=</span> <span class="s">&#39;playout&#39;</span>
+        <span class="n">excludes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;updated&#39;</span><span class="p">,]</span>
+        <span class="n">authentication</span> <span class="o">=</span> <span class="n">BasicAuthentication</span><span class="p">()</span>
+        <span class="n">authorization</span> <span class="o">=</span> <span class="n">Authorization</span><span class="p">()</span>
+        <span class="n">filtering</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;channel&#39;</span><span class="p">:</span> <span class="n">ALL_WITH_RELATIONS</span><span class="p">,</span>
+            <span class="s">&#39;created&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;exact&#39;</span><span class="p">,</span> <span class="s">&#39;range&#39;</span><span class="p">,</span> <span class="s">&#39;gt&#39;</span><span class="p">,</span> <span class="s">&#39;gte&#39;</span><span class="p">,</span> <span class="s">&#39;lt&#39;</span><span class="p">,</span> <span class="s">&#39;lte&#39;</span><span class="p">],</span>
+        <span class="p">}</span>
+        </div>
+    <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PlayoutResource.obj_create"><a class="viewcode-back" href="../../auto_modules.html#bcmon.api.PlayoutResource.obj_create">[docs]</a>    <span class="k">def</span> <span class="nf">obj_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundle</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        
+        <span class="k">print</span> <span class="s">&#39;create&#39;</span>
+        
+        <span class="k">if</span> <span class="s">&#39;channel&#39;</span> <span class="ow">in</span> <span class="n">bundle</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>            
+            <span class="n">bundle</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;channel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;pk&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">bundle</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;channel&#39;</span><span class="p">])}</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">PlayoutResource</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">obj_create</span><span class="p">(</span><span class="n">bundle</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    </div>
+<div class="viewcode-block" id="PlayoutResource.obj_update"><a class="viewcode-back" href="../../auto_modules.html#bcmon.api.PlayoutResource.obj_update">[docs]</a>    <span class="k">def</span> <span class="nf">obj_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundle</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">PlayoutResource</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">obj_update</span><span class="p">(</span><span class="n">bundle</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    
+    
+    
+    
+    </div></div>
+<div class="viewcode-block" id="FPObject"><a class="viewcode-back" href="../../auto_modules.html#bcmon.api.FPObject">[docs]</a><span class="k">class</span> <span class="nc">FPObject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s">&#39;_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">initial</span><span class="p">,</span> <span class="s">&#39;items&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s">&#39;_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s">&#39;_data&#39;</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="FPObject.to_dict"><a class="viewcode-back" href="../../auto_modules.html#bcmon.api.FPObject.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+    
+    
+    </div></div>
+<div class="viewcode-block" id="FPResource"><a class="viewcode-back" href="../../auto_modules.html#bcmon.api.FPResource">[docs]</a><span class="k">class</span> <span class="nc">FPResource</span><span class="p">(</span><span class="n">Resource</span><span class="p">):</span>
+    
+    <span class="n">uuid</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">attribute</span><span class="o">=</span><span class="s">&#39;uuid&#39;</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">user_uuid</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">attribute</span><span class="o">=</span><span class="s">&#39;user_uuid&#39;</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="FPResource.Meta"><a class="viewcode-back" href="../../auto_modules.html#bcmon.api.FPResource.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">resource_name</span> <span class="o">=</span> <span class="s">&#39;identify&#39;</span>
+        <span class="n">object_class</span> <span class="o">=</span> <span class="n">FPObject</span>
+        <span class="n">allowed_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;get&#39;</span><span class="p">,]</span>
+        <span class="n">authentication</span> <span class="o">=</span> <span class="n">BasicAuthentication</span><span class="p">()</span>
+        <span class="n">authorization</span> <span class="o">=</span> <span class="n">Authorization</span><span class="p">()</span>
+        </div>
+<div class="viewcode-block" id="FPResource.detail_uri_kwargs"><a class="viewcode-back" href="../../auto_modules.html#bcmon.api.FPResource.detail_uri_kwargs">[docs]</a>    <span class="k">def</span> <span class="nf">detail_uri_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundle_or_obj</span><span class="p">):</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bundle_or_obj</span><span class="p">,</span> <span class="n">Bundle</span><span class="p">):</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;pk&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bundle_or_obj</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">uuid</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;pk&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bundle_or_obj</span><span class="o">.</span><span class="n">uuid</span>
+
+        <span class="k">return</span> <span class="n">kwargs</span>
+</div>
+<div class="viewcode-block" id="FPResource.get_object_list"><a class="viewcode-back" href="../../auto_modules.html#bcmon.api.FPResource.get_object_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_object_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="n">q</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;q&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">q</span><span class="p">:</span>
+            <span class="n">new_obj</span> <span class="o">=</span> <span class="n">FPObject</span><span class="p">()</span>
+            <span class="n">new_obj</span><span class="o">.</span><span class="n">uuid</span> <span class="o">=</span> <span class="s">&#39;UID-ID-IIIDDD&#39;</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_obj</span><span class="p">)</span>
+
+        
+        <span class="k">return</span> <span class="n">results</span>
+</div>
+<div class="viewcode-block" id="FPResource.obj_get_list"><a class="viewcode-back" href="../../auto_modules.html#bcmon.api.FPResource.obj_get_list">[docs]</a>    <span class="k">def</span> <span class="nf">obj_get_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c"># Filtering disabled for brevity...</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object_list</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

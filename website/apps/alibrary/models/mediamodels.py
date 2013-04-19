@@ -11,7 +11,7 @@ import json
 
 # django
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.template.defaultfilters import slugify
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
@@ -167,12 +167,22 @@ class Media(MigrationMixin):
     release = models.ForeignKey('Release', blank=True, null=True, related_name='media_release', on_delete=models.SET_NULL)
     artist = models.ForeignKey('Artist', blank=True, null=True, related_name='media_artist')
     
+    # user relations
+    owner = models.ForeignKey(User, blank=True, null=True, related_name="media_owner", on_delete=models.SET_NULL)
+    creator = models.ForeignKey(User, blank=True, null=True, related_name="media_creator", on_delete=models.SET_NULL)
+    publisher = models.ForeignKey(User, blank=True, null=True, related_name="media_publisher", on_delete=models.SET_NULL)
+
+    
+    
     # relations a.k.a. links
     relations = generic.GenericRelation(Relation)
     
+    # tagging (d_tags = "display tags")
+    d_tags = tagging.fields.TagField(verbose_name="Tags", blank=True, null=True)
+    
     # extra-artists
     # TODO: Fix this - guess should relate to Artist instead of Profession
-    extra_artists = models.ManyToManyField(Profession, through='MediaExtraartists', blank=True, null=True)
+    extra_artists = models.ManyToManyField('Artist', through='MediaExtraartists', blank=True, null=True)
     
     license = models.ForeignKey(License, blank=True, null=True, related_name='media_license')
     
@@ -333,7 +343,10 @@ class Media(MigrationMixin):
         
         if not waveform_image:
             try:
-                self.create_waveform_image()
+                
+                #self.create_waveform_image()
+                # celeryd version
+                self.create_waveform_image.delay(self)
                 waveform_image = self.get_cache_file('png', 'waveform')
             except:
                 waveform_image = None
@@ -512,7 +525,7 @@ class Media(MigrationMixin):
         pass
     
     
-
+    @task
     def create_waveform_image(self):
 
         tmp_directory = tempfile.mkdtemp()
@@ -845,7 +858,7 @@ class Media(MigrationMixin):
                         "import_date": "%sZ" % id
                         }
                 
-                print nfp
+                #print nfp
                 
                 
                 res = fp.ingest(nfp, split=False, do_commit=True)
@@ -967,7 +980,22 @@ class Media(MigrationMixin):
                 
                 
         unique_slugify(self, self.name)
+        
+        # update d_tags
+        t_tags = ''
+        for tag in self.tags:
+            t_tags += '%s, ' % tag    
+        
+        self.tags = t_tags;
+        self.d_tags = t_tags;
+        
         super(Media, self).save(*args, **kwargs)
+
+
+try:
+    tagging.register(Media)
+except:
+    pass
 
 # register
 # post_save.connect(library_post_save, sender=Media)   
@@ -1006,7 +1034,25 @@ def media_post_save(sender, **kwargs):
         
 
 # register
-post_save.connect(media_post_save, sender=Media)    
+post_save.connect(media_post_save, sender=Media) 
+        
+# media post save
+def media_pre_delete(sender, **kwargs):
+    
+    log = logging.getLogger('alibrary.mediamodels.media_pre_delete')
+    obj = kwargs['instance']
+
+    # try to delete fingerprint
+    try:
+        log.info('delete fingerprint on server id: %s' % obj.id)
+        fp.delete("%s" % obj.id)
+    except Exception, e:
+        log.warning('unable to delete fingerprint for media_id: %s' % obj.id)
+        
+        
+
+# register
+pre_delete.connect(media_pre_delete, sender=Media)    
 
 class MediaExtraartists(models.Model):
     artist = models.ForeignKey('Artist', related_name='extraartist_artist')
@@ -1015,6 +1061,7 @@ class MediaExtraartists(models.Model):
     profession = models.ForeignKey(Profession, verbose_name='Role/Profession', related_name='media_extraartist_profession', blank=True, null=True)   
     class Meta:
         app_label = 'alibrary'
+        ordering = ('profession__name', 'artist__name', )
     
     
 
@@ -1034,31 +1081,6 @@ class MediaPlugin(CMSPlugin):
     # meta
     class Meta:
         app_label = 'alibrary'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

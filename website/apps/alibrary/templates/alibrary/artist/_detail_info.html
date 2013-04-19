@@ -2,74 +2,108 @@
 <div class="span7 padded-h container_content">
 
 	<div class="page-header">
-		<h2>{{ object.name|truncate_chars_inner:40 }} <small>{{ object.get_releasetype_display }}</small></h2>
+		<h2>{{ object.name|truncate_chars_inner:40 }} <small>{{ object.type }}</small></h2>
 	</div>
 
 	<dl class="dl-horizontal main">
 
+
+
+		{% if object.real_name %}
 		<dt>
-			{% trans "Artist" %}:
+			{% trans "Realname" %}:
 		</dt>
 		<dd>
-			{% for artist in object.get_artists %}
+			{{ object.real_name }}
+		</dd>
+		{% endif %}
+
+
+		{% if object.aliases.count > 0 %}
+		<dt>
+			{% trans "Aliases" %}:
+		</dt>
+		<dd>
+			{% for artist in object.aliases.all %}
 			{% with item=artist %}
 			{% include "alibrary/element/_inline_link.html" %}
 			{% if not forloop.last %},{% endif %}
 			{% endwith %}
 			{% endfor %}
 		</dd>
+		{% endif %}
 
+		{% if object.members.count > 0 %}
 		<dt>
-			{% trans "Label" %}:
+			{% trans "Members" %}:
 		</dt>
 		<dd>
-			{% with item=object.label %}
+			{% for artist in object.members.all %}
+			{% with item=artist %}
 			{% include "alibrary/element/_inline_link.html" %}
+			{% if not forloop.last %},{% endif %}
 			{% endwith %}
+			{% endfor %}
 		</dd>
+		{% endif %}
+
 
 	</dl>
 
-	<dl class="dl-horizontal license">
 
-		<dt>
-			{% trans "License" %}:
-		</dt>
-		<dd>
-			<div class="license {% if object.get_license %}{{ object.get_license.key }}{% endif %}">
-				{% if object.get_license %}
-				<a rel="tooltip" href="{{ object.get_license.get_absolute_url }}" title="License details" class="dialog disabled-modal"><img src="/static/img/icons/transparent_16x16.png" width="78" height="24" alt="License" class="noborder"></a>
-				{% else %}
-				&nbsp;
-				{% endif %}
-			</div>
-		</dd>
 
-	</dl>
-
-	<dl class="dl-horizontal links external">
+	<dl class="dl-horizontal">
 
 		<dt>
 			{% trans "Show on" %}:
 		</dt>
-		<dd>
-			<a href="http://www.discogs.com/release/3572034" title="Show on Discogs" class="external discogs"><img src="/static/img/base/spacer.png" alt="Discogs" style="width: 16px; height: 16px;"></a>
+		<dd class="horizontal relations">
+			{% for relation in object.relations.specific %}
+			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}"><i class="icon-{{ relation.service }}"></i></a>
+			
+			{% endfor %}
+			<div class="clear"></div>
 		</dd>
 
 	</dl>
 
-	<dl class="dl-horizontal sub">
+	<dl class="dl-horizontal">
 
 		<dt>
-			{% trans "Release date" %}:
+			{% trans "Show on (debug)" %}:
 		</dt>
-		<dd>
-			{% if object.releasedate %}
-			{{ object.releasedate|date:"SHORT_DATE_FORMAT" }}
-			{% else %}
-			{% trans "Unknown" %}
-			{% endif %}
+		<dd class="horizontal relations">
+			{% for relation in object.relations.specific %}
+			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}">{{ relation.service }}</a>
+			
+			{% endfor %}
+			<div class="clear"></div>
 		</dd>
+
+	</dl>
+
+	<!--
+	<dl class="dl-horizontal">
+
+		<dt>
+			{% trans "Relations" %}:
+		</dt>
+		<dd class="horizontal">
+			<ul class="unstyled">
+			{% for relation in object.relations.generic %}
+			<li><a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.url }}">{{ relation.url }}</a></li>
+			
+			{% endfor %}
+			</ul>
+			<div class="clear"></div>
+		</dd>
+
+	</dl>
+	-->
+
+	<dl class="dl-horizontal sub">
+
+
 
 		<dt>
 			{% trans "History" %}:
@@ -90,6 +124,7 @@
 			&nbsp;
 		</dd>
 
+		<!--
 		<dt>
 			{% trans "Stats" %}:
 		</dt>
@@ -98,7 +133,8 @@
 			<span class="value">173</span> <span class="key">{% trans "Plays" %}</span> /
 			<span class="value">28</span> <span class="key">{% trans "Downloads" %}</span>
 		</dd>
-
+		-->
+		
 		{% if object.tags %}
 		<dt>
 			{% trans "Tags" %}:

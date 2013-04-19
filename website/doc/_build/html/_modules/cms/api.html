@@ -1,0 +1,489 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>cms.api &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for cms.api</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Public Python API to create CMS contents.</span>
+
+<span class="sd">WARNING: None of the functions defined in this module checks for permissions.</span>
+<span class="sd">You must implement the necessary permission checks in your own code before</span>
+<span class="sd">calling these methods!</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sites.models</span> <span class="kn">import</span> <span class="n">Site</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">Max</span>
+<span class="kn">from</span> <span class="nn">django.template.defaultfilters</span> <span class="kn">import</span> <span class="n">slugify</span>
+<span class="kn">from</span> <span class="nn">menus.menu_pool</span> <span class="kn">import</span> <span class="n">menu_pool</span>
+
+<span class="kn">from</span> <span class="nn">cms.admin.forms</span> <span class="kn">import</span> <span class="n">save_permissions</span>
+<span class="kn">from</span> <span class="nn">cms.app_base</span> <span class="kn">import</span> <span class="n">CMSApp</span>
+<span class="kn">from</span> <span class="nn">cms.apphook_pool</span> <span class="kn">import</span> <span class="n">apphook_pool</span>
+<span class="kn">from</span> <span class="nn">cms.models.moderatormodels</span> <span class="kn">import</span> <span class="n">ACCESS_PAGE_AND_DESCENDANTS</span>
+<span class="kn">from</span> <span class="nn">cms.models.pagemodel</span> <span class="kn">import</span> <span class="n">Page</span>
+<span class="kn">from</span> <span class="nn">cms.models.permissionmodels</span> <span class="kn">import</span> <span class="n">PageUser</span><span class="p">,</span> <span class="n">PagePermission</span><span class="p">,</span> <span class="n">GlobalPagePermission</span>
+<span class="kn">from</span> <span class="nn">cms.models.placeholdermodel</span> <span class="kn">import</span> <span class="n">Placeholder</span>
+<span class="kn">from</span> <span class="nn">cms.models.pluginmodel</span> <span class="kn">import</span> <span class="n">CMSPlugin</span>
+<span class="kn">from</span> <span class="nn">cms.models.titlemodels</span> <span class="kn">import</span> <span class="n">Title</span>
+<span class="kn">from</span> <span class="nn">cms.plugin_base</span> <span class="kn">import</span> <span class="n">CMSPluginBase</span>
+<span class="kn">from</span> <span class="nn">cms.plugin_pool</span> <span class="kn">import</span> <span class="n">plugin_pool</span>
+<span class="kn">from</span> <span class="nn">cms.utils</span> <span class="kn">import</span> <span class="n">moderator</span>
+<span class="kn">from</span> <span class="nn">cms.utils.permissions</span> <span class="kn">import</span> <span class="n">_thread_locals</span>
+
+
+<span class="c">#===============================================================================</span>
+<span class="c"># Constants </span>
+<span class="c">#===============================================================================</span>
+
+<span class="n">VISIBILITY_ALL</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">VISIBILITY_USERS</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">VISIBILITY_STAFF</span> <span class="o">=</span> <span class="mi">2</span>
+
+<span class="c">#===============================================================================</span>
+<span class="c"># Helpers/Internals</span>
+<span class="c">#===============================================================================</span>
+
+<span class="k">def</span> <span class="nf">_generate_valid_slug</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">language</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a valid slug for a page from source for the given language.</span>
+<span class="sd">    Parent is passed so we can make sure the slug is unique for this level in</span>
+<span class="sd">    the page tree.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">parent</span><span class="p">:</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="n">Title</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">language</span><span class="o">=</span><span class="n">language</span><span class="p">,</span> <span class="n">page__parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="n">Title</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">language</span><span class="o">=</span><span class="n">language</span><span class="p">,</span> <span class="n">page__parent__isnull</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">used</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s">&#39;slug&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">baseslug</span> <span class="o">=</span> <span class="n">slugify</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="n">slug</span> <span class="o">=</span> <span class="n">baseslug</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="n">slug</span> <span class="ow">in</span> <span class="n">used</span><span class="p">:</span>
+        <span class="n">slug</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">baseslug</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">slug</span>
+
+<span class="k">def</span> <span class="nf">_verify_apphook</span><span class="p">(</span><span class="n">apphook</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Verifies the apphook given is valid and returns the normalized form (name)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apphook</span><span class="p">,</span> <span class="s">&#39;__module__&#39;</span><span class="p">)</span> <span class="ow">and</span>  <span class="nb">issubclass</span><span class="p">(</span><span class="n">apphook</span><span class="p">,</span> <span class="n">CMSApp</span><span class="p">):</span>
+        <span class="n">apphook_pool</span><span class="o">.</span><span class="n">discover_apps</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">apphook</span> <span class="ow">in</span> <span class="n">apphook_pool</span><span class="o">.</span><span class="n">apps</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">apphook</span><span class="o">.</span><span class="n">__name__</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apphook</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="n">apphook_pool</span><span class="o">.</span><span class="n">discover_apps</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">apphook</span> <span class="ow">in</span> <span class="n">apphook_pool</span><span class="o">.</span><span class="n">apps</span>
+        <span class="k">return</span> <span class="n">apphook</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;apphook must be string or CMSApp instance&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_verify_plugin_type</span><span class="p">(</span><span class="n">plugin_type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Verifies the given plugin_type is valid and returns a tuple of</span>
+<span class="sd">    (plugin_model, plugin_type)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">plugin_type</span><span class="p">,</span> <span class="s">&#39;__module__&#39;</span><span class="p">)</span> <span class="ow">and</span>
+        <span class="nb">issubclass</span><span class="p">(</span><span class="n">plugin_type</span><span class="p">,</span> <span class="n">CMSPluginBase</span><span class="p">)):</span>
+        <span class="n">plugin_model</span> <span class="o">=</span> <span class="n">plugin_type</span><span class="o">.</span><span class="n">model</span>
+        <span class="k">assert</span> <span class="n">plugin_type</span> <span class="ow">in</span> <span class="n">plugin_pool</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="n">plugin_type</span> <span class="o">=</span> <span class="n">plugin_type</span><span class="o">.</span><span class="n">__name__</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plugin_type</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">plugin_model</span> <span class="o">=</span> <span class="n">plugin_pool</span><span class="o">.</span><span class="n">get_plugin</span><span class="p">(</span><span class="n">plugin_type</span><span class="p">)</span><span class="o">.</span><span class="n">model</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s">&#39;plugin_type must be CMSPluginBase subclass or string&#39;</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;plugin_type must be CMSPluginBase subclass or string&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">plugin_model</span><span class="p">,</span> <span class="n">plugin_type</span>
+
+<span class="c">#===============================================================================</span>
+<span class="c"># Public API </span>
+<span class="c">#===============================================================================</span>
+
+<div class="viewcode-block" id="create_page"><a class="viewcode-back" href="../../auto_modules.html#cms.api.create_page">[docs]</a><span class="k">def</span> <span class="nf">create_page</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">language</span><span class="p">,</span> <span class="n">menu_title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">slug</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">apphook</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">redirect</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">meta_description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">meta_keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">created_by</span><span class="o">=</span><span class="s">&#39;python-api&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">publication_date</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">publication_end_date</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">in_navigation</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">soft_root</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">reverse_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">navigation_extenders</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">published</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">login_required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">limit_visibility_in_menu</span><span class="o">=</span><span class="n">VISIBILITY_ALL</span><span class="p">,</span>
+                <span class="n">position</span><span class="o">=</span><span class="s">&quot;last-child&quot;</span><span class="p">,</span> <span class="n">overwrite_url</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a CMS Page and it&#39;s title for the given language</span>
+<span class="sd">    </span>
+<span class="sd">    See docs/extending_cms/api_reference.rst for more info</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># ugly permissions hack</span>
+    <span class="k">if</span> <span class="n">created_by</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">created_by</span><span class="p">,</span> <span class="n">User</span><span class="p">):</span>
+        <span class="n">_thread_locals</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">created_by</span>
+        <span class="n">created_by</span> <span class="o">=</span> <span class="n">created_by</span><span class="o">.</span><span class="n">username</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_thread_locals</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="c"># validate template</span>
+    <span class="k">assert</span> <span class="n">template</span> <span class="ow">in</span> <span class="p">[</span><span class="n">tpl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tpl</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMS_TEMPLATES</span><span class="p">]</span>
+    
+    <span class="c"># validate language:</span>
+    <span class="k">assert</span> <span class="n">language</span> <span class="ow">in</span> <span class="p">[</span><span class="n">lang</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">lang</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMS_LANGUAGES</span><span class="p">]</span>
+    
+    <span class="c"># set default slug:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">slug</span><span class="p">:</span>
+        <span class="n">slug</span> <span class="o">=</span> <span class="n">_generate_valid_slug</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+    
+    <span class="c"># validate and normalize apphook </span>
+    <span class="k">if</span> <span class="n">apphook</span><span class="p">:</span>
+        <span class="n">application_urls</span> <span class="o">=</span> <span class="n">_verify_apphook</span><span class="p">(</span><span class="n">apphook</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">application_urls</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="c"># validate parent</span>
+    <span class="k">if</span> <span class="n">parent</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">Page</span><span class="p">)</span>
+    
+    <span class="c"># validate publication date</span>
+    <span class="k">if</span> <span class="n">publication_date</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">publication_date</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">)</span>
+    
+    <span class="c"># validate publication end date</span>
+    <span class="k">if</span> <span class="n">publication_end_date</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">publication_end_date</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">)</span>
+        
+    <span class="c"># validate softroot</span>
+    <span class="k">assert</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMS_SOFTROOT</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">soft_root</span>
+    
+    <span class="c"># validate site</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">site</span><span class="p">:</span>
+        <span class="n">site</span> <span class="o">=</span> <span class="n">Site</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_current</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">site</span><span class="p">,</span> <span class="n">Site</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="n">navigation_extenders</span><span class="p">:</span>
+        <span class="n">raw_menus</span> <span class="o">=</span> <span class="n">menu_pool</span><span class="o">.</span><span class="n">get_menus_by_attribute</span><span class="p">(</span><span class="s">&quot;cms_enabled&quot;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">menus</span> <span class="o">=</span> <span class="p">[</span><span class="n">menu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">menu</span> <span class="ow">in</span> <span class="n">raw_menus</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">navigation_extenders</span> <span class="ow">in</span> <span class="n">menus</span>
+        
+    <span class="c"># validate menu visibility</span>
+    <span class="n">accepted_limitations</span> <span class="o">=</span> <span class="p">(</span><span class="n">VISIBILITY_ALL</span><span class="p">,</span> <span class="n">VISIBILITY_USERS</span><span class="p">,</span> <span class="n">VISIBILITY_STAFF</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">limit_visibility_in_menu</span> <span class="ow">in</span> <span class="n">accepted_limitations</span>
+    
+    <span class="c"># validate position</span>
+    <span class="k">assert</span> <span class="n">position</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;last-child&#39;</span><span class="p">,</span> <span class="s">&#39;first-child&#39;</span><span class="p">,</span> <span class="s">&#39;left&#39;</span><span class="p">,</span> <span class="s">&#39;right&#39;</span><span class="p">)</span>
+    
+    <span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">created_by</span><span class="o">=</span><span class="n">created_by</span><span class="p">,</span>
+        <span class="n">changed_by</span><span class="o">=</span><span class="n">created_by</span><span class="p">,</span>
+        <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
+        <span class="n">publication_date</span><span class="o">=</span><span class="n">publication_date</span><span class="p">,</span>
+        <span class="n">publication_end_date</span><span class="o">=</span><span class="n">publication_end_date</span><span class="p">,</span>
+        <span class="n">in_navigation</span><span class="o">=</span><span class="n">in_navigation</span><span class="p">,</span>
+        <span class="n">soft_root</span><span class="o">=</span><span class="n">soft_root</span><span class="p">,</span>
+        <span class="n">reverse_id</span><span class="o">=</span><span class="n">reverse_id</span><span class="p">,</span>
+        <span class="n">navigation_extenders</span><span class="o">=</span><span class="n">navigation_extenders</span><span class="p">,</span>
+        <span class="n">published</span><span class="o">=</span><span class="n">published</span><span class="p">,</span>
+        <span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span>
+        <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+        <span class="n">login_required</span><span class="o">=</span><span class="n">login_required</span><span class="p">,</span>
+        <span class="n">limit_visibility_in_menu</span><span class="o">=</span><span class="n">limit_visibility_in_menu</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">parent</span><span class="p">:</span>
+        <span class="n">page</span><span class="o">.</span><span class="n">insert_at</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+    <span class="n">page</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMS_MODERATOR</span> <span class="ow">and</span> <span class="n">_thread_locals</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+        <span class="n">page</span><span class="o">.</span><span class="n">pagemoderator_set</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">_thread_locals</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+    
+    <span class="n">create_title</span><span class="p">(</span>
+        <span class="n">language</span><span class="o">=</span><span class="n">language</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+        <span class="n">menu_title</span><span class="o">=</span><span class="n">menu_title</span><span class="p">,</span>
+        <span class="n">slug</span><span class="o">=</span><span class="n">slug</span><span class="p">,</span>
+        <span class="n">apphook</span><span class="o">=</span><span class="n">application_urls</span><span class="p">,</span>
+        <span class="n">redirect</span><span class="o">=</span><span class="n">redirect</span><span class="p">,</span>
+        <span class="n">meta_description</span><span class="o">=</span><span class="n">meta_description</span><span class="p">,</span>
+        <span class="n">meta_keywords</span><span class="o">=</span><span class="n">meta_keywords</span><span class="p">,</span>
+        <span class="n">page</span><span class="o">=</span><span class="n">page</span><span class="p">,</span>
+        <span class="n">overwrite_url</span><span class="o">=</span><span class="n">overwrite_url</span>
+    <span class="p">)</span>
+        
+    <span class="k">del</span> <span class="n">_thread_locals</span><span class="o">.</span><span class="n">user</span>
+    <span class="k">return</span> <span class="n">page</span>
+    </div>
+<div class="viewcode-block" id="create_title"><a class="viewcode-back" href="../../auto_modules.html#cms.api.create_title">[docs]</a><span class="k">def</span> <span class="nf">create_title</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">menu_title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">slug</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">apphook</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">redirect</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">meta_description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">meta_keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">overwrite_url</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a title.</span>
+<span class="sd">    </span>
+<span class="sd">    Parent is only used if slug=None.</span>
+<span class="sd">    </span>
+<span class="sd">    See docs/extending_cms/api_reference.rst for more info</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># validate language:</span>
+    <span class="k">assert</span> <span class="n">language</span> <span class="ow">in</span> <span class="p">[</span><span class="n">lang</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">lang</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMS_LANGUAGES</span><span class="p">]</span>
+    
+    <span class="c"># validate page</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">Page</span><span class="p">)</span>
+    
+    <span class="c"># set default slug:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">slug</span><span class="p">:</span>
+        <span class="n">slug</span> <span class="o">=</span> <span class="n">_generate_valid_slug</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+        
+    <span class="c"># validate and normalize apphook </span>
+    <span class="k">if</span> <span class="n">apphook</span><span class="p">:</span>
+        <span class="n">application_urls</span> <span class="o">=</span> <span class="n">_verify_apphook</span><span class="p">(</span><span class="n">apphook</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">application_urls</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="n">title</span> <span class="o">=</span> <span class="n">Title</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">language</span><span class="o">=</span><span class="n">language</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+        <span class="n">menu_title</span><span class="o">=</span><span class="n">menu_title</span><span class="p">,</span>
+        <span class="n">slug</span><span class="o">=</span><span class="n">slug</span><span class="p">,</span>
+        <span class="n">application_urls</span><span class="o">=</span><span class="n">application_urls</span><span class="p">,</span>
+        <span class="n">redirect</span><span class="o">=</span><span class="n">redirect</span><span class="p">,</span>
+        <span class="n">meta_description</span><span class="o">=</span><span class="n">meta_description</span><span class="p">,</span>
+        <span class="n">meta_keywords</span><span class="o">=</span><span class="n">meta_keywords</span><span class="p">,</span>
+        <span class="n">page</span><span class="o">=</span><span class="n">page</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">overwrite_url</span><span class="p">:</span>
+        <span class="n">title</span><span class="o">.</span><span class="n">has_url_overwrite</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">title</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">overwrite_url</span>
+        <span class="n">title</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">title</span>
+</div>
+<div class="viewcode-block" id="add_plugin"><a class="viewcode-back" href="../../auto_modules.html#cms.api.add_plugin">[docs]</a><span class="k">def</span> <span class="nf">add_plugin</span><span class="p">(</span><span class="n">placeholder</span><span class="p">,</span> <span class="n">plugin_type</span><span class="p">,</span> <span class="n">language</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s">&#39;last-child&#39;</span><span class="p">,</span>
+               <span class="n">target</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add a plugin to a placeholder</span>
+<span class="sd">    </span>
+<span class="sd">    See docs/extending_cms/api_reference.rst for more info</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># validate placeholder</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">placeholder</span><span class="p">,</span> <span class="n">Placeholder</span><span class="p">)</span>
+    
+    <span class="c"># validate and normalize plugin type</span>
+    <span class="n">plugin_model</span><span class="p">,</span> <span class="n">plugin_type</span> <span class="o">=</span> <span class="n">_verify_plugin_type</span><span class="p">(</span><span class="n">plugin_type</span><span class="p">)</span>
+        
+
+    <span class="n">max_pos</span> <span class="o">=</span> <span class="n">CMSPlugin</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">language</span><span class="o">=</span><span class="n">language</span><span class="p">,</span>
+        <span class="n">placeholder</span><span class="o">=</span><span class="n">placeholder</span><span class="p">)</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">Max</span><span class="p">(</span><span class="s">&#39;position&#39;</span><span class="p">))[</span><span class="s">&#39;position__max&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="mi">0</span>
+
+    <span class="n">plugin_base</span> <span class="o">=</span> <span class="n">CMSPlugin</span><span class="p">(</span>
+        <span class="n">plugin_type</span><span class="o">=</span><span class="n">plugin_type</span><span class="p">,</span>
+        <span class="n">placeholder</span><span class="o">=</span><span class="n">placeholder</span><span class="p">,</span> 
+        <span class="n">position</span><span class="o">=</span><span class="n">max_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">language</span><span class="o">=</span><span class="n">language</span>
+    <span class="p">)</span>
+    <span class="n">plugin_base</span><span class="o">.</span><span class="n">insert_at</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            
+    <span class="n">plugin</span> <span class="o">=</span> <span class="n">plugin_model</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">plugin_base</span><span class="o">.</span><span class="n">set_base_attr</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
+    <span class="n">plugin</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">plugin</span>
+    </div>
+<div class="viewcode-block" id="create_page_user"><a class="viewcode-back" href="../../auto_modules.html#cms.api.create_page_user">[docs]</a><span class="k">def</span> <span class="nf">create_page_user</span><span class="p">(</span><span class="n">created_by</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span>
+                     <span class="n">can_add_page</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">can_view_page</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                     <span class="n">can_change_page</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">can_delete_page</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> 
+                     <span class="n">can_recover_page</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">can_add_pageuser</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                     <span class="n">can_change_pageuser</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">can_delete_pageuser</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                     <span class="n">can_add_pagepermission</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                     <span class="n">can_change_pagepermission</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                     <span class="n">can_delete_pagepermission</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grant_all</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a page user.</span>
+<span class="sd">    </span>
+<span class="sd">    See docs/extending_cms/api_reference.rst for more info</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">grant_all</span><span class="p">:</span>
+        <span class="c"># just be lazy</span>
+        <span class="k">return</span> <span class="n">create_page_user</span><span class="p">(</span><span class="n">created_by</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span>
+                                <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    
+    <span class="c"># validate created_by</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">created_by</span><span class="p">,</span> <span class="n">User</span><span class="p">)</span>
+    
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;can_add_page&#39;</span><span class="p">:</span> <span class="n">can_add_page</span><span class="p">,</span> 
+        <span class="s">&#39;can_view_page&#39;</span><span class="p">:</span> <span class="n">can_view_page</span><span class="p">,</span> 
+        <span class="s">&#39;can_change_page&#39;</span><span class="p">:</span> <span class="n">can_change_page</span><span class="p">,</span> 
+        <span class="s">&#39;can_delete_page&#39;</span><span class="p">:</span> <span class="n">can_delete_page</span><span class="p">,</span> 
+        <span class="s">&#39;can_recover_page&#39;</span><span class="p">:</span> <span class="n">can_recover_page</span><span class="p">,</span> 
+        <span class="s">&#39;can_add_pageuser&#39;</span><span class="p">:</span> <span class="n">can_add_pageuser</span><span class="p">,</span> 
+        <span class="s">&#39;can_change_pageuser&#39;</span><span class="p">:</span> <span class="n">can_change_pageuser</span><span class="p">,</span> 
+        <span class="s">&#39;can_delete_pageuser&#39;</span><span class="p">:</span> <span class="n">can_delete_pageuser</span><span class="p">,</span> 
+        <span class="s">&#39;can_add_pagepermission&#39;</span><span class="p">:</span> <span class="n">can_add_pagepermission</span><span class="p">,</span>
+        <span class="s">&#39;can_change_pagepermission&#39;</span><span class="p">:</span> <span class="n">can_change_pagepermission</span><span class="p">,</span>
+        <span class="s">&#39;can_delete_pagepermission&#39;</span><span class="p">:</span> <span class="n">can_delete_pagepermission</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">user</span><span class="o">.</span><span class="n">is_staff</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">user</span><span class="o">.</span><span class="n">is_active</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">page_user</span> <span class="o">=</span> <span class="n">PageUser</span><span class="p">(</span><span class="n">created_by</span><span class="o">=</span><span class="n">created_by</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">User</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">local_fields</span><span class="p">]:</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">page_user</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+    <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="n">page_user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="n">save_permissions</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">page_user</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">user</span>
+        </div>
+<div class="viewcode-block" id="assign_user_to_page"><a class="viewcode-back" href="../../auto_modules.html#cms.api.assign_user_to_page">[docs]</a><span class="k">def</span> <span class="nf">assign_user_to_page</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">grant_on</span><span class="o">=</span><span class="n">ACCESS_PAGE_AND_DESCENDANTS</span><span class="p">,</span>
+    <span class="n">can_add</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">can_change</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">can_delete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
+    <span class="n">can_change_advanced_settings</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">can_publish</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
+    <span class="n">can_change_permissions</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">can_move_page</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">can_moderate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
+    <span class="n">can_recover_page</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">can_view</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+    <span class="n">grant_all</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">global_permission</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assigns given user to page, and gives him requested permissions.</span>
+<span class="sd">    </span>
+<span class="sd">    See docs/extending_cms/api_reference.rst for more info</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">grant_all</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">global_permission</span><span class="p">:</span>
+        <span class="c"># shortcut to grant all permissions</span>
+        <span class="k">return</span> <span class="n">assign_user_to_page</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">grant_on</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span>
+                                   <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;can_add&#39;</span><span class="p">:</span> <span class="n">can_add</span><span class="p">,</span>
+        <span class="s">&#39;can_change&#39;</span><span class="p">:</span> <span class="n">can_change</span><span class="p">,</span>
+        <span class="s">&#39;can_delete&#39;</span><span class="p">:</span> <span class="n">can_delete</span><span class="p">,</span> 
+        <span class="s">&#39;can_change_advanced_settings&#39;</span><span class="p">:</span> <span class="n">can_change_advanced_settings</span><span class="p">,</span>
+        <span class="s">&#39;can_publish&#39;</span><span class="p">:</span> <span class="n">can_publish</span><span class="p">,</span> 
+        <span class="s">&#39;can_change_permissions&#39;</span><span class="p">:</span> <span class="n">can_change_permissions</span><span class="p">,</span> 
+        <span class="s">&#39;can_move_page&#39;</span><span class="p">:</span> <span class="n">can_move_page</span><span class="p">,</span> 
+        <span class="s">&#39;can_moderate&#39;</span><span class="p">:</span> <span class="n">can_moderate</span><span class="p">,</span>  
+        <span class="s">&#39;can_view&#39;</span><span class="p">:</span> <span class="n">can_view</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">page_permission</span> <span class="o">=</span> <span class="n">PagePermission</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="n">page</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span>
+                                     <span class="n">grant_on</span><span class="o">=</span><span class="n">grant_on</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">page_permission</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">global_permission</span><span class="p">:</span>
+        <span class="n">page_permission</span> <span class="o">=</span> <span class="n">GlobalPagePermission</span><span class="p">(</span>
+            <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">can_recover_page</span><span class="o">=</span><span class="n">can_recover_page</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">page_permission</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">page_permission</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Site</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_current</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">page_permission</span>
+    </div>
+<div class="viewcode-block" id="publish_page"><a class="viewcode-back" href="../../auto_modules.html#cms.api.publish_page">[docs]</a><span class="k">def</span> <span class="nf">publish_page</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">approve</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Publish a page. This sets `page.published` to `True` and saves it, which</span>
+<span class="sd">    triggers `cms.utils.moderator.page_changed` which does the actual moderation</span>
+<span class="sd">    and publishing action.</span>
+<span class="sd">    </span>
+<span class="sd">    See docs/extending_cms/api_reference.rst for more info</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">page</span><span class="o">.</span><span class="n">published</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="c"># the magic happens in the post save signal here... WTF?</span>
+    <span class="n">page</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="c"># reload page</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">page</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+    <span class="c"># approve page if requested</span>
+    <span class="k">if</span> <span class="n">approve</span><span class="p">:</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="n">approve_page</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">page</span><span class="o">.</span><span class="n">reload</span><span class="p">()</span>
+    </div>
+<div class="viewcode-block" id="approve_page"><a class="viewcode-back" href="../../auto_modules.html#cms.api.approve_page">[docs]</a><span class="k">def</span> <span class="nf">approve_page</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Approve a page version.</span>
+<span class="sd">    </span>
+<span class="sd">    See docs/extending_cms/api_reference.rst for more info</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">class</span> <span class="nc">FakeRequest</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">user</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">FakeRequest</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+    <span class="n">moderator</span><span class="o">.</span><span class="n">approve_page</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">page</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">page</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

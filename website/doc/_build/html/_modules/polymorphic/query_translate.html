@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>polymorphic.query_translate &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for polymorphic.query_translate</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot; PolymorphicQuerySet support functions</span>
+<span class="sd">    Please see README.rst or DOCS.rst or http://bserve.webhop.org/wiki/django_polymorphic</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes.models</span> <span class="kn">import</span> <span class="n">ContentType</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">compatibility_tools</span> <span class="kn">import</span> <span class="n">compat_partition</span>
+
+
+<span class="c">###################################################################################</span>
+<span class="c">### PolymorphicQuerySet support functions</span>
+
+<span class="c"># These functions implement the additional filter- and Q-object functionality.</span>
+<span class="c"># They form a kind of small framework for easily adding more</span>
+<span class="c"># functionality to filters and Q objects.</span>
+<span class="c"># Probably a more general queryset enhancement class could be made out of them.</span>
+
+<div class="viewcode-block" id="translate_polymorphic_filter_definitions_in_kwargs"><a class="viewcode-back" href="../../auto_modules.html#polymorphic.query_translate.translate_polymorphic_filter_definitions_in_kwargs">[docs]</a><span class="k">def</span> <span class="nf">translate_polymorphic_filter_definitions_in_kwargs</span><span class="p">(</span><span class="n">queryset_model</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Translate the keyword argument list for PolymorphicQuerySet.filter()</span>
+
+<span class="sd">    Any kwargs with special polymorphic functionality are replaced in the kwargs</span>
+<span class="sd">    dict with their vanilla django equivalents.</span>
+
+<span class="sd">    For some kwargs a direct replacement is not possible, as a Q object is needed</span>
+<span class="sd">    instead to implement the required functionality. In these cases the kwarg is</span>
+<span class="sd">    deleted from the kwargs dict and a Q object is added to the return list.</span>
+
+<span class="sd">    Modifies: kwargs dict</span>
+<span class="sd">    Returns: a list of non-keyword-arguments (Q objects) to be added to the filter() query.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">additional_args</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">field_path</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="n">new_expr</span> <span class="o">=</span> <span class="n">_translate_polymorphic_filter_definition</span><span class="p">(</span><span class="n">queryset_model</span><span class="p">,</span> <span class="n">field_path</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">new_expr</span><span class="p">)</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">:</span>
+            <span class="c"># replace kwargs element</span>
+            <span class="k">del</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">field_path</span><span class="p">])</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="n">new_expr</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">new_expr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_expr</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">):</span>
+            <span class="k">del</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">field_path</span><span class="p">])</span>
+            <span class="n">additional_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_expr</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">additional_args</span>
+</div>
+<div class="viewcode-block" id="translate_polymorphic_Q_object"><a class="viewcode-back" href="../../auto_modules.html#polymorphic.query_translate.translate_polymorphic_Q_object">[docs]</a><span class="k">def</span> <span class="nf">translate_polymorphic_Q_object</span><span class="p">(</span><span class="n">queryset_model</span><span class="p">,</span> <span class="n">potential_q_object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">tree_node_correct_field_specs</span><span class="p">(</span><span class="n">my_model</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="s">&quot; process all children of this Q node &quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">)):</span>
+            <span class="n">child</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">child</span><span class="p">)</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">:</span>
+                <span class="c"># this Q object child is a tuple =&gt; a kwarg like Q( instance_of=ModelB )</span>
+                <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">child</span>
+                <span class="n">new_expr</span> <span class="o">=</span> <span class="n">_translate_polymorphic_filter_definition</span><span class="p">(</span><span class="n">my_model</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">new_expr</span><span class="p">:</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_expr</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># this Q object child is another Q object, recursively process this as well</span>
+                <span class="n">tree_node_correct_field_specs</span><span class="p">(</span><span class="n">my_model</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">potential_q_object</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">):</span>
+        <span class="n">tree_node_correct_field_specs</span><span class="p">(</span><span class="n">queryset_model</span><span class="p">,</span> <span class="n">potential_q_object</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">potential_q_object</span>
+</div>
+<div class="viewcode-block" id="translate_polymorphic_filter_definitions_in_args"><a class="viewcode-back" href="../../auto_modules.html#polymorphic.query_translate.translate_polymorphic_filter_definitions_in_args">[docs]</a><span class="k">def</span> <span class="nf">translate_polymorphic_filter_definitions_in_args</span><span class="p">(</span><span class="n">queryset_model</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Translate the non-keyword argument list for PolymorphicQuerySet.filter()</span>
+
+<span class="sd">    In the args list, we replace all kwargs to Q-objects that contain special</span>
+<span class="sd">    polymorphic functionality with their vanilla django equivalents.</span>
+<span class="sd">    We traverse the Q object tree for this (which is simple).</span>
+
+<span class="sd">    TODO: investigate: we modify the Q-objects ina args in-place. Is this OK?</span>
+
+<span class="sd">    Modifies: args list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+        <span class="n">translate_polymorphic_Q_object</span><span class="p">(</span><span class="n">queryset_model</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_translate_polymorphic_filter_definition</span><span class="p">(</span><span class="n">queryset_model</span><span class="p">,</span> <span class="n">field_path</span><span class="p">,</span> <span class="n">field_val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Translate a keyword argument (field_path=field_val), as used for</span>
+<span class="sd">    PolymorphicQuerySet.filter()-like functions (and Q objects).</span>
+
+<span class="sd">    A kwarg with special polymorphic functionality is translated into</span>
+<span class="sd">    its vanilla django equivalent, which is returned, either as tuple</span>
+<span class="sd">    (field_path, field_val) or as Q object.</span>
+
+<span class="sd">    Returns: kwarg tuple or Q object or None (if no change is required)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># handle instance_of expressions or alternatively,</span>
+    <span class="c"># if this is a normal Django filter expression, return None</span>
+    <span class="k">if</span> <span class="n">field_path</span> <span class="o">==</span> <span class="s">&#39;instance_of&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_create_model_filter_Q</span><span class="p">(</span><span class="n">field_val</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">field_path</span> <span class="o">==</span> <span class="s">&#39;not_instance_of&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_create_model_filter_Q</span><span class="p">(</span><span class="n">field_val</span><span class="p">,</span> <span class="n">not_instance_of</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="s">&#39;___&#39;</span> <span class="ow">in</span> <span class="n">field_path</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span> <span class="c">#no change</span>
+
+    <span class="c"># filter expression contains &#39;___&#39; (i.e. filter for polymorphic field)</span>
+    <span class="c"># =&gt; get the model class specified in the filter expression</span>
+    <span class="n">newpath</span> <span class="o">=</span> <span class="n">translate_polymorphic_field_path</span><span class="p">(</span><span class="n">queryset_model</span><span class="p">,</span> <span class="n">field_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">newpath</span><span class="p">,</span> <span class="n">field_val</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="translate_polymorphic_field_path"><a class="viewcode-back" href="../../auto_modules.html#polymorphic.query_translate.translate_polymorphic_field_path">[docs]</a><span class="k">def</span> <span class="nf">translate_polymorphic_field_path</span><span class="p">(</span><span class="n">queryset_model</span><span class="p">,</span> <span class="n">field_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Translate a field path from a keyword argument, as used for</span>
+<span class="sd">    PolymorphicQuerySet.filter()-like functions (and Q objects).</span>
+<span class="sd">    Supports leading &#39;-&#39; (for order_by args).</span>
+
+<span class="sd">    E.g.: if queryset_model is ModelA, then &quot;ModelC___field3&quot; is translated</span>
+<span class="sd">    into modela__modelb__modelc__field3.</span>
+<span class="sd">    Returns: translated path (unchanged, if no translation needed)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">classname</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">pure_field_path</span> <span class="o">=</span> <span class="n">compat_partition</span><span class="p">(</span><span class="n">field_path</span><span class="p">,</span> <span class="s">&#39;___&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sep</span><span class="p">:</span> <span class="k">return</span> <span class="n">field_path</span>
+    <span class="k">assert</span> <span class="n">classname</span><span class="p">,</span> <span class="s">&#39;PolymorphicModel: </span><span class="si">%s</span><span class="s">: bad field specification&#39;</span> <span class="o">%</span> <span class="n">field_path</span>
+
+    <span class="n">negated</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">classname</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;-&#39;</span><span class="p">:</span>
+        <span class="n">negated</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">classname</span> <span class="o">=</span> <span class="n">classname</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s">&#39;__&#39;</span> <span class="ow">in</span> <span class="n">classname</span><span class="p">:</span>
+        <span class="c"># the user has app label prepended to class name via __ =&gt; use Django&#39;s get_model function</span>
+        <span class="n">appname</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">classname</span> <span class="o">=</span> <span class="n">compat_partition</span><span class="p">(</span><span class="n">classname</span><span class="p">,</span> <span class="s">&#39;__&#39;</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="n">appname</span><span class="p">,</span> <span class="n">classname</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;PolymorphicModel: model </span><span class="si">%s</span><span class="s"> (in app </span><span class="si">%s</span><span class="s">) not found!&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">appname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">queryset_model</span><span class="p">):</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="s">&#39;PolymorphicModel: queryset filter error: &quot;&#39;</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s">&#39;&quot; is not derived from &quot;&#39;</span> <span class="o">+</span> <span class="n">queryset_model</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s">&#39;&quot;&#39;</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># the user has only given us the class name via __</span>
+        <span class="c"># =&gt; select the model from the sub models of the queryset base model</span>
+
+        <span class="c"># function to collect all sub-models, this should be optimized (cached)</span>
+        <span class="k">def</span> <span class="nf">add_all_sub_models</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">)</span> <span class="ow">and</span> <span class="n">model</span> <span class="o">!=</span> <span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">:</span>
+                <span class="c"># model name is occurring twice in submodel inheritance tree =&gt; Error</span>
+                <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">__name__</span> <span class="ow">in</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">model</span> <span class="o">!=</span> <span class="n">result</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">__name__</span><span class="p">]:</span>
+                    <span class="n">e</span> <span class="o">=</span> <span class="s">&#39;PolymorphicModel: model name alone is ambiguous: </span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s"> and </span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">!</span><span class="se">\n</span><span class="s">&#39;</span>
+                    <span class="n">e</span> <span class="o">+=</span> <span class="s">&#39;In this case, please use the syntax: applabel__ModelName___field&#39;</span>
+                    <span class="k">assert</span> <span class="n">model</span><span class="p">,</span> <span class="n">e</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">model</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                        <span class="n">result</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">__name__</span><span class="p">]</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span> <span class="n">result</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">__name__</span><span class="p">]</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+                <span class="n">result</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span>
+
+            <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">():</span>
+                <span class="n">add_all_sub_models</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+
+        <span class="n">submodels</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">add_all_sub_models</span><span class="p">(</span><span class="n">queryset_model</span><span class="p">,</span> <span class="n">submodels</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">submodels</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">classname</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;PolymorphicModel: model </span><span class="si">%s</span><span class="s"> not found (not a subclass of </span><span class="si">%s</span><span class="s">)!&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">classname</span><span class="p">,</span> <span class="n">queryset_model</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+    <span class="c"># create new field path for expressions, e.g. for baseclass=ModelA, myclass=ModelC</span>
+    <span class="c"># &#39;modelb__modelc&quot; is returned</span>
+    <span class="k">def</span> <span class="nf">_create_base_path</span><span class="p">(</span><span class="n">baseclass</span><span class="p">,</span> <span class="n">myclass</span><span class="p">):</span>
+        <span class="n">bases</span> <span class="o">=</span> <span class="n">myclass</span><span class="o">.</span><span class="n">__bases__</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="n">baseclass</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">myclass</span><span class="o">.</span><span class="n">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">_create_base_path</span><span class="p">(</span><span class="n">baseclass</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">path</span><span class="p">:</span> <span class="k">return</span> <span class="n">path</span> <span class="o">+</span> <span class="s">&#39;__&#39;</span> <span class="o">+</span> <span class="n">myclass</span><span class="o">.</span><span class="n">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s">&#39;&#39;</span>
+
+    <span class="n">basepath</span> <span class="o">=</span> <span class="n">_create_base_path</span><span class="p">(</span><span class="n">queryset_model</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">negated</span><span class="p">:</span> <span class="n">newpath</span> <span class="o">=</span> <span class="s">&#39;-&#39;</span>
+    <span class="k">else</span><span class="p">:</span> <span class="n">newpath</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    
+    <span class="n">newpath</span> <span class="o">+=</span> <span class="n">basepath</span>
+    <span class="k">if</span> <span class="n">basepath</span><span class="p">:</span> <span class="n">newpath</span> <span class="o">+=</span> <span class="s">&#39;__&#39;</span>
+
+    <span class="n">newpath</span> <span class="o">+=</span> <span class="n">pure_field_path</span>
+    <span class="k">return</span> <span class="n">newpath</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_create_model_filter_Q</span><span class="p">(</span><span class="n">modellist</span><span class="p">,</span> <span class="n">not_instance_of</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function for instance_of / not_instance_of</span>
+<span class="sd">    Creates and returns a Q object that filters for the models in modellist,</span>
+<span class="sd">    including all subclasses of these models (as we want to do the same</span>
+<span class="sd">    as pythons isinstance() ).</span>
+<span class="sd">    .</span>
+<span class="sd">    We recursively collect all __subclasses__(), create a Q filter for each,</span>
+<span class="sd">    and or-combine these Q objects. This could be done much more</span>
+<span class="sd">    efficiently however (regarding the resulting sql), should an optimization</span>
+<span class="sd">    be needed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">modellist</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="kn">from</span> <span class="nn">polymorphic_model</span> <span class="kn">import</span> <span class="n">PolymorphicModel</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">modellist</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">list</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">modellist</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">modellist</span><span class="p">,</span> <span class="n">PolymorphicModel</span><span class="p">):</span>
+            <span class="n">modellist</span> <span class="o">=</span> <span class="p">[</span><span class="n">modellist</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&#39;PolymorphicModel: instance_of expects a list of (polymorphic) models or a single (polymorphic) model&#39;</span>
+
+    <span class="k">def</span> <span class="nf">q_class_with_subclasses</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">polymorphic_ctype</span><span class="o">=</span><span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">subclass</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">():</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span> <span class="o">|</span> <span class="n">q_class_with_subclasses</span><span class="p">(</span><span class="n">subclass</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">q</span>
+
+    <span class="n">qlist</span> <span class="o">=</span> <span class="p">[</span>  <span class="n">q_class_with_subclasses</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>  <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">modellist</span>  <span class="p">]</span>
+
+    <span class="n">q_ored</span> <span class="o">=</span> <span class="nb">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">|</span> <span class="n">b</span><span class="p">,</span> <span class="n">qlist</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">not_instance_of</span><span class="p">:</span> <span class="n">q_ored</span> <span class="o">=</span> <span class="o">~</span><span class="n">q_ored</span>
+    <span class="k">return</span> <span class="n">q_ored</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

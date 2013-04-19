@@ -295,6 +295,7 @@ INSTALLED_APPS = (
     
     # server
     'gunicorn',
+    'django_date_extensions',
     
     'haystack',
     
@@ -680,6 +681,12 @@ BROKER_PORT = 5672
 BROKER_USER = "guest"
 BROKER_PASSWORD = "guest"
 BROKER_VHOST = "/"
+
+CELERY_ROUTES = {
+                 #'importer.models.process_task': {'queue': 'import'},
+                 # assign import task to single-instance worker
+                 'importer.models.import_task': {'queue': 'import'},
+                 }
 
 """
 streaming server

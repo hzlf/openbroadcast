@@ -1,0 +1,229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>debug_toolbar.middleware &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for debug_toolbar.middleware</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Debug Toolbar middleware</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">imp</span>
+<span class="kn">import</span> <span class="nn">thread</span>
+
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponseRedirect</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span>
+<span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">smart_unicode</span>
+<span class="kn">from</span> <span class="nn">django.utils.importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+
+<span class="kn">import</span> <span class="nn">debug_toolbar.urls</span>
+<span class="kn">from</span> <span class="nn">debug_toolbar.toolbar.loader</span> <span class="kn">import</span> <span class="n">DebugToolbar</span>
+
+<span class="n">_HTML_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;text/html&#39;</span><span class="p">,</span> <span class="s">&#39;application/xhtml+xml&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="replace_insensitive"><a class="viewcode-back" href="../../auto_modules.html#debug_toolbar.middleware.replace_insensitive">[docs]</a><span class="k">def</span> <span class="nf">replace_insensitive</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">replacement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Similar to string.replace() but is case insensitive</span>
+<span class="sd">    Code borrowed from: http://forums.devshed.com/python-programming-11/case-insensitive-string-replace-490921.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">no_case</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">no_case</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">string</span><span class="p">[:</span><span class="n">index</span><span class="p">]</span> <span class="o">+</span> <span class="n">replacement</span> <span class="o">+</span> <span class="n">string</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">):]</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c"># no results so return the original string</span>
+        <span class="k">return</span> <span class="n">string</span>
+
+</div>
+<div class="viewcode-block" id="DebugToolbarMiddleware"><a class="viewcode-back" href="../../auto_modules.html#debug_toolbar.middleware.DebugToolbarMiddleware">[docs]</a><span class="k">class</span> <span class="nc">DebugToolbarMiddleware</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Middleware to set up Debug Toolbar on incoming request and render toolbar</span>
+<span class="sd">    on outgoing response.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">debug_toolbars</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="DebugToolbarMiddleware.get_current"><a class="viewcode-back" href="../../auto_modules.html#debug_toolbar.middleware.DebugToolbarMiddleware.get_current">[docs]</a>    <span class="k">def</span> <span class="nf">get_current</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">debug_toolbars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">thread</span><span class="o">.</span><span class="n">get_ident</span><span class="p">())</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_urlconfs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># Set method to use to decide to show toolbar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_toolbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_show_toolbar</span>  <span class="c"># default</span>
+
+        <span class="c"># The tag to attach the toolbar to</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s">u&#39;&lt;/body&gt;&#39;</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;DEBUG_TOOLBAR_CONFIG&#39;</span><span class="p">):</span>
+            <span class="n">show_toolbar_callback</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEBUG_TOOLBAR_CONFIG</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s">&#39;SHOW_TOOLBAR_CALLBACK&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">show_toolbar_callback</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">show_toolbar</span> <span class="o">=</span> <span class="n">show_toolbar_callback</span>
+
+            <span class="n">tag</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEBUG_TOOLBAR_CONFIG</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;TAG&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tag</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s">u&#39;&lt;/&#39;</span> <span class="o">+</span> <span class="n">tag</span> <span class="o">+</span> <span class="s">u&#39;&gt;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_show_toolbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;TEST&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">x_forwarded_for</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;HTTP_X_FORWARDED_FOR&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x_forwarded_for</span><span class="p">:</span>
+            <span class="n">remote_addr</span> <span class="o">=</span> <span class="n">x_forwarded_for</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">remote_addr</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;REMOTE_ADDR&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="c"># if not internal ip, and not DEBUG</span>
+        <span class="k">return</span> <span class="n">remote_addr</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">INTERNAL_IPS</span> <span class="ow">and</span> <span class="nb">bool</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DebugToolbarMiddleware.process_request"><a class="viewcode-back" href="../../auto_modules.html#debug_toolbar.middleware.DebugToolbarMiddleware.process_request">[docs]</a>    <span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="n">__traceback_hide__</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_toolbar</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+            <span class="n">urlconf</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&#39;urlconf&#39;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ROOT_URLCONF</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">urlconf</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+                <span class="n">urlconf</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s">&#39;urlconf&#39;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ROOT_URLCONF</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">urlconf</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_urlconfs</span><span class="p">:</span>
+                <span class="n">new_urlconf</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">new_module</span><span class="p">(</span><span class="s">&#39;urlconf&#39;</span><span class="p">)</span>
+                <span class="n">new_urlconf</span><span class="o">.</span><span class="n">urlpatterns</span> <span class="o">=</span> <span class="n">debug_toolbar</span><span class="o">.</span><span class="n">urls</span><span class="o">.</span><span class="n">urlpatterns</span> <span class="o">+</span> \
+                        <span class="n">urlconf</span><span class="o">.</span><span class="n">urlpatterns</span>
+
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">urlconf</span><span class="p">,</span> <span class="s">&#39;handler404&#39;</span><span class="p">):</span>
+                    <span class="n">new_urlconf</span><span class="o">.</span><span class="n">handler404</span> <span class="o">=</span> <span class="n">urlconf</span><span class="o">.</span><span class="n">handler404</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">urlconf</span><span class="p">,</span> <span class="s">&#39;handler500&#39;</span><span class="p">):</span>
+                    <span class="n">new_urlconf</span><span class="o">.</span><span class="n">handler500</span> <span class="o">=</span> <span class="n">urlconf</span><span class="o">.</span><span class="n">handler500</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_urlconfs</span><span class="p">[</span><span class="n">urlconf</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_urlconf</span>
+
+            <span class="n">request</span><span class="o">.</span><span class="n">urlconf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_urlconfs</span><span class="p">[</span><span class="n">urlconf</span><span class="p">]</span>
+
+            <span class="n">toolbar</span> <span class="o">=</span> <span class="n">DebugToolbar</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">panel</span> <span class="ow">in</span> <span class="n">toolbar</span><span class="o">.</span><span class="n">panels</span><span class="p">:</span>
+                <span class="n">panel</span><span class="o">.</span><span class="n">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">debug_toolbars</span><span class="p">[</span><span class="n">thread</span><span class="o">.</span><span class="n">get_ident</span><span class="p">()]</span> <span class="o">=</span> <span class="n">toolbar</span>
+</div>
+<div class="viewcode-block" id="DebugToolbarMiddleware.process_view"><a class="viewcode-back" href="../../auto_modules.html#debug_toolbar.middleware.DebugToolbarMiddleware.process_view">[docs]</a>    <span class="k">def</span> <span class="nf">process_view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">view_func</span><span class="p">,</span> <span class="n">view_args</span><span class="p">,</span> <span class="n">view_kwargs</span><span class="p">):</span>
+        <span class="n">__traceback_hide__</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">toolbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">debug_toolbars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">thread</span><span class="o">.</span><span class="n">get_ident</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">toolbar</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">for</span> <span class="n">panel</span> <span class="ow">in</span> <span class="n">toolbar</span><span class="o">.</span><span class="n">panels</span><span class="p">:</span>
+            <span class="n">panel</span><span class="o">.</span><span class="n">process_view</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">view_func</span><span class="p">,</span> <span class="n">view_args</span><span class="p">,</span> <span class="n">view_kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DebugToolbarMiddleware.process_response"><a class="viewcode-back" href="../../auto_modules.html#debug_toolbar.middleware.DebugToolbarMiddleware.process_response">[docs]</a>    <span class="k">def</span> <span class="nf">process_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">__traceback_hide__</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">ident</span> <span class="o">=</span> <span class="n">thread</span><span class="o">.</span><span class="n">get_ident</span><span class="p">()</span>
+        <span class="n">toolbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">debug_toolbars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ident</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">toolbar</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">response</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">HttpResponseRedirect</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">toolbar</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;INTERCEPT_REDIRECTS&#39;</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="n">response</span>
+            <span class="n">redirect_to</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;Location&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">redirect_to</span><span class="p">:</span>
+                <span class="n">cookies</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">cookies</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="n">render_to_response</span><span class="p">(</span>
+                    <span class="s">&#39;debug_toolbar/redirect.html&#39;</span><span class="p">,</span>
+                    <span class="p">{</span><span class="s">&#39;redirect_to&#39;</span><span class="p">:</span> <span class="n">redirect_to</span><span class="p">}</span>
+                <span class="p">)</span>
+                <span class="n">response</span><span class="o">.</span><span class="n">cookies</span> <span class="o">=</span> <span class="n">cookies</span>
+        <span class="k">if</span> <span class="s">&#39;gzip&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;Content-Encoding&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span> <span class="ow">and</span> \
+           <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;Content-Type&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;;&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">_HTML_TYPES</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">panel</span> <span class="ow">in</span> <span class="n">toolbar</span><span class="o">.</span><span class="n">panels</span><span class="p">:</span>
+                <span class="n">panel</span><span class="o">.</span><span class="n">process_response</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">replace_insensitive</span><span class="p">(</span>
+                <span class="n">smart_unicode</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span>
+                <span class="n">smart_unicode</span><span class="p">(</span><span class="n">toolbar</span><span class="o">.</span><span class="n">render_toolbar</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;Content-Length&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+                <span class="n">response</span><span class="p">[</span><span class="s">&#39;Content-Length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">debug_toolbars</span><span class="p">[</span><span class="n">ident</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">response</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

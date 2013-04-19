@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.conf.urls.defaults import *
 from django.contrib.auth.models import User
 from django.db.models import Count
 import json
@@ -5,6 +7,11 @@ from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
 from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
+from tastypie.cache import SimpleCache
+from tastypie.utils import trailing_slash
+from tastypie.exceptions import ImmediateHttpResponse
+from django.http import HttpResponse
+
 
 from importer.models import Import, ImportFile
 
@@ -103,6 +110,98 @@ class ImportResource(ModelResource):
         
     def save_related(self, obj):
         return True
+    
+    
+    # additional methods
+    def prepend_urls(self):
+        
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/import-all%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('import_all'), name="importer_api_import_all"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/apply-to-all%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('apply_to_all'), name="importer_api_apply_to_all"),
+        ]
+
+    def import_all(self, request, **kwargs):
+        
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        import_session = Import.objects.get(**self.remove_api_resource_names(kwargs))
+        
+        import_files = import_session.files.filter(status=2)
+        
+        for import_file in import_files:
+            print import_file
+            import_file.status = 6
+            import_file.save()
+        
+        
+        bundle = self.build_bundle(obj=import_session, request=request)
+        bundle = self.full_dehydrate(bundle)
+
+        self.log_throttled_access(request)
+        return self.create_response(request, bundle)
+
+    """
+    mass aply import tag
+    """
+    def apply_to_all(self, request, **kwargs):
+        
+        self.method_check(request, allowed=['post'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        import_session = Import.objects.get(**self.remove_api_resource_names(kwargs))
+
+        item_id = request.POST.get('item_id', None)
+        ct = request.POST.get('ct', None)
+        
+        print 'item_id: %s' % item_id
+        print 'ct: %s' % ct
+        
+        if not (ct and item_id):
+            raise ImmediateHttpResponse(response=HttpResponse(status=410))
+        
+        import_files = import_session.files.filter(status__in=(2,4))
+        source = import_files.filter(pk=item_id)
+        # exclude current one
+        import_files = import_files.exclude(pk=item_id)
+        
+        try:
+            source = source[0]
+            print source
+            # print source.import_tag
+        except:
+            source = None
+        
+        
+        if source:
+            sit = source.import_tag   
+            for import_file in import_files:
+                dit = import_file.import_tag
+                
+                if ct == 'artist':
+                    map = ('artist', 'alibrary_artist_id', 'mb_artist_id', 'force_artist')
+                    
+                if ct == 'release':
+                    map = ('release', 'alibrary_release_id', 'mb_release_id', 'force_release')
+                
+                for key in map:
+                    src = sit.get(key, None)
+                    if src:
+                        dit[key] = src
+                    else:
+                        dit.pop(key, None)
+                        
+                import_file.import_tag = dit
+                import_file.save()
+        
+        
+        bundle = self.build_bundle(obj=import_session, request=request)
+        bundle = self.full_dehydrate(bundle)
+
+        self.log_throttled_access(request)
+        return self.create_response(request, bundle)
 
         
 

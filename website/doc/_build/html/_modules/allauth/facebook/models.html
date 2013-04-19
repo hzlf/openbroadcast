@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>allauth.facebook.models &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for allauth.facebook.models</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sites.models</span> <span class="kn">import</span> <span class="n">Site</span>
+
+<span class="kn">from</span> <span class="nn">allauth.socialaccount.defs</span> <span class="kn">import</span> <span class="n">SocialAccountProvider</span>
+<span class="kn">from</span> <span class="nn">allauth.socialaccount.models</span> <span class="kn">import</span> <span class="n">SocialAccount</span>
+
+<div class="viewcode-block" id="FacebookAppManager"><a class="viewcode-back" href="../../../auto_modules.html#allauth.facebook.models.FacebookAppManager">[docs]</a><span class="k">class</span> <span class="nc">FacebookAppManager</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">):</span>
+<div class="viewcode-block" id="FacebookAppManager.get_current"><a class="viewcode-back" href="../../../auto_modules.html#allauth.facebook.models.FacebookAppManager.get_current">[docs]</a>    <span class="k">def</span> <span class="nf">get_current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">site</span> <span class="o">=</span> <span class="n">Site</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_current</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="FacebookApp"><a class="viewcode-back" href="../../../auto_modules.html#allauth.facebook.models.FacebookApp">[docs]</a><span class="k">class</span> <span class="nc">FacebookApp</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">FacebookAppManager</span><span class="p">()</span>
+
+    <span class="n">site</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Site</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+    <span class="n">application_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
+    <span class="n">application_secret</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&quot;</span><span class="si">%s</span><span class="s"> (@</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FacebookAccount"><a class="viewcode-back" href="../../../auto_modules.html#allauth.facebook.models.FacebookAccount">[docs]</a><span class="k">class</span> <span class="nc">FacebookAccount</span><span class="p">(</span><span class="n">SocialAccount</span><span class="p">):</span>
+    <span class="n">social_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">link</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">URLField</span><span class="p">()</span>
+
+<div class="viewcode-block" id="FacebookAccount.get_profile_url"><a class="viewcode-back" href="../../../auto_modules.html#allauth.facebook.models.FacebookAccount.get_profile_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_profile_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">link</span>
+</div>
+<div class="viewcode-block" id="FacebookAccount.get_provider"><a class="viewcode-back" href="../../../auto_modules.html#allauth.facebook.models.FacebookAccount.get_provider">[docs]</a>    <span class="k">def</span> <span class="nf">get_provider</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">SocialAccountProvider</span><span class="o">.</span><span class="n">FACEBOOK</span>
+</div>
+<div class="viewcode-block" id="FacebookAccount.get_avatar_url"><a class="viewcode-back" href="../../../auto_modules.html#allauth.facebook.models.FacebookAccount.get_avatar_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_avatar_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;http://graph.facebook.com/</span><span class="si">%s</span><span class="s">/picture?type=large&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">social_id</span>
+</div>
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">social_id</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FacebookAccount.sync"><a class="viewcode-back" href="../../../auto_modules.html#allauth.facebook.models.FacebookAccount.sync">[docs]</a>    <span class="k">def</span> <span class="nf">sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">link</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;facebook_me&#39;</span><span class="p">][</span><span class="s">&#39;link&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;facebook_me&#39;</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">access_token</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;facebook_access_token&#39;</span><span class="p">]</span>
+        <span class="n">token</span><span class="p">,</span> <span class="n">created</span> <span class="o">=</span> <span class="n">FacebookAccessToken</span><span class="o">.</span><span class="n">objects</span> \
+            <span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">app</span><span class="o">=</span><span class="n">FacebookApp</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_current</span><span class="p">(),</span>
+                           <span class="n">account</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                           <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;access_token&#39;</span><span class="p">:</span> <span class="n">access_token</span><span class="p">})</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">created</span> <span class="ow">and</span> <span class="n">token</span><span class="o">.</span><span class="n">access_token</span> <span class="o">!=</span> <span class="n">access_token</span><span class="p">:</span>
+            <span class="n">token</span><span class="o">.</span><span class="n">access_token</span> <span class="o">=</span> <span class="n">access_token</span>
+            <span class="n">token</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    </div></div>
+<div class="viewcode-block" id="FacebookAccessToken"><a class="viewcode-back" href="../../../auto_modules.html#allauth.facebook.models.FacebookAccessToken">[docs]</a><span class="k">class</span> <span class="nc">FacebookAccessToken</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">FacebookApp</span><span class="p">)</span>
+    <span class="n">account</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">FacebookAccount</span><span class="p">)</span>
+    <span class="n">access_token</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">unique_together</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;app&#39;</span><span class="p">,</span> <span class="s">&#39;account&#39;</span><span class="p">)</span>                                                    
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">access_token</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

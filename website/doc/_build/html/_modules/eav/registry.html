@@ -1,0 +1,294 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>eav.registry &mdash; obp 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for eav.registry</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># vim: ai ts=4 sts=4 et sw=4 coding=utf-8</span>
+<span class="c">#</span>
+<span class="c">#    This software is derived from EAV-Django originally written and</span>
+<span class="c">#    copyrighted by Andrey Mikhaylenko &lt;http://pypi.python.org/pypi/eav-django&gt;</span>
+<span class="c">#</span>
+<span class="c">#    This is free software: you can redistribute it and/or modify</span>
+<span class="c">#    it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c">#    by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">#    (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">#    This software is distributed in the hope that it will be useful,</span>
+<span class="c">#    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#    GNU Lesser General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c">#    You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c">#    along with EAV-Django.  If not, see &lt;http://gnu.org/licenses/&gt;.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">########</span>
+<span class="sd">registry</span>
+<span class="sd">########</span>
+
+<span class="sd">This contains the registry classes</span>
+
+<span class="sd">Classes</span>
+<span class="sd">-------</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">django.db.utils</span> <span class="kn">import</span> <span class="n">DatabaseError</span>
+<span class="kn">from</span> <span class="nn">django.db.models.signals</span> <span class="kn">import</span> <span class="n">pre_init</span><span class="p">,</span> <span class="n">post_init</span><span class="p">,</span> <span class="n">pre_save</span><span class="p">,</span> <span class="n">post_save</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes</span> <span class="kn">import</span> <span class="n">generic</span>
+
+<span class="kn">from</span> <span class="nn">.managers</span> <span class="kn">import</span> <span class="n">EntityManager</span>
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Entity</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">,</span> <span class="n">Value</span>
+
+
+<div class="viewcode-block" id="EavConfig"><a class="viewcode-back" href="../../auto_modules.html#eav.registry.EavConfig">[docs]</a><span class="k">class</span> <span class="nc">EavConfig</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The default EevConfig class used if it is not overriden on registration.</span>
+<span class="sd">    This is where all the default eav attribute names are defined.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">manager_attr</span> <span class="o">=</span> <span class="s">&#39;objects&#39;</span>
+    <span class="n">manager_only</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">eav_attr</span> <span class="o">=</span> <span class="s">&#39;eav&#39;</span>
+    <span class="n">generic_relation_attr</span> <span class="o">=</span> <span class="s">&#39;eav_values&#39;</span>
+    <span class="n">generic_relation_related_name</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="EavConfig.get_attributes"><a class="viewcode-back" href="../../auto_modules.html#eav.registry.EavConfig.get_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">get_attributes</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        By default, all :class:`~eav.models.Attribute` object apply to an</span>
+<span class="sd">        entity, unless you provide a custom EavConfig class overriding this.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">Attribute</span><span class="o">.</span><span class="n">on_site</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="Registry"><a class="viewcode-back" href="../../auto_modules.html#eav.registry.Registry">[docs]</a><span class="k">class</span> <span class="nc">Registry</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Handles registration through the</span>
+<span class="sd">    :meth:`register` and :meth:`unregister` methods.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Registry.register"><a class="viewcode-back" href="../../auto_modules.html#eav.registry.Registry.register">[docs]</a>    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="n">model_cls</span><span class="p">,</span> <span class="n">config_cls</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Registers *model_cls* with eav. You can pass an optional *config_cls*</span>
+<span class="sd">        to override the EavConfig defaults.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">           Multiple registrations for the same entity are harmlessly ignored.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model_cls</span><span class="p">,</span> <span class="s">&#39;_eav_config_cls&#39;</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">config_cls</span> <span class="ow">is</span> <span class="n">EavConfig</span> <span class="ow">or</span> <span class="n">config_cls</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">config_cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">Config&quot;</span> <span class="o">%</span> <span class="n">model_cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                              <span class="p">(</span><span class="n">EavConfig</span><span class="p">,),</span> <span class="p">{})</span>
+
+        <span class="c"># set _eav_config_cls on the model so we can access it there</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">model_cls</span><span class="p">,</span> <span class="s">&#39;_eav_config_cls&#39;</span><span class="p">,</span> <span class="n">config_cls</span><span class="p">)</span>
+
+        <span class="n">reg</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="n">model_cls</span><span class="p">)</span>
+        <span class="n">reg</span><span class="o">.</span><span class="n">_register_self</span><span class="p">()</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Registry.unregister"><a class="viewcode-back" href="../../auto_modules.html#eav.registry.Registry.unregister">[docs]</a>    <span class="k">def</span> <span class="nf">unregister</span><span class="p">(</span><span class="n">model_cls</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Unregisters *model_cls* with eav.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">           Unregistering a class not already registered is harmlessly ignored.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model_cls</span><span class="p">,</span> <span class="s">&#39;_eav_config_cls&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="n">reg</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="n">model_cls</span><span class="p">)</span>
+        <span class="n">reg</span><span class="o">.</span><span class="n">_unregister_self</span><span class="p">()</span>
+
+        <span class="nb">delattr</span><span class="p">(</span><span class="n">model_cls</span><span class="p">,</span> <span class="s">&#39;_eav_config_cls&#39;</span><span class="p">)</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Registry.attach_eav_attr"><a class="viewcode-back" href="../../auto_modules.html#eav.registry.Registry.attach_eav_attr">[docs]</a>    <span class="k">def</span> <span class="nf">attach_eav_attr</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Attache EAV Entity toolkit to an instance after init.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">instance</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;instance&#39;</span><span class="p">]</span>
+        <span class="n">config_cls</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_eav_config_cls</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">config_cls</span><span class="o">.</span><span class="n">eav_attr</span><span class="p">,</span> <span class="n">Entity</span><span class="p">(</span><span class="n">instance</span><span class="p">))</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_cls</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Set the *model_cls* and its *config_cls*</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span> <span class="o">=</span> <span class="n">model_cls</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_cls</span> <span class="o">=</span> <span class="n">model_cls</span><span class="o">.</span><span class="n">_eav_config_cls</span>
+
+    <span class="k">def</span> <span class="nf">_attach_manager</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Attach the manager to *manager_attr* specified in *config_cls*</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c"># save the old manager if the attribute name conflict with the new one</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_cls</span><span class="o">.</span><span class="n">manager_attr</span><span class="p">):</span>
+            <span class="n">mgr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_cls</span><span class="o">.</span><span class="n">manager_attr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config_cls</span><span class="o">.</span><span class="n">old_mgr</span> <span class="o">=</span> <span class="n">mgr</span>
+
+        <span class="c"># attache the new manager to the model</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">EntityManager</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">contribute_to_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_cls</span><span class="o">.</span><span class="n">manager_attr</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_detach_manager</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Detach the manager, and reatach the previous manager (if there was one)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_cls</span><span class="o">.</span><span class="n">manager_attr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_cls</span><span class="p">,</span> <span class="s">&#39;old_mgr&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config_cls</span><span class="o">.</span><span class="n">old_mgr</span> \
+                <span class="o">.</span><span class="n">contribute_to_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">config_cls</span><span class="o">.</span><span class="n">manager_attr</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_attach_signals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Attach all signals for eav</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">post_init</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">Registry</span><span class="o">.</span><span class="n">attach_eav_attr</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="p">)</span>
+        <span class="n">pre_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">Entity</span><span class="o">.</span><span class="n">pre_save_handler</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="p">)</span>
+        <span class="n">post_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">Entity</span><span class="o">.</span><span class="n">post_save_handler</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_detach_signals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Detach all signals for eav</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">post_init</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">Registry</span><span class="o">.</span><span class="n">attach_eav_attr</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="p">)</span>
+        <span class="n">pre_save</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">Entity</span><span class="o">.</span><span class="n">pre_save_handler</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="p">)</span>
+        <span class="n">post_save</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">Entity</span><span class="o">.</span><span class="n">post_save_handler</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_attach_generic_relation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Set up the generic relation for the entity</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">rel_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_cls</span><span class="o">.</span><span class="n">generic_relation_related_name</span> <span class="ow">or</span> \
+                   <span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="o">.</span><span class="n">__name__</span>
+
+        <span class="n">gr_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_cls</span><span class="o">.</span><span class="n">generic_relation_attr</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">generic_relation</span> <span class="o">=</span> \
+                     <span class="n">generic</span><span class="o">.</span><span class="n">GenericRelation</span><span class="p">(</span><span class="n">Value</span><span class="p">,</span>
+                                             <span class="n">object_id_field</span><span class="o">=</span><span class="s">&#39;entity_id&#39;</span><span class="p">,</span>
+                                             <span class="n">content_type_field</span><span class="o">=</span><span class="s">&#39;entity_ct&#39;</span><span class="p">,</span>
+                                             <span class="n">related_name</span><span class="o">=</span><span class="n">rel_name</span><span class="p">)</span>
+        <span class="n">generic_relation</span><span class="o">.</span><span class="n">contribute_to_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="p">,</span> <span class="n">gr_name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_detach_generic_relation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Remove the generic relation from the entity</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">gen_rel_field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_cls</span><span class="o">.</span><span class="n">generic_relation_attr</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">local_many_to_many</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">gen_rel_field</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">local_many_to_many</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+                <span class="k">break</span>
+
+        <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_cls</span><span class="p">,</span> <span class="n">gen_rel_field</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_register_self</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Call the necessary registration methods</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_attach_manager</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_cls</span><span class="o">.</span><span class="n">manager_only</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_attach_signals</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_attach_generic_relation</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_unregister_self</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Call the necessary unregistration methods</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_detach_manager</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_cls</span><span class="o">.</span><span class="n">manager_only</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_detach_signals</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_detach_generic_relation</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, jonas ohrstrom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>
