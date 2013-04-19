@@ -73,6 +73,7 @@ class Process(object):
         musicbrainzngs.set_rate_limit(MUSICBRAINZ_RATE_LIMIT)
         
         self.pp = pprint.PrettyPrinter(indent=4)
+        self.pp.pprint = lambda d: None
         
         if MUSICBRAINZ_HOST:
             musicbrainzngs.set_hostname(MUSICBRAINZ_HOST)

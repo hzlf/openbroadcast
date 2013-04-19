@@ -69,7 +69,7 @@ class Importer(object):
             
         self.pp = pprint.PrettyPrinter(indent=4)
         
-        #self.pp.pprint = lambda d: None
+        self.pp.pprint = lambda d: None
         
         
         self.mb_completed = []

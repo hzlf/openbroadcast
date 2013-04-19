@@ -343,9 +343,9 @@ var ImportfileApp = function() {
 		$('.tooltip-inline', self.container).each(function(index){
 		
 		    var el = $(this);
-
+			/**/
 		    $.get(el.data('resource_uri'), function(data){
-		    
+						    
 		    	data.ct = el.data('ct');
 		    
 		    	var d = { item: data }
@@ -354,6 +354,7 @@ var ImportfileApp = function() {
 				
 		        el.popover({content: html, title: data.name, trigger: 'hover', placement: 'top', html: true});        
 		    });
+		    
 		       
 		});
 		

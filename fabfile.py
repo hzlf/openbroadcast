@@ -142,6 +142,7 @@ def deploy():
         run migrations
         """
         try:
+            run('/srv/%s/bin/python /%s/src/website/manage.py syncdb' % (env.site_id, env.path))
             run('/srv/%s/bin/python /%s/src/website/manage.py migrate' % (env.site_id, env.path))
         except Exception, e:
             pass

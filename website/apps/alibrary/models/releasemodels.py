@@ -544,8 +544,6 @@ class Release(MigrationMixin):
     # OBSOLETE
     def complete_by_mb_id(self, mb_id):
         
-        import pprint
-        pp = pprint.PrettyPrinter(indent=4)
         
         obj = self
 
@@ -557,8 +555,7 @@ class Release(MigrationMixin):
         
         r = requests.get(url)
         result = r.json()
-        
-        pp.pprint(result)
+
         
         return obj
     

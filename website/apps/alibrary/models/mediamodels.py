@@ -528,26 +528,27 @@ class Media(MigrationMixin):
     @task
     def create_waveform_image(self):
 
-        tmp_directory = tempfile.mkdtemp()
-
-        src_path = self.master.path;
-        tmp_path = os.path.join(tmp_directory, 'tmp.wav')
-        dst_path = os.path.join(self.get_folder_path('cache'), 'waveform.png')
-        
-        print 'create waveform'
-        print 'src_path: %s' % src_path
-        print 'tmp_path: %s' % tmp_path
-        print 'dst_path: %s' % dst_path
-        
-        audiotools.open(src_path).convert(tmp_path, audiotools.WaveAudio)
-        
-        args = (tmp_path, dst_path, None, 1800, 301, 2048)
-        create_wave_images(*args)
-        
-        try:
-            shutil.rmtree(tmp_directory)
-        except Exception, e:
-            print e
+        if self.master:
+            tmp_directory = tempfile.mkdtemp()
+    
+            src_path = self.master.path;
+            tmp_path = os.path.join(tmp_directory, 'tmp.wav')
+            dst_path = os.path.join(self.get_folder_path('cache'), 'waveform.png')
+            
+            print 'create waveform'
+            print 'src_path: %s' % src_path
+            print 'tmp_path: %s' % tmp_path
+            print 'dst_path: %s' % dst_path
+            
+            audiotools.open(src_path).convert(tmp_path, audiotools.WaveAudio)
+            
+            args = (tmp_path, dst_path, None, 1800, 301, 2048)
+            create_wave_images(*args)
+            
+            try:
+                shutil.rmtree(tmp_directory)
+            except Exception, e:
+                print e
             
         return
 

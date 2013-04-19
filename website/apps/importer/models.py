@@ -392,9 +392,8 @@ class ImportFile(BaseModel):
         
     @task
     def import_task(obj):
-
-
-
+        log = logging.getLogger('importer.models.import_task')
+        log.info('Starting import task for:  %s' % (obj.pk))
         # to prevent circular import errors
         from util.importer import Importer
         importer = Importer()
@@ -413,6 +412,7 @@ class ImportFile(BaseModel):
         else:
             obj.status = 99
         
+        log.info('Ending import task for:  %s' % (obj.pk))
         obj.save()
     
     def save(self, skip_apply_import_tag=False, *args, **kwargs):
