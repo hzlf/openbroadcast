@@ -21,13 +21,17 @@
 		alibrary.playlist_editor.api_url = "{{ object.get_api_url }}";
 		// alibrary.playlist_editor.init();
 
+
 		soundManager.setup({
 			url: '{{ STATIC_URL }}alibrary/js/lib/soundmanager2/swf/',
 			flashVersion: 9,
 			useFlashBlock: true,
+			debugFlash: true,
+			debugMode: true,
+			flashLoadTimeout: 0,
 			//useFastPolling: true,
-			useHighPerformance: true,
-			flashPollingInterval: 50,
+			useHighPerformance: false,
+			flashPollingInterval: 100,
 			html5PollingInterval: 100,
 			onready: function() {
 				alibrary.playlist_editor.init();

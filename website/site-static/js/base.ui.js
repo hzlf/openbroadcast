@@ -1618,6 +1618,8 @@ base.ui.listview = function() {
 	/*
 	 * Listview - Style selector
 	 */
+	 
+	/* moved to query variable
 	$('div.listhead a.action.list_style').live('click', function() {		
 
 		var key = 'list_style';
@@ -1650,6 +1652,10 @@ base.ui.listview = function() {
 		
 		return false;
 	});
+	*/
+	
+	
+	
 	
 	/*
 	 * Listview - row functions
@@ -1707,7 +1713,9 @@ base.ui.listview = function() {
 
 	/*
 	 * Info display for 'large' view
+	 * refcatored to css3
 	 */
+	/*
 	$('div.listview.container.l div.list_body_row').hover(function(event) {
 		
 		var container = $(this);
@@ -1720,6 +1728,7 @@ base.ui.listview = function() {
 		var spacer = $(this).find('div.spacer');		
 		spacer.animate({height:'150px'},{queue:true,duration:50});
 	});
+	*/
 	
 	
 	

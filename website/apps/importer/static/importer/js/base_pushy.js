@@ -170,10 +170,57 @@ ImporterUi = function() {
 				$('.importfile.' + cls).hide(300);
 				$(this).data('toggle-active', 0);
 			}
-			
-			
+
 			
 		});
+		
+		
+		// "add all to playlist"
+		var container = $('.sidebar.playlist-container');
+		$(container).on('click', 'a.add-all-to-playlist', function(e){
+			e.preventDefault();
+
+			// get id's
+			// console.log(self.importfiles);
+			var ids = [];
+			$.each(self.importfiles, function(i, el) {
+				if(el.local_data.status == 'done' || el.local_data.status == 'duplicate') {
+					ids.push(el.local_data.media.id);
+				}
+			});
+
+			/**/
+			var data = {
+				ids: ids.join(','), 
+				ct: 'media'
+			}
+
+			
+
+			url = '/api/v1/playlist/collect/';
+			
+			/**/
+			jQuery.ajax({
+				url: url,
+				type: 'POST',
+				data: data,
+				dataType: "json",
+				contentType: "application/json",
+				//processData:  false,
+				success: function(data) {
+					alibrary.playlist.update_playlists();
+				},
+				async: true
+			});
+			
+
+
+		});
+		
+		
+		
+		
+		
 	};
 
 

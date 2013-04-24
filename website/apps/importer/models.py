@@ -21,7 +21,7 @@ from django.contrib.contenttypes import generic
 from django_extensions.db.fields.json import JSONField
 
 
-from alibrary.models import Release, Media, Artist, Relation
+from alibrary.models import Release, Media, Artist, Relation, Playlist
 
 
 import magic
@@ -173,21 +173,26 @@ class Import(BaseModel):
                 
 
 
+    def add_to_playlist(self, item):
+        pass
+    
+    def add_to_collection(self, item):
+        pass
+
+
 
 
     # importitem handling
     def add_importitem(self, item):
         ctype = ContentType.objects.get_for_model(item)
         
-        print 
-        print '*******'
-        print 'item: %s' % item
-        print 'ctype: %s' % ctype
-        print 'pk: %s' % item.pk
-        
-        print
-        
-        return ImportItem.objects.get_or_create(object_id=item.pk, content_type=ctype, import_session=self)
+        item, created = ImportItem.objects.get_or_create(object_id=item.pk, content_type=ctype, import_session=self)
+    
+        if created:
+            self.add_to_playlist(item)
+            self.add_to_collection(item)
+    
+        return item
     
     def get_importitem_ids(self, ctype):
         ii_ids = ImportItem.objects.filter(content_type=ctype, import_session=self).values_list('object_id', flat=True)
@@ -373,6 +378,8 @@ class ImportFile(BaseModel):
         
         if media:
             obj.status = 5
+            # add to session
+            self.import_session.add_importitem(obj)
         
         obj.results_tag_status = True
         obj.save()

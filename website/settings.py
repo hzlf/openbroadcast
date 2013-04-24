@@ -96,6 +96,7 @@ MIDDLEWARE_CLASSES = (
     # custom
     #'lib.middleware.ProfileMiddleware',
     #'lib.middleware.PrettifyMiddlewareBS',
+    'django_badbrowser.middleware.BrowserSupportDetection',
     
     'arating.middleware.AratingIpMiddleware',
     
@@ -331,6 +332,9 @@ INSTALLED_APPS = (
     'clear_cache',
     
     'actstream',
+    
+    'django_badbrowser',
+    'datatrans',
 
     
     'eav',
@@ -367,6 +371,9 @@ INSTALLED_APPS = (
     # rest & API
     'djangorestframework',
     
+    # stats
+    'atracker',
+    
     
     # users/auth
     'avatar',
@@ -401,7 +408,7 @@ INSTALLED_APPS = (
     'asearch',
     #'django_db_signals',
     'pushy',
-    #'turbolinks',
+    'turbolinks',
     
     
     
@@ -673,6 +680,14 @@ sendfile, delivers bought relases/tracks
 SENDFILE_BACKEND = 'sendfile.backends.simple'
 
 
+BADBROWSER_REQUIREMENTS = (
+    ("firefox", "3.0"),
+    ("chrome", "10.0"),
+    ("microsoft internet explorer", "8"),
+    ("opera", None), # None indicates no support for the given browser, whatever the version
+)
+BADBROWSER_SUGGEST = ("firefox", "chrome", "safari", "opera", "microsoft internet explorer")
+#BADBROWSER_BASE_TEMPLATE = "base.html"
 
 """
 celeryd

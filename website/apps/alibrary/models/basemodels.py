@@ -84,7 +84,9 @@ class MigrationMixin(models.Model):
     
 
 
-
+from datatrans.utils import register
+class LabelTranslation(object):
+    fields = ('name', 'address')
 
 class Label(MPTTModel, MigrationMixin):
 
@@ -166,7 +168,7 @@ except:
 # register
 post_save.connect(library_post_save, sender=Label)   
  
-        
+# register(Label, LabelTranslation)     
         
         
         

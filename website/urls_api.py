@@ -7,7 +7,7 @@ from bcmon.api import ChannelResource as BcmonChannelResource
 from alibrary.api import MediaResource, ReleaseResource, ArtistResource, LabelResource, SimplePlaylistResource, PlaylistResource, PlaylistItemPlaylistResource
 from importer.api import ImportResource, ImportFileResource
 from exporter.api import ExportResource, ExportItemResource
-from abcast.api import StationResource, ChannelResource, JingleResource, JingleSetResource
+from abcast.api import StationResource, ChannelResource, JingleResource, JingleSetResource, EmissionResource
 
 from fluent_comments.api import CommentResource
 
@@ -39,6 +39,9 @@ api.register(StationResource())
 api.register(ChannelResource())
 api.register(JingleResource())
 api.register(JingleSetResource())
+
+### scheduler
+api.register(EmissionResource())
 
 # comment
 api.register(CommentResource())

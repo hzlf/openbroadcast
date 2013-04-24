@@ -3,9 +3,11 @@
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/playlist.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}
 <script>
+
+	var alibrary = alibrary || {};
+	
 	$(function(){
 
-		var alibrary = alibrary || {};
 		alibrary.playlist = new PlaylistUi();
 		alibrary.playlist.api_url = "{% url api_dispatch_list resource_name='playlist' api_name='v1'%}";
 		alibrary.playlist.api_url_simple = "{% url api_dispatch_list resource_name='simpleplaylist' api_name='v1'%}";

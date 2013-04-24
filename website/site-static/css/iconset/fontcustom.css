@@ -1,13 +1,13 @@
 /*
-  Font Custom - icon webfonts made simple
+  Font Custom - cicon webfonts made simple
 */
 
 @font-face {
-  font-family: "fontawesome";
-  src: url("fontawesome-a373f532db61f310d45405fbf96301ab.eot?#iefix") format("embedded-opentype"),
-       url("fontawesome-a373f532db61f310d45405fbf96301ab.woff") format("woff"),
-       url("fontawesome-a373f532db61f310d45405fbf96301ab.ttf") format("truetype"),
-       url("fontawesome-a373f532db61f310d45405fbf96301ab.svg#fontawesome") format("svg");
+  font-family: "iconset";
+  src: url("iconset.eot?#iefix") format("embedded-opentype"),
+       url("iconset.woff") format("woff"),
+       url("iconset.ttf") format("truetype"),
+       url("iconset.svg#iconset") format("svg");
   font-weight: normal;
   font-style: normal;
 }
@@ -16,61 +16,59 @@
   Bootstrap Overrides
 */
 
-[class^="icon-"]:before, [class*=" icon-"]:before {
-  font-family: "fontawesome";
+[class^="cicon-"]:before, [class*=" cicon-"]:before {
+  font-family: "iconset";
   font-weight: normal;
   font-style: normal;
   display: inline-block;
   text-decoration: inherit;
 }
 
-a [class^="icon-"], a [class*=" icon-"] {
+a [class^="cicon-"], a [class*=" cicon-"] {
   display: inline-block;
   text-decoration: inherit;
 }
 
-/* makes the font 33% larger relative to the icon container */
-.icon-large:before {
+/* makes the font 33% larger relative to the cicon container */
+.cicon-large:before {
   vertical-align: top;
   font-size: 1.333em;
 }
 
-/* keeps button heights with and without icons the same */
-.btn [class^="icon-"], .btn [class*=" icon-"] {
+/* keeps button heights with and without cicons the same */
+.btn [class^="cicon-"], .btn [class*=" cicon-"] {
   line-height: 0.9em;
 }
 
-li [class^="icon-"], li [class*=" icon-"] {
+li [class^="cicon-"], li [class*=" cicon-"] {
   display: inline-block;
   width: 1.25em;
   text-align: center;
 }
 
-/* 1.5 increased font size for icon-large * 1.25 width */
-li .icon-large[class^="icon-"], li .icon-large[class*=" icon-"] {
+/* 1.5 increased font size for cicon-large * 1.25 width */
+li .cicon-large[class^="cicon-"], li .cicon-large[class*=" cicon-"] {
   width: 1.875em;
 }
 
-li[class^="icon-"], li[class*=" icon-"] {
+li[class^="cicon-"], li[class*=" cicon-"] {
   margin-left: 0;
   list-style-type: none;
 }
 
-li[class^="icon-"]:before, li[class*=" icon-"]:before {
+li[class^="cicon-"]:before, li[class*=" cicon-"]:before {
   text-indent: -2em;
   text-align: center;
 }
 
-li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
+li[class^="cicon-"].cicon-large:before, li[class*=" cicon-"].cicon-large:before {
   text-indent: -1.333em;
 }
 
 /*
-  Icon Classes
+  cicon Classes
 */
 
-.icon-icon-base:before { content: "\f100"; }
-.icon-itunes:before { content: "\f101"; }
-.icon-soundcloud:before { content: "\f102"; }
-.icon-wikipedia:before { content: "\f103"; }
-.icon-youtube:before { content: "\f104"; }
+.cicon-discogs:before { content: "\f100"; }
+.cicon-soundcloud:before { content: "\f101"; }
+.cicon-wikipedia:before { content: "\f102"; }

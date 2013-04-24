@@ -70,7 +70,10 @@ class ReleaseListView(PaginationMixin, ListView):
         #self.extra_context['release_list'] = self.filter
     
         # hard-coded for the moment
-        self.extra_context['list_style'] = 's'
+        
+        self.extra_context['list_style'] = self.request.GET.get('list_style', 's')
+        #self.extra_context['list_style'] = 's'
+        
         self.extra_context['get'] = self.request.GET
         
         context.update(self.extra_context)
@@ -96,6 +99,16 @@ class ReleaseListView(PaginationMixin, ListView):
             .distinct()
         else:
             qs = Release.objects.all()
+            
+            
+        order_by = self.request.GET.get('order_by', None)
+        direction = self.request.GET.get('direction', None)
+        
+        if order_by and direction:
+            if direction == 'descending':
+                qs = qs.order_by('-%s' % order_by)
+            else:
+                qs = qs.order_by('%s' % order_by)
             
             
             

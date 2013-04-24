@@ -260,11 +260,16 @@ class Playlist(models.Model):
             
              
             if co:
+                
                 i = PlaylistItem(content_object=co)
-                i.save()    
-                    
-                pi = PlaylistItemPlaylist(item=i, playlist=self, position=self.items.count())
-                pi.save()
+                i.save()
+                """
+                ctype = ContentType.objects.get_for_model(co)
+                item, created = PlaylistItem.objects.get_or_create(object_id=co.pk, content_type=ctype)
+                """
+  
+                pi, created = PlaylistItemPlaylist.objects.get_or_create(item=i, playlist=self, position=self.items.count())
+                # pi.save()
             
             self.save()
 

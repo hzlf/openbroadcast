@@ -807,7 +807,7 @@ class Media(MigrationMixin):
         
         
         ecb = ECHOPRINT_CODEGEN_BIN
-        ecb = 'echoprint-codegen'
+        # ecb = 'echoprint-codegen'
         
         path = obj.get_master_path()
         

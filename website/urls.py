@@ -91,6 +91,9 @@ urlpatterns = patterns('',
     #(r'^', include('alibrary.urls')),
     (r'^player/', include('aplayer.urls')),
     
+    url(r'^bb/', include('django_badbrowser.urls')),
+    url(r'^translate/', include('datatrans.urls')),
+    
     # cms base
     url(r'^', include('cms.urls')),
 

@@ -1,6 +1,6 @@
 from django.utils.translation import ugettext as _
 import django_filters
-from alibrary.models import Release, Playlist
+from alibrary.models import Release, Playlist, Artist
 
 from django.utils.datastructures import SortedDict
 ORDER_BY_FIELD = 'o'
@@ -43,6 +43,37 @@ class ReleaseFilter(django_filters.FilterSet):
     class Meta:
         model = Release
         fields = ['releasetype', 'release_country', 'main_format__name', 'media_release__license__name',]
+    
+    @property
+    def filterlist(self):
+
+        flist = []
+        
+        if not hasattr(self, '_filterlist'):
+
+            
+            for name, filter_ in self.filters.iteritems():
+                    
+                ds = self.queryset.values_list(name, flat=False).annotate(n=models.Count("pk", distinct=True)).distinct()
+                
+                filter_.entries = ds
+                
+                if ds not in flist:                    
+                    flist.append(filter_)
+
+            self._filterlist = flist
+        
+        return self._filterlist
+
+
+class ArtistFilter(django_filters.FilterSet):
+
+    type = CharListFilter(label=_("Artist type"))
+    country = CharListFilter(label=_("Country"))
+    professions = CharListFilter(label=_("Professions"))
+    class Meta:
+        model = Artist
+        fields = ['type','country', 'professions__name']
     
     @property
     def filterlist(self):

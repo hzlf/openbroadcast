@@ -200,6 +200,8 @@ class Export(BaseModel):
     @task
     def process_task(obj):
         
+        from atracker.util import create_event
+        
         process = Process()
         
         log = logging.getLogger('exporter.models.process_task')
@@ -247,6 +249,8 @@ class Export(BaseModel):
                         
                         shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
                         process.incect_metadata(filepath, media)
+                        
+                    create_event(obj.user, media, None, 'download')
                     
                 if t_item.main_image:
                     pass

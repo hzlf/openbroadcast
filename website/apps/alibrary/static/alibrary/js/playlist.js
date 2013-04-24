@@ -276,7 +276,7 @@ PlaylistUi = function() {
 			
 			// maybe not the best way. think about alternatives...
 			try {
-					alibrary.playlist_editor.rebind();
+				alibrary.playlist_editor.rebind();
 			} catch(e) {
 				console.log('error', e);
 			}

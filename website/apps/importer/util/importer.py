@@ -298,8 +298,8 @@ class Importer(object):
         # attach item to current import
         if r:
             log.info('release here, add it to importitems: %s' % r)
-            ii, ii_created = obj.import_session.add_importitem(r)
-            log.info('importitem created: %s' % ii_created)
+            ii = obj.import_session.add_importitem(r)
+            log.info('importitem created: %s' % ii)
             
             # assign
             m.release = r
@@ -373,8 +373,8 @@ class Importer(object):
         # attach item to current import
         if a:
             log.info('artist here, add it to importitems: %s' % a)
-            ii, ii_created = obj.import_session.add_importitem(a)
-            log.info('importitem created: %s' % ii_created)
+            ii = obj.import_session.add_importitem(a)
+            log.info('importitem created: %s' % ii)
             
             # assign
             m.artist = a

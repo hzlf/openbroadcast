@@ -59,7 +59,7 @@
 		</dt>
 		<dd class="horizontal relations">
 			{% for relation in object.relations.specific %}
-			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}"><i class="icon-{{ relation.service }}"></i></a>
+			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}"><i class="cicon-{{ relation.service }}"></i></a>
 			
 			{% endfor %}
 			<div class="clear"></div>
@@ -154,14 +154,14 @@
 
 	<div class="image">
 		{% if object.main_image %}
-		<a href="{% thumbnail object.main_image 800x800 crop upscale %}" class="zoomable cboxElement"> <img src="{% thumbnail object.main_image 172x172 crop upscale subject_location=object.main_image.subject_location %}" alt="Cover" /> </a>
+		<a href="{% thumbnail object.main_image 1200x1200 crop upscale %}" class="zoomable cboxElement"> <img src="{% thumbnail object.main_image 172x172 crop upscale subject_location=object.main_image.subject_location %}" alt="Cover" /> </a>
 		{% else %}
-		<p>[[ IMAGE ]]</p>
+		<img src="/static/img/base/defaults/listview.artist.xl.png" alt="{% trans "No cover available" %}" />
 		{% endif %}
 	</div>
 
 	<div class="rating">
-		
+		{% rating_for_object object %}
 	</div>
 
 </div>

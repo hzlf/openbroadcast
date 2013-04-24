@@ -48,8 +48,8 @@ class MediaResource(ModelResource):
                      'rtmp_host': 'rtmp://%s:%s/' % (settings.RTMP_HOST, settings.RTMP_PORT),
                      'file': obj.master, 
                      'uuid': obj.uuid,
-                     'uri': obj.master.url,
-                     #'uri': obj.get_stream_url(),
+                     #'uri': obj.master.url,
+                     'uri': obj.get_stream_url(),
                      }
         else:
             stream = None

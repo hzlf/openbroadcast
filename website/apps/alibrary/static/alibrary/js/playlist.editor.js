@@ -1163,6 +1163,8 @@ PlaylistEditorItem = function() {
 	this.init_player = function() {
 		
 		
+
+		
 		var options = {
 			id: 'player_' + self.item.id,
 			url: self.co.stream.uri,

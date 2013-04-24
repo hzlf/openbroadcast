@@ -1,0 +1,150 @@
+{% extends "layout_base.html" %}
+
+{% load truncate i18n thumbnail arating_tags wiki_tags disqus_tags comments atracker_tags %}
+
+{% block heading %} <!-- heading / icon (large one) -->
+<div id="heading">
+	{% include "skeleton/heading.html" %}
+</div>
+<!-- heading / icon (large one) -->
+{% endblock %}
+
+{% block modnav %} <!-- start: intra-module navigation -->
+<div id="modnav">
+	{% include "skeleton/modnav.html" %}
+</div>
+<!-- end: intra-module navigation -->
+{% endblock %}
+
+{% block inner %}
+
+<div class="item_detail" style="">
+
+	<section class="shaded">
+		
+		<div class="row iteminfo release">
+			{% include "alibrary/media/_detail_info.html" %}
+		</div>
+
+		<div class="row-fluid">
+
+			<div class="span12">
+
+				<div  id="waveform" style="background: #a5a5a5; width: 100%; height: 50px;">
+					<img src="{{ object.get_waveform_url }}" style="height: 50px; width: 100%;"></img>
+
+				</div>
+			</div>
+
+		</div>
+
+	</section>
+
+	<div class="item_menu" id="item_menu">
+		<ul class="nav nav-tabs">
+			<li class="active">
+				<a href="#waveform" data-toggle="tab">{% trans "Track" %}</a>
+			</li>
+			<li>
+				<a href="#history" data-toggle="tab">{% trans "History" %}</a>
+			</li>
+			<li>
+				<a href="#statistics" data-toggle="tab">{% trans "Statistics" %}</a>
+			</li>
+		</ul>
+	</div>
+
+	<div class="clear"></div>
+
+	<section class="tabbed item_inner">
+
+		<div class="tab-content">
+
+			<div class="tab-pane" id="history">
+
+				<!---->
+				<table class="table table-condensed history">
+
+					<thead>
+						<tr>
+							<th>User</th>
+							<th>Time</th>
+							<th>Comment</th>
+						</tr>
+					</thead>
+					<tbody>
+
+						{% for r in object.get_versions.all|slice:":20" %}
+						<tr>
+							<td><a href="{{ r.revision.user.get_profile.get_absolute_url }}">{{ r.revision.user }}</a></td>
+							<td>{{ r.revision.date_created }}</td>
+							<td>{{ r.revision.comment }}</td>
+
+						</tr>
+
+						{% endfor %}
+
+					</tbody>
+				</table>
+
+			</div>
+
+			<div class="tab-pane" id="statistics">
+
+				<table class="table table-condensed history">
+					{% events_for_object object %}
+				</table>
+
+			</div>
+
+			<div class="tab-pane" id="broadcasts">
+				...
+			</div>
+		</div>
+
+	</section>
+
+	<section class="description">
+
+		<div class="description markdown padded-h">
+			{% wikify object.description %}
+		</div>
+
+	</section>
+
+	<section class="comments on-site">
+
+		<div class="header">
+			<h3>{% trans "Comments" %}</h3>
+		</div>
+
+		<div class="form">
+			{% if user.is_authenticated %}
+			{% render_comment_form for object %}
+			{% else %}
+			<p>
+				{% trans "Please login to join the conversation" %}
+			</p>
+			{% endif %}
+		</div>
+
+		<!-- TODO: maybe move to template tag.. just testing here... -->
+		{% with router=object.get_api_url %}
+		{% include "element/chat/_message_list.html" %}
+		{% endwith %}
+
+		{% render_comment_list for object %}
+	</section>
+
+	<section class="comments disqus">
+		{# disqus_show_comments #}
+	</section>
+
+</div>
+
+{% endblock %}
+
+{% block sidebar %}
+{% include "alibrary/release/sidebar/_detail.html" %}
+{% endblock %}
+

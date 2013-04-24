@@ -208,4 +208,18 @@ $(document).ready(function() {
 <div class="sidebar form-sidebar holder">
 	{% include "importer/form_import/_form_sidebar.html" %}
 </div>
+
+
+
+{% load alibrary_tags %}
+<div class="sidebar playlist-container">
+	
+	{% playlists_inline %}
+	<div class="actions">
+		<a href="#" class="pull-right btn btn-mini btn-primary add-all-to-playlist">{% trans "Add imported files to current basket" %}</a>
+	</div>
+
+
+</div>
+
 {% endblock %}

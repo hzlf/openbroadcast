@@ -146,6 +146,10 @@
           li 
             font-weight: normal
             font-size: 90%
+            &.highlight
+              text-transform: uppercase
+              small
+                color: #00bb00
             
 
 	  
@@ -286,7 +290,8 @@
     &.releases.s
       .c1
         &.list_body_item
-          background-image: url(/static/img/base/defaults/listview.release.s.png)
+          background-image: url(/static/img/base/defaults/listview.release.xl.png)
+          background-size: 36px 36px
       .c3
         width: 50px
         padding-right: 10px
@@ -296,9 +301,14 @@
       .c1
         &.list_body_item
           background-image: url(/static/img/base/defaults/listview.playlist.s.png)
+          background-size: 36px 36px
       
     /* artists */
     &.artists.s
+      .c1
+        &.list_body_item
+          background-image: url(/static/img/base/defaults/listview.artist.xl.png) 
+          background-size: 36px 36px
       .c6
         width: 30px
         padding-right: 0px
@@ -397,9 +407,24 @@
  ***********************************************************/
 .listview
   &.container
+  
+
+    &.releases.m
+      .c1.list_body_item
+        background-image: url(/static/img/base/defaults/listview.release.xl.png)
+        background-size: 54px 54px
+        
+    &.artists.m
+      .c1.list_body_item
+        background-image: url(/static/img/base/defaults/listview.artist.xl.png)
+        background-size: 54px 54px  
+      .c2
+        width: 214px
+  
     &.m
       font-size: 90%
       .list_body_item, .list_header_item
+        
         padding: 2px
       .c1
         width: 84px
@@ -453,7 +478,7 @@
             width: 30px
           &.bottom
             position: relative
-            width: 312px
+            width: 416px
             height: 44px
             ul.tags 
               position: absolute
@@ -492,6 +517,18 @@
  ***********************************************************/
  
  /* Reset all divs to block display (instead of table-way) */
+
+
+  
+.listview.container
+  &.releases.l
+    .list_body_row.item
+      background-image: url(/static/img/base/defaults/listview.release.xl.png)
+
+  &.artists.l
+    .list_body_row.item
+      background-image: url(/static/img/base/defaults/listview.artist.xl.png)
+
 .listview.container.l
   display: block
   
@@ -502,21 +539,24 @@
 
   
 
-
+  .list_body_row.item
+    background-size: 197px 197px
 
   
   div.list_body
     display: block
 	
     div.break_line
-      height: 30px
+      height: 55px
 	
     /* actually not a real 'row' in this style */
     div.list_body_row 
       display: block
       float: left
-      width: 172px
-      height: 200px
+      // width: 172px
+      width: 197px
+      //height: 200px
+      height: 235px
       /*background-color: #ff0000 */
       background-repeat: no-repeat
       overflow: hidden
@@ -540,8 +580,12 @@
       
 		
       margin: 9px 14px 0 0
-      &.pos3		
+      
+      &:nth-child(4n)
         margin: 9px 0 0 0
+      
+      //&.pos3		
+      //  margin: 9px 0 0 0
   
       div.list_body_item
         display: block
@@ -550,7 +594,7 @@
         &.action
           .wrapper
             width: 36px
-            padding: 0 0 0 130px
+            padding: 0 0 0 150px
 		
       /* Play icon */
       .wrapper_icon
@@ -583,12 +627,19 @@
             background-repeat: no-repeat
 
 		
-      /* Spacer panel (controlled via jQuery) */
       .spacer 
-        height: 150px
-        /*background-color: #ff00ff
+        // height: 150px
+        height: 171px
+        -webkit-transition-property: height
+        -webkit-transition-duration: .2s
+        // background-color: #ff00ff
         &.license
           background-position: right bottom
+          
+      &.hover .spacer
+        height: 88px
+        -webkit-transition-property: height
+        -webkit-transition-duration: .0s
 
 		
       /* Adjustable infoo panel */
@@ -632,8 +683,15 @@
 
 		
     &.links.external
-      ul li	
-        @include link_external
+      ul li
+        float: left
+        a
+          font-size: 16px
+          color: #5a5a5a
+          &:hover
+            color: #6633cc
+            text-decoration: none
+        // @include link_external
 	  
 	  	
   &.s

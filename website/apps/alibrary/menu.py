@@ -137,6 +137,17 @@ class PlaylistMenu(CMSAttachMenu):
 menu_pool.register_menu(PlaylistMenu)
 
 
+class LicenseMenu(CMSAttachMenu):
+    
+    name = _("License Menu")
+    
+    def get_nodes(self, request):
+        nodes = []
+        return nodes
+    
+menu_pool.register_menu(LicenseMenu)
+
+
 
 
 

@@ -51,6 +51,7 @@ import reversion
 import logging
 logger = logging.getLogger(__name__)
     
+import arating
     
 ################
 from alibrary.models.basemodels import *
@@ -79,6 +80,8 @@ class Artist(MigrationMixin):
     main_image = FilerImageField(null=True, blank=True, related_name="artist_main_image", rel='')
     real_name = models.CharField(max_length=200, blank=True, null=True)
     disambiguation = models.CharField(max_length=256, blank=True, null=True)
+    
+    country = CountryField(blank=True, null=True)
     
     date_start = models.DateField(null=True, blank=True)
     date_end = models.DateField(null=True, blank=True)
@@ -250,6 +253,7 @@ except:
     pass
 
 # register
+arating.enable_voting_on(Artist)
 post_save.connect(library_post_save, sender=Artist)      
 
 class ArtistMembership(models.Model):

@@ -82,6 +82,9 @@ def stream_html5(request, uuid):
     if not stream_permission:
         raise Http403
     
+    from atracker.util import create_event
+    create_event(request.user, media, None, 'stream')
+    
     return sendfile(request, media.get_cache_file('mp3', 'base'))
 
 
@@ -93,7 +96,6 @@ def waveform(request, uuid):
         waveform_file = media.get_cache_file('png', 'waveform')
     else:
         waveform_file = os.path.join(settings.STATIC_ROOT, 'img/base/defaults/waveform.png')
-        
-    print waveform_file
+
 
     return sendfile(request, waveform_file)
