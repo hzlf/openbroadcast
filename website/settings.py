@@ -408,7 +408,7 @@ INSTALLED_APPS = (
     'asearch',
     #'django_db_signals',
     'pushy',
-    'turbolinks',
+    #'turbolinks',
     
     
     
