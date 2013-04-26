@@ -60,6 +60,7 @@ from alibrary.models.artistmodels import *
 from alibrary.models.releasemodels import *
 from alibrary.models.mediamodels import *
 
+from caching.base import CachingMixin, CachingManager
 
 
 
@@ -126,7 +127,7 @@ class Weather(models.Model):
     
 
 
-class Playlist(models.Model):
+class Playlist(CachingMixin, models.Model):
     
     name = models.CharField(max_length=200)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
@@ -193,7 +194,8 @@ class Playlist(models.Model):
     description = extra.MarkdownTextField(blank=True, null=True)
     
     # manager
-    objects = models.Manager()
+    # objects = models.Manager()
+    objects = CachingManager()
     
     # auto-update
     created = models.DateTimeField(auto_now_add=True, editable=False)
@@ -271,7 +273,7 @@ class Playlist(models.Model):
                 pi, created = PlaylistItemPlaylist.objects.get_or_create(item=i, playlist=self, position=self.items.count())
                 # pi.save()
             
-            self.save()
+        self.save()
 
     def reorder_items_by_uuids(self, uuids):
         

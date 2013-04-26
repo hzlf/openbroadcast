@@ -10,6 +10,7 @@
 {% addtoblock "js-post" %}{% dajaxice_js_import %}{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}dajax/jquery.dajax.core.js"></script>{% endaddtoblock %}
 
+{% addtoblock "js-post" %}<!--<script type="text/javascript" src="{{ STATIC_URL }}js/ajax_select.js"></script>-->{% endaddtoblock %}
 
 
 {% addtoblock "js-post" %}
@@ -56,7 +57,7 @@
 
 	<section class="shaded">
 		<div class="row iteminfo release">
-			{% include "alibrary/release/_detail_info.html" %}
+			{% include "alibrary/artist/_detail_info.html" %}
 		</div>
 	</section>
 
@@ -68,7 +69,7 @@
 {% endblock %}
 
 {% block sidebar %}
-{% include "alibrary/release/sidebar/_edit.html" %}
+{% include "alibrary/artist/sidebar/_edit.html" %}
 {% endblock %}
 
 {% block form %}
@@ -89,7 +90,7 @@
 
 		<fieldset>
 			<legend>
-				Relations<span class="pull-right">Help</span>
+				Relations<span class="pull-right"></span>
 			</legend>
 		
 
@@ -100,21 +101,6 @@
 		{% crispy action_form %}
 		
 
-		<fieldset>
-			<legend>
-				Tracklist
-			</legend>
-		</fieldset>
-		
-		
-		{% crispy release_bulkedit_form %}
-		
-		{% crispy releasemedia_form %}
-
-		
-		
-		{% crispy action_form %}
-		
 
 	</form>
 

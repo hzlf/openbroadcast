@@ -1,6 +1,5 @@
 /*
  * PLAYLIST SCRIPTS
- * REFACTORINF TO NUNJUCKS!
  */
 
 /* core */
@@ -19,8 +18,6 @@ PlaylistUi = function() {
 	this.inline_dom_id = 'inline_playlist_holder';
 	this.inline_dom_element;
 	
-	this.current_playlist_id;
-	
 	this.current_data;
 	this.current_items = new Array;
 
@@ -35,20 +32,10 @@ PlaylistUi = function() {
 		self.bindings();
 
 		// set interval and run once
-		/*
 		if(self.interval_duration) {
 			self.set_interval(self.run_interval, self.interval_duration);
 		}
 		self.run_interval();
-		*/
-		self.load();
-		/*
-		pushy.subscribe(self.api_url + self.current_playlist_id + '/', function() {
-			debug.debug('pushy callback');
-			self.load();
-		});
-		*/
-		
 		
 	};
 
@@ -94,7 +81,6 @@ PlaylistUi = function() {
 			
 			if(action == 'delete' && confirm('Sure?')) {
 				self.delete_playlist(id);
-				conatiner.fadeOut(200)
 			}
 			
 			//var name = $('input.name', $(this)).val();
@@ -200,9 +186,9 @@ PlaylistUi = function() {
 				contentType: "application/json",
 				processData:  false,
 				success: function(data) {
-					self.load();
+					self.run_interval();
 				},
-				async: true
+				async: false
 			});
 			
 		});
@@ -246,8 +232,7 @@ PlaylistUi = function() {
 			processData:  false,
 			success: function(data) {
 				$('> div', self.inline_dom_element).remove();
-				// self.run_interval();
-				self.load();
+				self.run_interval();
 			},
 			async: true
 		});
@@ -272,8 +257,7 @@ PlaylistUi = function() {
 				$('#playlist_holder_' + id).fadeOut(160, function() { $(this).remove(); })
 				
 				
-				// self.update_playlists();
-				self.load();
+				self.update_playlists();
 			},
 			async: true
 		});
@@ -281,13 +265,11 @@ PlaylistUi = function() {
 	
 	this.update_playlists = function() {
 		
-		/*
 		$.getJSON(self.api_url_simple, function(data) {
 			self.update_playlist_selector(data);
 			
 		});
-		*/
-		/*
+		
 		$.getJSON(self.api_url + '?is_current=1', function(data) {
 			
 			console.log(self.api_url + '?is_current=1')
@@ -303,7 +285,7 @@ PlaylistUi = function() {
 			}
 			
 		});
-		*/
+		
 		
 		
 		/*
@@ -315,65 +297,59 @@ PlaylistUi = function() {
 	
 	/* refactored */
 	this.update_playlists_callback = function(data) {
+
 		self.update_playlist_display(data);
+		
 		self.update_playlist_selector(data);
+		
 		this.current_data = data;
 	};
 	
 	
-	this.load = function() {
-		
-		debug.debug('PlaylistUi: load');
-		
-		
-		// get & display data
-		$.getJSON(self.api_url + '?is_current=1', function(data) {
-			
-			console.log(self.api_url + '?is_current=1')
-			
-			self.update_playlist_display(data);
-			this.current_data = data;
-		
-			pushy.subscribe(self.api_url + data.objects[0].id + '/', function() {
-				debug.debug('pushy callback');
-				self.load();
-			});
-		
-			
-			// maybe not the best way. think about alternatives...
-			try {
-				alibrary.playlist_editor.rebind();
-			} catch(e) {
-				console.log('error', e);
-			}
-			
-		});
-		
-		
-
-		
-		setTimeout(function(){
-			$.getJSON(self.api_url_simple, function(data) {
-				self.update_playlist_selector(data);
-			});
-		}, 100)
-
-		
-	};
 	
 	this.update_playlist_display = function(data) {
 
+		// console.log(data)
+
+		var status_map = new Array;
+		status_map[0] = 'init';
+		status_map[1] = 'done';
+		status_map[2] = 'ready';
+		status_map[3] = 'progress';
+		status_map[4] = 'downloaded';
+		status_map[99] = 'error';
 
 		for (var i in data.objects) {
 
 			var item = data.objects[i];
 			var target_element = $('#playlist_holder_' + item.id);
 
+			item.status_key = status_map[item.status];
+			
+			// console.log(item);
 
 			// filter out current playlist
 			if (item.is_current) {
 
+				if (item.id in self.current_items) {
+					self.current_items[item.id] = item;
+					console.log('item already present');
 
+					//if(item.updated != target_element.attr('data-updated')) {
+						console.log('update detected');
+						
+						// var html = ich.tpl_playlists_inline({object: item});
+						var html = nj.render('alibrary/nj/playlist/listing_inline.html',{ 
+							object: item
+						});
+						
+						
+						
+						$(html).attr('data-updated', item.updated);
+						target_element.replaceWith(html);
+					//}
+					
+				} else {
 
 					// var html = ich.tpl_playlists_inline({object: item});
 					var html = nj.render('alibrary/nj/playlist/listing_inline.html',{ 
@@ -381,7 +357,9 @@ PlaylistUi = function() {
 					});
 					console.log('item:', item)
 					
-					self.inline_dom_element.html(html);
+					
+					$(html).attr('data-last_status', item.status);
+					self.inline_dom_element.append(html);
 
 					self.current_items[item.id] = item;
 					
@@ -393,7 +371,7 @@ PlaylistUi = function() {
 					}
 					
 					
-				
+				}
 			} else {
 				// remove item if not the current one
 				target_element.remove();
@@ -481,8 +459,6 @@ PlaylistUi = function() {
 				console.log('data unchanged');
 			}
 		
-		} else {
-			$('.playlist-selector', self.inline_dom_element.parent()).html('');
 		}
 	};
 
@@ -514,7 +490,6 @@ CollectorApp = (function() {
 	this.bindings= function() {
 		
 		$('.collectable').live('click', function(e) {
-			
 	
 			e.preventDefault();
 			
@@ -590,8 +565,7 @@ CollectorApp = (function() {
 				//processData:  false,
 				success: function(data) {
 					if(self.playlist_app) {
-						//self.playlist_app.update_playlists();
-						self.playlist_app.load();
+						self.playlist_app.update_playlists();
 					}
 				},
 				async: true

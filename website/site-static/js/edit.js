@@ -32,6 +32,7 @@ EditUi = function() {
 		var container = $('.lookup.provider.listing');
 
 		$('.item', container).live('click', function(e) {
+
 			e.preventDefault();
 			var item = $(this);
 			

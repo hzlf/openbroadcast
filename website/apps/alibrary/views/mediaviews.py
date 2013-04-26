@@ -16,7 +16,7 @@ from pure_pagination.mixins import PaginationMixin
 
 from alibrary.models import Media
 from alibrary.forms import *
-# from alibrary.filters import ArtistFilter
+from alibrary.filters import MediaFilter
 
 from lib.util import tagging_extra
 
@@ -27,10 +27,151 @@ ALIBRARY_PAGINATE_BY = getattr(settings, 'ALIBRARY_PAGINATE_BY', (12,24,36,120))
 ALIBRARY_PAGINATE_BY_DEFAULT = getattr(settings, 'ALIBRARY_PAGINATE_BY_DEFAULT', 12)
 
 
-class MediaListView(ListView):
+class MediaListView(PaginationMixin, ListView):
+    
+    # context_object_name = "artist_list"
+    #template_name = "alibrary/release_list.html"
+    
+    object = Media
+    paginate_by = ALIBRARY_PAGINATE_BY_DEFAULT
+    
+    model = Release
+    extra_context = {}
+    
+    def get_paginate_by(self, queryset):
+        
+        ipp = self.request.GET.get('ipp', None)
+        if ipp:
+            try:
+                if int(ipp) in ALIBRARY_PAGINATE_BY:
+                    return int(ipp)
+            except Exception, e:
+                pass
 
-    def get_queryset(self):
-        return Media.objects.all()
+        return self.paginate_by
+
+    def get_context_data(self, **kwargs):
+        context = super(MediaListView, self).get_context_data(**kwargs)
+        
+        self.extra_context['filter'] = self.filter
+        self.extra_context['relation_filter'] = self.relation_filter
+        self.extra_context['tagcloud'] = self.tagcloud
+        #self.extra_context['release_list'] = self.filter
+    
+        # hard-coded for the moment
+        
+        self.extra_context['list_style'] = self.request.GET.get('list_style', 's')
+        #self.extra_context['list_style'] = 's'
+        
+        self.extra_context['get'] = self.request.GET
+        
+        context.update(self.extra_context)
+
+        return context
+    
+
+    def get_queryset(self, **kwargs):
+
+        # return render_to_response('my_app/template.html', {'filter': f})
+
+        kwargs = {}
+
+        self.tagcloud = None
+
+        q = self.request.GET.get('q', None)
+        
+        if q:
+            qs = Artist.objects.filter(Q(name__istartswith=q)\
+            | Q(media_release__name__icontains=q)\
+            | Q(media_release__artist__name__icontains=q)\
+            | Q(label__name__icontains=q))\
+            .distinct()
+        else:
+            qs = Media.objects.all()
+            
+            
+        order_by = self.request.GET.get('order_by', None)
+        direction = self.request.GET.get('direction', None)
+        
+        if order_by and direction:
+            if direction == 'descending':
+                qs = qs.order_by('-%s' % order_by)
+            else:
+                qs = qs.order_by('%s' % order_by)
+            
+            
+            
+        # special relation filters
+        self.relation_filter = []
+        
+        artist_filter = self.request.GET.get('artist', None)
+        if artist_filter:
+            qs = qs.filter(media_release__artist__slug=artist_filter).distinct()
+            # add relation filter
+            fa = Artist.objects.filter(slug=artist_filter)[0]
+            f = {'item_type': 'artist' , 'item': fa, 'label': _('Artist')}
+            self.relation_filter.append(f)
+            
+        label_filter = self.request.GET.get('label', None)
+        if label_filter:
+            qs = qs.filter(label__slug=label_filter).distinct()
+            # add relation filter
+            fa = Label.objects.filter(slug=label_filter)[0]
+            f = {'item_type': 'label' , 'item': fa, 'label': _('Label')}
+            self.relation_filter.append(f)
+            
+            
+            
+
+        # base queryset        
+        #qs = Release.objects.all()
+        
+        # apply filters
+        self.filter = MediaFilter(self.request.GET, queryset=qs)
+        # self.filter = ReleaseFilter(self.request.GET, queryset=Release.objects.active().filter(**kwargs))
+        
+        qs = self.filter.qs
+        
+        
+        
+        
+        stags = self.request.GET.get('tags', None)
+        #print "** STAGS:"
+        #print stags
+        tstags = []
+        if stags:
+            stags = stags.split(',')
+            for stag in stags:
+                #print int(stag)
+                tstags.append(int(stag))
+        
+        #print "** TSTAGS:"
+        #print tstags
+        
+        #stags = ('Techno', 'Electronic')
+        #stags = (4,)
+        if stags:
+            qs = Release.tagged.with_all(tstags, qs)
+            
+            
+        # rebuild filter after applying tags
+        self.filter = MediaFilter(self.request.GET, queryset=qs)
+        
+        # tagging / cloud generation
+        tagcloud = Tag.objects.usage_for_queryset(qs, counts=True, min_count=0)
+        #print '** CLOUD: **'
+        #print tagcloud
+        #print '** END CLOUD **'
+        
+        self.tagcloud = tagging_extra.calculate_cloud(tagcloud)
+        
+        #print '** CALCULATED CLOUD'
+        #print self.tagcloud
+        
+        return qs
+    
+    
+    
     
     
 class MediaDetailView(DetailView):

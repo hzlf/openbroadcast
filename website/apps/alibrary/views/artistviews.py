@@ -21,7 +21,7 @@ from sendfile import sendfile
 from ashop.util.base import get_download_permissions
 
 #from alibrary.forms import ReleaseForm
-from alibrary.forms import *
+from alibrary.forms import ArtistForm, ArtistActionForm, ArtistRelationFormSet
 
 from alibrary.filters import ArtistFilter
 
@@ -268,11 +268,107 @@ class ArtistDetailView(DetailView):
     
 
 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    
+class ArtistEditView(UpdateView):
+    model = Artist
+    template_name = "alibrary/artist_edit.html"
+    success_url = '#'
+    form_class = ArtistForm
+    
+    def __init__(self, *args, **kwargs):
+        super(ArtistEditView, self).__init__(*args, **kwargs)
+        
+    """"""
+    def get_initial(self):
+        self.initial.update({ 'user': self.request.user })
+        return self.initial
+     
+
+    def get_context_data(self, **kwargs):
+        
+        context = super(ArtistEditView, self).get_context_data(**kwargs)
+        
+        context['action_form'] = ArtistActionForm(instance=self.object)
+        context['relation_form'] = ArtistRelationFormSet(instance=self.object)
+        context['user'] = self.request.user
+        context['request'] = self.request
+        
+        """ 
+        context['release_bulkedit_form'] = ReleaseBulkeditForm(instance=self.object)
+        
+        
+        context['releasemedia_form'] = ReleaseMediaFormSet(instance=self.object)
+
+        """
+        return context
+    
+
+
+    """"""
+    def form_valid(self, form):
+    
+        context = self.get_context_data()
+
+        relation_form = context['relation_form']
+
+        # validation
+        if form.is_valid():
+            print 'form valid'
+            
+            self.object.tags = form.cleaned_data['d_tags']
+            
+            # temporary instance to validate inline forms against
+            tmp = form.save(commit=False)
+
+            # bloody hack
+            
+            print self.request.POST
+            
+            aliases_text = self.request.POST.get('aliases_text', None)
+            aliases = self.request.POST.get('aliases', None)
+        
+            print "***"
+            print aliases_text
+            print aliases
+        
+            relation_form = ArtistRelationFormSet(self.request.POST, instance=tmp)
+            print "relation_form.cleaned_data:",
+            print relation_form.is_valid()
+            print relation_form.errors
+        
+            if relation_form.is_valid():                
+                relation_form.save()
+
+                obj = form.save()
+                form.save_m2m()
+
+
+            return HttpResponseRedirect('#')
+        else:
+            return self.render_to_response(self.get_context_data(form=form, relation_form=relation_form))
+     
+ 
+ 
+ 
+ 
     
 
     
 # autocompleter views
-def release_autocomplete(request):
+# TODO: write!
+def artist_autocomplete(request):
 
     q = request.GET.get('q', None)
     

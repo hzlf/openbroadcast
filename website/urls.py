@@ -44,6 +44,7 @@ urlpatterns = patterns('',
     
     url(r"^vote/", include('arating.urls')),
     url(r'^ac_tagging/', include('ac_tagging.urls')),
+    #url(r'^ac_lookup/lookups/', include('ajax_select.urls')),
     
     
     url(r"^api/", include("alibrary.urls_api")),

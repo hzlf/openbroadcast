@@ -104,8 +104,15 @@ MIDDLEWARE_CLASSES = (
     
 )
 
-CACHE_BACKEND = 'locmem:///'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
 CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
+
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
@@ -342,6 +349,8 @@ INSTALLED_APPS = (
     # dajax
     'dajaxice',
     'dajax',
+    
+    'ajax_select',
     
     
     # cms plugins
@@ -733,7 +742,7 @@ using django pushy!!
 """
 PUSHY_SETTINGS = {
     'MODELS': (
-               #'alibrary.playlist',
+               'alibrary.playlist',
                'importer.import',
                'importer.importfile',
                ),
@@ -741,6 +750,16 @@ PUSHY_SETTINGS = {
     'CHANNEL_PREFIX': 'pushy_',
     'DEBUG': DEBUG
 }
+
+
+"""
+ajax lookups
+"""
+AJAX_LOOKUP_CHANNELS = {
+    'aliases'  : {'model':'alibrary.artist', 'search_field':'name'}
+}
+# AJAX_SELECT_BOOTSTRAP = True
+# AJAX_SELECT_INLINES = 'inline'
 
 
 
@@ -807,7 +826,7 @@ WYM_CLASSES = ",\n".join([
 
 
 ACTSTREAM_SETTINGS = {
-    'MODELS': ('auth.user', 'auth.group', 'alibrary.release', 'alibrary.playlist',),
+    'MODELS': ('auth.user', 'auth.group', 'alibrary.release', 'alibrary.playlist', 'alibrary.artist',),
     #'MANAGER': 'myapp.streams.MyActionManager',
     'FETCH_RELATIONS': True,
     'USE_PREFETCH': True,

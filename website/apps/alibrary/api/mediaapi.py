@@ -94,3 +94,60 @@ class MediaResource(ModelResource):
 
         return orm_filters
     
+    
+    
+
+
+
+class SimpleMediaResource(ModelResource):
+
+    #release = fields.ForeignKey('alibrary.api.ReleaseResource', 'release', null=True, full=False, max_depth=2)
+    #artist = fields.ForeignKey('alibrary.api.ArtistResource', 'artist', null=True, full=False, max_depth=2)
+    
+    #message = fields.CharField(attribute='message', null=True)
+
+    class Meta:
+        queryset = Media.objects.order_by('tracknumber').all()
+        list_allowed_methods = ['get',]
+        detail_allowed_methods = ['get',]
+        resource_name = 'track'
+        excludes = ['updated', 'release__media']
+        include_absolute_url = True
+        authentication = Authentication()
+        authorization = Authorization()
+        filtering = {
+            #'channel': ALL_WITH_RELATIONS,
+            'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
+        }
+
+
+    """
+    Add streaming information
+    """
+    def dehydrate(self, bundle):
+        
+        obj = bundle.obj
+        
+        if obj.master:
+            stream = {
+                     'rtmp_app': '%s' % settings.RTMP_APP,
+                     'rtmp_host': 'rtmp://%s:%s/' % (settings.RTMP_HOST, settings.RTMP_PORT),
+                     'file': obj.master, 
+                     'uuid': obj.uuid,
+                     #'uri': obj.master.url,
+                     'uri': obj.get_stream_url(),
+                     }
+        else:
+            stream = None
+        
+        bundle.data['stream'] = stream
+        bundle.data['waveform_image'] = None
+        try:
+            waveform_image = bundle.obj.get_waveform_image()
+            if waveform_image:
+                bundle.data['waveform_image'] = bundle.obj.get_waveform_url()
+
+        except:
+            pass
+
+        return bundle

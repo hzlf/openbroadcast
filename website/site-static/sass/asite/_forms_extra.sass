@@ -179,7 +179,7 @@ body
 // lookup form / providers
 
 
-.lookup.provider
+.lookup.provider__
 
   &.listing
     &.fixed
@@ -196,6 +196,41 @@ body
     
     &.hover
       background-color: red
+      
+      
+// sidebar
+.lookup.provider
+
+  &.listing
+    &.fixed
+      position: fixed
+      width: 260px
+      top: 120px
+      
+  h2
+    border-bottom: 1px solid #efefef
+      
+  .item
+    padding: 4px 4px 4px 4px
+    margin: 0px 0 0px 0
+    border-bottom: 1px solid #efefef
+
+
+    
+    &.available
+      // color: green
+      cursor: pointer
+      &.hover
+        background-color: #DDFFD9
+    
+    &.unavailable
+      // color: green
+      cursor: wait
+      h4
+        color: #a5a5a5
+      &.hover
+        background-color: #efefef
+
       
       
 // bulk apply form

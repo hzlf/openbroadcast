@@ -8,7 +8,7 @@ from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
 from tastypie.cache import SimpleCache
 from tastypie.utils import trailing_slash
 
-from alibrary.api import ReleaseResource, MediaResource
+from alibrary.api import ReleaseResource, MediaResource, SimpleMediaResource
 from alibrary.models import Release, Artist
 from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
 
@@ -24,7 +24,8 @@ class PlaylistItemResource(ModelResource):
     
     co_to = {
              Release: ReleaseResource,
-             Media: MediaResource,
+             #Media: MediaResource,
+             Media: SimpleMediaResource,
              Jingle: JingleResource,
              }
     
@@ -179,11 +180,13 @@ class PlaylistResource(ModelResource):
     def obj_delete(self, request=None, **kwargs):
         ret = super(PlaylistResource, self).obj_delete(request, **kwargs)
         
-        p = Playlist.objects.filter(user=request.user)[0]
-        p.is_current = True
-        p.save()
+        try:
+            p = Playlist.objects.filter(user=request.user)[0]
+            p.is_current = True
+            p.save()
+        except:
+            pass
         
-        print p
         
         return ret
     
@@ -291,8 +294,11 @@ class PlaylistResource(ModelResource):
         self.is_authenticated(request)
         self.throttle_check(request)
 
-        p = Playlist.objects.filter(user=request.user,is_current=True)[0]
-
+        try:
+            p = Playlist.objects.filter(user=request.user,is_current=True)[0]
+        except:
+            p = Playlist(user=request.user,is_current=True, name="New Playlist")
+            p.save()
         ids = request.POST.get('ids', None)
         ct = request.POST.get('ct', None)
 

@@ -1,23 +1,77 @@
 {% load i18n %}
 
-<div id="lookup_providers" class="lookup provider listing">
-	
+<!--
+<div id="lookup_providers_" class="lookup provider listing">
+
 	<div class="page-header">
-		<h2>{% trans "Compare" %} <small>with API-data</small></h2>
+		<h2>{% trans "Compare" %} <small>{% trans "with API-data" %}</small></h2>
 	</div>
-	
+
 	{% for provider in providers %}
 	<div data-item_type="release" data-item_id="{{ object.pk }}" data-provider="{{ provider.key }}" class="lookup provider item hoverable {% if provider.relation %}available{% endif %}">
+
 		<ul class="horizontal unstyled links external">
+
 			<li class="icon external {{ provider.key }} {% if provider.relation %}available{% endif %}"></li>
-			<li class="action"><a href="#">{{ provider.name }}</a></li>
+
+			<li class="action">
+				<a href="#">{{ provider.name }}</a>
+			</li>
+
 			{% if provider.relation %}
-			<li class="pull-right" style="float: right !important;"><a href="#">{% trans "Change" %} <i class="icon-refresh icon-white"></i></a></li>
+			<li class="pull-right" style="float: right !important;">
+				<a href="#">{% trans "Change" %} <i class="icon-refresh icon-white"></i></a>
+			</li>
 			{% else %}
-			<li class="pull-right" style="float: right !important;"><a href="#">{% trans "Set" %} <i class="icon-search icon-white"></i></a></li>
+			<li class="pull-right" style="float: right !important;">
+				<a href="#">{% trans "Set" %} <i class="icon-search icon-white"></i></a>
+			</li>
 			{% endif %}
+
 		</ul>
+
 		<div class="clearfix"></div>
+
 	</div>
 	{% endfor %}
 </div>
+-->
+<div id="lookup_providers" class="lookup provider listing">
+
+	<div class="page-header">
+		<h2>{% trans "Compare" %} <small>{% trans "with API-data" %}</small></h2>
+	</div>
+	
+	
+	{% for provider in providers %}
+	<div data-item_type="release" data-item_id="{{ object.pk }}" data-provider="{{ provider.key }}" class="item {% if provider.relation %}available{% else %}unavailable{% endif %} hoverable {% if provider.relation %}available{% endif %}">
+		
+		<div class="row-fluid ">
+			
+			<div class="span8">
+				<h4><i class="cicon-{{ provider.key }}"></i> {{ provider.name }}</h4>
+			</div>
+			
+			<div class="span4">
+				
+				<ul class="unstyled">
+					{% if provider.relation %}
+					<li class="pull-right" style="float: right !important;">
+						<a href="#">{% trans "Change" %} <i class="icon-exchange icon-white"></i></a>
+					</li>
+					{% else %}
+					<li class="pull-right" style="float: right !important;">
+						<a href="#">{% trans "Search" %} <i class="icon-search icon-white"></i></a>
+					</li>
+					{% endif %}
+				</ul>
+				
+			</div>
+		</div>
+	</div>
+	{% endfor %}
+	
+	
+	
+</div>
+

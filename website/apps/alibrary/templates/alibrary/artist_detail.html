@@ -70,6 +70,8 @@
 							{# for item in media.object_list #}
 							{% for item in m_top %}
 							{% include "alibrary/media/_list_item_foreign_xs.html" %}
+							{% empty %}
+							<p>{% trans "Not enough ratings to calculate the 'Tops'." %}</p>
 							{% endfor %}
 						</div>
 					</div>
@@ -90,6 +92,8 @@
 							
 							{% for item in m_flop %}
 							{% include "alibrary/media/_list_item_foreign_xs.html" %}
+							{% empty %}
+							<p>{% trans "Not enough ratings to calculate the 'Flops'." %}</p>
 							{% endfor %}
 						</div>
 					</div>
@@ -189,7 +193,7 @@
 
 			<div class="tab-pane" id="biography">
 				<section class="description">
-					<h4>{% trans "Artist description" %}</h4>
+					<h2>{% trans "Artist description" %}</h2>
 					<div class="description markdown padded-h">
 						{% wikify object.biography %}
 					</div>
@@ -198,7 +202,7 @@
 				
 				{% if object.relations.generic.count > 0 %}
 				<section class="relations">
-					<h4>{% trans "More relations" %}</h4>
+					<h2>{% trans "More relations" %}</h2>
 						<ul class="unstyled">
 						{% for relation in object.relations.generic %}
 						<li><a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.url }}">{{ relation.url }}</a></li>

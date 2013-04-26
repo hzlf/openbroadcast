@@ -93,7 +93,7 @@ import arating
 
 
 
-
+from caching.base import CachingMixin, CachingManager
 
 
 def clean_filename(filename):
@@ -113,7 +113,7 @@ def masterpath_by_uuid(instance, filename):
 
 
 
-class Media(MigrationMixin):
+class Media(CachingMixin, MigrationMixin):
     
     # core fields
     uuid = RUUIDField(primary_key=False)
@@ -209,7 +209,8 @@ class Media(MigrationMixin):
     #tags = TaggableManager(blank=True)
     
     # manager
-    objects = models.Manager()
+    # objects = models.Manager()
+    objects = CachingManager()
     
     # auto-update
     created = models.DateTimeField(auto_now_add=True, editable=False)

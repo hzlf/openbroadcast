@@ -1,4 +1,7 @@
-{% load sekizai_tags verbatim i18n %}
+{% load sekizai_tags verbatim i18n pushy_tags %}
+
+
+{% addtoblock "js-post" %}{% pushy_scripts %}{% endaddtoblock %}
 
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/playlist.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}
@@ -11,6 +14,7 @@
 		alibrary.playlist = new PlaylistUi();
 		alibrary.playlist.api_url = "{% url api_dispatch_list resource_name='playlist' api_name='v1'%}";
 		alibrary.playlist.api_url_simple = "{% url api_dispatch_list resource_name='simpleplaylist' api_name='v1'%}";
+		alibrary.playlist.current_playlist_id = "{{ current_playlist.pk }}";
 		alibrary.playlist.init();
 		
 

@@ -121,11 +121,18 @@ div.row .sidebar
 	  
     div.wrapper
       div.playlist_holder
-        border: 1px solid #BBBBBB
-        margin: 0 0 4px 0
-        background-color: #DDDDDD
-        
+      
 
+        
+        // changed to single list holder
+        // border: 1px solid #BBBBBB
+        // margin: 0 0 4px 0
+        // background-color: #DDDDDD
+        div.header
+          background-image: none !important
+        // end cange
+        
+        
         &.open
           padding: 0 0 4px 0		
           /*border: 1px solid #CCCCCC*/
@@ -146,7 +153,8 @@ div.row .sidebar
 		
         div.header
           /*background-color: #00ffff*/
-          padding: 1px 0 1px 19px
+          //padding: 1px 0 1px 19px
+          padding: 1px 0 1px 3px // removed icon padding
 
           a.action
             display: block

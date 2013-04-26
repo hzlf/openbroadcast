@@ -62,7 +62,10 @@ from alibrary.models.playlistmodels import *
 from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
 
-
+LOOKUP_PROVIDERS = (
+    ('discogs', _('Discogs')),
+    ('musicbrainz', _('Musicbrainz')),
+)
 
 class ArtistManager(models.Manager):
 
@@ -154,6 +157,29 @@ class Artist(MigrationMixin):
     def __unicode__(self):
         
         return self.name
+    
+    @property
+    def classname(self):
+        return self.__class__.__name__
+    
+    def get_versions(self):
+        try:
+            return reversion.get_for_object(self)
+        except:
+            return None
+        
+    def get_last_revision(self):
+        try:
+            return reversion.get_unique_for_object(self)[0].revision
+        except:
+            return None
+        
+    def get_last_editor(self):
+        latest_revision = self.get_last_revision()
+        if latest_revision:
+            return latest_revision.user
+        else:
+            return None
 
     @models.permalink
     def get_absolute_url(self):
@@ -162,6 +188,10 @@ class Artist(MigrationMixin):
             return None
         
         return ('alibrary-artist-detail', [self.slug])
+
+    @models.permalink
+    def get_edit_url(self):
+        return ('alibrary-artist-edit', [self.pk])
     
     def get_api_url(self):
         return reverse('api_dispatch_detail', kwargs={  
@@ -220,6 +250,18 @@ class Artist(MigrationMixin):
         return images
         
 
+    def get_lookup_providers(self):
+        
+        providers = []
+        for key, name in LOOKUP_PROVIDERS:
+            relations = self.relations.filter(service=key)
+            relation = None
+            if relations.count() == 1:
+                relation = relations[0]
+                
+            providers.append({'key': key, 'name': name, 'relation': relation})
+
+        return providers
 
 
     def is_multiple(self):
@@ -254,7 +296,16 @@ except:
 
 # register
 arating.enable_voting_on(Artist)
-post_save.connect(library_post_save, sender=Artist)      
+post_save.connect(library_post_save, sender=Artist)   
+
+from actstream import action
+def action_handler(sender, instance, created, **kwargs):
+    try:
+        action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
+    except Exception, e:
+        print e
+
+post_save.connect(action_handler, sender=Artist)   
 
 class ArtistMembership(models.Model):
     
