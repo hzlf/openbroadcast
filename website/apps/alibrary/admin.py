@@ -19,6 +19,8 @@ from django.template import RequestContext, loader
 
 from multilingual.admin import MultilingualModelAdmin
 
+from genericadmin.admin import GenericAdminModelAdmin, GenericTabularInline
+
 import reversion
 
 def merge_selected(modeladmin,request,queryset): #This is an admin/
@@ -303,7 +305,7 @@ admin.site.register(Label, LabelAdmin)
 
 
     
-class PlaylistmediaInline(admin.TabularInline):
+class PlaylistmediaInline(GenericTabularInline):
     model = PlaylistMedia
     extra=1
     
@@ -316,7 +318,7 @@ class PlaylistItemPlaylistInline(admin.TabularInline):
     inlines = [PlaylistItemInline,] 
     extra=1
         
-class PlaylistAdmin(BaseAdmin):
+class PlaylistAdmin(GenericAdminModelAdmin):
     
     list_display   = ('name', 'user', 'type', 'duration', 'is_current', 'updated')
     list_filter = ('type', )
@@ -324,6 +326,9 @@ class PlaylistAdmin(BaseAdmin):
     #readonly_fields = ['slug', 'is_current',]
 
     inlines = [PlaylistItemPlaylistInline] 
+ 
+class PlaylistItemAdmin(GenericAdminModelAdmin):
+    pass
         
 class DaypartAdmin(BaseAdmin):
     
@@ -334,7 +339,7 @@ class DaypartAdmin(BaseAdmin):
     
 admin.site.register(Playlist, PlaylistAdmin)
 admin.site.register(Daypart, DaypartAdmin)
-admin.site.register(PlaylistItem)
+admin.site.register(PlaylistItem, PlaylistItemAdmin)
 
 
         

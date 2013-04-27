@@ -211,6 +211,10 @@ div.row .sidebar
 			  
             div.title
               margin: 0 0 0 4px
+              
+            &.ct-jingle
+              background-color: #F8F3FF
+
 			
             a.action
               display: block
@@ -326,6 +330,7 @@ div.row .sidebar
       background-repeat: no-repeat
       color: #333333
       padding: 3px 6px 2px 19px
+      
       border-bottom: none
       /*background-color: #ff00ff*/
 
@@ -333,9 +338,13 @@ div.row .sidebar
     
     div.wrapper
       div.jingle_holder
-        border: 1px solid #BBBBBB
-        margin: 0 0 4px 0
-        background-color: #DDDDDD
+        // changed to single list holder
+        // border: 1px solid #BBBBBB
+        // margin: 0 0 4px 0
+        // background-color: #DDDDDD
+        div.header
+          background-image: none !important
+        // end cange
         
 
         &.open
@@ -358,7 +367,8 @@ div.row .sidebar
     
         div.header
           /*background-color: #00ffff*/
-          padding: 1px 0 1px 19px
+          // padding: 1px 0 1px 19px
+          padding: 1px 0 1px 3px // removed icon padding
 
           a.action
             display: block

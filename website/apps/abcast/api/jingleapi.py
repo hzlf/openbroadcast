@@ -54,13 +54,14 @@ class JingleResource(ModelResource):
             stream = None
         
         bundle.data['stream'] = stream
-        bundle.data['waveform_image'] = '/inhalt/library/tracks/tracks/03f646f5-5e4a-11e2-8c4f-b8f6b11a3aed/waveform/'
+        bundle.data['waveform_image'] = None
         try:
             waveform_image = bundle.obj.get_waveform_image()
             if waveform_image:
                 bundle.data['waveform_image'] = bundle.obj.get_waveform_url()
 
-        except:
+        except Exception, e:
+            print e
             pass
 
         return bundle

@@ -18,6 +18,8 @@ PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # subdirectory for apps
 sys.path.insert(0, os.path.join(PROJECT_DIR, 'apps'))
+# subdirectory for tools
+sys.path.insert(0, os.path.join(PROJECT_DIR, 'tools'))
 # subdirectory for plugins
 sys.path.insert(0, os.path.join(PROJECT_DIR, 'cmsplugins'))
 # subdirectory for shop
@@ -26,6 +28,8 @@ sys.path.insert(0, os.path.join(PROJECT_DIR, 'shop'))
 DEBUG = True
 
 TEMPLATE_DEBUG = DEBUG
+#TEMPLATE_STRING_IF_INVALID ='* MISSING *'
+
 SERVE_MEDIA = False
 COMPRESS_OFFLINE = False
 COMPRESS_ENABLED = False
@@ -96,7 +100,7 @@ MIDDLEWARE_CLASSES = (
     # custom
     #'lib.middleware.ProfileMiddleware',
     #'lib.middleware.PrettifyMiddlewareBS',
-    'django_badbrowser.middleware.BrowserSupportDetection',
+    #'django_badbrowser.middleware.BrowserSupportDetection',
     
     'arating.middleware.AratingIpMiddleware',
     
@@ -342,6 +346,8 @@ INSTALLED_APPS = (
     
     'django_badbrowser',
     'datatrans',
+    
+    'genericadmin',
 
     
     'eav',

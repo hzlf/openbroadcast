@@ -25,7 +25,7 @@ class JingleAdmin(admin.ModelAdmin):
     
     list_display = ('name', 'duration', 'set', 'type' )
     list_filter = ('type',)
-    readonly_fields = ('uuid', 'slug', )
+    readonly_fields = ('uuid', 'slug', 'folder')
     
 class JingleSetAdmin(admin.ModelAdmin):    
     

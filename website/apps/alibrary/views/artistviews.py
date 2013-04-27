@@ -304,19 +304,9 @@ class ArtistEditView(UpdateView):
         context['relation_form'] = ArtistRelationFormSet(instance=self.object)
         context['user'] = self.request.user
         context['request'] = self.request
-        
-        """ 
-        context['release_bulkedit_form'] = ReleaseBulkeditForm(instance=self.object)
-        
-        
-        context['releasemedia_form'] = ReleaseMediaFormSet(instance=self.object)
 
-        """
         return context
-    
 
-
-    """"""
     def form_valid(self, form):
     
         context = self.get_context_data()

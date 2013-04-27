@@ -1,3 +1,5 @@
+import os
+
 from django.views.generic import DetailView, ListView, FormView, UpdateView
 from django.views.generic.detail import SingleObjectTemplateResponseMixin
 from django.shortcuts import get_object_or_404, render_to_response
@@ -15,7 +17,7 @@ from easy_thumbnails.files import get_thumbnailer
 from pure_pagination.mixins import PaginationMixin
 
 from alibrary.models import Media
-from alibrary.forms import *
+from alibrary.forms import MediaForm, MediaActionForm, MediaRelationFormSet
 from alibrary.filters import MediaFilter
 
 from lib.util import tagging_extra
@@ -35,7 +37,7 @@ class MediaListView(PaginationMixin, ListView):
     object = Media
     paginate_by = ALIBRARY_PAGINATE_BY_DEFAULT
     
-    model = Release
+    model = Media
     extra_context = {}
     
     def get_paginate_by(self, queryset):
@@ -181,6 +183,86 @@ class MediaDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(MediaDetailView, self).get_context_data(**kwargs)
         return context
+    
+    
+    
+    
+ 
+ 
+ 
+ 
+    
+class MediaEditView(UpdateView):
+    model = Media
+    template_name = "alibrary/media_edit.html"
+    success_url = '#'
+    form_class = MediaForm
+    
+    def __init__(self, *args, **kwargs):
+        super(MediaEditView, self).__init__(*args, **kwargs)
+        
+    """"""
+    def get_initial(self):
+        self.initial.update({ 'user': self.request.user })
+        return self.initial
+     
+
+    def get_context_data(self, **kwargs):
+        
+        context = super(MediaEditView, self).get_context_data(**kwargs)
+        
+        context['action_form'] = MediaActionForm(instance=self.object)
+        context['relation_form'] = MediaRelationFormSet(instance=self.object)
+        context['user'] = self.request.user
+        context['request'] = self.request
+
+        return context
+
+    """
+    def form_valid(self, form):
+    
+        context = self.get_context_data()
+
+        relation_form = context['relation_form']
+
+        # validation
+        if form.is_valid():
+            print 'form valid'
+            
+            self.object.tags = form.cleaned_data['d_tags']
+            
+            # temporary instance to validate inline forms against
+            tmp = form.save(commit=False)
+
+            # bloody hack
+            
+            print self.request.POST
+            
+            aliases_text = self.request.POST.get('aliases_text', None)
+            aliases = self.request.POST.get('aliases', None)
+        
+            print "***"
+            print aliases_text
+            print aliases
+        
+            relation_form = ArtistRelationFormSet(self.request.POST, instance=tmp)
+            print "relation_form.cleaned_data:",
+            print relation_form.is_valid()
+            print relation_form.errors
+        
+            if relation_form.is_valid():                
+                relation_form.save()
+
+                obj = form.save()
+                form.save_m2m()
+
+
+            return HttpResponseRedirect('#')
+        else:
+            return self.render_to_response(self.get_context_data(form=form, relation_form=relation_form))
+     """
+    
+    
     
     
 

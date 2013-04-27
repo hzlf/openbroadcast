@@ -158,6 +158,7 @@ JingleUi = function() {
 			self.update_jingle_selector(data);
 		});
 		
+		
 		var resource_uri = $('#default_jingle_set').data('resource_uri');
 		
 		
@@ -190,6 +191,9 @@ JingleUi = function() {
 	this.update_jingle_display = function(data) {
 
 		// console.log(data)
+		
+		
+		console.log('JINGLE DATA', data)
 
 		var status_map = new Array;
 		status_map[0] = 'init';
@@ -246,7 +250,7 @@ JingleUi = function() {
 		
 		console.log('this.current_data, data', data);
 
-		if(data.objects.length > 1) {
+		if(data.objects.length > 0) {
 		
 			if( ! Object.equals(this.current_data, data)) {
 				console.log('data changed');
