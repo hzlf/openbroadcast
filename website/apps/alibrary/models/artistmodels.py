@@ -105,8 +105,11 @@ class Artist(MigrationMixin):
 
     #multiple = models.NullBooleanField(null=True, blank=True)
     
+    
+    # properties to create 'special' objects. (like 'Unknown')
     listed = models.BooleanField(verbose_name='Include in listings', default=True, help_text=_('Should this Artist be shown on the default Artist-list?'))
     disable_link = models.BooleanField(verbose_name='Disable Link', default=False, help_text=_('Disable Linking. Useful e.g. for "Varius Artists"'))
+    disable_editing = models.BooleanField(verbose_name='Disable Editing', default=False, help_text=_('Disable Editing. Useful e.g. for "Unknown Artist"'))
     
     # 
     excerpt = models.TextField(blank=True, null=True)  
@@ -183,7 +186,6 @@ class Artist(MigrationMixin):
 
     @models.permalink
     def get_absolute_url(self):
-        """"""
         if self.disable_link:
             return None
         

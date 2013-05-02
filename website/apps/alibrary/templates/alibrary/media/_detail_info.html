@@ -1,4 +1,4 @@
-{% load truncate i18n thumbnail arating_tags %}
+{% load truncate i18n thumbnail arating_tags calc %}
 <div class="span7 padded-h container_content">
 
 	<div class="page-header">
@@ -27,6 +27,16 @@
 			{% with item=object.release %}
 			{% include "alibrary/element/_inline_link.html" %}
 			{% endwith %}
+			&nbsp;
+		</dd>
+		{% endif %}
+
+		{% if object.duration %}
+		<dt>
+			{% trans "Duration" %}:
+		</dt>
+		<dd>
+			{{ object.duration|msec_to_time }}
 			&nbsp;
 		</dd>
 		{% endif %}

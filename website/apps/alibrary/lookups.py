@@ -54,6 +54,16 @@ class ArtistLookup(ModelLookup):
 registry.register(ArtistLookup)
 
 
+class LabelLookup(ModelLookup):
+    model = Label
+    search_fields = ['name__icontains',]
+
+    def get_item_label(self, item):
+        return u"%s (%s)" % (item.name, item.pk)    
+    
+registry.register(LabelLookup)
+
+
 class LicenseLookup(ModelLookup):
     model = License
     search_fields = ['name__icontains',]

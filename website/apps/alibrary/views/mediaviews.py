@@ -153,7 +153,7 @@ class MediaListView(PaginationMixin, ListView):
         #stags = ('Techno', 'Electronic')
         #stags = (4,)
         if stags:
-            qs = Release.tagged.with_all(tstags, qs)
+            qs = Media.tagged.with_all(tstags, qs)
             
             
         # rebuild filter after applying tags
@@ -218,7 +218,7 @@ class MediaEditView(UpdateView):
 
         return context
 
-    """
+    """"""
     def form_valid(self, form):
     
         context = self.get_context_data()
@@ -226,41 +226,79 @@ class MediaEditView(UpdateView):
         relation_form = context['relation_form']
 
         # validation
+        
+        
+        
         if form.is_valid():
             print 'form valid'
+            
+            """
+            obj = form.save()
+            
+            
+        
+            print '----------------------------------------------'
+            print 'SAVED!'
+            print 'obj: %s' % obj.name
+            print 'obj a: %s' % obj.artist.name
+            obj.artist.save()
+            
+            #obj.save()
+            
+            obj.artist = obj.artist
+            obj.save()
+            """ 
             
             self.object.tags = form.cleaned_data['d_tags']
             
             # temporary instance to validate inline forms against
             tmp = form.save(commit=False)
 
-            # bloody hack
-            
             print self.request.POST
-            
-            aliases_text = self.request.POST.get('aliases_text', None)
-            aliases = self.request.POST.get('aliases', None)
-        
-            print "***"
-            print aliases_text
-            print aliases
-        
-            relation_form = ArtistRelationFormSet(self.request.POST, instance=tmp)
+
+            relation_form = MediaRelationFormSet(self.request.POST, instance=tmp)
             print "relation_form.cleaned_data:",
             print relation_form.is_valid()
             print relation_form.errors
         
-            if relation_form.is_valid():                
+            if relation_form.is_valid():        
+                
+                        
                 relation_form.save()
 
                 obj = form.save()
-                form.save_m2m()
-
+                #form.save_m2m()
+                
+                print '----------------------------------------------'
+                print 'SAVED!'
+                print 'obj: %s' % obj.name
+                print 'obj a: %s' % obj.artist.name
+                print 'obj r: %s' % obj.release.name
+                print 'obj r-pk: %s' % obj.release.pk
+                
+                
+                if not obj.artist.pk:
+                    obj.artist.creator = context['request'].user
+                
+                obj.artist.save()
+                obj.artist = obj.artist
+                
+                if not obj.release.pk:
+                    obj.release.creator = context['request'].user
+                
+                obj.release.save()
+                obj.release = obj.release
+                obj.save()
+                
+                #form.save_m2m()
+                print '----------------------------------------------'
+            
+                
 
             return HttpResponseRedirect('#')
         else:
             return self.render_to_response(self.get_context_data(form=form, relation_form=relation_form))
-     """
+     
     
     
     

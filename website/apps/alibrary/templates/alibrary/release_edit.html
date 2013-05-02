@@ -24,6 +24,15 @@
 			$(el).parents('.control-group').html('<span>' + val + '</span>');
 		});
 		
+		
+		// label shortcuts
+		$('.action.label-select').on('click', 'a', function(e){
+			e.preventDefault();
+			var val = $(this).data('label');
+			$('input#id_label_0').val(val);
+			$('input#id_label_0').focus();
+			$('input#id_label_0').blur();
+		});
 
 		
 	});

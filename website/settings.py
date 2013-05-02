@@ -328,6 +328,7 @@ INSTALLED_APPS = (
     'south',
     'polymorphic',
     'django_countries',
+    'l10n',
     'guardian',
     'filer',
     'private_files',
@@ -359,6 +360,9 @@ INSTALLED_APPS = (
     'ajax_select',
     
     
+    'email_obfuscator',
+    
+    
     # cms plugins
     'cms.plugins.text',
     'cms.plugins.link',
@@ -373,6 +377,8 @@ INSTALLED_APPS = (
     'multilingual',
     'disqus',
     'selectable',
+    
+    'autocomplete_light',
     
     # asset and media handling
     'sekizai',
@@ -832,7 +838,7 @@ WYM_CLASSES = ",\n".join([
 
 
 ACTSTREAM_SETTINGS = {
-    'MODELS': ('auth.user', 'auth.group', 'alibrary.release', 'alibrary.playlist', 'alibrary.artist',),
+    'MODELS': ('auth.user', 'auth.group', 'alibrary.release', 'alibrary.playlist', 'alibrary.artist', 'alibrary.media',),
     #'MANAGER': 'myapp.streams.MyActionManager',
     'FETCH_RELATIONS': True,
     'USE_PREFETCH': True,

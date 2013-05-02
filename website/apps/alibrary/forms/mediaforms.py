@@ -17,13 +17,14 @@ from filer.models.imagemodels import Image
 
 from django.contrib.admin import widgets as admin_widgets
 
+import autocomplete_light
 
-from alibrary.models import Media, Relation
+from alibrary.models import Media, Relation, Artist
 
 from pagedown.widgets import PagedownWidget
 
 import selectable.forms as selectable
-from alibrary.lookups import *
+from alibrary.lookups import ReleaseNameLookup, ArtistLookup, LicenseLookup
 
 
 import floppyforms as forms
@@ -80,8 +81,8 @@ class MediaForm(ModelForm):
 
     class Meta:
         model = Media
-        fields = ('name', 'd_tags')
-        
+        fields = ('name', 'description', 'artist', 'tracknumber', 'mediatype', 'license', 'release', 'd_tags')
+
 
     def __init__(self, *args, **kwargs):
 
@@ -119,15 +120,15 @@ class MediaForm(ModelForm):
                                
                 _('General'),
                 LookupField('name', css_class='input-xlarge'),
-                LookupField('real_name', css_class='input-xlarge'),
-                LookupField('type', css_class='input-xlarge'),
-                LookupField('country', css_class='input-xlarge'),
+                LookupField('release', css_class='input-xlarge'),
+                LookupField('artist', css_class='input-xlarge'),
+                LookupField('tracknumber', css_class='input-xlarge'),
+                LookupField('mediatype', css_class='input-xlarge'),
         )
         
-        alias_layout = Fieldset(
-                _('Alias(es)'),
-                Field('aliases', css_class='input-xlarge'),
-                Field('members', css_class='input-xlarge'),    
+        license_layout = Fieldset(
+                _('License/Source'),
+                Field('license', css_class='input-xlarge'),   
         )
         
         catalog_layout = Fieldset(
@@ -142,8 +143,7 @@ class MediaForm(ModelForm):
 
         meta_layout = Fieldset(
                 'Meta',
-                LookupField('biography', css_class='input-xxlarge'),
-                'main_image',
+                LookupField('description', css_class='input-xxlarge'),
         )
         
         tagging_layout = Fieldset(
@@ -155,7 +155,7 @@ class MediaForm(ModelForm):
                         base_layout,
                         # artist_layout,
                         meta_layout,
-                        alias_layout,
+                        license_layout,
                         tagging_layout,
                         )
 
@@ -164,13 +164,26 @@ class MediaForm(ModelForm):
         
 
     
-    main_image = forms.Field(widget=FileInput(), required=False)
-    #releasedate = forms.DateField(required=False,widget=forms.DateInput(format = '%Y-%m-%d'), input_formats=('%Y-%m-%d',))
-    #releasedate_approx = ApproximateDateFormField(label="Releasedate", required=False)
+
     d_tags = TagField(widget=TagAutocompleteTagIt(max_tags=9), required=False, label=_('Tags'))
-    #name = forms.CharField(widget=selectable.AutoCompleteWidget(ReleaseNameLookup), required=True)
-    #label = selectable.AutoCompleteSelectField(ReleaseLabelLookup, allow_new=True, required=False)    
-    biography = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")   
+    release = selectable.AutoCompleteSelectField(ReleaseNameLookup, allow_new=True, required=True) 
+    
+    
+    
+    """
+    extra_artists = forms.ModelChoiceField(Artist.objects.all(),
+        widget=autocomplete_light.ChoiceWidget('ArtistAutocomplete'), required=False)
+    """
+    
+    artist = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False)    
+    
+    
+    
+    
+    description = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")   
+
+    
+    #license = selectable.AutoCompleteSelectField(LicenseLookup, widget=selectable.AutoComboboxSelectWidget(lookup_class=LicenseLookup), allow_new=False, required=False, label=_('License'))
 
     # aliases = selectable.AutoCompleteSelectMultipleField(ArtistLookup, required=False)
     # aliases  = make_ajax_field(Media,'aliases','aliases',help_text=None)

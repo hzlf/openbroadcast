@@ -133,7 +133,7 @@ class ReleaseBulkeditForm(Form):
         
     # Fields
     bulk_artist_name = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False, label=_('Artist'))
-    bulk_license = selectable.AutoComboboxSelectField(LicenseLookup, allow_new=False, required=False, label=_('License'))
+    #bulk_license = selectable.AutoComboboxSelectField(LicenseLookup, allow_new=False, required=False, label=_('License'))
     
 
 
@@ -192,6 +192,10 @@ class ReleaseForm(ModelForm):
         catalog_layout = Fieldset(
                 _('Label/Catalog'),
                 LookupField('label', css_class='input-xlarge'),
+                HTML("""<ul class="action label-select">
+                    <li><a data-label="Unknown 22" href="#">Unknown label</a></li>
+                    <li><a data-label="Not on label" href="#">Not on label</a></li>
+                </ul>"""), 
                 LookupField('catalognumber', css_class='input-xlarge'),
                 LookupField('release_country', css_class='input-xlarge'),
                 # LookupField('releasedate', css_class='input-xlarge'),
@@ -244,9 +248,12 @@ class ReleaseForm(ModelForm):
         print cd
         
         label = cd['label']
-        if not label.pk:
-            print "SEEMS TO BE NEW ONE..."
-            label.save()
+        try:
+            if not label.pk:
+                print "SEEMS TO BE NEW ONE..."
+                label.save()
+        except:
+            pass
             
         
         if 'main_image' in cd and cd['main_image'] != None:

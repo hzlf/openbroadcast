@@ -75,7 +75,7 @@
 		<div class="clear"></div>
 		<div class="inner_row bottom left">
 			<ul class="tags unstyled">
-				{% for tag in item.tags %}
+				{% for tag in item.tags|slice:":10" %}
 				<li>{{ tag.name }}</li>
 				{% endfor %}
 			</ul>

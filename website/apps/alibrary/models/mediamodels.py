@@ -226,6 +226,34 @@ class Media(CachingMixin, MigrationMixin):
     
     def __unicode__(self):
         return self.name
+    
+    @property
+    def classname(self):
+        return self.__class__.__name__
+    
+    def get_versions(self):
+       
+        try:
+            return reversion.get_for_object(self)
+        except:
+            return None
+        
+    
+    def get_last_revision(self):
+        try:
+            return reversion.get_unique_for_object(self)[0].revision
+        except:
+            return None
+        
+    def get_last_editor(self):
+        
+        latest_revision = self.get_last_revision()
+        
+        if latest_revision:
+            return latest_revision.user
+        
+        else:
+            return None
 
     
     @models.permalink
@@ -1004,6 +1032,17 @@ except:
         
         
 arating.enable_voting_on(Media)
+
+
+""""""
+from actstream import action
+def action_handler(sender, instance, created, **kwargs):
+    try:
+        action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
+    except Exception, e:
+        print e
+
+post_save.connect(action_handler, sender=Media)
         
 # media post save
 def media_post_save(sender, **kwargs):

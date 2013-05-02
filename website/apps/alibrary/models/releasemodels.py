@@ -45,7 +45,6 @@ from filer.fields.audio import FilerAudioField
 from filer.fields.file import FilerFileField
 
 
-
 from django_date_extensions.fields import ApproximateDateField
 
 # modules
@@ -73,6 +72,7 @@ from alibrary.models.basemodels import *
 from alibrary.models.artistmodels import *
 from alibrary.models.mediamodels import *
 from alibrary.models.playlistmodels import *
+from alibrary.models.labelmodels import *
 
 FORCE_CATALOGNUMBER = False
 
@@ -195,6 +195,12 @@ class Release(MigrationMixin):
     # relations
     label = models.ForeignKey(Label, blank=True, null=True, related_name='release_label', on_delete=models.SET_NULL)
     folder = models.ForeignKey(Folder, blank=True, null=True, related_name='release_folder', on_delete=models.SET_NULL)
+    
+    
+    # reworking media relationship
+    media = models.ManyToManyField('Media', through='ReleaseMedia', blank=True, null=True, related_name="releases")
+    #media = SortedManyToManyField('Media', blank=True, null=True, related_name="releases")
+    
 
     # user relations
     owner = models.ForeignKey(User, blank=True, null=True, related_name="releases_owner", on_delete=models.SET_NULL)
@@ -607,8 +613,15 @@ post_save.connect(library_post_save, sender=Release)
 """"""
 from actstream import action
 def action_handler(sender, instance, created, **kwargs):
+    print 'action handler'
+    print 'created: %s' % created
+    print kwargs
+    print '--------------------------------------------'
     try:
-        action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
+        verb = _('updated')
+        if created:
+            verb = _('created')
+        action.send(instance.get_last_editor(), verb=verb, target=instance)
     except Exception, e:
         print e
 
@@ -633,6 +646,20 @@ class ReleaseRelations(models.Model):
         verbose_name = _('Relation')
         verbose_name_plural = _('Relations')
         
+
+""""""
+class ReleaseMedia(models.Model):
+    release = models.ForeignKey('Release')
+    media = models.ForeignKey('Media')
+    position = models.PositiveIntegerField(null=True, blank=True)
+    class Meta:
+        app_label = 'alibrary'
+
+
+
+
+
+
 
         
 class ReleasePlugin(CMSPlugin):

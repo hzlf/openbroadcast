@@ -7,6 +7,9 @@ from django.views.generic.simple import direct_to_template
 #from pinax.apps.account.openid_consumer import PinaxConsumer
 handler500 = "pinax.views.server_error"
 
+import autocomplete_light
+autocomplete_light.autodiscover()
+
 from django.contrib import admin
 
 from cms.sitemaps import CMSSitemap
@@ -45,6 +48,7 @@ urlpatterns = patterns('',
     url(r"^vote/", include('arating.urls')),
     url(r'^ac_tagging/', include('ac_tagging.urls')),
     #url(r'^ac_lookup/lookups/', include('ajax_select.urls')),
+    url(r'^autocomplete/', include('autocomplete_light.urls')),
     
     
     url(r"^api/", include("alibrary.urls_api")),

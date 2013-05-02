@@ -39,3 +39,11 @@ def sec_to_time(value):
         return time.strftime('%H:%M:%S', time.gmtime(value))
     else:
         return time.strftime('%M:%S', time.gmtime(value))
+
+@register.filter 
+def msec_to_time(value):
+    value = int(value/1000)
+    if value > 3600:
+        return time.strftime('%H:%M:%S', time.gmtime(value))
+    else:
+        return time.strftime('%M:%S', time.gmtime(value))

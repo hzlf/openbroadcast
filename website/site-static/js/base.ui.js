@@ -1318,8 +1318,9 @@ base.ui.tagcloud = function() {
 	$('#tagcloud_inline .toggle-level').each(function(i,e){
 
 		
-		var level = $(this).attr('taglevel');
+		var level = $(this).data('taglevel');
 		var count = $('a.level' + level, '#tagcloud_inline').length;
+
 		
 		total_count = total_count + count;
 		
@@ -1328,7 +1329,7 @@ base.ui.tagcloud = function() {
 		if(count>0) {
 			$(this).html('&nbsp;' + total_count + '&nbsp;');
 		} else {
-			$(this).html('.');
+			// $(this).html('.');
 		}
 		
 		
@@ -1339,7 +1340,7 @@ base.ui.tagcloud = function() {
 	
 	$('.tag-level a', '#tagcloud_inline').live('click', function(e) {
 		e.preventDefault();
-		var level = $(this).data('level');
+		var level = $(this).data('taglevel');
 		
 		for (i=1; i<= level; i++) {
 			console.log('show:', i);

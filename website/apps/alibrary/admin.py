@@ -153,6 +153,17 @@ class RelationsInline(GenericTabularInline):
 
     
 #class ReleaseAdmin(PlaceholderAdmin, BaseAdmin):
+
+class ReleaseMediaMediaInline(admin.TabularInline):
+    model = Media
+    extra = 1
+
+""""""
+class ReleaseMediaInline(admin.TabularInline):
+    model = ReleaseMedia
+    extra = 1 
+    inlines = [ReleaseMediaMediaInline]
+
 class ReleaseAdmin(BaseAdmin):
 
     #list_display   = ('name', 'get_extra_artists',)
@@ -161,7 +172,7 @@ class ReleaseAdmin(BaseAdmin):
     list_filter = ('releasetype','release_country',)
     
     #inlines = [RelationsInline, MediaInline, ReleaseExtraartistsInline, DownloadreleaseInline, HardwarereleaseInline]
-    inlines = [RelationsInline, MediaInline, ReleaseExtraartistsInline]
+    inlines = [ReleaseMediaInline, RelationsInline, MediaInline, ReleaseExtraartistsInline]
     #prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ['slug', 'license', 'd_tags']
     
@@ -171,7 +182,7 @@ class ReleaseAdmin(BaseAdmin):
     fieldsets = [
         (None,               {'fields': ['name', 'slug', ('main_image', 'cover_image',), ('label', 'catalognumber'), ('releasedate', 'release_country', 'license'), ('releasetype', 'pressings'), 'publish_date', 'enable_comments', 'main_format', 'd_tags', 'excerpt', 'description']}),
         #('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
-        ('Users', {'fields' : ['owner', 'creator', 'publisher']})
+        ('Users', {'fields' : ['owner', 'creator', 'publisher']}),
     ]
     
 admin.site.register(Release, ReleaseAdmin)
@@ -246,7 +257,10 @@ class ProfessionAdmin(admin.ModelAdmin):
 admin.site.register(Profession, ProfessionAdmin)
 
 
-
+""""""
+class MediaReleaseInline(admin.TabularInline):
+    model = Release.media.through
+    extra = 1
 
     
 class MediaAdmin(BaseAdmin):
@@ -255,7 +269,7 @@ class MediaAdmin(BaseAdmin):
     search_fields = ['artist__name', 'release__name']
     list_filter = ('mediatype', 'license__name', 'processed', 'echoprint_status', 'conversion_status')
     
-    inlines = [RelationsInline, MediaExtraartistsInline]
+    inlines = [MediaReleaseInline, RelationsInline, MediaExtraartistsInline]
 
     readonly_fields = ['slug', 'folder', 'uuid', 'base_format', 'base_filesize', 'base_duration','base_samplerate', 'base_bitrate', 'release_link', 'master_sha1', 'd_tags']
     
@@ -282,6 +296,11 @@ class MediaAdmin(BaseAdmin):
     
 admin.site.register(Media, MediaAdmin)
     
+    
+class DistributorLabelInline(admin.TabularInline):
+    model = Distributor.labels.through
+    extra = 1
+    
 class LabelAdmin(PlaceholderAdmin, BaseAdmin):
     
     # inlines = [LabelInline]
@@ -292,16 +311,34 @@ class LabelAdmin(PlaceholderAdmin, BaseAdmin):
     
     """"""
     fieldsets = [
-        (None,               {'fields': ['name', 'slug']}),
-        
-        ('Users', {'fields' : ['owner', 'creator', 'publisher']}),
-        
+        (None,               {'fields': ['name', 'slug', 'type', 'description']}),
+        ('Contact', {'fields' : ['address', 'country', ('phone', 'fax'), 'email']}),
+        ('Settings', {'fields' : ['listed', 'disable_link', 'disable_editing']}),
         ('Relations', {'fields': ['parent'], 'classes': ['']}),
-        
+        ('Users', {'fields' : [('owner', 'creator', 'publisher'),]}),
         ('Other content', {'fields': ['first_placeholder'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
     ]
     
 admin.site.register(Label, LabelAdmin)
+    
+class DistributorAdmin(PlaceholderAdmin, BaseAdmin):
+    
+    # inlines = [LabelInline]
+    #prepopulated_fields = {"slug": ("name",)}
+    readonly_fields = ['slug', 'd_tags']
+    
+    inlines = [DistributorLabelInline, RelationsInline]
+    
+    """"""
+    fieldsets = [
+        (None,               {'fields': ['name', 'slug', 'type', 'description']}),
+        ('Contact', {'fields' : ['address', 'country', ('phone', 'fax'), 'email']}),
+        ('Relations', {'fields': ['parent'], 'classes': ['']}),
+        ('Users', {'fields' : [('owner', 'creator', 'publisher'),]}),
+        ('Other content', {'fields': ['first_placeholder'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
+    ]
+    
+admin.site.register(Distributor, DistributorAdmin)
 
 
     

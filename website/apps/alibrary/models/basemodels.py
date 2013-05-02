@@ -39,6 +39,7 @@ from filer.fields.file import FilerFileField
 # modules
 #from taggit.managers import TaggableManager
 from django_countries import CountryField
+from phonenumber_field.modelfields import PhoneNumberField
 from easy_thumbnails.files import get_thumbnailer
 
 import tagging
@@ -52,6 +53,7 @@ from multilingual.manager import MultilingualManager
 # django-extensions (http://packages.python.org/django-extensions/)
 from django_extensions.db.fields import UUIDField, AutoSlugField
 
+from l10n.models import AdminArea, Country
 
 
 # logging
@@ -64,6 +66,7 @@ from alibrary.models import *
 from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
 
+from lib.fields import extra
 
 
     
@@ -84,23 +87,24 @@ class MigrationMixin(models.Model):
     
 
 
-from datatrans.utils import register
-class LabelTranslation(object):
-    fields = ('name', 'address')
 
-class Label(MPTTModel, MigrationMixin):
+class Distributor(MPTTModel, MigrationMixin):
 
     # core fields
     uuid = UUIDField(primary_key=False)
     name = models.CharField(max_length=400)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
+    code = models.CharField(max_length=50)
+    country = models.ForeignKey(Country, blank=True, null=True)
     
-    labelcode = models.CharField(max_length=50)
-    country = CountryField(blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     
-    email_main = models.EmailField(blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    phone = PhoneNumberField(blank=True, null=True)
+    fax = PhoneNumberField(blank=True, null=True)
+    
+    description = extra.MarkdownTextField(blank=True, null=True)
     
     first_placeholder = PlaceholderField('first_placeholder')
     
@@ -110,13 +114,23 @@ class Label(MPTTModel, MigrationMixin):
     
     # relations
     parent = TreeForeignKey('self', null=True, blank=True, related_name='label_children')
-    folder = models.ForeignKey(Folder, blank=True, null=True, related_name='label_folder')
+
+    labels = models.ManyToManyField('Label', through='DistributorLabel', blank=True, null=True, related_name="distributors")
     
     # user relations
-    owner = models.ForeignKey(User, blank=True, null=True, related_name="labels_owner", on_delete=models.SET_NULL)
-    creator = models.ForeignKey(User, blank=True, null=True, related_name="labels_creator", on_delete=models.SET_NULL)
-    publisher = models.ForeignKey(User, blank=True, null=True, related_name="labels_publisher", on_delete=models.SET_NULL)
+    owner = models.ForeignKey(User, blank=True, null=True, related_name="distributors_owner", on_delete=models.SET_NULL)
+    creator = models.ForeignKey(User, blank=True, null=True, related_name="distributors_creator", on_delete=models.SET_NULL)
+    publisher = models.ForeignKey(User, blank=True, null=True, related_name="distributors_publisher", on_delete=models.SET_NULL)
     
+    TYPE_CHOICES = (
+        ('unknown', _('Unknown')),
+        ('major', _('Major Label')),
+        ('indy', _('Independent Label')),
+        ('net', _('Netlabel')),
+    )
+    
+    type = models.CharField(verbose_name="Distributor type", max_length=12, default='unknown', choices=TYPE_CHOICES)
+
 
     # relations a.k.a. links
     relations = generic.GenericRelation('Relation')
@@ -131,8 +145,8 @@ class Label(MPTTModel, MigrationMixin):
     # meta
     class Meta:
         app_label = 'alibrary'
-        verbose_name = _('Label')
-        verbose_name_plural = _('Labels')
+        verbose_name = _('Distributor')
+        verbose_name_plural = _('Distributors')
         ordering = ('name', )
 
     class MPTTMeta:
@@ -141,10 +155,19 @@ class Label(MPTTModel, MigrationMixin):
     def __unicode__(self):
         return self.name
 
+
+
+    @models.permalink
+    def get_absolute_url(self):
+        if self.disable_link:
+            return None
+        
+        return ('alibrary-label-detail', [self.slug])
+
+    @models.permalink
+    def get_edit_url(self):
+        return ('alibrary-label-edit', [self.pk])
     
-    def get_folder(self, name):
-        folder, created = Folder.objects.get_or_create(name=name, parent=self.folder)
-        return folder
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
@@ -157,20 +180,27 @@ class Label(MPTTModel, MigrationMixin):
         self.tags = t_tags;
         self.d_tags = t_tags;
         
-        super(Label, self).save(*args, **kwargs)
+        super(Distributor, self).save(*args, **kwargs)
+
+       
     
         
 try:
-    tagging.register(Label)
+    tagging.register(Distributor)
 except:
-    pass
+    pass     
+        
+        
 
-# register
-post_save.connect(library_post_save, sender=Label)   
- 
-# register(Label, LabelTranslation)     
-        
-        
+class DistributorLabel(models.Model):
+    distributor = models.ForeignKey('Distributor')
+    label = models.ForeignKey('Label')
+    exclusive = models.BooleanField(default=False)
+    countries = models.ManyToManyField(Country, related_name="distribution_countries")
+    class Meta:
+        app_label = 'alibrary'
+        verbose_name = _('Labels in catalog')
+        verbose_name_plural = _('Labels in catalog')
         
         
 

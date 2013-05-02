@@ -115,7 +115,9 @@ class Import(BaseModel):
     def get_delete_url(self):
         return ('importer-import-delete', [str(self.pk)])
     
+
     
+    @task
     def get_stats(self):
         stats = {}
         stats['init'] = self.files.filter(status=0)
@@ -407,7 +409,6 @@ class ImportFile(BaseModel):
         
         media, status = importer.run(obj)
 
-        """   """      
         if media:
             print 'GOT MEDIA - SAVE IT'
             print media
