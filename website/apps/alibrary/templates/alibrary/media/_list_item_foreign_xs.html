@@ -1,4 +1,4 @@
-{% load calc i18n arating_tags truncate spacify_tags %}
+{% load calc i18n arating_tags truncate spacify_tags spurl %}
 
 <div class="list_body_row selectable item media published {{ item.uuid }}" id="list_item_{{ item.id }}" data-item_id="{{ item.id }}" >
 
@@ -27,13 +27,26 @@
 				</li>
 
 			</ul>
+			<ul class="unstyled">
+				<li>
+					{% if item.artist.get_absolute_url %}
+					<a href="{{ item.artist.get_absolute_url }}">{{ item.artist.name|truncate_chars_inner:32 }}</a>
+					&nbsp;
+					<a href="{% spurl path=release_list query="artist={{ item.artist.slug }}" %}" title="{% trans "Only show releases by" %} {{ item.artist.name }}">
+					{{ item.artist.release_label.count }}<i class="icon-filter"></i>	
+					</a>
+					{% else %}
+					<span>{{ item.artist.name|truncate_chars_inner:32 }}</span>
+					{% endif %}
+				</li>
+			</ul>
 			
 			{% if extended %}
 			<ul class="__horizontal unstyled small">
 			{% for ea in item.extraartist_media.all %}
 			<li class="{% if highlight.pk == ea.artist.pk %}highlight{% endif %}"><a href="{{ ea.artist.get_absolute_url }}">{{ ea.artist.name }}</a> <small>[{{ ea.profession.name }}]</small></li>
 			{% endfor %}
-			</dl>
+			</ul>
 			{% endif %}
 			
 		</div>

@@ -10,17 +10,22 @@ from django.template import RequestContext
 from django.db.models import Q
 from django.conf import settings
 
+from django.contrib.contenttypes.models import ContentType
+
 from tagging.models import Tag, TaggedItem
 from tagging.utils import calculate_cloud
 from easy_thumbnails.files import get_thumbnailer
 
 from pure_pagination.mixins import PaginationMixin
 
-from alibrary.models import Media
+from alibrary.models import Media, Playlist, PlaylistItem
 from alibrary.forms import MediaForm, MediaActionForm, MediaRelationFormSet
 from alibrary.filters import MediaFilter
 
 from lib.util import tagging_extra
+from lib.util import change_message
+
+import reversion
 
 from sendfile import sendfile
 
@@ -179,9 +184,28 @@ class MediaListView(PaginationMixin, ListView):
 class MediaDetailView(DetailView):
 
     model = Media
+    extra_context = {}
 
     def get_context_data(self, **kwargs):
+        
         context = super(MediaDetailView, self).get_context_data(**kwargs)
+        obj = kwargs.get('object', None)
+        
+        # change history
+        self.extra_context['history'] = obj.get_versions()
+        
+        # foreign appearance
+        ps = []
+        try:
+            pis = PlaylistItem.objects.filter(object_id=obj.id, content_type=ContentType.objects.get_for_model(obj))
+            ps = Playlist.objects.filter(items__in=pis)
+        except:
+            pass
+        
+        self.extra_context['appearance'] = ps
+        
+        context.update(self.extra_context)
+        
         return context
     
     
@@ -222,59 +246,25 @@ class MediaEditView(UpdateView):
     def form_valid(self, form):
     
         context = self.get_context_data()
-
         relation_form = context['relation_form']
-
-        # validation
-        
-        
         
         if form.is_valid():
-            print 'form valid'
-            
-            """
-            obj = form.save()
-            
-            
-        
-            print '----------------------------------------------'
-            print 'SAVED!'
-            print 'obj: %s' % obj.name
-            print 'obj a: %s' % obj.artist.name
-            obj.artist.save()
-            
-            #obj.save()
-            
-            obj.artist = obj.artist
-            obj.save()
-            """ 
-            
+
             self.object.tags = form.cleaned_data['d_tags']
             
             # temporary instance to validate inline forms against
             tmp = form.save(commit=False)
 
-            print self.request.POST
-
             relation_form = MediaRelationFormSet(self.request.POST, instance=tmp)
-            print "relation_form.cleaned_data:",
-            print relation_form.is_valid()
-            print relation_form.errors
         
             if relation_form.is_valid():        
-                
                         
                 relation_form.save()
 
-                obj = form.save()
-                #form.save_m2m()
-                
-                print '----------------------------------------------'
-                print 'SAVED!'
-                print 'obj: %s' % obj.name
-                print 'obj a: %s' % obj.artist.name
-                print 'obj r: %s' % obj.release.name
-                print 'obj r-pk: %s' % obj.release.pk
+                msg = change_message.construct(self.request, form, [relation_form])
+                with reversion.create_revision():
+                    obj = form.save()
+                    reversion.set_comment(msg)
                 
                 
                 if not obj.artist.pk:

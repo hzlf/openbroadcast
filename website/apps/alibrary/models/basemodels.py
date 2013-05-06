@@ -350,14 +350,44 @@ class Daypart(models.Model):
     
     
 
+
+
+class Service(models.Model):
+    
+    name = models.CharField(max_length=200)
+    key = models.CharField(max_length=200, blank=True, null=True)
+    pattern = models.CharField(max_length=256, null=True, blank=True, help_text='Regex to match url against. eg ""')
+    
+    class Meta:
+        app_label = 'alibrary'
+        verbose_name = _('Service')
+        verbose_name_plural = _('Services')
+        ordering = ('name', )
+    
+    def __unicode__(self):
+        return '%s - "%s"' % (self.name, self.pattern)
+    
+    
+
 class RelationManager(models.Manager):
 
     def generic(self):
         return self.get_query_set().filter(service='generic')
 
+    def specific(self, key=None):
+        
+        if not key:
+            services = Service.objects.values_list('key', 'pattern',)
+        
+        return self.get_query_set().exclude(service='generic')
+
+    """
+    def generic(self):
+        return self.get_query_set().filter(service='generic')
+
     def specific(self):
         return self.get_query_set().exclude(service='generic')
-    
+    """
     
 class Relation(models.Model):
     
@@ -382,6 +412,98 @@ class Relation(models.Model):
         ('itunes', _('iTunes')),
         ('official', _('Official website')),
     )
+    service = models.CharField(max_length=50, choices=SERVICE_CHOICES, blank=True, null=True, editable=False)
+
+    ACTION_CHOICES = (
+        ('information', _('Information')),
+        ('buy', _('Buy')),
+    )
+    action = models.CharField(max_length=50, default='information', choices=ACTION_CHOICES)
+
+    @property
+    def _service(cls):
+        return cls.service
+
+
+    
+    # auto-update
+    created = models.DateField(auto_now_add=True, editable=False)
+    updated = models.DateField(auto_now=True, editable=False)
+    
+    # manager
+    objects = RelationManager()
+
+    class Meta:
+        app_label = 'alibrary'
+        verbose_name = _('Relation')
+        verbose_name_plural = _('Relations')
+        ordering = ('url', )
+        #unique_together = ('content_type', 'object_id')
+    
+    def __unicode__(self):
+        return self.url
+    
+    """"""
+    def save(self, *args, **kwargs):
+
+        
+        if self.url.find('facebook.com') != -1:
+            self.service = 'facebook'
+            
+        if self.url.find('youtube.com') != -1:
+            self.service = 'youtube' 
+                   
+        if self.url.find('discogs.com') != -1:
+            if self.url.find('/master/') != -1:
+                self.service = 'discogs_master'
+            else:
+                self.service = 'discogs'
+                   
+        if self.url.find('wikipedia.org') != -1:
+            self.service = 'wikipedia'
+                   
+        if self.url.find('musicbrainz.org') != -1:
+            self.service = 'musicbrainz'
+                   
+        if self.url.find('bandcamp.com') != -1:
+            self.service = 'bandcamp'
+                   
+        if self.url.find('itunes.apple.com') != -1:
+            self.service = 'itunes'
+            
+        # find already assigned services and delete them
+        if self.service != 'generic':
+            # TODO: fix unique problem
+            reld = Relation.objects.filter(service=self.service, content_type=self.content_type, object_id=self.object_id).delete()
+        
+        super(Relation, self).save(*args, **kwargs)    
+        
+    
+    
+class __old_Relation__(models.Model):
+    
+    name = models.CharField(max_length=200, blank=True, null=True, help_text=(_('Additionally override the name.')))
+    url = models.URLField(max_length=512)
+
+    content_type = models.ForeignKey(ContentType)
+    #object_id = models.PositiveIntegerField()
+    object_id = UUIDField()
+    content_object = generic.GenericForeignKey('content_type', 'object_id')
+
+
+    SERVICE_CHOICES = (
+        ('generic', _('Generic')),
+        ('facebook', _('Facebook')),
+        ('youtube', _('YouTube')),
+        ('discogs', _('Discogs')),
+        ('discogs_master', _('Discogs | master-release')),
+        ('wikipedia', _('Wikipedia')),
+        ('musicbrainz', _('Musicbrainz')),
+        ('bandcamp', _('Bandcamp')),
+        ('itunes', _('iTunes')),
+        ('official', _('Official website')),
+    )
+    
     service = models.CharField(max_length=50, default='generic', choices=SERVICE_CHOICES)
     
     ACTION_CHOICES = (

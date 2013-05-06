@@ -407,6 +407,26 @@ class Media(CachingMixin, MigrationMixin):
             print e
             return None
         
+        
+        
+        
+    @property
+    def appearances(self):
+        return self.get_appearances()
+        
+    def get_appearances(self):
+        ps = []
+        try:
+            pis = PlaylistItem.objects.filter(object_id=self.pk, content_type=ContentType.objects.get_for_model(self))
+            ps = Playlist.objects.exclude(type='other').filter(items__in=pis).order_by('-type', '-created',).distinct()
+        except:
+            pass
+        
+        return ps
+        
+        
+    
+        
     
     """
     Conversion flow:

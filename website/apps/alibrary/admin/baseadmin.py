@@ -23,6 +23,7 @@ from genericadmin.admin import GenericAdminModelAdmin, GenericTabularInline
 
 import reversion
 
+
 def merge_selected(modeladmin,request,queryset): #This is an admin/
     import copy
     model = queryset.model
@@ -241,6 +242,15 @@ class LicenseAdmin(reversion.VersionAdmin, MultilingualModelAdmin):
     search_fields = ('name',)
     
 admin.site.register(License, LicenseAdmin)
+      
+      
+      
+      
+class ServiceAdmin(BaseAdmin):
+    pass
+    
+admin.site.register(Service, ServiceAdmin)      
+      
       
 class RelationAdmin(BaseAdmin):
 

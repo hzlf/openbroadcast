@@ -95,10 +95,7 @@ class ArtistListView(PaginationMixin, ListView):
         q = self.request.GET.get('q', None)
         
         if q:
-            qs = Artist.objects.filter(Q(name__istartswith=q)\
-            | Q(media_release__name__icontains=q)\
-            | Q(media_release__artist__name__icontains=q)\
-            | Q(label__name__icontains=q))\
+            qs = Artist.objects.filter(Q(name__istartswith=q))\
             .distinct()
         else:
             qs = Artist.objects.all()

@@ -66,7 +66,7 @@
 		<dd>
 
 		{% if object.owner %}
-		<span class="key">{% trans "Uploaded by" %}:</span> <span class="value"><a href="{{ object.owner.get_absolute_url }}">{{ object.owner }}</a></span> |
+		<span class="key">{% trans "Created by" %}:</span> <span class="value"><a href="{{ object.owner.get_absolute_url }}">{{ object.owner }}</a></span> |
 		{% endif %}
 
 		{% if object.publisher %}

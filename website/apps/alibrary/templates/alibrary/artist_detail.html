@@ -49,135 +49,99 @@
 		<div class="tab-content">
 
 			<div class="tab-pane {%  if releases.object_list.count > 0 %}active{% endif %}" id="tracklist" class="topflop">
-				
+
 				<!--
 				<div class="pagination">
-				    {{ media.render }}
+				{{ media.render }}
 				</div>
 				-->
 				<section class="top">
-					
+
 					<h2>{% trans "Top Tracks" %}</h2>
-						
+
 					<div class="listview container medias s">
-	
-	
+
 						<div class="list_header"></div>
-	
+
 						<div class="list_body">
-							
-							
+
 							{# for item in media.object_list #}
 							{% for item in m_top %}
 							{% include "alibrary/media/_list_item_foreign_xs.html" %}
 							{% empty %}
-							<p>{% trans "Not enough ratings to calculate the 'Tops'." %}</p>
+							<p>
+								{% trans "Not enough ratings to calculate the 'Tops'." %}
+							</p>
 							{% endfor %}
 						</div>
 					</div>
-				
+
 				</section>
-				
+
 				<section class="flop">
-					
+
 					<h2>{% trans "Flop Tracks" %}</h2>
-					
+
 					<div class="listview container medias s">
-	
-	
+
 						<div class="list_header"></div>
-	
+
 						<div class="list_body">
-							
-							
+
 							{% for item in m_flop %}
 							{% include "alibrary/media/_list_item_foreign_xs.html" %}
 							{% empty %}
-							<p>{% trans "Not enough ratings to calculate the 'Flops'." %}</p>
+							<p>
+								{% trans "Not enough ratings to calculate the 'Flops'." %}
+							</p>
 							{% endfor %}
 						</div>
 					</div>
-				
+
 				</section>
-				
+
 				<!--
 				<div class="pagination">
-				    {{ releases.render }}
+				{{ releases.render }}
 				</div>
-				-->	
-				
+				-->
+
 				<section class="flop">
-					
+
 					<h2>{% trans "Releases" %}</h2>
-					
+
 					<div class="listview container releases inner l">
-	
-	
+
 						<div class="list_header"></div>
-	
+
 						<div class="list_body">
-							
-							
+
 							{% for item in releases.object_list %}
 							{% include "alibrary/release/list_item_l.html" %}
 							{% endfor %}
 						</div>
 					</div>
-				
+
 				</section>
-				
+
 			</div>
 
 			<div class="tab-pane" id="history">
 
-				
-
-				
-				<!--
-				<table class="table table-condensed history">
-
-					<thead>
-						<tr>
-							<th>User</th>
-							<th>Time</th>
-							<th>Comment</th>
-						</tr>
-					</thead>
-					<tbody>
-
-						{% for r in object.get_versions.all %}
-						<tr>
-							<td><a href="{{ r.revision.user.get_profile.get_absolute_url }}">{{ r.revision.user }}</a></td>
-							<td>{{ r.revision.date_created }}</td>
-							<td>{{ r.revision.comment }}</td>
-
-						</tr>
-
-						{% endfor %}
-
-					</tbody>
-				</table>
-				-->
-
 			</div>
 
 			<div class="tab-pane {%  if releases.object_list.count < 1 and m_contrib > 1 %}active{% endif %}" id="contribution">
-				
-				
-				
 
-				
 				<section class="contribution">
-					
+
 					<h2>{% trans "Appears on" %}</h2>
-					
+
 					<div class="listview container medias s">
-	
-	
+
 						<div class="list_header"></div>
-	
+
 						<div class="list_body">
-							
+
 							{% with highlight=object extended=1 %}
 							{% for item in m_contrib %}
 							{% include "alibrary/media/_list_item_foreign_xs.html" %}
@@ -185,10 +149,9 @@
 							{% endwith %}
 						</div>
 					</div>
-				
+
 				</section>
-				
-				
+
 			</div>
 
 			<div class="tab-pane" id="biography">
@@ -197,47 +160,33 @@
 					<div class="description markdown padded-h">
 						{% wikify object.biography %}
 					</div>
-			
+
 				</section>
-				
+
 				{% if object.relations.generic.count > 0 %}
 				<section class="relations">
 					<h2>{% trans "More relations" %}</h2>
-						<ul class="unstyled">
+					<ul class="unstyled">
 						{% for relation in object.relations.generic %}
-						<li><a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.url }}">{{ relation.url }}</a></li>
-						
+						<li>
+							<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.url }}">{{ relation.url }}</a>
+						</li>
+
 						{% endfor %}
-						</ul>
-					
+					</ul>
+
 				</section>
 				{% endif %}
-				
-				
+
 			</div>
-			
-			
+
 			<div class="tab-pane" id="broadcasts">
 				...
 			</div>
-			
-			
-			
-			
+
 		</div>
 
 	</section>
-
-	
-
-	
-	
-	
-	
-	
-	
-	
-
 
 </div>
 

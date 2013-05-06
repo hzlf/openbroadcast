@@ -129,7 +129,7 @@ class Release(MigrationMixin):
     lik 2012-12 etc.
     """
     releasedate = models.DateField(blank=True, null=True)
-    releasedate_approx = ApproximateDateField(blank=True, null=True)
+    releasedate_approx = ApproximateDateField(verbose_name="Releasedate", blank=True, null=True)
     
     
     

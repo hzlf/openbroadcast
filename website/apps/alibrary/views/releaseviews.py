@@ -29,10 +29,10 @@ from django.db.models import Q
 
 from easy_thumbnails.files import get_thumbnailer
 
-
 from lib.util import tagging_extra
+from lib.util import change_message
 
-
+import reversion
 
 ALIBRARY_PAGINATE_BY = getattr(settings, 'ALIBRARY_PAGINATE_BY', (12,24,36,120))
 ALIBRARY_PAGINATE_BY_DEFAULT = getattr(settings, 'ALIBRARY_PAGINATE_BY_DEFAULT', 12)
@@ -185,16 +185,23 @@ class ReleaseListView(PaginationMixin, ListView):
 
 class ReleaseDetailView(DetailView):
 
-    context_object_name = "release"
     model = Release
+    context_object_name = "release"
+    extra_context = {}
     
     def render_to_response(self, context):
         return super(ReleaseDetailView, self).render_to_response(context, mimetype="text/html")
         
     def get_context_data(self, **kwargs):
-
+        
         context = super(ReleaseDetailView, self).get_context_data(**kwargs)
+        obj = kwargs.get('object', None)
+        
+        self.extra_context['history'] = obj.get_versions()
+        context.update(self.extra_context)
+        
         return context
+
     
     
 class ReleaseEditView(UpdateView):
@@ -239,13 +246,7 @@ class ReleaseEditView(UpdateView):
         # get the inline forms
         releasemedia_form = context['releasemedia_form']
         relation_form = context['relation_form']
-        
-        
 
-        
-        print 'validation:'
-
-        # validation
         if form.is_valid():
             print 'form valid'
             
@@ -255,14 +256,8 @@ class ReleaseEditView(UpdateView):
             tmp = form.save(commit=False)
         
             releasemedia_form = ReleaseMediaFormSet(self.request.POST, instance=tmp)
-            print "releasemedia_form valid?",
-            print releasemedia_form.is_valid()
-        
-        
+
             relation_form = ReleaseRelationFormSet(self.request.POST, instance=tmp)
-            print "relation_form.cleaned_data:",
-            print relation_form.is_valid()
-            print relation_form.errors
         
             if relation_form.is_valid():                
                 relation_form.save()
@@ -274,29 +269,9 @@ class ReleaseEditView(UpdateView):
                 for te in releasemedia_form.cleaned_data:
                     print te['artist']
                     if not te['artist'].pk:
-                        print "SAVE ARTIST"
                         te['artist'].save()
-                
-                
+                                
                 releasemedia_form.save()
-                
-                import reversion
-                
-                msg = construct_change_message(self.request, form, [relation_form, releasemedia_form])
-                
-                print '--- *****************'
-                print msg
-                print '--- *****************'
-                
-                with reversion.create_revision():
-                    obj = form.save()
-                    
-                    
-                    
-                    
-                    
-                    reversion.set_comment(msg)
-                form.save_m2m()
                 
                 """
                 handle publish action
@@ -306,12 +281,16 @@ class ReleaseEditView(UpdateView):
                 if action_form.is_valid():
                     publish = action_form.cleaned_data['publish']
                     
-                    
-                """
-                if not obj.creator:
-                    obj.creator = context['request'].user
-                    obj.save()
-                """
+
+
+                msg = change_message.construct(self.request, form, [relation_form, releasemedia_form])
+                with reversion.create_revision():
+                    obj = form.save()
+                    if publish:
+                        msg = '%s. \n %s' %('Published release', msg)
+                    reversion.set_comment(msg)
+                form.save_m2m()
+
                  
                 if publish:
                     print 'publish:'
@@ -321,6 +300,7 @@ class ReleaseEditView(UpdateView):
                     obj.publisher = self.request.user
                     
                     obj.save()
+                    
                     
             else:
                 print releasemedia_form.errors
@@ -487,34 +467,4 @@ def release_playlist(request, slug, format, version):
 
 
     
-    
-def construct_change_message(request, form, formsets):
-    from django.utils.text import capfirst, get_text_list
-    from django.utils.encoding import force_unicode
-    """
-    Construct a change message from a changed object.
-    """
-    change_message = []
-    if form.changed_data:
-        change_message.append(_('Changed %s.') % get_text_list(form.changed_data, _('and')))
 
-    if formsets:
-        for formset in formsets:
-            for added_object in formset.new_objects:
-                change_message.append(_('Added %(name)s "%(object)s".')
-                                      % {'name': force_unicode(added_object._meta.verbose_name),
-                                         'object': force_unicode(added_object)})
-            for changed_object, changed_fields in formset.changed_objects:
-                change_message.append(_('Changed %(list)s for %(name)s "%(object)s".')
-                                      % {'list': get_text_list(changed_fields, _('and')),
-                                         'name': force_unicode(changed_object._meta.verbose_name),
-                                         'object': force_unicode(changed_object)})
-            for deleted_object in formset.deleted_objects:
-                change_message.append(_('Deleted %(name)s "%(object)s".')
-                                      % {'name': force_unicode(deleted_object._meta.verbose_name),
-                                         'object': force_unicode(deleted_object)})
-    change_message = ' '.join(change_message)
-    return change_message or _('No fields changed.')
-    
-    
-    

@@ -398,6 +398,7 @@ class PlaylistMedia(models.Model):
 
 
 class PlaylistItemPlaylist(models.Model):
+    
     playlist = models.ForeignKey('Playlist')
     item = models.ForeignKey('PlaylistItem')
 
