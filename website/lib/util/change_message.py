@@ -8,8 +8,11 @@ def construct(request, form, formsets):
     change_message = []
     if form.changed_data:
         
-        
-        form.changed_data.remove('d_tags')
+        try:
+            form.changed_data.remove('d_tags')
+        except:
+            pass
+            
         if len(form.changed_data) > 0:
             change_message.append(_('Changed %s. \n') % get_text_list(form.changed_data, _('and')))
 
