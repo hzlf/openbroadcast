@@ -26,7 +26,6 @@ from lib.util import tagging_extra
 from django.contrib.auth.models import User
 from guardian.forms import UserObjectPermissionsForm
 
-
 ALIBRARY_PAGINATE_BY = getattr(settings, 'ALIBRARY_PAGINATE_BY', (12,24,36,120))
 ALIBRARY_PAGINATE_BY_DEFAULT = getattr(settings, 'ALIBRARY_PAGINATE_BY_DEFAULT', 12)
 
@@ -56,25 +55,21 @@ class PlaylistListView(PaginationMixin, ListView):
         
         context = super(PlaylistListView, self).get_context_data(**kwargs)
         
+        
         self.extra_context['filter'] = self.filter
         self.extra_context['relation_filter'] = self.relation_filter
         self.extra_context['tagcloud'] = self.tagcloud
         
-        self.extra_context['list_style'] = 's'
+        self.extra_context['list_style'] = self.request.GET.get('list_style', 's')
         self.extra_context['get'] = self.request.GET
         
         context.update(self.extra_context)
+        
         return context
     
 
     def get_queryset(self, **kwargs):
-
-        print '--args'
-        print self.args
-        print '--kwargs'
-        print self.kwargs
-        print kwargs
-        kwargs = {}
+        
         
         self.tagcloud = None
         q = self.request.GET.get('q', None)
@@ -86,10 +81,26 @@ class PlaylistListView(PaginationMixin, ListView):
         else:
             qs = Playlist.objects.all()
             
+
+            
+            
+        order_by = self.request.GET.get('order_by', None)
+        direction = self.request.GET.get('direction', None)
+        
+        if order_by and direction:
+            if direction == 'descending':
+                qs = qs.order_by('-%s' % order_by)
+            else:
+                qs = qs.order_by('%s' % order_by)
+            
             
             
         if 'type' in self.kwargs:
             qs = qs.filter(type=self.kwargs['type'])
+            
+        if 'user' in self.kwargs:
+            user = get_object_or_404(User, username=self.kwargs['user'])
+            qs = qs.filter(type=self.kwargs['type'], user=user)
             
             
         # special relation filters
@@ -115,6 +126,7 @@ class PlaylistListView(PaginationMixin, ListView):
         
         # tagging / cloud generation
         tagcloud = Tag.objects.usage_for_queryset(qs, counts=True, min_count=0)
+
         self.tagcloud = tagging_extra.calculate_cloud(tagcloud)
         return qs
     

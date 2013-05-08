@@ -120,6 +120,7 @@
       executeScriptTags();
     }
     currentState = window.history.state;
+    console.log('*** page changed ***');
     return triggerEvent('page:change');
   };
 

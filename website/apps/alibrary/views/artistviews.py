@@ -28,11 +28,11 @@ from alibrary.filters import ArtistFilter
 from tagging.models import Tag, TaggedItem
 from tagging.utils import calculate_cloud
 
-from django.db.models import Q
+
 
 from easy_thumbnails.files import get_thumbnailer
 
-
+from django.db.models import Q
 from lib.util import tagging_extra
 
 
@@ -72,13 +72,9 @@ class ArtistListView(PaginationMixin, ListView):
         self.extra_context['tagcloud'] = self.tagcloud
         #self.extra_context['release_list'] = self.filter
     
-        # hard-coded for the moment
-        
         self.extra_context['list_style'] = self.request.GET.get('list_style', 's')
-        #self.extra_context['list_style'] = 's'
         
         self.extra_context['get'] = self.request.GET
-        
         context.update(self.extra_context)
 
         return context

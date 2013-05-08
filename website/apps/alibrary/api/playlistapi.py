@@ -98,6 +98,7 @@ class SimplePlaylistResource(ModelResource):
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
             'status': ['exact', 'range',],
             'is_current': ['exact',],
+            'type': ['exact','in'],
         }
 
     def apply_authorization_limits(self, request, object_list):
@@ -161,6 +162,7 @@ class PlaylistResource(ModelResource):
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
             'status': ['exact', 'range',],
             'is_current': ['exact',],
+            'type': ['exact',],
         }
         #cache = SimpleCache(timeout=120)
         

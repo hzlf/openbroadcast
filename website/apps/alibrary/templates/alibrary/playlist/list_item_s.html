@@ -22,6 +22,8 @@
 					{% topflop_for_object item %}
 				</a>
 			</li>
+			
+			<!--
 			<li class="small">
 				{% for tag in item.tags %}
 					<span>{{ tag }}</span>
@@ -31,6 +33,7 @@
 				{% endfor %}
 
 			</li>
+			-->
 		</ul>
 	</div>
 	<div class="list_body_item c3">
@@ -46,7 +49,9 @@
 		<ul class="unstyled">
 			<li>
 				{{ item.duration|divide:1000|sec_to_time }}
+				{% if item.target_duration %}
 				<span class="small">{% trans "of" %} {{ item.target_duration|sec_to_time }}</span>
+				{% endif %}
 			</li>
 			<li class="small">
 				{{ item.items.count }} {% trans "Tracks" %}

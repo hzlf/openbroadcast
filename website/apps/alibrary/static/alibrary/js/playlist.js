@@ -281,36 +281,6 @@ PlaylistUi = function() {
 	
 	this.update_playlists = function() {
 		
-		/*
-		$.getJSON(self.api_url_simple, function(data) {
-			self.update_playlist_selector(data);
-			
-		});
-		*/
-		/*
-		$.getJSON(self.api_url + '?is_current=1', function(data) {
-			
-			console.log(self.api_url + '?is_current=1')
-			
-			self.update_playlist_display(data);
-			this.current_data = data;
-			
-			// maybe not the best way. think about alternatives...
-			try {
-				alibrary.playlist_editor.rebind();
-			} catch(e) {
-				console.log('error', e);
-			}
-			
-		});
-		*/
-		
-		
-		/*
-		$.getJSON(self.api_url, function(data) {
-			self.update_playlists_callback(data);
-		});
-		*/
 	};
 	
 	/* refactored */
@@ -353,7 +323,7 @@ PlaylistUi = function() {
 
 		
 		setTimeout(function(){
-			$.getJSON(self.api_url_simple, function(data) {
+			$.getJSON(self.api_url_simple + '?type__in=playlist,basket', function(data) {
 				self.update_playlist_selector(data);
 			});
 		}, 100)
@@ -691,7 +661,7 @@ PlaylistSelector = function() {
 		
 		var selector = $('select', self.dom_element);
 
-		$.getJSON(self.api_url_simple, function(data) {
+		$.getJSON(self.api_url_simple + '?type__in=playlist,basket', function(data) {
 			
 			var html = '';
 			for (i in data.objects) {

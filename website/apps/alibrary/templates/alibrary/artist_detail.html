@@ -128,6 +128,13 @@
 
 			<div class="tab-pane" id="history">
 
+				<section class="history">
+					
+					<h2>{% trans "Edit history" %}</h2>
+					
+					{% include "alibrary/element/_object_history.html" %}
+				</section>
+
 			</div>
 
 			<div class="tab-pane {%  if releases.object_list.count < 1 and m_contrib > 1 %}active{% endif %}" id="contribution">
@@ -186,6 +193,10 @@
 
 		</div>
 
+	</section>
+
+	<section class="comments on-site">
+		{% include "element/chat/_object_comments.html" %}
 	</section>
 
 </div>

@@ -1,4 +1,4 @@
-{% load truncate i18n thumbnail arating_tags calc %}
+{% load truncate i18n thumbnail arating_tags calc atracker_tags %}
 <div class="span7 padded-h container_content">
 
 	<div class="page-header">
@@ -193,11 +193,18 @@
 			&nbsp;
 		</dd>
 
+
+		
+
+
 		<dt>
 			{% trans "Stats" %}:
 		</dt>
 		<dd>
-			<span class="value">3</span><span class="key">{% trans "Airplays" %}</span> | <span class="value">173</span><span class="key">{% trans "Plays" %}</span> | <span class="value">28</span><span class="key">{% trans "Downloads" %}</span>
+			<ul class="horizontal unstyled" style="margin: 0">
+				{% stats_for_object object %}
+			</ul>
+			<div class="clear"></div>
 		</dd>
 
 		{% if object.tags %}

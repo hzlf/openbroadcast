@@ -6,5 +6,5 @@
 {% endcomment %}
 
 <div id="comments"{% if not comment_list %} class="empty"{% endif %} class="listing comment">
-  {% for comment in comment_list %}{% include "comments/comment.html" %}{% endfor %}
+  {% for comment in comment_list reversed %}{% include "comments/comment.html" %}{% endfor %}
 </div>

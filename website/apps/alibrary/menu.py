@@ -126,6 +126,13 @@ class PlaylistMenu(CMSAttachMenu):
             301
         )
         nodes.append(node)
+
+        node = NavigationNode(
+            _('My Broadcasts'),
+            reverse('alibrary-playlist-type-list', kwargs={'type': 'broadcast', 'user': request.user}),
+            302
+        )
+        nodes.append(node)
         
         node = NavigationNode(
             _('All Playlists'),
@@ -135,10 +142,16 @@ class PlaylistMenu(CMSAttachMenu):
         nodes.append(node)
         
         node = NavigationNode(
-            _('All Baskets'),
-            # reverse('alibrary-playlist-type-list', args=['basket', 'root']),
-            reverse('alibrary-playlist-type-list', kwargs={'type': 'basket', 'user': 'root'}),
-            411
+            _('My Playlists'),
+            reverse('alibrary-playlist-type-list', kwargs={'type': 'playlist', 'user': request.user}),
+            312
+        )
+        nodes.append(node)
+        
+        node = NavigationNode(
+            _('My Baskets'),
+            reverse('alibrary-playlist-type-list', kwargs={'type': 'basket', 'user': request.user}),
+            321
         )
         nodes.append(node)
         

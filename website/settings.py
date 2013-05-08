@@ -237,11 +237,11 @@ CMS_CACHE_DURATIONS = {
 }
 
 
-CMS_VIMEO_DEFAULT_WIDTH = 630
-CMS_VIMEO_DEFAULT_HEIGHT = 360
+CMS_VIMEO_DEFAULT_WIDTH = 830
+CMS_VIMEO_DEFAULT_HEIGHT = 467
 
-CMS_YOUTUBE_DEFAULT_WIDTH = 630
-CMS_YOUTUBE_DEFAULT_HEIGHT = 350
+CMS_YOUTUBE_DEFAULT_WIDTH = 830
+CMS_YOUTUBE_DEFAULT_HEIGHT = 467
 
 # media deliver
 MEDIA_ROOT = os.path.join(PROJECT_DIR, 'media')
@@ -270,7 +270,8 @@ STATICFILES_FINDERS = (
 
 
 COMMENTS_APP = 'fluent_comments'
-FLUENT_COMMENTS_EXCLUDE_FIELDS = ['email', 'name', 'url', ]
+COMMENT_MAX_LENGTH = 800
+FLUENT_COMMENTS_EXCLUDE_FIELDS = ['title', 'email', 'name', 'url', ]
 
 INSTALLED_APPS = (
                   
@@ -295,7 +296,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     
     
-    #'threadedcomments',
+    'threadedcomments',
     'fluent_comments',
     
     'django.contrib.comments',
@@ -369,10 +370,12 @@ INSTALLED_APPS = (
     'cms.plugins.inherit',
     #'cmsplugin_filer_folder',
     #'cmsplugin_filer_image',
-    #'cmsplugin_youtube',
-    #'cmsplugin_vimeo',
+    'cmsplugin_youtube',
+    'cmsplugin_vimeo',
     #'cmsplugin_soundcloud',
     'cmsplugin_pagedown',
+    
+    'shortcutter',
 
     'multilingual',
     'disqus',

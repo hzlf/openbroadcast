@@ -23,20 +23,17 @@ from easy_thumbnails.files import get_thumbnailer
 
 @receiver(signals.comment_was_posted)
 def on_comment_posted(sender, comment, request, **kwargs):
-    
-    
-    print "RUSER!!!!"
-    print request.user
-    
-    """
-    notify the push api!
+
     """
     rs = redis.StrictRedis()
     opt = dict(size=(70, 70), crop=True, bw=True, quality=80)
+    try:
+        image = get_thumbnailer(request.user.profile_set.all()[0].image).get_thumbnail(opt).url
+    except:
+        image = None
     message = {
                'user': request.user.username,
-               'image': get_thumbnailer(request.user.profile_set.all()[0].image).get_thumbnail(opt).url,
-               #'image': comment.user.profile_set.all()[0].image.url,
+               'image': image,
                'comment': comment.comment,
                'comment_html': re.sub('<[^<]+?>', '', comment.comment).replace('\n','<br>\n'),
                'route': comment.content_object.get_api_url(),
@@ -44,9 +41,8 @@ def on_comment_posted(sender, comment, request, **kwargs):
                #'timestamp': comment.submit_date
                }
     
-    print 'routing chat message'
     rs.publish('push_chat', json.dumps(message))
-    
+    """
     
     
     """

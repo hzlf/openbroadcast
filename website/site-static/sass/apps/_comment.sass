@@ -39,10 +39,31 @@ section.comments.on-site
   div.listing
   
     .item
-      border: none
-      padding: 5px
-      margin: 5px 0
-      +clearfix()
+      border: none !important
+      padding: 4px 0 4px 0 !important
+      
+      &:nth-child(odd)
+        background: #fafafa
+
+      .col-left
+        max-width: 640px
+        float: left
+        .comment-text > p
+          padding-left: 5px
+      
+      .col-right
+        float: right
+        
+        ul
+          background-repeat: no-repeat
+          background-position: right
+          padding-right: 40px
+          background-size: 34px
+        
+        .comment-date
+          color: #a5a5a5
+          font-size: 90%
+          padding-right: 5px
       
       img
         width: 48px
@@ -58,7 +79,7 @@ section.comments.on-site
         border-bottom: none
     
     .comment-text, .comment-text > p
-      color: green
+      // color: green
   
   div.listing.comment
-    display: none // hide for browser... comments handled via socketio
+    // display: none // hide for browser... comments handled via socketio
