@@ -14,7 +14,41 @@
 	{% for item in stream %}
 	
 	<div class="message hoverable linkable">
+		
+		
+		
+		<div class="row-fluid">
+			<div class="span12">
+				
+				{% if item.actor %}
+				
+					{% if item.actor == user %}
+					{% trans "You" %}
+					{% else %}
+					<a href="{{ item.actor.get_profile.get_absolute_url }}">{% firstof item.actor.get_full_name item.actor %}</a>
+					{% endif %} 
+				
+				{% endif %} 
+				
+				{{ item.verb }}
+				
+				<a class="link-main" href="{{ item.target.get_absolute_url }}" class="target">{{ item.target }}</a>
+			</div>
+
+		</div>
+		
+		<div class="row-fluid">
+			<div class="span4">
+				<span>&nbsp;</span>
+			</div>
+			<div class="span8">
+				<small class="timestamp pull-right">{{ item.timestamp|date:"SHORT_DATETIME_FORMAT" }}</small>
+			</div>
+		</div>
 	
+	
+	
+		<!--
 		<div class="row-fluid">
 			<div class="span8">
 				<a class="link-main" href="{{ item.target.get_absolute_url }}" class="target">{{ item.target }}</a>
@@ -32,6 +66,8 @@
 				<small>{% trans "User" %} {{ item.actor }}</small>
 			</div>
 		</div>
+		-->
+		
 	
 	</div>
 	

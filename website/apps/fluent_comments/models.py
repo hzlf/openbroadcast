@@ -44,6 +44,10 @@ def on_comment_posted(sender, comment, request, **kwargs):
     rs.publish('push_chat', json.dumps(message))
     """
     
+    from actstream import action
+    action.send(request.user, verb='commented on', target=comment.content_object)
+
+    
     
     """
     Send email notification of a new comment to site staff when email notifications have been requested.

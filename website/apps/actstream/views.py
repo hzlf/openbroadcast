@@ -10,22 +10,55 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.views.decorators.csrf import csrf_exempt
 
+from django.conf import settings
+
+from django.contrib.auth.models import User
+
 from actstream import actions, models
+
+from pure_pagination.mixins import PaginationMixin
+from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 
 from actstream.models import *
 
-#from actstream.forms import *
 
 
-class ActionListView(ListView):
+PAGINATE_BY = getattr(settings, 'ACTSTREAM_PAGINATE_BY', (30,60,120))
+PAGINATE_BY_DEFAULT = getattr(settings, 'ACTSTREAM_PAGINATE_BY_DEFAULT', 30)
+
+class ActionListView(PaginationMixin, ListView):
     
     context_object_name = "action_list"
     # template_name = "alibrary/artist_list.html"
+    paginate_by = PAGINATE_BY_DEFAULT
+    
+    def get_paginate_by(self, queryset):
+        
+        ipp = self.request.GET.get('ipp', None)
+        if ipp:
+            try:
+                if int(ipp) in PAGINATE_BY:
+                    return int(ipp)
+            except Exception, e:
+                pass
+
+        return self.paginate_by
     
     def get_queryset(self):
 
         kwargs = {}
-        return Action.objects.filter(**kwargs)
+        
+        qs = Action.objects.filter(**kwargs)
+
+        
+        user_filter = self.request.GET.get('username', None)
+        if user_filter:
+            user = get_object_or_404(User, username=user_filter)
+            qs = qs.filter(actor_object_id=user.pk).distinct()
+
+        
+        
+        return qs
     
 
     def get_context_data(self, **kwargs):

@@ -25,8 +25,8 @@ class ActionMenu(CMSAttachMenu):
         nodes.append(node)
         
         node = NavigationNode(
-            _('My Action'),
-            reverse('actstream-action-detail', args=['root']),
+            _('My Actions'),
+            '%s?username=%s' % (reverse('actstream-action-list'), request.user.username),
             211
         )
         nodes.append(node)

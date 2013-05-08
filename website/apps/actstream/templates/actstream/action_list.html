@@ -24,7 +24,7 @@
 {% endblock %}
 
 {% block searchbar %}
-
+<!--
 <div class="searchbar">
 	<div class="tagbar">
 
@@ -32,15 +32,10 @@
 
 		{% include "alibrary/searchbar/_filterlist.html" %}
 
-		<!-- search field -->
 		<div style="float: left;">
 			<input type="text" id="searchbar_input" name="searchbar_input" value="&lt; Search &gt;" class="blur" />
 		</div>
 
-		<!--
-		<a class="pull-right" href="{{ request.path }}">cs</a>
-		-->
-		<!-- TODO: rework! -->
 		<div style="padding: 4px 3px 0px;" class="pull-right">
 			{% if request.path != request.get_full_path %}
 			<a class="pull-right clear-search" href="{{ request.path }}" title="{% trans "Clear Search" %}"> <img class="search_clear" src="/static/img/prototype/i_clearsearch.png" alt="Clear search" /> </a>
@@ -52,7 +47,7 @@
 </div>
 
 <div id="autocomplete_holder" class="autocomplete holder"></div>
-
+-->
 {% endblock %}
 
 {% block inner %}
@@ -81,15 +76,33 @@
 
 			{% for action in action_list %}
 			<tr>
-				<td>#</td>
-
-				<td> {% if action.action_object %}
-				{{ action.action_object.classname }} <a href="{{ action.action_object.get_absolute_url }}">{{ action.action_object }}</a> {% trans "was" %}
-				{% endif %}
-				{{ action.verb }}
-
+				
+				<td>{% if action.target %}{{ action.target.classname }}{% else %}&nbsp;{% endif %}</td>
+				
+				<td>
+					
+					
 				{% if action.actor %}
-				{% trans "by" %} <a href="{{ action.actor.get_profile.get_absolute_url }}">{% firstof action.actor.get_full_name action.actor %}</a> {% endif %} </td>
+				
+					{% if action.actor == user %}
+					{% trans "You" %}
+					{% else %}
+					<a href="{{ action.actor.get_profile.get_absolute_url }}">{% firstof action.actor.get_full_name action.actor %}</a>
+					{% endif %} 
+				
+				{% endif %} 
+					
+				{{ action.verb }}
+					
+				{% if action.target %}<a href="{{ action.target.get_absolute_url }}">{{ action.target }}{% else %}&nbsp;{% endif %}</a>
+
+
+
+				
+				
+
+
+				</td>
 
 				<td><span class="pull-right">{{ action.timestamp|timesince }} {% trans "ago" %}</span></td>
 			</tr>
@@ -106,17 +119,17 @@
 	<div class="right ipp">
 
 		<ul class="unstyled horizontal">
-			{% spurl base=request.get_full_path active_query="ipp=12" as is_active %}
+			{% spurl base=request.get_full_path active_query="ipp=30" as is_active %}
 			<li>
-				<a class="{% if is_active %}active{% endif %}" href="{% spurl base=request.get_full_path set_query="ipp=12" %}">12</a>
+				<a class="{% if is_active %}active{% endif %}" href="{% spurl base=request.get_full_path set_query="ipp=30" %}">30</a>
 			</li>
-			{% spurl base=request.get_full_path active_query="ipp=24" as is_active %}
+			{% spurl base=request.get_full_path active_query="ipp=60" as is_active %}
 			<li>
-				<a class="{% if is_active %}active{% endif %}" href="{% spurl base=request.get_full_path set_query="ipp=24" %}">24</a>
+				<a class="{% if is_active %}active{% endif %}" href="{% spurl base=request.get_full_path set_query="ipp=60" %}">60</a>
 			</li>
-			{% spurl base=request.get_full_path active_query="ipp=36" as is_active %}
+			{% spurl base=request.get_full_path active_query="ipp=120" as is_active %}
 			<li>
-				<a class="{% if is_active %}active{% endif %}" href="{% spurl base=request.get_full_path set_query="ipp=36" %}">36</a>
+				<a class="{% if is_active %}active{% endif %}" href="{% spurl base=request.get_full_path set_query="ipp=120" %}">120</a>
 			</li>
 		</ul>
 
@@ -138,7 +151,7 @@
 	{% for action in user_stream %}
 	<li>
 		
-		{% display_timestamped_action action %}
+		{# display_timestamped_action action #}
 		
 		
 		<!--

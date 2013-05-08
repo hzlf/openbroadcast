@@ -19,6 +19,10 @@ from actstream.signals import action
 from actstream.actions import action_handler
 from actstream.managers import FollowManager
 
+__all__ = ('Action', 'Follow','actor_stream')
+
+
+
 class Follow(models.Model):
     """
     Lets a user follow the activities of any specific actor

@@ -168,7 +168,7 @@ def deploy():
             pass
             
         """
-        (re)start gunicorn worker
+        (re)start supervisor workers
         """
         try:
             # restart gunicorn webserver
@@ -186,5 +186,26 @@ def deploy():
             pass
         
         
+
+
+def restart():
+            
+    """
+    (re)start supervisor workers
+    """
+    try:
+        # restart gunicorn webserver
+        run('supervisorctl restart %s' % env.site_id)
+        # restart gunicorn celeryd-worker
+        run('supervisorctl restart worker.celery.%s' % env.site_id)
+        run('supervisorctl restart worker.import.%s' % env.site_id)
+        # restart other supervisor services
+        run('supervisorctl restart echoprint.%s' % env.site_id)
+        run('supervisorctl restart ttserver.%s' % env.site_id)
+        run('supervisorctl restart pushy.%s' % env.site_id)
         
+        run('supervisorctl status')
+        
+    except Exception, e:
+        pass
         
