@@ -97,6 +97,9 @@ MIDDLEWARE_CLASSES = (
     
     # xs
     'lib.middleware.xs_sharing.XsSharingMiddleware',
+    
+    # admin
+    'lib.middleware.admin_redirects.AdminRedirectMiddleware',
     # custom
     #'lib.middleware.ProfileMiddleware',
     #'lib.middleware.PrettifyMiddlewareBS',
