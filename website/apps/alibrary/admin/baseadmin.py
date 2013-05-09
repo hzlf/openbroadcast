@@ -141,7 +141,15 @@ admin.site.register(Format, FormatAdmin)
     
 class ReleaseExtraartistsInline(admin.TabularInline):
     model = ReleaseExtraartists
-    extra=1    
+    extra=1   
+    
+    
+class ReleaseAlbumartistsInline(admin.TabularInline):
+    model = ReleaseAlbumartists
+    extra=2
+    fieldsets = [
+        (None,               {'fields': ['position', 'join_phrase', 'artist']}),
+    ]
    
 
 class RelationsInline(GenericTabularInline):
@@ -173,7 +181,7 @@ class ReleaseAdmin(BaseAdmin):
     list_filter = ('releasetype','release_country',)
     
     #inlines = [RelationsInline, MediaInline, ReleaseExtraartistsInline, DownloadreleaseInline, HardwarereleaseInline]
-    inlines = [ReleaseMediaInline, RelationsInline, MediaInline, ReleaseExtraartistsInline]
+    inlines = [ReleaseAlbumartistsInline, ReleaseMediaInline, RelationsInline, MediaInline, ReleaseExtraartistsInline]
     #prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ['slug', 'license', 'd_tags']
     
@@ -181,8 +189,12 @@ class ReleaseAdmin(BaseAdmin):
     
     """"""
     fieldsets = [
-        (None,               {'fields': ['name', 'slug', ('main_image', 'cover_image',), ('label', 'catalognumber'), ('releasedate', 'release_country', 'license'), ('releasetype', 'pressings'), 'publish_date', 'enable_comments', 'main_format', 'd_tags', 'excerpt', 'description']}),
-        #('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
+        (None,  {
+                'fields': ['name', 'slug', ('main_image', 'cover_image',), ('label', 'catalognumber'), ('releasedate', 'release_country', 'license'), ('releasetype', 'pressings'), 'publish_date', 'enable_comments', 'main_format', 'd_tags', 'excerpt', 'description']
+                }),
+        #('Artist relations',  {
+        #        'fields': ['album_artists', 'album_artists_join',]
+        #        }),
         ('Users', {'fields' : ['owner', 'creator', 'publisher']}),
     ]
     

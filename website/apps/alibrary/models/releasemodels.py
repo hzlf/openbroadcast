@@ -215,6 +215,9 @@ class Release(MigrationMixin):
             ea.push(artist.name)
         return ea
     
+    # special relation to provide 'multi-names' for artists.
+    album_artists = models.ManyToManyField('Artist', through='ReleaseAlbumartists', related_name="release_albumartists", blank=True, null=True)
+    
     # relations a.k.a. links
     relations = generic.GenericRelation(Relation)
     
@@ -373,31 +376,24 @@ class Release(MigrationMixin):
 
         artists = []
         
-        try:
-            re = ReleaseExtraartists.objects.filter(release=self, profession__name="Album Artist")
-            for ea in re:
-                # print ea.artist
-                artists.append(ea.artist)
-                
-            if len(artists) > 0:
-                return artists
+        if self.album_artists.count() > 0:
+            
+            for albumartist in self.release_albumartist_release.all():
+                artists.append({'artist': albumartist.artist, 'join_phrase': albumartist.join_phrase})
+            
+            return artists
         
-        except Exception, e:
-            print e
-            pass
 
-                
         medias = self.get_media()
         for media in medias:
             artists.append(media.artist)
         
         artists = list(set(artists))
-        
+    
         if len(artists) > 1:
             from alibrary.models import Artist
             artists = Artist.objects.filter(name="Varous Artists")
             
-
         return artists
 
     def get_extra_artists(self):
@@ -636,6 +632,25 @@ class ReleaseExtraartists(models.Model):
         app_label = 'alibrary'
         verbose_name = _('Role')
         verbose_name_plural = _('Roles')
+
+""""""
+class ReleaseAlbumartists(models.Model):
+    artist = models.ForeignKey('Artist', related_name='release_albumartist_artist')
+    release = models.ForeignKey('Release', related_name='release_albumartist_release')
+    JOIN_PHRASE_CHOICES = (
+        ('&', _('"&"')),
+        (',', _('","')),
+        ('and', _('"and"')),
+        ('feat.', _('"feat."')),
+    )
+    join_phrase = models.CharField(verbose_name="join character(s)", max_length=12, default=None, choices=JOIN_PHRASE_CHOICES, blank=True, null=True)
+    position = models.PositiveIntegerField(null=True, blank=True)
+    
+    class Meta:
+        app_label = 'alibrary'
+        verbose_name = _('Albumartist')
+        verbose_name_plural = _('Albumartists')
+        ordering = ('position', )
 
 
 class ReleaseRelations(models.Model):

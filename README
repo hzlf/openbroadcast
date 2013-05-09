@@ -12,7 +12,7 @@ sudo rabbitmq-server -detached
 # celeryd
 source ~/srv/openbroadcast.ch-upgrade/bin/activate
 cd ~/code/openbroadcast.ch/website/
-./manage.py celeryd -c 1 --purge
+./manage.py celeryd -c 1 --purge -Q celery,import
 
 
 # tokyo-tyrant
