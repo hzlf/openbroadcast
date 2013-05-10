@@ -17,7 +17,7 @@
 				<li>
 					{% url alibrary-release-list as release_list %}
 					<a href="{% spurl path=release_list query="label={{ object.slug }}" %}" title="{% trans "Only show releases on" %} {{ object.name }}">
-					{{ object.release_label.count }}<i class="icon-filter"></i>	
+					{{ object.release_label.count }}<i class="icon-search"></i>	
 					</a>
 				</li>
 				{% else %}		

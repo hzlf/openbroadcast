@@ -7,6 +7,7 @@ import sys
 # django
 from django.db import models
 from django.db.models.signals import post_save
+from django.db.models import Q
 from django.template.defaultfilters import slugify
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
@@ -217,8 +218,15 @@ class Artist(MigrationMixin):
     # release collection
     def get_releases(self):
         try:
-            r = Release.objects.filter(media_release__artist=self).distinct()
+            r = Release.objects.filter(Q(media_release__artist=self) | Q(album_artists=self)).distinct()
             return r
+        except Exception, e:
+            return []
+        
+    def get_media(self):
+        try:
+            m = Media.objects.filter(artist=self).distinct()
+            return m
         except Exception, e:
             return []
         

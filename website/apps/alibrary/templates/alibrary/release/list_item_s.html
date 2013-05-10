@@ -25,14 +25,30 @@
 			<li>
 				
 				{% for artist in item.get_artists %}
-				{% if artist.get_absolute_url %}
-				<a href="{{ artist.get_absolute_url }}">{{ artist.name|truncate_chars_inner:32 }}</a>
-				&nbsp;
-				<a href="{% spurl base=request.get_full_path remove_query_param="page" set_query="artist={{ artist.slug }}" %}" title="{% trans "Only show releases by" %} {{ artist.name }}" style="vertical-align: top;"><span class="filter icon"></span></a>
-				{% if not forloop.last %},{% endif %}
+				
+				{% if "join_phrase" in artist %}
+	
+					{% with item=artist.artist %}
+					{% if artist.join_phrase %}{{ artist.join_phrase }}{% endif %}
+					{% include "alibrary/element/_inline_link.html" %}
+					{% endwith %}
+				
 				{% else %}
-				<span>{{ artist.name|truncate_chars_inner:32 }}</span>{% if not forloop.last %},{% endif %}
+				
+				
+					{% if artist.get_absolute_url %}
+					<a href="{{ artist.get_absolute_url }}">{{ artist.name|truncate_chars_inner:32 }}</a>
+					&nbsp;
+					<a href="{% spurl base=request.get_full_path remove_query_param="page" set_query="artist={{ artist.slug }}" %}" title="{% trans "Only show releases by" %} {{ artist.name }}" style="vertical-align: top;"><span class="filter icon"></span></a>
+					{% if not forloop.last %},{% endif %}
+					{% else %}
+					<span>{{ artist.name|truncate_chars_inner:32 }}</span>{% if not forloop.last %},{% endif %}
+					{% endif %}
+			
 				{% endif %}
+				
+				
+				
 				{% endfor %}
 
 			</li>

@@ -33,7 +33,7 @@
 					<a href="{{ item.artist.get_absolute_url }}">{{ item.artist.name|truncate_chars_inner:32 }}</a>
 					&nbsp;
 					<a href="{% spurl path=release_list query="artist={{ item.artist.slug }}" %}" title="{% trans "Only show releases by" %} {{ item.artist.name }}">
-					{{ item.artist.release_label.count }}<i class="icon-filter"></i>	
+					{{ item.artist.release_label.count }}<i class="icon-search"></i>	
 					</a>
 					{% else %}
 					<span>{{ item.artist.name|truncate_chars_inner:32 }}</span>

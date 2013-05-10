@@ -1,4 +1,4 @@
-{% load truncate i18n thumbnail arating_tags %}
+{% load truncate i18n thumbnail arating_tags spurl %}
 <div class="span7 padded-h container_content">
 
 	<div class="page-header">
@@ -7,6 +7,43 @@
 
 	<dl class="dl-horizontal main">
 
+
+
+		<dt>
+			{% trans "Releases" %}:
+		</dt>
+		<dd>
+			<ul class="unstyled">
+				{% if object.get_releases.count > 0 %}
+				<li>
+					{% url alibrary-release-list as release_list %}
+					<a href="{% spurl path=release_list query="artist={{ object.slug }}" %}" title="{% trans "Only show releases by" %} {{ object.name }}">
+					{{ object.get_releases.count }}<i class="icon-search"></i>	
+					</a>
+				</li>
+				{% else %}		
+				<li>{{ object.get_releases.count }}</li>
+				{% endif %}
+			</ul>
+		</dd>
+
+		<dt>
+			{% trans "Tracks" %}:
+		</dt>
+		<dd>
+			<ul class="unstyled">
+				{% if object.get_media.count > 0 %}
+				<li>
+					{% url alibrary-media-list as media_list %}
+					<a href="{% spurl path=media_list query="artist={{ object.slug }}" %}" title="{% trans "Only show tracks by" %} {{ object.name }}">
+					{{ object.get_media.count }}<i class="icon-search"></i>	
+					</a>
+				</li>
+				{% else %}		
+				<li>{{ object.get_media.count }}</li>
+				{% endif %}
+			</ul>
+		</dd>
 
 
 		{% if object.real_name %}
