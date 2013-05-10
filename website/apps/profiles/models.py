@@ -4,8 +4,8 @@ from dateutil import relativedelta
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import permalink
-from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+from django.contrib.auth.models import User, Group
+from django.db.models.signals import post_save, pre_save
 
 from django_countries import CountryField
 
@@ -17,6 +17,10 @@ from lib.fields import extra
 from django_extensions.db.fields import AutoSlugField, UUIDField
 
 from phonenumber_field.modelfields import PhoneNumberField
+
+
+DEFAULT_GROUP = 'Listener'
+
 
 def filename_by_uuid(instance, filename):
     filename, extension = os.path.splitext(filename)
@@ -39,6 +43,9 @@ class Profile(models.Model):
     
     #
     uuid = UUIDField()
+    
+    #
+    mentor = models.ForeignKey(User, blank=True, null=True, related_name="godchildren")
     
     #Personal
     gender = models.PositiveSmallIntegerField(_('gender'), choices=GENDER_CHOICES, blank=True, null=True)
@@ -101,6 +108,10 @@ class Profile(models.Model):
         if (self.mobile and self.mobile_provider):
             return u"%s@%s" % (re.sub('-', '', self.mobile), self.mobile_provider.domain)
         
+        
+    def get_groups(self):
+        return self.user.groups
+        
 
     def save(self, *args, **kwargs):
         t_tags = ''
@@ -121,11 +132,31 @@ except:
 arating.enable_voting_on(Profile)
 
 
-def create_profile(sender, instance, created, **kwargs):  
+def create_profile(sender, instance, created, **kwargs):
     if created:  
-       profile, created = Profile.objects.get_or_create(user=instance)  
-
+       profile, created = Profile.objects.get_or_create(user=instance)
+       
+       default_group, created = Group.objects.get_or_create(name=DEFAULT_GROUP)
+       instance.groups.add(default_group)
+       instance.save()
+       
 post_save.connect(create_profile, sender=User) 
+
+
+def add_to_group(sender, instance, **kwargs):
+    default_group, created = Group.objects.get_or_create(name=DEFAULT_GROUP)
+    
+    if not instance.groups.filter(pk=default_group.pk).exists():
+        print 'NOT IN GROUP'
+        instance.groups.add(default_group)
+        instance.save()
+    else:
+        print 'ALREADY IN GROUP'
+       
+#post_save.connect(add_to_group, sender=User) 
+
+
+
 
 class MobileProvider(models.Model):
     """MobileProvider model"""

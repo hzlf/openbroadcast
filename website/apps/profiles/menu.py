@@ -24,20 +24,21 @@ class ProfileMenu(CMSAttachMenu):
         )
         nodes.append(node)
         
-        node = NavigationNode(
-            _('My Profile'),
-            reverse('profiles-profile-detail', args=['root']),
-            111
-        )
-        nodes.append(node)
-        
-        
-        node = NavigationNode(
-            _('Edit my Profile'),
-            reverse('profiles-profile-edit'),
-            121
-        )
-        nodes.append(node)
+        if request.user.is_active:
+            node = NavigationNode(
+                _('My Profile'),
+                reverse('profiles-profile-detail', args=[request.user.username]),
+                111
+            )
+            nodes.append(node)
+            
+            
+            node = NavigationNode(
+                _('Edit my Profile'),
+                reverse('profiles-profile-edit'),
+                121
+            )
+            nodes.append(node)
         
         return nodes
     

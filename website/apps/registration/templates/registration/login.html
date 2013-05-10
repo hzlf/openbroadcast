@@ -1,0 +1,12 @@
+{% extends "registration/registration_base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+  {% include 'registration/form_errors.html' %}
+  <form method="post" class="well" action="{% url django.contrib.auth.views.login %}">{% csrf_token %}
+    {% include 'registration/form_fields.html' %}
+
+    <p><a href="{% url auth_password_reset %}">Forgot</a> your password?  <a href="{% url registration_register %}">Need an account</a>?</p>
+    <input type="submit" class="btn" value="Login" />
+    <input type="hidden" name="next" value="{{ next }}" />
+  </form>
+{% endblock %}

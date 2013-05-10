@@ -30,7 +30,7 @@
 			
 			{% if user.is_staff %}
 			<li class="link ">
-				<span class="left icon"><a href="{{ object.get_admin_url }}?next={% url alibrary-release-list %}" title="{% trans "Edit" %}">{% trans "Administration view" %}</a></span>
+				<span class="left icon"><a href="{{ object.get_admin_url }}?next={{ object.get_absolute_url }}" title="{% trans "Edit" %}">{% trans "Administration view" %}</a></span>
 				<span class="opt"></span>
 				<span class="clear"></span>
 			</li>

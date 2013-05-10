@@ -5,6 +5,6 @@
   the 'comments/comment.html template is also used by the Ajax view.
 {% endcomment %}
 
-<div id="comments"{% if not comment_list %} class="empty"{% endif %} class="listing comment">
+<div id="comments" class="listing comment{% if not comment_list %} empty{% endif %}">
   {% for comment in comment_list reversed %}{% include "comments/comment.html" %}{% endfor %}
 </div>

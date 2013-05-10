@@ -19,6 +19,8 @@ from lib.fields.extra import ExtraClearableFileInput, PreviewImageInput, Advance
 
 from profiles.models import *
 
+# from invite.fields import InviteField
+
 
 ACTION_LAYOUT =  action_layout = FormActions(
                 HTML('<button type="submit" name="save-i-classicon-arrow-upi" value="save" class="btn btn-primary pull-right ajax_submit" id="submit-id-save-i-classicon-arrow-upi"><i class="icon-ok icon-white"></i> Save</button>'),            
@@ -126,6 +128,8 @@ class ProfileForm(ModelForm):
     birth_date = forms.DateField(widget=DateInput(), required=False,)
     description = forms.CharField(widget=PagedownWidget(), required=False, help_text=_('Markdown enabled'))
     d_tags = TagField(widget=TagAutocompleteTagIt(max_tags=9), required=False, label=_('Tags'))
+    
+    #invitation = InviteField()
     
         
     def clean_user(self):

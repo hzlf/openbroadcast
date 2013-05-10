@@ -59,6 +59,14 @@ urlpatterns = patterns('',
     
     url(r'^comments/', include('fluent_comments.urls')),
     
+    url(r'^postman/', include('postman.urls')),
+    
+    #url(r'^invite/', include('invite.urls')),
+    
+    
+    
+    
+    
 
     url(r'^selectable/', include('selectable.urls')),
     
@@ -67,7 +75,9 @@ urlpatterns = patterns('',
     # varnish / ESI
     # (r'^esi/', include('esi.urls')),
     
-    (r'^accounts/', include('allauth.urls')),
+    url(r'^raccounts/', include('registration.backends.default.urls')),
+    
+    url(r'^accounts/', include('allauth.urls')),
     
     #(r'^accounts/notification/', include('notification.urls')),
     

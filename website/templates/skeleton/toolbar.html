@@ -16,6 +16,9 @@
 			        	{% if user.is_staff %}
 						<li><a href="/admin/"><i class="icon-dashboard"></i> <span>{% trans 'Administration' %}</span></a></li>
 						{% endif %}
+						
+						<li><a href="{% url postman_inbox %}"><i class="icon-envelope-alt"></i><span> {% trans 'Messages' %} [{{ postman_unread_count }}]</span></a></li>
+						
 						{% if user|user_stream_count > 0 %}
 						<li class="messages"><a href="#"><i class="icon-comment icon-white"></i> <span class="icon-label">{{ user|user_stream_count }}</span></a></li>
 						{% endif %}

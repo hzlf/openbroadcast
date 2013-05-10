@@ -141,6 +141,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     # mobile
     'django_mobile.context_processors.flavour',
     
+    # messaging
+    'postman.context_processors.inbox',
+    
     # authentication
     'allauth.context_processors.allauth',
     'allauth.account.context_processors.account',
@@ -315,6 +318,10 @@ INSTALLED_APPS = (
     
     'haystack',
     
+    # messaging & registration
+    'postman',
+    #'invite',
+    
     # core apps
     'django_extensions',
     'django_jenkins',
@@ -412,6 +419,10 @@ INSTALLED_APPS = (
     #'allauth.twitter',
     'allauth.openid',
     'allauth.facebook',
+    
+    
+    # alternative registration
+    'registration',
 
     'tastypie',
     
@@ -559,7 +570,7 @@ THUMBNAIL_QUALITY = 80
 Emial & messageing settings
 """
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# EMAIL_BACKEND = 'mailer.backend.DbBackend'
+#EMAIL_BACKEND = 'mailer.backend.DbBackend'
 
 
 EMAIL_CONFIRMATION_DAYS = 5
@@ -571,9 +582,9 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 """
 Identity
 """
-CONTACT_EMAIL = 'root@dock18.ch'
+CONTACT_EMAIL = 'root@hazelfire.com'
 ADMINS = (
-    ('anorg', 'network@anorg.net'),
+    ('anorg', 'root@hazelfire.com'),
 )
 MANAGERS = ADMINS
 
@@ -582,12 +593,12 @@ MANAGERS = ADMINS
 Accounts
 """
 AUTHENTICATION_BACKENDS = (
-    # userena
+    # allauth
     'allauth.account.auth_backends.AuthenticationBackend',
-    # guardian
-    'guardian.backends.ObjectPermissionBackend',
     # base
     'django.contrib.auth.backends.ModelBackend',
+    # guardian
+    'guardian.backends.ObjectPermissionBackend',
 )
 ANONYMOUS_USER_ID = -1
 #AUTH_PROFILE_MODULE = 'profiles.Profile'
@@ -598,10 +609,14 @@ LOGIN_URL = '/accounts/login/'
 LOGOUT_URL = '/accounts/signout/'
 LOGIN_REDIRECT_URL = "/"
 
+
+"""
+allauth version
+"""
 USERENA_ACTIVATION_REQUIRED = False
 
-ACCOUNT_EMAIL_REQUIRED=False
-ACCOUNT_EMAIL_VERIFICATION=False
+ACCOUNT_EMAIL_REQUIRED=True
+ACCOUNT_EMAIL_VERIFICATION=True
 ACCOUNT_EMAIL_AUTHENTICATION=False
 ACCOUNT_SIGNUP_PASSWORD_VERIFICATION=True
 ACCOUNT_UNIQUE_EMAIL=True
@@ -609,6 +624,13 @@ ACCOUNT_USERNAME_REQUIRED=True
 SOCIALACCOUNT_QUERY_EMAIL=ACCOUNT_EMAIL_REQUIRED
 SOCIALACCOUNT_AUTO_SIGNUP=True
 EMAIL_CONFIRMATION_DAYS=5
+
+
+
+"""
+registration version
+"""
+ACCOUNT_ACTIVATION_DAYS = 7
 
 
 # profiles & co
@@ -673,7 +695,18 @@ HAYSTACK_CONNECTIONS = {
 
 
 
-
+"""
+Messaging
+https://bitbucket.org/psam/django-postman/wiki/Quick_Start_Guide
+"""
+# POSTMAN_DISALLOW_ANONYMOUS = True  # default is False
+# POSTMAN_DISALLOW_MULTIRECIPIENTS = True  # default is False
+# POSTMAN_DISALLOW_COPIES_ON_REPLY = True  # default is False
+# POSTMAN_DISABLE_USER_EMAILING = True  # default is False
+POSTMAN_AUTO_MODERATE_AS = True  # default is None
+POSTMAN_SHOW_USER_AS = 'get_full_name'
+# POSTMAN_NOTIFIER_APP = None  # default is 'notification'
+POSTMAN_MAILER_APP = 'mailer'
 
 
 
