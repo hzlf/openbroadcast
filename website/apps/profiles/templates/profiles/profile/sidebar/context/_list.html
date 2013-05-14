@@ -3,24 +3,8 @@
 <div id="menu_context" class="menu_context">
 	<div class="set">
 		<ul class="unstyled">
-			<!-- Menu element / Action -->
-			<li class="action disabled selection_required selection_single selection_delete ">
-				<span class="left icon"> <a href="#release" title="Delete Selection">Delete Selection</a> </span>
-				<span class="opt"></span>
-				<span class="clear"></span>
-			</li><!-- Menu element / Action -->
-			<li class="action disabled selection_required selection_multiple selection_merge ">
-				<span class="left icon"> <a href="#release" title="Merge Selection">Merge Selection</a> </span>
-				<span class="opt"></span>
-				<span class="clear"></span>
-			</li><!-- Menu element / Action -->
-			<li class="action disabled selection_required selection_any selection_play ">
-				<span class="left icon"> <a href="#release" title="Play Selection">Play Selection</a> </span>
-				<span class="opt"></span>
-				<span class="clear"></span>
-			</li><!-- Menu element / Action -->
-			<li class="action disabled selection_required selection_any selection_download ">
-				<span class="left icon"> <a href="#release" title="Download Selection">Download Selection</a> </span>
+			<li class="link {% if not user.profile.is_approved %}disabled{% endif %}">
+				<span class="left icon"><a href="{% url invitation_invite %}?next={{ request.get_full_path }}" title="{% trans "Send Message" %}">{% trans "Invite new users" %}</a></span>
 				<span class="opt"></span>
 				<span class="clear"></span>
 			</li>

@@ -381,7 +381,7 @@ class ImportFile(BaseModel):
         if media:
             obj.status = 5
             # add to session
-            self.import_session.add_importitem(obj)
+            obj.import_session.add_importitem(obj)
         
         obj.results_tag_status = True
         obj.save()

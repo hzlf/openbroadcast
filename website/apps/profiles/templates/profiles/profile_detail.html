@@ -46,15 +46,188 @@
 
 	<div class="clear"></div>
 
-	<section class="description tabs">
+	<section class="tabbed item_inner">
 
 		<div class="tab-content">
 
+
+
 			<div class="tab-pane active" id="profile">
-				<div class="description markdown padded-h">
-					{% wikify object.description %}
-				</div>
+				
+				<section class="profile">
+					<h2>{% trans "Profile" %}</h2>
+					<div class="description markdown padded-h">
+						{% wikify object.description %}
+					</div>
+
+				</section>
+
+
+
+				<section class="profile information">
+					<h4>{% trans "Personal Information" %}</h4>
+					
+					<dl class="dl-horizontal">
+						
+						{% if object.birth_date %}
+						<dt>{% trans "Date of birth" %}</dt>
+						<dd>{{ object.birth_date }}</dd>
+						{% endif %}
+						
+						{% if object.gender %}
+						<dt>{% trans "Gender" %}</dt>
+						<dd>{{ object.get_gender_display }}</dd>
+						{% endif %}
+						
+					</dl>
+
+				</section>
+
+
+
+				<section class="profile information">
+					<h4>{% trans "Contact Information" %}</h4>
+					
+					<dl class="dl-horizontal">
+						
+						{% if object.address1 %}
+						<dt>{% trans "Address" %}</dt>
+						<dd>
+							<ul class="unstyled">
+								
+								{% if object.address1 %}
+								<li>{{ object.address1 }}</li>
+								{% endif %}
+								
+								{% if object.address2 %}
+								<li>{{ object.address2 }}</li>
+								{% endif %}
+								
+								{% if object.zip or object.city %}
+								<li>{{ object.zip }} {{ object.city }}</li>
+								{% endif %}
+								
+								{% if object.country %}
+								<li>{{ object.get_country_display }}</li>
+								{% endif %}
+								
+							</ul>
+						</dd>
+						{% endif %}
+						
+						{% if object.mobile %}
+						<dt>{% trans "Mobile" %}</dt>
+						<dd>{{ object.mobile }}</dd>
+						{% endif %}
+						
+						{% if object.phone %}
+						<dt>{% trans "Phone" %}</dt>
+						<dd>{{ object.phone }}</dd>
+						{% endif %}
+						
+						{% if object.fax %}
+						<dt>{% trans "Fax" %}</dt>
+						<dd>{{ object.fax }}</dd>
+						{% endif %}
+						
+					</dl>
+
+				</section>
+
+
+
+				<section class="profile information">
+					<h4>{% trans "Skills & Knowledge" %}</h4>
+					
+					<dl class="dl-horizontal">
+
+						
+
+						<dt>{% trans "Expertise" %}</dt>
+						<dd>
+							<ul class="unstyled horizontal">
+								{% for item in object.expertise.all %}
+								
+								<li>
+									{{ item.name }}{% if not forloop.last %},&nbsp;	{% endif %}
+									
+								</li>
+								
+								{% endfor %}
+								
+							</ul>
+							<div class="clear"></div>
+						</dd>
+						
+						
+
+						
+					</dl>
+
+				</section>
+
+
+
+				<section class="profile information">
+					<h4>{% trans "Communication & services" %}</h4>
+					
+					<dl class="dl-horizontal">
+
+						{% for service in object.service_set.all %}
+
+						<dt>{{ service.service }}</dt>
+						<dd>
+							<ul class="unstyled">
+								<li><a href="{{ service.service_url }}">{{ service.service_url }}</a></li>
+								<li>{% trans "User" %}: {{ service.username }}</li>
+							</ul>
+						</dd>
+						
+						{% endfor %}
+
+						
+					</dl>
+
+				</section>
+
+
+
+				<section class="profile information">
+					<h4>{% trans "Additional links" %}</h4>
+					
+					<dl class="dl-horizontal">
+
+						{% for link in object.link_set.all %}
+
+						<dt>{% if link.title %}{{ link.title }}{% endif %}</dt>
+						<dd>
+							<a href="{{ link.url }}">{{ link.url }}</a>
+						</dd>
+						
+						{% endfor %}
+
+						
+					</dl>
+
+				</section>
+
 			</div>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
 			<div class="tab-pane" id="activities">
 				<table class="table table-condensed striped action">
 					<tbody>

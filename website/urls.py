@@ -75,9 +75,14 @@ urlpatterns = patterns('',
     # varnish / ESI
     # (r'^esi/', include('esi.urls')),
     
-    url(r'^raccounts/', include('registration.backends.default.urls')),
+    # registration
+    url(r'^accounts/', include('invitation.urls')),
+    url(r'^accounts/', include('registration.backends.default.urls')),
+    # socialauth
+    url(r'^sa/', include('social_auth.urls')),
     
-    url(r'^accounts/', include('allauth.urls')),
+    # old accounts
+    url(r'^allauth_accounts/', include('allauth.urls')),
     
     #(r'^accounts/notification/', include('notification.urls')),
     

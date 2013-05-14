@@ -1,4 +1,4 @@
-{% load i18n guardian_tags ctype activity_tags %}
+{% load i18n guardian_tags ctype activity_tags mentor_tags %}
 
 {% get_obj_perms request.user for object as "object_perms" %}
 
@@ -21,21 +21,25 @@
 
 			
 			{% if user.is_authenticated %}
-			<li class="action">
-				<span class="left icon">
-					
-					<a href="{% follow_url object.user %}?next={{ request.get_full_path }}">
-					    {% if request.user|is_following:object.user %}
-					        {% trans "Stop following" %} {{ object.user|ct_name_by_object }}
-					    {% else %}
-					        {% trans "Follow" %} {{ object.user|ct_name_by_object }}
-					    {% endif %}
-					</a>
-					
-				</span>
-				<span class="opt"></span>
-				<span class="clear"></span>
-			</li>
+			
+			
+				{% if user !=  object.user %}
+				<li class="action">
+					<span class="left icon">
+						
+						<a href="{% follow_url object.user %}?next={{ request.get_full_path }}">
+						    {% if request.user|is_following:object.user %}
+						        {% trans "Stop following" %} {{ object.user|ct_name_by_object }}
+						    {% else %}
+						        {% trans "Follow" %} {{ object.user|ct_name_by_object }}
+						    {% endif %}
+						</a>
+						
+					</span>
+					<span class="opt"></span>
+					<span class="clear"></span>
+				</li>
+				{% endif %}
 
 			{% endif %}
 			
@@ -47,7 +51,21 @@
 				<span class="clear"></span>
 			</li>
 			
+			
+			{% mentor_for_user object user %}
+			
 
 		</ul>
+		
 	</div>
+	
+
+	
+
+	
+	
+	
+	
+	
+	
 </div>

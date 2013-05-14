@@ -39,6 +39,8 @@ class RegistrationForm(forms.Form):
     password2 = forms.CharField(widget=forms.PasswordInput,
                                 label=_("Password (again)"))
     
+
+    
     def clean_username(self):
         """
         Validate that the username is alphanumeric and is not already

@@ -1,0 +1,20 @@
+{% load i18n %}
+
+{% if notes %}
+<li class="notes">
+	<p>
+		{{ notes }}
+	</p>
+</li>
+{% endif %}
+
+{% for action in actions %}
+
+<li class="action">
+	<span class="left icon"> <a href="{{ action.url }}?next={{ user.get_absolute_url }}">{{ action.name }}</a> </span>
+	<span class="opt"></span>
+	<span class="clear"></span>
+</li>
+
+{% endfor %}
+

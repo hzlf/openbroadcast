@@ -41,7 +41,7 @@ class ProfileForm(ModelForm):
     
     class Meta:
         model = Profile
-        exclude = ('user', )
+        exclude = ('user', 'mentor',)
 
         widgets = {
             'image': AdvancedFileInput(image_width=76),

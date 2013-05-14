@@ -16,6 +16,9 @@
 
 {{ object.body }}
 
+{% trans "Sender" %}:
+http://{{ site }}{{ object.sender.get_absolute_url }}
+
 {% endif %}
 {% endif %}{# 'acceptance' #}
 {% trans "Thank you again for your interest in our services." %}

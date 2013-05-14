@@ -18,8 +18,11 @@ from django_extensions.db.fields import AutoSlugField, UUIDField
 
 from phonenumber_field.modelfields import PhoneNumberField
 
+from invitation.signals import invitation_accepted
+
 
 DEFAULT_GROUP = 'Listener'
+APPROVED_GROUPS = ('Member', 'Mentor',)
 
 
 def filename_by_uuid(instance, filename):
@@ -39,7 +42,8 @@ class Profile(models.Model):
         (1, _('Female')),
         (2, _('Other')),
     )
-    user = models.ForeignKey(User, unique=True)
+    #user = models.ForeignKey(User, unique=True)
+    user = models.OneToOneField(User, unique=True)
     
     #
     uuid = UUIDField()
@@ -49,7 +53,7 @@ class Profile(models.Model):
     
     #Personal
     gender = models.PositiveSmallIntegerField(_('gender'), choices=GENDER_CHOICES, blank=True, null=True)
-    birth_date = models.DateField(_('birth date'), blank=True, null=True)
+    birth_date = models.DateField(_('Date of birth'), blank=True, null=True)
     
     # Profile
     description = extra.MarkdownTextField(blank=True, null=True)
@@ -72,7 +76,7 @@ class Profile(models.Model):
     country = CountryField(blank=True, null=True)
     
     
-    iban = models.CharField(_('IBAN'), null=True, blank=True, max_length=100)
+    iban = models.CharField(_('IBAN'), null=True, blank=True, max_length=120)
     paypal = models.EmailField(_('Paypal'), null=True, blank=True, max_length=200)
     
     # relations
@@ -87,9 +91,27 @@ class Profile(models.Model):
         verbose_name = _('user profile')
         verbose_name_plural = _('user profiles')
         db_table = 'user_profiles'
+        
+        permissions = (
+            ('mentor_profiles', 'Mentoring profiles'),
+        )
 
     def __unicode__(self):
         return u"%s" % self.user.get_full_name()
+
+    @property
+    def is_approved(self):
+
+        if self.user in Group.objects.get(name='Member').user_set.all():
+            return True
+
+        return
+    
+    def approve(self, mentor):
+        groups = Group.objects.filter(name__in=APPROVED_GROUPS)
+        
+        for group in groups:
+            self.user.groups.add(group)
 
     @property
     def age(self):
@@ -155,6 +177,18 @@ def add_to_group(sender, instance, **kwargs):
        
 #post_save.connect(add_to_group, sender=User) 
 
+
+
+
+def add_mentor(sender, **kwargs):
+    
+    user = kwargs.get('new_user', None)
+    mentor = kwargs.get('inviting_user', None)
+    if user and mentor:    
+        mentor.godchildren.add(user.profile)
+
+    
+invitation_accepted.connect(add_mentor)
 
 
 

@@ -3,13 +3,19 @@
 
 
 	<div>
+		
 		<div class="navright">
+			
+			{% include "aplayer/_inline.html" %}
 			<div class="right">
+				
+				
+				
 				<!-- account section -->
 				<ul id="nav" class="horizontal unstyled nav-profile"> 
 			
 					{% if user.is_authenticated %}
-			        	<li><a href="{% url account_logout %}?next={{ request.get_full_path }}"><i class="icon-signout"></i><span> {% trans 'Logout' %}</span></a></li>
+			        	<li><a href="{% url auth_logout %}?next=/"><i class="icon-signout"></i><span> {% trans 'Logout' %}</span></a></li>
 
 			        	<li><a href="{% url profiles-profile-detail user %}"><i class="icon-cog"></i><span> {% trans 'Profile' %}</span></a></li>
 			        	
@@ -23,8 +29,8 @@
 						<li class="messages"><a href="#"><i class="icon-comment icon-white"></i> <span class="icon-label">{{ user|user_stream_count }}</span></a></li>
 						{% endif %}
 					{% else %}
-			        	<li><a title="Login" href="{% url account_login %}?next={{ request.get_full_path }}" rel="modal:open"><i class="icon-signin"></i><span> {% trans 'Login' %}</span></a></li>
-						<li><a title="Login" href="{% url account_signup %}?next={{ request.get_full_path }}" rel="modal:open"><i class="icon-ok-sign"></i><span> {% trans 'Sign Up' %}</span></a></li>
+			        	<li><a title="Login" href="{% url auth_login %}?next={{ request.get_full_path }}" rel="modal:open"><i class="icon-signin"></i><span> {% trans 'Login' %}</span></a></li>
+						<li><a title="Login" href="{% url registration_register %}?next={{ request.get_full_path }}" rel="modal:open"><i class="icon-ok-sign"></i><span> {% trans 'Sign Up' %}</span></a></li>
 			    	{% endif %}
 			    </ul>
 				<!-- // account section -->

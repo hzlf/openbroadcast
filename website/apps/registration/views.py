@@ -8,7 +8,7 @@ from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 
 from registration import signals
-from registration.forms import RegistrationForm
+from registration.forms import RegistrationFormTermsOfService as RegistrationForm
 
 
 class _RequestPassingFormView(FormView):
