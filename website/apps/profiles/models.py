@@ -11,6 +11,7 @@ from django_countries import CountryField
 
 import tagging
 import arating
+from postman.api import pm_write
 
 from lib.fields import extra
 
@@ -155,6 +156,7 @@ arating.enable_voting_on(Profile)
 
 
 def create_profile(sender, instance, created, **kwargs):
+    
     if created:  
        profile, created = Profile.objects.get_or_create(user=instance)
        
@@ -186,6 +188,13 @@ def add_mentor(sender, **kwargs):
     mentor = kwargs.get('inviting_user', None)
     if user and mentor:    
         mentor.godchildren.add(user.profile)
+        # send notification to mentor
+        pm_write(
+                sender = user,
+                recipient = mentor,
+                subject = _('%(username)s accepted your invitation' % {'username': user.username}),
+                body = '')
+        
 
     
 invitation_accepted.connect(add_mentor)

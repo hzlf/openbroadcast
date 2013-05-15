@@ -7,7 +7,13 @@
 	<div class="list_body_item c1 image_center_bg" {% if item.image %}style="background-image: url({% thumbnail item.image 54x54 crop upscale subject_location=item.image.subject_location %});"{% endif %}>
 		<ul class="unstyled">
 			<li class="play">
-				<a href="{{ item.get_api_url }}#0#replace" title="Play" class="playable popup"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
+				{% if item.is_approved %}
+				<i class="icon-star"></i>
+				{% else %}{% if item.mentor.username %}
+				<i class="icon-star-empty"></i>
+				{% else %}
+				<i class="icon-star-empty"></i>
+				{% endif %}{% endif %}
 			</li>
 		</ul>
 	</div>

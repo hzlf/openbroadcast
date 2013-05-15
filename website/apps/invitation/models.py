@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.hashcompat import sha_constructor
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site, RequestSite
+from django.contrib import messages
 import app_settings
 import signals
 
@@ -193,6 +194,7 @@ class Invitation(models.Model):
             'site': site
         })
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
+        messages.add_message(request, messages.SUCCESS, _('Invitatuion sent to %(email)s.')% {'email': email})
         signals.invitation_sent.send(sender=self)
 
     def mark_accepted(self, new_user):

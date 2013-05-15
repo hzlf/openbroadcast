@@ -451,7 +451,9 @@ INSTALLED_APPS = (
     #'turbolinks',
     
     
-    
+    # blog
+    'zinnia',
+    'cmsplugin_zinnia',
     
     'bcmon',
     #'secretballot',
@@ -487,6 +489,7 @@ INSTALLED_APPS = (
     #'kitsune',
 )
 
+ZINNIA_ENTRY_BASE_MODEL = 'cmsplugin_zinnia.placeholder.EntryPlaceholder'
 
 
 """
@@ -956,7 +959,7 @@ WYM_CLASSES = ",\n".join([
 
 
 ACTSTREAM_SETTINGS = {
-    'MODELS': ('auth.user', 'auth.group', 'alibrary.release', 'alibrary.playlist', 'alibrary.artist', 'alibrary.media',),
+    'MODELS': ('auth.user', 'auth.group', 'alibrary.release', 'alibrary.playlist', 'alibrary.artist', 'alibrary.media', 'zinnia.entry'),
     #'MANAGER': 'myapp.streams.MyActionManager',
     'FETCH_RELATIONS': True,
     'USE_PREFETCH': True,

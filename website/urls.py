@@ -65,8 +65,6 @@ urlpatterns = patterns('',
     
     
     
-    
-    
 
     url(r'^selectable/', include('selectable.urls')),
     
