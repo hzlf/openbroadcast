@@ -108,6 +108,11 @@ URLObject
 
 django-countries==1.2
 
+# blog
+cmsplugin_zinnia
+-e git+git://github.com/hzlf/django-blog-zinnia.git@v0.12.3#egg=django-zinnia
+
+
 # add-ons
 django-disqus==0.4.1
 django-crispy-forms
