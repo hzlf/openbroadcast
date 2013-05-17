@@ -21,9 +21,24 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 from invitation.signals import invitation_accepted
 
+from l10n.models import Country
 
 DEFAULT_GROUP = 'Listener'
 APPROVED_GROUPS = ('Member', 'Mentor',)
+
+class MigrationMixin(models.Model):
+    
+    legacy_id = models.IntegerField(null=True, blank=True, editable=False)
+    # to find way back to last-last database
+    legacy_legacy_id = models.IntegerField(null=True, blank=True, editable=False)
+    migrated = models.DateField(null=True, blank=True, editable=False)
+    
+    class Meta:
+        abstract = True
+        app_label = 'profiles'
+        verbose_name = _('MigrationMixin')
+        verbose_name_plural = _('MigrationMixins')
+        ordering = ('pk', )
 
 
 def filename_by_uuid(instance, filename):
@@ -36,7 +51,7 @@ def filename_by_uuid(instance, filename):
     return os.path.join(path, filename)
 
 
-class Profile(models.Model):
+class Profile(MigrationMixin):
     """Profile model"""
     GENDER_CHOICES = (
         (0, _('Male')),
@@ -48,6 +63,10 @@ class Profile(models.Model):
     
     #
     uuid = UUIDField()
+    
+    # auto-update
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+    updated = models.DateTimeField(auto_now=True, editable=False)
     
     #
     mentor = models.ForeignKey(User, blank=True, null=True, related_name="godchildren")
@@ -74,8 +93,8 @@ class Profile(models.Model):
     city = models.CharField(_('city'), null=True, blank=True, max_length=100)
     zip = models.CharField(_('zip'), null=True, blank=True, max_length=10)
     #country = models.CharField(_('country'), null=True, blank=True, max_length=100)
-    country = CountryField(blank=True, null=True)
-    
+    #country = CountryField(blank=True, null=True)
+    country = models.ForeignKey(Country, blank=True, null=True)
     
     iban = models.CharField(_('IBAN'), null=True, blank=True, max_length=120)
     paypal = models.EmailField(_('Paypal'), null=True, blank=True, max_length=200)
@@ -85,13 +104,14 @@ class Profile(models.Model):
     
     
     # tagging (d_tags = "display tags")
-    d_tags = tagging.fields.TagField(verbose_name="Tags", blank=True, null=True)
+    d_tags = tagging.fields.TagField(max_length=1024, verbose_name="Tags", blank=True, null=True)
 
     class Meta:
         app_label = 'profiles'
         verbose_name = _('user profile')
         verbose_name_plural = _('user profiles')
         db_table = 'user_profiles'
+        ordering = ('-user__last_login',)
         
         permissions = (
             ('mentor_profiles', 'Mentoring profiles'),
@@ -138,13 +158,13 @@ class Profile(models.Model):
 
     def save(self, *args, **kwargs):
         t_tags = ''
-        """
+        """"""
         for tag in self.tags:
             t_tags += '%s, ' % tag    
         
         self.tags = t_tags;
-        self.d_tags = t_tags;
-        """
+        self.d_tags = t_tags[:1000];
+        
         super(Profile, self).save(*args, **kwargs)
 
 try:
@@ -153,6 +173,81 @@ except:
     pass
 
 arating.enable_voting_on(Profile)
+
+
+class Community(MigrationMixin):
+    
+    uuid = UUIDField(primary_key=False)
+    name = models.CharField(max_length=200, db_index=True)
+    slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
+    
+    group = models.OneToOneField(Group, unique=True, null=True, blank=True)
+    members = models.ManyToManyField(User, null=True, blank=True)
+    
+    # auto-update
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+    updated = models.DateTimeField(auto_now=True, editable=False)
+
+    # Profile
+    description = extra.MarkdownTextField(blank=True, null=True)
+    image = models.ImageField(verbose_name=_('Profile Image'), upload_to=filename_by_uuid, null=True, blank=True)
+    
+    # Contact
+    mobile = PhoneNumberField(_('mobile'), blank=True, null=True)
+    phone = PhoneNumberField(_('phone'), blank=True, null=True)
+    fax = PhoneNumberField(_('fax'), blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    
+    address1 = models.CharField(_('address'), null=True, blank=True, max_length=100)
+    address2 = models.CharField(_('address (secondary)'), null=True, blank=True, max_length=100)
+    city = models.CharField(_('city'), null=True, blank=True, max_length=100)
+    zip = models.CharField(_('zip'), null=True, blank=True, max_length=10)
+    #country = CountryField(blank=True, null=True)
+    country = models.ForeignKey(Country, blank=True, null=True)
+    # relations
+    expertise = models.ManyToManyField('Expertise', verbose_name=_('Fields of expertise'), null=True, blank=True)
+    
+    # tagging (d_tags = "display tags")
+    d_tags = tagging.fields.TagField(verbose_name="Tags", blank=True, null=True)
+
+    class Meta:
+        app_label = 'profiles'
+        verbose_name = _('Community')
+        verbose_name_plural = _('Communities')
+        """
+        permissions = (
+            ('mentor_profiles', 'Mentoring profiles'),
+        )
+        """
+
+    def __unicode__(self):
+        return u"%s" % self.name
+
+    """
+    @permalink
+    def get_absolute_url(self):
+        return ('profiles-profile-detail', None, { 'slug': self.user.username })
+    """
+    def save(self, *args, **kwargs):
+        t_tags = ''
+        """"""
+        for tag in self.tags:
+            t_tags += '%s, ' % tag    
+        
+        self.tags = t_tags;
+        self.d_tags = t_tags[:245];
+        
+        super(Community, self).save(*args, **kwargs)
+
+try:
+    tagging.register(Community)
+except:
+    pass
+
+arating.enable_voting_on(Community)
+
+
+
 
 
 def create_profile(sender, instance, created, **kwargs):

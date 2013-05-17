@@ -328,16 +328,25 @@ aplayer.ui.update = function(aplayer) {
 	//if(this.type == 'main') {
 
 	// inline player
-	var container = $('div.aplayer.inline');	
-	if(container) {
+	var container = $('div#pplayer_inline');	
+	if(container.length) {
+		
+		console.log('got container');
+		
+		container.addClass('active');
 		
 		$('li.current', container).html(util.format_time(aplayer.states.position));
 		$('li.total', container).html(util.format_time(aplayer.states.duration));
 		
+		$('ul.timing', container).fadeIn(500);
+		
+		
 		$('.media_name a', container).html(media.name);
-		$('.media_name a', container).attr('href', media.release_url);
+		$('.media_name a', container).attr('href', media.absolute_url);
 		$('.artist_name a', container).html(media.artist.name);
-		$('.artist_name a', container).attr('href', media.artist.permalink);
+		$('.artist_name a', container).attr('href', media.artist.absolute_url);
+		$('.release_name a', container).html(media.release.name);
+		$('.release_name a', container).attr('href', media.release.absolute_url);
 		
 		$('.indicator', container).css('width', aplayer.states.position_rel + '%');
 		
@@ -470,7 +479,7 @@ aplayer.ui.hide_overlay = function() {
 
 aplayer.ui.reset = function() {
 
-	var container = $('div.content.aplayer')
+	var container = $('#pplayer_inline');
 
 	container.removeClass('active');
 	
@@ -478,6 +487,7 @@ aplayer.ui.reset = function() {
 	$('.media_name a').html('PLAYER');
 	$('.artist_name a').html('&nbsp;');
 	$('.release_name a').html('&nbsp;');
+	$('ul.timing', container).fadeOut(500);
 	
 	
 	$('.playlist .item').removeClass('active');

@@ -4,7 +4,16 @@ from profiles.models import *
 
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'city')
+    date_hierarchy = 'created'
+    readonly_fields = ('legacy_id','legacy_legacy_id',)
 admin.site.register(Profile, ProfileAdmin)
+
+class CommunityAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'country')
+    list_filter = ('country',)
+    date_hierarchy = 'created'
+    readonly_fields = ('legacy_id','legacy_legacy_id',)
+admin.site.register(Community, CommunityAdmin)
 
 
 class ServiceAdmin(admin.ModelAdmin):

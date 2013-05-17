@@ -78,11 +78,11 @@ class ReleaseFilter(django_filters.FilterSet):
 class ArtistFilter(django_filters.FilterSet):
 
     type = CharListFilter(label=_("Artist type"))
-    country = CharListFilter(label=_("Country"))
+    country__printable_name = CharListFilter(label=_("Country"))
     professions = CharListFilter(label=_("Professions"))
     class Meta:
         model = Artist
-        fields = ['type','country', 'professions__name']
+        fields = ['type', 'country__printable_name', 'country__continent', 'professions__name']
     
     @property
     def filterlist(self):

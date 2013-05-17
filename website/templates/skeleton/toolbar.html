@@ -28,9 +28,17 @@
 						{% if user|user_stream_count > 0 %}
 						<li class="messages"><a href="#"><i class="icon-comment icon-white"></i> <span class="icon-label">{{ user|user_stream_count }}</span></a></li>
 						{% endif %}
+						
 					{% else %}
+
+  						<li><a href="{% url socialauth_begin "twitter" %}?next={{ request.get_full_path }}"><i class="icon-twitter"></i></a></li>
+  						<li><a href="{% url socialauth_begin "facebook" %}?next={{ request.get_full_path }}"><i class="icon-facebook"></i></a></li>
+  						<li><a href="{% url socialauth_begin "google" %}?next={{ request.get_full_path }}"><i class="icon-google-plus"></i></a></li>
+ 						<li><a href="{% url socialauth_begin "github" %}?next={{ request.get_full_path }}"><i class="icon-github"></i></a></li>
+
+ 					
 			        	<li><a title="Login" href="{% url auth_login %}?next={{ request.get_full_path }}" rel="modal:open"><i class="icon-signin"></i><span> {% trans 'Login' %}</span></a></li>
-						<li><a title="Login" href="{% url registration_register %}?next={{ request.get_full_path }}" rel="modal:open"><i class="icon-ok-sign"></i><span> {% trans 'Sign Up' %}</span></a></li>
+						<li><a title="Register" href="{% url registration_register %}?next={{ request.get_full_path }}" rel="modal:open"><i class="icon-ok-sign"></i><span> {% trans 'Sign Up' %}</span></a></li>
 			    	{% endif %}
 			    </ul>
 				<!-- // account section -->

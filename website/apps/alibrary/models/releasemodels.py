@@ -189,7 +189,7 @@ class Release(MigrationMixin):
         ('unknown', _('Unknown')),
     )
     
-    releasetype = models.CharField(verbose_name="Release type", max_length=12, default='other', choices=RELEASETYPE_CHOICES)
+    releasetype = models.CharField(verbose_name="Release type", max_length=24, default='other', choices=RELEASETYPE_CHOICES)
 
     
     # relations
@@ -222,7 +222,7 @@ class Release(MigrationMixin):
     relations = generic.GenericRelation(Relation)
     
     # tagging (d_tags = "display tags")
-    d_tags = tagging.fields.TagField(verbose_name="Tags", blank=True, null=True)
+    d_tags = tagging.fields.TagField(max_length=1024, verbose_name="Tags", blank=True, null=True)
     
     enable_comments = models.BooleanField(_('Enable Comments'), default=True)
     
@@ -616,10 +616,6 @@ post_save.connect(library_post_save, sender=Release)
 """"""
 from actstream import action
 def action_handler(sender, instance, created, **kwargs):
-    print 'action handler'
-    print 'created: %s' % created
-    print kwargs
-    print '--------------------------------------------'
     try:
         verb = _('updated')
         if created:

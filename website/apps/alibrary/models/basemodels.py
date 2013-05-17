@@ -136,7 +136,7 @@ class Distributor(MPTTModel, MigrationMixin):
     relations = generic.GenericRelation('Relation')
     
     # tagging (d_tags = "display tags")
-    d_tags = tagging.fields.TagField(verbose_name="Tags", blank=True, null=True)
+    d_tags = tagging.fields.TagField(max_length=1024, verbose_name="Tags", blank=True, null=True)
  
     
     # manager

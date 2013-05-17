@@ -420,7 +420,7 @@ aplayer.base.release_remote_player = function() {
 
 
 /*********************************************************************************
- * Interval loop. Should run as long as the player is dong something.
+ * Interval loop. Should run as long as the player is doing something.
  * Polls information from the player and does some calculation, then triggers
  * needed display updates
  * Called from the window with the actual player!
@@ -429,7 +429,7 @@ aplayer.base.interval = function() {
 
 	if(local.type == 'popup') {
 			
-		//console.log('interval popup');
+		// console.log('interval popup');
 			
 		var states = aplayer.states;
 		

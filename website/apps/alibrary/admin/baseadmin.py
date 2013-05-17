@@ -180,6 +180,8 @@ class ReleaseAdmin(BaseAdmin):
     search_fields = ['name', 'label__name',]
     list_filter = ('releasetype','release_country',)
     
+    date_hierarchy = 'created'
+    
     #inlines = [RelationsInline, MediaInline, ReleaseExtraartistsInline, DownloadreleaseInline, HardwarereleaseInline]
     inlines = [ReleaseAlbumartistsInline, ReleaseMediaInline, RelationsInline, MediaInline, ReleaseExtraartistsInline]
     #prepopulated_fields = {"slug": ("name",)}
@@ -266,6 +268,9 @@ admin.site.register(Service, ServiceAdmin)
       
 class RelationAdmin(BaseAdmin):
 
+    list_display = ('url', 'service', 'name',)
+    list_filter = ('service',)
+
     fieldsets = [
         (None,               {'fields': ['url', 'service']}),
     ]
@@ -288,7 +293,7 @@ class MediaReleaseInline(admin.TabularInline):
 class MediaAdmin(BaseAdmin):
     
     list_display   = ('name', 'created', 'release_link', 'artist', 'mediatype', 'tracknumber', 'duration', 'processed', 'echoprint_status', 'conversion_status')
-    search_fields = ['artist__name', 'release__name']
+    search_fields = ['artist__name', 'release__name', 'name']
     list_filter = ('mediatype', 'license__name', 'processed', 'echoprint_status', 'conversion_status')
     
     inlines = [MediaReleaseInline, RelationsInline, MediaExtraartistsInline]

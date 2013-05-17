@@ -1,14 +1,40 @@
 /* pplayer inline */
+@import 'bourbon/bourbon' 
 
 #pplayer_inline
   
   width: 235px
   height: 18px
   margin-right: 20px
+  position: relative
+  right:auto
+  
+  
+  
+  &:hover
+    //height: 180px
+    .display
+      @include transition (height 0.05s)
+      height: 100px
+      width: auto
+      // background: whitesmoke
+    .shortcuts
+      display: none
 
   .display
+    @include transition (height 0.07s)
     width: 210px
     overflow: hidden
+    ul
+      list-style-type: none
+      padding: 0px
+      margin: 0px
+      
+    ul.timing
+      display: none
+      li
+        font-size: 83%
+        padding-top: 2px
 	
     background: none repeat scroll 0 0 #DDFFD9
     border-color: #666 #666 #999 #999
@@ -31,7 +57,7 @@
       color: #555555
     
   
-  .actions
+  .shortcuts
     padding-top: 1px
     width: 22px
     a

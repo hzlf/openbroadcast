@@ -9,10 +9,9 @@
 
 {% block inner %}
 <!-- include unparsed template for js rendering -->
-<!-- TODO: maybe refactor to icanhaze -->
+<!-- TODO: maybe refactor to nunjucks -->
 <script id="tpl_screen" type="text/html">
 	{% include_raw "aplayer/tpl_screen.html" %}
-	{# straight_include "aplayer/tpl_screen.html" #}
 </script>
 <script id="tpl_media" type="text/html">
 	{% include_raw "aplayer/tpl_media.html" %}
@@ -59,11 +58,7 @@
 		    <label class="control-label" for="inputEmail">{% trans "Active Basket" %}</label>
 		    <div class="controls">
 				<select>
-				  <option>1</option>
-				  <option>2</option>
-				  <option>3</option>
-				  <option>4</option>
-				  <option>5</option>
+
 				</select>
 		    </div>
 		  </div>

@@ -3715,29 +3715,29 @@ div.navbar .container .nav-profile .messages span.icon-label {
 .subnav {
   padding: 8px 0px 0px 112px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_toolbar\.sass}line{font-family:\00003122}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_toolbar\.sass}line{font-family:\00003124}}
 .subnav li {
   list-style: none;
   float: left;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_toolbar\.sass}line{font-family:\00003125}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_toolbar\.sass}line{font-family:\00003127}}
 .subnav li a {
   color: #666666;
   text-decoration: none;
   padding: 0px 7px 0px 7px;
   border-right: 1px solid #999999;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_toolbar\.sass}line{font-family:\00003131}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_toolbar\.sass}line{font-family:\00003133}}
 .subnav li a:hover {
   color: #00bb00;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_toolbar\.sass}line{font-family:\00003135}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_toolbar\.sass}line{font-family:\00003137}}
 .subnav li.selected a, .subnav li.ancestor a {
   color: #00bb00;
   text-decoration: none;
   padding: 0px 7px 0px 7px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_toolbar\.sass}line{font-family:\00003141}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_toolbar\.sass}line{font-family:\00003143}}
 .subnav li:last-child a {
   border-right: none !important;
 }
@@ -5853,14 +5853,30 @@ div.autocomplete.holder .result .listing .item.hover {
 }
 
 /* pplayer inline */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\000033}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\000034}}
 #pplayer_inline {
   width: 235px;
   height: 18px;
   margin-right: 20px;
+  position: relative;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\000039}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000316}}
+#pplayer_inline:hover .display {
+  -webkit-transition: height 0.05s;
+  -moz-transition: height 0.05s;
+  transition: height 0.05s;
+  height: 100px;
+  width: auto;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000321}}
+#pplayer_inline:hover .shortcuts {
+  display: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000324}}
 #pplayer_inline .display {
+  -webkit-transition: height 0.07s;
+  -moz-transition: height 0.07s;
+  transition: height 0.07s;
   width: 210px;
   overflow: hidden;
   background: none repeat scroll 0 0 #ddffd9;
@@ -5870,28 +5886,43 @@ div.autocomplete.holder .result .listing .item.hover {
   border-width: 1px;
   height: 18px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000322}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000328}}
+#pplayer_inline .display ul {
+  list-style-type: none;
+  padding: 0px;
+  margin: 0px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000333}}
+#pplayer_inline .display ul.timing {
+  display: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000335}}
+#pplayer_inline .display ul.timing li {
+  font-size: 83%;
+  padding-top: 2px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000348}}
 #pplayer_inline .display .name {
   font-weight: bold;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000325}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000351}}
 #pplayer_inline .display span {
   color: #555555;
   padding: 1px 4px 0;
   display: block;
   float: left;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000330}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000356}}
 #pplayer_inline .display a {
   color: #555555;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000334}}
-#pplayer_inline .actions {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000360}}
+#pplayer_inline .shortcuts {
   padding-top: 1px;
   width: 22px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000337}}
-#pplayer_inline .actions a {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_pplayer_inline\.sass}line{font-family:\0000363}}
+#pplayer_inline .shortcuts a {
   margin-left: 2px;
 }
 
@@ -12375,7 +12406,7 @@ form.form-horizontal .form-actions input, form.form-horizontal .form-actions but
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(white), to(whitesmoke));
   background-image: -webkit-linear-gradient(top, white, whitesmoke);
   background-image: -o-linear-gradient(top, white, whitesmoke);
-  background-image: linear-gradient(top, #ffffff, #f5f5f5);
+  background-image: linear, top, white, whitesmoke;
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='white', endColorstr='whitesmoke', GradientType=0), white, whitesmoke;
   border: 1px solid #dddddd;
@@ -12998,7 +13029,7 @@ a.thumbnail:hover {
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(whitesmoke), to(#f9f9f9));
   background-image: -webkit-linear-gradient(top, whitesmoke, #f9f9f9);
   background-image: -o-linear-gradient(top, whitesmoke, #f9f9f9);
-  background-image: linear-gradient(top, #f5f5f5, #f9f9f9);
+  background-image: linear, top, whitesmoke, #f9f9f9;
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='whitesmoke', endColorstr='#f9f9f9', GradientType=0), whitesmoke, #f9f9f9;
   -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -13024,7 +13055,7 @@ a.thumbnail:hover {
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#149bdf), to(#0480be));
   background-image: -webkit-linear-gradient(top, #149bdf, #0480be);
   background-image: -o-linear-gradient(top, #149bdf, #0480be);
-  background-image: linear-gradient(top, #149bdf, #0480be);
+  background-image: linear, top, #149bdf, #0480be;
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#149bdf', endColorstr='#0480be', GradientType=0), #149bdf, #0480be;
   -webkit-box-sizing: border-box;
@@ -13066,7 +13097,7 @@ a.thumbnail:hover {
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ee5f5b), to(#c43c35));
   background-image: -webkit-linear-gradient(top, #ee5f5b, #c43c35);
   background-image: -o-linear-gradient(top, #ee5f5b, #c43c35);
-  background-image: linear-gradient(top, #ee5f5b, #c43c35);
+  background-image: linear, top, #ee5f5b, #c43c35;
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ee5f5b', endColorstr='#c43c35', GradientType=0), #ee5f5b, #c43c35;
 }
@@ -13089,7 +13120,7 @@ a.thumbnail:hover {
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#00bb00), to(#00bb00));
   background-image: -webkit-linear-gradient(top, #00bb00, #00bb00);
   background-image: -o-linear-gradient(top, #00bb00, #00bb00);
-  background-image: linear-gradient(top, #00bb00, #00bb00);
+  background-image: linear, top, #00bb00, #00bb00;
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00bb00', endColorstr='#00bb00', GradientType=0), #00bb00, #00bb00;
 }
@@ -13112,7 +13143,7 @@ a.thumbnail:hover {
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#5bc0de), to(#339bb9));
   background-image: -webkit-linear-gradient(top, #5bc0de, #339bb9);
   background-image: -o-linear-gradient(top, #5bc0de, #339bb9);
-  background-image: linear-gradient(top, #5bc0de, #339bb9);
+  background-image: linear, top, #5bc0de, #339bb9;
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#5bc0de', endColorstr='#339bb9', GradientType=0), #5bc0de, #339bb9;
 }

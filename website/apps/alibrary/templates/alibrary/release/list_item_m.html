@@ -46,9 +46,13 @@
 	</div>
 
 	<div class="list_body_item c3 license {% if item.get_license %}{{ item.get_license.key }}{% endif %}">
+
 		{% if item.get_license %}
-		<a href="{{ item.get_license.get_absolute_url }}" title="{% trans "License details" %}" class="dialog todo-modal"><img src="/static/img/icons/transparent_16x16.png" width="78" height="24" alt="{% trans "License details" %}" class="noborder" /></a>
+			<a href="{{ item.get_license.get_absolute_url }}" title="{% trans "License details" %}" class="dialog todo-modal"><img src="/static/img/icons/transparent_16x16.png" width="78" height="24" alt="{% trans "License details" %}" class="noborder" /></a>
 		{% endif %}
+		<ul class="unstyled indicator">
+			{% include "alibrary/element/_track_indicator.html" %}
+		</ul>
 	</div>
 
 	<div class="list_body_item c4 action">

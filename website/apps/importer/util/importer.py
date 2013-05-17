@@ -786,7 +786,7 @@ class Importer(object):
                 date = '%s' % (date)
                 
             re_date = re.compile('^\d{4}-\d{2}-\d{2}$')
-            if re_date.match(date):
+            if re_date.match(date) and date != '0000-00-00':
                 obj.releasedate_approx = '%s' % date
             
             

@@ -46,6 +46,7 @@ from easy_thumbnails.files import get_thumbnailer
 import tagging
 import reversion 
 
+from l10n.models import Country
 
 
 # logging
@@ -85,7 +86,8 @@ class Artist(MigrationMixin):
     real_name = models.CharField(max_length=200, blank=True, null=True)
     disambiguation = models.CharField(max_length=256, blank=True, null=True)
     
-    country = CountryField(blank=True, null=True)
+    #country = CountryField(blank=True, null=True)
+    country = models.ForeignKey(Country, blank=True, null=True)
     
     date_start = models.DateField(null=True, blank=True)
     date_end = models.DateField(null=True, blank=True)
@@ -127,7 +129,7 @@ class Artist(MigrationMixin):
     relations = generic.GenericRelation(Relation)
     
     # tagging (d_tags = "display tags")
-    d_tags = tagging.fields.TagField(verbose_name="Tags", blank=True, null=True)
+    d_tags = tagging.fields.TagField(max_length=1024, verbose_name="Tags", blank=True, null=True)
  
     
     professions = models.ManyToManyField(Profession, through='ArtistProfessions')

@@ -1,17 +1,47 @@
-<div id="pplayer_inline" style="float:left;">
+{% load sekizai_tags i18n %}
+
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.li-scroller.1.0.js"></script>{% endaddtoblock %}
+{% addtoblock "js-post" %}
+{% endaddtoblock %}
+{% addtoblock "css" %}
+{% endaddtoblock %}
+
+<div id="pplayer_inline" class="" style="float:left;">
 	<div class="wrapper">
 		
 		<!-- Player display -->
 		<div class="left display">
-			<div id="pplayer_inline_scroll">
-				<span class="type"></span>
-				<span class="name">The Track</span>
-				<span class="artist">The Artist</span>
+			<ul class="main">
+				<li>
+					<span class="media_name"><a href="#"></a></span>
+					<ul class="unstyled horizontal timing pull-right">
+						<li class="current"></li>
+						<li class="separator">&nbsp;|&nbsp;</li>
+						<li class="total"></li>
+						<li>&nbsp;</li>
+					</ul>
+				</li>
+				<div class="clear"></div>
+			</ul><div class="clear"></div>
+			<ul class="aux">
+				<li><span class="artist_name">{% trans "Artist"%}: <a href="#"></a></span></li>
+				<li><span class="release_name">{% trans "Release"%}: <a href="#"></a></span></li>
+				<div class="clear"></div>
+			</ul>
+			
+			<div class="actions inner">
+				<ul class="unstyled horizontal pull-right">
+					<li><a href="#"><i class="icon-play"></i></a></li>
+					<li><a href="#"><i class="icon-pause"></i></a></li>
+					<li><a href="#"><i class="icon-stop"></i></a></li>
+				</ul>
 			</div>
+			
+			
 		</div>
 		
 		<!-- Icon/Actions-->
-		<div class="right actions">
+		<div class="right shortcuts">
 			<a href="/api/cast/listen.json#0#replace" title="Liten to the livestream" class="playable popup"><img src="/static/img/prototype/webstream.png" alt="Webstream" /></a>
 		</div>
 		 

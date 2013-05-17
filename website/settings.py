@@ -24,6 +24,8 @@ sys.path.insert(0, os.path.join(PROJECT_DIR, 'tools'))
 sys.path.insert(0, os.path.join(PROJECT_DIR, 'cmsplugins'))
 # subdirectory for shop
 sys.path.insert(0, os.path.join(PROJECT_DIR, 'shop'))
+# subdirectory for legacy tools
+sys.path.insert(0, os.path.join(PROJECT_DIR, 'legacy'))
 
 DEBUG = True
 
@@ -106,6 +108,7 @@ MIDDLEWARE_CLASSES = (
     #'django_badbrowser.middleware.BrowserSupportDetection',
     
     'arating.middleware.AratingIpMiddleware',
+    #'lib.middleware.social_auth_extra.SocialAuthExceptionExtraMiddleware',
     
     'django.middleware.cache.FetchFromCacheMiddleware',
     
@@ -145,8 +148,13 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'postman.context_processors.inbox',
     
     # authentication
-    'allauth.context_processors.allauth',
-    'allauth.account.context_processors.account',
+    #'allauth.context_processors.allauth',
+    #'allauth.account.context_processors.account',
+    #'social_auth.context_processors.social_auth_by_name_backends',
+    'social_auth.context_processors.social_auth_backends',
+    'social_auth.context_processors.backends_data',
+    #'social_auth.context_processors.social_auth_by_type_backends',
+    'social_auth.context_processors.social_auth_login_redirect',
 )
 
 
@@ -257,6 +265,8 @@ MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 STATIC_URL = '/static/'
 
+LEGACY_STORAGE_ROOT = None
+
 ADMIN_MEDIA_PREFIX = posixpath.join(STATIC_URL, "admin/")
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
@@ -361,6 +371,8 @@ INSTALLED_APPS = (
     
     'genericadmin',
 
+
+    # temp
     
     'eav',
     
@@ -412,18 +424,19 @@ INSTALLED_APPS = (
     # users/auth
     'avatar',
     'emailconfirmation',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    #'allauth.ajax',
-    #'allauth.twitter',
-    'allauth.openid',
-    'allauth.facebook',
+    #'allauth',
+    #'allauth.account',
+    #'allauth.socialaccount',
+    ##'allauth.ajax',
+    ##'allauth.twitter',
+    #'allauth.openid',
+    #'allauth.facebook',
     
     
     # alternative registration
     'registration',
     'social_auth',
+    'dropbox',
     'invitation',
 
     'tastypie',
@@ -599,7 +612,7 @@ Accounts
 """
 AUTHENTICATION_BACKENDS = (
     # allauth
-    'allauth.account.auth_backends.AuthenticationBackend',
+    #'allauth.account.auth_backends.AuthenticationBackend',
     # base
     'django.contrib.auth.backends.ModelBackend',
     # guardian
@@ -640,54 +653,52 @@ ACCOUNT_ACTIVATION_DAYS = 7
 AUTHENTICATION_BACKENDS = (
     'social_auth.backends.twitter.TwitterBackend',
     'social_auth.backends.facebook.FacebookBackend',
-    'social_auth.backends.google.GoogleOAuthBackend',
-    'social_auth.backends.google.GoogleOAuth2Backend',
+    #'social_auth.backends.google.GoogleOAuthBackend',
+    #'social_auth.backends.google.GoogleOAuth2Backend',
     'social_auth.backends.google.GoogleBackend',
-    'social_auth.backends.yahoo.YahooBackend',
-    'social_auth.backends.browserid.BrowserIDBackend',
-    #'social_auth.backends.contrib.linkedin.LinkedinBackend',
-    #'social_auth.backends.contrib.disqus.DisqusBackend',
+    'social_auth.backends.contrib.dropbox.DropboxBackend',
+    'social_auth.backends.contrib.soundcloud.SoundcloudBackend',
+    #'social_auth.backends.yahoo.YahooBackend',
+    #'social_auth.backends.browserid.BrowserIDBackend',
+    'social_auth.backends.contrib.linkedin.LinkedinBackend',
+    'social_auth.backends.contrib.disqus.DisqusBackend',
     #'social_auth.backends.contrib.livejournal.LiveJournalBackend',
     #'social_auth.backends.contrib.orkut.OrkutBackend',
     #'social_auth.backends.contrib.foursquare.FoursquareBackend',
-    #'social_auth.backends.contrib.github.GithubBackend',
+    'social_auth.backends.contrib.github.GithubBackend',
     #'social_auth.backends.contrib.vk.VKOAuth2Backend',
     #'social_auth.backends.contrib.live.LiveBackend',
     #'social_auth.backends.contrib.skyrock.SkyrockBackend',
     #'social_auth.backends.contrib.yahoo.YahooOAuthBackend',
     #'social_auth.backends.contrib.readability.ReadabilityBackend',
     #'social_auth.backends.contrib.fedora.FedoraBackend',
-    'social_auth.backends.OpenIDBackend',
+    #'social_auth.backends.OpenIDBackend',
     # base
     'django.contrib.auth.backends.ModelBackend',
     # guardian
     'guardian.backends.ObjectPermissionBackend',
 )
-TWITTER_CONSUMER_KEY         = ''
-TWITTER_CONSUMER_SECRET      = ''
-FACEBOOK_APP_ID              = ''
-FACEBOOK_API_SECRET          = ''
-LINKEDIN_CONSUMER_KEY        = ''
-LINKEDIN_CONSUMER_SECRET     = ''
-ORKUT_CONSUMER_KEY           = ''
-ORKUT_CONSUMER_SECRET        = ''
-GOOGLE_CONSUMER_KEY          = ''
-GOOGLE_CONSUMER_SECRET       = ''
-GOOGLE_OAUTH2_CLIENT_ID      = ''
-GOOGLE_OAUTH2_CLIENT_SECRET  = ''
-FOURSQUARE_CONSUMER_KEY      = ''
-FOURSQUARE_CONSUMER_SECRET   = ''
-VK_APP_ID                    = ''
-VK_API_SECRET                = ''
-LIVE_CLIENT_ID               = ''
-LIVE_CLIENT_SECRET           = ''
-SKYROCK_CONSUMER_KEY         = ''
-SKYROCK_CONSUMER_SECRET      = ''
-YAHOO_CONSUMER_KEY           = ''
-YAHOO_CONSUMER_SECRET        = ''
-READABILITY_CONSUMER_SECRET  = ''
-READABILITY_CONSUMER_SECRET  = ''
-
+TWITTER_CONSUMER_KEY         = 'Fbp98cYDsI3mY51krZVhVg'
+TWITTER_CONSUMER_SECRET      = 'ZTOXzo3zJH4AG1Q6rTHxsiKorDqeQkNWixThiZEfrc'
+FACEBOOK_APP_ID              = '154134078100508'
+FACEBOOK_API_SECRET          = 'f92f325fa14d5f8fa25c9cdd1700f854'
+FACEBOOK_EXTENDED_PERMISSIONS = ['email',]
+LINKEDIN_CONSUMER_KEY        = 'aaa'
+LINKEDIN_CONSUMER_SECRET     = 'bbb'
+GOOGLE_CONSUMER_KEY          = 'aaa'
+GOOGLE_CONSUMER_SECRET       = 'bbb'
+GOOGLE_OAUTH2_CLIENT_ID      = 'aaa'
+GOOGLE_OAUTH2_CLIENT_SECRET  = 'bbb'
+FOURSQUARE_CONSUMER_KEY      = 'aaa'
+FOURSQUARE_CONSUMER_SECRET   = 'bbb'
+YAHOO_CONSUMER_KEY           = 'aaa'
+YAHOO_CONSUMER_SECRET        = 'bbb'
+GITHUB_APP_ID = '93b8c5a82ee21f19e4c3'
+GITHUB_API_SECRET = 'a2602afb10e29096b101e3b698403996a6e86d70'
+DROPBOX_APP_ID = 'hysrslzv780iu8n'
+DROPBOX_API_SECRET = '5y9ldihkc9ot6cz'
+SOUNDCLOUD_CLIENT_ID = 'f009f9ca05053570a2c05d55f08f3dc8'
+SOUNDCLOUD_CLIENT_SECRET = 'ad689159fcecc12e14664084ab495874'
 #LOGIN_URL          = '/login-form/'
 #LOGIN_REDIRECT_URL = '/logged-in/'
 #LOGIN_ERROR_URL    = '/login-error/'
@@ -703,7 +714,7 @@ LOGIN_URL = '/accounts/login/'
 LOGOUT_URL = '/accounts/signout/'
 LOGIN_REDIRECT_URL = "/"
 
-
+LOGIN_ERROR_URL = LOGIN_URL
 
 
 

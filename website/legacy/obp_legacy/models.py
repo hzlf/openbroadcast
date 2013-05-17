@@ -87,8 +87,10 @@ class Labels(models.Model):
     lastfm_url = models.CharField(max_length=750, blank=True)
     lastfm_status = models.IntegerField()
     wikipedia_url = models.CharField(max_length=750, blank=True)
+    
     facebook_url = models.CharField(max_length=750, blank=True)
     soundcloud_url = models.CharField(max_length=750, blank=True)
+    
     various_links = models.TextField(blank=True)
     website = models.CharField(max_length=750, blank=True)
     parent_labelid = models.IntegerField(null=True, blank=True)
@@ -169,15 +171,19 @@ class Medias(models.Model):
     mb_releaseid = models.CharField(max_length=108, blank=True)
     mb_artistid = models.CharField(max_length=108, blank=True)
     mb_releaseartistid = models.CharField(max_length=108, blank=True)
+    
     wikipedia_url = models.CharField(max_length=750, blank=True)
     soundcloud_url = models.CharField(max_length=750, blank=True)
     youtube_url = models.CharField(max_length=750, blank=True)
+    
     musicip_puid = models.CharField(max_length=108, blank=True)
     ofa_fingerprint = models.CharField(max_length=512, blank=True)
     musicmagic_data = models.TextField(blank=True)
     musicmagic_fingerprint = models.TextField(blank=True)
+    
     lyricsfly_mediaid = models.CharField(max_length=150, blank=True)
     lyricsfly_status = models.IntegerField()
+    
     chartlyrics_status = models.IntegerField()
     tagquality = models.IntegerField(null=True, blank=True)
     orig_title = models.CharField(max_length=750, blank=True)
@@ -319,6 +325,39 @@ class Releases(models.Model):
     status_viral = models.IntegerField(blank=True)
     class Meta:
         db_table = u'releases'
+
+
+
+
+
+class Users(models.Model):
+    id = models.IntegerField(primary_key=True)
+    created = models.DateTimeField(null=True, blank=True)
+    updated = models.DateTimeField(null=True, blank=True)
+    legacy_id = models.IntegerField()
+    email = models.CharField(max_length=381)
+    username = models.CharField(max_length=96, unique=True)
+    password = models.CharField(max_length=150)
+    full_name = models.CharField(max_length=384, blank=True)
+    fb_id = models.CharField(max_length=90, blank=True)
+    fb_token = models.CharField(max_length=3072, blank=True)
+    logins = models.IntegerField()
+    last_login = models.IntegerField(null=True, blank=True)
+    client_ip = models.CharField(max_length=45, blank=True)
+    class Meta:
+        db_table = u'users'
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class ArtistsMedias(models.Model):

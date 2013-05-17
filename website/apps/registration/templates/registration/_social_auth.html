@@ -1,0 +1,15 @@
+{% load i18n %}
+
+  <h4>{% trans "Or use an existing account" %}:</h4>
+  
+  <ul class="social-auth unstyled horizontal">
+  {% for name in social_auth.backends %}
+  <li>
+  	
+  	<a href="{% url socialauth_begin name %}?{{ redirect_querystring }}">
+  		<i class="icon-{{ name }}"></i>{{ name|title }}
+  	</a>
+  </li>
+  <li>&nbsp;&nbsp;&nbsp;</li>
+  {% endfor %}
+  </ul>

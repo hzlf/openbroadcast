@@ -80,7 +80,7 @@ urlpatterns = patterns('',
     url(r'^sa/', include('social_auth.urls')),
     
     # old accounts
-    url(r'^allauth_accounts/', include('allauth.urls')),
+    #url(r'^allauth_accounts/', include('allauth.urls')),
     
     #(r'^accounts/notification/', include('notification.urls')),
     

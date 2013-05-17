@@ -23,11 +23,7 @@ class CharListFilter(django_filters.Filter):
             lookup = self.lookup_type
             
         if value and values:
-            
-            print 'value'
-            print value
-            print 'values'
-            print values
+
             
             if len(values) > 1:
                 lookup = 'in'
@@ -60,11 +56,6 @@ class ProfileFilter(django_filters.FilterSet):
 
             for name, filter_ in self.filters.iteritems():
                 
-                print '***'
-                print name
-                
-                for item in self.queryset.all():
-                    print item
                     
                 try:
                     ds = self.queryset.values_list(name, '%s__name' % name, flat=False).annotate(n=models.Count("pk", distinct=True)).distinct()
@@ -72,12 +63,10 @@ class ProfileFilter(django_filters.FilterSet):
                     ds = self.queryset.values_list(name, flat=False).annotate(n=models.Count("pk", distinct=True)).distinct()
                 
                 filter_.entries = ds
-                
-                print ds
+
                 
                 if ds not in flist:
-                    print '###########################'
-                    print ds                   
+          
                     flist.append(filter_)
 
             self._filterlist = flist
