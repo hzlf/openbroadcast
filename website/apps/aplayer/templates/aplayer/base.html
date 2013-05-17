@@ -36,7 +36,7 @@
 	{% render_block "js" %}
 	
 	
-	<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jwplayer/jwplayer-5.9.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}aplayer/js/lib/jwplayer/jwplayer-5.9.js"></script>
 	<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/playlist.js"></script>
 	
 	<script type="text/javascript">
@@ -54,8 +54,8 @@
 		$(document).ready(function() {
 			
 			// set some variables to be available in script file
-			aplayer.vars.swf_url = '{{ STATIC_URL }}swf/lib/jwplayer/jwplayer-5.9.swf';
-			aplayer.vars.skin_url = '{{ STATIC_URL }}css/lib/jwplayer/ulysses.zip';
+			aplayer.vars.swf_url = '{{ STATIC_URL }}aplayer/swf/lib/jwplayer/jwplayer-5.9.swf';
+			aplayer.vars.skin_url = '{{ STATIC_URL }}aplayer/css/lib/jwplayer/ulysses.zip';
 			
 			base.ui.init();
 			base.ui.iface();
