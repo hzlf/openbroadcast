@@ -6,6 +6,8 @@ import re
 import time
 import shutil
 
+import json
+
 import datetime
 
 import locale
@@ -15,6 +17,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.validators import email_re
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+
+from django.utils.html import strip_tags, strip_entities
+from html2text import html2text
 
 from filer.models.filemodels import File
 from filer.models.audiomodels import Audio
@@ -119,8 +124,16 @@ class ReleaseMigrator(Migrator):
 					date = '%s' % (date)
 					
 				re_date = re.compile('^\d{4}-\d{2}-\d{2}$')
-				if re_date.match(date)and date != '0000-00-00':
-					obj.releasedate_approx = '%s' % date
+				if re_date.match(date) and date != '0000-00-00':
+					try:
+						import time
+						valid_date = time.strptime('%s' % date, '%Y-%m-%d')
+						obj.releasedate_approx = '%s' % date
+					except Exception, e:
+						print 'Invalid date!'
+						print e
+					
+					
 	
 			
 			"""
@@ -341,13 +354,7 @@ class MediaMigrator(Migrator):
 			for nt in nts:
 				try:
 					t = Ntags.objects.using('legacy').get(id=nt.ntag_id)
-					print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-					print 'GOT TAG!!!'
-					print
-					print
 					log.debug('tag for object: %s' % t.name)
-					print
-					print
 					Tag.objects.add_tag(obj, u'"%s"' % t.name[:30])
 				except Exception, e:
 					print e
@@ -807,6 +814,11 @@ class UserMigrator(Migrator):
 
 
 
+
+
+
+
+
 class LegacyUserMigrator(Migrator):
 
 
@@ -1127,6 +1139,184 @@ class CommunityMigrator(Migrator):
 		obj.save()
 		
 		return obj, status
+
+
+
+
+
+class PlaylistMigrator(Migrator):
+
+
+	def __init__(self):
+		log = logging.getLogger('util.migrator.__init__')
+        
+        
+	def run(self, legacy_obj):
+		
+		from alibrary.models import Playlist, PlaylistItem, PlaylistItemPlaylist
+		from obp_legacy.models_legacy import *
+		
+		status = 1
+		
+		log = logging.getLogger('util.migrator.run')
+		log.info('playlist: %s' % legacy_obj.title)
+		
+		obj, created = Playlist.objects.get_or_create(legacy_id=legacy_obj.ident)
+
+
+		
+		if created:
+			log.info('object created: %s' % obj.pk)
+		else:
+			log.info('object found by legacy_id: %s' % obj.pk)
+
+		"""
+		Mapping data
+		"""
+		obj.name = legacy_obj.title
+		
+		print '#######################################################'
+		print 'name: %s' % obj.name
+		
+		"""
+		legacy status
+		1: work in progress
+		2: ready to schedule
+		3: scheduled (not possible to go back)
+		4: un-scheduled ?
+		"""
+		print 'status: %s' % legacy_obj.status
+		
+		if legacy_obj.status == 1:
+			obj.status = 2
+		if legacy_obj.status == 2:
+			obj.status = 1
+		if legacy_obj.status == 3:
+			obj.status = 3
+		if legacy_obj.status == 4:
+			obj.status = 4
+			
+		"""
+		Type mapping
+		"""
+		if legacy_obj.status in (2,3,4):
+			obj.type = 'broadcast'
+		if legacy_obj.status in (0,1):
+			# maybe exclude '0'
+			obj.type = 'playlist'
+		
+		
+		"""
+		Tag Mapping
+		"""
+		nts = ElggTags.objects.using('legacy_legacy').filter(ref=legacy_obj.ident)
+		for nt in nts:
+			try:
+				log.debug('tag for object: %s' % nt.tag)
+				Tag.objects.add_tag(obj, u'"%s"' % nt.tag[:30])
+			except Exception, e:
+				print e
+			
+		
+		
+		if legacy_obj.intro:
+			print legacy_obj.intro
+			obj.description = legacy_obj.intro
+			
+		# date mappings
+		if legacy_obj.posted:
+			obj.created = datetime.datetime.fromtimestamp(int(legacy_obj.posted)).strftime('%Y-%m-%d %H:%M:%S')
+			
+		if legacy_obj.lastupdate:
+			obj.updated = datetime.datetime.fromtimestamp(int(legacy_obj.lastupdate)).strftime('%Y-%m-%d %H:%M:%S')
+		
+		# TODO: status mapping 
+		if legacy_obj.status:
+			print 'status id: %s' % legacy_obj.status
+
+
+		"""
+		User mapping
+		"""
+		try:
+			legacy_user = Users.objects.using('legacy').get(legacy_id=legacy_obj.owner)
+			log.debug('mapping user')
+			item, s = get_user_by_legacy_object(legacy_user)
+			if item:
+				obj.user = item
+		except Exception, e:
+			print e
+			pass
+		
+		
+		"""
+		Getting this f**ing hell stupd content-container thing...
+		"""
+		cts = ElggCmContainer.objects.using('legacy_legacy').filter(x_ident=legacy_obj.ident, container_type="Playlist")
+		
+		if cts.count() > 0:
+			container = cts[0]
+		else:
+			container = None
+		
+		if container:
+			
+			print '***********************************************'
+			print container.body
+			print 
+			print html2text(container.body)
+			print
+			obj.description = html2text(container.body.replace('&nbsp;', ''))
+			 
+			print 'target_duration: %s' % container.target_duration
+			"""
+			target duration, calculation
+			"""
+			print 'calculated:      %s' % (int(container.target_duration) * 15 * 60 * 1000)
+			
+			
+			print 'duration:        %s' % container.duration
+			print 'sub_type:        %s' % container.sub_type
+			print 'best_broadcast_segment: %s' % container.best_broadcast_segment
+			print 'rotation_include: %s' % container.rotation_include
+			
+			obj.target_duration = (int(container.target_duration) * 15 * 60)
+			
+			
+			bcs = json.loads(container.best_broadcast_segment)
+			for bc in bcs:
+				if bc[0] == 1:
+					print 'Mo:',
+					print bc[1]
+			
+			
+			
+			PlaylistItemPlaylist.objects.filter(playlist=obj).delete()
+			""""""
+			legacy_media = json.loads(container.content_list)
+			position = 0
+			for lm in legacy_media:
+				print lm
+				print lm['ident']
+				tm = Medias.objects.using('legacy').get(id=int(lm['ident']))
+				print tm.name
+				print 'pos: %s' % position
+				
+				media, s = get_media_by_legacy_object(tm)
+				print media.pk
+				
+				pi = PlaylistItem()
+				
+				obj.add_items_by_ids(ids=[media.pk,], ct='media')
+				
+				position += 1
+			
+		
+		
+
+		obj.save()
+		
+		return obj, status
 	
 
 def get_release_by_legacy_object(legacy_obj):
@@ -1166,6 +1356,14 @@ def get_user_by_legacy_object(legacy_obj):
     
     return obj, status	
 	
+
+def get_playlist_by_legacy_object(legacy_obj):
+	
+    migrator = PlaylistMigrator()
+    obj, status = migrator.run(legacy_obj)
+    
+    return obj, status	
+	
 """
 Double legacy shortcuts
 """
@@ -1191,6 +1389,7 @@ def id_to_location(id):
     l = "%012d" % id
     return '%d/%d/%d' % (int(l[0:4]), int(l[4:8]), int(l[8:12]))
     
-  
+    
+
 
 

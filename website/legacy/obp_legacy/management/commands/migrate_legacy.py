@@ -33,6 +33,7 @@ from obp_legacy.util.migrator import get_release_by_legacy_object
 from obp_legacy.util.migrator import get_label_by_legacy_object
 from obp_legacy.util.migrator import get_artist_by_legacy_object
 from obp_legacy.util.migrator import get_media_by_legacy_object
+from obp_legacy.util.migrator import get_playlist_by_legacy_object
 from obp_legacy.util.migrator import get_user_by_legacy_legacy_object
 from obp_legacy.util.migrator import get_community_by_legacy_legacy_object
 
@@ -62,7 +63,7 @@ class LegacyImporter(object):
         
         if(self.object_type == 'media'):
 
-            objects = Medias.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:2000]
+            objects = Medias.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:100000]
         
             print 'NUM OBJECTS: %s' % objects.count()
         
@@ -115,6 +116,17 @@ class LegacyImporter(object):
         
             for legacy_obj in objects:
                 obj, status = get_community_by_legacy_legacy_object(legacy_obj)                
+                #legacy_obj.migrated = datetime.now()
+                legacy_obj.save()
+                
+                        
+        if(self.object_type == 'playlist'):
+
+            from obp_legacy.models_legacy import ElggCmMaster
+            objects = ElggCmMaster.objects.using('legacy_legacy').filter(type='Container')[0:100]
+        
+            for legacy_obj in objects:
+                obj, status = get_playlist_by_legacy_object(legacy_obj)                
                 #legacy_obj.migrated = datetime.now()
                 legacy_obj.save()
                 

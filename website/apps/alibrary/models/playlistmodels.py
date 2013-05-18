@@ -127,7 +127,7 @@ class Weather(models.Model):
     
 
 
-class Playlist(CachingMixin, models.Model):
+class Playlist(MigrationMixin, CachingMixin, models.Model):
     
     name = models.CharField(max_length=200)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
@@ -138,7 +138,7 @@ class Playlist(CachingMixin, models.Model):
         (1, _('Ready')),
         (2, _('In progress')),
         (3, _('Scheduled')),
-        (3, _('Descheduled')),
+        (4, _('Descheduled')),
         (99, _('Error')),
         (11, _('Other')),
     )
