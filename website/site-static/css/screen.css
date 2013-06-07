@@ -9369,112 +9369,117 @@ ul.tagit input[type="text"] {
   vertical-align: top;
 }
 
-/*  Font Awesome 3.0
- *    the iconic font designed for use with Twitter Bootstrap
+/*    Font Awesome 3.1.0
+ *    the iconic font designed for Bootstrap
  *    -------------------------------------------------------
  *    The full suite of pictographic icons, examples, and documentation
- *    can be found at: http://fortawesome.github.com/Font-Awesome/
- *
+ *    can be found at: http://fontawesome.io
+ *  
  *    License
  *    -------------------------------------------------------
- *    • The Font Awesome font is licensed under the SIL Open Font License - http://scripts.sil.org/OFL
- *    • Font Awesome CSS, LESS, and SASS files are licensed under the MIT License -
+ *    - The Font Awesome font is licensed under the SIL Open Font License v1.1 -
+ *      http://scripts.sil.org/OFL
+ *    - Font Awesome CSS, LESS, and SASS files are licensed under the MIT License -
  *      http://opensource.org/licenses/mit-license.html
- *    • The Font Awesome pictograms are licensed under the CC BY 3.0 License - http://creativecommons.org/licenses/by/3.0/
- *    • Attribution is no longer required in Font Awesome 3.0, but much appreciated:
- *      "Font Awesome by Dave Gandy - http://fortawesome.github.com/Font-Awesome"
+ *    - Font Awesome documentation licensed under CC BY 3.0 License -
+ *      http://creativecommons.org/licenses/by/3.0/
+ *    - Attribution is no longer required in Font Awesome 3.0, but much appreciated:
+ *      "Font Awesome by Dave Gandy - http://fontawesome.io"
  *
  *    Contact
  *    -------------------------------------------------------
- *    Email: dave@davegandy.com
+ *    Email: dave@fontawesome.io
  *    Twitter: http://twitter.com/fortaweso_me
  *    Work: Lead Product Designer @ http://kyruus.com */
+/* FONT PATH
+ * -------------------------- */
 @font-face {
   font-family: "FontAwesome";
-  src: url("../font/fontawesome-webfont.eot");
-  src: url("../font/fontawesome-webfont.eot?#iefix") format("embedded-opentype"), url("../font/fontawesome-webfont.woff") format("woff"), url("../font/fontawesome-webfont.ttf") format("truetype");
+  src: url("../font/fontawesome-3.1.1/fontawesome-webfont.eot?v=3.1.0");
+  src: url("../font/fontawesome-3.1.1/fontawesome-webfont.eot?#iefix&v=3.1.0") format("embedded-opentype"), url("../font/fontawesome-3.1.1/fontawesome-webfont.woff?v=3.1.0") format("woff"), url("../font/fontawesome-3.1.1/fontawesome-webfont.ttf?v=3.1.0") format("truetype"), url("../font/fontawesome-3.1.1/fontawesome-webfont.svg#fontawesomeregular?v=3.1.0") format("svg");
   font-weight: normal;
   font-style: normal;
 }
 
-/*  Font Awesome styles
- *  ------------------------------------------------------- */
-/* includes sprites.less reset */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\0000343}}
+/* FONT AWESOME CORE
+ * -------------------------- */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\0000340}}
 [class^="icon-"], [class*=" icon-"] {
   font-family: FontAwesome;
   font-weight: normal;
   font-style: normal;
   text-decoration: inherit;
-  display: inline;
-  width: auto;
-  height: auto;
-  line-height: normal;
-  vertical-align: baseline;
-  background-image: none !important;
-  background-position: 0% 0%;
-  background-repeat: repeat;
+  -webkit-font-smoothing: antialiased;
+  *margin-right: 0.3em;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\0000357}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\0000348}}
 [class^="icon-"]:before, [class*=" icon-"]:before {
   text-decoration: inherit;
   display: inline-block;
   speak: none;
 }
 
-/* makes sure icons active on rollover in links */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\0000365}}
-a [class^="icon-"], a [class*=" icon-"] {
-  display: inline-block;
-}
-
 /* makes the font 33% larger relative to the icon container */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\0000370}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\0000355}}
 .icon-large:before {
   vertical-align: -10%;
   font-size: 1.33333em;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\0000375}}
-.btn [class^="icon-"], .btn [class*=" icon-"], .nav [class^="icon-"], .nav [class*=" icon-"] {
+/* makes sure icons active on rollover in links */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\0000362}}
+a [class^="icon-"], a [class*=" icon-"], a [class^="icon-"]:before, a [class*=" icon-"]:before {
   display: inline;
-  /* keeps button heights with and without icons the same */
-  line-height: 0.6em;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\0000379}}
-.btn [class^="icon-"].icon-spin, .btn [class*=" icon-"].icon-spin, .nav [class^="icon-"].icon-spin, .nav [class*=" icon-"].icon-spin {
-  display: inline-block;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\0000383}}
-li [class^="icon-"], li [class*=" icon-"] {
+/* increased font size for icon-large */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\0000367}}
+[class^="icon-"].icon-fixed-width, [class*=" icon-"].icon-fixed-width {
   display: inline-block;
-  width: 1.25em;
+  width: 1.28571em;
   text-align: center;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\0000387}}
-li [class^="icon-"].icon-large, li [class*=" icon-"].icon-large {
-  /* increased font size for icon-large */
-  width: 1.5625em;
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\0000372}}
+[class^="icon-"].icon-fixed-width.icon-large, [class*=" icon-"].icon-fixed-width.icon-large {
+  width: 1.57143em;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\0000391}}
-ul.icons {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\0000375}}
+ul.icons-ul {
   list-style-type: none;
-  text-indent: -0.75em;
+  text-indent: -0.71429em;
+  margin-left: 2.14286em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\0000396}}
-ul.icons li [class^="icon-"], ul.icons li [class*=" icon-"] {
-  width: 0.75em;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\0000379}}
+ul.icons-ul > li .icon-li {
+  width: 0.71429em;
+  display: inline-block;
+  text-align: center;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\0000399}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\0000384}}
+[class^="icon-"].hide, [class*=" icon-"].hide {
+  display: none;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\0000387}}
 .icon-muted {
   color: #eeeeee;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003105}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\0000390}}
+.icon-light {
+  color: white;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\0000393}}
+.icon-dark {
+  color: #333333;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\0000396}}
 .icon-border {
   border: solid 1px #eeeeee;
   padding: 0.2em 0.25em 0.15em;
@@ -9483,11 +9488,11 @@ ul.icons li [class^="icon-"], ul.icons li [class*=" icon-"] {
   border-radius: 3px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003113}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003103}}
 .icon-2x {
   font-size: 2em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003115}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003105}}
 .icon-2x.icon-border {
   border-width: 2px;
   -webkit-border-radius: 4px;
@@ -9495,11 +9500,11 @@ ul.icons li [class^="icon-"], ul.icons li [class*=" icon-"] {
   border-radius: 4px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003119}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003111}}
 .icon-3x {
   font-size: 3em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003121}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003113}}
 .icon-3x.icon-border {
   border-width: 3px;
   -webkit-border-radius: 5px;
@@ -9507,11 +9512,11 @@ ul.icons li [class^="icon-"], ul.icons li [class*=" icon-"] {
   border-radius: 5px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003125}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003119}}
 .icon-4x {
   font-size: 4em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003127}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003121}}
 .icon-4x.icon-border {
   border-width: 4px;
   -webkit-border-radius: 6px;
@@ -9519,45 +9524,165 @@ ul.icons li [class^="icon-"], ul.icons li [class*=" icon-"] {
   border-radius: 6px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003135}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003127}}
+.icon-5x {
+  font-size: 5em;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003129}}
+.icon-5x.icon-border {
+  border-width: 5px;
+  -webkit-border-radius: 7px;
+  -moz-border-radius: 7px;
+  border-radius: 7px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003135}}
 .pull-right {
   float: right;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003138}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003138}}
 .pull-left {
   float: left;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003142}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003141}}
 [class^="icon-"].pull-left, [class*=" icon-"].pull-left {
-  margin-right: 0.35em;
+  margin-right: 0.3em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003144}}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003144}}
 [class^="icon-"].pull-right, [class*=" icon-"].pull-right {
-  margin-left: 0.35em;
+  margin-left: 0.3em;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003150}}
-.btn [class^="icon-"].pull-left.icon-2x, .btn [class^="icon-"].pull-right.icon-2x, .btn [class*=" icon-"].pull-left.icon-2x, .btn [class*=" icon-"].pull-right.icon-2x {
-  margin-top: 0.35em;
+/* BOOTSTRAP SPECIFIC CLASSES
+ * -------------------------- */
+/* Bootstrap 2.0 sprites.less reset */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003151}}
+[class^="icon-"], [class*=" icon-"] {
+  display: inline;
+  width: auto;
+  height: auto;
+  line-height: normal;
+  vertical-align: baseline;
+  background-image: none;
+  background-position: 0% 0%;
+  background-repeat: repeat;
+  margin-top: 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003152}}
+
+/* more sprites.less reset */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003164}}
+.icon-white {
+  background-image: none;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003168}}
+.nav-pills > .active > a > [class^="icon-"], .nav-pills > .active > a > [class*=" icon-"] {
+  background-image: none;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003172}}
+.nav-list > .active > a > [class^="icon-"], .nav-list > .active > a > [class*=" icon-"] {
+  background-image: none;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003176}}
+.navbar-inverse .nav > .active > a > [class^="icon-"], .navbar-inverse .nav > .active > a > [class*=" icon-"] {
+  background-image: none;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003181}}
+.dropdown-menu > li > a:hover > [class^="icon-"], .dropdown-menu > li > a:hover > [class*=" icon-"] {
+  background-image: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003184}}
+.dropdown-menu > .active > a > [class^="icon-"], .dropdown-menu > .active > a > [class*=" icon-"] {
+  background-image: none;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003188}}
+.dropdown-submenu:hover > a > [class^="icon-"], .dropdown-submenu:hover > a > [class*=" icon-"] {
+  background-image: none;
+}
+
+/* keeps Bootstrap styles with and without icons the same */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003193}}
+.btn [class^="icon-"].icon-large, .nav [class^="icon-"].icon-large, .btn [class*=" icon-"].icon-large, .nav [class*=" icon-"].icon-large {
+  line-height: 0.9em;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003196}}
+.btn [class^="icon-"].icon-spin, .nav [class^="icon-"].icon-spin, .btn [class*=" icon-"].icon-spin, .nav [class*=" icon-"].icon-spin {
+  display: inline-block;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003199}}
+.nav-tabs [class^="icon-"], .nav-pills [class^="icon-"], .nav-tabs [class*=" icon-"], .nav-pills [class*=" icon-"], .nav-tabs [class^="icon-"].icon-large, .nav-pills [class^="icon-"].icon-large, .nav-tabs [class*=" icon-"].icon-large, .nav-pills [class*=" icon-"].icon-large {
+  line-height: 0.9em;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003203}}
+.btn [class^="icon-"].pull-left.icon-2x, .btn [class*=" icon-"].pull-left.icon-2x, .btn [class^="icon-"].pull-right.icon-2x, .btn [class*=" icon-"].pull-right.icon-2x {
+  margin-top: 0.18em;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003205}}
 .btn [class^="icon-"].icon-spin.icon-large, .btn [class*=" icon-"].icon-spin.icon-large {
-  height: 0.75em;
+  line-height: 0.8em;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003208}}
+.btn.btn-small [class^="icon-"].pull-left.icon-2x, .btn.btn-small [class*=" icon-"].pull-left.icon-2x, .btn.btn-small [class^="icon-"].pull-right.icon-2x, .btn.btn-small [class*=" icon-"].pull-right.icon-2x {
+  margin-top: 0.25em;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003211}}
+.btn.btn-large [class^="icon-"], .btn.btn-large [class*=" icon-"] {
+  margin-top: 0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003213}}
+.btn.btn-large [class^="icon-"].pull-left.icon-2x, .btn.btn-large [class*=" icon-"].pull-left.icon-2x, .btn.btn-large [class^="icon-"].pull-right.icon-2x, .btn.btn-large [class*=" icon-"].pull-right.icon-2x {
+  margin-top: 0.05em;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003215}}
+.btn.btn-large [class^="icon-"].pull-left.icon-2x, .btn.btn-large [class*=" icon-"].pull-left.icon-2x {
+  margin-right: 0.2em;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003217}}
+.btn.btn-large [class^="icon-"].pull-right.icon-2x, .btn.btn-large [class*=" icon-"].pull-right.icon-2x {
+  margin-left: 0.2em;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003158}}
-.btn.btn-small [class^="icon-"].pull-left.icon-2x, .btn.btn-small [class^="icon-"].pull-right.icon-2x, .btn.btn-small [class*=" icon-"].pull-left.icon-2x, .btn.btn-small [class*=" icon-"].pull-right.icon-2x {
-  margin-top: 0.45em;
+/* EXTRAS
+ * -------------------------- */
+/* Stacked and layered icon */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003224}}
+.icon-stack {
+  position: relative;
+  display: inline-block;
+  width: 2em;
+  height: 2em;
+  line-height: 2em;
+  vertical-align: -35%;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003231}}
+.icon-stack [class^="icon-"], .icon-stack [class*=" icon-"] {
+  display: block;
+  text-align: center;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  font-size: 1em;
+  line-height: inherit;
+  *line-height: 2em;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003240}}
+.icon-stack .icon-stack-base {
+  font-size: 2em;
+  *line-height: 1em;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003164}}
-.btn.btn-large [class^="icon-"].pull-left.icon-2x, .btn.btn-large [class^="icon-"].pull-right.icon-2x, .btn.btn-large [class*=" icon-"].pull-left.icon-2x, .btn.btn-large [class*=" icon-"].pull-right.icon-2x {
-  margin-top: 0.2em;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003168}}
+/* Animated rotating icon */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003246}}
 .icon-spin {
   display: inline-block;
   -moz-animation: spin 2s infinite linear;
@@ -9567,1311 +9692,1952 @@ ul.icons li [class^="icon-"], ul.icons li [class*=" icon-"] {
 }
 
 @-moz-keyframes spin {
-  /* line 176, ../sass/bootstrap/addons/font-awesome-3.0.sass */
+  /* line 254, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
   0% {
     -moz-transform: rotate(0deg);
   }
 
-  /* line 178, ../sass/bootstrap/addons/font-awesome-3.0.sass */
+  /* line 256, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
   100% {
     -moz-transform: rotate(359deg);
   }
 }
 
 @-webkit-keyframes spin {
-  /* line 182, ../sass/bootstrap/addons/font-awesome-3.0.sass */
+  /* line 261, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
   0% {
     -webkit-transform: rotate(0deg);
   }
 
-  /* line 184, ../sass/bootstrap/addons/font-awesome-3.0.sass */
+  /* line 263, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
   100% {
     -webkit-transform: rotate(359deg);
   }
 }
 
 @-o-keyframes spin {
-  /* line 188, ../sass/bootstrap/addons/font-awesome-3.0.sass */
+  /* line 268, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
   0% {
     -o-transform: rotate(0deg);
   }
 
-  /* line 190, ../sass/bootstrap/addons/font-awesome-3.0.sass */
+  /* line 270, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
   100% {
     -o-transform: rotate(359deg);
   }
 }
 
 @-ms-keyframes spin {
-  /* line 194, ../sass/bootstrap/addons/font-awesome-3.0.sass */
+  /* line 275, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
   0% {
     -ms-transform: rotate(0deg);
   }
 
-  /* line 196, ../sass/bootstrap/addons/font-awesome-3.0.sass */
+  /* line 277, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
   100% {
     -ms-transform: rotate(359deg);
   }
 }
 
 @keyframes spin {
-  /* line 200, ../sass/bootstrap/addons/font-awesome-3.0.sass */
+  /* line 282, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
   0% {
     transform: rotate(0deg);
   }
 
-  /* line 202, ../sass/bootstrap/addons/font-awesome-3.0.sass */
+  /* line 284, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
   100% {
     transform: rotate(359deg);
   }
 }
 
-/*  Font Awesome uses the Unicode Private Use Area (PUA) to ensure screen
- *  readers do not read off random characters that represent icons */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003209}}
+/* Icon rotations and mirroring */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003290}}
+.icon-rotate-90:before {
+  -webkit-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  -o-transform: rotate(90deg);
+  transform: rotate(90deg);
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=1);
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003298}}
+.icon-rotate-180:before {
+  -webkit-transform: rotate(180deg);
+  -moz-transform: rotate(180deg);
+  -ms-transform: rotate(180deg);
+  -o-transform: rotate(180deg);
+  transform: rotate(180deg);
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003306}}
+.icon-rotate-270:before {
+  -webkit-transform: rotate(270deg);
+  -moz-transform: rotate(270deg);
+  -ms-transform: rotate(270deg);
+  -o-transform: rotate(270deg);
+  transform: rotate(270deg);
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003314}}
+.icon-flip-horizontal:before {
+  -webkit-transform: scale(-1, 1);
+  -moz-transform: scale(-1, 1);
+  -ms-transform: scale(-1, 1);
+  -o-transform: scale(-1, 1);
+  transform: scale(-1, 1);
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003321}}
+.icon-flip-vertical:before {
+  -webkit-transform: scale(1, -1);
+  -moz-transform: scale(1, -1);
+  -ms-transform: scale(1, -1);
+  -o-transform: scale(1, -1);
+  transform: scale(1, -1);
+}
+
+/* Font Awesome uses the Unicode Private Use Area (PUA) to ensure screen
+ * readers do not read off random characters that represent icons */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003331}}
 .icon-glass:before {
   content: "\f000";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003211}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003334}}
 .icon-music:before {
   content: "\f001";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003213}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003337}}
 .icon-search:before {
   content: "\f002";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003215}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003340}}
 .icon-envelope:before {
   content: "\f003";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003217}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003343}}
 .icon-heart:before {
   content: "\f004";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003219}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003346}}
 .icon-star:before {
   content: "\f005";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003221}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003349}}
 .icon-star-empty:before {
   content: "\f006";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003223}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003352}}
 .icon-user:before {
   content: "\f007";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003225}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003355}}
 .icon-film:before {
   content: "\f008";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003227}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003358}}
 .icon-th-large:before {
   content: "\f009";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003229}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003361}}
 .icon-th:before {
   content: "\f00a";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003231}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003364}}
 .icon-th-list:before {
   content: "\f00b";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003233}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003367}}
 .icon-ok:before {
   content: "\f00c";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003235}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003370}}
 .icon-remove:before {
   content: "\f00d";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003237}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003373}}
 .icon-zoom-in:before {
   content: "\f00e";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003239}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003376}}
 .icon-zoom-out:before {
   content: "\f010";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003241}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003379}}
 .icon-off:before {
   content: "\f011";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003243}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003382}}
 .icon-signal:before {
   content: "\f012";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003245}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003385}}
 .icon-cog:before {
   content: "\f013";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003247}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003388}}
 .icon-trash:before {
   content: "\f014";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003249}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003391}}
 .icon-home:before {
   content: "\f015";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003251}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003394}}
 .icon-file:before {
   content: "\f016";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003253}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003397}}
 .icon-time:before {
   content: "\f017";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003255}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003400}}
 .icon-road:before {
   content: "\f018";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003257}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003403}}
 .icon-download-alt:before {
   content: "\f019";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003259}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003406}}
 .icon-download:before {
   content: "\f01a";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003261}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003409}}
 .icon-upload:before {
   content: "\f01b";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003263}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003412}}
 .icon-inbox:before {
   content: "\f01c";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003265}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003415}}
 .icon-play-circle:before {
   content: "\f01d";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003267}}
-.icon-repeat:before {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003418}}
+.icon-repeat:before, .icon-rotate-right:before {
   content: "\f01e";
 }
 
-/* \f020 doesn't work in Safari. all shifted one down */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003270}}
+/* F020 doesn't work in Safari. all shifted one down */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003423}}
 .icon-refresh:before {
   content: "\f021";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003272}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003426}}
 .icon-list-alt:before {
   content: "\f022";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003274}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003429}}
 .icon-lock:before {
   content: "\f023";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003276}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003432}}
 .icon-flag:before {
   content: "\f024";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003278}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003435}}
 .icon-headphones:before {
   content: "\f025";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003280}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003438}}
 .icon-volume-off:before {
   content: "\f026";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003282}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003441}}
 .icon-volume-down:before {
   content: "\f027";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003284}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003444}}
 .icon-volume-up:before {
   content: "\f028";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003286}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003447}}
 .icon-qrcode:before {
   content: "\f029";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003288}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003450}}
 .icon-barcode:before {
   content: "\f02a";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003290}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003453}}
 .icon-tag:before {
   content: "\f02b";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003292}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003456}}
 .icon-tags:before {
   content: "\f02c";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003294}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003459}}
 .icon-book:before {
   content: "\f02d";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003296}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003462}}
 .icon-bookmark:before {
   content: "\f02e";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003298}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003465}}
 .icon-print:before {
   content: "\f02f";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003300}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003468}}
 .icon-camera:before {
   content: "\f030";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003302}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003471}}
 .icon-font:before {
   content: "\f031";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003304}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003474}}
 .icon-bold:before {
   content: "\f032";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003306}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003477}}
 .icon-italic:before {
   content: "\f033";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003308}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003480}}
 .icon-text-height:before {
   content: "\f034";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003310}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003483}}
 .icon-text-width:before {
   content: "\f035";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003312}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003486}}
 .icon-align-left:before {
   content: "\f036";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003314}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003489}}
 .icon-align-center:before {
   content: "\f037";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003316}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003492}}
 .icon-align-right:before {
   content: "\f038";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003318}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003495}}
 .icon-align-justify:before {
   content: "\f039";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003320}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003498}}
 .icon-list:before {
   content: "\f03a";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003322}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003501}}
 .icon-indent-left:before {
   content: "\f03b";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003324}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003504}}
 .icon-indent-right:before {
   content: "\f03c";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003326}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003507}}
 .icon-facetime-video:before {
   content: "\f03d";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003328}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003510}}
 .icon-picture:before {
   content: "\f03e";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003330}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003513}}
 .icon-pencil:before {
   content: "\f040";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003332}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003516}}
 .icon-map-marker:before {
   content: "\f041";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003334}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003519}}
 .icon-adjust:before {
   content: "\f042";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003336}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003522}}
 .icon-tint:before {
   content: "\f043";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003338}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003525}}
 .icon-edit:before {
   content: "\f044";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003340}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003528}}
 .icon-share:before {
   content: "\f045";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003342}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003531}}
 .icon-check:before {
   content: "\f046";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003344}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003534}}
 .icon-move:before {
   content: "\f047";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003346}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003537}}
 .icon-step-backward:before {
   content: "\f048";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003348}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003540}}
 .icon-fast-backward:before {
   content: "\f049";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003350}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003543}}
 .icon-backward:before {
   content: "\f04a";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003352}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003546}}
 .icon-play:before {
   content: "\f04b";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003354}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003549}}
 .icon-pause:before {
   content: "\f04c";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003356}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003552}}
 .icon-stop:before {
   content: "\f04d";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003358}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003555}}
 .icon-forward:before {
   content: "\f04e";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003360}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003558}}
 .icon-fast-forward:before {
   content: "\f050";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003362}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003561}}
 .icon-step-forward:before {
   content: "\f051";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003364}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003564}}
 .icon-eject:before {
   content: "\f052";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003366}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003567}}
 .icon-chevron-left:before {
   content: "\f053";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003368}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003570}}
 .icon-chevron-right:before {
   content: "\f054";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003370}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003573}}
 .icon-plus-sign:before {
   content: "\f055";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003372}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003576}}
 .icon-minus-sign:before {
   content: "\f056";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003374}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003579}}
 .icon-remove-sign:before {
   content: "\f057";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003376}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003582}}
 .icon-ok-sign:before {
   content: "\f058";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003378}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003585}}
 .icon-question-sign:before {
   content: "\f059";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003380}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003588}}
 .icon-info-sign:before {
   content: "\f05a";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003382}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003591}}
 .icon-screenshot:before {
   content: "\f05b";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003384}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003594}}
 .icon-remove-circle:before {
   content: "\f05c";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003386}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003597}}
 .icon-ok-circle:before {
   content: "\f05d";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003388}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003600}}
 .icon-ban-circle:before {
   content: "\f05e";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003390}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003603}}
 .icon-arrow-left:before {
   content: "\f060";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003392}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003606}}
 .icon-arrow-right:before {
   content: "\f061";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003394}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003609}}
 .icon-arrow-up:before {
   content: "\f062";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003396}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003612}}
 .icon-arrow-down:before {
   content: "\f063";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003398}}
-.icon-share-alt:before {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003615}}
+.icon-share-alt:before, .icon-mail-forward:before {
   content: "\f064";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003400}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003618}}
 .icon-resize-full:before {
   content: "\f065";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003402}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003621}}
 .icon-resize-small:before {
   content: "\f066";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003404}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003624}}
 .icon-plus:before {
   content: "\f067";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003406}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003627}}
 .icon-minus:before {
   content: "\f068";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003408}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003630}}
 .icon-asterisk:before {
   content: "\f069";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003410}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003633}}
 .icon-exclamation-sign:before {
   content: "\f06a";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003412}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003636}}
 .icon-gift:before {
   content: "\f06b";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003414}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003639}}
 .icon-leaf:before {
   content: "\f06c";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003416}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003642}}
 .icon-fire:before {
   content: "\f06d";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003418}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003645}}
 .icon-eye-open:before {
   content: "\f06e";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003420}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003648}}
 .icon-eye-close:before {
   content: "\f070";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003422}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003651}}
 .icon-warning-sign:before {
   content: "\f071";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003424}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003654}}
 .icon-plane:before {
   content: "\f072";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003426}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003657}}
 .icon-calendar:before {
   content: "\f073";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003428}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003660}}
 .icon-random:before {
   content: "\f074";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003430}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003663}}
 .icon-comment:before {
   content: "\f075";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003432}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003666}}
 .icon-magnet:before {
   content: "\f076";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003434}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003669}}
 .icon-chevron-up:before {
   content: "\f077";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003436}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003672}}
 .icon-chevron-down:before {
   content: "\f078";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003438}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003675}}
 .icon-retweet:before {
   content: "\f079";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003440}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003678}}
 .icon-shopping-cart:before {
   content: "\f07a";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003442}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003681}}
 .icon-folder-close:before {
   content: "\f07b";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003444}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003684}}
 .icon-folder-open:before {
   content: "\f07c";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003446}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003687}}
 .icon-resize-vertical:before {
   content: "\f07d";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003448}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003690}}
 .icon-resize-horizontal:before {
   content: "\f07e";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003450}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003693}}
 .icon-bar-chart:before {
   content: "\f080";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003452}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003696}}
 .icon-twitter-sign:before {
   content: "\f081";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003454}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003699}}
 .icon-facebook-sign:before {
   content: "\f082";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003456}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003702}}
 .icon-camera-retro:before {
   content: "\f083";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003458}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003705}}
 .icon-key:before {
   content: "\f084";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003460}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003708}}
 .icon-cogs:before {
   content: "\f085";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003462}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003711}}
 .icon-comments:before {
   content: "\f086";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003464}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003714}}
 .icon-thumbs-up:before {
   content: "\f087";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003466}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003717}}
 .icon-thumbs-down:before {
   content: "\f088";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003468}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003720}}
 .icon-star-half:before {
   content: "\f089";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003470}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003723}}
 .icon-heart-empty:before {
   content: "\f08a";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003472}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003726}}
 .icon-signout:before {
   content: "\f08b";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003474}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003729}}
 .icon-linkedin-sign:before {
   content: "\f08c";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003476}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003732}}
 .icon-pushpin:before {
   content: "\f08d";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003478}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003735}}
 .icon-external-link:before {
   content: "\f08e";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003480}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003738}}
 .icon-signin:before {
   content: "\f090";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003482}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003741}}
 .icon-trophy:before {
   content: "\f091";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003484}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003744}}
 .icon-github-sign:before {
   content: "\f092";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003486}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003747}}
 .icon-upload-alt:before {
   content: "\f093";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003488}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003750}}
 .icon-lemon:before {
   content: "\f094";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003490}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003753}}
 .icon-phone:before {
   content: "\f095";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003492}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003756}}
 .icon-check-empty:before {
   content: "\f096";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003494}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003759}}
 .icon-bookmark-empty:before {
   content: "\f097";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003496}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003762}}
 .icon-phone-sign:before {
   content: "\f098";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003498}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003765}}
 .icon-twitter:before {
   content: "\f099";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003500}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003768}}
 .icon-facebook:before {
   content: "\f09a";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003502}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003771}}
 .icon-github:before {
   content: "\f09b";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003504}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003774}}
 .icon-unlock:before {
   content: "\f09c";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003506}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003777}}
 .icon-credit-card:before {
   content: "\f09d";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003508}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003780}}
 .icon-rss:before {
   content: "\f09e";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003510}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003783}}
 .icon-hdd:before {
   content: "\f0a0";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003512}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003786}}
 .icon-bullhorn:before {
   content: "\f0a1";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003514}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003789}}
 .icon-bell:before {
   content: "\f0a2";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003516}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003792}}
 .icon-certificate:before {
   content: "\f0a3";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003518}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003795}}
 .icon-hand-right:before {
   content: "\f0a4";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003520}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003798}}
 .icon-hand-left:before {
   content: "\f0a5";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003522}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003801}}
 .icon-hand-up:before {
   content: "\f0a6";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003524}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003804}}
 .icon-hand-down:before {
   content: "\f0a7";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003526}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003807}}
 .icon-circle-arrow-left:before {
   content: "\f0a8";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003528}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003810}}
 .icon-circle-arrow-right:before {
   content: "\f0a9";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003530}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003813}}
 .icon-circle-arrow-up:before {
   content: "\f0aa";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003532}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003816}}
 .icon-circle-arrow-down:before {
   content: "\f0ab";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003534}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003819}}
 .icon-globe:before {
   content: "\f0ac";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003536}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003822}}
 .icon-wrench:before {
   content: "\f0ad";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003538}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003825}}
 .icon-tasks:before {
   content: "\f0ae";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003540}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003828}}
 .icon-filter:before {
   content: "\f0b0";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003542}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003831}}
 .icon-briefcase:before {
   content: "\f0b1";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003544}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003834}}
 .icon-fullscreen:before {
   content: "\f0b2";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003546}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003837}}
 .icon-group:before {
   content: "\f0c0";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003548}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003840}}
 .icon-link:before {
   content: "\f0c1";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003550}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003843}}
 .icon-cloud:before {
   content: "\f0c2";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003552}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003846}}
 .icon-beaker:before {
   content: "\f0c3";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003554}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003849}}
 .icon-cut:before {
   content: "\f0c4";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003556}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003852}}
 .icon-copy:before {
   content: "\f0c5";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003558}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003855}}
 .icon-paper-clip:before {
   content: "\f0c6";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003560}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003858}}
 .icon-save:before {
   content: "\f0c7";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003562}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003861}}
 .icon-sign-blank:before {
   content: "\f0c8";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003564}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003864}}
 .icon-reorder:before {
   content: "\f0c9";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003566}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003867}}
 .icon-list-ul:before {
   content: "\f0ca";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003568}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003870}}
 .icon-list-ol:before {
   content: "\f0cb";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003570}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003873}}
 .icon-strikethrough:before {
   content: "\f0cc";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003572}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003876}}
 .icon-underline:before {
   content: "\f0cd";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003574}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003879}}
 .icon-table:before {
   content: "\f0ce";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003576}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003882}}
 .icon-magic:before {
   content: "\f0d0";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003578}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003885}}
 .icon-truck:before {
   content: "\f0d1";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003580}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003888}}
 .icon-pinterest:before {
   content: "\f0d2";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003582}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003891}}
 .icon-pinterest-sign:before {
   content: "\f0d3";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003584}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003894}}
 .icon-google-plus-sign:before {
   content: "\f0d4";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003586}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003897}}
 .icon-google-plus:before {
   content: "\f0d5";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003588}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003900}}
 .icon-money:before {
   content: "\f0d6";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003590}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003903}}
 .icon-caret-down:before {
   content: "\f0d7";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003592}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003906}}
 .icon-caret-up:before {
   content: "\f0d8";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003594}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003909}}
 .icon-caret-left:before {
   content: "\f0d9";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003596}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003912}}
 .icon-caret-right:before {
   content: "\f0da";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003598}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003915}}
 .icon-columns:before {
   content: "\f0db";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003600}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003918}}
 .icon-sort:before {
   content: "\f0dc";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003602}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003921}}
 .icon-sort-down:before {
   content: "\f0dd";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003604}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003924}}
 .icon-sort-up:before {
   content: "\f0de";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003606}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003927}}
 .icon-envelope-alt:before {
   content: "\f0e0";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003608}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003930}}
 .icon-linkedin:before {
   content: "\f0e1";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003610}}
-.icon-undo:before {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003933}}
+.icon-undo:before, .icon-rotate-left:before {
   content: "\f0e2";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003612}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003936}}
 .icon-legal:before {
   content: "\f0e3";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003614}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003939}}
 .icon-dashboard:before {
   content: "\f0e4";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003616}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003942}}
 .icon-comment-alt:before {
   content: "\f0e5";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003618}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003945}}
 .icon-comments-alt:before {
   content: "\f0e6";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003620}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003948}}
 .icon-bolt:before {
   content: "\f0e7";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003622}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003951}}
 .icon-sitemap:before {
   content: "\f0e8";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003624}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003954}}
 .icon-umbrella:before {
   content: "\f0e9";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003626}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003957}}
 .icon-paste:before {
   content: "\f0ea";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003628}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003960}}
 .icon-lightbulb:before {
   content: "\f0eb";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003630}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003963}}
 .icon-exchange:before {
   content: "\f0ec";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003632}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003966}}
 .icon-cloud-download:before {
   content: "\f0ed";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003634}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003969}}
 .icon-cloud-upload:before {
   content: "\f0ee";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003636}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003972}}
 .icon-user-md:before {
   content: "\f0f0";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003638}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003975}}
 .icon-stethoscope:before {
   content: "\f0f1";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003640}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003978}}
 .icon-suitcase:before {
   content: "\f0f2";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003642}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003981}}
 .icon-bell-alt:before {
   content: "\f0f3";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003644}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003984}}
 .icon-coffee:before {
   content: "\f0f4";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003646}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003987}}
 .icon-food:before {
   content: "\f0f5";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003648}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003990}}
 .icon-file-alt:before {
   content: "\f0f6";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003650}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003993}}
 .icon-building:before {
   content: "\f0f7";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003652}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003996}}
 .icon-hospital:before {
   content: "\f0f8";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003654}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\00003999}}
 .icon-ambulance:before {
   content: "\f0f9";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003656}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031002}}
 .icon-medkit:before {
   content: "\f0fa";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003658}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031005}}
 .icon-fighter-jet:before {
   content: "\f0fb";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003660}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031008}}
 .icon-beer:before {
   content: "\f0fc";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003662}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031011}}
 .icon-h-sign:before {
   content: "\f0fd";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003664}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031014}}
 .icon-plus-sign-alt:before {
   content: "\f0fe";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003666}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031017}}
 .icon-double-angle-left:before {
   content: "\f100";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003668}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031020}}
 .icon-double-angle-right:before {
   content: "\f101";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003670}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031023}}
 .icon-double-angle-up:before {
   content: "\f102";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003672}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031026}}
 .icon-double-angle-down:before {
   content: "\f103";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003674}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031029}}
 .icon-angle-left:before {
   content: "\f104";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003676}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031032}}
 .icon-angle-right:before {
   content: "\f105";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003678}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031035}}
 .icon-angle-up:before {
   content: "\f106";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003680}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031038}}
 .icon-angle-down:before {
   content: "\f107";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003682}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031041}}
 .icon-desktop:before {
   content: "\f108";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003684}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031044}}
 .icon-laptop:before {
   content: "\f109";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003686}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031047}}
 .icon-tablet:before {
   content: "\f10a";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003688}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031050}}
 .icon-mobile-phone:before {
   content: "\f10b";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003690}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031053}}
 .icon-circle-blank:before {
   content: "\f10c";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003692}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031056}}
 .icon-quote-left:before {
   content: "\f10d";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003694}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031059}}
 .icon-quote-right:before {
   content: "\f10e";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003696}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031062}}
 .icon-spinner:before {
   content: "\f110";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003698}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031065}}
 .icon-circle:before {
   content: "\f111";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003700}}
-.icon-reply:before {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031068}}
+.icon-reply:before, .icon-mail-reply:before {
   content: "\f112";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003702}}
-.icon-github-alt:before {
-  content: "\f113";
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003704}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031071}}
 .icon-folder-close-alt:before {
   content: "\f114";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/font-awesome-3\.0\.sass}line{font-family:\00003706}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031074}}
 .icon-folder-open-alt:before {
   content: "\f115";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031077}}
+.icon-expand-alt:before {
+  content: "\f116";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031080}}
+.icon-collapse-alt:before {
+  content: "\f117";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031083}}
+.icon-smile:before {
+  content: "\f118";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031086}}
+.icon-frown:before {
+  content: "\f119";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031089}}
+.icon-meh:before {
+  content: "\f11a";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031092}}
+.icon-gamepad:before {
+  content: "\f11b";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031095}}
+.icon-keyboard:before {
+  content: "\f11c";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031098}}
+.icon-flag-alt:before {
+  content: "\f11d";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031101}}
+.icon-flag-checkered:before {
+  content: "\f11e";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031104}}
+.icon-terminal:before {
+  content: "\f120";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031107}}
+.icon-code:before {
+  content: "\f121";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031110}}
+.icon-reply-all:before, .icon-mail-reply-all:before {
+  content: "\f122";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031113}}
+.icon-star-half-full:before, .icon-star-half-empty:before {
+  content: "\f123";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031116}}
+.icon-location-arrow:before {
+  content: "\f124";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031119}}
+.icon-crop:before {
+  content: "\f125";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031122}}
+.icon-code-fork:before {
+  content: "\f126";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031125}}
+.icon-unlink:before {
+  content: "\f127";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031128}}
+.icon-question:before {
+  content: "\f128";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031131}}
+.icon-info:before {
+  content: "\f129";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031134}}
+.icon-exclamation:before {
+  content: "\f12a";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031137}}
+.icon-superscript:before {
+  content: "\f12b";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031140}}
+.icon-subscript:before {
+  content: "\f12c";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031143}}
+.icon-eraser:before {
+  content: "\f12d";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031146}}
+.icon-puzzle-piece:before {
+  content: "\f12e";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031149}}
+.icon-microphone:before {
+  content: "\f130";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031152}}
+.icon-microphone-off:before {
+  content: "\f131";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031155}}
+.icon-shield:before {
+  content: "\f132";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031158}}
+.icon-calendar-empty:before {
+  content: "\f133";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031161}}
+.icon-fire-extinguisher:before {
+  content: "\f134";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031164}}
+.icon-rocket:before {
+  content: "\f135";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031167}}
+.icon-maxcdn:before {
+  content: "\f136";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031170}}
+.icon-chevron-sign-left:before {
+  content: "\f137";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031173}}
+.icon-chevron-sign-right:before {
+  content: "\f138";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031176}}
+.icon-chevron-sign-up:before {
+  content: "\f139";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031179}}
+.icon-chevron-sign-down:before {
+  content: "\f13a";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031182}}
+.icon-html5:before {
+  content: "\f13b";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031185}}
+.icon-css3:before {
+  content: "\f13c";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031188}}
+.icon-anchor:before {
+  content: "\f13d";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031191}}
+.icon-unlock-alt:before {
+  content: "\f13e";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031194}}
+.icon-bullseye:before {
+  content: "\f140";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031197}}
+.icon-ellipsis-horizontal:before {
+  content: "\f141";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031200}}
+.icon-ellipsis-vertical:before {
+  content: "\f142";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031203}}
+.icon-rss-sign:before {
+  content: "\f143";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031206}}
+.icon-play-sign:before {
+  content: "\f144";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031209}}
+.icon-ticket:before {
+  content: "\f145";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031212}}
+.icon-minus-sign-alt:before {
+  content: "\f146";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031215}}
+.icon-check-minus:before {
+  content: "\f147";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031218}}
+.icon-level-up:before {
+  content: "\f148";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031221}}
+.icon-level-down:before {
+  content: "\f149";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031224}}
+.icon-check-sign:before {
+  content: "\f14a";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031227}}
+.icon-edit-sign:before {
+  content: "\f14b";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031230}}
+.icon-external-link-sign:before {
+  content: "\f14c";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_font-awesome-3\.1\.1\.sass}line{font-family:\000031233}}
+.icon-share-sign:before {
+  content: "\f14d";
+}
+
+/* ============================================================
+ * bootstrapSwitch v1.2 by Larentis Mattia @spiritualGuru
+ * http://www.larentis.eu/switch/
+ * ============================================================
+ * Licensed under the Apache License, Version 2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * ============================================================ */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\000039}}
+.has-switch {
+  display: inline-block;
+  cursor: pointer;
+  border-radius: 0px;
+  border: 1px solid;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  position: relative;
+  text-align: left;
+  overflow: hidden;
+  line-height: 8px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+  min-width: 100px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000325}}
+.has-switch.switch-mini {
+  min-width: 72px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000327}}
+.has-switch.switch-small {
+  min-width: 80px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000329}}
+.has-switch.switch-large {
+  min-width: 120px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000331}}
+.has-switch.deactivate {
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+  cursor: default !important;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000335}}
+.has-switch.deactivate label, .has-switch.deactivate span {
+  cursor: default !important;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000337}}
+.has-switch > div {
+  display: inline-block;
+  width: 150%;
+  position: relative;
+  top: 0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000342}}
+.has-switch > div.switch-animate {
+  -webkit-transition: left 0.1s;
+  -moz-transition: left 0.2s;
+  -o-transition: left 0.3s;
+  transition: left 0.3s;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000347}}
+.has-switch > div.switch-off {
+  left: -50%;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000349}}
+.has-switch > div.switch-on {
+  left: 0%;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000351}}
+.has-switch input[type=checkbox] {
+  display: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000353}}
+.has-switch span, .has-switch label {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+  height: 100%;
+  padding-bottom: 4px;
+  padding-top: 4px;
+  font-size: 14px;
+  line-height: 20px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000365}}
+.has-switch span.switch-mini, .has-switch label.switch-mini {
+  padding-bottom: 4px;
+  padding-top: 4px;
+  font-size: 10px;
+  line-height: 9px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000370}}
+.has-switch span.switch-small, .has-switch label.switch-small {
+  padding-bottom: 3px;
+  padding-top: 3px;
+  font-size: 12px;
+  line-height: 18px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000375}}
+.has-switch span.switch-large {
+  padding-bottom: 9px;
+  padding-top: 9px;
+  font-size: 16px;
+  line-height: normal;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000380}}
+.has-switch label {
+  text-align: center;
+  margin-top: -1px;
+  margin-bottom: -1px;
+  z-index: 100;
+  width: 34%;
+  border-left: 1px solid #cccccc;
+  border-right: 1px solid #cccccc;
+  color: white;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+  background-color: whitesmoke;
+  background-image: -moz-linear-gradient(top, white, #e6e6e6);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(white), to(#e6e6e6));
+  background-image: -webkit-linear-gradient(top, white, #e6e6e6);
+  background-image: -o-linear-gradient(top, white, #e6e6e6);
+  background-image: linear, to bottom, white, #e6e6e6;
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffe6e6e6', GradientType=0);
+  border-color: #e6e6e6 #e6e6e6 #bfbfbf;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  *background-color: #e6e6e6;
+  /* Darken IE7 buttons by default so they stand out more given they won't have borders */
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\0000381}}
+.has-switch label.switch-large {
+  padding-bottom: 9px;
+  padding-top: 9px;
+  font-size: 16px;
+  line-height: normal;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003108}}
+.has-switch label:hover, .has-switch label:focus, .has-switch label:active, .has-switch label.active, .has-switch label.disabled, .has-switch label[disabled] {
+  color: white;
+  background-color: #e6e6e6;
+  *background-color: #d9d9d9;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003112}}
+.has-switch label:active, .has-switch label.active {
+  background-color: #cccccc \9;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003114}}
+.has-switch label i {
+  color: black;
+  text-shadow: 0 1px 0 white;
+  line-height: 18px;
+  pointer-events: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003119}}
+.has-switch span {
+  text-align: center;
+  z-index: 1;
+  width: 33%;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003131}}
+.has-switch span.switch-right {
+  color: #333333;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+  background-color: #f0f0f0;
+  background-image: -moz-linear-gradient(top, #e6e6e6, white);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#e6e6e6), to(white));
+  background-image: -webkit-linear-gradient(top, #e6e6e6, white);
+  background-image: -o-linear-gradient(top, #e6e6e6, white);
+  background-image: linear, to bottom, #e6e6e6, white;
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffe6e6e6', endColorstr='#ffffffff', GradientType=0);
+  border-color: white white #d9d9d9;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  *background-color: white;
+  /* Darken IE7 buttons by default so they stand out more given they won't have borders */
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003147}}
+.has-switch span.switch-right:hover, .has-switch span.switch-right:focus, .has-switch span.switch-right:active, .has-switch span.switch-right.active, .has-switch span.switch-right.disabled, .has-switch span.switch-right[disabled] {
+  color: #333333;
+  background-color: white;
+  *background-color: #f2f2f2;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003151}}
+.has-switch span.switch-right:active, .has-switch span.switch-right.active {
+  background-color: #e6e6e6 \9;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003153}}
+.has-switch span.switch-primary, .has-switch span.switch-left {
+  color: white;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+  background-color: #005fcc;
+  background-image: -moz-linear-gradient(top, #0044cc, #0088cc);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#0044cc), to(#0088cc));
+  background-image: -webkit-linear-gradient(top, #0044cc, #0088cc);
+  background-image: -o-linear-gradient(top, #0044cc, #0088cc);
+  background-image: linear, to bottom, #0044cc, #0088cc;
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0044cc', endColorstr='#ff0088cc', GradientType=0);
+  border-color: #0088cc #0088cc #005580;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  *background-color: #0088cc;
+  /* Darken IE7 buttons by default so they stand out more given they won't have borders */
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003169}}
+.has-switch span.switch-primary:hover, .has-switch span.switch-left:hover, .has-switch span.switch-primary:focus, .has-switch span.switch-left:focus, .has-switch span.switch-primary:active, .has-switch span.switch-left:active, .has-switch span.switch-primary.active, .has-switch span.switch-left.active, .has-switch span.switch-primary.disabled, .has-switch span.switch-left.disabled, .has-switch span.switch-primary[disabled], .has-switch span.switch-left[disabled] {
+  color: white;
+  background-color: #0088cc;
+  *background-color: #0077b3;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003173}}
+.has-switch span.switch-primary:active, .has-switch span.switch-left:active, .has-switch span.switch-primary.active, .has-switch span.switch-left.active {
+  background-color: #006699 \9;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003175}}
+.has-switch span.switch-info {
+  color: white;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+  background-color: #41a7c5;
+  background-image: -moz-linear-gradient(top, #2f96b4, #5bc0de);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#2f96b4), to(#5bc0de));
+  background-image: -webkit-linear-gradient(top, #2f96b4, #5bc0de);
+  background-image: -o-linear-gradient(top, #2f96b4, #5bc0de);
+  background-image: linear, to bottom, #2f96b4, #5bc0de;
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff2f96b4', endColorstr='#ff5bc0de', GradientType=0);
+  border-color: #5bc0de #5bc0de #28a1c5;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  *background-color: #5bc0de;
+  /* Darken IE7 buttons by default so they stand out more given they won't have borders */
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003191}}
+.has-switch span.switch-info:hover, .has-switch span.switch-info:focus, .has-switch span.switch-info:active, .has-switch span.switch-info.active, .has-switch span.switch-info.disabled, .has-switch span.switch-info[disabled] {
+  color: white;
+  background-color: #5bc0de;
+  *background-color: #46b8da;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003195}}
+.has-switch span.switch-info:active, .has-switch span.switch-info.active {
+  background-color: #31b0d5 \9;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003197}}
+.has-switch span.switch-success {
+  color: white;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+  background-color: #58b058;
+  background-image: -moz-linear-gradient(top, #51a351, #62c462);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#51a351), to(#62c462));
+  background-image: -webkit-linear-gradient(top, #51a351, #62c462);
+  background-image: -o-linear-gradient(top, #51a351, #62c462);
+  background-image: linear, to bottom, #51a351, #62c462;
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff51a351', endColorstr='#ff62c462', GradientType=0);
+  border-color: #62c462 #62c462 #3b9e3b;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  *background-color: #62c462;
+  /* Darken IE7 buttons by default so they stand out more given they won't have borders */
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003213}}
+.has-switch span.switch-success:hover, .has-switch span.switch-success:focus, .has-switch span.switch-success:active, .has-switch span.switch-success.active, .has-switch span.switch-success.disabled, .has-switch span.switch-success[disabled] {
+  color: white;
+  background-color: #62c462;
+  *background-color: #4fbd4f;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003217}}
+.has-switch span.switch-success:active, .has-switch span.switch-success.active {
+  background-color: #42b142 \9;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003219}}
+.has-switch span.switch-warning {
+  color: white;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+  background-color: #f9a123;
+  background-image: -moz-linear-gradient(top, #f89406, #fbb450);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f89406), to(#fbb450));
+  background-image: -webkit-linear-gradient(top, #f89406, #fbb450);
+  background-image: -o-linear-gradient(top, #f89406, #fbb450);
+  background-image: linear, to bottom, #f89406, #fbb450;
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff89406', endColorstr='#fffbb450', GradientType=0);
+  border-color: #fbb450 #fbb450 #f89406;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  *background-color: #fbb450;
+  /* Darken IE7 buttons by default so they stand out more given they won't have borders */
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003235}}
+.has-switch span.switch-warning:hover, .has-switch span.switch-warning:focus, .has-switch span.switch-warning:active, .has-switch span.switch-warning.active, .has-switch span.switch-warning.disabled, .has-switch span.switch-warning[disabled] {
+  color: white;
+  background-color: #fbb450;
+  *background-color: #faa937;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003239}}
+.has-switch span.switch-warning:active, .has-switch span.switch-warning.active {
+  background-color: #fa9f1e \9;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003241}}
+.has-switch span.switch-danger {
+  color: white;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+  background-color: #d14641;
+  background-image: -moz-linear-gradient(top, #bd362f, #ee5f5b);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#bd362f), to(#ee5f5b));
+  background-image: -webkit-linear-gradient(top, #bd362f, #ee5f5b);
+  background-image: -o-linear-gradient(top, #bd362f, #ee5f5b);
+  background-image: linear, to bottom, #bd362f, #ee5f5b;
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffbd362f', endColorstr='#ffee5f5b', GradientType=0);
+  border-color: #ee5f5b #ee5f5b #e51d18;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  *background-color: #ee5f5b;
+  /* Darken IE7 buttons by default so they stand out more given they won't have borders */
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003257}}
+.has-switch span.switch-danger:hover, .has-switch span.switch-danger:focus, .has-switch span.switch-danger:active, .has-switch span.switch-danger.active, .has-switch span.switch-danger.disabled, .has-switch span.switch-danger[disabled] {
+  color: white;
+  background-color: #ee5f5b;
+  *background-color: #ec4844;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/addons\/_switch\.sass}line{font-family:\00003261}}
+.has-switch span.switch-danger:active, .has-switch span.switch-danger.active {
+  background-color: #e9322d \9;
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/bootstrap\/_dropdowns\.sass}line{font-family:\000035}}
@@ -14111,9 +14877,9 @@ div.shortcutter div.item.hover .col-left i {
 .qtip-default {
   border-width: 1px;
   border-style: solid;
-  border-color: #f1d031;
-  background-color: #ffffa3;
-  color: #555555;
+  border-color: #333333;
+  background-color: #333333;
+  color: white;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/util\/_dialog\.sass}line{font-family:\00003108}}
 .qtip-default .qtip-titlebar {

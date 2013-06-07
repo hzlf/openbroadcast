@@ -43,9 +43,10 @@ class ProfileFilter(django_filters.FilterSet):
     country = CharListFilter(label="Country")
     expertise = CharListFilter(label="Expertise")
     user__groups = CharListFilter(label="Access level")
+    mentor__username = CharListFilter(label="Mentor")
     class Meta:
         model = Profile
-        fields = ['country', 'expertise__name', 'user__groups',]
+        fields = ['country', 'expertise__name', 'user__groups', 'mentor__username',]
     
     @property
     def filterlist(self):

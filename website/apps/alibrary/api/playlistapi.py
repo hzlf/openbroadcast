@@ -18,6 +18,8 @@ from alibrary.models import Playlist, PlaylistMedia, Media, PlaylistItemPlaylist
 from abcast.models import Jingle
 from abcast.api import JingleResource
 
+THUMBNAIL_OPT = dict(size=(70, 70), crop=True, bw=False, quality=80)
+
 class PlaylistItemResource(ModelResource):
 
     #media = fields.ToOneField('alibrary.api.MediaResource', 'media', null=True, full=True)
@@ -101,9 +103,10 @@ class SimplePlaylistResource(ModelResource):
             'type': ['exact','in'],
         }
 
+    """
     def apply_authorization_limits(self, request, object_list):
         return object_list.filter(user=request.user)
-
+    """
     def dehydrate(self, bundle):
         bundle.data['item_count'] = bundle.obj.items.count();
         return bundle
@@ -168,9 +171,10 @@ class PlaylistResource(ModelResource):
         
         
 
+    """
     def apply_authorization_limits(self, request, object_list):
         return object_list.filter(user=request.user)
-        
+    """ 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle = super(PlaylistResource, self).obj_create(bundle, request, user=request.user)
         
@@ -235,6 +239,7 @@ class PlaylistResource(ModelResource):
             # collecting
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/collect%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('collect_specific'), name="playlist_api_collect_specific"),
             url(r"^(?P<resource_name>%s)/collect%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('collect'), name="playlist_api_collect"),
+            url(r"^(?P<resource_name>%s)/autocomplete-name%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('autocomplete'), name="alibrary-playlist_api-autocomplete"),
 
         ]
 
@@ -337,6 +342,88 @@ class PlaylistResource(ModelResource):
 
         self.log_throttled_access(request)
         return self.create_response(request, bundle)
+    
+
+        
+    def autocomplete(self, request, **kwargs):
+        
+        self.method_check(request, allowed=['get'])
+        self.throttle_check(request)
+        
+        q = request.GET.get('q', None)
+        result = []
+        object_list = []
+        objects = []
+        object_count = 0
+        
+        qs = None
+        
+        if q and len(q) > 1:
+            
+            #qs = Playlist.objects.filter(name__istartswith=q)
+            qs = Playlist.objects.filter(name__icontains=q)
+        
+
+            object_list = qs.distinct()[0:20]
+            object_count = qs.distinct().count()
+
+            for result in object_list:
+                bundle = self.build_bundle(obj=result, request=request)
+                bundle = self.autocomplete_dehydrate(bundle, q)
+                objects.append(bundle)
+                
+    
+        data = {
+            'meta': {
+                     'query': q,
+                     'total_count': object_count
+                     },
+            'objects': objects,
+        }
+
+            
+
+        self.log_throttled_access(request)
+        return self.create_response(request, data)
+    
+    
+
+    def autocomplete_dehydrate(self, bundle, q):
+        
+       
+        bundle.data['name'] = bundle.obj.name
+        bundle.data['id'] = bundle.obj.pk
+        bundle.data['target_duration'] = bundle.obj.target_duration
+        bundle.data['tags'] = bundle.obj.d_tags
+        
+        bundle.data['ct'] = 'playlist'
+        bundle.data['get_absolute_url'] = bundle.obj.get_absolute_url()
+        bundle.data['resource_uri'] = bundle.obj.get_api_url()
+        bundle.data['main_image'] = None
+        
+        try:
+            bundle.data['user'] = bundle.obj.user.get_full_name()
+        except:
+            bundle.data['user'] = bundle.obj.user.username
+            
+        try:
+            opt = THUMBNAIL_OPT
+            main_image = get_thumbnailer(bundle.obj.main_image).get_thumbnail(opt)
+            bundle.data['main_image'] = main_image.url
+        except:
+            pass
+        
+        media_list = []
+        try:
+            for item in bundle.obj.items.all():
+                media_list.append({'name': item.content_object.name, 'artist': item.content_object.artist.name})
+
+        except Exception, e:
+            print e
+        bundle.data['media'] = media_list
+        
+
+        return bundle
 
 
     

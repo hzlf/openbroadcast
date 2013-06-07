@@ -1,0 +1,52 @@
+<section class="title">
+	<h3>{{ object.name }} <small class="pull-right">{{ object.type_display }}</small></h3>
+	<ul class="unstyled">
+		{% if object.user %}
+		<li>
+			<i class="icon-user"></i> {{ object.user.username }}
+		</li>
+		{% endif %}
+		<li>
+			<i class="icon-time"></i> {{ object.time_start|format_datetime('time') }} - {{ object.time_end|format_datetime('time') }} | {{ object.time_start|format_datetime('date') }}
+		</li>
+	</ul>
+</section>
+
+<section class="description">
+
+	{{ object.content_object.description }}
+
+	<!--
+	<a href="{{ object.content_object.absolute_url }}" class="pull-left">> Read more</a>
+	-->
+
+	<ul class="unstyled">
+		<li><a href="{{ object.absolute_url }}">&gt; Emission details</a></li>
+		<li><a href="{{ object.content_object.absolute_url }}">&gt; Content details</a></li>
+	</ul>
+
+</section>
+
+<section class="form">
+
+
+  <fieldset>
+    <label class="checkbox">
+      <input type="checkbox" class="edit-lock" {% if object.locked == 1 %}checked="checked"{% endif %}> Lock editing
+    </label>
+  </fieldset>
+
+	<div class="btn-toolbar">
+		<div class="btn-group pull-right">
+
+			<a data-action="cancel" class="btn btn-mini pull-right">Cancel</a>
+			
+			{% if not object.locked %}
+			<a data-action="delete" class="btn btn-mini pull-right">Delete</a>
+			{% endif %}
+			<a data-action="save" class="btn btn-primary btn-mini pull-right">Save</a>
+		</div>
+	</div>
+
+
+</section>

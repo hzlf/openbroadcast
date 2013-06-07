@@ -227,6 +227,17 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
     def get_edit_url(self):
         return ('alibrary-playlist-edit', [self.pk])
     
+    
+    def get_duration(self):
+        duration = 0
+        for item in self.items.all():
+            duration += item.content_object.get_duration()
+            
+        # TODO: think about what to use as s reference
+        duration = self.target_duration * 1000
+            
+        return duration
+    
     #@models.permalink
     #def get_reorder_url(self):
     #    return ('alibrary-playlist-reorder', [self.pk])
@@ -235,6 +246,13 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
         return reverse('api_dispatch_detail', kwargs={  
             'api_name': 'v1',  
             'resource_name': 'playlist',  
+            'pk': self.pk  
+        }) + ''
+    
+    def get_api_simple_url(self):
+        return reverse('api_dispatch_detail', kwargs={  
+            'api_name': 'v1',  
+            'resource_name': 'simpleplaylist',  
             'pk': self.pk  
         }) + ''
         
@@ -317,6 +335,20 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
     def convert_to(self, type):
         self.type = type
         self.save()
+        
+        
+    def get_items(self):
+        pis = PlaylistItemPlaylist.objects.filter(playlist=self)
+        items = []
+        for pi in pis:
+            item = pi.item
+            item.cue_in = pi.cue_in
+            item.cue_out = pi.cue_out
+            item.fade_in = pi.fade_in
+            item.fade_out = pi.fade_out
+            item.fade_cross = pi.fade_cross
+            items.append(item)
+        return items
 
 
     def save(self, *args, **kwargs):

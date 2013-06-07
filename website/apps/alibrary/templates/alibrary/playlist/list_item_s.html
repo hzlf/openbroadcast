@@ -103,6 +103,38 @@
 	
 	<div class="list_body_item c8 action">
 		<!-- Actions sub-view  -->
+		<!-- reworking -->
+		<div class="wrapper">
+			<ul class="unstyled horizontal pull-right">
+				
+				<li>
+					<a href="#" data-action="download" data-ct="playlist" data-uuid="{{ item.uuid }}" title="{% trans "Download" %}">
+						<i class="icon-download-alt"></i>
+					</a>
+				</li>
+				
+				<li>
+					<a href="#" data-action="basket" data-ct="playlist" data-uuid="{{ item.uuid }}" title="{% trans "Add to basket" %}">
+						<i class="icon-plus"></i>
+					</a>
+				</li>
+				
+				<li>
+					<a href="#" data-action="schedule" data-ct="playlist" data-uuid="{{ item.uuid }}" title="{% trans "Schedule" %}">
+						<i class="icon-calendar"></i>
+					</a>
+				</li>
+				
+				<li>
+					<a href="{{ item.get_edit_url }}" data-action="edit" data-ct="playlist" data-uuid="{{ item.uuid }}" title="{% trans "Add to basket" %}">
+						<i class="icon-edit"></i>
+					</a>
+				</li>
+				
+			</ul>
+		</div>
+		
+		<!--
 		<div class="wrapper">
 			<div class="right">
 				<ul class="unstyled">
@@ -120,6 +152,7 @@
 			</div>
 			<div class="clear"></div>
 		</div>
+		-->
 	</div>
 	
 	

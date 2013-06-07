@@ -42,6 +42,45 @@ var nunjucks_register_filters = function(nj) {
 					
 				});
 				
+				nj.addFilter('format_datetime', function(time, part) {
+				
+					var ret;
+				
+					if(part == 'datetime') {
+
+						ret =  '{0}/{1}/{2} {3}:{4}'.format(
+							time.substr(0,4),
+							time.substr(5,2),
+							time.substr(8,2),
+							// time
+							time.substr(11,2),
+							time.substr(14,2)
+						);
+					}
+				
+					if(part == 'date') {
+
+						ret =  '{0}/{1}/{2}'.format(
+							time.substr(0,4),
+							time.substr(5,2),
+							time.substr(8,2)
+						);
+					}
+				
+					if(part == 'time') {
+
+						ret = '{0}:{1}'.format(
+							time.substr(11,2),
+							time.substr(14,2)
+						);
+					}
+					
+					
+						
+					return ret;
+					
+				});
+				
 				nj.addFilter('ms2time', function(time) {
 					
 					if(time == 0) {

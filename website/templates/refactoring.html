@@ -25,7 +25,7 @@
 	<!--
 	<body id="body" class="base">
 	-->
-	<body  id="body" class="base" data-spy="scroll" data-target=".subnav" data-offset="50">
+	<body id="body" class="base {% block body_class %}{% endblock %}" data-spy="scroll" data-target=".subnav" data-offset="50">
 		{% cms_toolbar %}
 		<div id="dim_content" style="display: none;"></div>
 		

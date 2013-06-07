@@ -1,0 +1,530 @@
+/*
+ * Scheduler stylesheet
+ */
+
+body.scheduler
+  #modnav
+    border-bottom-color: #999999
+    
+
+
+
+
+
+
+
+// styles popup
+
+.popup-emission
+  width: 1000px !important
+  
+  // content
+  > div
+    section.title
+      h3
+        color: #fff
+        small:
+          text-transform: none !important
+          font-size: 60%
+          
+    section.description
+      p
+        color: #efefef
+      a
+        background: #6633cc
+        color: white
+        
+    section.form
+      label
+        color: #efefef
+
+
+
+// object placement (drag n drop)
+// sidebar
+.object-to-schedule
+  background: #ddffd9
+  border: 1px solid #95d182
+  padding: 2px 4px
+  
+
+
+.object-to-schedule
+  &.ui-draggable-dragging
+    background: yellow
+    width: 108px !important
+    .item-list
+      display: none
+    .tags
+      display: none
+    h4 small
+      display: none
+    h4
+      display: none
+      
+    &.colision
+      background: red
+      
+      
+      
+      
+
+#scrolltimedeventswk
+  overflow: hidden
+
+
+
+.wk-daynames th
+  width: 110px
+
+ul.day-actions
+  height: 14px
+  margin-bottom: 0
+  li
+    padding: 0 4px 0 0
+    float: right
+    a
+      font-size: 90%
+      
+ 
+input.autocomplete
+  width: 250px    
+  height: 16px
+  padding: 2px 4px
+.ac-result
+  position: absolute
+  z-index: 1000
+  background: white
+  width: 260px
+  .listing
+    .item
+      margin-bottom: 0
+      padding: 4px
+      background-color: yellow
+      border-bottom: 1px solid #eeeeee
+      background: #333
+      color: #fff
+      img
+        width: 63px
+        height: 63px
+      &.hover
+        background-color: #ddffd9
+        color: #000
+
+
+
+// TODO: rework
+
+.tg-hourmarkers
+  width: 830px !important
+
+.tg-dualmarker, .tg-dualmarker60
+  border-bottom: 1px dotted #ddd
+  border-top: 1px solid #ddd
+  font-size: 1px
+  
+  
+.tg-markercell
+  .tg-quartermarker
+    
+    border-top: 1px dotted #ddd
+    border-bottom: 1px dotted #eee // 15-min markers
+    font-size: 1px
+    &:first-child
+      border-top: 1px solid #ddd
+      border-bottom: 1px dotted #eee // 15-min markers
+  
+  .tg-quartermarker
+    height: 10px
+    margin-bottom: 10px
+    
+
+  &.marker-limit
+    border-top: 1px solid #a9a9a9
+    height: 41px
+    .tg-quartermarker
+      &:first-child
+        border-top: none !important
+  
+  
+  
+  
+  
+  
+  
+
+#calcontent
+  &.eui-s
+    .calListLabel, .calListLabel-sel
+      line-height: 24px
+  &.eui-t
+    .calListLabel, .calListLabel-sel
+      line-height: 20px
+
+.calListLabel
+  color: #555555
+
+.calListLabelOuter-hvr
+  background: #eeeeee
+
+.chip
+  position: absolute
+  cursor: default
+  color: #222
+  -moz-user-select: none
+  background: #ddffd9
+  a
+    color: #333 !important
+  &.colision
+    background: #f99 !important
+  &.ui-draggable-dragging
+    width: 108px !important
+    > *
+      border-right: none
+      
+  &.autopilot
+    background: #D9FAFF
+    dl
+      border-color: #C0D3F3
+    
+  dt
+    margin-top: -1px
+    font: bold 10px Arial, sans-serif
+    white-space: nowrap
+    overflow: hidden
+    padding: 0 0 1px
+    text-align: left
+  dl
+    margin: 0
+    padding: 0 0 1px
+    border-left: 1px solid
+    border-right: 1px solid
+    border-color: rgb(149, 209, 130)
+    overflow: hidden
+  dd
+    margin: 0
+    overflow: hidden
+    padding: 0 1px
+    font: 12px Arial, sans-serif
+    text-align: left
+    word-wrap: break-word
+
+.chip
+  dd, dt
+    padding: 0 2px 0 4px
+  dl
+    padding: 2px 0 1px
+  dd
+    line-height: 1.1
+
+.drag-chip .cbrd
+  padding: 1px 0 0
+
+.chip-border
+  border-bottom: 2px solid
+  border-left: 2px solid
+  border-top: 2px solid
+  margin: -2px 0 -2px -2px
+
+.chip-color
+  border-color: white
+
+.chip-color-today
+  border-color: #f1f1f1
+
+.cbrd
+  border: 1px solid
+  -moz-border-radius: 0
+  -webkit-border-radius: 0
+
+
+.chip a
+  &:link, &:visited, &:active
+    text-decoration: none
+    color: white
+
+.chip .location
+  display: block
+  font-style: normal
+
+
+
+// week stuff
+.wk-table
+  margin: 0
+  padding: 0
+
+.wk-weektop
+  table-layout: fixed
+  width: 100%
+  background-color: #fff
+  overflow: hidden
+  font-size: 11px
+  line-height: 14px
+
+.wk-dayname
+  font-weight: normal
+  color: #555
+  padding: 2px 4px
+  white-space: nowrap
+  border-top: 1px solid #fff
+  font-size: 12px
+  padding: 4px
+
+.wk-today
+  background-color: #fff
+  color: #222
+  font-weight: bold
+
+.wk-full-mode
+  .wk-today
+    background: #f1f1f1
+    border-left: 1px solid #ddd
+    border-top: 1px solid #dddddd
+  .wk-today-last
+    border-right: 1px solid #dddddd
+  .wk-tomorrow
+    border-left: 1px solid #dddddd
+
+.wk-dummyth
+  vertical-align: top
+  background-color: #fff
+  padding: 0
+
+.wk-allday
+  background-color: #fff
+  font-size: 11px
+  line-height: 14px
+  border-color: #e7ebef
+  border-style: solid
+  border-width: 0
+  font-size: 12px
+  line-height: 10px
+
+.wk-allday-pos
+  position: relative
+
+.wk-allday .st-grid
+  padding: 1px 1px 0
+
+.wk-webcontent-td
+  font-size: 0
+  height: 5px
+
+.wk-scrolltimedevents
+  position: relative
+  overflow-y: scroll
+  overflow-x: hidden
+  border-top: 1px solid #ddd
+  border-left: 0 none
+  border-bottom: 1px solid #ddd
+  padding: 0
+  font-size: 11px
+  line-height: normal
+  direction: ltr
+
+.wk-scrolltimedevents
+  font-size: 12px
+
+.wk-border
+  border-bottom: 1px solid #ddd
+  margin-right: 0
+
+.wbkt.wk-scrolltimedevents
+  border-top: none
+  border-bottom: none
+
+
+
+
+
+
+
+.tg-mainwrapper
+  position: relative
+
+.tg-timedevents
+  background-color: #fff
+  border-bottom: 1px solid #ddd
+  margin-top: -1px
+  table-layout: fixed
+  width: 100%
+  margin-top: -2px
+
+.wbkt .tg-timedevents
+  border-right: 1px solid #dddddd
+
+.tg-times-pri
+  background-color: #fff
+  color: #555
+  padding: 1px 0 0
+  text-align: right
+  vertical-align: top
+
+.tg-times-sec
+  background-color: #fff
+  color: #555
+  padding: 1px 0 0
+  text-align: right
+  vertical-align: top
+  background-color: #fff
+  color: #aaadbc
+
+.tg-times-start
+  background-color: #fff7d7
+  color: #555
+  padding: 1px 0 0
+  text-align: right
+  vertical-align: top
+  padding-right: 2px
+
+.tg-times-end
+  background-color: #fff7d7
+  color: #555
+  padding: 1px 0 0
+  text-align: right
+  vertical-align: top
+  padding-right: 2px
+  background-color: #d9f2db
+
+.tg-time-pri, .tg-time-sec
+  border-bottom: 1px solid #a9a9a9
+  padding-right: 2px
+
+.tg-time-pri-last, .tg-time-sec-last, .tg-times-start-last, .tg-times-end-last
+  border-bottom: none
+
+.tg-time-sec, .tg-time-start, .tg-time-end
+  border-bottom: 1px solid #e7ebef
+
+.tg-times-pri, .tg-times-sec
+  border-left: 1px solid #dddddd
+
+.ep-scg
+  .tg-times-pri, .tg-times-sec
+    border-left: none
+  .tg-timesnotlast
+    border-right: 1px solid #dddddd
+
+.tg-col, .tg-col-today
+  border-left: 1px solid #ddd
+  vertical-align: top
+
+.tg-col-overlaywrapper
+  position: relative
+  height: 0
+
+.tg-gutter
+  position: relative
+  height: 0
+  margin-right: 10px
+  width: 109px
+
+.tg-col-eventwrapper
+  position: relative
+  cursor: default
+
+.tg-today
+  background-color: #f1f1f1
+
+.bg-exists .tg-today
+  background-color: #eee
+  opacity: .5
+  filter: alpha(opacity = 50)
+
+.tg-spanningwrapper
+  position: relative
+  margin: 1px 0 0 1px
+
+.tg-chipspanningwrapper
+  line-height: 0
+  margin: 0 10px 0 1px
+  z-index: 1
+
+.tg-hourmarkers
+  position: absolute
+  width: 100%
+
+.tg-markercell
+  height: 42px
+
+.tg-markercell60
+  height: 60px
+
+.tg-dualmarker, .tg-dualmarker60
+  border-bottom: 1px dotted #ddd
+  border-top: 1px solid #ddd
+  font-size: 1px
+
+.tg-dualmarker
+  height: 20px
+  margin-bottom: 20px
+
+.tg-dualmarker60
+  height: 29px
+  margin-bottom: 29px
+
+.tg-nowmarker
+  position: absolute
+  left: 0
+  width: 100%
+  top: 0
+  height: 0
+  border-top: 2px solid #ff7f6e
+  overflow: hidden
+
+.tg-nowptr
+  position: absolute
+  background-position: -60px -68px
+  width: 5px
+  height: 9px
+  background-image: url(//calendar.google.com/googlecalendar/images/combined_v43_vr.png)
+
+
+
+
+
+
+#mainbody
+  margin-left: 0px
+  padding-top: 14px
+  width: 830px
+  
+
+.dp-cell.dp-dayh
+  text-align: center
+
+.calHeader, #dp_0_cur
+  color: #222
+  font-weight: normal
+  line-height: 30px
+  padding: 0
+  position: relative
+
+.calHeader, .goog-zippy-expanded .monthtableSpace
+  margin-left: -16px
+  margin-right: -5px
+
+.calHeader
+  padding: 2px 0
+
+.calHeaderSpace
+  margin-left: 4px
+
+.calHeader:hover
+  background-color: #eeeeee
+
+#calcontent
+  &.eui-s
+    .calHeader, #dp_0_cur
+      line-height: 24px
+  &.eui-t
+    .calHeader, #dp_0_cur
+      line-height: 20px
+
+.st-grid
+  .te-t, .te-s
+    font-size: 100%
+
+
+

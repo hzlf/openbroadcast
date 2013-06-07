@@ -235,6 +235,9 @@ class Media(CachingMixin, MigrationMixin):
     def classname(self):
         return self.__class__.__name__
     
+    def get_duration(self):
+        return self.base_duration
+    
     def get_versions(self):
        
         try:

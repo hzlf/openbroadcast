@@ -1,0 +1,662 @@
+/* Scheduler stylesheet
+ */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\000036}}
+body.scheduler #modnav {
+  border-bottom-color: #999999;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000318}}
+.popup-emission {
+  width: 1000px !important;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000324}}
+.popup-emission > div section.title h3 {
+  color: white;
+  small-text-transform: none !important;
+  small-font-size: 60%;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000331}}
+.popup-emission > div section.description p {
+  color: #efefef;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000333}}
+.popup-emission > div section.description a {
+  background: #6633cc;
+  color: white;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000338}}
+.popup-emission > div section.form label {
+  color: #efefef;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000345}}
+.object-to-schedule {
+  background: #ddffd9;
+  border: 1px solid #95d182;
+  padding: 2px 4px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000353}}
+.object-to-schedule.ui-draggable-dragging {
+  background: yellow;
+  width: 108px !important;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000356}}
+.object-to-schedule.ui-draggable-dragging .item-list {
+  display: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000358}}
+.object-to-schedule.ui-draggable-dragging .tags {
+  display: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000360}}
+.object-to-schedule.ui-draggable-dragging h4 small {
+  display: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000362}}
+.object-to-schedule.ui-draggable-dragging h4 {
+  display: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000365}}
+.object-to-schedule.ui-draggable-dragging.colision {
+  background: red;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000372}}
+#scrolltimedeventswk {
+  overflow: hidden;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000377}}
+.wk-daynames th {
+  width: 110px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000380}}
+ul.day-actions {
+  height: 14px;
+  margin-bottom: 0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000383}}
+ul.day-actions li {
+  padding: 0 4px 0 0;
+  float: right;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000386}}
+ul.day-actions li a {
+  font-size: 90%;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000390}}
+input.autocomplete {
+  width: 250px;
+  height: 16px;
+  padding: 2px 4px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\0000394}}
+.ac-result {
+  position: absolute;
+  z-index: 1000;
+  background: white;
+  width: 260px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003100}}
+.ac-result .listing .item {
+  margin-bottom: 0;
+  padding: 4px;
+  background-color: yellow;
+  border-bottom: 1px solid #eeeeee;
+  background: #333333;
+  color: white;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003107}}
+.ac-result .listing .item img {
+  width: 63px;
+  height: 63px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003110}}
+.ac-result .listing .item.hover {
+  background-color: #ddffd9;
+  color: black;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003118}}
+.tg-hourmarkers {
+  width: 830px !important;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003121}}
+.tg-dualmarker, .tg-dualmarker60 {
+  border-bottom: 1px dotted #dddddd;
+  border-top: 1px solid #dddddd;
+  font-size: 1px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003128}}
+.tg-markercell .tg-quartermarker {
+  border-top: 1px dotted #dddddd;
+  border-bottom: 1px dotted #eeeeee;
+  font-size: 1px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003133}}
+.tg-markercell .tg-quartermarker:first-child {
+  border-top: 1px solid #dddddd;
+  border-bottom: 1px dotted #eeeeee;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003137}}
+.tg-markercell .tg-quartermarker {
+  height: 10px;
+  margin-bottom: 10px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003142}}
+.tg-markercell.marker-limit {
+  border-top: 1px solid darkgrey;
+  height: 41px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003146}}
+.tg-markercell.marker-limit .tg-quartermarker:first-child {
+  border-top: none !important;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003158}}
+#calcontent.eui-s .calListLabel, #calcontent.eui-s .calListLabel-sel {
+  line-height: 24px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003161}}
+#calcontent.eui-t .calListLabel, #calcontent.eui-t .calListLabel-sel {
+  line-height: 20px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003164}}
+.calListLabel {
+  color: #555555;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003167}}
+.calListLabelOuter-hvr {
+  background: #eeeeee;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003170}}
+.chip {
+  position: absolute;
+  cursor: default;
+  color: #222222;
+  -moz-user-select: none;
+  background: #ddffd9;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003176}}
+.chip a {
+  color: #333333 !important;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003178}}
+.chip.colision {
+  background: #ff9999 !important;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003180}}
+.chip.ui-draggable-dragging {
+  width: 108px !important;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003182}}
+.chip.ui-draggable-dragging > * {
+  border-right: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003185}}
+.chip.autopilot {
+  background: #d9faff;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003187}}
+.chip.autopilot dl {
+  border-color: #c0d3f3;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003190}}
+.chip dt {
+  margin-top: -1px;
+  font: bold 10px Arial, sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  padding: 0 0 1px;
+  text-align: left;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003197}}
+.chip dl {
+  margin: 0;
+  padding: 0 0 1px;
+  border-left: 1px solid;
+  border-right: 1px solid;
+  border-color: #95d182;
+  overflow: hidden;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003204}}
+.chip dd {
+  margin: 0;
+  overflow: hidden;
+  padding: 0 1px;
+  font: 12px Arial, sans-serif;
+  text-align: left;
+  word-wrap: break-word;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003213}}
+.chip dd, .chip dt {
+  padding: 0 2px 0 4px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003215}}
+.chip dl {
+  padding: 2px 0 1px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003217}}
+.chip dd {
+  line-height: 1.1;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003220}}
+.drag-chip .cbrd {
+  padding: 1px 0 0;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003223}}
+.chip-border {
+  border-bottom: 2px solid;
+  border-left: 2px solid;
+  border-top: 2px solid;
+  margin: -2px 0 -2px -2px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003229}}
+.chip-color {
+  border-color: white;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003232}}
+.chip-color-today {
+  border-color: #f1f1f1;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003235}}
+.cbrd {
+  border: 1px solid;
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003242}}
+.chip a:link, .chip a:visited, .chip a:active {
+  text-decoration: none;
+  color: white;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003246}}
+.chip .location {
+  display: block;
+  font-style: normal;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003253}}
+.wk-table {
+  margin: 0;
+  padding: 0;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003257}}
+.wk-weektop {
+  table-layout: fixed;
+  width: 100%;
+  background-color: white;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003265}}
+.wk-dayname {
+  font-weight: normal;
+  color: #555555;
+  padding: 2px 4px;
+  white-space: nowrap;
+  border-top: 1px solid white;
+  font-size: 12px;
+  padding: 4px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003274}}
+.wk-today {
+  background-color: white;
+  color: #222222;
+  font-weight: bold;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003280}}
+.wk-full-mode .wk-today {
+  background: #f1f1f1;
+  border-left: 1px solid #dddddd;
+  border-top: 1px solid #dddddd;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003284}}
+.wk-full-mode .wk-today-last {
+  border-right: 1px solid #dddddd;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003286}}
+.wk-full-mode .wk-tomorrow {
+  border-left: 1px solid #dddddd;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003289}}
+.wk-dummyth {
+  vertical-align: top;
+  background-color: white;
+  padding: 0;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003294}}
+.wk-allday {
+  background-color: white;
+  font-size: 11px;
+  line-height: 14px;
+  border-color: #e7ebef;
+  border-style: solid;
+  border-width: 0;
+  font-size: 12px;
+  line-height: 10px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003304}}
+.wk-allday-pos {
+  position: relative;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003307}}
+.wk-allday .st-grid {
+  padding: 1px 1px 0;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003310}}
+.wk-webcontent-td {
+  font-size: 0;
+  height: 5px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003314}}
+.wk-scrolltimedevents {
+  position: relative;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  border-top: 1px solid #dddddd;
+  border-left: 0 none;
+  border-bottom: 1px solid #dddddd;
+  padding: 0;
+  font-size: 11px;
+  line-height: normal;
+  direction: ltr;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003326}}
+.wk-scrolltimedevents {
+  font-size: 12px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003329}}
+.wk-border {
+  border-bottom: 1px solid #dddddd;
+  margin-right: 0;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003333}}
+.wbkt.wk-scrolltimedevents {
+  border-top: none;
+  border-bottom: none;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003343}}
+.tg-mainwrapper {
+  position: relative;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003346}}
+.tg-timedevents {
+  background-color: white;
+  border-bottom: 1px solid #dddddd;
+  margin-top: -1px;
+  table-layout: fixed;
+  width: 100%;
+  margin-top: -2px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003354}}
+.wbkt .tg-timedevents {
+  border-right: 1px solid #dddddd;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003357}}
+.tg-times-pri {
+  background-color: white;
+  color: #555555;
+  padding: 1px 0 0;
+  text-align: right;
+  vertical-align: top;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003364}}
+.tg-times-sec {
+  background-color: white;
+  color: #555555;
+  padding: 1px 0 0;
+  text-align: right;
+  vertical-align: top;
+  background-color: white;
+  color: #aaadbc;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003373}}
+.tg-times-start {
+  background-color: #fff7d7;
+  color: #555555;
+  padding: 1px 0 0;
+  text-align: right;
+  vertical-align: top;
+  padding-right: 2px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003381}}
+.tg-times-end {
+  background-color: #fff7d7;
+  color: #555555;
+  padding: 1px 0 0;
+  text-align: right;
+  vertical-align: top;
+  padding-right: 2px;
+  background-color: #d9f2db;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003390}}
+.tg-time-pri, .tg-time-sec {
+  border-bottom: 1px solid darkgrey;
+  padding-right: 2px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003394}}
+.tg-time-pri-last, .tg-time-sec-last, .tg-times-start-last, .tg-times-end-last {
+  border-bottom: none;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003397}}
+.tg-time-sec, .tg-time-start, .tg-time-end {
+  border-bottom: 1px solid #e7ebef;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003400}}
+.tg-times-pri, .tg-times-sec {
+  border-left: 1px solid #dddddd;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003404}}
+.ep-scg .tg-times-pri, .ep-scg .tg-times-sec {
+  border-left: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003406}}
+.ep-scg .tg-timesnotlast {
+  border-right: 1px solid #dddddd;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003409}}
+.tg-col, .tg-col-today {
+  border-left: 1px solid #dddddd;
+  vertical-align: top;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003413}}
+.tg-col-overlaywrapper {
+  position: relative;
+  height: 0;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003417}}
+.tg-gutter {
+  position: relative;
+  height: 0;
+  margin-right: 10px;
+  width: 109px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003423}}
+.tg-col-eventwrapper {
+  position: relative;
+  cursor: default;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003427}}
+.tg-today {
+  background-color: #f1f1f1;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003430}}
+.bg-exists .tg-today {
+  background-color: #eeeeee;
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003435}}
+.tg-spanningwrapper {
+  position: relative;
+  margin: 1px 0 0 1px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003439}}
+.tg-chipspanningwrapper {
+  line-height: 0;
+  margin: 0 10px 0 1px;
+  z-index: 1;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003444}}
+.tg-hourmarkers {
+  position: absolute;
+  width: 100%;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003448}}
+.tg-markercell {
+  height: 42px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003451}}
+.tg-markercell60 {
+  height: 60px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003454}}
+.tg-dualmarker, .tg-dualmarker60 {
+  border-bottom: 1px dotted #dddddd;
+  border-top: 1px solid #dddddd;
+  font-size: 1px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003459}}
+.tg-dualmarker {
+  height: 20px;
+  margin-bottom: 20px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003463}}
+.tg-dualmarker60 {
+  height: 29px;
+  margin-bottom: 29px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003467}}
+.tg-nowmarker {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  top: 0;
+  height: 0;
+  border-top: 2px solid #ff7f6e;
+  overflow: hidden;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003476}}
+.tg-nowptr {
+  position: absolute;
+  background-position: -60px -68px;
+  width: 5px;
+  height: 9px;
+  background-image: url(//calendar.google.com/googlecalendar/images/combined_v43_vr.png);
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003488}}
+#mainbody {
+  margin-left: 0px;
+  padding-top: 14px;
+  width: 830px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003494}}
+.dp-cell.dp-dayh {
+  text-align: center;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003497}}
+.calHeader, #dp_0_cur {
+  color: #222222;
+  font-weight: normal;
+  line-height: 30px;
+  padding: 0;
+  position: relative;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003504}}
+.calHeader, .goog-zippy-expanded .monthtableSpace {
+  margin-left: -16px;
+  margin-right: -5px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003508}}
+.calHeader {
+  padding: 2px 0;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003511}}
+.calHeaderSpace {
+  margin-left: 4px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003514}}
+.calHeader:hover {
+  background-color: #eeeeee;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003519}}
+#calcontent.eui-s .calHeader, #calcontent.eui-s #dp_0_cur {
+  line-height: 24px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003522}}
+#calcontent.eui-t .calHeader, #calcontent.eui-t #dp_0_cur {
+  line-height: 20px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/scheduler\.sass}line{font-family:\00003526}}
+.st-grid .te-t, .st-grid .te-s {
+  font-size: 100%;
+}

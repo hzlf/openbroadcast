@@ -1,0 +1,24 @@
+
+<h4>Selected for scheduling</h4>
+<p>Drag and drop to a free slot</p>
+
+<div class="object-search">
+	<input class="autocomplete" data-ct="playlist" type="text" placeholder="Search broadcasts">
+	<div class="ac-result"></div>
+</div>
+
+{% if object.id %}
+<div class="_container object-to-schedule" id="{{ object.uuid }}">
+	<h4>{{ object.name }} <small class="pull-right">{{ object.target_duration / 60 }} min</small></h4>
+	<p class="tags">{{ object.d_tags|shorten(60) }}</p>
+	
+	
+	<!--
+	<ul class="unstyled item-list">
+	{% for item in object.items %}
+	<li>{{ item.item.content_object.name|truncate_chars_inner(30) }}</li>
+	{% endfor %}
+	</ul>
+	-->
+</div>
+{% endif %}

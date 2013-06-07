@@ -332,8 +332,11 @@ def stream_html5(request, uuid):
     if not stream_permission:
         raise Http403
     
-    from atracker.util import create_event
-    create_event(request.user, media, None, 'stream')
+    try:
+        from atracker.util import create_event
+        create_event(request.user, media, None, 'stream')
+    except:
+        pass
     
     return sendfile(request, media.get_cache_file('mp3', 'base'))
 

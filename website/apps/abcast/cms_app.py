@@ -2,7 +2,7 @@ from cms.app_base import CMSApp
 from cms.apphook_pool import apphook_pool
 from django.utils.translation import ugettext_lazy as _
 
-#from abcast.menu import JingleMenu
+from abcast.menu import SchedulerMenu
 
 class JingleApp(CMSApp):
     
@@ -11,3 +11,11 @@ class JingleApp(CMSApp):
     # menus = [JingleMenu]
 
 apphook_pool.register(JingleApp)
+
+class SchedulerApp(CMSApp):
+    
+    name = _("Scheduler App")
+    urls = ["abcast.urls_scheduler"]
+    menus = [SchedulerMenu]
+
+apphook_pool.register(SchedulerApp)

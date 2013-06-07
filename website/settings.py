@@ -337,6 +337,9 @@ INSTALLED_APPS = (
     'django_jenkins',
     'django_filters',
 
+    # base app
+    'base',
+
     #'notification',
     'notifications',
     'debug_toolbar',
@@ -708,6 +711,8 @@ INVITATION_INVITE_ONLY = False
 INVITATION_EXPIRE_DAYS = 10
 INVITATION_INITIAL_INVITATIONS = 5
 
+SOCIAL_AUTH_SLUGIFY_USERNAMES = True
+# SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 
 LOGIN_REDIRECT_URL = '/accounts/%(username)s/'
 LOGIN_URL = '/accounts/login/'
@@ -889,6 +894,7 @@ PUSHY_SETTINGS = {
                'alibrary.playlist',
                'importer.import',
                'importer.importfile',
+               'abcast.emission',
                ),
     'SOCKET_SERVER': 'http://localhost:8888/',
     'CHANNEL_PREFIX': 'pushy_',

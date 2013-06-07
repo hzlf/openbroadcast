@@ -1,0 +1,37 @@
+<div 
+	class="chip fix {{ object.source }} emission" 
+	data-resource-uri={{ object.resource_uri }}
+	id="{{ object.uuid }}" 
+	data-tip="<strong><i class='icon-tasks'></i> {{ object.type }}</strong><br>{{ object.start }} - {{ object.end }}<br>by: {{ object.user.username }}{{ object.content_object.description_html }}" 
+	style="top:{{ top }}px;left:-1px;width:100%;
+">
+	
+	<dl class="cbrd" style="height:{{ height - 4 }}px;">
+		<dt style="">
+			
+			<a href="{{ object.content_object.absolute_url }}" data-resource_uri="{{ object.resource_uri }}">
+			{{ object.name }}
+			</a>
+			
+			<!--
+			<a class="pull-right"> <i class="icon-pencil"></i> </a>
+			-->
+			{% if object.playing %}
+			<i class="icon-bullhorn pull-right"></i>
+			{% endif %}
+			
+			{% if object.locked %}
+			<i class="icon-lock pull-right"></i>
+			{% endif %}
+		</dt>
+		<!--
+		<dd>
+			<span>{{ object.name }}</span>
+			<ul class="unstyled">
+				<li>{{ object.start }}</li>
+			</ul>
+		</dd>
+		-->
+	</dl>
+	
+</div>
