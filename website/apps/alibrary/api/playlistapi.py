@@ -103,10 +103,10 @@ class SimplePlaylistResource(ModelResource):
             'type': ['exact','in'],
         }
 
-    """
+    """"""
     def apply_authorization_limits(self, request, object_list):
         return object_list.filter(user=request.user)
-    """
+    
     def dehydrate(self, bundle):
         bundle.data['item_count'] = bundle.obj.items.count();
         return bundle
@@ -171,10 +171,13 @@ class PlaylistResource(ModelResource):
         
         
 
-    """
+    """ """
     def apply_authorization_limits(self, request, object_list):
-        return object_list.filter(user=request.user)
-    """ 
+        if request.GET.get('all', False):
+            return object_list
+        else:
+            return object_list.filter(user=request.user)
+    
     def obj_create(self, bundle, request=None, **kwargs):
         bundle = super(PlaylistResource, self).obj_create(bundle, request, user=request.user)
         

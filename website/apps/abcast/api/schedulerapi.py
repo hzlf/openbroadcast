@@ -29,10 +29,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+SCHEDULER_GRID_WIDTH = getattr(settings, 'SCHEDULER_GRID_WIDTH', 830)
+SCHEDULER_GRID_OFFSET = getattr(settings, 'SCHEDULER_GRID_OFFSET', 60)
 SCHEDULER_PPH = getattr(settings, 'SCHEDULER_PPH', 42)
-SCHEDULER_PPD = getattr(settings, 'SCHEDULER_PPD', 110)
+SCHEDULER_PPD = getattr(settings, 'SCHEDULER_PPD', 110) # actually should be calculated
 # how long ahead should the schedule be locked
-SCHEDULER_LOCK_AHEAD = getattr(settings, 'SCHEDULER_LOCK_AHEAD', 60 * 60)
+SCHEDULER_LOCK_AHEAD = getattr(settings, 'SCHEDULER_LOCK_AHEAD', 60) # 1 minute, to allow caching of files
+SCHEDULER_NUM_DAYS = 7
 
 
 """
@@ -90,6 +93,7 @@ class EmissionResource(ModelResource):
             #'channel': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
         }
+        max_limit = 100000
         #cache = SimpleCache(timeout=120)
 
 
@@ -134,6 +138,7 @@ class EmissionResource(ModelResource):
         e = Emission.objects.get(**self.remove_api_resource_names(kwargs))
 
         locked = request.POST.get('locked', 0)
+        color = request.POST.get('color', 0)
         
         print "*****************************************************"
         print locked
@@ -143,6 +148,8 @@ class EmissionResource(ModelResource):
             e.locked = True
         else:
             e.locked = False
+            
+        e.color = int(color)
         
         
         
@@ -158,6 +165,8 @@ class EmissionResource(ModelResource):
 
         top = request.POST.get('top', None)
         left = request.POST.get('left', None)
+        
+        num_days = request.POST.get('num_days', SCHEDULER_NUM_DAYS)
 
         e = Emission.objects.get(**self.remove_api_resource_names(kwargs))
 
@@ -165,7 +174,8 @@ class EmissionResource(ModelResource):
     
     
         pph = SCHEDULER_PPH
-        ppd = SCHEDULER_PPD
+        # ppd = SCHEDULER_PPD
+        ppd = (SCHEDULER_GRID_WIDTH - SCHEDULER_GRID_OFFSET) / int(num_days)
         
         top = float(top) / pph * 60
         offset_min = int(15 * round(float(top)/15))

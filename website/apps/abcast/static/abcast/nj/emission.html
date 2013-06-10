@@ -1,5 +1,5 @@
 <div 
-	class="chip fix {{ object.source }} emission" 
+	class="chip fix {{ object.source }} emission theme-{{ object.color }}" 
 	data-resource-uri={{ object.resource_uri }}
 	id="{{ object.uuid }}" 
 	data-tip="<strong><i class='icon-tasks'></i> {{ object.type }}</strong><br>{{ object.start }} - {{ object.end }}<br>by: {{ object.user.username }}{{ object.content_object.description_html }}" 
@@ -13,9 +13,6 @@
 			{{ object.name }}
 			</a>
 			
-			<!--
-			<a class="pull-right"> <i class="icon-pencil"></i> </a>
-			-->
 			{% if object.playing %}
 			<i class="icon-bullhorn pull-right"></i>
 			{% endif %}
@@ -24,14 +21,7 @@
 			<i class="icon-lock pull-right"></i>
 			{% endif %}
 		</dt>
-		<!--
-		<dd>
-			<span>{{ object.name }}</span>
-			<ul class="unstyled">
-				<li>{{ object.start }}</li>
-			</ul>
-		</dd>
-		-->
+
 	</dl>
 	
 </div>

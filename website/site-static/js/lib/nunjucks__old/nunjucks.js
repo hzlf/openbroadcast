@@ -63,18 +63,6 @@ modules['object'] = extend(Object, "Object", {});
 var ArrayProto = Array.prototype;
 var ObjProto = Object.prototype;
 
-var escapeMap = {
-    '&': '&amp;',
-    '"': '&quot;',
-    "'": '&#39;',
-    "<": '&lt;',
-    ">": '&gt;'
-};
-
-var lookupEscape = function(ch) {
-    return escapeMap[ch];
-};
-
 var exports = modules['lib'] = {};
 
 exports.withPrettyErrors = function(path, withInternals, func) {
@@ -105,9 +93,7 @@ exports.TemplateError = function(message, lineno, colno) {
         err = message;
         message = message.name + ": " + message.message;
     } else {
-        if(Error.captureStackTrace) {
-            Error.captureStackTrace(err);
-        }
+        Error.captureStackTrace(err);
     }
 
     err.name = "Template render error";
@@ -144,10 +130,6 @@ exports.TemplateError = function(message, lineno, colno) {
 };
 
 exports.TemplateError.prototype = Error.prototype;
-
-exports.escape = function(val) {
-    return val.replace(/[&"'<>]/g, lookupEscape);
-};
 
 exports.isFunction = function(obj) {
     return ObjProto.toString.call(obj) == '[object Function]';
@@ -251,249 +233,6 @@ exports.map = function(obj, func) {
 (function() {
 
 var lib = modules["lib"];
-var Object = modules["object"];
-
-// Frames keep track of scoping both at compile-time and run-time so
-// we know how to access variables. Block tags can introduce special
-// variables, for example.
-var Frame = Object.extend({
-    init: function(parent) {
-        this.variables = {};
-        this.parent = parent;
-    },
-
-    set: function(name, val) {
-        // Allow variables with dots by automatically creating the
-        // nested structure
-        var parts = name.split('.');
-        var obj = this.variables;
-
-        for(var i=0; i<parts.length - 1; i++) {
-            var id = parts[i];
-
-            if(!obj[id]) {
-                obj[id] = {};
-            }
-            obj = obj[id];
-        }
-
-        obj[parts[parts.length - 1]] = val;
-    },
-
-    get: function(name) {
-        var val = this.variables[name];
-        if(val !== undefined && val !== null) {
-            return val;
-        }
-        return null;
-    },
-
-    lookup: function(name) {
-        var p = this.parent;
-        var val = this.variables[name];
-        if(val !== undefined && val !== null) {
-            return val;
-        }
-        return p && p.lookup(name);
-    },
-
-    push: function() {
-        return new Frame(this);
-    },
-
-    pop: function() {
-        return this.parent;
-    }
-});
-
-function makeMacro(argNames, kwargNames, func) {
-    return function() {
-        var argCount = numArgs(arguments);
-        var args;
-        var kwargs = getKeywordArgs(arguments);
-
-        if(argCount > argNames.length) {
-            args = Array.prototype.slice.call(arguments, 0, argNames.length);
-
-            // Positional arguments that should be passed in as
-            // keyword arguments (essentially default values)
-            var vals = Array.prototype.slice.call(arguments, args.length, argCount);
-            for(var i=0; i<vals.length; i++) {
-                if(i < kwargNames.length) {
-                    kwargs[kwargNames[i]] = vals[i];
-                }
-            }
-
-            args.push(kwargs);
-        }
-        else if(argCount < argNames.length) {
-            args = Array.prototype.slice.call(arguments, 0, argCount);
-
-            for(var i=argCount; i<argNames.length; i++) {
-                var arg = argNames[i];
-
-                // Keyword arguments that should be passed as
-                // positional arguments, i.e. the caller explicitly
-                // used the name of a positional arg
-                args.push(kwargs[arg]);
-                delete kwargs[arg];
-            }
-
-            args.push(kwargs);
-        }
-        else {
-            args = arguments;
-        }
-
-        return func.apply(this, args);
-    };
-}
-
-function makeKeywordArgs(obj) {
-    obj.__keywords = true;
-    return obj;
-}
-
-function getKeywordArgs(args) {
-    var len = args.length;
-    if(len) {
-        var lastArg = args[len - 1];
-        if(lastArg && lastArg.hasOwnProperty('__keywords')) {
-            return lastArg;
-        }
-    }
-    return {};
-}
-
-function numArgs(args) {
-    var len = args.length;
-    if(len === 0) {
-        return 0;
-    }
-
-    var lastArg = args[len - 1];
-    if(lastArg && lastArg.hasOwnProperty('__keywords')) {
-        return len - 1;
-    }
-    else {
-        return len;
-    }
-}
-
-// A SafeString object indicates that the string should not be
-// autoescaped. This happens magically because autoescaping only
-// occurs on primitive string objects.
-function SafeString(val) {
-    if(typeof val != 'string') {
-        return val;
-    }
-
-    this.toString = function() {
-        return val;
-    };
-
-    this.length = val.length;
-
-    var methods = [
-        'charAt', 'charCodeAt', 'concat', 'contains',
-        'endsWith', 'fromCharCode', 'indexOf', 'lastIndexOf',
-        'length', 'localeCompare', 'match', 'quote', 'replace',
-        'search', 'slice', 'split', 'startsWith', 'substr',
-        'substring', 'toLocaleLowerCase', 'toLocaleUpperCase',
-        'toLowerCase', 'toUpperCase', 'trim', 'trimLeft', 'trimRight'
-    ];
-
-    for(var i=0; i<methods.length; i++) {
-        this[methods[i]] = proxyStr(val[methods[i]]);
-    }
-}
-
-function copySafeness(dest, target) {
-    if(dest instanceof SafeString) {
-        return new SafeString(target);
-    }
-    return target.toString();
-}
-
-function proxyStr(func) {
-    return function() {
-        var ret = func.apply(this, arguments);
-
-        if(typeof ret == 'string') {
-            return new SafeString(ret);
-        }
-        return ret;
-    };
-}
-
-function suppressValue(val, autoescape) {
-    val = (val !== undefined && val !== null) ? val : "";
-
-    if(autoescape && typeof val === "string") {
-        val = lib.escape(val);
-    }
-
-    return val;
-}
-
-function memberLookup(obj, val) {
-    obj = obj || {};
-
-    if(typeof obj[val] === 'function') {
-        return function() {
-            return obj[val].apply(obj, arguments);
-        };
-    }
-
-    return obj[val];
-}
-
-function callWrap(obj, name, args) {
-    if(!obj) {
-        throw new Error('Unable to call `' + name + '`, which is undefined or falsey');
-    }
-    else if(typeof obj !== 'function') {
-        throw new Error('Unable to call `' + name + '`, which is not a function');
-    }
-
-    return obj.apply(this, args);
-}
-
-function contextOrFrameLookup(context, frame, name) {
-    var val = context.lookup(name);
-    return (val !== undefined && val !== null) ?
-        val :
-        frame.lookup(name);
-}
-
-function handleError(error, lineno, colno) {
-    if(error.lineno) {
-        throw error;
-    }
-    else {
-        throw new lib.TemplateError(error, lineno, colno);
-    }
-}
-
-modules['runtime'] = {
-    Frame: Frame,
-    makeMacro: makeMacro,
-    makeKeywordArgs: makeKeywordArgs,
-    numArgs: numArgs,
-    suppressValue: suppressValue,
-    memberLookup: memberLookup,
-    contextOrFrameLookup: contextOrFrameLookup,
-    callWrap: callWrap,
-    handleError: handleError,
-    isArray: lib.isArray,
-    SafeString: SafeString,
-    copySafeness: copySafeness
-};
-})();
-(function() {
-
-var lib = modules["lib"];
-var r = modules["runtime"];
 
 var filters = {
     abs: function(n) {
@@ -527,8 +266,8 @@ var filters = {
     },
 
     capitalize: function(str) {
-        var ret = str.toLowerCase();
-        return r.copySafeness(str, ret[0].toUpperCase() + ret.slice(1));
+        str = str.toLowerCase();
+        return str[0].toUpperCase() + str.slice(1);
     },
 
     center: function(str, width) {
@@ -541,7 +280,7 @@ var filters = {
         var spaces = width - str.length;
         var pre = lib.repeat(" ", spaces/2 - spaces % 2);
         var post = lib.repeat(" ", spaces/2);
-        return r.copySafeness(str, pre + str + post);
+        return pre + str + post;
     },
 
     'default': function(val, def) {
@@ -587,17 +326,18 @@ var filters = {
 
         return array;
     },
-    
-    escape: function(str) {
-        if(typeof str == 'string' || 
-           str instanceof r.SafeString) {
-            return lib.escape(str);
-        }
-        return str;
-    },
 
-    safe: function(str) {
-        return new r.SafeString(str);
+    escape: function(str) {
+        if(typeof str === 'string') {
+            return str.replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+        else {
+            return str;
+        }
     },
 
     first: function(arr) {
@@ -623,7 +363,7 @@ var filters = {
             }
         }
 
-        return r.copySafeness(str, res);
+        return res;
     },
 
     join: function(arr, del, attr) {
@@ -701,7 +441,7 @@ var filters = {
             count++;
         }
 
-        return r.copySafeness(str, res);
+        return res;
     },
 
     reverse: function(val) {
@@ -717,7 +457,7 @@ var filters = {
         arr.reverse();
 
         if(lib.isString(val)) {
-            return r.copySafeness(val, arr.join(''));
+            return arr.join('');
         }
         return arr;
     },
@@ -799,7 +539,7 @@ var filters = {
     },
 
     string: function(obj) {
-        return r.copySafeness(obj, obj);
+        return obj.toString();
     },
 
     title: function(str) {
@@ -807,15 +547,14 @@ var filters = {
         for(var i = 0; i < words.length; i++) {
             words[i] = filters.capitalize(words[i]);
         }
-        return r.copySafeness(str, words.join(' '));
+        return words.join(' ');
     },
 
     trim: function(str) {
-        return r.copySafeness(str, str.replace(/^\s*|\s*$/g, ''));
+        return str.replace(/^\s*|\s*$/g, '');
     },
 
     truncate: function(input, length, killwords, end) {
-        var orig = input;
         length = length || 255;
 
         if (input.length <= length)
@@ -824,16 +563,11 @@ var filters = {
         if (killwords) {
             input = input.substring(0, length);
         } else {
-            var idx = input.lastIndexOf(' ', length);
-            if(idx === -1) {
-                idx = length;
-            }
-
-            input = input.substring(0, idx);
+            input = input.substring(0, input.lastIndexOf(' ', length));
         }
 
         input += (end !== undefined && end !== null) ? end : '...';
-        return r.copySafeness(orig, input);
+        return input;
     },
 
     upper: function(str) {
@@ -862,72 +596,178 @@ filters.e = filters.escape;
 modules['filters'] = filters;
 })();
 (function() {
+var lib = modules["lib"];
+var Object = modules["object"];
 
-function cycler(items) {
-    var index = -1;
-    var current = null;
+// Frames keep track of scoping both at compile-time and run-time so
+// we know how to access variables. Block tags can introduce special
+// variables, for example.
+var Frame = Object.extend({
+    init: function(parent) {
+        this.variables = {};
+        this.parent = parent;
+    },
 
-    return {
-        reset: function() {
-            index = -1;
-            current = null;
-        },
+    set: function(name, val) {
+        // Allow variables with dots by automatically creating the
+        // nested structure
+        var parts = name.split('.');
+        var obj = this.variables;
 
-        next: function() {
-            index++;
-            if(index >= items.length) {
-                index = 0;
+        for(var i=0; i<parts.length - 1; i++) {
+            var id = parts[i];
+
+            if(!obj[id]) {
+                obj[id] = {};
+            }
+            obj = obj[id];
+        }
+
+        obj[parts[parts.length - 1]] = val;
+    },
+
+    lookup: function(name) {
+        var p = this.parent;
+        var val = this.variables[name];
+        if(val !== undefined && val !== null) {
+            return val;
+        }
+        return p && p.lookup(name);
+    },
+
+    push: function() {
+        return new Frame(this);
+    },
+
+    pop: function() {
+        return this.parent;
+    }
+});
+
+function makeMacro(argNames, kwargNames, func) {
+    return function() {
+        var argCount = numArgs(arguments);
+        var args;
+        var kwargs = getKeywordArgs(arguments);
+
+        if(argCount > argNames.length) {
+            args = Array.prototype.slice.call(arguments, 0, argNames.length);
+
+            // Positional arguments that should be passed in as
+            // keyword arguments (essentially default values)
+            var vals = Array.prototype.slice.call(arguments, args.length, argCount);
+            for(var i=0; i<vals.length; i++) {
+                if(i < kwargNames.length) {
+                    kwargs[kwargNames[i]] = vals[i];
+                }
             }
 
-            current = items[index];
-            return current;
+            args.push(kwargs);
         }
-    };
+        else if(argCount < argNames.length) {
+            args = Array.prototype.slice.call(arguments, 0, argCount);
 
+            for(var i=argCount; i<argNames.length; i++) {
+                var arg = argNames[i];
+
+                // Keyword arguments that should be passed as
+                // positional arguments, i.e. the caller explicitly
+                // used the name of a positional arg
+                args.push(kwargs[arg]);
+                delete kwargs[arg];
+            }
+
+            args.push(kwargs);
+        }
+        else {
+            args = arguments;
+        }
+
+        return func.apply(this, args);
+    };
 }
 
-function joiner(sep) {
-    sep = sep || ',';
-    var first = true;
-
-    return function() {
-        var val = first ? '' : sep;
-        first = false;
-        return val;
-    };
+function makeKeywordArgs(obj) {
+    obj.__keywords = true;
+    return obj;
 }
 
-var globals = {
-    range: function(start, stop, step) {
-        if(!stop) {
-            stop = start;
-            start = 0;
-            step = 1;
-        }
-        else if(!step) {
-            step = 1;
-        }
+function getKeywordArgs(args) {
+    if(args.length && args[args.length - 1].__keywords) {
+        return args[args.length - 1];
+    }
+    return {};
+}
 
-        var arr = [];
-        for(var i=start; i<stop; i+=step) {
-            arr.push(i);
-        }
-        return arr;
-    },
-
-    // lipsum: function(n, html, min, max) {
-    // },
-
-    cycler: function() {
-        return cycler(Array.prototype.slice.call(arguments));
-    },
-
-    joiner: function(sep) {
-        return joiner(sep);
+function numArgs(args) {
+    if(args.length === 0) {
+        return 0;
+    }
+    else if(args[args.length - 1].__keywords) {
+        return args.length - 1;
+    }
+    else {
+        return args.length;
     }
 }
 
-modules['globals'] = globals;
+function suppressValue(val) {
+    return (val !== undefined && val !== null) ? val : "";
+}
+
+function suppressLookupValue(obj, val) {
+    obj = obj || {};
+    val = obj[val];
+
+    if(typeof val === 'function') {
+        return function() {
+            return suppressValue(val.apply(obj, arguments));
+        };
+    }
+    else {
+        return suppressValue(val);
+    }
+}
+
+function callWrap(obj, name, args) {
+    if(!obj) {
+        throw new Error('Unable to call `' + name + '`, which is undefined or falsey');
+    }
+    else if(typeof obj !== 'function') {
+        throw new Error('Unable to call `' + name + '`, which is not a function');
+    }
+
+    return obj.apply(this, args);
+}
+
+function contextOrFrameLookup(context, frame, name) {
+    var val = context.lookup(name);
+    return (val !== undefined && val !== null) ?
+        val :
+        frame.lookup(name);
+}
+
+function handleError(error, lineno, colno) {
+    if(error.lineno) {
+        throw error;
+    }
+    else {
+        throw new lib.TemplateError(error, lineno, colno);
+    }
+}
+
+modules['runtime'] = {
+    Frame: Frame,
+    makeMacro: makeMacro,
+    makeKeywordArgs: makeKeywordArgs,
+    numArgs: numArgs,
+    suppressValue: suppressValue,
+    suppressLookupValue: suppressLookupValue,
+    contextOrFrameLookup: contextOrFrameLookup,
+    callWrap: callWrap,
+    handleError: handleError,
+    isArray: lib.isArray
+};
 })();
 (function() {
 var lib = modules["lib"];
@@ -937,25 +777,16 @@ var compiler = modules["compiler"];
 var builtin_filters = modules["filters"];
 var builtin_loaders = modules["loaders"];
 var runtime = modules["runtime"];
-var globals = modules["globals"];
 var Frame = runtime.Frame;
 
 var Environment = Object.extend({
-    init: function(loaders, opts) {
+    init: function(loaders, tags, dev) {
         // The dev flag determines the trace that'll be shown on errors.
         // If set to true, returns the full trace from the error point,
         // otherwise will return trace starting from Template.render
         // (the full trace from within nunjucks may confuse developers using
         //  the library)
-        // defaults to false
-        opts = opts || {};
-        this.dev = !!opts.dev;
-
-        // The autoescape flag sets global autoescaping. If true,
-        // every string variable will be escaped by default.
-        // If false, strings can be manually escaped using the `escape` filter.
-        // defaults to false
-        this.autoesc = !!opts.autoescape;
+        this.dev = dev;
 
         if(!loaders) {
             // The filesystem loader is only available client-side
@@ -970,24 +801,12 @@ var Environment = Object.extend({
             this.loaders = lib.isArray(loaders) ? loaders : [loaders];
         }
 
-        if(opts.tags) {
-            lexer.setTags(opts.tags);
+        if(tags) {
+            lexer.setTags(tags);
         }
 
         this.filters = builtin_filters;
         this.cache = {};
-        this.extensions = {};
-        this.extensionsList = [];
-    },
-
-    addExtension: function(name, extension) {
-        extension._name = name;
-        this.extensions[name] = extension;
-        this.extensionsList.push(extension);
-    },
-
-    getExtension: function(name) {
-        return this.extensions[name];
     },
 
     addFilter: function(name, func) {
@@ -1002,10 +821,6 @@ var Environment = Object.extend({
     },
 
     getTemplate: function(name, eagerCompile) {
-        if (name && name.raw) {
-            // this fixes autoescape for templates referenced in symbols
-            name = name.raw;
-        }
         var info = null;
         var tmpl = this.cache[name];
         var upToDate;
@@ -1122,14 +937,7 @@ var Context = Object.extend({
     },
 
     lookup: function(name) {
-        // This is one of the most called functions, so optimize for
-        // the typical case where the name isn't in the globals
-        if(name in globals && !(name in this.ctx)) {
-            return globals[name];
-        }
-        else {
-            return this.ctx[name];
-        }
+        return this.ctx[name];
     },
 
     setVariable: function(name, val) {
@@ -1257,8 +1065,7 @@ var Template = Object.extend({
             props = this.tmplProps;
         }
         else {
-            var source = compiler.compile(this.tmplStr, this.env.extensionsList, this.path);
-            var func = new Function(source);
+            var func = new Function(compiler.compile(this.tmplStr, this.env));
             props = func();
         }
 
@@ -1282,19 +1089,15 @@ var Template = Object.extend({
 
 // var fs = modules["fs"];
 // var src = fs.readFileSync('test.html', 'utf-8');
-// var src = '{% macro foo(x) %}{{ x }}{% endmacro %}{{ foo("<>") }}';
-// var env = new Environment(null, { autoescape: true, dev: true });
+// //var src = '{% macro foo(x, y, z=3) %}h{% endmacro %}';
+// //var src = '{% macro foo() %}{{ h }}{% endmacro %} {{ foo() }}';
 
-// env.addFilter('bar', function(x) {
-//     return runtime.copySafeness(x, x.substring(3, 1) + x.substring(0, 2));
-// });
-
-// //env.addExtension('testExtension', new testExtension());
+// var env = new Environment();
 // console.log(compiler.compile(src));
 
 // var tmpl = new Template(src, env);
 // console.log("OUTPUT ---");
-// console.log(tmpl.render({ bar: '<>&' }));
+// console.log(tmpl.render({ username: "James" }));
 
 modules['environment'] = {
     Environment: Environment,
@@ -1307,7 +1110,6 @@ var env = modules["environment"];
 var compiler = modules["compiler"];
 var parser = modules["parser"];
 var lexer = modules["lexer"];
-var runtime = modules["runtime"];
 var loaders = modules["loaders"];
 
 nunjucks = {};
@@ -1327,7 +1129,6 @@ if(loaders) {
 nunjucks.compiler = compiler;
 nunjucks.parser = parser;
 nunjucks.lexer = lexer;
-nunjucks.runtime = runtime;
 
 nunjucks.require = function(name) { return modules[name]; };
 

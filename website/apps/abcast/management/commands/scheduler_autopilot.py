@@ -13,15 +13,135 @@ import datetime
 
 from random import choice
 
+# logging
+import logging
+logger = logging.getLogger(__name__)
+
+START_OFFSET = 0 # hours to look ahead
+RANGE = 24 * 28 # hours to fill
+
+
+
 class Autopilot(object):
     def __init__(self, * args, **kwargs):
         self.action = kwargs.get('action')
         self.verbosity = int(kwargs.get('verbosity', 1))
         
+        
+    def add_emission(self, slot_start):
+        
+        log = logging.getLogger('abcast.autopilot.add_emission')
+        log.debug('auto-adding emission, slot start: %s' % slot_start)
+            
+        # check if overlapping emission exists
+        ces = Emission.objects.filter(time_start__lt=slot_start, time_end__gt=slot_start)
+        print 'coliding emissions'
+        print ces
+        if ces.count() > 0:
+            next_start = ces[0].time_end
+        else:
+            next_start = slot_start
+            
+        print 'next_start: %s' % next_start
+            
+        # check how much time is available until next emission
+        fes = Emission.objects.filter(time_start__gte=next_start).order_by('time_start')
+        print fes
+        free_slot = 14400
+        if fes.count() > 0:
+            log.debug('got %s emissions scheduled in future' % fes.count())
+            diff = fes[0].time_start - next_start
+            free_slot = int(diff.total_seconds())
+
+        log.debug('length of free slot is: %s seconds' % free_slot)
+        log.debug('length of free slot is: %s hours' % (int(free_slot) / 60 / 60))
+            
+        if free_slot == 0:
+            print 'FREE SLOT IS ZERO - FUCK!'
+            return fes[0].time_end
+            
+        """
+        look for possible playlists to schedule
+        """
+        ps = Playlist.objects.filter(target_duration__lte=free_slot, rotation=True).order_by('?')
+        
+        if ps.count() > 0:
+            p = ps[0]
+        else:
+            p = None
+        
+        print 'The random selection iiiiiiiiiiiiiis!!'
+        print p
+        
+        # create the scheduler entry
+        if p:
+            pass
+            e = Emission(content_object=p, time_start=next_start)
+            e.save()
+            
+            print 'Created emission, will run until: %s' % e.time_end
+            
+            return e.time_end
+        
+
+    def free_time_in_range(self, range_start, range_end):
+        
+        log = logging.getLogger('abcast.autopilot.free_time_in_range')
+        log.debug('range_start: %s' % range_start)
+        log.debug('range_end: %s' % range_end)
+        
+        
+        
+        
+        range_seconds = int((range_end - range_start).total_seconds())
+        print 'range_seconds %s' % range_seconds
+        
+        emissions_total = 0
+        es = Emission.objects.filter(time_end__gte=range_start, time_start__lte=range_end)
+        for e in es:
+            print e
+            emissions_total += int(e.content_object.get_duration())
+        
+            
+        print 'range_seconds:   %s' % range_seconds
+        print 'emissions_total: %s' % (int(emissions_total) / 1000)
+            
+        free_time = range_seconds - (int(emissions_total) / 1000)
+        
+        return free_time
+        
+        
     def run(self):
         
-        print 'Autopilot'
+        log = logging.getLogger('abcast.autopilot.run')
+        
+        log.debug('running autopilot, action: %s' % self.action)
+        
+        
         if self.action == 'schedule':
+            
+            log.debug('try to fill up the schedule')
+            
+            now = datetime.datetime.now()
+            range_start = now.replace(minute=0, second=0, microsecond=0) + datetime.timedelta(hours=1 + START_OFFSET)
+            range_end = range_start + datetime.timedelta(hours=RANGE)
+            
+            log.debug('range_start: %s' % range_start)
+            log.debug('range_end:   %s' % range_end)
+            
+            slot_start = range_start
+            
+            
+            print 'FREEEEEE'
+            print self.free_time_in_range(range_start, range_end)
+            
+            """"""
+            while self.free_time_in_range(range_start, range_end) > 0:
+                slot_start = self.add_emission(slot_start)
+            
+             
+        
+        if self.action == 'schedule__':
             print 'schedule!!'
             
             now = datetime.datetime.now()

@@ -8,7 +8,21 @@ body.scheduler
     
 
 
+// themes
+$theme-0-dark: #95d182
+$theme-0-bright: #ddffd9
 
+$theme-1-dark: #63C
+$theme-1-bright: #d9ccf2
+
+$theme-2-dark: #cc33b9
+$theme-2-bright: #f2cced
+
+$theme-3-dark: #3391cc
+$theme-3-bright: #cce3f2
+
+$theme-4-dark: #cc6833
+$theme-4-bright: #f2dacc
 
 
 
@@ -37,6 +51,36 @@ body.scheduler
     section.form
       label
         color: #efefef
+        
+    section.form
+      fieldset.color
+        .controls
+          height: 40px
+          label
+            height: 24px
+            width: 14px
+            float: left
+            padding-top: 0
+            border: 4px solid #333
+            &.selected
+              border-color: #6633cc
+              
+            &.theme-0
+              background: $theme-0-dark
+              
+            &.theme-1
+              background: $theme-1-dark
+              
+            &.theme-2
+              background: $theme-2-dark
+              
+            &.theme-3
+              background: $theme-3-dark
+              
+            &.theme-4
+              background: $theme-4-dark
+
+          // padding: 0 10px 0 0
 
 
 
@@ -52,7 +96,7 @@ body.scheduler
 .object-to-schedule
   &.ui-draggable-dragging
     background: yellow
-    width: 108px !important
+    // width: 108px !important
     .item-list
       display: none
     .tags
@@ -68,6 +112,87 @@ body.scheduler
       
       
       
+      
+
+
+.emission
+  position: absolute
+  cursor: default
+  color: #222
+  -moz-user-select: none
+  background: #ddffd9
+  a
+    color: #333 !important
+  &.colision
+    background: #f99 !important
+  &.ui-draggable-dragging
+    // width: 108px !important
+    > *
+      border-right: none
+      
+  &.___autopilot
+    background: #D9FAFF
+    dl
+      border-color: #C0D3F3
+      
+  &.theme-0
+    background: $theme-0-bright
+    dl
+      border-color: $theme-0-dark
+      
+  &.theme-1
+    background: $theme-1-bright
+    dl
+      border-color: $theme-1-dark
+      
+  &.theme-2
+    background: $theme-2-bright
+    dl
+      border-color: $theme-2-dark
+      
+  &.theme-3
+    background: $theme-3-bright
+    dl
+      border-color: $theme-3-dark
+      
+  &.theme-4
+    background: $theme-4-bright
+    dl
+      border-color: $theme-4-dark
+    
+  dt
+    margin-top: -1px
+    font: bold 10px Arial, sans-serif
+    white-space: nowrap
+    overflow: hidden
+    padding: 0 0 1px
+    text-align: left
+  dl
+    margin: 0
+    padding: 0 0 1px
+    border-left: 1px solid
+    border-right: 1px solid
+    border-color: rgb(149, 209, 130)
+    overflow: hidden
+  dd
+    margin: 0
+    overflow: hidden
+    padding: 0 1px
+    font: 12px Arial, sans-serif
+    text-align: left
+    word-wrap: break-word    
+
+  dd, dt
+    padding: 0 2px 0 4px
+  dl
+    padding: 2px 0 1px
+  dd
+    line-height: 1.1
+      
+      
+      
+      
+      
 
 #scrolltimedeventswk
   overflow: hidden
@@ -75,7 +200,7 @@ body.scheduler
 
 
 .wk-daynames th
-  width: 110px
+  // width: 110px
 
 ul.day-actions
   height: 14px
@@ -166,56 +291,6 @@ input.autocomplete
 
 .calListLabelOuter-hvr
   background: #eeeeee
-
-.chip
-  position: absolute
-  cursor: default
-  color: #222
-  -moz-user-select: none
-  background: #ddffd9
-  a
-    color: #333 !important
-  &.colision
-    background: #f99 !important
-  &.ui-draggable-dragging
-    width: 108px !important
-    > *
-      border-right: none
-      
-  &.autopilot
-    background: #D9FAFF
-    dl
-      border-color: #C0D3F3
-    
-  dt
-    margin-top: -1px
-    font: bold 10px Arial, sans-serif
-    white-space: nowrap
-    overflow: hidden
-    padding: 0 0 1px
-    text-align: left
-  dl
-    margin: 0
-    padding: 0 0 1px
-    border-left: 1px solid
-    border-right: 1px solid
-    border-color: rgb(149, 209, 130)
-    overflow: hidden
-  dd
-    margin: 0
-    overflow: hidden
-    padding: 0 1px
-    font: 12px Arial, sans-serif
-    text-align: left
-    word-wrap: break-word
-
-.chip
-  dd, dt
-    padding: 0 2px 0 4px
-  dl
-    padding: 2px 0 1px
-  dd
-    line-height: 1.1
 
 .drag-chip .cbrd
   padding: 1px 0 0

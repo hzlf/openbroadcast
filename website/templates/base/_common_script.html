@@ -47,7 +47,17 @@
 	
 	{% addtoblock "js-post" %}<!--<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.autocomplete.js"></script>-->{% endaddtoblock %}
 	
+	
+	
+	
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/nunjucks/nunjucks-dev.js"></script>{% endaddtoblock %}
+	
+	{% addtoblock "js-post" %}<!--
+	<script type="text/javascript" src="{{ STATIC_URL }}js/lib/nunjucks/nunjucks-dev.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}nj/templates.js"></script>
+	-->{% endaddtoblock %}
+	
+	
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/nunjucks/filters.js"></script>{% endaddtoblock %}
 	
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.daterangepicker.js"></script>{% endaddtoblock %}

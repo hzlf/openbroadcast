@@ -18,12 +18,13 @@ SchedulerApp = function() {
 	this.range = [];
 
 	// settings
-	this.ppd = 110; // pixels per day (horizontal)
-	this.pph = 42; // pixels per hour (vertical)
+	this.ppd; // pixels per day (horizontal)
+	this.pph; // pixels per hour (vertical)
 	this.grid_offset = {
 		top: 0,
 		left: 60
 	};
+	this.num_days;
 
 	this.local_data = new Array;
 	this.emissions = new Array;
@@ -91,7 +92,7 @@ SchedulerApp = function() {
 			self.display(self.local_data);
 		} else {
 			debug.debug('SchedulerApp - load: using remote data');
-			var url = self.api_url;
+			var url = self.api_url + '?limit=500';
 			$.get(url, function(data) {
 				self.local_data = data;
 				self.display(data);
@@ -114,6 +115,9 @@ SchedulerApp = function() {
 
 			if (!(item.uuid in self.emissions)) {
 				var emission = new EmissionApp;
+				emission.ppd = self.ppd;
+				emission.pph = self.pph;
+				emission.num_days = self.num_days;
 				emission.local_data = item;
 				emission.scheduler_app = self;
 				emission.api_url = item.resource_uri;
@@ -136,74 +140,12 @@ SchedulerApp = function() {
 
 	};
 
-	this.drag = function(event, ui) {
-		//console.log(event);
-		$(".protrusion").remove();
-		var collision = $(event.target).collision("div.chip.fix", {
-			mode : "collision",
-			colliderData : "cdata",
-			as : "<div/>"
-		});
-
-		if (collision.length > 1) {
-			for (var i = 1; i < collision.length; i++) {
-
-				var hit = collision[i];
-
-				//var o = $(hit).data("odata");
-				var c = $(hit).data("cdata");
-
-				//console.log('collider:', c)
-
-				$(c).addClass('colision');
-
-			}
-		} else {
-			$(event.target).removeClass('colision');
-		}
-
-		if (event.type == 'dragstop') {
-
-			var el = $(event.target);
-			console.log('drag-stop', event.target.offsetTop);
-			if (event.target.offsetTop < 0) {
-				el.css('top', 0)
-			}
-
-			// update schedule data
-			var url = el.data('resource-uri') + 'reschedule/';
-			var data = {
-				top : parseInt(el.css('top'))
-			};
-
-			$.ajax({
-				type : "POST",
-				url : url,
-				dataType : "json",
-				contentType : 'application/json',
-				processData : true,
-				data : data,
-				success : function(data) {
-					debug.debug(data);
-				},
-				error: function(a,b,c) {
-					console.log(a,b,c)
-				}
-			});
-
-		};
-
-		// console.log(collision)
-
-		// protruding.addClass("protrusion").appendTo("body");
-	};
-
 	// handling of selected object (to place in schedule)
 	this.set_selection = function(ct, resource_uri) {
 
 		debug.debug('set_selection', ct, resource_uri);
 
-		$.get(resource_uri, function(data) {
+		$.get(resource_uri + '?all=1', function(data) {
 			self.selected_object = data;
 			self.display_selection(data);
 			// call view to save state to session
@@ -323,6 +265,7 @@ SchedulerApp = function() {
 			obj_id: obj.id,
 			left: pos.left,
 			top: pos.top,
+			num_days: self.num_days,
 			range_start: self.range[0],
 			range_end: self.range[self.range.length -1],
 		}
@@ -429,7 +372,8 @@ var EmissionApp = function() {
 			if (action == 'save') {
 
 				var locked = $('.edit-lock', $(dialogue.elements.content)).attr('checked');
-
+				var color = $('input[name=color]:checked', $(dialogue.elements.content)).val();
+				
 				if (locked) {
 					locked = 1;
 				} else {
@@ -437,7 +381,8 @@ var EmissionApp = function() {
 				}
 
 				var data = {
-					'locked' : locked
+					'locked' : locked,
+					'color' : color,
 				}
 				var url = self.api_url + 'update/';
 				$.ajax({
@@ -473,7 +418,15 @@ var EmissionApp = function() {
 			};
 
 		});
-
+		
+		// color selector
+		var form = $('.form', $(dialogue.elements.content));
+		$('fieldset.color input:checked').parent().addClass("selected");
+		$('fieldset.color input').css('display', 'none');
+		$('fieldset.color input').live('change', function(e){
+			$('fieldset.color label').removeClass('selected');
+			$(this).parents('label').addClass('selected');
+		});
 	};
 
 	this.dialogue = function(uri, title) {
@@ -639,7 +592,8 @@ var EmissionApp = function() {
 			var url = self.api_url + 'reschedule/';
 			var data = {
 				left : parseInt(el.position().left),
-				top : parseInt(el.css('top'))
+				top : parseInt(el.css('top')),
+				num_days: self.num_days,
 			};
 
 			/**/

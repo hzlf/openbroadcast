@@ -159,6 +159,8 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
     )
     edit_mode = models.PositiveIntegerField(default=2, choices=EDIT_MODE_CHOICES)
     
+    rotation = models.BooleanField(default=False)
+    
     main_image = models.ImageField(verbose_name=_('Image'), upload_to=filename_by_uuid, null=True, blank=True)
     
     # relations

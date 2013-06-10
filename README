@@ -52,3 +52,19 @@ cd ~/code/openbroadcast.ch/website/site-static
 fontcustom watch iconset -n FontAwesome -o css/iconset
 
 
+
+
+# playout startup
+parts running on playout server:
+ - pypo (python scripts)
+ - liqudsoap (sound server)
+ 
+ssh 172.16.82.134 -l root
+cd /home/pypo/pypo/liquidsoap_scripts
+sudo -u pypo /usr/bin/airtime-liquidsoap --verbose -f ls_script.liq
+
+cd /home/pypo/pypo
+sudo -u pypo env/bin/python pypo.py
+ 
+  
+

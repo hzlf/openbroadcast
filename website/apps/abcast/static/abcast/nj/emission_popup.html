@@ -21,32 +21,64 @@
 	-->
 
 	<ul class="unstyled">
-		<li><a href="{{ object.absolute_url }}">&gt; Emission details</a></li>
-		<li><a href="{{ object.content_object.absolute_url }}">&gt; Content details</a></li>
+		<li>
+			<a href="{{ object.absolute_url }}">&gt; Emission details</a>
+		</li>
+		<li>
+			<a href="{{ object.content_object.absolute_url }}">&gt; Content details</a>
+		</li>
 	</ul>
 
 </section>
 
 <section class="form">
 
+	<fieldset>
+		<label class="checkbox">
+			<input type="checkbox" class="edit-lock" {% if object.locked == 1 %}checked="checked"{% endif %}>
+			Lock editing </label>
+	</fieldset>
+	
+	
 
-  <fieldset>
-    <label class="checkbox">
-      <input type="checkbox" class="edit-lock" {% if object.locked == 1 %}checked="checked"{% endif %}> Lock editing
-    </label>
-  </fieldset>
+	
+	<fieldset class="color">
+		<div class="controls">
+			
+			<label class="radio  theme-0">
+				<input type="radio" class="color" name="color" value="0" {% if object.color == 0 %}checked="checked"{% endif %}>
+			</label>
+			
+			<label class="radio theme-1">
+				<input type="radio" class="color" name="color" value="1" {% if object.color == 1 %}checked="checked"{% endif %}>
+			</label>
+			
+			<label class="radio theme-2">
+				<input type="radio" class="color" name="color" value="2" {% if object.color == 2 %}checked="checked"{% endif %}>
+			</label>
+			
+			<label class="radio theme-3">
+				<input type="radio" class="color" name="color" value="3" {% if object.color == 3 %}checked="checked"{% endif %}>
+			</label>
+			
+			<label class="radio theme-4">
+				<input type="radio" class="color" name="color" value="4" {% if object.color == 4 %}checked="checked"{% endif %}>
+			</label>
+
+		</div>
+	</fieldset>
+	
 
 	<div class="btn-toolbar">
 		<div class="btn-group pull-right">
 
 			<a data-action="cancel" class="btn btn-mini pull-right">Cancel</a>
-			
+
 			{% if not object.locked %}
 			<a data-action="delete" class="btn btn-mini pull-right">Delete</a>
 			{% endif %}
 			<a data-action="save" class="btn btn-primary btn-mini pull-right">Save</a>
 		</div>
 	</div>
-
 
 </section>

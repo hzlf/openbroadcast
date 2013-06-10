@@ -384,7 +384,7 @@ class PlaylistItemPlaylistInline(admin.TabularInline):
         
 class PlaylistAdmin(GenericAdminModelAdmin):
     
-    list_display   = ('name', 'user', 'type', 'duration', 'is_current', 'updated')
+    list_display   = ('name', 'user', 'type', 'duration', 'target_duration', 'is_current', 'rotation', 'updated')
     list_filter = ('type', )
     
     #readonly_fields = ['slug', 'is_current',]

@@ -39,25 +39,30 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+SCHEDULER_GRID_WIDTH = getattr(settings, 'SCHEDULER_GRID_WIDTH', 830)
+SCHEDULER_GRID_OFFSET = getattr(settings, 'SCHEDULER_GRID_OFFSET', 60)
 SCHEDULER_PPH = getattr(settings, 'SCHEDULER_PPH', 42)
-SCHEDULER_PPD = getattr(settings, 'SCHEDULER_PPD', 110)
+SCHEDULER_PPD = getattr(settings, 'SCHEDULER_PPD', 110) # actually should be calculated
 # how long ahead should the schedule be locked
-SCHEDULER_LOCK_AHEAD = getattr(settings, 'SCHEDULER_LOCK_AHEAD', 60 * 60)
-
+SCHEDULER_LOCK_AHEAD = getattr(settings, 'SCHEDULER_LOCK_AHEAD', 60) # 1 minute, to allow caching of files
+SCHEDULER_NUM_DAYS = 7
 
 def schedule(request):
         
     log = logging.getLogger('abcast.schedulerviews.schedule')
 
     data = {}
-    data['list_style'] = request.GET.get('list_style', 's')    
-    data['days_offset'] = request.GET.get('days_offset', 0)        
+    data['list_style'] = request.GET.get('list_style', 's')
+    data['days_offset'] = request.GET.get('days_offset', 0)
     data['get'] = request.GET
+    
+    num_days = request.GET.get('num_days', SCHEDULER_NUM_DAYS)
+    data['num_days'] = int(num_days)
     
     days = []
     today = datetime.datetime.now() 
     offset = datetime.timedelta(days=-today.weekday() + int(data['days_offset']))
-    for day in range(7):
+    for day in range(int(num_days)):
         date = today + offset
         #date = date.strftime("%a, %d %b %Y %H:%M:%S +0000")
         days.append( date )
@@ -66,6 +71,13 @@ def schedule(request):
     
     data['today'] = today
     data['days'] = days
+    
+    data['pph'] = SCHEDULER_PPH
+    data['ppd'] = (SCHEDULER_GRID_WIDTH - SCHEDULER_GRID_OFFSET) / int(num_days)
+    
+    
+    log.debug('grid pph: %s' % data['pph'])
+    log.debug('grid ppd: %s' % data['ppd'])
         
         
     # look for a selected playlist in session
@@ -217,6 +229,8 @@ def schedule_object(request):
     range_start = request.POST.get('range_start', None)
     range_end = request.POST.get('range_end', None)
     
+    num_days = request.POST.get('num_days', SCHEDULER_NUM_DAYS)
+    
     log.debug('content type: %s' % ct)
     
     if ct == 'playlist':
@@ -225,7 +239,8 @@ def schedule_object(request):
     
     
     pph = SCHEDULER_PPH
-    ppd = SCHEDULER_PPD
+    # ppd = SCHEDULER_PPD
+    ppd = (SCHEDULER_GRID_WIDTH - SCHEDULER_GRID_OFFSET) / int(num_days)
     
     
     top = float(top) / pph * 60
@@ -257,6 +272,10 @@ def schedule_object(request):
     # check if slot is free
     es = Emission.objects.filter(time_end__gt=time_start, time_start__lt=time_end)
     if es.count() > 0:
+        for em in es:
+            print 'Blocking emission: %s' % em.id
+            print em.time_start
+            print em.time_end
         return { 'message': _('Sorry, but the desired time does not seem to be available.') }
     
     

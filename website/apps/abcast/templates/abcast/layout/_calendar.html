@@ -16,7 +16,11 @@
 						{% for date in days %}
 						<th scope="col">
 						<div class="wk-dayname">
+							{% if days|length < 8 %}
 							<span class="wk-daylink">{{ date|date:"DATE_FORMAT" }}</span>
+							{% else %}
+							<span class="wk-daylink">{{ date|date:"m / d" }}</span>
+							{% endif %}
 							<ul class="unstyled horizontal day-actions">
 								<li><a href="#" title="{% trans "Paste day" %}"><i class="icon-paste"></i></a></li>
 								<li><a href="#" title="{% trans "Copy day" %}"><i class="icon-copy"></i></a></li>

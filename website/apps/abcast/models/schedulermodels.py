@@ -33,7 +33,7 @@ from alibrary.models import Artist, Playlist
 from abcast.models import BaseModel, Station, Channel
 
 
-
+from caching.base import CachingMixin, CachingManager
 
 
 
@@ -78,7 +78,7 @@ class Broadcast(BaseModel):
         return u'%s' % self.name
 
 
-class EmissionManager(models.Manager):
+class EmissionManager(CachingManager):
 
     def future(self):
         now = datetime.datetime.now()
@@ -91,7 +91,7 @@ class EmissionManager(models.Manager):
 
 
 
-class Emission(BaseModel):
+class Emission(BaseModel, CachingMixin):
     
     # core fields
     name = models.CharField(max_length=200, db_index=True)
@@ -103,6 +103,14 @@ class Emission(BaseModel):
         (2, _('Error')),
     )
     status = models.PositiveIntegerField(max_length=2, default=0, choices=STATUS_CHOICES)
+    
+    COLOR_CHOICES = (
+        (0, _('Theme 1')),
+        (1, _('Theme 2')),
+        (2, _('Theme 3')),
+        (3, _('Theme 4')),
+    )
+    color = models.PositiveIntegerField(max_length=2, default=0, choices=COLOR_CHOICES)
 
     TYPE_CHOICES = (
         ('studio', _('Studio')),
