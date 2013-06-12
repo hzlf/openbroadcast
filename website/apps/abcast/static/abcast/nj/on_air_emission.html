@@ -1,0 +1,5 @@
+<ul class="unstyled">
+	<li><strong class="name"><a href="{{ object.absolute_url }}">{{ object.name|truncate_chars_inner(30) }}</a></strong><small class="pull-right">{{ object.type_display }}</small></li>
+	<li><a href="{{ object.user.absolute_url }}">{{ object.user.full_name }}</a></li>
+	<li>{{ object.time_start|format_datetime('time') }} - {{ object.time_end|format_datetime('time') }}</li>
+</ul>

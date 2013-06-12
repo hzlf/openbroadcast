@@ -11,7 +11,7 @@
 			</li>
 			
 			<li class="action {% if object.type != "broadcast"  %}disabled{% endif %} selection_single convert_playlist">
-				<span class="left icon"><a href="{% url alibrary-playlist-convert object.pk "playlist" %}" title="{% trans "Schedule for Broadcast" %}">{% trans "Schedule for Broadcast" %}</a> </span>
+				<span class="left icon"><a href="{% url abcast-schedule-select-playlist  %}?playlist_id={{ object.pk }}&next={% url abcast-schedule %}" title="{% trans "Schedule for Broadcast" %}">{% trans "Schedule for Broadcast" %}</a> </span>
 				<span class="opt"></span>
 				<span class="clear"></span>
 			</li>

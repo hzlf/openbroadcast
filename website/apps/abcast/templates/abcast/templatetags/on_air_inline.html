@@ -1,0 +1,28 @@
+{% load sekizai_tags verbatim i18n %}
+
+{% addtoblock "js-post" %}<script src="{{ STATIC_URL }}abcast/js/lib/jquery.countdown.js"></script>{% endaddtoblock %}
+{% addtoblock "js-post" %}<script src="{{ STATIC_URL }}abcast/js/on_air.js"></script>{% endaddtoblock %}
+{% addtoblock "js-post" %}
+<script>
+	$(function(){
+
+		var abcast = abcast || {};
+		abcast.on_air = new OnAirApp();
+		abcast.on_air.api_url = "{% url api_dispatch_list resource_name='abcast/base' api_name='v1'%}on-air/";
+		abcast.on_air.init();
+
+	});
+</script>
+{% endaddtoblock %}
+
+<div class="on-air-container" id="on_air_app">
+	<div class="emission">
+
+	</div>
+	<div class="items">
+
+	</div>
+	<div>Next: <span class="countdown"></span></div>
+	
+</div>
+

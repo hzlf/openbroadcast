@@ -1,0 +1,31 @@
+<div class="row-fluid" style="display: none;">
+	<div class="span3">
+		
+		{% if object.release %}
+		<img src="{{ object.release.main_image }}" width="54">
+		{% else %}
+		&nbsp;
+		{% endif %}
+		
+	</div>
+	<div class="span9">
+
+		<ul class="unstyled">
+			<li>
+				<span class="playing">
+				<i class="icon-headphones"></i>
+				</span>
+				<strong class="name"><a href="{{ object.absolute_url }}">{{ object.name|truncate_chars_inner(30) }}</a></strong>
+			</li>
+			<li>
+				<a href="{{ object.artist.absolute_url }}">{{ object.artist.name|truncate_chars_inner(20) }}</a>	
+			</li>
+			<li>
+				<a href="{{ object.release.absolute_url }}">{{ object.release.name|truncate_chars_inner(20) }}</a>
+			</li>
+		</ul>
+
+	</div>
+
+</div>
+

@@ -15,3 +15,8 @@ register = template.Library()
 def jingles_inline(context):
     #context.update({'foo': '...'})
     return context
+
+@register.inclusion_tag('abcast/templatetags/on_air_inline.html', takes_context=True)
+def on_air_inline(context):
+    #context.update({'foo': '...'})
+    return context

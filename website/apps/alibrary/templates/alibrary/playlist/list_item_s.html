@@ -125,11 +125,13 @@
 					</a>
 				</li>
 				
+				{% if user.is_authenticated and user == item.user %}
 				<li>
 					<a href="{{ item.get_edit_url }}" data-action="edit" data-ct="playlist" data-uuid="{{ item.uuid }}" title="{% trans "Add to basket" %}">
 						<i class="icon-edit"></i>
 					</a>
 				</li>
+				{% endif %}
 				
 			</ul>
 		</div>

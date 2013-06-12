@@ -180,6 +180,7 @@ CMS_REDIRECTS = True
 CMS_TEMPLATES = (
     # generic templates
     ('_templates/layout_a.html', 'Base - X column & Menu'),
+    ('_templates/home.html', 'Home template'),
 )
 
 WIDTH_INNER = 960

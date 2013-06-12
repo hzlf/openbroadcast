@@ -140,6 +140,11 @@ class BaseResource(Resource):
                 self._meta.resource_name, trailing_slash()),
                 self.wrap_view('get_schedule'),
                 name="base_api_get_schedule"),
+                
+            url(r"^(?P<resource_name>%s)/on-air%s$" % (
+                self._meta.resource_name, trailing_slash()),
+                self.wrap_view('get_now_playing'),
+                name="base_api_get_now_playing'"),
         ]
         
         
@@ -257,8 +262,93 @@ class BaseResource(Resource):
     
     
     
-    
-    
+    def get_now_playing(self, request, **kwargs):
+        """
+        search for current emission & map item times
+        """
+        now = datetime.datetime.now()
+        
+        es = Emission.objects.filter(time_start__lte=now, time_end__gte=now)
+        print
+        print 'get_now_playing:'
+        print es
+        
+        now_playing = []
+        start_next = False
+        items = []
+        
+        
+        
+        if es.count() == 1:
+            e = es[0]
+            print e
+            print 'Got scheduled emission!'
+            
+
+            e_start = e.time_start
+            offset = 0
+            items = e.content_object.get_items()
+            for item in items:
+                co = item.content_object
+                item.time_start = e_start + datetime.timedelta(milliseconds=offset)
+                item.time_end = e_start + datetime.timedelta(milliseconds=offset + co.get_duration() - (item.cue_in + item.cue_out + item.fade_cross))
+                
+                # check if playing
+                if item.time_start < now and item.time_end > now:
+                    item.is_playing = True
+                    # map item for quick access
+                    now_playing = {
+                                   'emission': e.get_api_url(),
+                                   'item': item.content_object.get_api_url(),
+                                   'time_start': item.time_start,
+                                   'time_end': item.time_end,
+                                   }
+                    
+                    start_next = (item.time_end - now).total_seconds()
+                    
+                    print (item.time_end - now).total_seconds()
+                    
+                else:
+                    item.is_playing = False
+                
+                print '## item'
+                print 
+                print 'start:      %s' % item.time_start
+                print 'end:        %s' % item.time_end
+                print 'is playing: %s' % item.is_playing
+                # print item.content_object
+                
+                """
+                compose media data
+                """
+
+
+                
+                offset += ( co.get_duration() - (item.cue_in + item.cue_out) )
+                
+        else:
+            # no emission in timeframe
+            es = Emission.objects.filter(time_start__gte=now).order_by('time_start')
+            print 'Nothing playing right now... future:'
+            if es.count() > 0:
+                e = es[0]
+                start_next = (e.time_start - now).total_seconds()
+            
+            
+            
+
+        bundle = {
+                  'start_next': start_next,
+                  'playing': now_playing,
+                  }
+
+        self.log_throttled_access(request)
+        return self.create_response(request, bundle)
+        
+        """
+        data = {"now_playing": now_playing,"items": []}
+        return self.json_response(request, data)
+        """
 
 
     """
