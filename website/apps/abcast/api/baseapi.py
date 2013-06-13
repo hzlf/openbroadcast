@@ -101,7 +101,8 @@ class ChannelResource(ModelResource):
                   'file': 'lala',
                   'rtmp_app': 'lala',
                   'rtmp_host': 'lala',
-                  'uri': 'http://pypo:8000/obp-dev-256.mp3',
+                  #'uri': 'http://pypo:8000/obp-dev-256.mp3',
+                  'uri': bundle.obj.get_stream_url(),
                   'uuid': bundle.obj.uuid,
                   }
         bundle.data['stream'] = stream

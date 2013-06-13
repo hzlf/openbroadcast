@@ -113,6 +113,17 @@ class Channel(BaseModel):
             'resource_name': 'abcast/channel',  
             'pk': self.pk  
         }) + ''
+        
+        
+    def get_stream_url(self, format=None):
+        
+        if self.stream_url:
+            return self.stream_url
+        
+        stream_server = self.stream_server
+        format = self.stream_server.formats.all()[0]
+        
+        return '%s%s-%s.%s' % (stream_server.host, self.mount, format.bitrate, format.type)
 
 
 class StreamServer(BaseModel):
