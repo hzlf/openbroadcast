@@ -110,7 +110,7 @@ class Channel(BaseModel):
     def get_api_url(self):
         return reverse('api_dispatch_detail', kwargs={  
             'api_name': 'v1',  
-            'resource_name': 'track',  
+            'resource_name': 'abcast/channel',  
             'pk': self.pk  
         }) + ''
 
@@ -174,11 +174,13 @@ class StreamFormat(BaseModel):
     
     
     
-    
-    
-"""
-class StationPlugin(CMSPlugin):    
-    station = models.ForeignKey(Station, related_name='plugins')
+
+class OnAirPlugin(CMSPlugin):    
+    channel = models.ForeignKey(Channel, related_name='plugins')
+    show_channel_info = models.BooleanField(default=True)
+    class Meta:
+        app_label = 'abcast'
+
     def __unicode__(self):
-        return "%s" % self.station.name
-"""
+        return "%s" % self.channel.name
+
