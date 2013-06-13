@@ -154,6 +154,10 @@ aplayer.base.load = function(play) {
 		console.log(play);
 	}
 	
+	console.log('******************************')
+	console.log(play);
+	console.log('******************************')
+	
 	aplayer.vars.uri = play.uri;
 	
 	if (play.mode === undefined) {
@@ -172,6 +176,8 @@ aplayer.base.load = function(play) {
 		aplayer.vars.force_seek = play.force_seek;
 	}
 	
+	aplayer.vars.source = play.source;
+	
 	aplayer.base.debug('uri - ' + play.uri);
 		
 	aplayer.ui.hide_overlay();
@@ -188,6 +194,8 @@ aplayer.base.load = function(play) {
  * (eg: /api/releases/142b60ba-41cf-11e1-bcff-d49a20be2cd0/ )
  *********************************************************************************/
 aplayer.base.load_playlist = function(uri) {
+
+	console.log('aplayer.base.load_playlist', uri);
 
 	if(uri) {
 		data = {};
@@ -272,7 +280,7 @@ aplayer.base.set_playlist = function(result) {
 /*********************************************************************************
  * Player handling / parent-child communication and bindings
  *********************************************************************************/
-aplayer.base.play_in_popup = function(uri, token, offset, mode, force_seek) {
+aplayer.base.play_in_popup = function(uri, token, offset, mode, force_seek, source) {
 
 	if(mode === undefined) {
 		mode = "replace";
@@ -282,6 +290,9 @@ aplayer.base.play_in_popup = function(uri, token, offset, mode, force_seek) {
 	}
 	if(force_seek === undefined) {
 		force_seek = false;
+	}
+	if(source === undefined) {
+		source = 'alibrary';
 	}
 	
 	if(aplayer.vars.debug) {
@@ -299,7 +310,8 @@ aplayer.base.play_in_popup = function(uri, token, offset, mode, force_seek) {
 		token: token,
 		offset: offset,
 		mode: mode,
-		force_seek: force_seek
+		force_seek: force_seek,
+		source: source
 	};
 	
 	local.play = play;
@@ -478,9 +490,7 @@ aplayer.base.interval = function() {
 		
 		
 		try {
-			
-			
-			
+
 			/*
 			var media = aplayer.vars.playlist[aplayer.states.current];
 			if(aplayer.vars.debug) {
@@ -565,7 +575,41 @@ aplayer.base.on_complete = function() {
 };
 
 
+aplayer.base.subscribe_channel_data = function(channel) {
+	console.log('aplayer.base.subscribe_channel_data: ', channel)
+	aplayer.base.update_channel_data(channel)
+	
+}
+aplayer.base.unsubscribe_channel_data = function() {
+	console.log('aplayer.base.unsubscribe_channel_data: ')
+	
+}
+aplayer.base.update_channel_data = function(channel) {
+	console.log('aplayer.base.update_channel_data: ', channel)
+	
+	$.get(channel.resource_uri + 'on-air/', function(data) {
+		if(data.playing && data.playing.item) {
+			$.get(data.playing.item, function(media_data, start_next){
 
+				aplayer.vars.playlist[aplayer.states.current].media = media_data;
+				
+				
+				console.log('got data:', data)
+				
+				if (data.start_next) {
+					console.log('next update:' + ((Math.floor(data.start_next) + 1) * 1000) );
+					setTimeout(function() {
+						aplayer.base.update_channel_data(channel);
+					}, (Math.floor(data.start_next) + 1) * 1000)
+				}
+
+			});
+		}
+	})
+	
+	// aplayer.vars.playlist[aplayer.states.current].media
+	
+}
 
 aplayer.base.controls = function(args) {
 	
@@ -626,7 +670,28 @@ aplayer.base.controls = function(args) {
 	
 	if(action == 'play' && index !== false) {
 		
-		var stream = aplayer.vars.playlist[index].stream;
+		// cancel pending subscriptions
+		aplayer.base.unsubscribe_channel_data();
+		
+		// switch to handle live streams
+		if (aplayer.vars.source && aplayer.vars.source == 'alibrary') {
+			var stream = aplayer.vars.playlist[index].stream;
+			console.log('stream:', stream);
+		}
+		if (aplayer.vars.source && aplayer.vars.source == 'abcast') {
+			var channel = aplayer.vars.result;
+			
+			console.log('channel:', channel);
+			aplayer.vars.playlist = [];
+			aplayer.vars.playlist[0] = channel;
+			
+			
+			aplayer.base.subscribe_channel_data(channel);
+			
+			var stream = channel.stream;
+		}
+		
+		
 		
 		if(aplayer.vars.debug) {
 			console.log(stream);

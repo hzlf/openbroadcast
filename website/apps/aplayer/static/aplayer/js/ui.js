@@ -41,8 +41,33 @@ aplayer.ui.bind = function() {
 		var offset = action[1];
 		var mode = action[2];
 		var token = 'xx-yy-zz';
+		var source = 'alibrary';
 		
-		aplayer.base.play_in_popup(uri, token, offset, mode);
+		aplayer.base.play_in_popup(uri, token, offset, mode, false, source);
+		
+		return false;
+		
+	});
+	
+	// handles '.streamable' elements
+	$('.streamable.popup').live('click', function(e) {
+
+		
+		e.preventDefault();
+		
+		var resource_uri = $(this).data('resource_uri');
+		
+		console.log(resource_uri);
+		
+		var action = $(this).attr('href').split('#');
+
+		var uri = resource_uri;
+		var offset = 0;
+		var mode = 'replace';
+		var token = 'xx-yy-zz';
+		var source = 'abcast';
+		
+		aplayer.base.play_in_popup(uri, token, offset, mode, false, source);
 		
 		return false;
 		
@@ -275,101 +300,127 @@ aplayer.ui.update = function(aplayer) {
 
 
 	// TODO: check if this is a good way
-	var media = aplayer.vars.playlist[aplayer.states.current];
-	
-
-	// var playlist_container = $('div.listing.extended');
-	$('div.item.playlist').not('div.item.playlist.' + media.uuid).removeClass('active playing');
-	$('div.item.playlist.' + media.uuid).addClass('active playing');
-	
-	// modification for alternate layout
-	$('div.listview.medias .item').not('div.item.playlist.' + media.uuid).removeClass('active playing');
-	$('div.listview.medias .item.' + media.uuid).addClass('active playing');
-
-	// playhead
-	//var active_playhead = $('div.item.' + media.uuid + ' ' + 'div.indicator');
-	
-	var container = $('div.aplayer.inline');
-	var active_playhead =  $('.playhead .indicator', container_screen);
-	
-	if(active_playhead.html()) {
-		outer_width = active_playhead.css('width');
-		try {
-			base_width = outer_width.slice(0, -2);
-		} catch(err) {
-			//console.log(media.uuid);
-			//console.log('no base_width');
-			base_width = 700;
-		};
-		active_playhead.css('background-position', (aplayer.states.position_rel * base_width / 100) + 'px' + ' 0px');
-
-	}
-	
-	
-	
-	
-	// console.log(state_changed, 'changed');
-	var body = $('body');
-	//if(this.state_changed || this.media_changed) {
-	
-		$('body').addClass('aplayer-active');
-		$('div.content.aplayer').addClass('active');
-	
-		body.removeClass('buffering playing paused idle');
-		body.addClass(aplayer.states.state);
-	//}
-	// console.log(media);
-	
-	
-	
-	
-	
-	// main window
-	//if(this.type == 'main') {
-
-	// inline player
-	var container = $('div#pplayer_inline');	
-	if(container.length) {
-		
-		console.log('got container');
-		
-		container.addClass('active');
-		
-		$('li.current', container).html(util.format_time(aplayer.states.position));
-		$('li.total', container).html(util.format_time(aplayer.states.duration));
-		
-		$('ul.timing', container).fadeIn(500);
-		
-		
-		$('.media_name a', container).html(media.name);
-		$('.media_name a', container).attr('href', media.absolute_url);
-		$('.artist_name a', container).html(media.artist.name);
-		$('.artist_name a', container).attr('href', media.artist.absolute_url);
-		$('.release_name a', container).html(media.release.name);
-		$('.release_name a', container).attr('href', media.release.absolute_url);
-		
-		$('.indicator', container).css('width', aplayer.states.position_rel + '%');
-		
+	var media = false;
+	if (aplayer.vars.source && aplayer.vars.source == 'alibrary') {
+		media = aplayer.vars.playlist[aplayer.states.current];
 	}
 
-	var container_screen = $('#progress_bar');
-	if(container_screen) {
-		$('div.time-current > span', container_screen).html(util.format_time(aplayer.states.position));
-		$('div.time-total > span', container_screen).html(util.format_time(aplayer.states.duration));
+	if (aplayer.vars.source && aplayer.vars.source == 'abcast') {
+		//console.log('we\'re in abcast mode..');	
+		var channel = aplayer.vars.playlist[aplayer.states.current];
 		
-		// $('.indicator .inner', container_screen).css('width', aplayer.states.position_rel + '%');
-		//$('.playhead .indicator', container_screen).css('width', aplayer.states.position_rel + '%');
+		//console.log('channel:', channel);
 		
-		// playlist inline progress
-		$('.indicator .inner', '.item.playlist.playing').css('width', aplayer.states.position_rel + '%');
+		if (!channel.media) {
+			console.log('NEED TO GET MEDIA!!');
+		} else {
+			media = channel.media;
+		}
 	}
+	
+	if (media) {
+		
 
 		
-	//}
-	
-	// popup window
-	if(this.type == 'popup') {
+		// var media = aplayer.vars.playlist[aplayer.states.current];
 		
+		//console.log('media:', media);
+		//console.log('media name:', media.name);
+	
+		// var playlist_container = $('div.listing.extended');
+		$('div.item.playlist').not('div.item.playlist.' + media.uuid).removeClass('active playing');
+		$('div.item.playlist.' + media.uuid).addClass('active playing');
+		
+		// modification for alternate layout
+		$('div.listview.medias .item').not('div.item.playlist.' + media.uuid).removeClass('active playing');
+		$('div.listview.medias .item.' + media.uuid).addClass('active playing');
+	
+		// playhead
+		//var active_playhead = $('div.item.' + media.uuid + ' ' + 'div.indicator');
+		
+		var container = $('div.aplayer.inline');
+		var active_playhead =  $('.playhead .indicator', container_screen);
+		
+		if(active_playhead.html()) {
+			outer_width = active_playhead.css('width');
+			try {
+				base_width = outer_width.slice(0, -2);
+			} catch(err) {
+				//console.log(media.uuid);
+				//console.log('no base_width');
+				base_width = 700;
+			};
+			active_playhead.css('background-position', (aplayer.states.position_rel * base_width / 100) + 'px' + ' 0px');
+	
+		}
+		
+		
+		
+		
+		// console.log(state_changed, 'changed');
+		var body = $('body');
+		//if(this.state_changed || this.media_changed) {
+		
+			$('body').addClass('aplayer-active');
+			$('div.content.aplayer').addClass('active');
+		
+			body.removeClass('buffering playing paused idle');
+			body.addClass(aplayer.states.state);
+		//}
+		// console.log(media);
+		
+		
+		
+		
+		
+		// main window
+		//if(this.type == 'main') {
+	
+		// inline player
+		var container = $('div#pplayer_inline');	
+		if(container.length) {
+			
+			// console.log('got container');
+			
+			container.addClass('active');
+			
+			$('li.current', container).html(util.format_time(aplayer.states.position));
+			$('li.total', container).html(util.format_time(aplayer.states.duration));
+			
+			$('ul.timing', container).fadeIn(500);
+			
+			//console.log('media !!!!!!', media);
+			
+			$('.media_name a', container).html(media.name);
+			$('.media_name a', container).attr('href', media.absolute_url);
+			$('.artist_name a', container).html(media.artist.name);
+			$('.artist_name a', container).attr('href', media.artist.absolute_url);
+			$('.release_name a', container).html(media.release.name);
+			$('.release_name a', container).attr('href', media.release.absolute_url);
+			
+			$('.indicator', container).css('width', aplayer.states.position_rel + '%');
+			
+		}
+	
+		var container_screen = $('#progress_bar');
+		if(container_screen) {
+			$('div.time-current > span', container_screen).html(util.format_time(aplayer.states.position));
+			$('div.time-total > span', container_screen).html(util.format_time(aplayer.states.duration));
+			
+			// $('.indicator .inner', container_screen).css('width', aplayer.states.position_rel + '%');
+			//$('.playhead .indicator', container_screen).css('width', aplayer.states.position_rel + '%');
+			
+			// playlist inline progress
+			$('.indicator .inner', '.item.playlist.playing').css('width', aplayer.states.position_rel + '%');
+		}
+	
+			
+		//}
+		
+		// popup window
+		if(this.type == 'popup') {
+			
+		}
 	}
 
 	// console.log(aplayer.states, local.type);
@@ -388,8 +439,9 @@ aplayer.ui.screen_display = function(index) {
 	var item = aplayer.vars.playlist[index];
 	
 	
-	item.images = []
+	
 	try {
+		item.images = []
 		item.images.push(item.release.main_image);
 	} catch(err) {};
 	

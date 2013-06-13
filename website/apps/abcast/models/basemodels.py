@@ -87,6 +87,13 @@ class Channel(BaseModel):
     
     station = models.ForeignKey('Station', null=True, blank=True, on_delete=models.SET_NULL)
     
+    """
+    settings for 'owned' channels
+    """
+    stream_server = models.ForeignKey('StreamServer', null=True, blank=True, on_delete=models.SET_NULL)
+    mount = models.CharField(max_length=64, null=True, blank=True)
+    
+    
     class Meta:
         app_label = 'abcast'
         verbose_name = _('Channel')
@@ -106,6 +113,66 @@ class Channel(BaseModel):
             'resource_name': 'track',  
             'pk': self.pk  
         }) + ''
+
+
+class StreamServer(BaseModel):
+    
+    name = models.CharField(max_length=256, null=True, blank=False)     
+    host = models.URLField(max_length=256, null=True, blank=False) 
+    source_pass = models.CharField(max_length=64, null=True, blank=True)
+    admin_pass = models.CharField(max_length=64, null=True, blank=True)
+    
+    active = models.BooleanField(default=True)
+    formats = models.ManyToManyField('StreamFormat', null=True, blank=True)
+    
+    
+     
+    TYPE_CHOICES = (
+        ('icecast2', _('Icecast 2')),
+        ('rtmp', _('RTMP / Wowza')),
+    )
+    type = models.CharField(verbose_name=_('Type'), max_length=12, default='icecast2', choices=TYPE_CHOICES)
+    
+    
+    class Meta:
+        app_label = 'abcast'
+        verbose_name = _('Streaming server')
+        verbose_name_plural = _('Streaming servers')
+        ordering = ('name', )
+
+    def __unicode__(self):
+        return "%s" % self.name
+
+class StreamFormat(BaseModel):
+
+    TYPE_CHOICES = (
+        ('mp3', _('MP3')),
+        ('ogg', _('ogg/vorbis')),
+        ('aac', _('AAC')),
+    )
+    type = models.CharField(max_length=12, default='mp3', choices=TYPE_CHOICES)
+    BITRATE_CHOICES = (
+        (64, _('64 kbps')),
+        (96, _('96 kbps')),
+        (128, _('128 kbps')),
+        (160, _('160 kbps')),
+        (192, _('192 kbps')),
+        (256, _('256 kbps')),
+        (320, _('320 kbps')),
+    )
+    bitrate = models.PositiveIntegerField(default=256, choices=BITRATE_CHOICES)
+    
+    
+    class Meta:
+        app_label = 'abcast'
+        verbose_name = _('Streaming format')
+        verbose_name_plural = _('Streaming formats')
+        ordering = ('type', )
+
+    def __unicode__(self):
+        return "%s | %s" % (self.type, self.bitrate)
+    
+    
     
     
     

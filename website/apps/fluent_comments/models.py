@@ -21,6 +21,8 @@ import re
 from easy_thumbnails.files import get_thumbnailer
 
 
+
+
 @receiver(signals.comment_was_posted)
 def on_comment_posted(sender, comment, request, **kwargs):
 
@@ -47,6 +49,12 @@ def on_comment_posted(sender, comment, request, **kwargs):
     from actstream import action
     action.send(request.user, verb='commented on', target=comment.content_object)
 
+    from pushy.util import pushy_custom
+    body = {
+            'comment': comment.comment,
+            'user': request.user.username
+            }
+    pushy_custom(comment.content_object.uuid, body=body, type='update')
     
     
     """

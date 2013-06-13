@@ -106,9 +106,9 @@
 	
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}ac_tagging/js/ac_tagging.js"></script>{% endaddtoblock %}
 	
-	<!--
-	{% addtoblock "js-post" %}<script src="{% value_from_settings "SOCKETIO_URL" %}socket.io/socket.io.js"></script>{% endaddtoblock %}
-	-->
+	
+	{% addtoblock "js-post" %}<!--<script src="{% value_from_settings "SOCKETIO_URL" %}socket.io/socket.io.js"></script>-->{% endaddtoblock %}
+	
 	
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/apps/arating.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}pusher/js/pusher.js"></script>{% endaddtoblock %}

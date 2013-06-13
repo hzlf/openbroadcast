@@ -9,7 +9,7 @@ OnAirApp = function() {
 	var self = this;
 	
 	this.timeout = false;
-	this.timeout_duration = 5000;
+	this.timeout_duration = 60000;
 	
 	this.api_url = false;
 	
@@ -31,6 +31,11 @@ OnAirApp = function() {
 		self.bindings();
 
 		self.load();
+
+		pushy.subscribe('19741cf3-cf71-11e2-ae7c-b8f6b11a3aed', function(data) {
+			debug.debug('pushy callback');
+			self.load(data)
+		});
 		
 		
 	};
@@ -49,8 +54,9 @@ OnAirApp = function() {
 		self.timeout = setTimeout(callback, duration);
 	};
 
-	this.load = function() {
+	this.load = function(data) {
 	
+		console.log(data);
 	
 		$.get(self.api_url, function(data){
 			

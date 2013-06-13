@@ -11,7 +11,7 @@ class StationAdmin(admin.ModelAdmin):
     
 class ChannelAdmin(admin.ModelAdmin):    
     
-    list_display = ('name', 'station', 'type', 'stream_url', )
+    list_display = ('name', 'station', 'type', 'stream_url', 'mount', )
     list_filter = ('station', 'type',)
     readonly_fields = ('uuid', 'slug', )
     
@@ -36,12 +36,21 @@ class JingleSetAdmin(admin.ModelAdmin):
     inlines = [JingleInline, ]
     
     
+class StreamServerAdmin(admin.ModelAdmin):    
+    
+    list_display = ('name', 'host', 'type' )
+    list_filter = ('type',)
+    readonly_fields = ('uuid',)
+    
     
 
 admin.site.register(Station, StationAdmin)
 admin.site.register(Channel, ChannelAdmin)
 admin.site.register(Jingle, JingleAdmin)
 admin.site.register(JingleSet, JingleSetAdmin)
+
+admin.site.register(StreamServer, StreamServerAdmin)
+admin.site.register(StreamFormat)
 
 
 

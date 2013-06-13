@@ -17,6 +17,7 @@ from tastypie.utils import trailing_slash
 from tastypie.exceptions import ImmediateHttpResponse
 
 from abcast.models import Station, Channel, Emission
+from abcast.util import notify
 
 from easy_thumbnails.files import get_thumbnailer
 
@@ -31,7 +32,7 @@ class StationResource(ModelResource):
         resource_name = 'abcast/station'
         excludes = ['updated',]
         #include_absolute_url = True
-        authentication =  Authentication()
+        authentication =  MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication(), Authentication())
         authorization = Authorization()
         filtering = {
             #'channel': ALL_WITH_RELATIONS,
@@ -72,6 +73,147 @@ class ChannelResource(ModelResource):
         #cache = SimpleCache(timeout=120)
         
 
+    """ stream:
+    file: "private/8acfe075/bcb7/11e2/a24c/b8f6b11a3aed/master.mp3"
+    rtmp_app: "alibrary"
+    rtmp_host: "rtmp://localhost:1935/"
+    uri: "/content/library/tracks/tracks/8acfe075-bcb7-11e2-a24c-b8f6b11a3aed/stream_html5/base.mp3"
+    uuid: "8acfe075-bcb7-11e2-a24c-b8f6b11a3aed"
+    """
+
+    def dehydrate(self, bundle):
+        
+        if(bundle.obj.station and bundle.obj.station.main_image):
+            opt = dict(size=(70, 70), crop=True, bw=False, quality=80)
+            try:
+                main_image = get_thumbnailer(bundle.obj.station.main_image).get_thumbnail(opt)
+                bundle.data['main_image'] = main_image.url
+            except:
+                bundle.data['main_image'] = None
+        else:
+            bundle.data['main_image'] = None
+
+
+        """
+        Generate stream settings
+        """
+        stream = {
+                  'file': 'lala',
+                  'rtmp_app': 'lala',
+                  'rtmp_host': 'lala',
+                  'uri': 'http://pypo:8000/obp-dev-256.mp3',
+                  'uuid': bundle.obj.uuid,
+                  }
+        bundle.data['stream'] = stream
+        bundle.data['images'] = []
+        bundle.data['media'] = None
+
+        return bundle
+    
+    # additional methods
+    def prepend_urls(self):
+        
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/on-air%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_now_playing'), name="playlist_api_get_now_playing"),
+        ]
+
+
+
+    def get_now_playing(self, request, **kwargs):
+        
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        c = Channel.objects.get(**self.remove_api_resource_names(kwargs))
+        
+        bundle = self.build_bundle(obj=c, request=request)
+        bundle = self.full_dehydrate(bundle)
+        
+
+        """
+        search for current emission & map item times
+        """
+        now = datetime.datetime.now()
+        
+        es = Emission.objects.filter(time_start__lte=now, time_end__gte=now)
+        print
+        print 'get_now_playing:'
+        print es
+        
+        now_playing = []
+        start_next = False
+        items = []
+        
+        
+        
+        if es.count() == 1:
+            e = es[0]
+            print e
+            print 'Got scheduled emission!'
+            
+
+            e_start = e.time_start
+            offset = 0
+            items = e.content_object.get_items()
+            for item in items:
+                co = item.content_object
+                item.time_start = e_start + datetime.timedelta(milliseconds=offset)
+                item.time_end = e_start + datetime.timedelta(milliseconds=offset + co.get_duration() - (item.cue_in + item.cue_out + item.fade_cross))
+                
+                # check if playing
+                if item.time_start < now and item.time_end > now:
+                    item.is_playing = True
+                    # map item for quick access
+                    now_playing = {
+                                   'emission': e.get_api_url(),
+                                   'item': item.content_object.get_api_url(),
+                                   'time_start': item.time_start,
+                                   'time_end': item.time_end,
+                                   }
+                    
+                    start_next = (item.time_end - now).total_seconds()
+                    
+                    print (item.time_end - now).total_seconds()
+                    
+                else:
+                    item.is_playing = False
+                
+                print '## item'
+                print 
+                print 'start:      %s' % item.time_start
+                print 'end:        %s' % item.time_end
+                print 'is playing: %s' % item.is_playing
+                # print item.content_object
+                
+                """
+                compose media data
+                """
+
+
+                
+                offset += ( co.get_duration() - (item.cue_in + item.cue_out) )
+                
+        else:
+            # no emission in timeframe
+            es = Emission.objects.filter(time_start__gte=now).order_by('time_start')
+            print 'Nothing playing right now... future:'
+            if es.count() > 0:
+                e = es[0]
+                start_next = (e.time_start - now).total_seconds()
+            
+            
+            
+
+        bundle = {
+                  'start_next': start_next,
+                  'playing': now_playing,
+                  }
+
+        self.log_throttled_access(request)
+        return self.create_response(request, bundle)
+        
+
 """
 api mapping for airtime / pypo
 
@@ -93,7 +235,7 @@ class BaseResource(Resource):
         resource_name = 'abcast/base'
         # excludes = ['type','results_musicbrainz']
         excludes = ['type',]
-        authentication = Authentication()
+        authentication =  MultiAuthentication(ApiKeyAuthentication(), SessionAuthentication(), Authentication())
         authorization = Authorization()
         always_return_data = True
         filtering = {
@@ -120,11 +262,26 @@ class BaseResource(Resource):
                 self._meta.resource_name, trailing_slash()),
                 self.wrap_view('get_stream_parameters'),
                 name="base_api_get_stream_parameters"),
+            
+            url(r"^(?P<resource_name>%s)/get-stream-settings%s$" % (
+                self._meta.resource_name, trailing_slash()),
+                self.wrap_view('get_stream_settings'),
+                name="base_api_get_stream_settings"),
                 
             url(r"^(?P<resource_name>%s)/update-stream-settings%s$" % (
                 self._meta.resource_name, trailing_slash()),
                 self.wrap_view('update_stream_settings'),
                 name="base_api_update_stream_settings"),
+                
+            url(r"^(?P<resource_name>%s)/update-liquidsoap-status%s$" % (
+                self._meta.resource_name, trailing_slash()),
+                self.wrap_view('update_liquidsoap_status'),
+                name="base_api_update_liquidsoap_status"),
+                
+            url(r"^(?P<resource_name>%s)/notify-media-item-start-play%s$" % (
+                self._meta.resource_name, trailing_slash()),
+                self.wrap_view('notify_start_play'),
+                name="base_api_notify_start_play"),
                 
             url(r"^(?P<resource_name>%s)/get-bootstrap-info%s$" % (
                 self._meta.resource_name, trailing_slash()),
@@ -171,6 +328,65 @@ class BaseResource(Resource):
         print request.POST
 
         data = {"stream_params":{"s1":{"enable":"true","output":"icecast","type":"ogg","bitrate":"128","host":"ubuntu","port":"8000","user":"","pass":"donthackme","admin_user":"admin","admin_pass":"donthackme","mount":"airtime_128","url":"http:\/\/airtime.sourcefabric.org","description":"Airtime Radio! Stream #1","genre":"genre","name":"Airtime!","channels":"stereo","liquidsoap_error":"OK"},"s2":{"enable":"false","output":"icecast","type":"","bitrate":"","host":"","port":"","user":"","pass":"","admin_user":"","admin_pass":"","mount":"","url":"","description":"","genre":"","name":"","channels":"stereo"},"s3":{"enable":"false","output":"icecast","type":"","bitrate":"","host":"","port":"","user":"","pass":"","admin_user":"","admin_pass":"","mount":"","url":"","description":"","genre":"","name":"","channels":"stereo"}}}
+        return self.json_response(request, data)
+
+    def get_stream_settings(self, request, **kwargs):
+        
+        print '** get_stream_settings **'
+        print request.GET
+        channel_uuid = request.GET.get('channel_id', None)
+
+        try:
+            channel = Channel.objects.get(uuid=channel_uuid)
+        except Exception, e:
+            print e
+            channel = None
+            
+        settings = []
+        if channel:
+            from abcast.util.liquidsoap import generate_settings
+            settings = generate_settings(channel)
+
+        data = {'settings': settings}
+        return self.json_response(request, data)
+
+    def update_liquidsoap_status(self, request, **kwargs):
+        
+        print '** update_liquidsoap_status **'
+        print request.POST
+        
+        data = {'status': 'session!'}
+        return self.json_response(request, data)
+
+    def notify_start_play(self, request, **kwargs):
+        
+        print '** notify_start_play **'
+        media_uuid = request.GET.get('media_id', None)
+        channel_uuid = request.GET.get('channel_id', None)
+        
+        print 'request user!!'
+        print request.user
+        
+        if media_uuid and channel_uuid:
+            print 'media_uuid  : %s' % media_uuid
+            print 'channel_uuid: %s' % channel_uuid
+            
+            from alibrary.models import Media 
+            
+            item = Media.objects.get(uuid=media_uuid)
+            try:
+                channel = Channel.objects.get(uuid=channel_uuid)
+            except:
+                channel = None
+                
+            # call notification
+            notify.start_play(item, channel, request.user)
+            
+            
+            print 'item: %s' % item.name
+            print 'channel: %s' % channel.name
+            
+        data = {'status': 'session!'}
         return self.json_response(request, data)
 
     def get_bootstrap_info(self, request, **kwargs):
@@ -233,7 +449,8 @@ class BaseResource(Resource):
                 compose media data
                 """
                 data = {
-                        'id': co.pk,     
+                        #'id': co.pk, 
+                        'id': co.uuid,     
                         'cue_in': float(item.cue_in) / 1000,  
                         'cue_out': float(co.get_duration() - item.cue_out) / 1000,   
                         'fade_in': item.fade_in,              
@@ -244,7 +461,7 @@ class BaseResource(Resource):
                         'end': "%s" % i_end_str,
                         'show_name': "%s" % e.name,
                         'uri': "http://%s%s" % (self.base_url, co.get_stream_url()),
-                        'row_id': co.pk,
+                        'row_id': co.uuid,
                         'type': "file",
                         
                         }
