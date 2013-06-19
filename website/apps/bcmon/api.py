@@ -7,6 +7,7 @@ from tastypie.authorization import *
 from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
 
 from bcmon.models import *
+from alibrary.api import MediaResource
 
 class ChannelResource(ModelResource):
     
@@ -23,7 +24,7 @@ class ChannelResource(ModelResource):
 
 class PlayoutResource(ModelResource):
     
-    #channel = fields.ForeignKey(ChannelResource, 'channel', null=True, full=True)
+    media = fields.ForeignKey(MediaResource, 'media', null=True, full=False)
     channel = fields.ForeignKey(ChannelResource, 'channel', null=True, full=True)
 
     class Meta:

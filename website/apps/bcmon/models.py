@@ -81,6 +81,10 @@ class Playout(BaseModel):
     echoprint_data = JSONField(blank=True, null=True)
     echoprintfp = JSONField(blank=True, null=True)
     
+    # reference to actual media object
+    media = models.ForeignKey(Media, null=True, blank=True, on_delete=models.SET_NULL)
+    
+    
     # meta
     class Meta:
         app_label = 'bcmon'
@@ -188,6 +192,9 @@ def playout_post_save(sender, **kwargs):
             print e
             pass
         
+        
+    m = None
+        
     if obj.status == '4' or obj.status == 4:
         print 'pre fingerprinted entry'
         code = obj.echoprintfp['code']
@@ -268,7 +275,8 @@ def playout_post_save(sender, **kwargs):
             print
         
 
-            
+        if m:
+            obj.media = m
         
         obj.status = 1;
         obj.save()

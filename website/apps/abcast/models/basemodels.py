@@ -182,7 +182,43 @@ class StreamFormat(BaseModel):
 
     def __unicode__(self):
         return "%s | %s" % (self.type, self.bitrate)
+
+"""
+class StreamMount(BaseModel):
+
+    TYPE_CHOICES = (
+        ('icecast2', _('Icecast 2')),
+        ('rtmp', _('RTMP / Wowza')),
+    )
+    type = models.CharField(max_length=12, default='icecast2', choices=TYPE_CHOICES)
+    formats = models.ManyToManyField('StreamFormat', null=True, blank=True)
+    active = models.BooleanField(default=True)
     
+    stream_url = models.URLField(null=True, blank=True, max_length=256, help_text=_('stream-url has priority over streams-erver'))
+    stream_server = models.ForeignKey('StreamServer', null=True, blank=True, on_delete=models.SET_NULL)
+
+    # url is either generated through an assigned stream-server, or the given stream-url.
+    # the stream-url has priority.
+    
+    @property
+    def url(selfself):
+        if self.stream_url:
+            return self.stream_url
+        
+        if self.stream_server:
+            return self.stream_server.host
+        
+        return None
+            
+    class Meta:
+        app_label = 'abcast'
+        verbose_name = _('Mountpoint')
+        verbose_name_plural = _('Mountpoints')
+        ordering = ('type', )
+
+    def __unicode__(self):
+        return "%s | %s" % (self.type, self.bitrate)
+"""    
     
     
 
