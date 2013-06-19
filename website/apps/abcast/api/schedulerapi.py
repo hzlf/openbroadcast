@@ -36,6 +36,9 @@ SCHEDULER_PPD = getattr(settings, 'SCHEDULER_PPD', 110) # actually should be cal
 # how long ahead should the schedule be locked
 SCHEDULER_LOCK_AHEAD = getattr(settings, 'SCHEDULER_LOCK_AHEAD', 60) # 1 minute, to allow caching of files
 SCHEDULER_NUM_DAYS = 7
+# hours to offset the schedule
+# 6: day starts at 6:00 and goes until 6:00
+SCHEDULER_OFFSET = getattr(settings, 'SCHEDULER_OFFSET', 6)
 
 
 """
@@ -92,6 +95,8 @@ class EmissionResource(ModelResource):
         filtering = {
             #'channel': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
+            'time_start': ['gte', 'lte'],
+            'time_end': ['gte', 'lte'],
         }
         max_limit = 100000
         #cache = SimpleCache(timeout=120)
@@ -104,6 +109,14 @@ class EmissionResource(ModelResource):
         bundle.data['locked'] = obj.has_lock
         bundle.data['playing'] = obj.is_playing
         bundle.data['type_display'] = obj.get_type_display()
+        
+        bundle.data['overlap'] = False
+        if obj.time_start.hour < 6:
+                tt = obj.time_start + datetime.timedelta(days=-1)
+                bundle.data['day_id'] = tt.strftime("%Y-%m-%d")
+                bundle.data['overlap'] = True
+        else:
+            bundle.data['day_id'] = obj.time_start.strftime("%Y-%m-%d")
         
         if obj.user:
             bundle.data['user'] = {
@@ -192,6 +205,9 @@ class EmissionResource(ModelResource):
         # add offsets
         time_start = datetime.datetime.combine(e.time_start.date(), datetime.time(0))
         time_start = time_start + datetime.timedelta(minutes=offset_min, days=offset_d)
+        
+        time_start = time_start + datetime.timedelta(hours=SCHEDULER_OFFSET)
+        
         time_end = time_start + datetime.timedelta(milliseconds=e.content_object.get_duration())
     
         log.debug('time_start: %s' % time_start)

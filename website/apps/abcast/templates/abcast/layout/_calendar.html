@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n calc %}
 
 <div id="mainbody" class="printAlignLeft" style="">
 	
@@ -22,8 +22,10 @@
 							<span class="wk-daylink">{{ date|date:"m / d" }}</span>
 							{% endif %}
 							<ul class="unstyled horizontal day-actions">
-								<li><a href="#" title="{% trans "Paste day" %}"><i class="icon-paste"></i></a></li>
-								<li><a href="#" title="{% trans "Copy day" %}"><i class="icon-copy"></i></a></li>
+								{% if date > today %}
+								<li><a href="#" data-action="paste" data-date="{{ date|date:"Y-m-d" }}" title="{% trans "Paste day" %}"><i class="icon-paste"></i></a></li>
+								{% endif %}
+								<li><a href="#" data-action="copy" data-date="{{ date|date:"Y-m-d" }}" title="{% trans "Copy day" %}"><i class="icon-copy"></i></a></li>
 							</ul>
 						</div></th>
 						{% endfor %}
@@ -31,45 +33,7 @@
 					</tr>
 				</tbody>
 			</table>
-			
-			<!--
-			<table class="wk-weektop wk-full-mode" cellpadding="0" cellspacing="0">
-				<tbody>
-					<tr class="wk-daynames">
-						<td class="wk-tzlabel" style="width:60px" rowspan="3"></td>
-						
-						<th title="Sun 5/19" scope="col">
-						<div class="wk-dayname">
-							<span class="ca-cdp22195 wk-daylink">Sun 5/19</span>
-						</div></th>
-						
-						<th title="Mon 5/20" scope="col">
-						<div class="wk-dayname">
-							<span class="ca-cdp22196 wk-daylink">Mon 5/20</span>
-						</div></th>
-						
-						<th title="Tue 5/21" scope="col">
-						<div class="wk-dayname">
-							<span class="ca-cdp22197 wk-daylink">Tue 5/21</span>
-						</div></th><th title="Wed 5/22" scope="col">
-						<div class="wk-dayname">
-							<span class="ca-cdp22198 wk-daylink">Wed 5/22</span>
-						</div></th><th title="Thu 5/23" scope="col">
-						<div class="wk-dayname">
-							<span class="ca-cdp22199 wk-daylink">Thu 5/23</span>
-						</div></th><th title="Fri 5/24" scope="col">
-						<div class="wk-dayname wk-today">
-							<span class="ca-cdp22200 wk-daylink">Fri 5/24</span>
-						</div></th><th title="Sat 5/25" scope="col">
-						<div class="wk-dayname wk-tomorrow">
-							<span class="ca-cdp22201 wk-daylink">Sat 5/25</span>
-						</div>
-						
-						</th><th class="wk-dummyth" rowspan="3" style="width: 17px;">&nbsp;</th>
-					</tr>
-				</tbody>
-			</table>
-			-->
+
 		</div><div id="topcontainerBorderwk" class="wk-border"></div>
 		<div id="scrolltimedeventswk" class="wbkt wk-scrolltimedevents" style="/* height: 377px; */">
 			<div class="tg-mainwrapper" style="margin-top:0px;">
@@ -86,32 +50,6 @@
 										<div class="tg-quartermarker"></div>
 									</div>
 									
-									<div class="tg-markercell marker">
-										<div class="tg-quartermarker"></div>
-										<div class="tg-quartermarker"></div>
-									</div>
-									
-									<div class="tg-markercell marker">
-										<div class="tg-quartermarker"></div>
-										<div class="tg-quartermarker"></div>
-									</div>
-									
-									<div class="tg-markercell marker">
-										<div class="tg-quartermarker"></div>
-										<div class="tg-quartermarker"></div>
-									</div>
-									
-									<div class="tg-markercell marker">
-										<div class="tg-quartermarker"></div>
-										<div class="tg-quartermarker"></div>
-									</div>
-									
-									<div class="tg-markercell marker">
-										<div class="tg-quartermarker"></div>
-										<div class="tg-quartermarker"></div>
-									</div>
-									
-									
 									<div class="tg-markercell marker-limit">
 										<div class="tg-quartermarker"></div>
 										<div class="tg-quartermarker"></div>
@@ -121,6 +59,22 @@
 										<div class="tg-quartermarker"></div>
 										<div class="tg-quartermarker"></div>
 									</div>
+									
+									<div class="tg-markercell marker">
+										<div class="tg-quartermarker"></div>
+										<div class="tg-quartermarker"></div>
+									</div>
+									
+									<div class="tg-markercell marker">
+										<div class="tg-quartermarker"></div>
+										<div class="tg-quartermarker"></div>
+									</div>
+									
+									<div class="tg-markercell marker">
+										<div class="tg-quartermarker"></div>
+										<div class="tg-quartermarker"></div>
+									</div>
+									
 									
 									<div class="tg-markercell marker-limit">
 										<div class="tg-quartermarker"></div>
@@ -172,6 +126,21 @@
 										<div class="tg-quartermarker"></div>
 									</div>
 									
+									<div class="tg-markercell marker-limit">
+										<div class="tg-quartermarker"></div>
+										<div class="tg-quartermarker"></div>
+									</div>
+									
+									<div class="tg-markercell marker">
+										<div class="tg-quartermarker"></div>
+										<div class="tg-quartermarker"></div>
+									</div>
+									
+									<div class="tg-markercell marker-limit">
+										<div class="tg-quartermarker"></div>
+										<div class="tg-quartermarker"></div>
+									</div>
+									
 									<div class="tg-markercell marker">
 										<div class="tg-quartermarker"></div>
 										<div class="tg-quartermarker"></div>
@@ -196,20 +165,7 @@
 										<div class="tg-quartermarker"></div>
 										<div class="tg-quartermarker"></div>
 									</div>
-									
-									<div class="tg-markercell marker">
-										<div class="tg-quartermarker"></div>
-										<div class="tg-quartermarker"></div>
-									</div>
-									
-									
-									<!-- orig
-									<div class="tg-markercell">
-										<div class="tg-dualmarker"></div>
-									</div>
-									-->
-									
-									
+
 									
 									
 								</div>
@@ -218,17 +174,62 @@
 						<tr>
 							<td class="tg-times-pri">
 							
-							{% for i in "xxxxxxxxxxxxxxxxxxxxxxxx" %}
-    							
-    							<!--
-								<div style="height:42px;">
-									<div class="tg-time-pri {% if forloop.last %}tg-time-pri-last{% endif %}" style="height:41px;">
-										{{ forloop.counter0 }}
-									</div>
+							
+							{% for daypart in dayparts %}
+							<div class="daypart" style="height:{{ daypart.duration|multiply:pph }}px;">
+								<div class="tg-time-pri {% if forloop.last %}tg-time-pri-last{% endif %}" style="height:{{ daypart.duration|multiply:pph }}px;">
+									
+									{{ daypart.time_start|time:"H" }} - {{ daypart.time_end|time:"H" }}
 								</div>
-    							-->
-    							
-							{% endfor %}	
+								
+								<div class="tt-content" style="display: none;">
+									<h4 style="color: white;">{{ daypart.name }} <small class="pull-right">{{ daypart.time_start|time:"H" }} - {{ daypart.time_end|time:"H" }}</small></h4>
+									
+									{% if daypart.mood %}
+									<div class="mood">
+										<div class="row-fluid">
+											<div class="span3">
+												<i class="icon-heart"></i>
+											</div>
+											<div class="span9">
+												{{ daypart.mood }}
+											</div>
+										</div>
+									</div>
+									{% endif %}
+									{% if daypart.music %}
+									<div class="mood">
+										<div class="row-fluid">
+											<div class="span3">
+												<i class="icon-headphones"></i>
+											</div>
+											<div class="span9">
+												{{ daypart.music }}
+											</div>
+										</div>
+									</div>
+									{% endif %}
+									{% if daypart.talk %}
+									<div class="mood">
+										<div class="row-fluid">
+											<div class="span3">
+												<i class="icon-microphone"></i>
+											</div>
+											<div class="span9">
+												{{ daypart.talk }}
+											</div>
+										</div>
+									</div>
+									{% endif %}
+									
+								</div>
+								
+							</div>	
+							
+							{% endfor %}
+							
+							
+							<!--	
 							<div style="height:252px;">
 								<div class="tg-time-pri {% if forloop.last %}tg-time-pri-last{% endif %}" style="height:251px;">
 									24-06
@@ -244,10 +245,10 @@
 									07-09
 								</div>
 							</div>
+							-->
 							
 							
-							
-							<div class="tg-nowptr" style="left: 0px; top: 487px;"></div></td>
+							<div class="current-time-arrow" style="left: 0px; top: 487px;"></div></td>
 							
 							{% for date in days %}
 							<td class="tg-col{% if date == today %}-today{% endif %} day" id="day_{{ date|date:"Y-m-d" }}">
@@ -263,7 +264,11 @@
 									</div>
 									
 								</div>
-								<div class="tg-col-overlaywrapper"></div>
+								<div class="tg-col-overlaywrapper">
+									
+									<div class="current-time-marker{% if date == today %} today{% endif %}" style="top: 273px;"> </div>
+									
+								</div>
 							</td>
 							{% endfor %}
 							

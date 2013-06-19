@@ -199,6 +199,40 @@ $theme-4-bright: #f2dacc
 
 
 
+
+
+.current-time-marker
+  position: absolute
+  left: 0
+  width: 100%
+  top: 0
+  height: 0
+  overflow: hidden
+  border-top: 1px solid red
+  opacity: 0.2
+  display: none
+  &.today
+    opacity: 1
+    border-top: 1px solid red
+    
+
+.current-time-arrow
+  position: absolute
+  width: 5px
+  height: 10px
+  // background: green
+  display: none
+  
+  width: 0 
+  height: 0 
+  border-top: 5px solid transparent
+  border-bottom: 5px solid transparent
+  
+  border-left: 5px solid red
+
+
+
+
 .wk-daynames th
   // width: 110px
 
@@ -432,7 +466,7 @@ input.autocomplete
 .tg-times-pri
   background-color: #fff
   color: #555
-  padding: 1px 0 0
+  padding: 0 0 0
   text-align: right
   vertical-align: top
 
@@ -464,7 +498,7 @@ input.autocomplete
 
 .tg-time-pri, .tg-time-sec
   border-bottom: 1px solid #a9a9a9
-  padding-right: 2px
+  padding-right: 4px
 
 .tg-time-pri-last, .tg-time-sec-last, .tg-times-start-last, .tg-times-end-last
   border-bottom: none
@@ -538,23 +572,6 @@ input.autocomplete
 .tg-dualmarker60
   height: 29px
   margin-bottom: 29px
-
-.tg-nowmarker
-  position: absolute
-  left: 0
-  width: 100%
-  top: 0
-  height: 0
-  border-top: 2px solid #ff7f6e
-  overflow: hidden
-
-.tg-nowptr
-  position: absolute
-  background-position: -60px -68px
-  width: 5px
-  height: 9px
-  background-image: url(//calendar.google.com/googlecalendar/images/combined_v43_vr.png)
-
 
 
 

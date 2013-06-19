@@ -126,6 +126,21 @@ class Channel(BaseModel):
         return '%s%s-%s.%s' % (stream_server.host, self.mount, format.bitrate, format.type)
 
 
+
+    def get_dayparts(self, day):
+        dayparts = []
+        daypart_sets = self.daypartset_set.filter(time_start__lte=day, time_end__gte=day, channel=self)
+        daypart_set = None
+        if daypart_sets.count() > 0:
+            daypart_set = daypart_sets[0]
+        
+        if daypart_set:
+            for dp in daypart_set.daypart_set.all():
+                dayparts.append(dp)
+        
+        return dayparts
+
+
 class StreamServer(BaseModel):
     
     name = models.CharField(max_length=256, null=True, blank=False)     

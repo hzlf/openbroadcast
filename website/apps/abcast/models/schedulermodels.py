@@ -25,6 +25,7 @@ from django.core.urlresolvers import reverse
 from filer.fields.image import FilerImageField
 from filer.fields.file import FilerFileField
 
+
 # 
 from lib.fields import extra
 
@@ -215,4 +216,95 @@ class Emission(BaseModel, CachingMixin):
         
         
         super(Emission, self).save(*args, **kwargs)
+        
+        
+        
+        
+        
+        
+class DaypartSet(BaseModel):
+    
+    channel = models.ForeignKey(Channel, blank=False, null=True, related_name="daypartset_set", on_delete=models.SET_NULL)
+
+    time_start = models.DateField(blank=False, null=True)
+    time_end = models.DateField(blank=False, null=True)
+
+    class Meta:
+        app_label = 'abcast'
+        verbose_name = _('Daypart set')
+        verbose_name_plural = _('Daypart sets')
+        ordering = ('created', )
+    
+    
+    def __unicode__(self):
+        return u'%s' % self.time_start
+        
+
+
+
+class Weekday(models.Model):
+
+    DAY_CHOICES = (
+        (1, _('Sun')),
+        (2, _('Mon')),
+        (3, _('Tue')),
+        (4, _('Wed')),
+        (5, _('Thu')),
+        (6, _('Fri')),
+        (7, _('Sat')),
+    )
+    day = models.PositiveIntegerField(max_length=1, default=1, null=False, choices=DAY_CHOICES)
+
+    class Meta:
+        app_label = 'abcast'
+        verbose_name = _('Weekay')
+        verbose_name_plural = _('Weekays')
+        ordering = ('day', )
+    
+    
+    def __unicode__(self):
+        return u'%s' % self.get_day_display()
+    
+
+class Daypart(BaseModel):
+
+    DAY_CHOICES = (
+        (0, _('Mon')),
+        (1, _('Tue')),
+        (2, _('Wed')),
+        (3, _('Thu')),
+        (4, _('Fri')),
+        (5, _('Sat')),
+        (6, _('Sun')),
+    )
+    daypartset = models.ForeignKey(DaypartSet, blank=False, null=True, on_delete=models.SET_NULL)
+    weekdays = models.ManyToManyField(Weekday, null=True, blank=True)
+    
+    time_start = models.TimeField()
+    time_end = models.TimeField()
+    
+    name = models.CharField(max_length=128, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    mood = models.TextField(null=True, blank=True)
+    sound = models.TextField(null=True, blank=True)
+    talk = models.TextField(null=True, blank=True)
+    
+    @property
+    def duration(self):
+        duration = (self.time_end.hour - self.time_start.hour)
+        if duration < 0:
+            duration = 24 + duration
+        return duration
+
+    class Meta:
+        app_label = 'abcast'
+        verbose_name = _('Daypart')
+        verbose_name_plural = _('Dayparts')
+        ordering = ('created', )
+    
+    
+    def __unicode__(self):
+        return u'%s - %s' % (self.time_start, self.time_end)
+        
+        
     

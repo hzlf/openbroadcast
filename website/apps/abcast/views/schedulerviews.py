@@ -15,7 +15,7 @@ import json
 
 from django.template import RequestContext
 
-from abcast.models import Emission
+from abcast.models import Emission, Channel
 from alibrary.models import Playlist
 
 #from abcast.filters import EmissionFilter
@@ -46,10 +46,15 @@ SCHEDULER_PPD = getattr(settings, 'SCHEDULER_PPD', 110) # actually should be cal
 # how long ahead should the schedule be locked
 SCHEDULER_LOCK_AHEAD = getattr(settings, 'SCHEDULER_LOCK_AHEAD', 60) # 1 minute, to allow caching of files
 SCHEDULER_NUM_DAYS = 7
+# hours to offset the schedule
+# 6: day starts at 6:00 and goes until 6:00
+SCHEDULER_OFFSET = getattr(settings, 'SCHEDULER_OFFSET', 6)
 
 def schedule(request):
         
     log = logging.getLogger('abcast.schedulerviews.schedule')
+    
+
 
     data = {}
     data['list_style'] = request.GET.get('list_style', 's')
@@ -61,6 +66,7 @@ def schedule(request):
     
     days = []
     today = datetime.datetime.now() 
+    today = datetime.datetime(today.year, today.month, today.day)
     offset = datetime.timedelta(days=-today.weekday() + int(data['days_offset']))
     for day in range(int(num_days)):
         date = today + offset
@@ -74,11 +80,33 @@ def schedule(request):
     
     data['pph'] = SCHEDULER_PPH
     data['ppd'] = (SCHEDULER_GRID_WIDTH - SCHEDULER_GRID_OFFSET) / int(num_days)
+    data['offset'] = SCHEDULER_OFFSET
     
+    # build a range-filter string for the API
+    range_start = days[0] + datetime.timedelta(hours=SCHEDULER_OFFSET)
+    range_end = days[-1] + datetime.timedelta(hours=SCHEDULER_OFFSET + 24)
+    
+    range_start = range_start.strftime("%Y-%m-%dT%H:%M:%S")
+    range_end = range_end.strftime("%Y-%m-%dT%H:%M:%S")
+    
+    data['range_filter'] = '&time_start__gte=%s&time_end__lte=%s&' % (range_start, range_end)
+    
+    
+    channel_id = request.GET.get('channel_id', 1)
+    channel = Channel.objects.get(pk=channel_id)
+    dayparts = channel.get_dayparts(days[0])
+    data['dayparts'] = dayparts
+    
+    print dayparts
+    
+    for dp in dayparts:
+        print dp.duration
     
     log.debug('grid pph: %s' % data['pph'])
     log.debug('grid ppd: %s' % data['ppd'])
         
+        
+    data['station_time'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
         
     # look for a selected playlist in session
     playlist_id = request.session.get('scheduler_selected_playlist_id', None)
@@ -258,6 +286,9 @@ def schedule_object(request):
     # add offsets
     time_start = schedule_start + datetime.timedelta(minutes=offset_min)
     time_start = time_start + datetime.timedelta(days=offset_d)
+    
+    time_start = time_start + datetime.timedelta(hours=SCHEDULER_OFFSET)
+    
     time_end = time_start + datetime.timedelta(milliseconds=obj.get_duration())
     
     log.debug('time_start: %s' % time_start)
@@ -293,6 +324,60 @@ def schedule_object(request):
     return data
     #data = json.dumps(data)
     #return HttpResponse(data, mimetype='application/json')
+ 
+
+"""
+copy a day to another
+"""
+@json_view
+def copy_paste_day(request):
+    
+    log = logging.getLogger('abcast.schedulerviews.copy_day')
+    
+    source = request.POST.get('source', None) 
+    target = request.POST.get('target', None)
+    channel_id = request.POST.get('channel_id', 1)
+    channel = Channel.objects.get(pk=channel_id)
+    
+    log.debug('copy from: %s to %s' % (source, target))
+    
+    if source and target:
+        source = datetime.datetime.strptime(source, '%Y-%m-%d')
+        target = datetime.datetime.strptime(target, '%Y-%m-%d')
+        
+        offset = (target - source)
+        
+        source_start = source + datetime.timedelta(hours=SCHEDULER_OFFSET)
+        source_end = source_start + datetime.timedelta(hours=24)
+
+        
+        log.debug('source: %s to %s' % (source_start, source_end))
+        log.debug('offset: %s' % (offset))
+        
+        # get emissions
+        es = Emission.objects.filter(time_start__gte=source_start, time_end__lte=source_end)
+        for e in es:
+            print e
+            e.pk = None
+            e.uuid = None
+            e.locked = False
+            e.time_start = e.time_start + offset
+            e.save()
+            #ne = Emission()
+        
+    
+
+    
+    
+    now = datetime.datetime.now()
+
+    
+    data = {
+            'status': True,
+            }
+    
+    return data
+
  
  
  

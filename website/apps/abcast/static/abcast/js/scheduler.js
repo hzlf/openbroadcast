@@ -14,9 +14,13 @@ SchedulerApp = function() {
 	this.field_prefix = 'id_';
 	this.api_url = false;
 	this.ac;
+	
+	this.station_time;
+	this.time_offset;
 
 	this.range = [];
-
+	this.range_filter = false; // filter string for API
+	this.offset = 0; // hours tooffset a day
 	// settings
 	this.ppd; // pixels per day (horizontal)
 	this.pph; // pixels per hour (vertical)
@@ -30,22 +34,38 @@ SchedulerApp = function() {
 	this.emissions = new Array;
 
 	this.selected_object = false;
+	
+	// c-p - maybe move
+	this.copy_paste_source = false;
 
 	this.init = function() {
 		debug.debug('scheduler: init');
 		debug.debug(self.api_url);
+		
+		if($.cookie('scheduler_copy_paste_source')) {
+			self.copy_paste_source = $.cookie('scheduler_copy_paste_source');
+		}
+
 
 		self.dom_element = $('#tgTable');
 		
 		self.ac = new BaseAcApp();
 
 		self.iface();
-		self.bindings();
+		// self.bindings(); // called from display method
 
 		pushy.subscribe(self.api_url, function() {
 			self.load();
 		});
 		self.load();
+		
+		
+		self.update_time_marker();
+		setInterval(function(){
+			self.update_time_marker();
+		}, 500);
+		
+		
 	};
 
 	this.iface = function() {
@@ -81,6 +101,80 @@ SchedulerApp = function() {
 			var resource_uri = $(this).attr('data-resource_uri');
 			self.set_selection('playlist', resource_uri);
 		});
+		
+		
+		// copy-paster
+		$('.day-actions').on('click', 'a', function(e){
+			e.preventDefault();
+			debug.debug('copy-paste action');
+			var action = $(this).data('action');
+			var date = $(this).data('date');
+			debug.debug(action);
+			
+			if (action == 'copy') {
+				self.copy_paste_source = date;
+				$.cookie('scheduler_copy_paste_source', date);
+			}
+			if (action == 'paste') {
+				if( ! self.copy_paste_source) {
+					alert('Nothing selected.');
+					return;
+				} else {
+					var url = '/program/scheduler/copy-paste-day/';
+					var data = {
+						source: self.copy_paste_source,
+						target: date
+					} 
+					$.ajax({
+						type : "POST",
+						url : url,
+						dataType : "json",
+						contentType : 'application/json',
+						processData : true,
+						data : data,
+						success : function(data) {
+							if(data.status) {
+								self.load();
+							} else {
+								base.ui.ui_message(data.message, 4000);
+							}
+						},
+						error: function(xhr, status, e) {
+							base.ui.ui_message(e, 4000);
+						}
+					});
+				}
+			}
+			
+			
+			debug.debug(date);
+			
+		});
+		
+		
+		// daypart tooltips
+		$('.daypart').qtip({
+			content : {
+				text : function(api) {
+					return $('.tt-content', this).html()
+					//return $(this).attr('data-tip');
+				}
+			},
+			position : {
+				my : 'left top',
+				at : 'top right',
+			},
+			style : {
+				classes : 'qtip-default',
+			},
+			show : {
+				delay : 10
+			},
+			hide : {
+				delay : 10
+			},
+		});
+		
 
 	};
 
@@ -92,7 +186,7 @@ SchedulerApp = function() {
 			self.display(self.local_data);
 		} else {
 			debug.debug('SchedulerApp - load: using remote data');
-			var url = self.api_url + '?limit=500';
+			var url = self.api_url + '?limit=500' + self.range_filter;
 			$.get(url, function(data) {
 				self.local_data = data;
 				self.display(data);
@@ -309,6 +403,47 @@ SchedulerApp = function() {
 		}
 
 	};
+	
+	
+	// time marker
+	this.update_time_marker = function() {
+		
+		
+		
+
+		if(! self.time_offset) {
+			console.log('calculate time offset!');
+			var ds = new Date(self.station_time);
+			var dl = new Date();
+			
+			console.log(ds, dl);
+			
+			var offset = ds - dl;
+			console.log('offset:', offset);
+			
+			self.time_offset = offset / 1000;
+		}
+		
+		
+		var d = new Date();	
+		// d += self.time_offset;
+		// d = new Date(d + self.time_offset)
+		var top = (d.getMinutes() / 60 + d.getHours() ) * self.pph - self.pph * self.offset;
+
+		// console.log('station_time:', d);
+		// console.log('offset:', self.time_offset);
+
+		// lines
+		$('.current-time-marker').fadeIn(1000).css('top', top + 'px');
+		// left marker
+		$('.current-time-arrow').fadeIn(1000).css('top', (top - 5) + 'px');
+		
+		
+		// 
+		
+		
+	};
+	
 
 };
 
@@ -323,7 +458,8 @@ var EmissionApp = function() {
 	this.container
 	this.dom_element = false;
 
-	this.scheduler_app
+	this.scheduler_app;
+	this.offset;
 
 	// settings
 	this.ppd = 110;
@@ -333,8 +469,9 @@ var EmissionApp = function() {
 
 	this.local_data = false;
 
-	self.init = function(use_local_data) {
+	this.init = function(use_local_data) {
 		debug.debug('EmissionApp - init');
+		self.offset = self.scheduler_app.offset;
 		// self.bindings();
 		self.load(use_local_data);
 		debug.debug('e a u', self.api_url)
@@ -524,7 +661,6 @@ var EmissionApp = function() {
 		self.dom_element.qtip({
 			content : {
 				text : function(api) {
-					// Retrieve content from custom attribute of the $('.selector') elements.
 					return $(this).attr('data-tip');
 				}
 			},
@@ -625,9 +761,13 @@ var EmissionApp = function() {
 	this.display = function(data) {
 
 		debug.debug('EmissionApp - display');
+		debug.debug('offset:', self.offset);
 
 		debug.debug(data.time_start)
 		var day_id = data.time_start.substring(0, 10);
+
+		var day_id = data.day_id;
+		debug.debug('day_id:', data.day_id)
 
 		var hms = data.time_start.substr(11, 8);
 		var a = hms.split(':');
@@ -638,7 +778,13 @@ var EmissionApp = function() {
 		var s_end = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
 
 		var top = Math.floor(s_start * 0.01166666666667);
-
+		
+		// apply offset
+		if(! data.overlap) {
+			top -= self.offset * self.pph;
+		} else {
+			top += (24 - self.offset) * self.pph;
+		}
 		// var height = Math.floor((s_end - s_start) * 0.01166666666667)
 		var height = Math.floor((data.duration / 1000) * 0.01166666666667)
 
