@@ -39,7 +39,7 @@ SCHEDULER_NUM_DAYS = 7
 # hours to offset the schedule
 # 6: day starts at 6:00 and goes until 6:00
 SCHEDULER_OFFSET = getattr(settings, 'SCHEDULER_OFFSET', 6)
-
+SCHEDULER_DEFAULT_CHANNEL_ID = getattr(settings, 'SCHEDULER_DEFAULT_CHANNEL_ID', 1)
 
 """
 scheduler specific resources, using custom hydration

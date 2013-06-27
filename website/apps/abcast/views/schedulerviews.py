@@ -49,6 +49,7 @@ SCHEDULER_NUM_DAYS = 7
 # hours to offset the schedule
 # 6: day starts at 6:00 and goes until 6:00
 SCHEDULER_OFFSET = getattr(settings, 'SCHEDULER_OFFSET', 6)
+SCHEDULER_DEFAULT_CHANNEL_ID = getattr(settings, 'SCHEDULER_DEFAULT_CHANNEL_ID', 1)
 
 def schedule(request):
         
@@ -92,7 +93,7 @@ def schedule(request):
     data['range_filter'] = '&time_start__gte=%s&time_end__lte=%s&' % (range_start, range_end)
     
     
-    channel_id = request.GET.get('channel_id', 1)
+    channel_id = request.GET.get('channel_id', SCHEDULER_DEFAULT_CHANNEL_ID)
     channel = Channel.objects.get(pk=channel_id)
     dayparts = channel.get_dayparts(days[0])
     data['dayparts'] = dayparts
@@ -213,6 +214,8 @@ def select_playlist(request):
     
     playlist_id = request.GET.get('playlist_id', None) 
     next = request.GET.get('next', None)
+    
+    
     
     if not playlist_id:
         request.session['scheduler_selected_playlist_id'] = None
@@ -336,7 +339,7 @@ def copy_paste_day(request):
     
     source = request.POST.get('source', None) 
     target = request.POST.get('target', None)
-    channel_id = request.POST.get('channel_id', 1)
+    channel_id = request.POST.get('channel_id', SCHEDULER_DEFAULT_CHANNEL_ID)
     channel = Channel.objects.get(pk=channel_id)
     
     log.debug('copy from: %s to %s' % (source, target))
