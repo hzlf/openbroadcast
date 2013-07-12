@@ -292,19 +292,21 @@ class MediaReleaseInline(admin.TabularInline):
     
 class MediaAdmin(BaseAdmin):
     
-    list_display   = ('name', 'created', 'release_link', 'artist', 'mediatype', 'tracknumber', 'duration', 'processed', 'echoprint_status', 'conversion_status')
+    list_display   = ('name', 'created', 'release_link', 'artist', 'mediatype', 'tracknumber', 'mediamumber', 'duration', 'processed', 'echoprint_status', 'conversion_status')
     search_fields = ['artist__name', 'release__name', 'name']
     list_filter = ('mediatype', 'license__name', 'processed', 'echoprint_status', 'conversion_status')
     
     inlines = [MediaReleaseInline, RelationsInline, MediaExtraartistsInline]
 
     readonly_fields = ['slug', 'folder', 'uuid', 'base_format', 'base_filesize', 'base_duration','base_samplerate', 'base_bitrate', 'release_link', 'master_sha1', 'd_tags']
-    
+
+
+    date_hierarchy = 'created'
     
     """"""
     fieldsets = [
         (None,  {'fields': 
-                 ['name', 'slug', 'isrc', 'uuid', 'tracknumber', 'mediatype', ('release', 'release_link'), 'artist', 'license', 'd_tags']
+                 ['name', 'slug', 'isrc', 'uuid', ('tracknumber', 'mediamumber'), 'mediatype', ('release', 'release_link'), 'artist', 'license', 'd_tags']
                  }),
                  
         ('Users', {'fields' : ['owner', 'creator', 'publisher']}),

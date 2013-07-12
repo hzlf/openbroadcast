@@ -190,25 +190,46 @@ EditUi = function () {
         });
 
 
-        // shift offset
+        // shift offset (single, by click)
         $('#offset_selector a').live('click', function (e) {
             e.preventDefault();
             var offset = $(this).data('offset');
 
             // alert(offset);
 
-            if(offset == 'add') {
+            if (offset == 'add') {
                 self.lookup_offset++;
-            } else if(offset == 'subtract'){
+            } else if (offset == 'subtract') {
                 self.lookup_offset--;
             }
 
-            console.log('*********', self.lookup_data)
-
-            self.media_lookup(self.lookup_data.tracklist);
-
+            self.media_lookup(self.lookup_data);
 
         });
+
+
+        // shift offset (via dropdown)
+        $('#offset_selector .shift-offset select').live('change', function () {
+            var offset = $(this).val();
+            self.lookup_offset = parseInt(offset);
+            self.media_lookup(self.lookup_data);
+        });
+
+
+
+        // mode switch (editor)
+        $('#editor_mode_switch li > a').live('click', function(e) {
+            e.preventDefault();
+            var mode = $(this).data('mode');
+            $(this).parents('.ui-persistent').data('uistate', mode);
+
+        });
+
+        // apply classes based on state
+        // $("#release_media_form *[class*='mode-']").parents('.control-group').hide(5000);
+
+        $('#release_media_form .mode-m').parents('.control-group').addClass('mode-m');
+        $('#release_media_form .mode-l').parents('.control-group').addClass('mode-l');
 
 
     };
@@ -362,8 +383,26 @@ EditUi = function () {
             }
 
             // media (a.k.a. track)-based data
+            // look at the tracklist to eventually detect an offset
+            var tbd = [];
+            $.each(data.tracklist, function (i, el) {
+                console.log('el', el);
+                if (el.duration == '' && el.position == '') {
+                    tbd.push(i);
+                }
+            });
+            // remove eventual non-track data
+            var ros = 0;
+            $.each(tbd, function (i, el) {
+                data.tracklist.remove(el - ros);
+                ros++;
+            });
+
+            self.offset_selector();
+
+            // display dta
             if (data.tracklist) {
-                self.media_lookup(data.tracklist);
+                self.media_lookup(data);
             }
 
 
@@ -371,16 +410,51 @@ EditUi = function () {
     };
 
 
+    this.offset_selector = function () {
+
+        // generate the dropdown list
+        var select = $('#offset_selector .shift-offset select');
+        var html = '';
+        $.each(self.lookup_data.tracklist, function (i, el) {
+            html += '<option';
+            html += ' value="' + i + '" ';
+            if (i == self.lookup_offset) {
+                html += ' selected="selected" ';
+            }
+            html += '>';
+            if (el.position) {
+                html += el.position + ' - ' + el.title;
+            } else {
+                html += '# ' + el.title;
+            }
+            html += '</option>';
+        });
+        select.html(html);
+    };
+
     /*
      * Mapping track-based data
      */
     this.media_lookup = function (data) {
         var container = $('#release_media_form');
-        console.log('media:', data);
+        debug.debug('data:', data);
 
+
+        // reset the lookup results
+        $('.field-lookup .field-lookup-holder', container).hide();
+        $('.field-lookup span', container).html('');
+        // reset markers
+        $('.field-lookup .field-lookup-holder', container).removeClass('lookup-match');
+        $('.field-lookup .field-lookup-holder', container).removeClass('lookup-diff');
+
+
+        var tracklist = data.tracklist;
 
         // offset tracks - in case of 'non-track-meta'
         var offset = self.lookup_offset;
+
+        console.log('OFFSET: ', offset);
+
 
         $('.releasemedia-row', container).each(function (i, el) {
 
@@ -394,11 +468,11 @@ EditUi = function () {
 
             // ok got one, try to map. tracknumber is 1-based, index of tracklist 0-based
             if (tracknumber && tracknumber != 0) {
-                var meta = null;
+                var meta = false;
                 var index = (tracknumber - 1) + offset;
 
                 try {
-                    var meta = data[index];
+                    var meta = tracklist[index];
                 } catch (e) {
                     debug.debug(e);
                 }
@@ -408,20 +482,38 @@ EditUi = function () {
                 // apply meta lookup information
                 if (meta) {
 
+
+                    // media name
+                    var value = meta.title;
                     var holder_name = $('.field-lookup-holder span[id$="name"]', el);
-                    holder_name.parent().css('display', 'block');
-                    holder_name.html(meta.title);
-
-                    var holder_artist = $('.field-lookup-holder span[id$="artist_0"]', el);
-                    holder_artist.parent().css('display', 'block');
-                    try {
-                        holder_artist.html(meta.artists[0].name);
-                    } catch (e) {
-
+                    holder_name.html(value);
+                    holder_name.parent().fadeIn(100);
+                    // mark
+                    var target_name = $('#' + self.field_prefix + holder_name.attr('id').replace(self.lookup_prefix, ''));
+                    if (value == target_name.val()) {
+                        holder_name.parent().addClass('lookup-match');
+                    } else {
+                        holder_name.parent().addClass('lookup-diff');
                     }
-                    ;
 
 
+                    // media artist name
+                    value = '';
+                    if (meta.artists && meta.artists.length > 0) {
+                        value = meta.artists[0].name;
+                    } else if (data.artists && data.artists.length > 0) {
+                        value = data.artists[0].name;
+                    }
+                    var holder_artist = $('.field-lookup-holder span[id$="artist_0"]', el);
+                    holder_artist.html(value);
+                    holder_artist.parent().fadeIn(100);
+                    // mark
+                    var target_artist = $('#' + self.field_prefix + holder_artist.attr('id').replace(self.lookup_prefix, ''));
+                    if (value == target_artist.val()) {
+                        holder_artist.parent().addClass('lookup-match');
+                    } else {
+                        holder_artist.parent().addClass('lookup-diff');
+                    }
                 }
 
 
@@ -432,6 +524,13 @@ EditUi = function () {
 
 
         });
+
+
+        // update the dropdown
+        setTimeout(function(){
+            self.offset_selector();
+        }, 10);
+
 
 
     };
@@ -473,6 +572,19 @@ EditUi = function () {
         var val = el.html();
         var target = $('#' + self.field_prefix + key);
 
+
+        console.log('apply value:', val, ' key: ', key);
+
+        // hack for autocomlete fields (there is a hidden value)
+        if(key.endsWith('_0')) {
+            var t = key.slice(0,key.length - 1) + '1';
+            var hidden_target = $('#' + self.field_prefix + t);
+            hidden_target.val('');
+            //alert(hidden_target)
+
+        }
+
+
         // apply feedback
         el.parent().removeClass('lookup-diff');
         el.parent().addClass('lookup-match');
@@ -488,7 +600,7 @@ EditUi = function () {
             case 2:
                 break;
             default:
-                target.val(val);
+                target.val($.decodeHTML(val));
         }
 
 

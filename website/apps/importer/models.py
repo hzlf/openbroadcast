@@ -29,7 +29,7 @@ from celery.task import task
 import logging
 log = logging.getLogger(__name__)
 
-USE_CELERYD = True    
+USE_CELERYD = True
         
 GENERIC_STATUS_CHOICES = (
     (0, _('Init')),
@@ -149,8 +149,6 @@ class Import(BaseModel):
             qs = self.files.exclude(pk=importfile.pk)
             importfiles = qs.filter(status=2)
             for file in importfiles:
-                print '*************************'
-                print file
                 print 'mb results'
                 for mb in file.results_musicbrainz:
                     print mb
@@ -272,7 +270,7 @@ class ImportFile(BaseModel):
         (3, _('Working')),
         (4, _('Warning')),
         (5, _('Duplicate')),
-        (6, _('Queued')),
+        (6, _('Queued > will go straight to import.')),
         (7, _('Importing')),
         (99, _('Error')),
         (11, _('Other')),

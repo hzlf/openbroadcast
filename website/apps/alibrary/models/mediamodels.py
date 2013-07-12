@@ -154,6 +154,21 @@ class Media(CachingMixin, MigrationMixin):
     lock = models.PositiveIntegerField(max_length=1, default=0, editable=False)
     
     tracknumber = models.PositiveIntegerField(max_length=12, default=0)
+
+
+    MEDIANUMBER_CHOICES = (
+        (0, '0'),
+        (1, '1'),
+        (2, '2'),
+        (3, '3'),
+        (4, '4'),
+        (5, '5'),
+        (6, '6'),
+        (7, '7'),
+        (8, '8'),
+    )
+    # a.k.a. "Disc number"
+    mediamumber = models.PositiveIntegerField(verbose_name=_('a.k.a. "Disc number'), max_length=12, default=0, choices=MEDIANUMBER_CHOICES)
     
     MEDIATYPE_CHOICES = (
         ('track', _('Track')),
@@ -225,7 +240,7 @@ class Media(CachingMixin, MigrationMixin):
         app_label = 'alibrary'
         verbose_name = _('Track')
         verbose_name_plural = _('Tracks')
-        ordering = ('tracknumber', )
+        ordering = ('mediamumber', 'tracknumber', )
     
     
     def __unicode__(self):

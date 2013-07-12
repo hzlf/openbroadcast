@@ -41,6 +41,9 @@
                 });
 
 
+				edit.ui.init();
+
+
             });
         </script>
     {% endaddtoblock %}
@@ -129,19 +132,26 @@
 
                 <div class="form-header row-fluid">
 
-                    <div id="editor_mode_switch" class="span6">
-                        <ul class="unstyled horizontal">
+                    <div id="editor_mode_switch" class="span4">
+                        <ul class="unstyled horizontal ui-persistent" id="editor_mode" data-uistate="init">
                             <li>Display</li>
-                            <li><a data-mode="extended" href="#"><i class="icon-th-list"></i></a></li>
-                            <li><a data-mode="condensed" href="#"><i class="icon-list"></i></a></li>
+                            <li><a data-mode="s" href="#"><i class="icon-list"></i></a></li>
+                            <li><a data-mode="m" href="#"><i class="icon-th-list"></i></a></li>
                         </ul>
                     </div>
 
-                    <div id="offset_selector" class="span6">
+                    <div id="offset_selector" class="span8">
                         <ul class="unstyled horizontal pull-right">
                             <li><span>Shift lookup-results:</span></li>
-                            <li><a href="#" data-offset="subtract"><i class="icon-caret-up icon-large"></i></a></li>
-                            <li><a href="#" data-offset="add"><i class="icon-caret-down icon-large"></i></a></li>
+
+                            <li class="dropdown shift-offset">
+                                <select>
+                                </select>
+                            </li>
+
+
+                            <li><a href="#" data-offset="add"><i class="icon-caret-up icon-large"></i></a></li>
+                            <li><a href="#" data-offset="subtract"><i class="icon-caret-down icon-large"></i></a></li>
                             <li style="clear: both;"></li>
                         </ul>
                     </div>

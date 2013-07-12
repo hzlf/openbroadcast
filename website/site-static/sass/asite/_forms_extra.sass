@@ -247,13 +247,15 @@ div.bulk_edit
   background: #DDFFD9
 
 #release_media_form
+
   .form-header
     background: #fafafa
     margin: 7px 0 0 0
     ul
       margin: 0
-      padding: 6px 10px
+      padding: 0 10px
       li
+        padding: 6px 0 0 0
         color: #666666
         text-transform: uppercase
         font-size: 90%
@@ -261,6 +263,34 @@ div.bulk_edit
           padding: 0 0 0 10px
           .icon-large
             font-size: 110%
+
+        &.dropdown
+          padding: 4px 10px 0
+          select
+            height: 18px
+            border: 1px solid #d3d3d3
+            background: #fafafa !important
+            padding: 0 4px
+            box-shadow: none
+
+
+
+// mode based styles (s, m, l)
+#release_media_form
+  *[class*='mode-']
+    display: none
+
+.editor-mode-s #release_media_form
+  .mode-s
+    display: block
+
+.editor-mode-m #release_media_form
+  .mode-m
+    display: block
+
+.editor-mode-l #release_media_form
+  .mode-l
+    display: block
 
 
 

@@ -313,13 +313,13 @@ class BaseReleaseMediaFormSet(BaseInlineFormSet):
                 Column(
                        Field('tracknumber', css_class='input-small'),
                        Field('mediatype', css_class='input-small'),
-                       Field('license', css_class='input-small'),
+                       Field('license', css_class='input-small mode-m mode-l'),
                        css_class='span3'
                        ),
                 Column(
                         LookupField('name', css_class='input-large'),
                         LookupField('artist', css_class='input-large'),
-                        Field('isrc', css_class='input-large'),
+                        Field('isrc', css_class='input-large mode-m mode-l'),
                        css_class='span9'
                        ),
                 css_class='releasemedia-row row-fluid',

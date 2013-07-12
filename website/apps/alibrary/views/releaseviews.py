@@ -1,7 +1,7 @@
 from django.views.generic import DetailView, ListView, FormView, UpdateView
 from django.views.generic.detail import SingleObjectTemplateResponseMixin
 from django.shortcuts import get_object_or_404, render_to_response
-
+import time
 from django import http
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect
 from django.utils import simplejson as json
@@ -269,14 +269,33 @@ class ReleaseEditView(UpdateView):
             if releasemedia_form.is_valid():
                 print "releasemedia_form.cleaned_data:",
                 print releasemedia_form.cleaned_data
-                
+
+                releasemedia_form.save()
+
                 for te in releasemedia_form.cleaned_data:
+                    print
+                    print 'releasemedia_form element'
+                    print
+                    print te
+                    print
+                    print te['id']
+                    print
+
+
                     print te['artist']
                     if not te['artist'].pk:
+                        print 'no artist yet - create: %s' % te['artist']
                         te['artist'].save()
-                                
-                releasemedia_form.save()
-                
+                        te['id'].artist = te['artist']
+                        te['id'].save()
+
+                        #time.sleep(2)
+
+
+
+
+
+
                 """
                 handle publish action
                 """
@@ -286,7 +305,7 @@ class ReleaseEditView(UpdateView):
                     publish = action_form.cleaned_data['publish']
                     
 
-
+                """
                 msg = change_message.construct(self.request, form, [relation_form, releasemedia_form])
                 with reversion.create_revision():
                     obj = form.save()
@@ -294,7 +313,7 @@ class ReleaseEditView(UpdateView):
                         msg = '%s. \n %s' %('Published release', msg)
                     reversion.set_comment(msg)
                 form.save_m2m()
-
+                """
                  
                 if publish:
                     print 'publish:'
@@ -307,11 +326,20 @@ class ReleaseEditView(UpdateView):
                     
                     
             else:
+                print '!!! ERRORS'
                 print releasemedia_form.errors
 
+            print
+            print "HttpResponseRedirect('#')"
+            print
 
             return HttpResponseRedirect('#')
         else:
+
+            print
+            print "render_to_response(..."
+            print
+
             return self.render_to_response(self.get_context_data(form=form, releasemedia_form=releasemedia_form))
 
 

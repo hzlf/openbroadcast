@@ -41,6 +41,10 @@ log = logging.getLogger(__name__)
 MUSICBRAINZ_HOST = getattr(settings, 'MUSICBRAINZ_HOST', None)
 MUSICBRAINZ_RATE_LIMIT = getattr(settings, 'MUSICBRAINZ_RATE_LIMIT', True)
 
+# promt for continuation
+DEBUG_WAIT = False
+
+
 def clean_filename(filename):
     import unicodedata
     import string
@@ -204,8 +208,10 @@ class Importer(object):
         print '***************************************************************'
         
         
-        time.sleep(1.1)
-        #raw_input("Press Enter to continue...")
+        time.sleep(1)
+
+        if DEBUG_WAIT:
+            raw_input("Press Enter to continue...")
         
         
         """
@@ -406,7 +412,7 @@ class Importer(object):
         if m_created:
             log.info('media created, try to complete: %s' % m)
             m.creator = obj.import_session.user
-            m = self.mb_complete_media(m, mb_track_id, excludes=(mb_artist_id,))
+            m = self.mb_complete_media(m, mb_track_id, mb_release_id,  excludes=(mb_artist_id,))
             
         
         
@@ -450,7 +456,7 @@ class Importer(object):
     
     
     
-    def mb_complete_media(self, obj, mb_id, excludes=()):
+    def mb_complete_media(self, obj, mb_id, mb_release_id, excludes=()):
         
         log = logging.getLogger('util.importer.mb_complete_media')
         log.info('complete media, m: %s | mb_id: %s' % (obj.name, mb_id))
@@ -460,22 +466,85 @@ class Importer(object):
         
         inc = ('artists', 'url-rels', 'aliases', 'tags', 'recording-rels', 'artist-rels', 'work-level-rels', 'artist-credits')
         url = 'http://%s/ws/2/recording/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, mb_id, "+".join(inc))
-        
+
         r = requests.get(url)
         result = r.json()
-        
-        
+
         print '*****************************************************************'
+        print url
         print '*****************************************************************'
+
+        # get release based information (to map track- and disc-number)
+        inc = ('recordings',)
+        url = 'http://%s/ws/2/release/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, mb_release_id, "+".join(inc))
+
+        r = requests.get(url)
+        result_release = r.json()
+        print '*****************************************************************'
+        print url
         print '*****************************************************************'
         
-        self.pp.pprint(result)
+        print(result)
+
+        print
+
+        print(result_release)
 
 
         print '*****************************************************************'
-        print '*****************************************************************'
-        print '*****************************************************************'
-        
+
+        if DEBUG_WAIT:
+            raw_input("Press Enter to continue...")
+
+
+
+        # loop release recordings, trying to get our track...
+        if 'media' in result_release:
+            disc_index = 0
+            media_index = 0
+            media_offset = 0
+            for disc in result_release['media']:
+
+                for m in disc['tracks']:
+
+                    x_mb_id = m['recording']['id']
+                    x_pos = m['number']
+
+                    if x_mb_id == mb_id:
+                        print 'id:  %s' % x_mb_id
+                        print 'pos: %s' % x_pos
+                        print 'disc_index: %s' % disc_index
+                        print 'media_offset: %s' % media_offset
+                        print 'final pos: %s' % (int(media_offset) + int(x_pos))
+
+                        obj.tracknumber = (int(media_offset) + int(x_pos))
+                        obj.mediamumber = int(disc_index)
+
+                    media_index =+ 1
+
+                disc_index += 1
+                media_offset += int(disc['track-count'])
+
+
+
+
+
+
+
+
+
+
+
+        if DEBUG_WAIT:
+            raw_input("Press Enter to continue...")
+
+
+
+
+
+
+
+
         # self.pp.pprint(result)
         if 'relations' in result:
             for relation in result['relations']:
