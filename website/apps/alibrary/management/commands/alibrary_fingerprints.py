@@ -36,7 +36,7 @@ class Fingerprinter(object):
             from alibrary.models import Media
             print 'create fingerprints'
             
-            media = Media.objects.all()
+            media = Media.objects.exclude(master='')
             for m in media:
                 print m.name
                 m.update_echoprint()

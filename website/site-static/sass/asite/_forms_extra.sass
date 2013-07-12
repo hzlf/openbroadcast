@@ -65,14 +65,18 @@ form.form-horizontal
     &.unpadded
       padding-left: 0px
       margin-left: 0px
-      
-  > .formRow
+
+  // sorry, hack here...
+  > .formRow, #release_media_form > .formRow
     margin-bottom: 9px
     margin-top: 9px
     padding-top: 9px
-    
     margin-left: 5px
-    
+
+    .controls
+      margin-left: 70px !important
+
+
     &:nth-child(odd)
       background: #fafafa
     
@@ -231,12 +235,44 @@ body
       &.hover
         background-color: #efefef
 
-      
+
+
+
+/* specific form styles
+ * release edit view*/
       
 // bulk apply form
 div.bulk_edit
   padding: 20px
   background: #DDFFD9
+
+#release_media_form
+  .form-header
+    background: #fafafa
+    margin: 7px 0 0 0
+    ul
+      margin: 0
+      padding: 6px 10px
+      li
+        color: #666666
+        text-transform: uppercase
+        font-size: 90%
+        a
+          padding: 0 0 0 10px
+          .icon-large
+            font-size: 110%
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ul.links.external

@@ -11,7 +11,7 @@ from filer.models import File, Image
 class ReadOnlyIconField(Widget):
     
     def render(self, name, value, attrs=None):
-        
+
         if not value:
             value = 'unknown'
 

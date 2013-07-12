@@ -1,41 +1,7 @@
-{% load i18n %}
+{% load i18n truncate %}
 
-<!--
-<div id="lookup_providers_" class="lookup provider listing">
 
-	<div class="page-header">
-		<h2>{% trans "Compare" %} <small>{% trans "with API-data" %}</small></h2>
-	</div>
 
-	{% for provider in providers %}
-	<div data-item_type="release" data-item_id="{{ object.pk }}" data-provider="{{ provider.key }}" class="lookup provider item hoverable {% if provider.relation %}available{% endif %}">
-
-		<ul class="horizontal unstyled links external">
-
-			<li class="icon external {{ provider.key }} {% if provider.relation %}available{% endif %}"></li>
-
-			<li class="action">
-				<a href="#">{{ provider.name }}</a>
-			</li>
-
-			{% if provider.relation %}
-			<li class="pull-right" style="float: right !important;">
-				<a href="#">{% trans "Change" %} <i class="icon-refresh icon-white"></i></a>
-			</li>
-			{% else %}
-			<li class="pull-right" style="float: right !important;">
-				<a href="#">{% trans "Set" %} <i class="icon-search icon-white"></i></a>
-			</li>
-			{% endif %}
-
-		</ul>
-
-		<div class="clearfix"></div>
-
-	</div>
-	{% endfor %}
-</div>
--->
 <div id="lookup_providers" class="lookup provider listing">
 
 	<div class="page-header">
@@ -57,17 +23,26 @@
 				<ul class="unstyled">
 					{% if provider.relation %}
 					<li class="pull-right" style="float: right !important;">
-						<a href="#">{% trans "Change" %} <i class="icon-exchange icon-white"></i></a>
+						<a class="action" href="#">{% trans "Change" %} <i class="icon-exchange icon-white"></i></a>
 					</li>
 					{% else %}
 					<li class="pull-right" style="float: right !important;">
-						<a href="#">{% trans "Search" %} <i class="icon-search icon-white"></i></a>
+						<a class="action"  href="#">{% trans "Search" %} <i class="icon-search icon-white"></i></a>
 					</li>
 					{% endif %}
 				</ul>
 				
 			</div>
 		</div>
+
+        <!--
+        <small>
+            <a href="{{ provider.relation }}" title="{% trans "Link" %}: {{ provider.relation }}">
+                {% trans "Link" %}
+            </a>
+
+        </small>
+        -->
 	</div>
 	{% endfor %}
 	

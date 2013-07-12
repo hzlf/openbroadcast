@@ -16,6 +16,7 @@ class PagedownWidget(forms.Textarea):
               '%s/pagedown/Markdown.Editor.js' % settings.STATIC_URL,)
     
     def render(self, name, value, attrs=None):
+
         if value is None: value = ''
         if 'class' not in attrs:
             attrs['class'] = ""

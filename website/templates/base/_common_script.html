@@ -116,7 +116,7 @@
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/util.base.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/base.ui.js"></script>{% endaddtoblock %}
 	
-	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/edit.js"></script>{% endaddtoblock %}
+	{% addtoblock "js-post" %}<!--<script type="text/javascript" src="{{ STATIC_URL }}js/edit.js"></script>-->{% endaddtoblock %}
 	
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}aplayer/js/base.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}aplayer/js/ui.js"></script>{% endaddtoblock %}
@@ -124,6 +124,7 @@
 	<!-- alibrary apps -->
 	
 	<!-- utils -->
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/util/util.base.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/util/util.notify.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/util/util.dialog.js"></script>{% endaddtoblock %}
 	

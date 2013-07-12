@@ -321,7 +321,11 @@ class Media(CachingMixin, MigrationMixin):
     
     
     def get_master_path(self):
-        return self.master.path
+        try:
+            return self.master.path
+        except Exception, e:
+            print e
+            return None
     
     # full absolute path
     def get_folder_path(self, subfolder=None):
@@ -866,8 +870,11 @@ class Media(CachingMixin, MigrationMixin):
         # ecb = 'echoprint-codegen'
         
         path = obj.get_master_path()
-        
-        #path = obj.master_path
+
+        if not path:
+            obj.echoprint_status = 2
+            obj.save()
+            return None
         
         print 'path: %s' % path
         
@@ -889,8 +896,7 @@ class Media(CachingMixin, MigrationMixin):
             version = None
             duration = None
             status = 2
-            
-            
+
         if code:
             
             try:
@@ -901,6 +907,7 @@ class Media(CachingMixin, MigrationMixin):
                 print 'post new fingerprint:'
                 code_pre = code
                 id = obj.updated.isoformat('T')[:-7]
+                id = obj.updated.isoformat()
                 code = fp.decode_code_string(code)
                 
                 nfp = {
@@ -917,9 +924,10 @@ class Media(CachingMixin, MigrationMixin):
                 
                 #print nfp
                 
-                
+                print 'PRE INGEST'
                 res = fp.ingest(nfp, split=False, do_commit=True)
-    
+                print 'POST INGEST'
+
                 print 'getting code by id (check)'
     
                 

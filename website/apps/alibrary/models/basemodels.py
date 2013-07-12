@@ -412,7 +412,7 @@ class Relation(models.Model):
         ('itunes', _('iTunes')),
         ('official', _('Official website')),
     )
-    service = models.CharField(max_length=50, choices=SERVICE_CHOICES, blank=True, null=True, editable=False)
+    service = models.CharField(max_length=50, choices=SERVICE_CHOICES, blank=True, null=True, editable=True)
 
     ACTION_CHOICES = (
         ('information', _('Information')),

@@ -101,7 +101,15 @@ class APILookup(models.Model):
         if self.provider == 'discogs':
             return self.get_from_discogs()
         
-        
+
+
+
+
+
+
+
+
+
     def get_from_discogs(self):
         
         log = logging.getLogger('alibrary.lookupmodels.get_from_discogs')
@@ -170,6 +178,7 @@ class APILookup(models.Model):
         #self.save()
 
         res = {}
+        d_tags = [] # needed as merged from different keys
         for k in d_release.data:
             # print 'k: %s - v:%s' % (k, d_release.data[k])
             
@@ -177,21 +186,61 @@ class APILookup(models.Model):
             mk = k
             if k == 'title':
                 mk = 'name'
+
             if k == 'notes':
                 mk = 'description'
-            if k == 'released':
-                mk = 'releasedate'
+
+            if k == 'released_formatted':
+                mk = 'releasedate_approx'
+
+
+            # try to extract format information
+            if k == 'formats':
+                try:
+                    d = d_release.data[k]
+                    res['releasetype'] = d[0]['descriptions'][0]
+                except:
+                    pass
+
+
             if k == 'country':
                 mk = 'release_country'
                 
             if k == 'labels':
-                labels = d_release.data[k]
-                label = labels[0]
-                
-                res['label'] = label['name']
-            
+                try:
+                    d = d_release.data[k][0]
+                    res['label_0'] = d['name']
+                    res['catalognumber'] = d['catno']
+                except:
+                    pass
+
+
+            # tagging
+            if k == 'styles':
+                try:
+                    d = d_release.data[k]
+                    for v in d:
+                        d_tags.append(v)
+                except:
+                    pass
+
+            if k == 'genres':
+                try:
+                    d = d_release.data[k]
+                    for v in d:
+                        d_tags.append(v)
+                except:
+                    pass
+
+            # dummy tagging
+            # res['d_tags'] = 'techno, whatever'
+
             res[mk] = d_release.data[k]
-        
+
+        print 'DTAGS:'
+        print d_tags
+
+        res['d_tags'] = ', '.join(d_tags)
         self.api_data = res
         self.save()
         

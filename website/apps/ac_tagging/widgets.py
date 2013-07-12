@@ -13,7 +13,7 @@ class TagAutocompleteTagIt(TextInput):
     def render(self, name, value, attrs=None):
         """ Render HTML code """
         # django-tagging
-        case_sensitive = 'true' if not getattr(settings, 'FORCE_LOWERCASE_TAGS', False) else 'false'
+        case_sensitive = 'false' if not getattr(settings, 'FORCE_LOWERCASE_TAGS', False) else 'false'
         max_tag_lentgh = getattr(settings, 'MAX_TAG_LENGTH', 50)
         # django-tagging-autocomplete-tagit
         autocomplete_min_length = getattr(settings, 'TAGGING_AUTOCOMPLETE_MIN_LENGTH', 1)

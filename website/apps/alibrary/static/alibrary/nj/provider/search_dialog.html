@@ -1,0 +1,80 @@
+<div class="query">
+
+    <form class="form-horizontal">
+
+        <input class="query" type="text" value="{{ query }}">
+
+        <a class="pull-right search btn btn-primary" type="button">Search</a>
+
+    </form>
+
+</div>
+
+
+<div class="results" style="max-height: 400px; overflow: auto; width: 700px;">
+
+
+    {% if results.length < 1 %}
+
+        <p>
+            Sorry - but we could not find any results.
+        </p>
+    {% endif %}
+
+    {% for result in results %}
+
+        <div class="item result" data-uri="{{ result.uri }}">
+
+            <div class="row-fluid">
+
+                <div class="span2">
+                    {% if  result.thumb %}
+                    <img src="{{ result.thumb }}">
+                    {% endif %}
+                </div>
+
+                <div class="span10">
+                    <strong>{{ result.title }}</strong>
+                    <ul class="unstyled">
+
+                        <li>
+
+                            <span class="value">
+                                <strong>{{ result.year }} | {{ result.country }}</strong>
+                            </span>
+                        </li>
+
+                        <li>
+                            <span class="title">
+                                Catalog #:
+                            </span>
+                            <span class="value">
+                                <strong>{{ result.catno }}</strong>
+                            </span>
+                        </li>
+
+                        <li>
+                            <span class="title">
+                                Format:
+                            </span>
+                            <span class="value">
+                                <strong>
+                                    {% for k in result.format %}
+                                        {{ k }} |
+                                    {% endfor %}
+                                </strong>
+                            </span>
+                        </li>
+
+                    </ul>
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+
+    {% endfor %}
+</div>
