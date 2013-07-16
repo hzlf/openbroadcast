@@ -227,6 +227,9 @@ class ReleaseEditView(UpdateView):
         
 
     def get_context_data(self, **kwargs):
+
+        print 'GET CONTEXT DATA'
+        print kwargs
         
         context = super(ReleaseEditView, self).get_context_data(**kwargs)
         
@@ -234,7 +237,11 @@ class ReleaseEditView(UpdateView):
         context['release_bulkedit_form'] = ReleaseBulkeditForm(instance=self.object)
         context['action_form'] = ReleaseActionForm(instance=self.object)
         
-        context['releasemedia_form'] = ReleaseMediaFormSet(instance=self.object)
+        #context['releasemedia_form'] = ReleaseMediaFormSet(instance=self.object)
+
+        context['releasemedia_form'] = kwargs.get('releasemedia_form', ReleaseMediaFormSet(instance=self.object))
+
+
         context['relation_form'] = ReleaseRelationFormSet(instance=self.object)
         
         context['user'] = self.request.user
@@ -251,94 +258,80 @@ class ReleaseEditView(UpdateView):
         releasemedia_form = context['releasemedia_form']
         relation_form = context['relation_form']
 
+
+        valid = False
+
+
         if form.is_valid():
+
             print 'form valid'
-            
+
             self.object.tags = form.cleaned_data['d_tags']
-            
+
+
             # temporary instance to validate inline forms against
             tmp = form.save(commit=False)
-        
             releasemedia_form = ReleaseMediaFormSet(self.request.POST, instance=tmp)
-
             relation_form = ReleaseRelationFormSet(self.request.POST, instance=tmp)
-        
-            if relation_form.is_valid():                
-                relation_form.save()
 
-            if releasemedia_form.is_valid():
-                print "releasemedia_form.cleaned_data:",
-                print releasemedia_form.cleaned_data
+        if relation_form.is_valid():
+            relation_form.save()
 
-                releasemedia_form.save()
+        if releasemedia_form.is_valid():
 
-                for te in releasemedia_form.cleaned_data:
-                    print
-                    print 'releasemedia_form element'
-                    print
-                    print te
-                    print
-                    print te['id']
-                    print
+            valid = True
 
+            print "releasemedia_form.cleaned_data:",
+            print releasemedia_form.cleaned_data
 
-                    print te['artist']
-                    if not te['artist'].pk:
-                        print 'no artist yet - create: %s' % te['artist']
-                        te['artist'].save()
-                        te['id'].artist = te['artist']
-                        te['id'].save()
+            releasemedia_form.save()
 
-                        #time.sleep(2)
+            for te in releasemedia_form.cleaned_data:
+
+                print te['artist']
+                if not te['artist'].pk:
+                    print 'no artist yet - create: %s' % te['artist']
+                    te['artist'].save()
+                    te['id'].artist = te['artist']
+                    te['id'].save()
 
 
+            """
+            handle publish action
+            """
+            action_form = ReleaseActionForm(self.request.POST)
+            publish = False
+            if action_form.is_valid():
+                publish = action_form.cleaned_data['publish']
 
 
-
-
-                """
-                handle publish action
-                """
-                action_form = ReleaseActionForm(self.request.POST)
-                publish = False
-                if action_form.is_valid():
-                    publish = action_form.cleaned_data['publish']
-                    
-
-                """
-                msg = change_message.construct(self.request, form, [relation_form, releasemedia_form])
-                with reversion.create_revision():
-                    obj = form.save()
-                    if publish:
-                        msg = '%s. \n %s' %('Published release', msg)
-                    reversion.set_comment(msg)
-                form.save_m2m()
-                """
-                 
+            """"""
+            msg = change_message.construct(self.request, form, [relation_form, releasemedia_form])
+            with reversion.create_revision():
+                obj = form.save()
                 if publish:
-                    print 'publish:'
-                    print publish
-                    from datetime import datetime
-                    obj.publish_date = datetime.now()
-                    obj.publisher = self.request.user
-                    
-                    obj.save()
-                    
-                    
-            else:
-                print '!!! ERRORS'
-                print releasemedia_form.errors
+                    msg = '%s. \n %s' %('Published release', msg)
+                reversion.set_comment(msg)
+            form.save_m2m()
 
-            print
-            print "HttpResponseRedirect('#')"
-            print
 
+            if publish:
+                print 'publish:'
+                print publish
+                from datetime import datetime
+                obj.publish_date = datetime.now()
+                obj.publisher = self.request.user
+
+                obj.save()
+
+
+
+
+        if valid:
             return HttpResponseRedirect('#')
         else:
-
-            print
-            print "render_to_response(..."
-            print
+            print '!!! ERRORS!!!!!!!!!!!!!!!!!!!!!!!!'
+            print releasemedia_form.errors
 
             return self.render_to_response(self.get_context_data(form=form, releasemedia_form=releasemedia_form))
 

@@ -93,8 +93,16 @@ form.form-horizontal
     &.releasemedia-row
       margin-left: 0px
     
-    
-form.form_horizontal
+
+
+// overrides for special cases
+fieldset
+  #div_id_remote_image
+    display: none
+
+
+
+
 
 form.form-horizontal
   .controls
@@ -114,6 +122,9 @@ form.form-horizontal
         
         display: none
         padding: 0px 4px 0px 24px
+
+        max-height: 185px
+        overflow: auto
         
 
         background-image: url(/static/img/icons/forms/compare.png)
@@ -246,7 +257,15 @@ div.bulk_edit
   padding: 20px
   background: #DDFFD9
 
+
+
+
 #release_media_form
+
+  // hide error messages & hints
+  .help-inline
+    // display: none
+    font-size: 78%
 
   .form-header
     background: #fafafa
@@ -272,6 +291,12 @@ div.bulk_edit
             background: #fafafa !important
             padding: 0 4px
             box-shadow: none
+
+  .form-extra.readonly
+    color: #a5a5a5
+    padding: 2px 0 0 0
+
+
 
 
 
@@ -486,8 +511,14 @@ form.form-playlist
   div.target-duration div.controls
     label
       float: left
-      width: 30px
-      padding: 0 0 0 20px
+
+      // width: 30px
+      // padding: 0 0 0 20px
+
+      // version with up to 240 min
+      width: 26px
+      padding: 0 0 0 7px
+
       &.selected
         background-color: #ddffd9
       input

@@ -99,7 +99,9 @@ MIDDLEWARE_CLASSES = (
     
     # xs
     'lib.middleware.xs_sharing.XsSharingMiddleware',
-    
+
+    'lib.middleware.profiler.ProfileMiddleware',
+
     # admin
     'lib.middleware.admin_redirects.AdminRedirectMiddleware',
     # custom
@@ -990,7 +992,7 @@ ACTSTREAM_SETTINGS = {
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
-logging.getLogger('django.db.backends').setLevel(logging.ERROR)
+#logging.getLogger('django.db.backends').setLevel(logging.ERROR)
 
 # try to override from local_config.py
 DEBUG_APPS = None

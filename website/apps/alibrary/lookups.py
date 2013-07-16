@@ -1,7 +1,10 @@
+from django.utils.html import mark_safe
 from selectable.base import ModelLookup
 from selectable.registry import registry
 from django.utils.safestring import mark_safe
+from easy_thumbnails.files import get_thumbnailer
 from alibrary.models import *
+THUMBNAIL_OPT = dict(size=(70, 70), crop=True, bw=False, quality=80)
 
 
 class ReleaseNameLookup(ModelLookup):
@@ -9,7 +12,27 @@ class ReleaseNameLookup(ModelLookup):
     search_fields = ['name__icontains',]
     
     def get_item_label(self, item):
-        return u"%s, %s" % (item.name, item.catalognumber)
+
+        name = (item.name[:22] + '..') if len(item.name) > 22 else item.name
+
+        try:
+            opt = THUMBNAIL_OPT
+            image = image = get_thumbnailer(item.main_image).get_thumbnail(opt).url
+        except:
+            image = "/static/img/base/spacer.png"
+            pass
+
+        html = '<img src="%s">' % image
+        html += '<span>%s' % name
+
+        if item.catalognumber:
+            html += '<small>%s</small>' % item.catalognumber
+
+        html += '</span>'
+
+
+
+        return mark_safe(html)
     
 registry.register(ReleaseNameLookup)
 
@@ -18,16 +41,18 @@ class ReleaseLabelLookup(ModelLookup):
     model = Label
     search_fields = ['name__icontains',]
 
-    #def get_item_value(self, item):
-        # Display for currently selected item
-        #return item.name
-
     def get_item_label(self, item):
-        # Display for choice listings
-        return u"%s (%s)" % (item.name, item.pk)
+        try:
+            opt = THUMBNAIL_OPT
+            image = image = get_thumbnailer(item.main_image).get_thumbnail(opt).url
+        except:
+            image = "/static/img/base/spacer.png"
+            pass
 
-    #def get_item_id(self, item):
-        #return u"%s" % item.name
+        html = '<img src="%s">' % image
+        html += '<span>%s</span>' % item.name
+
+        return mark_safe(html)
     
     
     
@@ -38,16 +63,19 @@ class ArtistLookup(ModelLookup):
     model = Artist
     search_fields = ['name__icontains',]
 
-    #def get_item_value(self, item):
-        # Display for currently selected item
-        #return item.name
-
     def get_item_label(self, item):
-        # Display for choice listings
-        return u"%s (%s)" % (item.name, item.pk)
+        try:
+            opt = THUMBNAIL_OPT
+            image = image = get_thumbnailer(item.main_image).get_thumbnail(opt).url
+        except:
+            image = "/static/img/base/spacer.png"
+            pass
 
-    #def get_item_id(self, item):
-        #return u"%s" % item.name
+        html = '<img src="%s">' % image
+        html += '<span>%s</span>' % item.name
+
+        return mark_safe(html)
+
     
     
     
@@ -59,7 +87,17 @@ class LabelLookup(ModelLookup):
     search_fields = ['name__icontains',]
 
     def get_item_label(self, item):
-        return u"%s (%s)" % (item.name, item.pk)    
+        try:
+            opt = THUMBNAIL_OPT
+            image = image = get_thumbnailer(item.main_image).get_thumbnail(opt).url
+        except:
+            image = "/static/img/base/spacer.png"
+            pass
+
+        html = '<img src="%s">' % image
+        html += '<span>%s</span>' % item.name
+
+        return mark_safe(html)
     
 registry.register(LabelLookup)
 

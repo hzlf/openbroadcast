@@ -74,7 +74,7 @@
 {% addtoblock "js-post" %}
 <script type="text/javascript">
 $(document).ready(function() {
-	
+
     // Initialize the jQuery File Upload widget:
     fu = $('#fileupload').fileupload();
 
@@ -92,14 +92,14 @@ $(document).ready(function() {
 {% endaddtoblock %}
 
 <section>
-	
+
 	<div class="page-header">
    <div id="sidebar">
     </div>
 		<!--
 		<h1>{% url api_dispatch_list resource_name='import' api_name='v1'%}{{ object.id }}/</h1>
 		-->
-		
+
 		<h2>{% trans "Upload" %} <small>{% trans "Add/Upload Files to the Import Queue" %}</small></h2>
 	</div>
 	<div>
@@ -107,18 +107,18 @@ $(document).ready(function() {
 	</div>
 
 	<div class="uploader">
-		
+
 		<form id="fileupload" action="/api/v1/importfile/?format=json&import_session=27" method="POST" enctype="multipart/form-data">
 		<!--
 		<form id="fileupload" action="{% url importer-upload-multi object.id %}" method="POST" enctype="multipart/form-data">
 		-->
-			
-			
-			
+
+
+
 	        <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-	        
+
 	        <input type="hidden" id="import_api_url"  value="{% url api_dispatch_list resource_name='import' api_name='v1'%}{{ object.id }}" />
-	        
+
 	        <div class="fileupload-buttonbar">
 
 	                <!-- The fileinput-button span is used to style the file input field as button -->
@@ -155,18 +155,18 @@ $(document).ready(function() {
 	        <br>
 	        <!-- The table listing the files available for upload/download -->
 	        <table role="presentation" class="table table-striped table-condensed"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
-	  
-	  
+
+
 	  		<table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
-	  
-	  
+
+
 	    </form>
     </div>
 
 </section>
 
 <section class="importer-importfiles">
-	
+
 	<div class="page-header">
 		<h2>Review <small>your uplads and confirm additions</small></h2>
 	</div>
@@ -255,29 +255,29 @@ $(document).ready(function() {
 
 
 <script type="text/x-tmpl" id="tmpl-demo">
-	
+
 <div id="importfile_result_{%=o.id%}" class="importfile item">
 	<h3><i class="icon-barcode"></i> {%=o.filename%}  <small>[{%=o.mimetype%}]</small></h3>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
 	<div class="row-fluid result-set provider-tag">
-		
+
 		<div class="span1">
 			ID3 /
 			Vorbis
 		</div>
-		
-		
+
+
 		<div class="span4">
-			
+
 			<label class="checkbox holder-media_name">
 				<input type="checkbox">
 					<ul class="horizontal unstyled">
@@ -286,8 +286,8 @@ $(document).ready(function() {
 					</ul>
 			</label>
 			<div class="clearfix"></div>
-			
-			
+
+
 			<label class="checkbox holder-label_name">
 				<input type="checkbox">
 					<ul class="horizontal unstyled">
@@ -297,9 +297,9 @@ $(document).ready(function() {
 			</label>
 
 		</div>
-		
+
 		<div class="span4">
-			
+
 			<label class="checkbox holder-artist_name">
 				<input type="checkbox">
 					<ul class="horizontal unstyled">
@@ -308,8 +308,8 @@ $(document).ready(function() {
 					</ul>
 			</label>
 			<div class="clearfix"></div>
-			
-			
+
+
 			<label class="checkbox holder-release_catalognumber">
 				<input type="checkbox">
 					<ul class="horizontal unstyled">
@@ -317,11 +317,11 @@ $(document).ready(function() {
 						<li class="value"></li>
 					</ul>
 			</label>
-			
+
 		</div>
-		
+
 		<div class="span3">
-			
+
 			<label class="checkbox holder-media_tracknumber">
 				<input type="checkbox">
 					<ul class="horizontal unstyled">
@@ -330,8 +330,8 @@ $(document).ready(function() {
 					</ul>
 			</label>
 			<div class="clearfix"></div>
-			
-			
+
+
 			<label class="checkbox holder-release_date">
 				<input type="checkbox">
 					<ul class="horizontal unstyled">
@@ -339,27 +339,27 @@ $(document).ready(function() {
 						<li class="value"></li>
 					</ul>
 			</label>
-			
+
 		</div>
-		
+
 	</div>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	<div class="row-fluid pull-righ result-actions">
 
 			<div class="btn-group pull-right">
@@ -386,9 +386,9 @@ $(document).ready(function() {
 				</ul>
 			</div>
 	</div>
-	
-	
-		
+
+
+
 </div>
 
 </script>

@@ -8,8 +8,16 @@ from filer.models import File, Image
 
 
 
-class ReadOnlyIconField(Widget):
+class ReadOnlyField(Widget):
     
+    def render(self, name, value, attrs=None):
+
+        return mark_safe('<div  class="form-extra readonly %s"><span>%s</span></div>' % (name, value))
+        #return mark_safe('<ul class="links external"><li class="icon external %s"></li></ul>' % value)
+
+
+class ReadOnlyIconField(Widget):
+
     def render(self, name, value, attrs=None):
 
         if not value:

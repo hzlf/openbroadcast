@@ -439,6 +439,41 @@ class LookupField(LayoutObject):
             html += render_field(field, form, form_style, context, template=self.template, attrs=self.attrs)
         return html
 
+
+class LookupImageField(LayoutObject):
+    """
+    Layout object, It contains one field name, and you can add attributes to it easily.
+    For setting class attributes, you need to use `css_class`, as `class` is a Python keyword.
+
+    Example::
+
+        Field('field_name', style="color: #333;", css_class="whatever", id="field_name")
+    """
+    template = "%s/lookup_image_field.html" % TEMPLATE_PACK
+
+    def __init__(self, *args, **kwargs):
+        self.fields = list(args)
+
+        if not hasattr(self, 'attrs'):
+            self.attrs = {}
+
+        if kwargs.has_key('css_class'):
+            if 'class' in self.attrs:
+                self.attrs['class'] += " %s" % kwargs.pop('css_class')
+            else:
+                self.attrs['class'] = kwargs.pop('css_class')
+
+        self.template = kwargs.pop('template', self.template)
+
+        # We use kwargs as HTML attributes, turning data_id='test' into data-id='test'
+        self.attrs.update(dict([(k.replace('_', '-'), conditional_escape(v)) for k,v in kwargs.items()]))
+
+    def render(self, form, form_style, context):
+        html = ''
+        for field in self.fields:
+            html += render_field(field, form, form_style, context, template=self.template, attrs=self.attrs)
+        return html
+
 class MultiWidgetField(Field):
     """
     Layout object. For fields with :class:`~django.forms.MultiWidget` as `widget`, you can pass

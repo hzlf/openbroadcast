@@ -41,7 +41,7 @@
                 });
 
 
-				edit.ui.init();
+                edit.ui.init();
 
 
             });
@@ -99,6 +99,23 @@
             {{ releasemedia_form.management_form }}
 
             {% crispy action_form %}
+
+
+
+
+            {% if releasemedia_form.errors or form.errors %}
+
+                <div class="alert alert-error">
+                    <strong>{% trans "Errors in form" %}</strong>
+                    <p>{% trans "Please check the given data and correct where marked." %}</p>
+                </div>
+
+
+
+
+
+            {% endif %}
+
 
 
             {% crispy form %}
@@ -159,7 +176,6 @@
 
 
                 </div>
-
 
                 {% crispy releasemedia_form %}
             </div>

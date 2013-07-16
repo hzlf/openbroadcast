@@ -99,6 +99,7 @@ class Importer(object):
         # media
         name = None
         tracknumber = None
+        filename = obj.filename
         alibrary_media_id = None
         mb_track_id = None
         
@@ -181,6 +182,7 @@ class Importer(object):
         print
         print '  name:                 %s' % name
         print '  tracknumber:          %s' % tracknumber
+        print '  filename:             %s' % filename
         print '  alibrary_media_id:    %s' % alibrary_media_id
         print '  mb_track_id:          %s' % mb_track_id
         print
@@ -222,6 +224,7 @@ class Importer(object):
         m_created = False
         log.info('media, force creation: %s' % name)
         m = Media(name=name)
+        m.filename = filename
         if tracknumber:
             m.tracknumber = tracknumber
         m.save()
@@ -251,8 +254,8 @@ class Importer(object):
             print 'ii_ids: '
             print ii_ids
             ir = Release.objects.filter(pk__in=ii_ids, name=release)
-            print ir
-            log.info('found release in import session: %s' % ir)
+            #print ir
+            #log.info('found release in import session: %s' % ir)
         except:
             ir = None
         
@@ -327,8 +330,8 @@ class Importer(object):
             print 'ii_ids: '
             print ii_ids
             ia = Artist.objects.filter(pk__in=ii_ids, name=artist)
-            print ia
-            log.info('found artist in import session: %s' % ia)
+            #print ia
+            #log.info('found artist in import session: %s' % ia)
         except:
             ia = None
         

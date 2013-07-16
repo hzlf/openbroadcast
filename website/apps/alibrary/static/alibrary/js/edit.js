@@ -216,9 +216,8 @@ EditUi = function () {
         });
 
 
-
         // mode switch (editor)
-        $('#editor_mode_switch li > a').live('click', function(e) {
+        $('#editor_mode_switch li > a').live('click', function (e) {
             e.preventDefault();
             var mode = $(this).data('mode');
             $(this).parents('.ui-persistent').data('uistate', mode);
@@ -365,16 +364,36 @@ EditUi = function () {
 
             debug.debug('returned data:', data);
 
+            console.log('***', data.tracklist)
+
+            self.lookup_data = data;
+
+            for (var key_ in data) {
+                console.log('### ' + key_)
+            };
+
+
             // generic data
             for (var key in data) {
-
-                self.lookup_data = data;
 
                 var obj = data[key];
                 console.log('key: ' + key + ': ', obj);
 
-                $('#' + self.lookup_prefix + key).html(obj);
-                $('#' + self.lookup_prefix + key).parent().fadeIn(200);
+                // check if custom method is required for this key
+
+
+
+                switch(key) {
+                    case 'main_image':
+                        self.image_lookup(key);
+                        break;
+                    default:
+                        $('#' + self.lookup_prefix + key).html(obj);
+                        $('#' + self.lookup_prefix + key).parent().fadeIn(200);
+                }
+
+
+
 
                 // if ($.inArray(key, exclude_mark)) {
                 if (exclude_mark.indexOf(key) == -1) {
@@ -382,6 +401,7 @@ EditUi = function () {
                 }
             }
 
+            console.log('***', data.tracklist)
             // media (a.k.a. track)-based data
             // look at the tracklist to eventually detect an offset
             var tbd = [];
@@ -391,22 +411,42 @@ EditUi = function () {
                     tbd.push(i);
                 }
             });
+
+
+
             // remove eventual non-track data
             var ros = 0;
             $.each(tbd, function (i, el) {
-                data.tracklist.remove(el - ros);
+                // data.tracklist.remove(el - ros);
+                data.tracklist = arrRemove(data.tracklist, (el-ros));
                 ros++;
             });
 
             self.offset_selector();
-
+            console.log('***', data.tracklist)
             // display dta
             if (data.tracklist) {
+
+
+
                 self.media_lookup(data);
             }
 
 
         }, data);
+    };
+
+
+    this.image_lookup = function (key) {
+        var val = self.lookup_data[key];
+
+        var image_container = $('#' + self.lookup_prefix + key);
+        var html = '<img src="' + val + '" style="height: 125px; width: 125px;">'
+
+        image_container.html(html);
+        image_container.parent().fadeIn(200);
+
+
     };
 
 
@@ -490,7 +530,7 @@ EditUi = function () {
                     holder_name.parent().fadeIn(100);
                     // mark
                     var target_name = $('#' + self.field_prefix + holder_name.attr('id').replace(self.lookup_prefix, ''));
-                    if (value == target_name.val()) {
+                    if (value.toLowerCase() == target_name.val().toLowerCase()) {
                         holder_name.parent().addClass('lookup-match');
                     } else {
                         holder_name.parent().addClass('lookup-diff');
@@ -527,10 +567,9 @@ EditUi = function () {
 
 
         // update the dropdown
-        setTimeout(function(){
+        setTimeout(function () {
             self.offset_selector();
         }, 10);
-
 
 
     };
@@ -540,14 +579,15 @@ EditUi = function () {
 
         // which keys should be checked case-insensitive=
         var keys_ci = [
-            'releasetype'
+            'releasetype',
+            'main_image'
         ];
 
         // compare original value & lookup suggestion
         var orig = $('#' + self.field_prefix + key).val();
         var lookup_value = data[key];
 
-        console.log('orig:', orig, 'lookup_value:', lookup_value)
+        // console.log('orig:', orig, 'lookup_value:', lookup_value)
 
         //if (orig != undefined && !$.inArray(key, keys_ci)) {
         if (orig != undefined && keys_ci.indexOf(key) != -1) {
@@ -576,13 +616,42 @@ EditUi = function () {
         console.log('apply value:', val, ' key: ', key);
 
         // hack for autocomlete fields (there is a hidden value)
-        if(key.endsWith('_0')) {
-            var t = key.slice(0,key.length - 1) + '1';
+        if (key.endsWith('_0')) {
+            var t = key.slice(0, key.length - 1) + '1';
             var hidden_target = $('#' + self.field_prefix + t);
             hidden_target.val('');
-            //alert(hidden_target)
-
         }
+
+        // special handling for image field (value should be put to hidden input)
+        if (key == 'main_image') {
+            var val_b = $('#' + self.lookup_prefix + 'remote_image').html();
+            var target_b = $('#' + self.field_prefix + 'remote_image');
+            target_b.val(val_b);
+        }
+        ;
+
+        // handle tags
+        if (key == 'd_tags') {
+            var tags = val.split(',');
+            $(tags).each(function (i, el) {
+                $("#id_d_tags").tagit("createTag", $.trim(el));
+            });
+        }
+        ;
+
+
+        // handle pagedown-preview
+        if (key == 'description') {
+
+            try {
+                setTimeout(function(){
+                    pd_editor.refreshPreview()
+                }, 200)
+            } catch (e) {
+            }
+            ;
+        }
+        ;
 
 
         // apply feedback
@@ -590,21 +659,22 @@ EditUi = function () {
         el.parent().addClass('lookup-match');
 
         // some keys need special treatment...
-        switch (key) {
-            case 'd_tags':
-                var tags = val.split(',');
-                $(tags).each(function (i, el) {
-                    $("#id_d_tags").tagit("createTag", $.trim(el));
-                });
-                break;
-            case 2:
-                break;
-            default:
-                target.val($.decodeHTML(val));
-        }
+        /*
+         switch (key) {
+         case 'd_tags':
+         var tags = val.split(',');
+         $(tags).each(function (i, el) {
+         $("#id_d_tags").tagit("createTag", $.trim(el));
+         });
+         break;
+         case 2:
+         break;
+         default:
+         target.val($.decodeHTML(val));
+         }
+         */
 
-
-        // $("#id_d_tags").tagit("createTag", "brand-new-taggg");
+        target.val($.decodeHTML(val));
 
     };
 

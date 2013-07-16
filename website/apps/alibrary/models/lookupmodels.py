@@ -3,6 +3,7 @@ import datetime
 import uuid
 import shutil
 import sys
+import json
 
 # django
 from django.db import models
@@ -179,6 +180,7 @@ class APILookup(models.Model):
 
         res = {}
         d_tags = [] # needed as merged from different keys
+
         for k in d_release.data:
             # print 'k: %s - v:%s' % (k, d_release.data[k])
             
@@ -232,8 +234,37 @@ class APILookup(models.Model):
                 except:
                     pass
 
-            # dummy tagging
-            # res['d_tags'] = 'techno, whatever'
+            # image
+            if k == 'images':
+                image = None
+                try:
+                    d = d_release.data[k]
+                    for v in d:
+                        if v['type'] == 'primary':
+                            image = v['resource_url']
+                        print v
+                except:
+                    pass
+
+                # sorry, kind of ugly...
+                if not image:
+                    try:
+                        d = d_release.data[k]
+                        for v in d:
+                            if v['type'] == 'secondary':
+                                image = v['resource_url']
+                            print v
+                    except:
+                        pass
+
+                try:
+                    res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', 'dgs.anorg.net') + '?cache=7'
+                except:
+                    res['remote_image'] = res['main_image'] = None
+                #res['remote_image'] = 'http://dgs.anorg.net/image/R-5081-1147456810.jpeg'
+
+
+
 
             res[mk] = d_release.data[k]
 

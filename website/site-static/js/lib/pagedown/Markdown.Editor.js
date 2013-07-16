@@ -632,8 +632,12 @@
                 setMode("moving");
             });
 
+
             panels.input.onpaste = handlePaste;
             panels.input.ondrop = handlePaste;
+
+
+
         };
 
         var init = function () {

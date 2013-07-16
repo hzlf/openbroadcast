@@ -500,13 +500,17 @@ base.ui.iface = function () {
 
     // add class to external links
     $('body').bind('DOMSubtreeModified', function (e) {
-        if (e.target.innerHTML.length > 0) {
-            $("a:not(.skip-external)").filter(function () {
-                return this.hostname && this.hostname !== location.hostname;
-            })
-                .addClass('external')
-                // .attr("target","_blank")
-            ;
+        try {
+            if (e.target.innerHTML.length > 0) {
+                $("a:not(.skip-external)").filter(function () {
+                    return this.hostname && this.hostname !== location.hostname;
+                })
+                    .addClass('external')
+                    // .attr("target","_blank")
+                ;
+            }
+        } catch (e) {
+
         }
     });
 

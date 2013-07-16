@@ -1,11 +1,13 @@
 .wmd-wrapper
   display: inline-block
+  float: left
+  width: 400px
 
 .wmd-panel
   margin-left: 0
-  width: 80%
+  //width: 400px
   textarea
-    width: 100%
+    width: 395px
     min-width: 272px
 
 .wmd-button-row
@@ -16,11 +18,13 @@
 
 
 .wmd-preview
-  width: 80%
+  //width: 400px
   min-width: 267px
   padding: 5px
   margin-top: 20px
   background-color: #F3F3F3
+  max-height: 240px
+  overflow: auto
   +markdown()
 
 

@@ -31,6 +31,7 @@ class PagedownWidget(forms.Textarea):
                 <div id="%(id)s_wmd_preview" class="wmd-panel wmd-preview"></div>
             </div>
             <script type="text/javascript">
+                var pd_editor;
                 $(document).ready(function() {
                 (function () {
                     var converter = Markdown.getSanitizingConverter();
@@ -39,8 +40,8 @@ class PagedownWidget(forms.Textarea):
                         button : "%(id)s_wmd_button_bar", 
                         preview : "%(id)s_wmd_preview",
                     }
-                    var editor = new Markdown.Editor(converter, selectors);
-                    editor.run();
+                    pd_editor = new Markdown.Editor(converter, selectors);
+                    pd_editor.run();
                 })();
                 });
             </script>

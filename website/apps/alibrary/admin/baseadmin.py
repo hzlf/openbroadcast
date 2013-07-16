@@ -306,7 +306,7 @@ class MediaAdmin(BaseAdmin):
     """"""
     fieldsets = [
         (None,  {'fields': 
-                 ['name', 'slug', 'isrc', 'uuid', ('tracknumber', 'mediamumber'), 'mediatype', ('release', 'release_link'), 'artist', 'license', 'd_tags']
+                 ['name', 'slug', 'isrc', 'filename', 'uuid', ('tracknumber', 'mediamumber'), 'mediatype', ('release', 'release_link'), 'artist', 'license', 'd_tags']
                  }),
                  
         ('Users', {'fields' : ['owner', 'creator', 'publisher']}),

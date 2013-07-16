@@ -223,7 +223,8 @@ class Media(CachingMixin, MigrationMixin):
     base_duration = models.FloatField(verbose_name=_('Duration'), blank=True, null=True)
     base_samplerate = models.PositiveIntegerField(verbose_name=_('Samplerate'), blank=True, null=True)
     base_bitrate = models.PositiveIntegerField(verbose_name=_('Bitrate'), blank=True, null=True)
-    
+    filename = models.CharField(verbose_name=_('Original filename'), max_length=256, blank=True, null=True)
+
     # tagging
     #tags = TaggableManager(blank=True)
     
@@ -1014,7 +1015,7 @@ class Media(CachingMixin, MigrationMixin):
         try:
             cache_folder = self.folder
         except Exception, e:
-            print e
+            #print e
             log.info('Media id: %s - cache folder does not exist' % (self.pk))
             cache_folder = None
 
@@ -1035,7 +1036,7 @@ class Media(CachingMixin, MigrationMixin):
                 
                 self.processed = 1
             except Exception, e:
-                print e
+                #print e
                 base_bitrate = None
                 base_samplerate = None
                 base_filesize = None

@@ -50,7 +50,7 @@ def api_lookup(request, *args, **kwargs):
 
 
 
-        data = json.dumps(data)
+        data = json.dumps(data, encoding="utf-8", ensure_ascii=False)
 
 
         return data
@@ -107,7 +107,7 @@ def provider_search(request, *args, **kwargs):
     r = requests.get(url)
     results = r.json()['results']
     text = r.text
-    text = text.replace('api.discogs.com', 'dgs.anorg.net')
+    #text = text.replace('api.discogs.com', 'dgs.anorg.net')
     results = json.loads(text)['results']
 
 

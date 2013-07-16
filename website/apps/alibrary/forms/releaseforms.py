@@ -40,6 +40,10 @@ from ac_tagging.widgets import TagAutocompleteTagIt
 
 from lib.widgets.widgets import ReadOnlyIconField
 
+from lib.widgets.widgets import ReadOnlyField
+
+from lib.util.filer_extra import url_to_file
+
 
 
 ACTION_LAYOUT =  action_layout = FormActions(
@@ -209,7 +213,8 @@ class ReleaseForm(ModelForm):
         image_layout = Fieldset(
                 'Meta',
                 LookupField('description', css_class='input-xxlarge'),
-                'main_image',
+                LookupImageField('main_image',),
+                LookupField('remote_image',),
         )
 
         tagging_layout = Fieldset(
@@ -233,12 +238,13 @@ class ReleaseForm(ModelForm):
 
 
     main_image = forms.Field(widget=FileInput(), required=False)
+    remote_image = forms.URLField(required=False)
     #releasedate = forms.DateField(required=False,widget=forms.DateInput(format = '%Y-%m-%d'), input_formats=('%Y-%m-%d',))
     releasedate_approx = ApproximateDateFormField(label="Releasedate", required=False)
     d_tags = TagField(widget=TagAutocompleteTagIt(max_tags=9), required=False, label=_('Tags'))
     name = forms.CharField(widget=selectable.AutoCompleteWidget(ReleaseNameLookup), required=True)
     label = selectable.AutoCompleteSelectField(ReleaseLabelLookup, allow_new=True, required=False)
-    description = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")
+    description = forms.CharField(widget=PagedownWidget(), required=False)
 
     #extra_artists = selectable.AutoComboboxSelectMultipleField(ArtistLookup, required=False)
 
@@ -248,7 +254,10 @@ class ReleaseForm(ModelForm):
 
         cd = super(ReleaseForm, self).clean()
 
+        print
+        print "ReleaseForm: clean"
         print cd
+        print
 
         label = cd['label']
         try:
@@ -259,8 +268,11 @@ class ReleaseForm(ModelForm):
             pass
 
 
-        if 'main_image' in cd and cd['main_image'] != None:
-            print "IMAGE SAFIX!!"
+        main_image = cd.get('main_image', None)
+        remote_image = cd.get('remote_image', None)
+
+        if main_image:
+            print "adding image (main)"
             try:
                 ui = cd['main_image']
                 dj_file = DjangoFile(open(ui.temporary_file_path()), name='cover.jpg')
@@ -272,6 +284,17 @@ class ReleaseForm(ModelForm):
             except Exception, e:
                 print e
                 pass
+
+
+
+
+        elif remote_image:
+            print "adding image (remote)"
+            try:
+                cd['main_image'] = url_to_file(remote_image, self.instance.folder)
+            except Exception, e:
+                print e
+
 
         else:
             cd['main_image'] = self.instance.main_image
@@ -320,6 +343,7 @@ class BaseReleaseMediaFormSet(BaseInlineFormSet):
                         LookupField('name', css_class='input-large'),
                         LookupField('artist', css_class='input-large'),
                         Field('isrc', css_class='input-large mode-m mode-l'),
+                       Field('filename', css_class='input-large mode-m mode-l'),
                        css_class='span9'
                        ),
                 css_class='releasemedia-row row-fluid',
@@ -350,11 +374,14 @@ class BaseReleaseMediaForm(ModelForm):
         model = Media
         parent_model = Release
         #formset = BaseReleaseMediaFormSet
-        fields = ('name','tracknumber',)
+        #fields = ('name','tracknumber','base_filesize',)
 
     def __init__(self, *args, **kwargs):
         self.instance = kwargs['instance']
         super(BaseReleaseMediaForm, self).__init__(*args, **kwargs)
+
+        self.fields['filename'].widget.attrs['readonly'] = True
+
         if self.instance and self.instance.release and self.instance.release.publish_date:
             self.fields['license'].widget.attrs['readonly'] = True
             #self.fields['license'].widget = forms.TextInput(attrs={'readonly':'readonly'})
@@ -362,6 +389,7 @@ class BaseReleaseMediaForm(ModelForm):
 
     artist = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False)
     tracknumber =  forms.CharField(label=_('No.'))
+    filename =  forms.CharField(widget=ReadOnlyField(), label=_('Original File'), required=False)
 
     def clean_license(self):
         instance = getattr(self, 'instance', None)
@@ -437,7 +465,7 @@ class BaseReleaseReleationForm(ModelForm):
 
 
 # Compose Formsets
-ReleaseMediaFormSet = inlineformset_factory(Release, Media, form=BaseReleaseMediaForm, formset=BaseReleaseMediaFormSet, can_delete=False, extra=0, fields=('name', 'tracknumber', 'isrc', 'artist', 'license', 'mediatype',), can_order=False)
+ReleaseMediaFormSet = inlineformset_factory(Release, Media, form=BaseReleaseMediaForm, formset=BaseReleaseMediaFormSet, can_delete=False, extra=0, fields=('name', 'tracknumber', 'isrc', 'artist', 'license', 'mediatype','filename'), can_order=False)
 ReleaseRelationFormSet = generic_inlineformset_factory(Relation, form=BaseReleaseReleationForm, formset=BaseReleaseReleationFormSet, extra=3, exclude=('action',), can_delete=True)
 
 

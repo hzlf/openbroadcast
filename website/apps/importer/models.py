@@ -270,7 +270,7 @@ class ImportFile(BaseModel):
         (3, _('Working')),
         (4, _('Warning')),
         (5, _('Duplicate')),
-        (6, _('Queued > will go straight to import.')),
+        (6, _('Queued')),
         (7, _('Importing')),
         (99, _('Error')),
         (11, _('Other')),
@@ -409,7 +409,7 @@ class ImportFile(BaseModel):
 
         if media:
             print 'GOT MEDIA - SAVE IT'
-            print media
+            #print media
             obj.media = media
             print obj.media
             
