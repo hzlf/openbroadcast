@@ -28,7 +28,7 @@ from eav.models import Attribute
 from jsonfield import JSONField
 
 from urlparse import urlparse
-
+import requests
 
 # logging
 import logging
@@ -37,6 +37,8 @@ logger = logging.getLogger(__name__)
 
 ################
 from alibrary.models import *
+
+USER_AGENT = 'ANORGDiscogsAPIClient/0.0.1 +http://anorg.net'
 
 
 class APILookup(models.Model):
@@ -118,7 +120,105 @@ class APILookup(models.Model):
         log.debug('content_object: %s' % self.content_object)
 
         self.uri = self.content_object.relations.filter(service='discogs')[0].url
-        
+
+        if '/release/' in self.uri:
+            return self.get_release_from_discogs()
+
+        if '/artist/' in self.uri:
+            return self.get_artist_from_discogs()
+
+
+
+
+
+    def get_artist_from_discogs(self):
+
+        log.info('uri: %s' % self.uri)
+
+
+        # some hacks to convert site url to api id
+        v1_id = self.uri.split('/')[-1]
+        v1_url = 'http://api.discogs.com/artist/%s?f=json' % v1_id
+
+        print "#########################################"
+        print v1_url
+        r = requests.get(v1_url)
+        v1_data= r.json()
+
+        d_id = v1_data['resp']['artist']['id']
+
+
+        #d_id = 8760
+
+        # the v2 client
+        from dgs2 import discogs_client
+        discogs = discogs_client.Client(USER_AGENT)
+
+        d_artist = discogs.artist(d_id)
+        print '***********************'
+        print d_artist
+        print '***********************'
+
+
+
+        res = {}
+        d_tags = [] # needed as merged from different keys
+
+        for k in d_artist.data:
+            print k
+            #print d_artist.data[k]
+
+            # kind of ugly data mapping
+            mk = k
+
+            if k == 'profile':
+                mk = 'biography'
+
+            if k == 'realname':
+                mk = 'real_name'
+
+            # image
+            if k == 'images':
+                image = None
+                try:
+                    d = d_artist.data[k]
+                    for v in d:
+                        if v['type'] == 'primary':
+                            image = v['resource_url']
+                        print v
+                except:
+                    pass
+
+                # sorry, kind of ugly...
+                if not image:
+                    try:
+                        d = d_artist.data[k]
+                        for v in d:
+                            if v['type'] == 'secondary':
+                                image = v['resource_url']
+                            print v
+                    except:
+                        pass
+
+                try:
+                    res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', 'dgs.anorg.net')
+                except:
+                    res['remote_image'] = res['main_image'] = None
+                #res['remote_image'] = 'http://dgs.anorg.net/image/R-5081-1147456810.jpeg'
+
+            res[mk] = d_artist.data[k]
+
+
+        #res['d_tags'] = ', '.join(d_tags)
+        self.api_data = res
+        self.save()
+
+        return res
+
+
+
+    def get_release_from_discogs(self):
+
         log.info('uri: %s' % self.uri)
             
         try:
@@ -137,17 +237,15 @@ class APILookup(models.Model):
         if not self.ressource_id:
             log.warning('no resource id for %s' % self.content_object)
         
-        
-        
-        
+
         """
         Actual API requests
         """
-        
+
+        # the v1 client
         import discogs_client as discogs
-        discogs.user_agent = 'ANORGDiscogsAPIClient/0.0.1 +http://anorg.net'
-        
-        
+        discogs.user_agent = USER_AGENT
+
         #d_release = discogs.Release(self.ressource_id).master
         #d_master = d_release.master
         #d_releasde = d_master.key_release
@@ -171,12 +269,7 @@ class APILookup(models.Model):
          |  tracklist
         """
         
-        #for k in d_release.data:
-        #    print 'k: %s - v:%s' % (k, d_release.data[k])
-        #    attribute, created = Attribute.objects.get_or_create(name=k, datatype=Attribute.TYPE_TEXT)
-        #    setattr(self.eav, k, d_release.data[k])
-            
-        #self.save()
+
 
         res = {}
         d_tags = [] # needed as merged from different keys
@@ -258,7 +351,7 @@ class APILookup(models.Model):
                         pass
 
                 try:
-                    res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', 'dgs.anorg.net') + '?cache=7'
+                    res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', 'dgs.anorg.net')
                 except:
                     res['remote_image'] = res['main_image'] = None
                 #res['remote_image'] = 'http://dgs.anorg.net/image/R-5081-1147456810.jpeg'

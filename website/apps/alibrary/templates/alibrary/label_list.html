@@ -1,7 +1,21 @@
 {% extends "layout_base.html" %}
-{% load spurl cache i18n truncate cache %}
+{% load spurl cache i18n truncate dajaxice_templatetags sekizai_tags %}
 
 {% block heading %}
+<!-- view specific scripts -->
+{% addtoblock "js-post" %}{% dajaxice_js_import %}{% endaddtoblock %}
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/list.edit.js"></script>{% endaddtoblock %}
+
+{% addtoblock "js-post" %}
+    <script>
+    var list_edit = list_edit || {};
+    $(function(){
+       list_edit = new ListEditUi();
+       list_edit.init();
+    });
+    </script>
+{% endaddtoblock %}
+
 <!-- heading / icon (large one) -->
 <div id="heading">
 	{% include "skeleton/heading.html" %}
@@ -164,6 +178,6 @@
 {% endblock %}
 
 {% block sidebar %}
-{% include "alibrary/release/sidebar/_list.html" %}
+{% include "alibrary/label/sidebar/_list.html" %}
 {% endblock %}
 

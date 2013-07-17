@@ -10,7 +10,7 @@
 	
 	
 	{% for provider in providers %}
-	<div data-item_type="release" data-item_id="{{ object.pk }}" data-provider="{{ provider.key }}" class="item {% if provider.relation %}available{% else %}unavailable{% endif %} hoverable {% if provider.relation %}available{% endif %}">
+	<div data-item_type="{{ ct }}" data-item_id="{{ object.pk }}" data-provider="{{ provider.key }}" class="item {% if provider.relation %}available{% else %}unavailable{% endif %} hoverable {% if provider.relation %}available{% endif %}">
 		
 		<div class="row-fluid ">
 			

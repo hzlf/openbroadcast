@@ -66,7 +66,7 @@ from alibrary.util.slug import unique_slugify
 
 LOOKUP_PROVIDERS = (
     ('discogs', _('Discogs')),
-    ('musicbrainz', _('Musicbrainz')),
+    #('musicbrainz', _('Musicbrainz')),
 )
 
 class ArtistManager(models.Manager):

@@ -6,7 +6,9 @@ from dajax.core import Dajax
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
-from alibrary.models import APILookup, Release, Relation
+from alibrary.models import APILookup, Release, Relation, Label, Artist
+
+from lib.util.merge import merge_model_objects
 
 import requests
 
@@ -29,13 +31,24 @@ def api_lookup(request, *args, **kwargs):
 
     log.debug('type: %s - id: %s - provider: %s' % (item_type, item_id, provider))
 
+    data = {}
+
+
     try:
         if item_type == 'release':
-            r = Release.objects.get(pk=item_id)
-            ctype = ContentType.objects.get_for_model(r)
-            al, created = APILookup.objects.get_or_create(content_type=ctype, object_id=r.id, provider=provider)
+            i = Release.objects.get(pk=item_id)
+            ctype = ContentType.objects.get_for_model(i)
+            al, created = APILookup.objects.get_or_create(content_type=ctype, object_id=i.id, provider=provider)
             if created:
                 log.debug('APILookup created: %s' % (al.pk))
+
+        if item_type == 'artist':
+            i = Artist.objects.get(pk=item_id)
+            ctype = ContentType.objects.get_for_model(i)
+            al, created = APILookup.objects.get_or_create(content_type=ctype, object_id=i.id, provider=provider)
+            if created:
+                log.debug('APILookup created: %s' % (al.pk))
+
 
 
         data = al.get_from_api()
@@ -49,15 +62,10 @@ def api_lookup(request, *args, **kwargs):
         print '*********************************************'
 
 
-
-        data = json.dumps(data, encoding="utf-8", ensure_ascii=False)
-
-
-        return data
-
     except Exception, e:
         log.warning('%s' % e)
-        return None
+
+    return json.dumps(data, encoding="utf-8")
 
 
 @dajaxice_register
@@ -77,9 +85,14 @@ def provider_search_query(request, *args, **kwargs):
         if item_type == 'release':
             item = Release.objects.get(pk=item_id)
             ctype = ContentType.objects.get_for_model(item)
-            #al, created = APILookup.objects.get_or_create(content_type=ctype, object_id=r.id, provider=provider)
+            data = {'query': '%s %s' % (item.name, item.get_artists()[0])}
 
-        data = {'query': '%s %s' % (item.name, item.get_artists()[0])}
+        if item_type == 'artist':
+            item = Artist.objects.get(pk=item_id)
+            ctype = ContentType.objects.get_for_model(item)
+            data = {'query': '%s' % (item.name)}
+
+
         return json.dumps(data)
 
     except Exception, e:
@@ -150,6 +163,10 @@ def provider_update(request, *args, **kwargs):
         if item_type == 'release':
             item = Release.objects.get(pk=item_id)
 
+        if item_type == 'artist':
+            item = Artist.objects.get(pk=item_id)
+
+
         if item and uri:
             rel = Relation(content_object=item, url=uri)
             rel.save()
@@ -158,8 +175,116 @@ def provider_update(request, *args, **kwargs):
             'service': '%s' % rel.service,
             'url': '%s' % rel.url,
             }
-        return json.dumps(data)
+
 
     except Exception, e:
         log.warning('%s' % e)
-        return None
+
+
+    return json.dumps(data)
+
+
+
+
+
+
+
+
+
+"""
+listview functions (merge etc)
+"""
+
+@dajaxice_register
+def merge_items(request, *args, **kwargs):
+
+    log = logging.getLogger('alibrary.ajax.merge_items')
+
+
+    print kwargs
+
+    item_type = kwargs.get('item_type', None)
+    item_ids = kwargs.get('item_ids', None)
+    master_id = kwargs.get('master_id', None)
+
+    slave_items = []
+    master_item = None
+    data = {
+        'status': None,
+        'error': None
+    }
+
+
+    if item_type and item_ids and master_id:
+        log.debug('type: %s - ids: %s - master: %s' % (item_type, ', '.join(item_ids), master_id))
+        try:
+
+            if item_type == 'release':
+                items = Release.objects.filter(pk__in=item_ids).exclude(pk=int(master_id))
+                for item in items:
+                    slave_items.append(item)
+
+                master_item = Release.objects.get(pk=int(master_id))
+                if slave_items and master_item:
+                    merge_model_objects(master_item, slave_items)
+                    master_item.save()
+                    # needed to clear cache
+                    for media in master_item.media_release.all():
+                        media.save()
+                    data['status'] = True
+                else:
+                    data['status'] = False
+                    data['error'] = 'No selection'
+
+            if item_type == 'artist':
+                items = Artist.objects.filter(pk__in=item_ids).exclude(pk=int(master_id))
+                for item in items:
+                    slave_items.append(item)
+
+                master_item = Artist.objects.get(pk=int(master_id))
+                if slave_items and master_item:
+                    merge_model_objects(master_item, slave_items)
+                    master_item.save()
+                    # needed to clear cache
+                    """"""
+                    for media in master_item.media_artist.all():
+                        media.save()
+
+                    data['status'] = True
+                else:
+                    data['status'] = False
+                    data['error'] = 'No selection'
+
+            if item_type == 'label':
+                items = Label.objects.filter(pk__in=item_ids).exclude(pk=int(master_id))
+                for item in items:
+                    slave_items.append(item)
+
+                master_item = Label.objects.get(pk=int(master_id))
+                if slave_items and master_item:
+                    merge_model_objects(master_item, slave_items)
+                    master_item.save()
+                    # needed to clear cache
+                    """
+                    for media in master_item.media_release.all():
+                        media.save()
+                    """
+                    data['status'] = True
+                else:
+                    data['status'] = False
+                    data['error'] = 'No selection'
+
+
+
+        except Exception, e:
+            log.warning('%s' % e)
+            data['status'] = False
+            data['error'] = '%s' % e
+
+    return json.dumps(data)
+
+
+
+
+
+

@@ -41,6 +41,8 @@ from ac_tagging.widgets import TagAutocompleteTagIt
 
 from lib.widgets.widgets import ReadOnlyIconField
 
+from lib.util.filer_extra import url_to_file
+
 
 
 ACTION_LAYOUT =  action_layout = FormActions(
@@ -143,7 +145,8 @@ class ArtistForm(ModelForm):
         meta_layout = Fieldset(
                 'Meta',
                 LookupField('biography', css_class='input-xxlarge'),
-                'main_image',
+                LookupImageField('main_image',),
+                LookupField('remote_image',),
         )
         
         tagging_layout = Fieldset(
@@ -165,6 +168,7 @@ class ArtistForm(ModelForm):
 
     
     main_image = forms.Field(widget=FileInput(), required=False)
+    remote_image = forms.URLField(required=False)
     #releasedate = forms.DateField(required=False,widget=forms.DateInput(format = '%Y-%m-%d'), input_formats=('%Y-%m-%d',))
     #releasedate_approx = ApproximateDateFormField(label="Releasedate", required=False)
     d_tags = TagField(widget=TagAutocompleteTagIt(max_tags=9), required=False, label=_('Tags'))
@@ -186,9 +190,10 @@ class ArtistForm(ModelForm):
         print cd
         print "*************************************"
         
-            
-        
-        if 'main_image' in cd and cd['main_image'] != None:
+        main_image = cd.get('main_image', None)
+        remote_image = cd.get('remote_image', None)
+
+        if main_image:
             try:
                 ui = cd['main_image']
                 dj_file = DjangoFile(open(ui.temporary_file_path()), name='cover.jpg')
@@ -200,6 +205,16 @@ class ArtistForm(ModelForm):
             except Exception, e:
                 print e
                 pass
+
+
+
+
+        elif remote_image:
+            print "adding image (remote)"
+            try:
+                cd['main_image'] = url_to_file(remote_image, self.instance.folder)
+            except Exception, e:
+                print e
             
         else:
             cd['main_image'] = self.instance.main_image

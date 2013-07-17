@@ -625,11 +625,12 @@ base.ui.iface = function () {
 
     /*
      * Merge selected items
+     * MOVED: refactored to list.edit.js
      */
 
     /*
      * Dialog opening and parameter collection
-     */
+
     $('.action.selection_merge a').live('click', function () {
 
         if ($(this).hasClass('disabled')) {
@@ -652,6 +653,7 @@ base.ui.iface = function () {
 
         return false;
     });
+    */
 
     /*
      * Handlers in dialog window actions and ajax call

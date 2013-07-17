@@ -33,6 +33,7 @@ class ReleaseResource(ModelResource):
         filtering = {
             #'channel': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
+            'id': ['exact', 'in'],
         }
         #cache = SimpleCache(timeout=120)
         

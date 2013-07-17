@@ -260,6 +260,8 @@ class ImportFile(BaseModel):
     media = models.ForeignKey(Media, blank=True, null=True, related_name="importfile_media", on_delete=models.SET_NULL)
     
     imported_api_url = models.CharField(max_length=512, null=True, blank=True)
+
+    error = models.CharField(max_length=512, null=True, blank=True)
     
     
         
@@ -317,9 +319,15 @@ class ImportFile(BaseModel):
         # duplicate check by echoprint
         if not media_id:
             media_id = processor.id_by_echoprint(obj.file)
-        
-        metadata = processor.extract_metadata(obj.file)
-        
+
+        try:
+            metadata = processor.extract_metadata(obj.file)
+        except Exception, e:
+            print e
+            obj.error = '%s' % e
+            obj.status = 99
+            obj.save()
+            return
         
         # try to get media by id returned from fingerprinter
         media = None

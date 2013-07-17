@@ -328,6 +328,8 @@ INSTALLED_APPS = (
     # server
     'gunicorn',
     'django_date_extensions',
+    'esi',
+    'turbolinks',
     
     'haystack',
     
@@ -467,7 +469,6 @@ INSTALLED_APPS = (
     'asearch',
     #'django_db_signals',
     'pushy',
-    #'turbolinks',
     
     
     # blog

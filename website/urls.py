@@ -71,7 +71,7 @@ urlpatterns = patterns('',
     url(dajaxice_config.dajaxice_url, include('dajaxice.urls')),
     
     # varnish / ESI
-    # (r'^esi/', include('esi.urls')),
+    url(r'^esi/', include('esi.urls')),
     
     # registration
     url(r'^accounts/', include('invitation.urls')),

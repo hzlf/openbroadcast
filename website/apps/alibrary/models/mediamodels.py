@@ -880,6 +880,8 @@ class Media(CachingMixin, MigrationMixin):
     def update_echoprint_task(obj):
         
         from settings import ECHOPRINT_CODEGEN_BIN
+
+        status = 2
         
         
         ecb = ECHOPRINT_CODEGEN_BIN
@@ -969,7 +971,7 @@ class Media(CachingMixin, MigrationMixin):
             except Exception, e:
                 print e
                 status = 2
-                
+
         obj.echoprint_status = status
         obj.save()
 

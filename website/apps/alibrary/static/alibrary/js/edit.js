@@ -338,6 +338,7 @@ EditUi = function () {
         // which keys should not be marked red/green?
         var exclude_mark = [
             'description',
+            'biography',
             'd_tags'
         ];
 
@@ -363,8 +364,6 @@ EditUi = function () {
             $('body').removeClass('api_lookup-progress');
 
             debug.debug('returned data:', data);
-
-            console.log('***', data.tracklist)
 
             self.lookup_data = data;
 
@@ -401,17 +400,17 @@ EditUi = function () {
                 }
             }
 
-            console.log('***', data.tracklist)
             // media (a.k.a. track)-based data
             // look at the tracklist to eventually detect an offset
             var tbd = [];
-            $.each(data.tracklist, function (i, el) {
-                console.log('el', el);
-                if (el.duration == '' && el.position == '') {
-                    tbd.push(i);
-                }
-            });
-
+            if(data.tracklist){
+                $.each(data.tracklist, function (i, el) {
+                    console.log('el', el);
+                    if (el.duration == '' && el.position == '') {
+                        tbd.push(i);
+                    }
+                });
+            }
 
 
             // remove eventual non-track data
@@ -422,13 +421,10 @@ EditUi = function () {
                 ros++;
             });
 
-            self.offset_selector();
-            console.log('***', data.tracklist)
+
             // display dta
             if (data.tracklist) {
-
-
-
+                self.offset_selector();
                 self.media_lookup(data);
             }
 
@@ -441,7 +437,7 @@ EditUi = function () {
         var val = self.lookup_data[key];
 
         var image_container = $('#' + self.lookup_prefix + key);
-        var html = '<img src="' + val + '" style="height: 125px; width: 125px;">'
+        var html = '<img src="' + val + '" style="height: 125px;">'
 
         image_container.html(html);
         image_container.parent().fadeIn(200);
@@ -642,6 +638,18 @@ EditUi = function () {
 
         // handle pagedown-preview
         if (key == 'description') {
+
+            try {
+                setTimeout(function(){
+                    pd_editor.refreshPreview()
+                }, 200)
+            } catch (e) {
+            }
+            ;
+        }
+        ;
+        // handle pagedown-preview
+        if (key == 'biography') {
 
             try {
                 setTimeout(function(){

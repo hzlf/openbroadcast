@@ -27,32 +27,32 @@
 		<h1>TEST</h1>
 		{% block inner %}
 		{% endblock %}
-		
+
 		<!-- main javascript block -->
 		{% render_block "js" %}
-		
+
 		<script type="text/javascript">
 			//<![CDATA[//><!--
-			
+
 			var settings = settings || {};
 			settings.debug = true;
-			
+
 			// local / window-dependent container
 			var	local = local || {};
 			local.type = 'main';
-			
+
 			var nj;
 
-			
+
 			// javascript init / user interface
 			$(document).ready(function() {
-				
+
 				// passing some usefull variables for later use in js
 				asite.vars.aplayer_width = 630;
 				asite.vars.aplayer_height = 630;
-				
 
-				
+
+
 
 				asite.base.init();
 
@@ -61,19 +61,19 @@
 
 				aplayer.ui.init();
 				aplayer.ui.playhead();
-				
+
 				{% render_block "dom-ready" %}
 
 			});
 			//--><!]]>
 		</script>
-		
-		
+
+
 		<!-- 3rd-party js initialisation (analytics, facebook etc) -->
 		{% include "asite/js_init.html" %}
-		
+
 		<!-- verry last scripts -->
 		{% render_block "js-post" %}
-		
+
 	</body>
 </html>

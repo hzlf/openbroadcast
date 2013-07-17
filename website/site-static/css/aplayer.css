@@ -14998,6 +14998,82 @@ ul.ui-autocomplete > li img {
   display: none;
 }
 
+/* alibrary styleing. further app specific styles should be placed here */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_alibrary\.sass}line{font-family:\000034}}
+.popup-merge {
+  width: 703px !important;
+  max-width: 703px !important;
+  padding: 10px 0 0 0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_alibrary\.sass}line{font-family:\0000310}}
+.popup-merge .info {
+  border-bottom: 1px solid #5a5a5a;
+  margin-bottom: 10px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_alibrary\.sass}line{font-family:\0000314}}
+.popup-merge .info strong {
+  color: white;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_alibrary\.sass}line{font-family:\0000317}}
+.popup-merge .info p {
+  color: #999999;
+  margin-bottom: 4px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_alibrary\.sass}line{font-family:\0000323}}
+.popup-merge .item.object {
+  margin: 0 0 10px 0;
+  width: 98%;
+  cursor: pointer;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_alibrary\.sass}line{font-family:\0000326}}
+.popup-merge .item.object img {
+  width: 72px;
+  padding: 4px 0 4px 4px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_alibrary\.sass}line{font-family:\0000330}}
+.popup-merge .item.object .span10 {
+  width: 80.982%;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_alibrary\.sass}line{font-family:\0000334}}
+.popup-merge .item.object.hover, .popup-merge .item.object.selected {
+  background: #ddffd9;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_alibrary\.sass}line{font-family:\0000336}}
+.popup-merge .item.object.hover *, .popup-merge .item.object.selected * {
+  color: #5a5a5a;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_alibrary\.sass}line{font-family:\0000339}}
+.popup-merge .item.object.slave {
+  opacity: 0.7;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_alibrary\.sass}line{font-family:\0000347}}
+.popup-merge > div section.title h3 {
+  color: white;
+  small-text-transform: none !important;
+  small-font-size: 60%;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_alibrary\.sass}line{font-family:\0000354}}
+.popup-merge > div section.description p {
+  color: #efefef;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_alibrary\.sass}line{font-family:\0000356}}
+.popup-merge > div section.description a {
+  background: #6633cc;
+  color: white;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_alibrary\.sass}line{font-family:\0000361}}
+.popup-merge > div section.form label {
+  color: #efefef;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/apps\/_alibrary\.sass}line{font-family:\0000365}}
+.popup-merge .action input {
+  color: white;
+  width: 550px;
+  border: none;
+  background: #5a5a5a;
+  padding: 4px 2px 4px 6px;
+}
+
 /* qTip2 - Pretty powerful tooltips - v2.0.1-4-g
  * http://qtip2.com
  *
@@ -15579,6 +15655,14 @@ body a.external {
   background-image: url(/static/img/base/link.external.png);
   background-repeat: no-repeat;
   padding-left: 16px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/site\/_style\.sass}line{font-family:\000039}}
+body.tl-loading .container.main {
+  opacity: 0.8;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/site\/_style\.sass}line{font-family:\0000311}}
+body.tl-loading .container.main * {
+  color: #999999 !important;
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/aplayer\/_style\.sass}line{font-family:\0000316}}

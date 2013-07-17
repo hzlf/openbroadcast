@@ -68,3 +68,5 @@ sudo -u pypo env/bin/python pypo.py
  
   
 
+# varnish
+sudo /usr/local/Cellar/varnish/3.0.3/sbin/varnishd -F -a 0.0.0.0:88 -f ~/code/openbroadcast.ch/conf/openbroadcast.ch.vcl

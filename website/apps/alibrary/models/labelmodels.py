@@ -70,7 +70,7 @@ from lib.fields import extra
 
 LOOKUP_PROVIDERS = (
     ('discogs', _('Discogs')),
-    ('musicbrainz', _('Musicbrainz')),
+    #('musicbrainz', _('Musicbrainz')),
 )
 
 class LabelManager(models.Manager):

@@ -42,7 +42,13 @@ def id_to_location(id):
     l = "%012d" % id
     return '%d/%d/%d' % (int(l[0:4]), int(l[4:8]), int(l[8:12]))
     
-    
+
+"""
+Needed db changes on legacy_legacy:
+
+ALTER TABLE `elgg_cm_master` ADD `migrated` DATETIME  NULL  AFTER `locked_userident`;
+
+"""
 
 class LegacyImporter(object):
     def __init__(self, * args, **kwargs):
@@ -123,11 +129,11 @@ class LegacyImporter(object):
         if(self.object_type == 'playlist'):
 
             from obp_legacy.models_legacy import ElggCmMaster
-            objects = ElggCmMaster.objects.using('legacy_legacy').filter(type='Container')[0:100]
+            objects = ElggCmMaster.objects.using('legacy_legacy').filter(type='Container', migrated=None)[0:100]
         
             for legacy_obj in objects:
                 obj, status = get_playlist_by_legacy_object(legacy_obj)                
-                #legacy_obj.migrated = datetime.now()
+                legacy_obj.migrated = datetime.now()
                 legacy_obj.save()
                 
                 

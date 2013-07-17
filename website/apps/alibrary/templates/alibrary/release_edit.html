@@ -14,8 +14,7 @@
     {% addtoblock "js-post" %}
         <script type="text/javascript" src="{{ STATIC_URL }}dajax/jquery.dajax.core.js"></script>{% endaddtoblock %}
 
-    {% addtoblock "js-post" %}
-        <script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/edit.js"></script>{% endaddtoblock %}
+    {% addtoblock "js-post" %} <script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/edit.js"></script>{% endaddtoblock %}
 
 
     {% addtoblock "js-post" %}
@@ -191,7 +190,7 @@
 
 {% block form_sidebar %}
     <div class="sidebar form-sidebar holder">
-        {% with providers=object.get_lookup_providers %}
+        {% with providers=object.get_lookup_providers ct="release" %}
             {% include "alibrary/form_lookup/_providers.html" %}
         {% endwith %}
     </div>
