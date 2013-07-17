@@ -329,7 +329,7 @@ INSTALLED_APPS = (
     'gunicorn',
     'django_date_extensions',
     'esi',
-    'turbolinks',
+    #'turbolinks',
     
     'haystack',
     
