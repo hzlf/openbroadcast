@@ -24,8 +24,8 @@
 		<div class="span3">
 			<ul class="unstyled">
 				<li class="bold">
-					<a href="#" title="{{ object.item.content_object.name }}">
-						{{ object.item.content_object.name|shorten }}
+					<a href="{{ object.item.content_object.absolute_url }}" title="{{ object.item.content_object.name }}">
+						{{ object.item.content_object.name|shorten(30) }}
 					</a>
 				</li>
 				<li class="small relations">

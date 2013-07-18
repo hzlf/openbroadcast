@@ -38,6 +38,9 @@ from obp_legacy.util.migrator import get_user_by_legacy_legacy_object
 from obp_legacy.util.migrator import get_community_by_legacy_legacy_object
 
 
+DEFAULT_LIMIT = 100
+
+
 def id_to_location(id):
     l = "%012d" % id
     return '%d/%d/%d' % (int(l[0:4]), int(l[4:8]), int(l[8:12]))
@@ -55,6 +58,7 @@ class LegacyImporter(object):
         self.object_type = kwargs.get('object_type')
         self.id = kwargs.get('id')
         self.legacy_id = kwargs.get('legacy_id')
+        self.limit = kwargs.get('limit')
         self.verbosity = int(kwargs.get('verbosity', 1))
         
     def walker(self):
@@ -75,7 +79,7 @@ class LegacyImporter(object):
 
         if(self.object_type == 'release'):
 
-            objects = Releases.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:100000]
+            objects = Releases.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:self.limit]
         
             for legacy_obj in objects:
                 obj, status = get_release_by_legacy_object(legacy_obj)                
@@ -85,7 +89,7 @@ class LegacyImporter(object):
         
         if(self.object_type == 'media'):
 
-            objects = Medias.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:100000]
+            objects = Medias.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:self.limit]
         
             print 'NUM OBJECTS: %s' % objects.count()
         
@@ -97,7 +101,7 @@ class LegacyImporter(object):
                         
         if(self.object_type == 'label'):
 
-            objects = Labels.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:100000]
+            objects = Labels.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:self.limit]
         
             for legacy_obj in objects:
                 obj, status = get_label_by_legacy_object(legacy_obj)                
@@ -107,7 +111,7 @@ class LegacyImporter(object):
                         
         if(self.object_type == 'artist'):
 
-            objects = Artists.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:100]
+            objects = Artists.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:self.limit]
         
             for legacy_obj in objects:
                 obj, status = get_artist_by_legacy_object(legacy_obj)                
@@ -120,7 +124,7 @@ class LegacyImporter(object):
             #objects = Users.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:5]
             #objects = Users.objects.using('legacy').exclude(username=u'').all()[0:1000]
             from obp_legacy.models_legacy import ElggUsers
-            objects = ElggUsers.objects.using('legacy_legacy').filter(user_type='person')[0:2000]
+            objects = ElggUsers.objects.using('legacy_legacy').filter(user_type='person')[0:self.limit]
             #objects = ElggUsers.objects.using('legacy_legacy').filter(user_type='person', ident=9)[0:2000] # jonas
         
             for legacy_obj in objects:
@@ -134,7 +138,7 @@ class LegacyImporter(object):
             #objects = Users.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:5]
             #objects = Users.objects.using('legacy').exclude(username=u'').all()[0:1000]
             from obp_legacy.models_legacy import ElggUsers
-            objects = ElggUsers.objects.using('legacy_legacy').filter(user_type='community')[0:50]
+            objects = ElggUsers.objects.using('legacy_legacy').filter(user_type='community')[0:self.limit]
         
             for legacy_obj in objects:
                 obj, status = get_community_by_legacy_legacy_object(legacy_obj)                
@@ -145,8 +149,7 @@ class LegacyImporter(object):
         if(self.object_type == 'playlist'):
 
             from obp_legacy.models_legacy import ElggCmMaster
-            #objects = ElggCmMaster.objects.using('legacy_legacy').filter(type='Container', migrated=None)[0:100]
-            objects = ElggCmMaster.objects.using('legacy_legacy').filter(type='Container', migrated=None)[0:1]
+            objects = ElggCmMaster.objects.using('legacy_legacy').filter(type='Container', migrated=None)[0:self.limit]
 
             for legacy_obj in objects:
                 obj, status = get_playlist_by_legacy_object(legacy_obj)                
@@ -182,6 +185,11 @@ class Command(NoArgsCommand):
             dest='legacy_id',
             default=False,
             help='Specify a Legacy-ID to run migration on'),
+        make_option('--limit',
+            action='store',
+            dest='limit',
+            default=100,
+            help='How many rows to process... defaults to 100'),
         )
 
     def handle_noargs(self, **options):
