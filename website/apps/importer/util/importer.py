@@ -514,14 +514,23 @@ class Importer(object):
                     x_pos = m['number']
 
                     if x_mb_id == mb_id:
+                        """
                         print 'id:  %s' % x_mb_id
                         print 'pos: %s' % x_pos
                         print 'disc_index: %s' % disc_index
                         print 'media_offset: %s' % media_offset
                         print 'final pos: %s' % (int(media_offset) + int(x_pos))
+                        """
 
-                        obj.tracknumber = (int(media_offset) + int(x_pos))
-                        obj.mediamumber = int(disc_index)
+                        try:
+                            obj.tracknumber = (int(media_offset) + int(x_pos))
+                        except:
+                            pass
+
+                        try:
+                            obj.mediamumber = int(disc_index)
+                        except:
+                            pass
 
                     media_index =+ 1
 
