@@ -145,8 +145,9 @@ class LegacyImporter(object):
         if(self.object_type == 'playlist'):
 
             from obp_legacy.models_legacy import ElggCmMaster
-            objects = ElggCmMaster.objects.using('legacy_legacy').filter(type='Container', migrated=None)[0:100]
-        
+            #objects = ElggCmMaster.objects.using('legacy_legacy').filter(type='Container', migrated=None)[0:100]
+            objects = ElggCmMaster.objects.using('legacy_legacy').filter(type='Container', migrated=None)[0:1]
+
             for legacy_obj in objects:
                 obj, status = get_playlist_by_legacy_object(legacy_obj)                
                 legacy_obj.migrated = datetime.now()

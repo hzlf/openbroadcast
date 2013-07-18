@@ -10,6 +10,7 @@ env.supervisor = '/etc/supervisord'
 env.nginx = '/etc/nginx/sites-enabled'
 
 env.skip_requirements = False
+env.skip_db = False
 
 def clean():
     local("find . -name '*.DS_Store' -type f -delete")
@@ -45,6 +46,9 @@ def build_ci():
 
 def skip_req():
     env.skip_requirements = True
+
+def skip_db():
+    env.skip_db = True
 
 def deploy():
     """
@@ -142,11 +146,12 @@ def deploy():
         """
         run migrations
         """
-        try:
-            run('/srv/%s/bin/python /%s/src/website/manage.py syncdb' % (env.site_id, env.path))
-            run('/srv/%s/bin/python /%s/src/website/manage.py migrate' % (env.site_id, env.path))
-        except Exception, e:
-            pass
+        if not env.skip_db:
+            try:
+                run('/srv/%s/bin/python /%s/src/website/manage.py syncdb' % (env.site_id, env.path))
+                run('/srv/%s/bin/python /%s/src/website/manage.py migrate' % (env.site_id, env.path))
+            except Exception, e:
+                pass
             
         """
         staticfiles & compress

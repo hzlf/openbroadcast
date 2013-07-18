@@ -1216,9 +1216,17 @@ class PlaylistMigrator(Migrator):
                     media, s = get_media_by_legacy_object(tm)
                     print media.pk
 
-                    pi = PlaylistItem()
+                    #pi = PlaylistItem()
 
-                    obj.add_items_by_ids(ids=[media.pk, ], ct='media')
+                    # map timing
+                    timing = {
+                        'fade_in': lm['fade_in'],
+                        'fade_out': lm['fade_out'],
+                        'cue_in': lm['offset_in'],
+                        'cue_out': lm['offset_out'],
+                    }
+
+                    obj.add_items_by_ids(ids=[media.pk,], ct='media', timing=timing)
 
                     position += 1
 
