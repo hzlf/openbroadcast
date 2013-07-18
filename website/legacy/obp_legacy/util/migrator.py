@@ -237,7 +237,7 @@ class MediaMigrator(Migrator):
         log = logging.getLogger('util.migrator.__init__')
 
 
-    def run(self, legacy_obj):
+    def run(self, legacy_obj, force=False):
 
         from alibrary.models import Media, Relation
 
@@ -251,9 +251,9 @@ class MediaMigrator(Migrator):
         if created:
             log.info('object created: %s' % obj.pk)
         else:
-            log.info('object found by legacy_id: %s' % obj.pk)
+            log.info('object %s found by legacy_id: %s' % (obj.pk, obj.legacy_id))
 
-        if created:
+        if created or force:
             """
             Mapping data
             1-to-1 fields
@@ -1234,9 +1234,9 @@ def get_release_by_legacy_object(legacy_obj):
     return obj, status
 
 
-def get_media_by_legacy_object(legacy_obj):
+def get_media_by_legacy_object(legacy_obj, force=False):
     migrator = MediaMigrator()
-    obj, status = migrator.run(legacy_obj)
+    obj, status = migrator.run(legacy_obj, force)
 
     return obj, status
 

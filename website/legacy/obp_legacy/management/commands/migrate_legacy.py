@@ -53,10 +53,26 @@ ALTER TABLE `elgg_cm_master` ADD `migrated` DATETIME  NULL  AFTER `locked_userid
 class LegacyImporter(object):
     def __init__(self, * args, **kwargs):
         self.object_type = kwargs.get('object_type')
+        self.id = kwargs.get('id')
+        self.legacy_id = kwargs.get('legacy_id')
         self.verbosity = int(kwargs.get('verbosity', 1))
         
     def walker(self):
-        
+
+
+        if self.id or self.legacy_id:
+            print 'run migration on specific object'
+            if(self.object_type == 'media'):
+
+
+                if self.legacy_id:
+                    legacy_obj = Medias.objects.using('legacy').get(id=int(self.legacy_id))
+                    obj, status = get_media_by_legacy_object(legacy_obj, force=True)
+                    legacy_obj.migrated = datetime.now()
+                    legacy_obj.save()
+
+            return
+
         if(self.object_type == 'release'):
 
             objects = Releases.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:100000]
@@ -155,6 +171,16 @@ class Command(NoArgsCommand):
             dest='object_type',
             default=False,
             help='Import files located in the path into django-filer'),
+        make_option('--id',
+            action='store',
+            dest='id',
+            default=False,
+            help='Specify an ID to run migration on'),
+        make_option('--legacy_id',
+            action='store',
+            dest='legacy_id',
+            default=False,
+            help='Specify a Legacy-ID to run migration on'),
         )
 
     def handle_noargs(self, **options):
