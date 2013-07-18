@@ -35,7 +35,7 @@ def widetuple(value):
 
 @register.filter 
 def sec_to_time(value):
-    if value > 3600:
+    if value >= 3600:
         return time.strftime('%H:%M:%S', time.gmtime(value))
     else:
         return time.strftime('%M:%S', time.gmtime(value))
@@ -43,7 +43,7 @@ def sec_to_time(value):
 @register.filter 
 def msec_to_time(value):
     value = int(value/1000)
-    if value > 3600:
+    if value >= 3600:
         return time.strftime('%H:%M:%S', time.gmtime(value))
     else:
         return time.strftime('%M:%S', time.gmtime(value))

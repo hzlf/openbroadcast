@@ -680,6 +680,8 @@ AUTHENTICATION_BACKENDS = (
     #'social_auth.backends.contrib.readability.ReadabilityBackend',
     #'social_auth.backends.contrib.fedora.FedoraBackend',
     #'social_auth.backends.OpenIDBackend',
+    # legacy
+    'obp_legacy.auth.backends.LegacyBackend',
     # base
     'django.contrib.auth.backends.ModelBackend',
     # guardian

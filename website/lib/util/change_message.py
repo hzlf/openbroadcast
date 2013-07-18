@@ -23,17 +23,49 @@ def construct(request, form, formsets):
                     change_message.append(_('Added %(name)s "%(object)s". \n')
                                           % {'name': force_unicode(added_object._meta.verbose_name),
                                              'object': force_unicode(added_object)})
-                for changed_object, changed_fields in formset.changed_objects:
-                    change_message.append(_('Changed %(list)s for %(name)s "%(object)s". \n')
-                                          % {'list': get_text_list(changed_fields, _('and')),
-                                             'name': force_unicode(changed_object._meta.verbose_name),
-                                             'object': force_unicode(changed_object)})
+
+
+
+                # remove some 'wrong' messages
+                co = formset.changed_objects
+                for el in formset.changed_objects:
+                    print el
+                    if el[0].__class__.__name__ == 'Media':
+                        if el[0].release.publish_date:
+                            print 'SKIPPPPP LICENSE'
+                            if 'license' in el[1]: el[1].remove('license')
+
+                    if len(el[1]) < 1:
+                        co.remove(el)
+
+                print co
+
+                for changed_object, changed_fields in co:
+
+                    # hakish... somehow we have to exclude certain messages
+                    skip = False
+                    if changed_object.__class__.__name__ == 'Relation':
+                        if 'service' in changed_fields:
+                            skip = True
+
+                    if changed_object.__class__.__name__ == 'Media':
+                        if 'license' in changed_fields:
+                            if changed_object.release.publish_date:
+                                skip = True
+
+
+                    if not skip:
+                        change_message.append(_('Changed %(list)s for %(name)s "%(object)s". \n')
+                                              % {'list': get_text_list(changed_fields, _('and')),
+                                                 'name': force_unicode(changed_object._meta.verbose_name),
+                                                 'object': force_unicode(changed_object)})
 
                 for deleted_object in formset.deleted_objects:
                     change_message.append(_('Deleted %(name)s "%(object)s". \n')
                                           % {'name': force_unicode(deleted_object._meta.verbose_name),
                                              'object': force_unicode(deleted_object)})
-        except:
+        except Exception, e:
+            print e
             pass
 
     change_message = ' '.join(change_message)

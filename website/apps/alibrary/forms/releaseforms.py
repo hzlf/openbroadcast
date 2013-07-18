@@ -394,6 +394,7 @@ class BaseReleaseMediaForm(ModelForm):
     def clean_license(self):
         instance = getattr(self, 'instance', None)
         if instance and instance.release.publish_date:
+            #return
             return instance.license
         else:
             return self.cleaned_data['license']

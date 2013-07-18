@@ -313,7 +313,8 @@ post_save.connect(library_post_save, sender=Artist)
 from actstream import action
 def action_handler(sender, instance, created, **kwargs):
     try:
-        action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
+        if instance.get_last_editor():
+            action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
     except Exception, e:
         print e
 
