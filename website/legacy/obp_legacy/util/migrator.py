@@ -1298,18 +1298,22 @@ class PlaylistMigrator(Migrator):
 			for lm in legacy_media:
 				print lm
 				print lm['ident']
-				tm = Medias.objects.using('legacy').get(id=int(lm['ident']))
-				print tm.name
-				print 'pos: %s' % position
-				
-				media, s = get_media_by_legacy_object(tm)
-				print media.pk
-				
-				pi = PlaylistItem()
-				
-				obj.add_items_by_ids(ids=[media.pk,], ct='media')
-				
-				position += 1
+
+                # make sure to only migrate library items (e.g. no 'Audio Placeholders')
+                if lm['source'] == 'ml':
+
+                    tm = Medias.objects.using('legacy').get(id=int(lm['ident']))
+                    print tm.name
+                    print 'pos: %s' % position
+
+                    media, s = get_media_by_legacy_object(tm)
+                    print media.pk
+
+                    pi = PlaylistItem()
+
+                    obj.add_items_by_ids(ids=[media.pk,], ct='media')
+
+                    position += 1
 			
 		
 		

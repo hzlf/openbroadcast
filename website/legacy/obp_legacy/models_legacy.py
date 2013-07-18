@@ -138,6 +138,7 @@ class ElggCmMaster(models.Model):
     revnumber = models.IntegerField()
     locked = models.IntegerField()
     locked_userident = models.IntegerField()
+    migrated = models.DateTimeField(null=True, blank=True)
     class Meta:
         db_table = u'elgg_cm_master'
 

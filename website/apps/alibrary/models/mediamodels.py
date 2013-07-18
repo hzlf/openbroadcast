@@ -414,7 +414,6 @@ class Media(CachingMixin, MigrationMixin):
     def get_duration(self):
     
         if self.duration:
-            print 'from cache:'
             return self.duration
         else:
             try:
