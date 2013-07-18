@@ -48,7 +48,7 @@
 	<div class="list_body_item c4">
 		<ul class="unstyled">
 			<li>
-				{{ item.duration|divide:1000|sec_to_time }}
+				{{ item.get_duration|divide:1000|sec_to_time }}
 				{% if item.target_duration %}
 				<span class="small">{% trans "of" %} {{ item.target_duration|sec_to_time }}</span>
 				{% endif %}

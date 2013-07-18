@@ -243,11 +243,16 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
     
     def get_duration(self):
         duration = 0
+
         for item in self.items.all():
             duration += item.content_object.get_duration()
-            
+            pip = PlaylistItemPlaylist.objects.get(playlist=self, item=item)
+            duration -= pip.cue_in
+            duration -= pip.cue_out
+            duration -= pip.fade_cross
+
         # TODO: think about what to use as s reference
-        duration = self.target_duration * 1000
+        # duration = self.target_duration * 1000
             
         return duration
     
@@ -383,14 +388,10 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
         """"""
         duration = 0
         try:
-            for item in self.items.all():
-                item.content_object.get_duration()
-                if item.content_object.duration:
-                    duration += item.content_object.duration
-                    #duration -= item.cue_in
-                    #duration -= item.cue_out
+            duration = self.get_duration()
+
         except Exception, e:
-            #print e
+            print e
             pass
         
         self.duration = duration
