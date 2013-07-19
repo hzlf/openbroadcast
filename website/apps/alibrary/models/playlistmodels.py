@@ -309,15 +309,15 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
                 pi, created = PlaylistItemPlaylist.objects.get_or_create(item=i, playlist=self, position=self.items.count())
 
                 if timing:
-                    pi.fade_in = timing['fade_in']
-                    pi.fade_out = timing['fade_out']
-                    pi.cue_in = timing['cue_in']
-                    pi.cue_out = timing['cue_out']
+                    try:
+                        pi.fade_in = timing['fade_in']
+                        pi.fade_out = timing['fade_out']
+                        pi.cue_in = timing['cue_in']
+                        pi.cue_out = timing['cue_out']
+                        pi.save()
+                    except:
+                        pass
 
-                    pi.save()
-
-                # pi.save()
-            
         self.save()
 
     def reorder_items_by_uuids(self, uuids):

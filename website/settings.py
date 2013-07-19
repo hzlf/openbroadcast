@@ -9,6 +9,7 @@ import sys
 
 # celery
 import djcelery
+
 djcelery.setup_loader()
 
 import posixpath
@@ -36,11 +37,10 @@ SERVE_MEDIA = False
 COMPRESS_OFFLINE = False
 COMPRESS_ENABLED = False
 
-
 LANGUAGES = [('en', 'en'), ('de', 'de'), ('fr', 'fr')]
 DEFAULT_LANGUAGE = 0
 
-DATABASES = {    
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(PROJECT_DIR, 'data.db'),
@@ -63,7 +63,8 @@ CRYPTO_SECRET = 'JHRhwLiOsyMyL1JA'
 AES_SECRET_PASSWORD = 'JHRhwLiOsyMyL1JA'
 AES_BLOCK_SIZE = 32
 
-TEMPLATE_LOADERS = (    
+"""
+TEMPLATE_LOADERS = (
     # mobile
     #'django_mobile.loader.Loader',
     'django.template.loaders.filesystem.Loader',
@@ -71,10 +72,18 @@ TEMPLATE_LOADERS = (
     #'django.template.loaders.eggs.Loader',
     #'django.template.loaders.app_directories.Loader',
 )
+"""
+
+TEMPLATE_LOADERS = (
+    ('django.template.loaders.cached.Loader', (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )),
+)
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.cache.UpdateCacheMiddleware',
-                             
+
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -83,7 +92,7 @@ MIDDLEWARE_CLASSES = (
 
     'django.middleware.transaction.TransactionMiddleware',
     'reversion.middleware.RevisionMiddleware',
-    
+
     'django.contrib.messages.middleware.MessageMiddleware',
     #'pagination.middleware.PaginationMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
@@ -92,11 +101,11 @@ MIDDLEWARE_CLASSES = (
     'cms.middleware.page.CurrentPageMiddleware',
     'cms.middleware.user.CurrentUserMiddleware',
     'cms.middleware.toolbar.ToolbarMiddleware',
-    
+
     # mobile [just testing]
     'django_mobile.middleware.MobileDetectionMiddleware',
     'django_mobile.middleware.SetFlavourMiddleware',
-    
+
     # xs
     'lib.middleware.xs_sharing.XsSharingMiddleware',
 
@@ -108,14 +117,13 @@ MIDDLEWARE_CLASSES = (
     #'lib.middleware.ProfileMiddleware',
     #'lib.middleware.PrettifyMiddlewareBS',
     #'django_badbrowser.middleware.BrowserSupportDetection',
-    
+
     'arating.middleware.AratingIpMiddleware',
     #'lib.middleware.social_auth_extra.SocialAuthExceptionExtraMiddleware',
-    
-    'django.middleware.cache.FetchFromCacheMiddleware',
-    
-)
 
+    'django.middleware.cache.FetchFromCacheMiddleware',
+
+)
 
 CACHES = {
     'default': {
@@ -124,7 +132,6 @@ CACHES = {
     }
 }
 CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
-
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
@@ -142,13 +149,13 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'sekizai.context_processors.sekizai',
     # multilingual
     'multilingual.context_processors.multilingual',
-    
+
     # mobile
     'django_mobile.context_processors.flavour',
-    
+
     # messaging
     'postman.context_processors.inbox',
-    
+
     # authentication
     #'allauth.context_processors.allauth',
     #'allauth.account.context_processors.account',
@@ -159,13 +166,11 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'social_auth.context_processors.social_auth_login_redirect',
 )
 
-
 ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
     os.path.join(PROJECT_DIR, 'templates'),
 )
-
 
 FILE_UPLOAD_HANDLERS = (
     'django.core.files.uploadhandler.TemporaryFileUploadHandler',
@@ -189,49 +194,49 @@ WIDTH_INNER = 960
 CMS_PLACEHOLDER_CONF = {
     'main': {
         #"plugins": ('TeaserPlugin', 'LinkPlugin'),
-        "extra_context": {"width":WIDTH_INNER},
-        'name':gettext("Main Content"),
+        "extra_context": {"width": WIDTH_INNER},
+        'name': gettext("Main Content"),
     },
     'template_1_content_2': {
         #"plugins": ('TeaserPlugin', 'LinkPlugin'),
-        "extra_context": {"width":300},
-        'name':gettext("FlexBox"),
+        "extra_context": {"width": 300},
+        'name': gettext("FlexBox"),
     },
     'sidebar_pre': {
         #"plugins": ('TeaserPlugin', 'LinkPlugin'),
-        "extra_context": {"width":280},
-        'name':gettext("Sidebar | Pre-Menu"),
+        "extra_context": {"width": 280},
+        'name': gettext("Sidebar | Pre-Menu"),
     },
     'sidebar_post': {
         #"plugins": ('TeaserPlugin', 'LinkPlugin'),
-        "extra_context": {"width":280},
-        'name':gettext("Sidebar | Post-Menu"),
+        "extra_context": {"width": 280},
+        'name': gettext("Sidebar | Post-Menu"),
     },
     'placeholder_1': {
         #"plugins": ('TeaserPlugin', 'LinkPlugin'),
-        "extra_context": {"width":WIDTH_INNER},
-        'name':gettext("Main Content"),
+        "extra_context": {"width": WIDTH_INNER},
+        'name': gettext("Main Content"),
     },
     # home slots
     'home_slot_a': {
         #"plugins": ('TeaserPlugin', 'LinkPlugin'),
         "extra_context": {},
-        'name':gettext("Home | Slot A"),
+        'name': gettext("Home | Slot A"),
     },
     'home_slot_b': {
         #"plugins": ('TeaserPlugin', 'LinkPlugin'),
         "extra_context": {},
-        'name':gettext("Home | Slot B"),
+        'name': gettext("Home | Slot B"),
     },
     'home_slot_c': {
         #"plugins": ('TeaserPlugin', 'LinkPlugin'),
         "extra_context": {},
-        'name':gettext("Home | Slot C"),
+        'name': gettext("Home | Slot C"),
     },
     'home_slot_d': {
         #"plugins": ('TeaserPlugin', 'LinkPlugin'),
         "extra_context": {},
-        'name':gettext("Home | Slot D"),
+        'name': gettext("Home | Slot D"),
     },
 }
 
@@ -239,7 +244,7 @@ CMS_APPLICATIONS_URLS = (
     ('cmsplugin_advancednews.urls', 'News'),
 )
 CMS_NAVIGATION_EXTENDERS = (
-    ('cmsplugin_advancednews.navigation.get_nodes','News navigation'),
+    ('cmsplugin_advancednews.navigation.get_nodes', 'News navigation'),
 )
 
 CMS_PLUGIN_PROCESSORS = (
@@ -252,7 +257,6 @@ CMS_CACHE_DURATIONS = {
     'menus': 1,
     'content': 1,
 }
-
 
 CMS_VIMEO_DEFAULT_WIDTH = 830
 CMS_VIMEO_DEFAULT_HEIGHT = 467
@@ -273,7 +277,6 @@ LEGACY_STORAGE_ROOT = None
 ADMIN_MEDIA_PREFIX = posixpath.join(STATIC_URL, "admin/")
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
-
 STATICFILES_DIRS = (
     os.path.join(PROJECT_DIR, 'site-static'),
 )
@@ -286,24 +289,22 @@ STATICFILES_FINDERS = (
     'dajaxice.finders.DajaxiceFinder',
 )
 
-
-
 COMMENTS_APP = 'fluent_comments'
 COMMENT_MAX_LENGTH = 800
 FLUENT_COMMENTS_EXCLUDE_FIELDS = ['title', 'email', 'name', 'url', ]
 
 INSTALLED_APPS = (
-                  
+
     #'admin_tools.theming',
     #'admin_tools.menu',
     #'admin_tools.dashboard',
-    
+
     #'admintools_bootstrap',
     'admin_style',
     'admin_tools',
-    
+
     'admin_shortcuts',
-    
+
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -313,30 +314,30 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.webdesign',
     'django.contrib.admin',
-    
-    
+
+
     'threadedcomments',
     'fluent_comments',
-    
+
     'django.contrib.comments',
     'django.contrib.staticfiles',
     'django.contrib.markup',
     'django.contrib.sitemaps',
 
     #'staticfiles',
-    
+
     # server
     'gunicorn',
     'django_date_extensions',
     'esi',
     #'turbolinks',
-    
+
     'haystack',
-    
+
     # messaging & registration
     'postman',
     #'invite',
-    
+
     # core apps
     'django_extensions',
     'django_jenkins',
@@ -350,7 +351,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'mailer',
     'djcelery',
-    
+
     'cms',
     'menus',
     'mptt',
@@ -361,39 +362,39 @@ INSTALLED_APPS = (
     'guardian',
     'filer',
     'private_files',
-    
+
     'profiles',
     #'django_hgroups',
-    
-    
+
+
     'sendfile',
-    
+
     'reversion',
-    
+
     'clear_cache',
-    
+
     'actstream',
-    
+
     'django_badbrowser',
     'datatrans',
-    
+
     'genericadmin',
 
 
     # temp
-    
+
     'eav',
-    
+
     # dajax
     'dajaxice',
     'dajax',
-    
+
     'ajax_select',
-    
-    
+
+
     'email_obfuscator',
-    
-    
+
+
     # cms plugins
     'cms.plugins.text',
     'cms.plugins.link',
@@ -404,31 +405,31 @@ INSTALLED_APPS = (
     'cmsplugin_vimeo',
     #'cmsplugin_soundcloud',
     'cmsplugin_pagedown',
-    
+
     'shortcutter',
 
     'multilingual',
     'disqus',
     'selectable',
-    
+
     'autocomplete_light',
-    
+
     # asset and media handling
     'sekizai',
     'compressor',
     'easy_thumbnails',
-    
+
     # translation
     'modeltranslation',
-    
-    
+
+
     # rest & API
     'djangorestframework',
-    
+
     # stats
     'atracker',
-    
-    
+
+
     # users/auth
     'avatar',
     'emailconfirmation',
@@ -439,8 +440,8 @@ INSTALLED_APPS = (
     ##'allauth.twitter',
     #'allauth.openid',
     #'allauth.facebook',
-    
-    
+
+
     # alternative registration
     'registration',
     'social_auth',
@@ -448,14 +449,14 @@ INSTALLED_APPS = (
     'invitation',
 
     'tastypie',
-    
+
     'crispy_forms',
     'floppyforms',
     #'djangoratings',
     #'agon_ratings',
     'django_mobile',
 
-    
+
     # custom apps/*
     'pusher',
     'asite',
@@ -469,12 +470,12 @@ INSTALLED_APPS = (
     'asearch',
     #'django_db_signals',
     'pushy',
-    
-    
+
+
     # blog
     'zinnia',
     'cmsplugin_zinnia',
-    
+
     'bcmon',
     #'secretballot',
     'genericrelations',
@@ -485,7 +486,7 @@ INSTALLED_APPS = (
     'spurl',
     'lib',
     #'teaser',
-    
+
     # shop apps
     'shop',
     'shop_ajax',
@@ -499,18 +500,17 @@ INSTALLED_APPS = (
     'ac_tagging',
     'pure_pagination',
     #'taggit_templatetags',
-    
+
     'obp_legacy',
-    
+
     # helpers
     'dev',
-    
+
     # monitoring
     #'kitsune',
 )
 
 ZINNIA_ENTRY_BASE_MODEL = 'cmsplugin_zinnia.placeholder.EntryPlaceholder'
-
 
 """
 Mixed shizzle
@@ -523,7 +523,6 @@ DEBUG_TOOLBAR_CONFIG = {
 }
 TEMP_DIR = '%s/%s' % (PROJECT_DIR, 'temp')
 
-
 PAGINATION_SETTINGS = {
     'PAGE_RANGE_DISPLAYED': 5,
     'MARGIN_PAGES_DISPLAYED': 2,
@@ -531,9 +530,8 @@ PAGINATION_SETTINGS = {
 
 FORMATS_MEDIA = {
     #'mp3': ['base', 'low'],
-    'mp3': ['base',],    
+    'mp3': ['base', ],
 }
-
 
 """
 ADMIN_SHORTCUTS = [
@@ -549,9 +547,6 @@ ADMIN_SHORTCUTS = [
     },
 ]
 """
-
-
-
 
 """
 API-Keys (override in local_settings)
@@ -570,7 +565,6 @@ FACEBOOK_EXTENDED_PERMISSIONS = ['email', 'publish_stream']
 ECHONEST_API_KEY = 'DC7YKF3VYN7R0LG1M'
 ENMFP_CODEGEN_BIN = PROJECT_DIR + '/lib/analyzer/bin/codegen.Darwin'
 ECHOPRINT_CODEGEN_BIN = 'echoprint-codegen'
-
 
 """
 Filer related settings
@@ -603,7 +597,6 @@ EMAIL_DEBUG = DEBUG
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
-
 """
 Identity
 """
@@ -612,7 +605,6 @@ ADMINS = (
     ('anorg', 'root@hazelfire.com'),
 )
 MANAGERS = ADMINS
-
 
 """
 Accounts
@@ -634,23 +626,20 @@ LOGIN_URL = '/accounts/login/'
 LOGOUT_URL = '/accounts/signout/'
 LOGIN_REDIRECT_URL = "/"
 
-
 """
 allauth version
 """
 USERENA_ACTIVATION_REQUIRED = False
 
-ACCOUNT_EMAIL_REQUIRED=True
-ACCOUNT_EMAIL_VERIFICATION=True
-ACCOUNT_EMAIL_AUTHENTICATION=False
-ACCOUNT_SIGNUP_PASSWORD_VERIFICATION=True
-ACCOUNT_UNIQUE_EMAIL=True
-ACCOUNT_USERNAME_REQUIRED=True
-SOCIALACCOUNT_QUERY_EMAIL=ACCOUNT_EMAIL_REQUIRED
-SOCIALACCOUNT_AUTO_SIGNUP=True
-EMAIL_CONFIRMATION_DAYS=5
-
-
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = True
+ACCOUNT_EMAIL_AUTHENTICATION = False
+ACCOUNT_SIGNUP_PASSWORD_VERIFICATION = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USERNAME_REQUIRED = True
+SOCIALACCOUNT_QUERY_EMAIL = ACCOUNT_EMAIL_REQUIRED
+SOCIALACCOUNT_AUTO_SIGNUP = True
+EMAIL_CONFIRMATION_DAYS = 5
 
 """
 registration version
@@ -687,21 +676,21 @@ AUTHENTICATION_BACKENDS = (
     # guardian
     'guardian.backends.ObjectPermissionBackend',
 )
-TWITTER_CONSUMER_KEY         = 'Fbp98cYDsI3mY51krZVhVg'
-TWITTER_CONSUMER_SECRET      = 'ZTOXzo3zJH4AG1Q6rTHxsiKorDqeQkNWixThiZEfrc'
-FACEBOOK_APP_ID              = '154134078100508'
-FACEBOOK_API_SECRET          = 'f92f325fa14d5f8fa25c9cdd1700f854'
-FACEBOOK_EXTENDED_PERMISSIONS = ['email',]
-LINKEDIN_CONSUMER_KEY        = 'aaa'
-LINKEDIN_CONSUMER_SECRET     = 'bbb'
-GOOGLE_CONSUMER_KEY          = 'aaa'
-GOOGLE_CONSUMER_SECRET       = 'bbb'
-GOOGLE_OAUTH2_CLIENT_ID      = 'aaa'
-GOOGLE_OAUTH2_CLIENT_SECRET  = 'bbb'
-FOURSQUARE_CONSUMER_KEY      = 'aaa'
-FOURSQUARE_CONSUMER_SECRET   = 'bbb'
-YAHOO_CONSUMER_KEY           = 'aaa'
-YAHOO_CONSUMER_SECRET        = 'bbb'
+TWITTER_CONSUMER_KEY = 'Fbp98cYDsI3mY51krZVhVg'
+TWITTER_CONSUMER_SECRET = 'ZTOXzo3zJH4AG1Q6rTHxsiKorDqeQkNWixThiZEfrc'
+FACEBOOK_APP_ID = '154134078100508'
+FACEBOOK_API_SECRET = 'f92f325fa14d5f8fa25c9cdd1700f854'
+FACEBOOK_EXTENDED_PERMISSIONS = ['email', ]
+LINKEDIN_CONSUMER_KEY = 'aaa'
+LINKEDIN_CONSUMER_SECRET = 'bbb'
+GOOGLE_CONSUMER_KEY = 'aaa'
+GOOGLE_CONSUMER_SECRET = 'bbb'
+GOOGLE_OAUTH2_CLIENT_ID = 'aaa'
+GOOGLE_OAUTH2_CLIENT_SECRET = 'bbb'
+FOURSQUARE_CONSUMER_KEY = 'aaa'
+FOURSQUARE_CONSUMER_SECRET = 'bbb'
+YAHOO_CONSUMER_KEY = 'aaa'
+YAHOO_CONSUMER_SECRET = 'bbb'
 GITHUB_APP_ID = '93b8c5a82ee21f19e4c3'
 GITHUB_API_SECRET = 'a2602afb10e29096b101e3b698403996a6e86d70'
 DROPBOX_APP_ID = 'hysrslzv780iu8n'
@@ -743,8 +732,6 @@ ABSOLUTE_URL_OVERRIDES = {
 }
 AUTH_PROFILE_MODULE = "profiles.Profile"
 
-
-
 """
 Shop configuration
 """
@@ -773,9 +760,9 @@ SHOP_CART_MODIFIERS = (
 # shop and payment settings
 SHOP_SHIPPING_FLAT_RATE = "10.00"
 SHOP_CURRENCY = {
-                 'code': 'USD',
-                 'character': '$',
-                 'separator': '',
+    'code': 'USD',
+    'character': '$',
+    'separator': '',
 }
 
 """
@@ -784,8 +771,6 @@ Payment providers
 # paypal
 PAYPAL_RECEIVER_EMAIL = 'spam3_1325160774_biz@anorg.net'
 PAYPAL_CURRENCY_CODE = SHOP_CURRENCY['code']
-
-
 
 """
 Search
@@ -796,8 +781,6 @@ HAYSTACK_CONNECTIONS = {
         'URL': 'http://127.0.0.1:8983/solr',
     },
 }
-
-
 
 """
 Messaging
@@ -817,13 +800,8 @@ POSTMAN_MAILER_APP = 'mailer'
 # other...
 PRETTIFY = True
 
-
-
 DISQUS_API_KEY = 'hLRbAlPsBN6G11HyeNX4qMWiebrLZeVzLpUUimq82jsthcFBohQFMTAwS1iCBjie'
 DISQUS_WEBSITE_SHORTNAME = 'obp-dev'
-
-
-
 
 """
 Other app related
@@ -833,8 +811,8 @@ Other app related
 wikisyntax, eg allows tor resolve [a:Artists Name] to object
 """
 WIKISYNTAX = (
-    ('r','alibrary.util.object_linker.WikiRelease'),
-    ('a','alibrary.util.object_linker.WikiArtist'),
+    ('r', 'alibrary.util.object_linker.WikiRelease'),
+    ('a', 'alibrary.util.object_linker.WikiArtist'),
 )
 WIKISYNTAX_DISABLE_CACHE = True
 
@@ -842,7 +820,6 @@ WIKISYNTAX_DISABLE_CACHE = True
 sendfile, delivers bought relases/tracks
 """
 SENDFILE_BACKEND = 'sendfile.backends.simple'
-
 
 BADBROWSER_REQUIREMENTS = (
     ("firefox", "3.0"),
@@ -863,10 +840,10 @@ BROKER_PASSWORD = "guest"
 BROKER_VHOST = "/"
 
 CELERY_ROUTES = {
-                 #'importer.models.process_task': {'queue': 'import'},
-                 # assign import task to single-instance worker
-                 'importer.models.import_task': {'queue': 'import'},
-                 }
+    #'importer.models.process_task': {'queue': 'import'},
+    # assign import task to single-instance worker
+    'importer.models.import_task': {'queue': 'import'},
+}
 
 """
 streaming server
@@ -897,22 +874,21 @@ using django pushy!!
 """
 PUSHY_SETTINGS = {
     'MODELS': (
-               'alibrary.playlist',
-               'importer.import',
-               'importer.importfile',
-               'abcast.emission',
-               ),
+        'alibrary.playlist',
+        'importer.import',
+        'importer.importfile',
+        'abcast.emission',
+    ),
     'SOCKET_SERVER': 'http://localhost:8888/',
     'CHANNEL_PREFIX': 'pushy_',
     'DEBUG': DEBUG
 }
 
-
 """
 ajax lookups
 """
 AJAX_LOOKUP_CHANNELS = {
-    'aliases'  : {'model':'alibrary.artist', 'search_field':'name'}
+    'aliases': {'model': 'alibrary.artist', 'search_field': 'name'}
 }
 # AJAX_SELECT_BOOTSTRAP = True
 # AJAX_SELECT_INLINES = 'inline'
@@ -925,14 +901,14 @@ AJAX_LOOKUP_CHANNELS = {
 stream - defaults to: mp3, highest available bitrate.
 would theoretically be possible to implement bitrate-switching
 depending on users connection.
-""" 
+"""
 FORMATS_STREAM = {
     'mp3': [128],
 }
 FORMATS_DOWNLOAD = {
     'mp3': [192],
     'flac': ['base'],
-    'wav': ['base'],           
+    'wav': ['base'],
 }
 
 WAVEFORM_SIZES = {
@@ -980,9 +956,9 @@ WYM_CLASSES = ",\n".join([
     "{'name': 'hidden-note', 'title': 'PARA: Hidden note', 'expr': 'p[@class!=\"important\"]'}",
 ])
 
-
 ACTSTREAM_SETTINGS = {
-    'MODELS': ('auth.user', 'auth.group', 'alibrary.release', 'alibrary.playlist', 'alibrary.artist', 'alibrary.media', 'zinnia.entry', 'abcast.emission'),
+    'MODELS': ('auth.user', 'auth.group', 'alibrary.release', 'alibrary.playlist', 'alibrary.artist', 'alibrary.media',
+               'zinnia.entry', 'abcast.emission'),
     #'MANAGER': 'myapp.streams.MyActionManager',
     'FETCH_RELATIONS': True,
     'USE_PREFETCH': True,
@@ -990,10 +966,8 @@ ACTSTREAM_SETTINGS = {
     'GFK_FETCH_DEPTH': 1,
 }
 
-
-
-
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
 #logging.getLogger('django.db.backends').setLevel(logging.ERROR)
 
@@ -1001,6 +975,7 @@ logging.basicConfig(level=logging.DEBUG)
 DEBUG_APPS = None
 try:
     from local_settings import *
+
     if DEBUG_APPS:
         INSTALLED_APPS += DEBUG_APPS
 except ImportError:
