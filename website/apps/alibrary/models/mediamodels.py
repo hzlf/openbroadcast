@@ -564,7 +564,7 @@ class Media(CachingMixin, MigrationMixin):
             print "Final Source: %s" % tmp_path
             print "Final Destination: %s" % dst_final + dst_file
             
-
+            # TODO: just create a symlink in case of mp3
             shutil.copy2(tmp_path, dst_final + dst_file)
             
             #tmp_file = DjangoFile(open(tmp_path), name=dst_file)
