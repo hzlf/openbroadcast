@@ -506,6 +506,11 @@ INSTALLED_APPS = (
     # helpers
     'dev',
 
+
+    # spf
+    'csvimport',
+    'spf',
+
     # monitoring
     #'kitsune',
 )
