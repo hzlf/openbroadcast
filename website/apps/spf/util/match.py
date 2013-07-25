@@ -22,8 +22,8 @@ class MediaMatch(object):
     def __init__(self):
         log = logging.getLogger('util.migrator.__init__')
         musicbrainzngs.set_useragent("Example music app", "0.1", "http://example.com/music")
-        musicbrainzngs.set_hostname("mb.anorg.net")
-        musicbrainzngs.set_rate_limit(limit_or_interval=False)
+        #musicbrainzngs.set_hostname("mb.anorg.net")
+        #musicbrainzngs.set_rate_limit(limit_or_interval=False)
         self.pp = pprint.PrettyPrinter(indent=4)
         #self.pp.pprint = lambda d: None
 
@@ -55,6 +55,7 @@ class MediaMatch(object):
                 'work-rels',
                 'recording-rels',
                 'media',
+                'isrcs',
                 ]
 
 
@@ -63,7 +64,9 @@ class MediaMatch(object):
                 mr = musicbrainzngs.get_recording_by_id(id=mb_id, includes=includes)
                 mr = mr['recording']
 
-                #self.pp.pprint(mr)
+                # self.pp.pprint(mr)
+
+                match.title = mr['title']
 
                 # match data as json
                 match.results_mb = mr
@@ -104,6 +107,17 @@ class MediaMatch(object):
 
                     match.artist_credits_secondary = credits
 
+                if 'isrc-list' in mr:
+                    self.pp.pprint(mr['isrc-list'])
+
+                    try:
+                        isrcs = "\n".join(mr['isrc-list'])
+                        match.isrc_list = isrcs
+                    except Exception, e:
+                        print e
+                        pass
+
+
                 # compose release string
                 if 'release-list' in mr:
                     releases = ''
@@ -115,16 +129,76 @@ class MediaMatch(object):
                         print '*******************************'
                         """
 
+                        includes = ['labels','release-rels', 'work-rels']
+
+
+
+
+                        #mr = mr['recording']
+
+                        try:
+                            pass
+                        except:
+                            pass
+
                         try:
                             rstr = r['title']
 
                             rstr = '%s - [%s | %s]' % (rstr, r['country'], r['date'])
+
+
 
                             if 'medium-list' in r:
                                 try:
                                     rstr += ' - %s - Track# %s' % (r['medium-list'][0]['format'], r['medium-list'][0]['track-list'][0]['number'])
                                 except:
                                     pass
+
+
+                            try:
+
+                                tstr = ''
+
+                                if 'label-info-list' in mrel:
+                                    lil = mrel['label-info-list'][0]
+                                    self.pp.pprint(lil)
+
+
+                                    if 'label' in lil:
+                                        tstr += ' %s ' % lil['label']['name']
+
+                                        if 'label-code' in lil['label']:
+                                            tstr += '(%s) ' % lil['label']['label-code']
+
+
+                                    if 'catalog-number' in lil:
+                                        tstr += 'catno: %s' % lil['catalog-number']
+
+
+
+                                print '****'
+                                print tstr
+
+                                rstr += ' [ ' + tstr + ' ] '
+
+                            except Exception, e:
+                                print e
+                                pass
+
+
+
+                            try:
+                                mrel = musicbrainzngs.get_release_by_id(id=r['id'], includes=includes)
+                                mrel = mrel['release']
+                                # self.pp.pprint(mrel)
+
+                                rstr += ' [barcode: %s]' % (mrel['barcode'])
+
+
+                            except:
+                                pass
+
+
 
 
                             releases += rstr + "\n"
@@ -141,8 +215,13 @@ class MediaMatch(object):
                         match.iswc_list = iswcs
                     except:
                         pass
+
+                match.status = 1
+
             except Exception, e:
+                print 'GOT ERROR!!!: '
                 print e
+                print
 
                 match.status = 99
 

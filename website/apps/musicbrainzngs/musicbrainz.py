@@ -47,7 +47,7 @@ VALID_INCLUDES = {
                      "artists", "releases", # Subqueries
                      "discids", "media", "artist-credits",
                      "tags", "user-tags", "ratings", "user-ratings", # misc
-                     "annotation", "aliases"
+                     "annotation", "aliases", "isrcs"
                  ] + RELATION_INCLUDES,
     'release': [
                    "artists", "labels", "recordings", "release-groups", "media",

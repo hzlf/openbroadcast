@@ -111,6 +111,11 @@ urlpatterns = patterns('',
     
     url(r'^bb/', include('django_badbrowser.urls')),
     url(r'^translate/', include('datatrans.urls')),
+
+
+    # spf
+    url(r"^spf/", include("spf.urls")),
+
     
     # cms base
     url(r'^', include('cms.urls')),

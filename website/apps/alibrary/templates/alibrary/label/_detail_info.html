@@ -50,6 +50,42 @@
 		{% endif %}
 
 
+
+
+		{% if object.parent %}
+		<dt>
+			{% trans "Parent Label" %}:
+		</dt>
+		<dd>
+			<ul class="unstyled">
+			<li><a href="{{ object.parent.get_absolute_url }}">{{ object.parent.name }}</a>
+            {% if object.parent.type %}<small>
+			[{{ object.parent.get_type_display }}]
+            </small>{% endif %}
+            </li>
+			</ul>
+		</dd>
+		{% endif %}
+
+		{% if object.label_children.count > 0 %}
+		<dt>
+			{% trans "Sub Labels" %}:
+		</dt>
+		<dd>
+			<ul class="unstyled">
+			{% for sl in object.label_children.all %}
+
+			<li><a href="{{ sl.get_absolute_url }}">{{ sl.name }}</a>
+            {% if sl.type %}<small>
+			[{{ sl.get_type_display }}]
+            </small>{% endif %}
+            </li>
+			{% endfor %}
+			</ul>
+		</dd>
+		{% endif %}
+
+
 		{% if object.address %}
 		<dt>
 			{% trans "Contact" %}:

@@ -58,6 +58,12 @@ class ReleaseLabelLookup(ModelLookup):
     
 registry.register(ReleaseLabelLookup)
 
+
+class ParentLabelLookup(ReleaseLabelLookup):
+    pass
+
+registry.register(ParentLabelLookup)
+
 """"""
 class ArtistLookup(ModelLookup):
     model = Artist

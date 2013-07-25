@@ -72,7 +72,7 @@ class Request(models.Model):
 
 
     def __unicode__(self):
-        return u'%s' % self.title
+        return u'[ %s ] %s' % (self.swp_id, self.title)
 
 
     def save(self, *args, **kwargs):
@@ -113,6 +113,9 @@ class Match(models.Model):
 
 
     # gathered information
+
+    title = models.CharField(max_length=1024, null=True, blank=True)
+
     artist = models.CharField(max_length=1024, null=True, blank=True)
     duration = models.PositiveIntegerField(default=0)
 
@@ -124,6 +127,7 @@ class Match(models.Model):
 
     work_list = models.TextField(null=True, blank=True)
     iswc_list = models.TextField(null=True, blank=True)
+    isrc_list = models.TextField(null=True, blank=True)
 
 
 

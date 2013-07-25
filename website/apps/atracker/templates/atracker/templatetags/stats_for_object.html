@@ -12,6 +12,9 @@
 	{% else %}
 	{{ type.title }}
 	{% endif %}{% endif %}{% endif %}
+    {% if not forloop.last %}
+    |&nbsp;
+    {% endif %}
 </span>
 
 </li>

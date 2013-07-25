@@ -10,7 +10,7 @@ from .models import Request, Match
 
 
 class MatchAdmin(admin.ModelAdmin):
-    list_display = ['status', 'mb_id','artist','artist_credits', 'artist_credits_secondary','release_list', 'duration', 'work_list', 'iswc_list', 'request',]
+    list_display = ['status', 'mb_id','title', 'artist','artist_credits', 'artist_credits_secondary','release_list', 'duration', 'isrc_list', 'iswc_list', 'request',]
     list_filter = ['status', ]
 
 class MatchInline(admin.TabularInline):

@@ -83,6 +83,7 @@ class LabelForm(ModelForm):
         fields = ('name',
                   'type',
                   'labelcode',
+                  'parent',
                   'description',
                   'address',
                   'country',
@@ -131,6 +132,7 @@ class LabelForm(ModelForm):
                 LookupField('name', css_class='input-xlarge'),
                 LookupField('type', css_class='input-xlarge'),
                 LookupField('labelcode', css_class='input-xlarge'),
+                LookupField('parent', css_class='input-xlarge'),
         )
         
         contact_layout = Fieldset(
@@ -168,7 +170,7 @@ class LabelForm(ModelForm):
     main_image = forms.Field(widget=FileInput(), required=False)
     d_tags = TagField(widget=TagAutocompleteTagIt(max_tags=9), required=False, label=_('Tags'))
     description = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")   
-
+    parent = selectable.AutoCompleteSelectField(ParentLabelLookup, allow_new=True, required=False, label=_('Parent Label'))
     
 
     def clean(self, *args, **kwargs):
@@ -179,7 +181,13 @@ class LabelForm(ModelForm):
         print cd
         print "*************************************"
         
-            
+        parent = cd['parent']
+        try:
+            if not parent.pk:
+                print "SEEMS TO BE NEW ONE..."
+                parent.save()
+        except:
+            pass
         
         if 'main_image' in cd and cd['main_image'] != None:
             try:
