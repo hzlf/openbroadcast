@@ -101,6 +101,10 @@
                         <dd>{{ object.tempo }}</dd>
                     </dl>
 
+                    {% for section in object.sections %}
+                        {{ section.start }} | {{ section.duration }} | {{ section.confidence }}<br>
+                    {% endfor %}
+
                 </ul>
 
             </div>

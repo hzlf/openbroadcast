@@ -43,6 +43,8 @@ from filer.fields.image import FilerImageField
 from filer.fields.audio import FilerAudioField
 from filer.fields.file import FilerFileField
 
+from django_extensions.db.fields.json import JSONField
+
 # private_files
 from private_files import PrivateFileField
 
@@ -92,7 +94,7 @@ from alibrary.util.echonest import EchonestWorker
 
 import arating
 
-USE_CELERYD = True
+USE_CELERYD = False
 
 
 from caching.base import CachingMixin, CachingManager
@@ -249,6 +251,8 @@ class Media(CachingMixin, MigrationMixin):
     echonest_duration = models.FloatField(null=True, blank=True)
     tempo = models.FloatField(null=True, blank=True)
     key = models.IntegerField(null=True, blank=True)
+
+    sections = JSONField(blank=True, null=True)
 
 
 

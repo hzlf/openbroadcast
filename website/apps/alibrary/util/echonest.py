@@ -104,6 +104,7 @@ class EchonestWorker(object):
             item.echonest_duration = t.duration
             item.start_of_fade_out = t.start_of_fade_out
             item.tempo = t.tempo
+            item.sections = t.sections
 
             self.pp.pprint(t.meta)
             self.pp.pprint(t.sections)
