@@ -15,4 +15,8 @@ urlpatterns = patterns('',
     url(r'^tracks/(?P<uuid>[-\w]+)/stream_html5/base.mp3$', 'alibrary.views.stream_html5', name='alibrary-media-stream_html5'),
     url(r'^tracks/(?P<uuid>[-\w]+)/waveform/$', 'alibrary.views.waveform', name='alibrary-media-waveform'),
 
+
+    url(r'^encode/(?P<uuid>[-\w]+)/stream.(?P<bitrate>\d+).(?P<format>[-\w]+)$', 'alibrary.views.encode', name='alibrary-media-encode'),
+
+
 )

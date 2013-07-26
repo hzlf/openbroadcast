@@ -57,17 +57,30 @@
 			</li>
 			{% endif %}
 			
-			<!-- Menu element / Action -->
+			<!-- Menu element / Action
 			<li class="action disabled selection_required selection_single selection_delete ">
 				<span class="left icon"> <a href="#release" title="Delete Selection">Delete Selection</a> </span>
 				<span class="opt"></span>
 				<span class="clear"></span>
-			</li><!-- Menu element / Action -->
-			<li class="action disabled selection_required selection_multiple selection_merge ">
-				<span class="left icon"> <a href="#release" title="Merge Selection">Merge Selection</a> </span>
-				<span class="opt"></span>
-				<span class="clear"></span>
-			</li><!-- Menu element / Action -->
+			</li> -->
+
+
+            <!-- Menu element / Action -->
+
+            {% if user.is_authenticated %}
+            <li class="action disabled selection_required selection_multiple selection_merge ">
+                <span class="left icon"> <a href="#" data-action="merge" data-ct="media" title="Merge Selection">Merge
+                    Selection</a> </span>
+                <span class="opt"></span>
+                <span class="clear"></span>
+            </li>
+            {% endif %}
+
+
+
+
+
+            <!-- Menu element / Action -->
 			<li class="action disabled selection_required selection_any selection_play ">
 				<span class="left icon"> <a href="#release" title="Play Selection">Play Selection</a> </span>
 				<span class="opt"></span>

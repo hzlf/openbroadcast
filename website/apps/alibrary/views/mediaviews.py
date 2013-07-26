@@ -28,6 +28,7 @@ from lib.util import change_message
 import reversion
 
 from sendfile import sendfile
+import audiotranscode
 
 
 ALIBRARY_PAGINATE_BY = getattr(settings, 'ALIBRARY_PAGINATE_BY', (12,24,36,120))
@@ -339,6 +340,37 @@ def stream_html5(request, uuid):
         pass
     
     return sendfile(request, media.get_cache_file('mp3', 'base'))
+
+
+
+def __encode(path, bitrate, format):
+    at = audiotranscode.AudioTranscode()
+    for data in at.transcode_stream(path, format, bitrate=bitrate):
+        # do something with chuck of data
+        # e.g. sendDataToClient(data)
+        yield data
+
+def encode(request, uuid, bitrate=128, format='mp3'):
+
+    media = get_object_or_404(Media, uuid=uuid)
+
+    stream_permission = True
+
+    if not stream_permission:
+        raise Http403
+
+    try:
+        from atracker.util import create_event
+        create_event(request.user, media, None, 'stream')
+    except:
+        pass
+
+
+
+
+    return HttpResponse(__encode(media.master.path, bitrate, format), mimetype='audio/mpeg')
+
+    #return sendfile(request, media.get_cache_file('mp3', 'base'))
 
 
 def waveform(request, uuid):

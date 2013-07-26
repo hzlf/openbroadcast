@@ -6,7 +6,7 @@ from dajax.core import Dajax
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
-from alibrary.models import APILookup, Release, Relation, Label, Artist
+from alibrary.models import APILookup, Release, Relation, Label, Artist, Media
 
 from lib.util.merge import merge_model_objects
 
@@ -231,6 +231,21 @@ def merge_items(request, *args, **kwargs):
                     # needed to clear cache
                     for media in master_item.media_release.all():
                         media.save()
+                    data['status'] = True
+                else:
+                    data['status'] = False
+                    data['error'] = 'No selection'
+
+
+            if item_type == 'media':
+                items = Media.objects.filter(pk__in=item_ids).exclude(pk=int(master_id))
+                for item in items:
+                    slave_items.append(item)
+
+                master_item = Media.objects.get(pk=int(master_id))
+                if slave_items and master_item:
+                    merge_model_objects(master_item, slave_items)
+                    master_item.save()
                     data['status'] = True
                 else:
                     data['status'] = False

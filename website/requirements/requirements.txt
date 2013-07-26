@@ -20,6 +20,8 @@ redis
 django-model-utils==1.2.0
 
 django-csvimport
+unicodecsv
+
 
 
 django-cache-machine==0.6
@@ -169,6 +171,9 @@ scikits.audiolab>=0.11.0
 
 -e git://github.com/toastdriven/django-haystack.git#egg=django-haystack
 pysolr
+
+
+-e git+https://github.com/echonest/pyechonest.git#egg=pyechonest
 
 
 # shop

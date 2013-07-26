@@ -120,7 +120,17 @@ class Media(CachingMixin, MigrationMixin):
     name = models.CharField(max_length=200, db_index=True)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
-    
+    STATUS_CHOICES = (
+        (0, _('Init')),
+        (1, _('Ready')),
+        (3, _('Working')),
+        (4, _('File missing')),
+        (5, _('File error')),
+        (99, _('Error')),
+    )
+    status = models.PositiveIntegerField(default=0, choices=STATUS_CHOICES)
+
+
     isrc = models.CharField(verbose_name='ISRC', max_length=12, null=True, blank=True)
     
     publish_date = models.DateTimeField(blank=True, null=True)
@@ -195,6 +205,7 @@ class Media(CachingMixin, MigrationMixin):
     
     # relations a.k.a. links
     relations = generic.GenericRelation(Relation)
+
     
     # tagging (d_tags = "display tags")
     d_tags = tagging.fields.TagField(max_length=1024, verbose_name="Tags", blank=True, null=True)
@@ -224,6 +235,20 @@ class Media(CachingMixin, MigrationMixin):
     base_samplerate = models.PositiveIntegerField(verbose_name=_('Samplerate'), blank=True, null=True)
     base_bitrate = models.PositiveIntegerField(verbose_name=_('Bitrate'), blank=True, null=True)
     filename = models.CharField(verbose_name=_('Original filename'), max_length=256, blank=True, null=True)
+
+    # echonest data
+    echonest_id = models.CharField(max_length=20, blank=True, null=True)
+    danceability = models.FloatField(null=True, blank=True)
+    energy = models.FloatField(null=True, blank=True)
+    liveness = models.FloatField(null=True, blank=True)
+    loudness = models.FloatField(null=True, blank=True)
+    speechiness = models.FloatField(null=True, blank=True)
+    start_of_fade_out = models.FloatField(null=True, blank=True)
+    echonest_duration = models.FloatField(null=True, blank=True)
+    tempo = models.FloatField(null=True, blank=True)
+    key = models.IntegerField(null=True, blank=True)
+
+
 
     # tagging
     #tags = TaggableManager(blank=True)
@@ -290,7 +315,12 @@ class Media(CachingMixin, MigrationMixin):
     @models.permalink
     def get_stream_url(self):
         return ('alibrary-media-stream_html5', [self.uuid])
-    
+
+    @models.permalink
+    def get_encode_url(self, format='mp3', bitrate='32'):
+        #return ('alibrary-media-encode', [self.uuid, format, bitrate])
+        return ('alibrary-media-encode', (), {'uuid': self.uuid, 'format': format, 'bitrate': bitrate})
+
     @models.permalink
     def get_waveform_url(self):
         return ('alibrary-media-waveform', [self.uuid])

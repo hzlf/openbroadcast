@@ -31,6 +31,7 @@ class MediaResource(ModelResource):
         filtering = {
             #'channel': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
+            'id': ['exact', 'in'],
         }
 
 

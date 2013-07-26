@@ -1,8 +1,23 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags wiki_tags disqus_tags comments %}
+{% load truncate i18n thumbnail arating_tags wiki_tags disqus_tags comments dajaxice_templatetags sekizai_tags %}
 
-{% block heading %} <!-- heading / icon (large one) -->
+{% block heading %}
+<!-- view specific scripts -->
+{% addtoblock "js-post" %}{% dajaxice_js_import %}{% endaddtoblock %}
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/list.edit.js"></script>{% endaddtoblock %}
+
+{% addtoblock "js-post" %}
+    <script>
+    var list_edit = list_edit || {};
+    $(function(){
+       list_edit = new ListEditUi();
+       list_edit.init();
+    });
+    </script>
+{% endaddtoblock %}
+
+<!-- heading / icon (large one) -->
 <div id="heading">
 	{% include "skeleton/heading.html" %}
 </div>

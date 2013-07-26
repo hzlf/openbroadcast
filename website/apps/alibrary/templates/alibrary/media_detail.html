@@ -3,30 +3,30 @@
 {% load truncate i18n thumbnail arating_tags wiki_tags disqus_tags comments atracker_tags %}
 
 {% block heading %} <!-- heading / icon (large one) -->
-<div id="heading">
-	{% include "skeleton/heading.html" %}
-</div>
-<!-- heading / icon (large one) -->
+    <div id="heading">
+        {% include "skeleton/heading.html" %}
+    </div>
+    <!-- heading / icon (large one) -->
 {% endblock %}
 
 {% block modnav %} <!-- start: intra-module navigation -->
-<div id="modnav">
-	{% include "skeleton/modnav.html" %}
-</div>
-<!-- end: intra-module navigation -->
+    <div id="modnav">
+        {% include "skeleton/modnav.html" %}
+    </div>
+    <!-- end: intra-module navigation -->
 {% endblock %}
 
 {% block inner %}
 
-<div class="item_detail" style="">
+    <div class="item_detail" style="">
 
-	<section class="shaded">
+        <section class="shaded">
 
-		<div class="row iteminfo release">
-			{% include "alibrary/media/_detail_info.html" %}
-		</div>
+            <div class="row iteminfo release">
+                {% include "alibrary/media/_detail_info.html" %}
+            </div>
 
-		<!--
+            <!--
 		<div class="row-fluid">
 
 		<div class="span12">
@@ -40,112 +40,154 @@
 		</div>
 		-->
 
-	</section>
+        </section>
 
-	<div class="item_menu" id="item_menu">
-		<ul class="nav nav-tabs">
-			<li class="active">
-				<a href="#overview_" data-toggle="tab">{% trans "Overview" %}</a>
-			</li>
-			{%  if object.appearances.count > 0 %}
-			<li>
-				<a href="#appearance" data-toggle="tab">{% trans "Appearance" %} ({{ object.appearances.count }})</a>
-			</li>
-			{% endif %}
-			<li>
-				<a href="#history" data-toggle="tab">{% trans "History" %}</a>
-			</li>
-			<li>
-				<a href="#statistics" data-toggle="tab">{% trans "Statistics" %}</a>
-			</li>
-		</ul>
-	</div>
+        <div class="item_menu" id="item_menu">
+            <ul class="nav nav-tabs">
+                <li class="active">
+                    <a href="#overview_" data-toggle="tab">{% trans "Overview" %}</a>
+                </li>
+                {% if object.appearances.count > 0 %}
+                    <li>
+                        <a href="#appearance" data-toggle="tab">{% trans "Appearance" %} ({{ object.appearances.count }})</a>
+                    </li>
+                {% endif %}
+                <li>
+                    <a href="#history" data-toggle="tab">{% trans "History" %}</a>
+                </li>
+                <li>
+                    <a href="#statistics" data-toggle="tab">{% trans "Statistics" %}</a>
+                </li>
+            </ul>
+        </div>
 
-	<div class="clear"></div>
+        <div class="clear"></div>
 
-	<section class="tabbed item_inner">
+        <section class="tabbed item_inner">
 
-		<div class="tab-content">
+            <div class="debug">
+                {{ object.get_stream_url }}<br>
+                {{ object.get_encode_url }}<br>
 
-			<div class="tab-pane active" id="overview_">
+                <ul class="unstyled">
 
-				<section class="media">
-					<h2>{% trans "Track" %}</h2>
-					<div  id="waveform" style="background: #a5a5a5; width: 100%; height: 50px;">
-						<img src="{{ object.get_waveform_url }}" style="height: 50px; width: 100%;"></img>
-					</div>
-				</section>
-				
-				{% if object.description %}
-				<section class="description">
-					<h2>{% trans "Track description" %}</h2>
-					<div class="description markdown padded-h">
-						{% wikify object.description %}
-					</div>
-				</section>
-				{% endif %}
+                    <dl class="dl-horizontal sub">
 
-			</div>
+                        <dt>{% trans "Danceability" %}:</dt>
+                        <dd>{{ object.danceability }}</dd>
 
-			<div class="tab-pane" id="appearance">
+                        <dt>{% trans "Energy" %}:</dt>
+                        <dd>{{ object.energy }}</dd>
 
-				<section class="appearance">
+                        <dt>{% trans "Key" %}:</dt>
+                        <dd>{{ object.key }}</dd>
 
-					<h2>{% trans "Appears on" %}</h2>
+                        <dt>{% trans "Liveness" %}:</dt>
+                        <dd>{{ object.liveness }}</dd>
 
-					<div class="listview container playlist s">
+                        <dt>{% trans "Loudness" %}:</dt>
+                        <dd>{{ object.loudness }}</dd>
 
-						<div class="list_body">
+                        <dt>{% trans "Speechiness" %}:</dt>
+                        <dd>{{ object.speechiness }}</dd>
 
-							{% with highlight=object extended=1 %}
-							{% for item in object.appearances %}
-							{% include "alibrary/playlist/list_item_s.html" %}
-							{% endfor %}
-							{% endwith %}
-						</div>
-					</div>
+                        <dt>{% trans "Duration" %}:</dt>
+                        <dd>{{ object.duration }} | {{ object.echonest_duration }} </dd>
 
-				</section>
+                        <dt>{% trans "Start of fade-out" %}:</dt>
+                        <dd>{{ object.start_of_fade_out }}</dd>
 
-			</div>
+                        <dt>{% trans "Tempo" %}:</dt>
+                        <dd>{{ object.tempo }}</dd>
+                    </dl>
 
-			<div class="tab-pane" id="history">
+                </ul>
 
-				<section class="history">
+            </div>
 
-					<h2>{% trans "Edit history" %}</h2>
+            <div class="tab-content">
 
-					{% include "alibrary/element/_object_history.html" %}
-				</section>
+                <div class="tab-pane active" id="overview_">
 
-			</div>
+                    <section class="media">
+                        <h2>{% trans "Track" %}</h2>
 
-			<div class="tab-pane" id="statistics">
+                        <div id="waveform" style="background: #a5a5a5; width: 100%; height: 50px;">
+                            <img src="{{ object.get_waveform_url }}" style="height: 50px; width: 100%;"></img>
+                        </div>
+                    </section>
 
-				<table class="table table-condensed history">
-					{% events_for_object object %}
-				</table>
+                    {% if object.description %}
+                        <section class="description">
+                            <h2>{% trans "Track description" %}</h2>
 
-			</div>
+                            <div class="description markdown padded-h">
+                                {% wikify object.description %}
+                            </div>
+                        </section>
+                    {% endif %}
 
-		</div>
+                </div>
 
-	</section>
+                <div class="tab-pane" id="appearance">
+
+                    <section class="appearance">
+
+                        <h2>{% trans "Appears on" %}</h2>
+
+                        <div class="listview container playlist s">
+
+                            <div class="list_body">
+
+                                {% with highlight=object extended=1 %}
+                                    {% for item in object.appearances %}
+                                        {% include "alibrary/playlist/list_item_s.html" %}
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                        </div>
+
+                    </section>
+
+                </div>
+
+                <div class="tab-pane" id="history">
+
+                    <section class="history">
+
+                        <h2>{% trans "Edit history" %}</h2>
+
+                        {% include "alibrary/element/_object_history.html" %}
+                    </section>
+
+                </div>
+
+                <div class="tab-pane" id="statistics">
+
+                    <table class="table table-condensed history">
+                        {% events_for_object object %}
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
 
 
-	<section class="comments on-site">
-		{% include "element/chat/_object_comments.html" %}
-	</section>
+        <section class="comments on-site">
+            {% include "element/chat/_object_comments.html" %}
+        </section>
 
-	<section class="comments disqus">
-		{# disqus_show_comments #}
-	</section>
+        <section class="comments disqus">
+            {# disqus_show_comments #}
+        </section>
 
-</div>
+    </div>
 
 {% endblock %}
 
 {% block sidebar %}
-{% include "alibrary/media/sidebar/_detail.html" %}
+    {% include "alibrary/media/sidebar/_detail.html" %}
 {% endblock %}
 

@@ -211,7 +211,14 @@ ListEditUi = function () {
     this.merge_dialog_update = function (data) {
 
 
-        var url = '/api/v1/' + data.item_type + '/';
+        // not so nice, but have to map type as names differ in api
+        var item_type = data.item_type
+
+        if(item_type == 'media') {
+            item_type = 'track';
+        }
+
+        var url = '/api/v1/' + item_type + '/';
         var query = '?id__in=' + data.item_ids.join(',');
 
         $.get(url + query, function (data) {
