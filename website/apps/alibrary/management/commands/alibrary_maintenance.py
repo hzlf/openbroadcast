@@ -103,8 +103,21 @@ class MaintenanceWorker(object):
                     item.save()
 
 
-
         if self.action == 'echonest_media':
+
+            from alibrary.models import Media
+            
+            if self.id:
+                items = Media.objects.filter(id=self.id)
+            else:
+                items = Media.objects.filter(echonest_id=None)[0:self.limit]
+
+            for item in items:
+                log.info('analyze: %s' % item)
+                item.echonest_analyze()
+
+
+        if self.action == 'echonest_media__':
 
             from alibrary.models import Media
             from pyechonest.util import EchoNestAPIError

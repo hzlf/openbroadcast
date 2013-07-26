@@ -88,9 +88,11 @@ from alibrary.models.playlistmodels import *
 from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
 
+from alibrary.util.echonest import EchonestWorker
+
 import arating
 
-
+USE_CELERYD = True
 
 
 from caching.base import CachingMixin, CachingManager
@@ -1003,6 +1005,33 @@ class Media(CachingMixin, MigrationMixin):
 
         obj.echoprint_status = status
         obj.save()
+
+
+
+    """
+    Echoprint analyzer
+    """
+    def echonest_analyze(self):
+
+        log.info('Start echoprint_analyze: %s' % (self.pk))
+
+        if USE_CELERYD:
+            self.echonest_analyze_task.delay(self)
+        else:
+            self.echonest_analyze_task(self)
+
+    @task
+    def echonest_analyze_task(obj):
+
+        ew = EchonestWorker()
+        try:
+            obj = ew.analyze(obj)
+            obj.save()
+        except Exception, e:
+            print e
+
+
+
 
         
     def save(self, *args, **kwargs):
