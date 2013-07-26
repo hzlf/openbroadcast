@@ -210,6 +210,8 @@ class Media(CachingMixin, MigrationMixin):
     # relations a.k.a. links
     relations = generic.GenericRelation(Relation)
 
+    playlist_items = generic.GenericRelation(PlaylistItem, object_id_field="object_id")
+
     
     # tagging (d_tags = "display tags")
     d_tags = tagging.fields.TagField(max_length=1024, verbose_name="Tags", blank=True, null=True)
@@ -1201,6 +1203,10 @@ def media_pre_delete(sender, **kwargs):
         fp.delete("%s" % obj.id)
     except Exception, e:
         log.warning('unable to delete fingerprint for media_id: %s' % obj.id)
+
+
+    # try to delete relations
+
         
         
 

@@ -457,8 +457,8 @@ class PlaylistMedia(models.Model):
 
 class PlaylistItemPlaylist(models.Model):
     
-    playlist = models.ForeignKey('Playlist')
-    item = models.ForeignKey('PlaylistItem')
+    playlist = models.ForeignKey('Playlist', on_delete=models.CASCADE)
+    item = models.ForeignKey('PlaylistItem', on_delete=models.CASCADE)
 
     uuid = UUIDField()
     

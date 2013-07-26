@@ -117,6 +117,28 @@ class MaintenanceWorker(object):
                 item.echonest_analyze()
 
 
+        if self.action == 'clean_playlists':
+
+            from alibrary.models import PlaylistItem
+            from alibrary.models import Media
+
+            items = PlaylistItem.objects.all()
+
+            for item in items:
+                log.info('clean: %s' % item.pk)
+                if not item.content_object:
+                    log.info('no content object > delete: %s' % item.pk)
+                    item.delete()
+                # m = Media.objects.get(pk=item.)
+
+
+
+
+
+
+
+
+
         if self.action == 'echonest_media__':
 
             from alibrary.models import Media
