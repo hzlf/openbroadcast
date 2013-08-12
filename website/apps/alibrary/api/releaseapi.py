@@ -137,7 +137,7 @@ class ReleaseResource(ModelResource):
         
         media_list = []
         for media in bundle.obj.media_release.filter(Q(name__icontains=q) | Q(artist__name__icontains=q)).distinct():
-            media_list.append({'name': media.name, 'artist': media.artist.name})
+            media_list.append({'name': media.name, 'artist': media.artist.name, 'get_absolute_url': media.get_absolute_url()})
         
         bundle.data['media'] = media_list
         return bundle

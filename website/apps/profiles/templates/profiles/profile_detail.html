@@ -232,7 +232,7 @@
 				<table class="table table-condensed striped action">
 					<tbody>
 
-						{% for action in user_stream %}
+						{% for action in user_stream|slice:":50" %}
 						<tr>
 							<td>#</td>
 							

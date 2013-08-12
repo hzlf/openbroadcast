@@ -81,7 +81,7 @@ class EchonestWorker(object):
 
             t.get_analysis()
 
-            print t
+            #print t
             print t.id
             print t.analysis_url
             print

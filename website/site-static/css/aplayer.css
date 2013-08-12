@@ -5777,79 +5777,109 @@ div.row .sidebar div.jingle div.form select.default {
 }
 
 /* search */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\000035}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\000038}}
 div.autocomplete.holder {
   position: absolute;
   width: 830px;
-  background-color: whitesmoke;
+  background-color: #333333;
   z-index: 1001;
   margin-top: 0px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000312}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000316}}
 div.autocomplete.holder .result {
   padding: 0;
   border: 1px solid #999999;
   border-top: none;
   border-right: 1px solid #cccccc;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000318}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000322}}
 div.autocomplete.holder .result h1, div.autocomplete.holder .result h2, div.autocomplete.holder .result h3 {
   font-size: 12px !important;
   line-height: 15px !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000322}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000326}}
 div.autocomplete.holder .result .linkable {
   cursor: pointer;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000325}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000329}}
 div.autocomplete.holder .result .search {
+  color: white;
   padding: 5px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000328}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000333}}
 div.autocomplete.holder .result .search h1 {
   margin-bottom: 0px !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000331}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000336}}
 div.autocomplete.holder .result .listing {
   max-height: 491px;
   overflow: auto;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000336}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000344}}
 div.autocomplete.holder .result .listing .item {
+  color: white;
   border-top: 1px solid #cccccc;
   background-repeat: no-repeat;
   background-position: top right;
   padding: 5px;
   min-height: 42px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000344}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000347}}
+div.autocomplete.holder .result .listing .item .row-fluid > .span2 {
+  width: 70px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000349}}
+div.autocomplete.holder .result .listing .item .row-fluid > .span10 {
+  width: 710px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000353}}
+div.autocomplete.holder .result .listing .item a {
+  color: white;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000364}}
 div.autocomplete.holder .result .listing .item h2 {
+  color: white;
   text-transform: uppercase;
   margin-bottom: 0px !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000350}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000371}}
 div.autocomplete.holder .result .listing .item .related > span {
   float: left;
   margin-right: 4px;
   text-transform: none;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000355}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000376}}
 div.autocomplete.holder .result .listing .item .related ul {
   list-style: none !important;
+  margin-left: 55px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000357}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000379}}
 div.autocomplete.holder .result .listing .item .related ul li {
   margin-right: 10px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000360}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000382}}
 div.autocomplete.holder .result .listing .item em.highlight {
-  background: #ddffd9;
+  color: #ddffd9;
   padding: 0px;
   font-style: italic;
+  font-weight: bold;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000368}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000392}}
 div.autocomplete.holder .result .listing .item.hover {
   background-color: #ddffd9;
+  color: #333333;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000395}}
+div.autocomplete.holder .result .listing .item.hover h2, div.autocomplete.holder .result .listing .item.hover a {
+  color: #333333;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\0000397}}
+div.autocomplete.holder .result .listing .item.hover a:hover {
+  text-decoration: underline;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ohrstrom\/Documents\/Code\/openbroadcast\.ch\/website\/site-static\/sass\/element\/_search\.sass}line{font-family:\00003100}}
+div.autocomplete.holder .result .listing .item.hover em.highlight {
+  color: black;
 }
 
 /* pplayer inline */

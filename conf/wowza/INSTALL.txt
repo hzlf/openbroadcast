@@ -7,15 +7,15 @@ http://wowza.com/pricing/installer
 http://www.wowza.com/media-server/developers
 
 cd /Library/WowzaMediaServer/
-mkdir applications/alabel
-mkdir config/alabel
+mkdir applications/alibrary
+mkdir conf/alibrary
 
-cp <your code-base>/conf/wowza//Application.xml conf/alabel/
+cp <your code-base>/conf/wowza//Application.xml conf/alibrary/
 
-nano conf/alabel/Application.xml
+nano conf/alibrary/Application.xml
 
 (edit storage dir - must match your installations smedia/filer) e.g.:
-<StorageDir>/Users/ohrstrom/Documents/Code/alabel/website/smedia/filer</StorageDir>
+<StorageDir>/Users/ohrstrom/code/openbroadcast.ch/website/media/private</StorageDir>
 
 
 cd bin

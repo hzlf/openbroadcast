@@ -401,6 +401,15 @@ aplayer.ui.update = function(aplayer) {
 			$('.indicator', container).css('width', aplayer.states.position_rel + '%');
 			
 		}
+
+
+        // detail player (e.g. on media page)
+        if(window.detail_player != undefined) {
+            window.detail_player.update(aplayer);
+        }
+
+
+
 	
 		var container_screen = $('#progress_bar');
 		if(container_screen) {

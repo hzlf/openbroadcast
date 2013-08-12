@@ -1,0 +1,57 @@
+<div class="list_body_row item hoverable editable {{ object.uuid }} {{ object.item.content_type }}"
+     data-updated="{{ object.updated }}" data-resource_uri="{{ object.resource_uri }}" data-uuid="{{ object.uuid }}"
+     data-id="{{ object.id }}" id="playlist_item_{{ object.id }}">
+
+
+    <div class="row-fluid playhead">
+        <div class="span12">
+
+            <div class="waveform" id="detail_player_waveform_{{ object.id }}"></div>
+
+        </div>
+
+    </div>
+
+
+    <div class="row-fluid base">
+
+        <div class="span6 actions">
+
+            <ul class="unstyled">
+                <li>
+                    <a href="#" data-action="stop" class="visible-while-playing">
+                        <i class=" icon-stop icon-large"></i>
+                    </a>
+                    <a href="#" data-action="play" class="hidden-while-playing">
+                        <i class=" icon-play icon-large"></i>
+                    </a>
+                    <a href="#" data-action="pause" class="">
+                        <i class=" icon-pause icon-large"></i>
+                    </a>
+                </li>
+            </ul>
+            <!--
+			<span>{{ object.duration|ms2time }}</span>
+			-->
+        </div>
+
+
+        <div class="span6 actions pull-right">
+
+            <ul class="unstyled">
+                <li>
+                    <a href="#" data-action="collect" class=" pull-right">
+                        <i class="icon-plus icon-large"></i>
+                    </a>
+                    <a href="#" data-action="delete" class=" pull-right">
+                        <i class="icon-trash icon-large"></i>
+                    </a>
+                </li>
+            </ul>
+
+        </div>
+
+    </div>
+
+
+</div>

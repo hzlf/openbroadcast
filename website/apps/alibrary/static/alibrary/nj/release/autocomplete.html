@@ -8,9 +8,15 @@
 	</div>
 	<div class="listing">
 		{% for item in objects %}
+
 		<div class="item linkable hoverable">
 			
 			<div class="row-fluid">
+
+				<div class="span2">
+					<img src="{{ item.main_image }}" />
+				</div>
+
 				<div class="span10">
 					
 					<a href="{{ item.get_absolute_url }}" class="link-main"><h2>{{ item.name|highlight(meta.query) }}</h2></a>
@@ -35,9 +41,6 @@
 					</div>
 					
 					
-				</div>
-				<div class="span2">
-					<img src="{{ item.main_image }}" />
 				</div>
 				
 			</div>

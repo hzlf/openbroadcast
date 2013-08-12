@@ -1,8 +1,30 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags wiki_tags disqus_tags comments atracker_tags %}
+{% load truncate i18n thumbnail arating_tags wiki_tags disqus_tags comments atracker_tags sekizai_tags %}
 
 {% block heading %} <!-- heading / icon (large one) -->
+
+    {% addtoblock "js-post" %}
+        <script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/lib/raphael-min.js"></script>{% endaddtoblock %}
+    {% addtoblock "js-post" %}
+        <script type="text/javascript" src="{{ STATIC_URL }}aplayer/js/detail.js"></script>{% endaddtoblock %}
+
+
+    {% addtoblock "js-post" %}
+        <script>
+            $(function () {
+
+                detail_player = new DetailPlayer;
+                detail_player.dom_id = 'aplayer_detail';
+                detail_player.api_url = '{{ object.get_api_url }}';
+                detail_player.init();
+
+                window.detail_player = detail_player;
+
+            });
+        </script>
+    {% endaddtoblock %}
+
     <div id="heading">
         {% include "skeleton/heading.html" %}
     </div>
@@ -40,6 +62,10 @@
 		</div>
 		-->
 
+            <div id="aplayer_detail" style="padding-left: 10px;">
+                {% trans "Loading player" %}
+            </div>
+
         </section>
 
         <div class="item_menu" id="item_menu">
@@ -65,60 +91,27 @@
 
         <section class="tabbed item_inner">
 
-            <div class="debug">
-                {{ object.get_stream_url }}<br>
-                {{ object.get_encode_url }}<br>
-
-                <ul class="unstyled">
-
-                    <dl class="dl-horizontal sub">
-
-                        <dt>{% trans "Danceability" %}:</dt>
-                        <dd>{{ object.danceability }}</dd>
-
-                        <dt>{% trans "Energy" %}:</dt>
-                        <dd>{{ object.energy }}</dd>
-
-                        <dt>{% trans "Key" %}:</dt>
-                        <dd>{{ object.key }}</dd>
-
-                        <dt>{% trans "Liveness" %}:</dt>
-                        <dd>{{ object.liveness }}</dd>
-
-                        <dt>{% trans "Loudness" %}:</dt>
-                        <dd>{{ object.loudness }}</dd>
-
-                        <dt>{% trans "Speechiness" %}:</dt>
-                        <dd>{{ object.speechiness }}</dd>
-
-                        <dt>{% trans "Duration" %}:</dt>
-                        <dd>{{ object.duration }} | {{ object.echonest_duration }} </dd>
-
-                        <dt>{% trans "Start of fade-out" %}:</dt>
-                        <dd>{{ object.start_of_fade_out }}</dd>
-
-                        <dt>{% trans "Tempo" %}:</dt>
-                        <dd>{{ object.tempo }}</dd>
-                    </dl>
-
-                    {% for section in object.sections %}
-                        {{ section.start }} | {{ section.duration }} | {{ section.confidence }}<br>
-                    {% endfor %}
-
-                </ul>
-
-            </div>
-
             <div class="tab-content">
 
                 <div class="tab-pane active" id="overview_">
 
                     <section class="media">
+
+                        <!--
                         <h2>{% trans "Track" %}</h2>
 
+
+                        <div id="aplayer_detail__" style="background: white;">
+                            {% trans "Loading player" %}
+                        </div>
+                        -->
+
+                        <!--
                         <div id="waveform" style="background: #a5a5a5; width: 100%; height: 50px;">
                             <img src="{{ object.get_waveform_url }}" style="height: 50px; width: 100%;"></img>
                         </div>
+                        -->
+
                     </section>
 
                     {% if object.description %}
@@ -130,6 +123,58 @@
                             </div>
                         </section>
                     {% endif %}
+
+
+
+                    <section class="analyse">
+                        <h2>{% trans "Track analysis" %}</h2>
+
+                        <!--
+                        {{ object.get_stream_url }}<br>
+                        {{ object.get_encode_url }}<br>
+                        -->
+
+                        <ul class="unstyled">
+
+                            <dl class="dl-horizontal sub">
+
+                                <dt>{% trans "Danceability" %}:</dt>
+                                <dd>{{ object.danceability }}</dd>
+
+                                <dt>{% trans "Energy" %}:</dt>
+                                <dd>{{ object.energy }}</dd>
+
+                                <dt>{% trans "Key" %}:</dt>
+                                <dd>{{ object.key }}</dd>
+
+                                <dt>{% trans "Liveness" %}:</dt>
+                                <dd>{{ object.liveness }}</dd>
+
+                                <dt>{% trans "Loudness" %}:</dt>
+                                <dd>{{ object.loudness }}</dd>
+
+                                <dt>{% trans "Speechiness" %}:</dt>
+                                <dd>{{ object.speechiness }}</dd>
+
+                                <dt>{% trans "Duration" %}:</dt>
+                                <dd>{{ object.duration }} | {{ object.echonest_duration }} </dd>
+
+                                <dt>{% trans "Start of fade-out" %}:</dt>
+                                <dd>{{ object.start_of_fade_out }}</dd>
+
+                                <dt>{% trans "Tempo" %}:</dt>
+                                <dd>{{ object.tempo }}</dd>
+                            </dl>
+                            <!--
+                            {% for section in object.sections %}
+                                {{ section.start }} | {{ section.duration }} | {{ section.confidence }}<br>
+                            {% endfor %}
+                            -->
+
+                        </ul>
+
+                    </section>
+
 
                 </div>
 

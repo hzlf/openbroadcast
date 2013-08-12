@@ -1,11 +1,15 @@
 /* search */
 
+$ac-width: 830px
+
+
 div.autocomplete
 
   &.holder
     position: absolute
-    width: 830px
-    background-color: whiteSmoke
+    width: $ac-width
+    // background-color: whiteSmoke
+    background-color: #333333
     z-index: 1001
     margin-top: 0px
 
@@ -23,17 +27,33 @@ div.autocomplete
         cursor: pointer
       
       .search
+        color: white
         padding: 5px
         
         h1
           margin-bottom: 0px !important
       
       .listing
+
+
+
       
         max-height: 491px
         overflow: auto
       
         .item
+
+          // fix col widths
+          .row-fluid > .span2
+            width: 70px
+          .row-fluid > .span10
+            width: 710px
+
+          color: white
+          a
+            color: white
+
+
           border-top: 1px solid #CCC
           background-repeat: no-repeat
           background-position: top right
@@ -42,6 +62,7 @@ div.autocomplete
           min-height: 42px
           
           h2
+            color: white
             text-transform: uppercase
             margin-bottom: 0px !important
           
@@ -54,19 +75,33 @@ div.autocomplete
               
             ul
               list-style: none !important
+              margin-left: 55px
               li
                 margin-right: 10px
           
           em.highlight
-            background: #DDFFD9
+            //background: #DDFFD9
+            color: #DDFFD9
             //color: #0b0
             padding: 0px
             //font-style: normal
             //text-decoration: underline
             font-style: italic
+            font-weight: bold
             
           &.hover
             background-color: #DDFFD9
+            color: #333
+            h2, a
+              color: #333
+            a:hover
+              text-decoration: underline
+
+            em.highlight
+              //background: #DDFFD9
+              color: black
+
+
             // color: #0b0
         
         
