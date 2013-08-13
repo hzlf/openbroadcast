@@ -1,11 +1,15 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
 from django.views.generic.simple import direct_to_template
+from django.conf.urls import handler403, handler404, handler500
 
 
 # pinax
 #from pinax.apps.account.openid_consumer import PinaxConsumer
-handler500 = "pinax.views.server_error"
+#handler500 = "pinax.views.server_error"
+
+# error handlers
+#handler403 = 'lib.errors.views.handler403'
 
 import autocomplete_light
 autocomplete_light.autodiscover()

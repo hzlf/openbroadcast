@@ -270,11 +270,19 @@ class Media(CachingMixin, MigrationMixin):
     updated = models.DateTimeField(auto_now=True, editable=False)
 
 
+
     class Meta:
         app_label = 'alibrary'
         verbose_name = _('Track')
         verbose_name_plural = _('Tracks')
         ordering = ('mediamumber', 'tracknumber', )
+
+        permissions = (
+            ('play_media', 'Play Track'),
+            ('downoad_media', 'Download Track'),
+            ('merge_media', 'Merge Tracks'),
+            ('admin_media', 'Edit Track (extended)'),
+        )
     
     
     def __unicode__(self):

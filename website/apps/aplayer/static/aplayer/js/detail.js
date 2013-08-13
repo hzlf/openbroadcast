@@ -96,9 +96,10 @@ DetailPlayer = function () {
 
     this.trigger_hover = function (e) {
         //self.el_controls_cue.attr({stroke: self.envelope_color});
+        //$('.player_actions').fadeIn(100);
     };
     this.trigger_hout = function (e) {
-        //self.el_controls_cue.attr({stroke: "none"});
+        //$('.player_actions').fadeOut(100);
     };
 
 
@@ -143,6 +144,7 @@ DetailPlayer = function () {
         self.el_buffer = this.r.rect(0, 0, 0, self.size_y).attr({ stroke: "none", fill: self.waveform_fill });
         self.el_waveform = this.r.image(self.item.waveform_image, 0, 0, 830, self.size_y);
         self.el_indicator = this.r.rect(-10, 0, 2, self.size_y).attr({ stroke: "none", fill: '#00bb00' });
+
 
         // self.set_envelope();
 

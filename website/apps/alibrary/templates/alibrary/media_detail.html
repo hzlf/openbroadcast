@@ -1,6 +1,6 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags wiki_tags disqus_tags comments atracker_tags sekizai_tags %}
+{% load truncate i18n thumbnail arating_tags wiki_tags disqus_tags comments atracker_tags sekizai_tags calc %}
 
 {% block heading %} <!-- heading / icon (large one) -->
 
@@ -134,44 +134,42 @@
                         {{ object.get_encode_url }}<br>
                         -->
 
-                        <ul class="unstyled">
 
-                            <dl class="dl-horizontal sub">
+                        <table class=" table-condensed" style="width: 100%;">
+                            <thead>
+                            <tr>
+                                <th>{% trans "Tempo" %} [BPM]</th>
+                                <th>{% trans "Loudness" %}</th>
+                                <th>{% trans "Key" %}</th>
 
-                                <dt>{% trans "Danceability" %}:</dt>
-                                <dd>{{ object.danceability }}</dd>
+                                <th>{% trans "Danceability" %}</th>
+                                <th>{% trans "Energy" %}</th>
+                                <th>{% trans "Liveness" %}</th>
+                                <th>{% trans "Speechiness" %}</th>
 
-                                <dt>{% trans "Energy" %}:</dt>
-                                <dd>{{ object.energy }}</dd>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>{{ object.tempo }}</td>
+                                <td>{{ object.loudness }}</td>
+                                <td>{{ object.key }}</td>
 
-                                <dt>{% trans "Key" %}:</dt>
-                                <dd>{{ object.key }}</dd>
+                                <td>
 
-                                <dt>{% trans "Liveness" %}:</dt>
-                                <dd>{{ object.liveness }}</dd>
 
-                                <dt>{% trans "Loudness" %}:</dt>
-                                <dd>{{ object.loudness }}</dd>
+                                    {{ object.danceability }}
 
-                                <dt>{% trans "Speechiness" %}:</dt>
-                                <dd>{{ object.speechiness }}</dd>
 
-                                <dt>{% trans "Duration" %}:</dt>
-                                <dd>{{ object.duration }} | {{ object.echonest_duration }} </dd>
+                                </td>
 
-                                <dt>{% trans "Start of fade-out" %}:</dt>
-                                <dd>{{ object.start_of_fade_out }}</dd>
+                                <td>{{ object.energy }}</td>
+                                <td>{{ object.liveness }}</td>
+                                <td>{{ object.speechiness }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
 
-                                <dt>{% trans "Tempo" %}:</dt>
-                                <dd>{{ object.tempo }}</dd>
-                            </dl>
-                            <!--
-                            {% for section in object.sections %}
-                                {{ section.start }} | {{ section.duration }} | {{ section.confidence }}<br>
-                            {% endfor %}
-                            -->
-
-                        </ul>
 
                     </section>
 

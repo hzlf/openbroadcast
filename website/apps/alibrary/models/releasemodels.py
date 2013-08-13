@@ -243,6 +243,7 @@ class Release(MigrationMixin):
         permissions = (
             ('view_release', 'View Release'),
             ('edit_release', 'Edit Release'),
+            ('merge_release', 'Merge Releases'),
             ('admin_release', 'Edit Release (extended)'),
         )
     

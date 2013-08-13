@@ -7,7 +7,7 @@
 		<ul>
 			<!-- Play link  -->
 			<li class="play">
-				<a href="{{ item.release.get_api_url }}#{{ forloop.counter0 }}#replace" title="Play" class="playable popup"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play"></a>
+				<a href="{{ item.release.get_api_url }}#{{ forloop.counter0 }}#replace" data-ct="media_set" title="{% trans "Play" %}" class="playable popup"><img src="/static/img/base/spacer.png" width="16" height="16" alt="{% trans "Play" %}"></a>
 			</li>
 		</ul>
 

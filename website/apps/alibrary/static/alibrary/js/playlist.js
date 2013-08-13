@@ -666,7 +666,7 @@ PlaylistSelector = function() {
 			var html = '';
 			for (i in data.objects) {
 				var item = data.objects[i];
-				console.log('item:', item);
+				//console.log('item:', item);
 				
 				html += '<option';
 				if(item.is_current) {

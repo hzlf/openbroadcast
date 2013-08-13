@@ -5,6 +5,9 @@ from django.views.generic.detail import SingleObjectTemplateResponseMixin
 from django.shortcuts import get_object_or_404, render_to_response
 from django import http
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect
+
+from django.core.exceptions import PermissionDenied
+
 from django.utils import simplejson as json
 from django.template import RequestContext
 from django.db.models import Q
@@ -328,10 +331,18 @@ def stream_html5(request, uuid):
     
     media = get_object_or_404(Media, uuid=uuid)
 
-    stream_permission = True
+    stream_permission = False
+
+    if request.user and request.user.has_perm('alibrary.play_media'):
+        stream_permission = True
+
+    # check if unrestricted license
+    if not stream_permission:
+        if media.license and media.license.restricted == False:
+            stream_permission = True
 
     if not stream_permission:
-        raise Http403
+        raise PermissionDenied
     
     try:
         from atracker.util import create_event
@@ -354,10 +365,18 @@ def encode(request, uuid, bitrate=128, format='mp3'):
 
     media = get_object_or_404(Media, uuid=uuid)
 
-    stream_permission = True
+    stream_permission = False
+
+    if request.user and request.user.has_perm('alibrary.play_media'):
+        stream_permission = True
+
+    # check if unrestricted license
+    if not stream_permission:
+        if media.license and media.license.restricted == False:
+            stream_permission = True
 
     if not stream_permission:
-        raise Http403
+        raise PermissionDenied
 
     try:
         from atracker.util import create_event

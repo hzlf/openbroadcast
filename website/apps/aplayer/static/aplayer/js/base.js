@@ -76,6 +76,10 @@ aplayer.jwp = function(container) {
         height: 10,
         width: 610,
         repeat: false,
+        rtmp: {
+            bufferlength: 1.0,
+            securetoken: "Kosif093n203a"
+        },
         events: {
             onReady: function() { aplayer.jwp.on_ready();},
             onPlaylist: function(event) { aplayer.jwp.on_playlist(event);}, 
@@ -148,10 +152,10 @@ aplayer.base.ready = function() {
  *********************************************************************************/
 aplayer.base.load = function(play) {
 	
-	aplayer.base.debug('aplayer.base.load - callback from remote window');
+	console.log('aplayer.base.load - callback from remote window');
 	
 	if(aplayer.vars.debug) {
-		console.log(play);
+		// console.log(play);
 	}
 	
 	console.log('******************************')
@@ -203,17 +207,32 @@ aplayer.base.load_playlist = function(uri) {
 		aplayer.base.debug('aplayer.base.load_playlist() - ' + uri);
 		
 		$.ajax( {
-			url : uri + "?format=json", // FUCK U IE!
+			//url : uri + "?format=json", // FUCK U IE! TODO: do we support ie???
+			url : uri,
 			traditional: true,
 			type : "GET",
 			data : data,
 			dataType : "json",
 			success : function(result, textStatus, jqXHR) {
-				aplayer.base.debug('success: ' + textStatus);
-				aplayer.base.set_playlist(result);
+
+                console.log('RESULT', result);
+
+                // switch to handle releases & media api listings
+                if(uri.indexOf("release") != -1) {
+                    aplayer.base.set_playlist(result.media);
+                } else {
+                    aplayer.base.set_playlist(result.objects);
+                }
+
+
+
 			},
 			error: function (XMLHttpRequest, textStatus, errorThrown) {
 				aplayer.base.debug('error: ' + errorThrown);
+                $('#wrap .screen.controls')
+                    .css('padding-top', '17px')
+                    .append('<p>error: ' + errorThrown + '</p>');
+                // alert('error: ' + errorThrown);
 				// console.log(errorThrown, 'Error');
 			}
 		});
@@ -223,14 +242,16 @@ aplayer.base.load_playlist = function(uri) {
 /*********************************************************************************
  * Parses and sets the loaded playlist
  *********************************************************************************/
-aplayer.base.set_playlist = function(result) {
+aplayer.base.set_playlist = function(media) {
+
+    aplayer.base.debug('start - aplayer.base.set_playlist()');
+
+    console.log('setting playlist to:', media);
 
 
-	aplayer.base.debug('start - aplayer.base.set_playlist()');
-	
 	// store playlist
-	aplayer.vars.result = result;
-	playlist = result.media;
+	// aplayer.vars.result = result;
+	playlist = media;
 	
 	// TODO: is this neccessary?
 	// playlist.sort();
@@ -315,10 +336,11 @@ aplayer.base.play_in_popup = function(uri, token, offset, mode, force_seek, sour
 	};
 	
 	local.play = play;
-	
-	if(!aplayer.base.get_popup_lock()) {
+
+    // TODO: investigate if this part is needed
+	//if(!aplayer.base.get_popup_lock()) {
 		aplayer.base.grab_player(false);	
-	}
+	//}
 	
 };
 
@@ -506,9 +528,6 @@ aplayer.base.interval = function() {
 
 	if(local.type == 'main') {
 
-		//console.log('interval main');
-		//console.log(local.aplayer_updated);
-		
 		// Lost heartbeat. So the aplayer maight be fucked up.. 
 		if(local.aplayer_updated < 1) {
 			aplayer.base.release_remote_player();
@@ -737,6 +756,9 @@ aplayer.base.controls = function(args) {
 	    
 	              
 	    jwprun = jwp.stop().load(pl).play();
+
+        console.log('jwp run:', jwprun);
+
 	    
 	    if(args.force_seek) {
 	    	jwp.seek(args.force_seek);
@@ -1153,6 +1175,8 @@ aplayer.base.debug = function(text) {
 	var sec = d.getSeconds();
 	
 	var time = hour + ':' + min + ':' + sec;
+
+    console.log(text);
 	
-	$('.footer > .wrapper').prepend('<p>' + '<span>' + time + '</span> | ' + text + '</p>');
+	// $('.footer > .wrapper').prepend('<p>' + '<span>' + time + '</span> | ' + text + '</p>');
 };
