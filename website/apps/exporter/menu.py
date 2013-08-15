@@ -24,8 +24,8 @@ class ExportMenu(CMSAttachMenu):
         
         """"""
         node = NavigationNode(
-            _('Help'),
-            reverse('exporter-export-list'),
+            _('Settings'),
+            reverse('exporter-export-settings'),
             192
         )
         nodes.append(node)

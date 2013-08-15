@@ -180,7 +180,7 @@ class PlaylistResource(ModelResource):
     
     def obj_create(self, bundle, request=None, **kwargs):
         bundle = super(PlaylistResource, self).obj_create(bundle, request, user=request.user)
-        
+
         Playlist.objects.filter(user=request.user).update(is_current=False)
         bundle.obj.is_current = True
         bundle.obj.save()
@@ -204,31 +204,31 @@ class PlaylistResource(ModelResource):
         bundle.data['edit_url'] = bundle.obj.get_edit_url();
         #bundle.data['reorder_url'] = bundle.obj.get_reorder_url();
         return bundle
-    
+
     """
     def hydrate_m2m(self, bundle):
         print "hydrate m2m"
-        
-        
+
+
         #curl --dump-header - -H "Content-Type: application/json" -X PUT --data '{"media": [{"media": "/api/v1/track/16587/"}]}' "http://localhost:8080/de/api/v1/playlist/58/?username=root&api_key=APIKEY"
-        
+
         try:
             for item in bundle.data['media']:
                 #item[u'media'] = self.get_resource_uri(bundle.obj)
-                print item 
+                print item
         except:
             pass
-        
+
     """
     def save_m2m(self, bundle):
-        
-        print 
+
+        print
         print
         print 'save m2m:'
         print bundle
-        
+
         return bundle
-    
+
     
     
     

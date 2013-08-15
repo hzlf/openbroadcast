@@ -319,7 +319,8 @@ base.ui.refresh = function () {
 };
 
 
-/* TODO: Move somewhere */
+/* TODO: Move somewhere
+ * moved to exporter/base.js
 ExporterApp = (function () {
 
     var self = this;
@@ -418,7 +419,7 @@ ExporterApp = (function () {
     };
 
 });
-
+ */
 
 /*
  * global interface things
@@ -428,7 +429,6 @@ base.ui.iface = function () {
 
     Boxy.DEFAULTS.title = '&nbsp;';
 
-    base.ui.exporter = new ExporterApp;
 
     if (window.console && console.firebug) {
         console.warn('You should disable firebug, else performance can be very low!');
@@ -512,79 +512,6 @@ base.ui.iface = function () {
         } catch (e) {
 
         }
-    });
-
-
-    // handling of 'downloadables' & resp. queues
-    // for single elements (through href/class)
-    $('.downloadable.queue').live('click', function (e) {
-
-        e.preventDefault();
-
-        // href is eg: "#release:324:flac"
-        var action = $(this).attr('href').substr(1).split(':');
-
-        var item_type = action[0];
-        var item_id = action[1];
-        var format = action[2];
-
-        /*
-         *  The controller takes a list of items as argument 'items'
-         *  So the same controller can also be used to implement download
-         *  of multiple items at once. we here just pack this single item
-         *  into an object
-         */
-
-        items = new Array;
-        items.push({item_type: item_type, item_id: item_id, format: format});
-
-        // Request data (legacy)
-        var data = {
-            items: items
-        };
-
-        base.ui.exporter.queue(items, false);
-
-        // AJAX Call (legacy)
-        // base.ui.ajax(url, data);
-
-
-    });
-
-    /*
-     * Download multiple items
-     */
-    $('.action.selection_download a').live('click', function (e) {
-
-        var item_type = $(this).attr('href').substring(1);
-        // item_type = 'release';
-
-        items = new Array;
-        $('.list_body_row.selection').each(function (index) {
-            var item_id = $(this).attr('id').split("_").pop();
-            items.push({item_type: item_type, item_id: item_id, format: 'mp3'});
-
-            if (base.ui.use_effects) {
-                $(this).effect("transfer", { to: "#nav_sub-content li a.downloads" }, 300);
-            }
-
-        });
-
-        // Request url
-        var url = base.vars.base_url + 'archiver/queue';
-
-        // Request data
-        var data = {
-            items: items
-        };
-
-        base.ui.exporter.queue(items, false);
-
-        // AJAX Call
-        // base.ui.ajax(url, data);
-
-
-        return false;
     });
 
 

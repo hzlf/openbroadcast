@@ -368,7 +368,7 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
         
         
     def get_items(self):
-        pis = PlaylistItemPlaylist.objects.filter(playlist=self)
+        pis = PlaylistItemPlaylist.objects.filter(playlist=self).order_by('position')
         items = []
         for pi in pis:
             item = pi.item

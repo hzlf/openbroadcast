@@ -1,0 +1,7 @@
+{% for object in objects %}
+----------------------------------------------------------------------------
+{{ object.filename }}
+{{ object.item.name }}
+Artist: {{ object.item.artist.name }}
+{{ object.item.license.name }} {% if object.item.license.restricted %} [Restricted License] {% endif %}{% endfor %}
+----------------------------------------------------------------------------

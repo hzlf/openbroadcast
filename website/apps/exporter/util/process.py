@@ -19,10 +19,10 @@ class Process(object):
 
 
 
-    def incect_metadata(self, path, media):
+    def inject_metadata(self, path, media):
         
-        log = logging.getLogger('util.process.Process.incect_metadata')
-        log.debug('incect metadata to: %s' % (path))
+        log = logging.getLogger('util.process.Process.inject_metadata')
+        log.debug('inject metadata to: %s' % (path))
         log.debug('source: %s' % (media))
         
         
@@ -98,4 +98,4 @@ def get_raw_image(filename, type):
 
         return audiotools.Image.new(data, u'', type)
     except IOError:
-        raise audiotools.InvalidImage(_(u"Unable to open file"))
+        raise audiotools.InvalidImage(u'Unable to open file')

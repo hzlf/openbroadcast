@@ -379,7 +379,34 @@ class Release(MigrationMixin):
             
         return license
 
-    
+
+    """
+    compose artist display as string
+    """
+    def get_artist_display(self):
+
+
+        artist_str = ''
+        artists = self.get_artists()
+
+        # dummy
+        if len(artists) > 1:
+            try:
+                for artist in artists:
+                    if artist['join_phrase']:
+                        artist_str += ' %s ' % artist['join_phrase']
+                    artist_str += artist['artist'].name
+
+            except:
+                artist_str = artists[0].name
+
+        else:
+            artist_str = artists[0].name
+
+        return artist_str
+
+
+
     def get_artists(self):
 
         artists = []
@@ -400,7 +427,7 @@ class Release(MigrationMixin):
     
         if len(artists) > 1:
             from alibrary.models import Artist
-            artists = Artist.objects.filter(name="Varous Artists")
+            artists = Artist.objects.filter(name="Various Artists")
             
         return artists
 

@@ -108,26 +108,26 @@
 			<ul class="unstyled horizontal pull-right">
 				
 				<li>
-					<a href="#" data-action="download" data-ct="playlist" data-uuid="{{ item.uuid }}" title="{% trans "Download" %}">
+					<a href="#" data-action="download" data-ct="playlist" data-id="{{ item.id }}" data-uuid="{{ item.uuid }}" title="{% trans "Download" %}">
 						<i class="icon-download-alt"></i>
 					</a>
 				</li>
 				
 				<li>
-					<a href="#" data-action="basket" data-ct="playlist" data-uuid="{{ item.uuid }}" title="{% trans "Add to basket" %}">
+					<a href="#" data-action="basket" data-ct="playlist" data-id="{{ item.id }}" data-uuid="{{ item.uuid }}" title="{% trans "Add to basket" %}">
 						<i class="icon-plus"></i>
 					</a>
 				</li>
 				
 				<li>
-					<a href="#" data-action="schedule" data-ct="playlist" data-uuid="{{ item.uuid }}" title="{% trans "Schedule" %}">
+					<a href="#" data-action="schedule" data-ct="playlist" data-id="{{ item.id }}" data-uuid="{{ item.uuid }}" title="{% trans "Schedule" %}">
 						<i class="icon-calendar"></i>
 					</a>
 				</li>
 				
 				{% if user.is_authenticated and user == item.user %}
 				<li>
-					<a href="{{ item.get_edit_url }}" data-action="edit" data-ct="playlist" data-uuid="{{ item.uuid }}" title="{% trans "Add to basket" %}">
+					<a href="{{ item.get_edit_url }}" data-action="edit" data-ct="playlist" data-id="{{ item.id }}" data-uuid="{{ item.uuid }}" title="{% trans "Add to basket" %}">
 						<i class="icon-edit"></i>
 					</a>
 				</li>
@@ -135,26 +135,7 @@
 				
 			</ul>
 		</div>
-		
-		<!--
-		<div class="wrapper">
-			<div class="right">
-				<ul class="unstyled">
-					<li class="basket">
-						<a href="#release:19287:default" title="Add to Basket" class="collectable"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
-					</li>
-				</ul>
-			</div>
-			<div>
-				<ul class="unstyled">
-					<li class="download">
-						<a href="#release:{{ item.pk }}:mp3" title="Download Release" class="downloadable queue"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
-					</li>
-				</ul>
-			</div>
-			<div class="clear"></div>
-		</div>
-		-->
+
 	</div>
 	
 	
