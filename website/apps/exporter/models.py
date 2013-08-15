@@ -34,6 +34,7 @@ from django.utils.hashcompat import sha_constructor
 from alibrary.models import Release, Media, Artist, Relation
 
 from util.process import Process
+from util.dbox import Synchronizer
 
 
 from lib.util.filename import safe_name
@@ -43,7 +44,7 @@ from celery.task import task
 import logging
 log = logging.getLogger(__name__)
 
-USE_CELERYD = True
+USE_CELERYD = False
         
 GENERIC_STATUS_CHOICES = (
     (0, _('Init')),
@@ -208,6 +209,9 @@ class Export(BaseModel):
         from atracker.util import create_event
         
         process = Process()
+
+        # dbox = None
+        dbox = Synchronizer(obj.user)
         
         log = logging.getLogger('exporter.models.process_task')
         
@@ -244,7 +248,11 @@ class Export(BaseModel):
                 create item specific path
                 < Artist Name >/< Release Name >/...
                 """
-                item_cache_dir = os.path.join(archive_cache_dir, safe_name(t_item.get_artist_display()), safe_name(t_item.name))
+
+                # relative path, for any target
+                item_rel_dir = os.path.join(safe_name(t_item.get_artist_display()), safe_name(t_item.name))
+                item_cache_dir = os.path.join(archive_cache_dir, item_rel_dir)
+
                 os.makedirs(item_cache_dir)
 
                 # holder for playlist entries
@@ -269,8 +277,6 @@ class Export(BaseModel):
                             process.inject_metadata(filepath, media)
                         except Exception, e:
                             pass
-
-                        playlist_items.append({'filename': filename, 'item': media })
                 
                     # just dummy - not possible...
                     if obj.fileformat == 'flac':
@@ -285,7 +291,12 @@ class Export(BaseModel):
                         except Exception, e:
                             pass
 
-                        playlist_items.append({'filename': filename, 'item': media })
+
+                    playlist_items.append({'filename': filename, 'item': media })
+
+                    if dbox:
+                        dbox.upload(filepath, os.path.join('Releases', item_rel_dir, filename))
+
                         
                     create_event(obj.user, media, None, 'download')
                     
