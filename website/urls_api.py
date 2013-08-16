@@ -13,6 +13,8 @@ from exporter.api import ExportResource, ExportItemResource
 from abcast.api import StationResource, ChannelResource, JingleResource, JingleSetResource, EmissionResource
 from abcast.api import BaseResource as AbcastBaseResource
 
+from istats.api import StatsResource
+
 from fluent_comments.api import CommentResource
 
 api = Api(api_name='v1')
@@ -53,6 +55,9 @@ api.register(EmissionResource())
 
 # comment
 api.register(CommentResource())
+
+# server stats
+api.register(StatsResource())
 
     
 urlpatterns = patterns('',

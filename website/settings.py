@@ -457,6 +457,9 @@ INSTALLED_APPS = (
     'django_mobile',
 
 
+    'pushy',
+    'istats',
+
     # custom apps/*
     'pusher',
     'asite',
@@ -469,7 +472,6 @@ INSTALLED_APPS = (
     'arating',
     'asearch',
     #'django_db_signals',
-    'pushy',
 
 
     # blog
@@ -883,6 +885,7 @@ PUSHY_SETTINGS = {
         'importer.import',
         'importer.importfile',
         'abcast.emission',
+        'exporter.Export',
     ),
     'SOCKET_SERVER': 'http://localhost:8888/',
     'CHANNEL_PREFIX': 'pushy_',

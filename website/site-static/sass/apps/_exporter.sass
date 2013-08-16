@@ -4,6 +4,10 @@
 
 div.listview.export
 
+  thead th
+    background-color: white
+
+
   [class^="visible-while-"], [class*=" visible-while-"]
     display: none
     
@@ -16,7 +20,7 @@ div.listview.export
         
     &.done
       td
-        background-color: $successBackgroundAlt
+        // background-color: $successBackgroundAlt
       .visible-while-done
         display: inline-block
         color: $successTextAlt
@@ -51,7 +55,8 @@ div.listview.export
       a
         color: #a5a5a5
         cursor: wait
-    &.done
+
+    &.done, &.downloaded
       .action.download
         a
           color: $linkColor

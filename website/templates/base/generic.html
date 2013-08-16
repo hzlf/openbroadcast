@@ -24,6 +24,10 @@
 
 {% block inner %}
 
+<div>
+	{% block pre_body %}{% endblock %}
+</div>
+
 <div class="listview container {% block object_type %}{% endblock %} {{ list_style }}">
 	<div class="list_body">
 		{% block list_inner %}{% endblock %}

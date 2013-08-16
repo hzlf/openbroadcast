@@ -129,23 +129,7 @@ class ExportResource(ModelResource):
 
     def dehydrate(self, bundle):
         bundle.data['download_url'] = bundle.obj.get_download_url();
-        
-        # pre-format some values
-        try:
-            formatted_created = formats.date_format(bundle.obj.created, "SHORT_DATETIME_FORMAT")
-        except:
-            formatted_created = None
-            
-        try:
-            formatted_downloaded = formats.date_format(bundle.obj.downloaded, "SHORT_DATETIME_FORMAT")
-        except:
-            formatted_downloaded = None
-            
-        
-        bundle.data['formatted_created']  = formatted_created
-        bundle.data['formatted_downloaded']  = formatted_downloaded
         bundle.data['formatted_filesize']  = dj_filters.filesizeformat(bundle.obj.filesize)
-        
         return bundle
 
     """

@@ -168,11 +168,8 @@ def export_download(request, uuid, token):
     if not download_permission:
         return HttpResponseForbidden('forbidden')
     
-        
-    #filename = '%02d %s - %s' % (media.tracknumber, media.name.encode('ascii', 'ignore'), media.artist.name.encode('ascii', 'ignore'))
-    
+
     filename = '%s.%s' % (export.filename, 'zip')
-    
 
     export.set_downloaded()
     

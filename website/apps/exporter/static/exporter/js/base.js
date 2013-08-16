@@ -5,19 +5,16 @@
 /* core */
 
 
-ExporterUi = function () {
+ExporterMain = function () {
 
     var self = this;
-
-    this.interval = false;
-    this.interval_loops = 0;
-    this.interval_duration = 5000;
     this.api_url = false;
 
     this.dom_id = 'export_list_holder';
     this.dom_element;
+    this.pushy_key;
 
-    this.current_data = new Array;
+    this.export_items = [];
 
     this.init = function () {
 
@@ -29,9 +26,11 @@ ExporterUi = function () {
         self.iface();
         self.bindings();
 
-        // set interval and run once
-        self.set_interval(self.run_interval, self.interval_duration);
-        self.run_interval();
+        self.load();
+
+        pushy.subscribe(self.pushy_key, function () {
+            self.load()
+        });
 
     };
 
@@ -42,64 +41,125 @@ ExporterUi = function () {
     this.bindings = function () {
 
 
-        // list items (on exporter screen)
-        $('.action.download > a', self.dom_element).live('click', function (e) {
-            e.preventDefault();
-
-            if ($(this).parents('.item').hasClass('done')) {
-                var url = $(this).data('url');
-                // alert(url);
-                // $.get(url);
-                window.location.href = url;
-            }
-            ;
-
-            if ($(this).parents('.item').hasClass('downloaded')) {
-
-                // alert('already downloaded');
-                var dialog = {
-                    title: 'Error',
-                    text: 'Already downloaded.',
-                }
-                util.dialog.show(dialog);
-
-            }
-            ;
-
-        });
-
     };
 
-    // interval
-    this.set_interval = function (method, duration) {
-        self.interval = setInterval(method, duration);
-    };
-    this.clear_interval = function (method) {
-        self.interval = clearInterval(method);
-    };
 
-    this.run_interval = function () {
-        self.interval_loops += 1;
-
-        // Put functions needed in interval here
-        self.update_exports();
-
-    };
-
-    this.update_exports = function () {
+    this.load = function () {
 
         $.getJSON(self.api_url, function (data) {
-            self.update_exports_callback(data);
+            self.display(data);
         });
 
     };
-    this.update_exports_callback = function (data) {
-        debug.debug(data);
-        self.update_list_display(data);
+
+
+    this.display = function (data) {
+
+        $(data.objects).each(function (i, item) {
+
+            if (!(item.uuid in self.export_items)) {
+                var export_item = new ExporterItem;
+                export_item.local_data = item;
+                export_item.exporter_app = self;
+                export_item.container = self.dom_element;
+                export_item.api_url = item.resource_uri;
+                export_item.init(true);
+                self.export_items[item.uuid] = export_item;
+            } else {
+                debug.debug('Item exists on stage');
+            }
+
+            // $('#' + item.uuid).removeClass('delete-flag');
+
+        });
+
     };
 
-    this.update_list_display = function (data) {
 
+};
+
+
+ExporterItem = function () {
+
+    var self = this;
+    this.api_url;
+    this.container;
+    this.dom_element = false;
+
+    this.exporter_app;
+    this.offset;
+
+    this.local_data = false;
+
+    this.init = function (use_local_data) {
+        debug.debug('ExporterItem - init');
+        self.load(use_local_data);
+        pushy.subscribe(self.api_url, function () {
+            self.load()
+        });
+    };
+
+    this.load = function (use_local_data) {
+        debug.debug('ExporterItem - load');
+
+        if (use_local_data) {
+            debug.debug('ExporterItem - load: using local data');
+            self.display(self.local_data);
+        } else {
+            debug.debug('ExporterItem - load: using remote data');
+            var url = self.api_url;
+            $.get(url, function (data) {
+                self.local_data = data;
+                self.display(data);
+            })
+        }
+    };
+
+    this.bindings = function () {
+
+
+        $(self.dom_element).on('click', 'a[data-action="download"]', function (e) {
+            e.preventDefault();
+            var download_url = self.local_data.download_url;
+            if (self.local_data.status == 1) {
+                window.location.href = download_url;
+            }
+
+
+            // TODO: allow multiple downloads?
+            if (self.local_data.status == 4) { // 4: downloaded
+                window.location.href = download_url;
+
+                var dialog = {
+                    title: 'Error',
+                    text: 'Already downloaded.'
+                }
+                // util.dialog.show(dialog);
+
+            }
+
+
+        });
+
+
+        $(self.dom_element).on('click', 'a[data-action="delete"]', function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: self.api_url,
+                type: 'DELETE'
+            }).done(function () {
+                    self.dom_element.fadeOut(300)
+                });
+        });
+    };
+
+
+    this.display = function (data) {
+
+        debug.debug('ExporterItem - display');
+        debug.debug(data);
+
+        // not so nice.. but for the moment...
         var status_map = new Array;
         status_map[0] = 'init';
         status_map[1] = 'done';
@@ -108,45 +168,26 @@ ExporterUi = function () {
         status_map[4] = 'downloaded';
         status_map[99] = 'error';
 
-        for (var i in data.objects) {
+        data.status_display = status_map[data.status]
 
-            var item = data.objects[i];
-            var target_element = $('#export_' + item.id);
 
-            item.status_key = status_map[item.status];
+        var html = nj.render('exporter/nj/export.html', { object: data });
 
-            if (item.status > -1) {
-
-                if (item.id in self.current_data) {
-                    self.current_data[item.id] = item;
-                    debug.debug('item already present');
-
-                    if (item.status != target_element.attr('data-last_status')) {
-                        debug.debug('status change detected');
-
-                        var html = ich.tpl_export({object: item});
-
-                        html.attr('data-last_status', item.status);
-                        target_element.replaceWith(html);
-                    }
-
-                } else {
-
-                    var html = ich.tpl_export({object: item});
-                    html.attr('data-last_status', item.status);
-                    self.dom_element.prepend(html);
-
-                    self.current_data[item.id] = item;
-                }
-
-            }
-
+        if (!self.dom_element) {
+            console.log('create:', data);
+            self.container.prepend(html);
+            self.dom_element = $('#' + data.uuid, self.container);
+        } else {
+            $(self.dom_element).replaceWith(html);
+            self.dom_element = $('#' + data.uuid, self.container);
         }
+
+        self.bindings();
 
     };
 
-
 };
+
 
 /*
  * exporter app - use this on listviews
@@ -154,7 +195,7 @@ ExporterUi = function () {
 ExporterApp = (function () {
 
     var self = this;
-    this.api_url = '/api/v1/export/'
+    this.api_url;
 
 
     this.init = function () {
@@ -169,7 +210,7 @@ ExporterApp = (function () {
         // "REAL" VERSION
         // using data- attributes
         //////////////////////////////////////////////////////
-        $('.listview').on('click', 'a[data-action="download"]', function(e) {
+        $('.listview').on('click', 'a[data-action="download"]', function (e) {
 
             e.preventDefault();
 
@@ -189,10 +230,6 @@ ExporterApp = (function () {
 
             self.queue(items, false);
         });
-
-
-
-
 
 
         // handling of 'downloadables' & resp. queues
@@ -329,7 +366,7 @@ ExporterApp = (function () {
 
 
 
-        // TODO: refactor dependency
+            // TODO: refactor dependency
         base.ui.ui_message('Download queued', 10000);
 
 

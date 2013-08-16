@@ -39,12 +39,14 @@ from util.dbox import Synchronizer
 
 from lib.util.filename import safe_name
 
+from pushy.util import pushy_custom
+
 import magic
 from celery.task import task
 import logging
 log = logging.getLogger(__name__)
 
-USE_CELERYD = False
+USE_CELERYD = True
         
 GENERIC_STATUS_CHOICES = (
     (0, _('Init')),
@@ -129,6 +131,8 @@ class Export(BaseModel):
     
     user = models.ForeignKey(User, blank=True, null=True, related_name="exports", on_delete=models.SET_NULL)
     status = models.PositiveIntegerField(default=0, choices=GENERIC_STATUS_CHOICES)
+
+    status_msg = models.CharField(max_length=512, blank=True, null=True)
         
 
     filesize = models.IntegerField(default=0,blank=True, null=True)
@@ -170,7 +174,7 @@ class Export(BaseModel):
 
     def get_api_url(self):
         url = reverse('api_dispatch_list', kwargs={'resource_name': 'export', 'api_name': 'v1'})
-        return url
+        return '%s%s/' % (url, self.pk)
     
     def save(self, *args, **kwargs):
         
@@ -231,199 +235,204 @@ class Export(BaseModel):
         first collect respective items and store everything in a temporary directory
         (the archive_cache_dir)
         """
-        for item in obj.export_items.all():
 
-            log.debug('export ctype: %s | id: %s' % (item.content_type, item.object_id))
 
-            # switching processing for different types
+        try:
 
-            """
-            Releases
-            """
-            if item.content_type.name.lower() == 'release':
-                
-                t_item = item.content_object
+
+            for item in obj.export_items.all():
+
+                log.debug('export ctype: %s | id: %s' % (item.content_type, item.object_id))
+
+                # switching processing for different types
 
                 """
-                create item specific path
-                < Artist Name >/< Release Name >/...
+                Releases
                 """
+                if item.content_type.name.lower() == 'release':
 
-                # relative path, for any target
-                item_rel_dir = os.path.join(safe_name(t_item.get_artist_display()), safe_name(t_item.name))
-                item_cache_dir = os.path.join(archive_cache_dir, item_rel_dir)
+                    t_item = item.content_object
 
-                os.makedirs(item_cache_dir)
+                    """
+                    create item specific path
+                    < Artist Name >/< Release Name >/...
+                    """
 
-                # holder for playlist entries
-                playlist_items = []
+                    # relative path, for any target
+                    item_rel_dir = os.path.join(safe_name(t_item.get_artist_display()), safe_name(t_item.name))
+                    item_cache_dir = os.path.join(archive_cache_dir, item_rel_dir)
 
-                # string format for filename
-                filename_format = '%s - %s - %s.%s'
-                
-                for media in t_item.media_release.all():
+                    os.makedirs(item_cache_dir)
 
-                    log.debug('export item: %s | id: %s' % ( media.name,  media.pk))
+                    # holder for playlist entries
+                    playlist_items = []
 
-                    if obj.fileformat == 'mp3':
-                
-                        filename = filename_format % (media.tracknumber, media.name, media.artist.name, 'mp3')
-                        filename = safe_name(filename)
-                        #filepath = os.path.join(archive_cache_dir, filename)
-                        filepath = os.path.join(item_cache_dir, filename)
+                    # string format for filename
+                    filename_format = '%s - %s - %s.%s'
 
-                        shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
-                        try:
-                            process.inject_metadata(filepath, media)
-                        except Exception, e:
-                            pass
-                
-                    # just dummy - not possible...
-                    if obj.fileformat == 'flac':
-                
-                        filename = filename_format % (media.tracknumber, media.name, media.artist.name, 'mp3')
-                        filename = safe_name(filename)
-                        filepath = os.path.join(item_cache_dir, filename)
-                        
-                        shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
-                        try:
-                            process.inject_metadata(filepath, media)
-                        except Exception, e:
-                            pass
+                    for media in t_item.media_release.all():
 
+                        log.debug('export item: %s | id: %s' % ( media.name,  media.pk))
 
-                    playlist_items.append({'filename': filename, 'item': media })
+                        if obj.fileformat == 'mp3':
 
-                    if dbox:
-                        dbox.upload(filepath, os.path.join('Releases', item_rel_dir, filename))
+                            filename = filename_format % (media.tracknumber, media.name, media.artist.name, 'mp3')
+                            filename = safe_name(filename)
+                            #filepath = os.path.join(archive_cache_dir, filename)
+                            filepath = os.path.join(item_cache_dir, filename)
 
-                        
-                    create_event(obj.user, media, None, 'download')
-                    
-                if t_item.main_image:
-                    try:
-                        shutil.copyfile(t_item.main_image.path, os.path.join(item_cache_dir, 'cover.jpg'))
-                    except Exception, e:
-                        print e
-                        pass
+                            shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
+                            try:
+                                process.inject_metadata(filepath, media)
+                            except Exception, e:
+                                pass
 
+                        # just dummy - not possible...
+                        if obj.fileformat == 'flac':
 
-                    #archive_file.write(t_item.main_image.path, 'cover.jpg')
+                            filename = filename_format % (media.tracknumber, media.name, media.artist.name, 'mp3')
+                            filename = safe_name(filename)
+                            filepath = os.path.join(item_cache_dir, filename)
 
+                            shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
+                            try:
+                                process.inject_metadata(filepath, media)
+                            except Exception, e:
+                                pass
 
-                """
-                Add additional assets
-                REATME.TXT LICENSE.TXT etc
-                """
-                with open(os.path.join(item_cache_dir, 'README.TXT'), "w") as txt:
-                    str = render_to_string('exporter/txt/README.TXT', { 'object': t_item })
-                    txt.write(str)
-
-                """
-                with open(os.path.join(item_cache_dir, '00 - playlist.m3u'), "w") as txt:
-                    str = render_to_string('exporter/txt/playlist.m3u', { 'objects': playlist_items })
-                    txt.write(str)
-
-                with open(os.path.join(item_cache_dir, 'LICENSE.TXT'), "w") as txt:
-                    str = render_to_string('exporter/txt/LICENSE.TXT', { 'objects': playlist_items })
-                    txt.write(str)
-                """
-
-
-
-
-
-
-
-
-
-
-            """
-            Playlist
-            """
-            if item.content_type.name.lower() == 'playlist':
-
-                t_item = item.content_object
-
-                """
-                create item specific path
-                < Playlist Name >/...
-                """
-                item_cache_dir = os.path.join(archive_cache_dir, safe_name(t_item.name))
-                os.makedirs(item_cache_dir)
-
-                # holder for playlist entries
-                playlist_items = []
-
-                # string format for filename
-                filename_format = '%s - %s.%s'
-
-                for playlist_item in t_item.get_items():
-
-                    media = playlist_item.content_object
-
-                    log.debug('export item: %s | id: %s' % ( media.name,  media.pk))
-
-                    if obj.fileformat == 'mp3':
-
-                        filename = filename_format % (media.name, media.artist.name, 'mp3')
-                        filename = safe_name(filename)
-                        #filepath = os.path.join(archive_cache_dir, filename)
-                        filepath = os.path.join(item_cache_dir, filename)
-
-                        shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
-                        try:
-                            process.inject_metadata(filepath, media)
-                        except Exception, e:
-                            pass
 
                         playlist_items.append({'filename': filename, 'item': media })
 
-                    # just dummy - not possible...
-                    if obj.fileformat == 'flac':
+                        if dbox:
+                            dbox.upload(filepath, os.path.join('Releases', item_rel_dir, filename))
 
-                        filename = filename_format % (media.name, media.artist.name, 'mp3')
-                        filename = safe_name(filename)
-                        filepath = os.path.join(item_cache_dir, filename)
 
-                        shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
+                        create_event(obj.user, media, None, 'download')
+
+                    if t_item.main_image:
                         try:
-                            process.inject_metadata(filepath, media)
+                            shutil.copyfile(t_item.main_image.path, os.path.join(item_cache_dir, 'cover.jpg'))
                         except Exception, e:
+                            print e
                             pass
 
-                        playlist_items.append({'filename': filename, 'item': media })
 
-                    create_event(obj.user, media, None, 'download')
-
-                if t_item.main_image:
-                    try:
-                        shutil.copyfile(t_item.main_image.path, os.path.join(item_cache_dir, 'image.jpg'))
-                    except Exception, e:
-                        print e
-                        pass
+                        #archive_file.write(t_item.main_image.path, 'cover.jpg')
 
 
-                    #archive_file.write(t_item.main_image.path, 'cover.jpg')
+                    """
+                    Add additional assets
+                    REATME.TXT LICENSE.TXT etc
+                    """
+                    with open(os.path.join(item_cache_dir, 'README.TXT'), "w") as txt:
+                        str = render_to_string('exporter/txt/README.TXT', { 'object': t_item })
+                        txt.write(str)
+
+                    """
+                    with open(os.path.join(item_cache_dir, '00 - playlist.m3u'), "w") as txt:
+                        str = render_to_string('exporter/txt/playlist.m3u', { 'objects': playlist_items })
+                        txt.write(str)
+
+                    with open(os.path.join(item_cache_dir, 'LICENSE.TXT'), "w") as txt:
+                        str = render_to_string('exporter/txt/LICENSE.TXT', { 'objects': playlist_items })
+                        txt.write(str)
+                    """
+
+
+
+
+
+
+
+
 
 
                 """
-                Add additional assets
-                REATME.TXT LICENSE.TXT etc
+                Playlist
                 """
-                with open(os.path.join(item_cache_dir, 'README.TXT'), "w") as txt:
-                    str = render_to_string('exporter/txt/README.TXT', { 'object': t_item })
-                    txt.write(str)
+                if item.content_type.name.lower() == 'playlist':
+
+                    t_item = item.content_object
+
+                    """
+                    create item specific path
+                    < Playlist Name >/...
+                    """
+                    item_cache_dir = os.path.join(archive_cache_dir, safe_name(t_item.name))
+                    os.makedirs(item_cache_dir)
+
+                    # holder for playlist entries
+                    playlist_items = []
+
+                    # string format for filename
+                    filename_format = '%s - %s.%s'
+
+                    for playlist_item in t_item.get_items():
+
+                        media = playlist_item.content_object
+
+                        log.debug('export item: %s | id: %s' % ( media.name,  media.pk))
+
+                        if obj.fileformat == 'mp3':
+
+                            filename = filename_format % (media.name, media.artist.name, 'mp3')
+                            filename = safe_name(filename)
+                            #filepath = os.path.join(archive_cache_dir, filename)
+                            filepath = os.path.join(item_cache_dir, filename)
+
+                            shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
+                            try:
+                                process.inject_metadata(filepath, media)
+                            except Exception, e:
+                                pass
+
+                            playlist_items.append({'filename': filename, 'item': media })
+
+                        # just dummy - not possible...
+                        if obj.fileformat == 'flac':
+
+                            filename = filename_format % (media.name, media.artist.name, 'mp3')
+                            filename = safe_name(filename)
+                            filepath = os.path.join(item_cache_dir, filename)
+
+                            shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
+                            try:
+                                process.inject_metadata(filepath, media)
+                            except Exception, e:
+                                pass
+
+                            playlist_items.append({'filename': filename, 'item': media })
+
+                        create_event(obj.user, media, None, 'download')
+
+                    if t_item.main_image:
+                        try:
+                            shutil.copyfile(t_item.main_image.path, os.path.join(item_cache_dir, 'image.jpg'))
+                        except Exception, e:
+                            print e
+                            pass
 
 
-                with open(os.path.join(item_cache_dir, '00 - playlist.m3u'), "w") as txt:
-                    str = render_to_string('exporter/txt/playlist.m3u', { 'objects': playlist_items })
-                    txt.write(str)
-                """
-                with open(os.path.join(item_cache_dir, 'LICENSE.TXT'), "w") as txt:
-                    str = render_to_string('exporter/txt/LICENSE.TXT', { 'objects': playlist_items })
-                    txt.write(str)
-                """
+                        #archive_file.write(t_item.main_image.path, 'cover.jpg')
+
+
+                    """
+                    Add additional assets
+                    REATME.TXT LICENSE.TXT etc
+                    """
+                    with open(os.path.join(item_cache_dir, 'README.TXT'), "w") as txt:
+                        str = render_to_string('exporter/txt/README.TXT', { 'object': t_item })
+                        txt.write(str)
+
+
+                    with open(os.path.join(item_cache_dir, '00 - playlist.m3u'), "w") as txt:
+                        str = render_to_string('exporter/txt/playlist.m3u', { 'objects': playlist_items })
+                        txt.write(str)
+                    """
+                    with open(os.path.join(item_cache_dir, 'LICENSE.TXT'), "w") as txt:
+                        str = render_to_string('exporter/txt/LICENSE.TXT', { 'objects': playlist_items })
+                        txt.write(str)
+                    """
 
 
 
@@ -440,35 +449,52 @@ class Export(BaseModel):
 
 
 
-        """
-        take the 'archive_cache_dir' and compress it to zip format
-        """
-        shutil.make_archive(archive_path, 'zip', archive_cache_dir)
+            """
+            take the 'archive_cache_dir' and compress it to zip format
+            """
+            shutil.make_archive(archive_path, 'zip', archive_cache_dir)
 
-        """
-        get archive-file metadata and create a django-file
-        """
-        obj.file = DjangoFile(open(archive_path + '.zip'), u'archive.zip')
-        obj.filesize = os.path.getsize(archive_path + '.zip')
-        obj.filename = generate_export_filename(obj.export_items)
+            """
+            get archive-file metadata and create a django-file
+            """
+            obj.file = DjangoFile(open(archive_path + '.zip'), u'archive.zip')
+            obj.filesize = os.path.getsize(archive_path + '.zip')
 
-        # update status
-        obj.status = 1;
-        obj.save()
+
+            # update status
+            obj.status = 1
+            obj.save()
+
+        except Exception, e:
+            obj.status_msg = e
+            obj.status = 99
+            obj.save()
         
         """
         finally clean up
         """
         shutil.rmtree(archive_dir, True)
+
+    def save(self, *args, **kwargs):
+
+        self.filename = generate_export_filename(self.export_items)
+
+        super(Export, self).save(*args, **kwargs)
     
 
 
 def post_save_export(sender, **kwargs):
 
     obj = kwargs['instance']
+
     # if status is 'ready' > run exporter
     if obj.status == 2:
         obj.process()
+
+    # emmit update message via pushy
+    if kwargs['created']:
+        if obj.user and obj.user.profile:
+            pushy_custom(obj.user.profile.uuid)
 
     obj.export_items.update(status=1)
 
@@ -476,15 +502,15 @@ def post_save_export(sender, **kwargs):
 post_save.connect(post_save_export, sender=Export)
 
         
-def generate_export_filename(qs_export_items):
+def generate_export_filename(qs):
     
-    filename = _('unknown')
-    if qs_export_items.count() == 1:
-        item = qs_export_items.all()[0]
+    filename = _('initializing export')
+    if qs.count() == 1:
+        item = qs.all()[0]
         if item.content_type.name.lower() == 'release':
             filename = item.content_object.name.encode('ascii', 'ignore')
         
-    if qs_export_items.count() > 1:
+    if qs.count() > 1:
         filename = _('Multiple items')
         
     return filename

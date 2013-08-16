@@ -474,7 +474,6 @@ var EmissionApp = function() {
 		self.offset = self.scheduler_app.offset;
 		// self.bindings();
 		self.load(use_local_data);
-		debug.debug('e a u', self.api_url)
 		pushy.subscribe(self.api_url, function() {
 			debug.debug('pushy callback');
 			self.load()
