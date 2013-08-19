@@ -193,7 +193,7 @@ aplayer.ui.bind = function() {
 	
 	
 	
-	$('.item.playlist').live('click', function(e){
+	$('.playlist .item.playlist').live('click', function(e){
 		
 		var uuid = $(this).attr('id');
 		var index = aplayer.vars.uuid_map[uuid]
@@ -416,31 +416,41 @@ aplayer.ui.update = function(aplayer) {
 		// main window
 		//if(this.type == 'main') {
 	
-		// inline player
-		var container = $('div#pplayer_inline');	
+		// inline player (maybe refactor..)
+        /*
+		var container = $('div#aplayer_inline');
 		if(container.length) {
 			
 			// console.log('got container');
-			
+
 			container.addClass('active');
-			
+
 			$('li.current', container).html(util.format_time(aplayer.states.position));
 			$('li.total', container).html(util.format_time(aplayer.states.duration));
-			
+
 			$('ul.timing', container).fadeIn(500);
-			
+
 			//console.log('media !!!!!!', media);
-			
+
 			$('.media_name a', container).html(media.name);
 			$('.media_name a', container).attr('href', media.absolute_url);
 			$('.artist_name a', container).html(media.artist.name);
 			$('.artist_name a', container).attr('href', media.artist.absolute_url);
 			$('.release_name a', container).html(media.release.name);
 			$('.release_name a', container).attr('href', media.release.absolute_url);
-			
+
 			$('.indicator', container).css('width', aplayer.states.position_rel + '%');
 			
 		}
+		*/
+
+        // refactored version, using InlinePlayer
+        if(window.aplayer.inline) {
+            if(!window.aplayer.inline.player) {
+                window.aplayer.inline.player = aplayer;
+            }
+            window.aplayer.inline.update(aplayer, media);
+        };
 
 
         // detail player (e.g. on media page)
@@ -580,7 +590,12 @@ aplayer.ui.hide_overlay = function() {
 
 aplayer.ui.reset = function() {
 
-	var container = $('#pplayer_inline');
+    if(window.aplayer.inline) {
+        window.aplayer.inline.reset();
+    };
+
+    /*
+	var container = $('#aplayer_inline');
 
 	container.removeClass('active');
 	
@@ -592,7 +607,7 @@ aplayer.ui.reset = function() {
 	
 	
 	$('.playlist .item').removeClass('active');
-
+    */
 };
 
 

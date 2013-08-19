@@ -2,9 +2,9 @@
 
 
 
-<div class="list_body_row selectable item profile {% if item.mentor == user %}owner{% endif %} {% if item.user == user %}owner{% endif %} view edit" id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}">
+<div class="list_body_row selectable item profile {% if item.user == user %}owner{% endif %} {% if item.user == user %}owner{% endif %} view edit" id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}">
 
-	<div class="list_body_item c1 image_center_bg" {% if item.image %}style="background-image: url({% thumbnail item.image 54x54 crop upscale subject_location=item.image.subject_location %});"{% endif %}>
+	<div class="list_body_item c1 image_center_bg" {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 54x54 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
 		<ul class="unstyled">
 			<li class="play">
 				{% if item.is_approved %}
@@ -21,7 +21,7 @@
 	<div class="list_body_item c2">
 		<ul class="unstyled">
 			<li class="bold">
-				<a href="{{ item.get_absolute_url }}" class="permalink">{% firstof item.user.get_full_name|truncate_chars_inner:20 item.user.username|truncate_chars_inner:20 %}
+				<a href="{{ item.get_absolute_url }}" class="permalink">{{ item.name|truncate_chars_inner:20  }}
 				{% if item.country %}({{ item.country }}){% endif %}
 				{% topflop_for_object item %} </a>
 			</li>
@@ -60,7 +60,6 @@
 				<div class="right">
 					<ul class="unstyled">
 						<li>
-							<a href="{% url postman_write item.user.username %}" title="{% trans "Send Message" %}"><i class="icon-envelope"></i></a>
 						</li>
 					</ul>
 				</div>

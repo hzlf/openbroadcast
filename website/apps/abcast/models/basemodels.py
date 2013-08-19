@@ -21,6 +21,11 @@ from django.core.urlresolvers import reverse
 from filer.fields.image import FilerImageField
 from filer.fields.file import FilerFileField
 
+import arating
+
+from phonenumber_field.modelfields import PhoneNumberField
+from l10n.models import Country
+
 # 
 from lib.fields import extra
 
@@ -52,7 +57,22 @@ class Station(BaseModel):
     main_image = FilerImageField(null=True, blank=True, related_name="station_main_image", rel='')
     description = extra.MarkdownTextField(blank=True, null=True)
 
-    
+
+    # members
+    members = models.ManyToManyField(User, through='StationMembers', blank=True, null=True)
+
+    # stations contact information
+    website = models.URLField(max_length=256, null=True, blank=True)
+
+    phone = PhoneNumberField(_('phone'), blank=True, null=True)
+    fax = PhoneNumberField(_('fax'), blank=True, null=True)
+
+    address1 = models.CharField(_('address'), null=True, blank=True, max_length=100)
+    address2 = models.CharField(_('address (secondary)'), null=True, blank=True, max_length=100)
+    city = models.CharField(_('city'), null=True, blank=True, max_length=100)
+    zip = models.CharField(_('zip'), null=True, blank=True, max_length=10)
+    country = models.ForeignKey(Country, blank=True, null=True)
+
     class Meta:
         app_label = 'abcast'
         verbose_name = _('Station')
@@ -64,7 +84,41 @@ class Station(BaseModel):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('abcast-station-detail', [self.pk])
+        return ('abcast-station-detail', [self.slug])
+
+
+arating.enable_voting_on(Station)
+
+
+
+class Role(BaseModel):
+
+    name = models.CharField(max_length=200)
+
+    # meta
+    class Meta:
+        app_label = 'abcast'
+        verbose_name = _('Role')
+        verbose_name_plural = _('Roles')
+        ordering = ('name', )
+
+    def __unicode__(self):
+        return self.name
+
+
+class StationMembers(models.Model):
+    user = models.ForeignKey(User, related_name='station_membership')
+    station = models.ForeignKey(Station)
+    # role = models.ForeignKey(Role, blank=True, null=True)
+    roles = models.ManyToManyField(Role, blank=True, null=True, related_name='memgership_roles')
+
+    class Meta:
+        app_label = 'abcast'
+        verbose_name = _('Role')
+        verbose_name_plural = _('Roles')
+
+
+
     
     
 """
@@ -90,6 +144,7 @@ class Channel(BaseModel):
     """
     settings for 'owned' channels
     """
+    has_scheduler = models.BooleanField(default=False)
     stream_server = models.ForeignKey('StreamServer', null=True, blank=True, on_delete=models.SET_NULL)
     mount = models.CharField(max_length=64, null=True, blank=True)
     

@@ -389,7 +389,6 @@ class Release(MigrationMixin):
         artist_str = ''
         artists = self.get_artists()
 
-        # dummy
         if len(artists) > 1:
             try:
                 for artist in artists:
@@ -401,7 +400,10 @@ class Release(MigrationMixin):
                 artist_str = artists[0].name
 
         else:
-            artist_str = artists[0].name
+            try:
+                artist_str = artists[0].name
+            except:
+                artist_str = _('Unknown Artist')
 
         return artist_str
 

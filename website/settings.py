@@ -6,6 +6,7 @@ See LICENSE.txt
 
 import os
 import sys
+from datetime import timedelta
 
 # celery
 import djcelery
@@ -851,6 +852,22 @@ CELERY_ROUTES = {
     # assign import task to single-instance worker
     'importer.models.import_task': {'queue': 'import'},
 }
+
+
+"""
+celery repetitive tasks
+use for maintenance tasks etc.
+"""
+CELERYBEAT_SCHEDULE = {
+    'exporter-cleanup': {
+        'task': 'exporter.models.cleanup_exports',
+        'schedule': timedelta(seconds=10),
+    },
+}
+
+
+
+
 
 """
 streaming server

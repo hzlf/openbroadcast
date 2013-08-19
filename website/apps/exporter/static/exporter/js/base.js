@@ -357,7 +357,7 @@ ExporterApp = (function () {
         }
 
         // run the queue
-        self.run(export_session);
+        self.run(export_session, redirect);
 
         /**/
 
@@ -372,7 +372,7 @@ ExporterApp = (function () {
 
     };
 
-    this.run = function (export_session) {
+    this.run = function (export_session, redirect) {
         jQuery.ajax({
             url: export_session.resource_uri,
             type: 'PATCH',

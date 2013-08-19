@@ -1,13 +1,20 @@
 from django.contrib import admin
 
 from abcast.models import *
+from django.contrib.auth.models import User
+from genericadmin.admin import GenericAdminModelAdmin, GenericTabularInline
 
-class StationAdmin(admin.ModelAdmin):    
+
+class MembersInline(admin.TabularInline):
+    model = Station.members.through
+
+
+class StationAdmin(admin.ModelAdmin):
     
-    list_display = ('name', 'type',)
+    list_display = ('name', 'type', 'website',)
     readonly_fields = ('uuid', 'slug', )
     
-    inlines = []
+    inlines = [MembersInline,]
     
 class ChannelAdmin(admin.ModelAdmin):    
     
@@ -51,6 +58,7 @@ admin.site.register(JingleSet, JingleSetAdmin)
 
 admin.site.register(StreamServer, StreamServerAdmin)
 admin.site.register(StreamFormat)
+admin.site.register(Role)
 
 
 

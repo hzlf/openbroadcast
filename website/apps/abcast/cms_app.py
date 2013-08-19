@@ -19,3 +19,11 @@ class SchedulerApp(CMSApp):
     menus = [SchedulerMenu]
 
 apphook_pool.register(SchedulerApp)
+
+class StationApp(CMSApp):
+
+    name = _("Station App")
+    urls = ["abcast.urls_station"]
+    #menus = [StationMenu]
+
+apphook_pool.register(StationApp)
