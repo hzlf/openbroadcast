@@ -134,7 +134,24 @@ class MaintenanceWorker(object):
 
 
 
+        if self.action == 'map_tags':
 
+            from alibrary.models import Media
+
+
+            if self.id:
+                items = Media.objects.filter(id=self.id)
+            else:
+                items = Media.objects.filter()[0:self.limit]
+
+            for item in items:
+
+                if item.tags.count() < 1:
+                    print item
+                    print 'map release tags'
+                    if item.release.tags.count() > 0:
+                        item.tags = item.release.tags
+                        item.save()
 
 
 
