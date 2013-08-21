@@ -128,7 +128,17 @@ class ArtistListView(PaginationMixin, ListView):
             self.relation_filter.append(f)
             
             
-            
+
+
+        # filter by import session
+        import_session = self.request.GET.get('import', None)
+        if import_session:
+            from importer.models import Import
+            from django.contrib.contenttypes.models import ContentType
+            import_session = get_object_or_404(Import, pk=int(import_session))
+            ctype = ContentType.objects.get(model='artist')
+            ids = import_session.importitem_set.filter(content_type=ctype.pk).values_list('object_id',)
+            qs = qs.filter(pk__in=ids).distinct()
 
         # base queryset        
         #qs = Release.objects.all()

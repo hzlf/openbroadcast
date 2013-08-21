@@ -1,0 +1,24 @@
+<section class="title">
+	<h3>Playlists<small class="pull-right">{{ object.type_display }}</small></h3>
+</section>
+
+<section class="listing nano" id="playlist_list">
+    <div class="content">
+    {% for item in data.objects %}
+    {% include "alibrary/nj/playlist/select_popup_item.html" %}
+    {% endfor %}
+    </div>
+</section>
+
+<section class="form">
+
+        <div class="btn-toolbar">
+            <div class="btn-group">
+                <input type="text" class="name" title="Name" placeholder="Create a new list" required>
+                <a data-action="cancel" class="btn btn-mini">Cancel</a>
+                <a data-action="save" class="btn btn-primary btn-mini">Save</a>
+            </div>
+        </div>
+
+
+</section>

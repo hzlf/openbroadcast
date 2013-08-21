@@ -1515,8 +1515,8 @@ base.ui.listview = function () {
     // select
     $('div.listview.container div.list_body_row.selectable').live('click', function (event) {
 
-        if ($(event.target).is("a") || $(event.target).is("img")) {
-            //alert('no div');
+        if ($(event.target).is("a") || $(event.target).is("img") || $(event.target).is("i")) {
+            // alert('no div');
         }
         else {
             $(this).toggleClass('selection');

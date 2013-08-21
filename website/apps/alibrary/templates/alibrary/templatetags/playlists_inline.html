@@ -15,7 +15,7 @@
 		alibrary.playlist.api_url = "{% url api_dispatch_list resource_name='playlist' api_name='v1'%}";
 		alibrary.playlist.api_url_simple = "{% url api_dispatch_list resource_name='simpleplaylist' api_name='v1'%}";
 		alibrary.playlist.current_playlist_id = "{{ current_playlist.pk }}";
-		alibrary.playlist.init();
+		// alibrary.playlist.init();
 		
 
 		alibrary.collector = new CollectorApp;
@@ -121,16 +121,13 @@
 
 
 
-
+<!--
 <div id="inline_playlist_container" class="">
 	
 	<div class="playlist basket ui-persistent open" data-uistate="init" id="playlist_basket">
 
 		<div class="header">
 			<span>{% trans "Playlist Basket" %}</span>
-			<!--
-			<span style="float: right;"> <span style="color: rgb(153, 153, 153);" class="opt">1</span> </span>
-			-->
 		</div>
 
 
@@ -140,17 +137,13 @@
 
 				<div class="control-group">
 					<div class="controls playlist-selector">
-						<!-- content via ich -->
 					</div>
 				</div>
 			</form>
 
 		</div>
 
-
-		<!-- Wrapper, can hold multiple lists  -->
 		<div id="inline_playlist_holder" class="wrapper"></div>
-
 
 		<div class="form">
 
@@ -171,3 +164,4 @@
 	</div>
 	
 </div>
+-->

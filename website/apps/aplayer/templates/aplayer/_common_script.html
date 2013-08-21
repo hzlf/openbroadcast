@@ -17,7 +17,9 @@
 	
   	<!-- js, the default "js" block -->
 	{% addtoblock "js" %}{% endaddtoblock %}
-  
+
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/ba-debug.js"></script>{% endaddtoblock %}
+
   
   	<!-- js-post, rendered AFTER the default "js" block -->
   	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.cookie.min.js"></script>{% endaddtoblock %}

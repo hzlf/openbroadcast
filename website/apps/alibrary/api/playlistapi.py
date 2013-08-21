@@ -12,6 +12,8 @@ from alibrary.api import ReleaseResource, MediaResource, SimpleMediaResource
 from alibrary.models import Release, Artist
 from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
 
+from lib.api.authentication import OAuth20Authentication
+
 from easy_thumbnails.files import get_thumbnailer
 
 from alibrary.models import Playlist, PlaylistMedia, Media, PlaylistItemPlaylist, PlaylistItem, Daypart
@@ -109,6 +111,14 @@ class SimplePlaylistResource(ModelResource):
     
     def dehydrate(self, bundle):
         bundle.data['item_count'] = bundle.obj.items.count();
+
+        # a bit hackish maybe, provide uuids of all items in playlist
+        items = bundle.obj.get_items()
+        item_uuids = []
+        for item in items:
+            item_uuids.append(item.content_object.uuid)
+        bundle.data['item_uuids'] = item_uuids
+
         return bundle
     
 
@@ -158,7 +168,7 @@ class PlaylistResource(ModelResource):
         
         always_return_data = True
         
-        authentication =  MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
+        authentication =  MultiAuthentication(SessionAuthentication(), OAuth20Authentication(), ApiKeyAuthentication())
         authorization = Authorization()
         filtering = {
             #'channel': ALL_WITH_RELATIONS,
@@ -202,6 +212,16 @@ class PlaylistResource(ModelResource):
     
     def dehydrate(self, bundle):
         bundle.data['edit_url'] = bundle.obj.get_edit_url();
+
+        bundle.data['item_count'] = bundle.obj.items.count();
+
+        # a bit hackish maybe, provide uuids of all items in playlist
+        items = bundle.obj.get_items()
+        item_uuids = []
+        for item in items:
+            item_uuids.append(item.content_object.uuid)
+        bundle.data['item_uuids'] = item_uuids
+
         #bundle.data['reorder_url'] = bundle.obj.get_reorder_url();
         return bundle
 

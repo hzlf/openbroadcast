@@ -68,11 +68,14 @@ from alibrary.util.slug import unique_slugify
 import arating
     
 ################
+
 from alibrary.models.basemodels import *
 from alibrary.models.artistmodels import *
 from alibrary.models.mediamodels import *
 from alibrary.models.playlistmodels import *
 from alibrary.models.labelmodels import *
+
+
 
 FORCE_CATALOGNUMBER = False
 
@@ -206,6 +209,9 @@ class Release(MigrationMixin):
     owner = models.ForeignKey(User, blank=True, null=True, related_name="releases_owner", on_delete=models.SET_NULL)
     creator = models.ForeignKey(User, blank=True, null=True, related_name="releases_creator", on_delete=models.SET_NULL)
     publisher = models.ForeignKey(User, blank=True, null=True, related_name="releases_publisher", on_delete=models.SET_NULL)
+
+    # generic reverse relations
+    # import_items = generic.GenericRelation('importer.ImportItem')
 
     # extra-artists
     extra_artists = models.ManyToManyField('Artist', through='ReleaseExtraartists', blank=True, null=True)

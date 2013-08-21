@@ -56,9 +56,11 @@ urlpatterns = patterns('',
     
     
     url(r"^api/", include("alibrary.urls_api")),
-    
-    
     url(r'^api/', include('urls_api')),
+
+    # oauth
+    url(r'^oauth2/', include('provider.oauth2.urls', namespace = 'oauth2')),
+
     
     
     url(r'^comments/', include('fluent_comments.urls')),

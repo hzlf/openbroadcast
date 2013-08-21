@@ -182,6 +182,7 @@ def deploy():
             # restart gunicorn celeryd-worker
             run('supervisorctl restart worker.celery.%s' % env.site_id)
             run('supervisorctl restart worker.import.%s' % env.site_id)
+            run('supervisorctl restart worker.convert.%s' % env.site_id)
             # restart other supervisor services
             run('supervisorctl restart echoprint.%s' % env.site_id)
             run('supervisorctl restart ttserver.%s' % env.site_id)
@@ -205,6 +206,7 @@ def restart():
         # restart gunicorn celeryd-worker
         run('supervisorctl restart worker.celery.%s' % env.site_id)
         run('supervisorctl restart worker.import.%s' % env.site_id)
+        run('supervisorctl restart worker.convert.%s' % env.site_id)
         # restart other supervisor services
         run('supervisorctl restart echoprint.%s' % env.site_id)
         run('supervisorctl restart ttserver.%s' % env.site_id)

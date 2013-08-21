@@ -166,12 +166,24 @@
 					<li>
 						<a class="transform-post reload" href="{{ object.get_delete_url }}"><i class="icon-trash"></i> {% trans "Delete" %}</a>
 					</li>
-					<!--
+					<!---->
 					<li class="divider"></li>
+                    <li>
+                        <span>&nbsp;{% trans "Created items"  %}</span>
+                    </li>
 					<li>
-						<a href="#">Separated link</a>
+						<a href="{% url alibrary-release-list %}?import={{ object.pk }}">{% trans "Releases"  %}</a>
 					</li>
-					-->
+					<li>
+						<a href="{% url alibrary-artist-list %}?import={{ object.pk }}">{% trans "Artists"  %}</a>
+					</li>
+					<li>
+						<a href="{% url alibrary-media-list %}?import={{ object.pk }}">{% trans "Tracks"  %}</a>
+					</li>
+					<li>
+						<a href="{% url alibrary-label-list %}?import={{ object.pk }}">{% trans "Labels"  %}</a>
+					</li>
+
 				</ul>
 			</div>
 			</td>

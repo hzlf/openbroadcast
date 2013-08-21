@@ -20,8 +20,8 @@ from django.contrib.contenttypes import generic
 
 from django_extensions.db.fields.json import JSONField
 
+from alibrary.models import Media
 
-from alibrary.models import Release, Media, Artist, Relation, Playlist
 
 
 import magic

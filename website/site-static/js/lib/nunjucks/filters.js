@@ -131,6 +131,50 @@ var nunjucks_register_filters = function(nj) {
 				    return out.trim();
 				});
 
+				nj.addFilter('s2time', function(time) {
+
+					if(time == 0) {
+						return '00:00';
+					}
+
+					time = Math.abs(time);
+
+					var millis= time % 1000;
+				    time = parseInt(time/1000);
+				    var seconds = time % 60;
+				    time = parseInt(time/60);
+				    var minutes = time % 60;
+				    time = parseInt(time/60);
+				    var hours = time % 24;
+				    var out = "";
+
+				    if(hours && hours > 0) {
+				    	out += hours + ':';
+				    } else {
+				    	// out += '0' + ':';
+				    }
+
+				    if(minutes && minutes > 0) {
+                        if(minutes < 10) {
+                            out += '0';
+                        }
+				    	out += minutes + ':';
+				    } else {
+				    	out += '00' + ':';
+				    }
+
+				    if(seconds && seconds > 0) {
+                        if(seconds < 10) {
+                            out += '0';
+                        }
+				    	out += seconds;
+				    } else {
+				    	out += '00';
+				    }
+
+				    return out.trim();
+				});
+
 
 				return nj;
 };

@@ -94,7 +94,7 @@ from alibrary.util.echonest import EchonestWorker
 
 import arating
 
-USE_CELERYD = False
+USE_CELERYD = True
 
 
 from caching.base import CachingMixin, CachingManager
@@ -560,12 +560,12 @@ class Media(CachingMixin, MigrationMixin):
         print 'Destination file at: %s' % dst_file
         print '*******************************************************'
 
-
+        skip_conversion = False
         if format == 'mp3':
             # TODO: make compression variable / configuration dependant
             
             compression = '2'
-            skip_conversion = False
+
             
             print 'Version: %s' % version
 
@@ -611,7 +611,14 @@ class Media(CachingMixin, MigrationMixin):
             print "Final Destination: %s" % dst_final + dst_file
             
             # TODO: just create a symlink in case of mp3
-            shutil.copy2(tmp_path, dst_final + dst_file)
+            # shutil.copy2(tmp_path, dst_final + dst_file)
+
+            if skip_conversion:
+                print "o conversion -> just symlinking to cache folder"
+                if not os.path.lexists(dst_final + dst_file):
+                    os.symlink(tmp_path, dst_final + dst_file)
+            else:
+                shutil.copy2(tmp_path, dst_final + dst_file)
             
             #tmp_file = DjangoFile(open(tmp_path), name=dst_file)
 

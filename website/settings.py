@@ -449,7 +449,11 @@ INSTALLED_APPS = (
     'dropbox',
     'invitation',
 
+    # api
     'tastypie',
+    # oauth
+    'provider',
+    'provider.oauth2',
 
     'crispy_forms',
     'floppyforms',
@@ -851,6 +855,7 @@ CELERY_ROUTES = {
     #'importer.models.process_task': {'queue': 'import'},
     # assign import task to single-instance worker
     'importer.models.import_task': {'queue': 'import'},
+    'alibrary.models.generate_media_versions_task': {'queue': 'convert'},
 }
 
 
