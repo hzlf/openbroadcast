@@ -219,6 +219,24 @@
           font-size: 9px
           vertical-align: top
           color: #999999
+
+    // play/queue/etc actions
+    .list_body_item
+      ul.action
+
+        li.square
+          padding: 2px 0 0 1px
+          > a
+            border-radius: 1px
+            text-align: center
+            padding: 0 0px 2px 2px
+            color: #00bb00 !important
+            text-decoration: none !important
+
+          &:hover > a
+            background: #00bb00
+            color: #fff !important
+
               
               
       
@@ -234,8 +252,10 @@
       .c1
         width: 64px
         background-position: 28px center
+
+
+
         &.list_body_item
-          
           background-repeat: no-repeat
         img
           width: 62px

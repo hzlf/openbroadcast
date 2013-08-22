@@ -15,7 +15,7 @@
 		alibrary.playlist.api_url = "{% url api_dispatch_list resource_name='playlist' api_name='v1'%}";
 		alibrary.playlist.api_url_simple = "{% url api_dispatch_list resource_name='simpleplaylist' api_name='v1'%}";
 		alibrary.playlist.current_playlist_id = "{{ current_playlist.pk }}";
-		// alibrary.playlist.init();
+		alibrary.playlist.init();
 		
 
 		alibrary.collector = new CollectorApp;
@@ -121,7 +121,7 @@
 
 
 
-<!--
+<!---->
 <div id="inline_playlist_container" class="">
 	
 	<div class="playlist basket ui-persistent open" data-uistate="init" id="playlist_basket">
@@ -164,4 +164,3 @@
 	</div>
 	
 </div>
--->

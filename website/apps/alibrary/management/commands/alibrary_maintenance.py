@@ -149,7 +149,7 @@ class MaintenanceWorker(object):
                 if item.tags.count() < 1:
                     print item
                     print 'map release tags'
-                    if item.release.tags.count() > 0:
+                    if item.release and item.release.tags.count() > 0:
                         item.tags = item.release.tags
                         item.save()
 

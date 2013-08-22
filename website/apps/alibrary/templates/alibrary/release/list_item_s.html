@@ -7,14 +7,26 @@
 <div class="list_body_row selectable item release {% if item.publish_date %}published{% else %}unpublished{% endif %} {% if item.creator == user %}owner{% endif %} view edit stream collect download" id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}">
 
 	<div class="list_body_item c1 image_center_bg" {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 36x36 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
-		<ul class="unstyled">
-			<!-- Play link  -->
+		<ul class="unstyled action">
+			<!-- play action (legacy version)
 			<li class="play">
 				<a href="{{ item.get_api_url }}#0#replace" title="Play" class="playable popup"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
 			</li>
 			<li class="queue">
 				<a href="{{ item.get_api_url }}#0#queue" title="Play" class="playable popup"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
 			</li>
+			-->
+
+            <li class="square">
+                <a href="{{ item.get_api_url }}#0#replace" title="{% trans "Play" %}" class="playable popup"><i class="icon icon-play"></i></a>
+            </li>
+
+            <li class="square">
+                <a href="{{ item.get_api_url }}#0#queue" title="{% trans "Queue" %}" class="playable popup"><i class="icon icon-reorder"></i></a>
+            </li>
+
+
+
 		</ul>
 	</div>
 	<div class="list_body_item c2">
