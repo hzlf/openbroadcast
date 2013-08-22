@@ -630,8 +630,31 @@ CollectorApp = (function () {
             var media = self.media_to_collect;
             self.collect(item, media);
 
+        });
+
+        // search / filter
+        el.on('keyup', 'input.search', function (e) {
+
+            var q = $(this).val();
+
+            if(q.length < 2){
+                $('.item', el).removeClass('hidden');
+            } else {
+                $('.item', el).addClass('hidden');
+                $('.item', el).each(function(i, item){
+                    var name = $(this).data('name').toLowerCase();
+                    if (name.indexOf(q) != -1) {
+                        $(this).removeClass('hidden');
+                    }
+                });
+            }
+
 
         });
+
+        $('input.search', el).focus();
+
+
         self.update_dialog_markers();
 
     };

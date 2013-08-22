@@ -458,15 +458,15 @@ class Importer(object):
     
     
     
-    
+
     def mb_complete_media(self, obj, mb_id, mb_release_id, excludes=()):
-        
+
         log = logging.getLogger('util.importer.mb_complete_media')
         log.info('complete media, m: %s | mb_id: %s' % (obj.name, mb_id))
-        
+
         #raw_input("Press Enter to continue...")
         time.sleep(1.1)
-        
+
         inc = ('artists', 'url-rels', 'aliases', 'tags', 'recording-rels', 'artist-rels', 'work-level-rels', 'artist-credits')
         url = 'http://%s/ws/2/recording/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, mb_id, "+".join(inc))
 
@@ -486,7 +486,7 @@ class Importer(object):
         print '*****************************************************************'
         print url
         print '*****************************************************************'
-        
+
         print(result)
 
         print
@@ -560,8 +560,8 @@ class Importer(object):
         # self.pp.pprint(result)
         if 'relations' in result:
             for relation in result['relations']:
-    
-                
+
+
                 # map artists
                 if 'artist' in relation:
                     print 'artist: %s' % relation['artist']['name']
@@ -572,42 +572,42 @@ class Importer(object):
                     l_as = lookup.artist_by_mb_id(relation['artist']['id'])
                     l_a = None
 
-                    
+
                     #if len(l_as) < 1 and relation['artist']['id'] not in self.mb_completed:
                     if len(l_as) < 1 and relation['artist']['id'] not in excludes:
                         self.mb_completed.append(relation['artist']['id'])
                         l_a = Artist(name=relation['artist']['name'])
                         l_a.save()
-                            
+
                         url = 'http://musicbrainz.org/artist/%s' % relation['artist']['id']
                         print 'musicbrainz_url: %s' % url
                         rel = Relation(content_object=l_a, url=url)
                         rel.save()
-                        
+
                         print 'artist created'
                     if len(l_as) == 1:
                         print 'got artist!'
                         l_a = l_as[0]
                         print l_as[0]
-                        
+
                     profession = None
                     if 'type' in relation:
                         profession, created = Profession.objects.get_or_create(name=relation['type'])
-                        
-                        
+
+
                     """"""
                     if l_a:
                         mea, created = MediaExtraartists.objects.get_or_create(artist=l_a, media=obj, profession=profession)
                         l_a = self.mb_complete_artist(l_a, relation['artist']['id'])
                     #self.pp.pprint(relation['artist']['name'])
-                    
+
         tags = result.get('tags', ())
         for tag in tags:
             log.debug('got tag: %s' % (tag['name']))
             Tag.objects.add_tag(obj, '"%s"' % tag['name'])
-            
 
-                    
+
+
         # add mb relation
         mb_url = 'http://musicbrainz.org/recording/%s' % (mb_id)
         try:
@@ -616,12 +616,12 @@ class Importer(object):
             log.debug('relation not here yet, add it: %s' % (mb_url))
             rel = Relation(content_object=obj, url=mb_url)
             rel.save()
-        
-        
+
+
         return obj
-    
-    
-    
+
+
+
     def mb_complete_release(self, obj, mb_id):
         
         log = logging.getLogger('util.importer.mb_complete_release')

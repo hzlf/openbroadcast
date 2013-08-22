@@ -188,7 +188,7 @@ def deploy():
             run('supervisorctl restart ttserver.%s' % env.site_id)
             run('supervisorctl restart pushy.%s' % env.site_id)
             
-            run('supervisorctl status')
+            run('supervisorctl status | grep %s' % env.site_id)
         except Exception, e:
             pass
         

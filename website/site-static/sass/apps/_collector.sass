@@ -1,4 +1,5 @@
 $popup-height: 280px
+$popup-width: 280px
 
 .popup-select-playlist
 
@@ -7,12 +8,34 @@ $popup-height: 280px
   // content
   > div
     section.title
+      display: none // f.t.m.
       height: 30px
       h3
         color: #fff
         small:
           text-transform: none !important
           font-size: 60%
+
+    section.search
+      height: 30px
+      input
+        margin-bottom: 0
+        width: 100px
+        float: left
+        width: $popup-width - 28px
+        height: 10px
+        border-color: #333
+        background: transparent
+
+      &:hover
+        input
+          background: #424242
+          border-color: #999
+          color: white
+
+
+
+
 
     section.listing
       height: $popup-height - 70px
@@ -58,6 +81,11 @@ $popup-height: 280px
         &.loading
           opacity: 0.7
           cursor: wait !important
+
+        // guess that obsolete (generic)
+        &.hidden
+          opacity: 0.8
+
 
 
     section.form
