@@ -878,6 +878,9 @@ CELERYBEAT_SCHEDULE = {
 """
 streaming server
 """
+
+APLAYER_STREAM_MODE = 'html5'
+
 RTMP_HOST = '127.0.0.2'
 RTMP_APP = 'alibrary'
 RTMP_PORT = '1935'

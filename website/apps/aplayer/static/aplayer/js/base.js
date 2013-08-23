@@ -721,7 +721,7 @@ aplayer.base.controls = function(args) {
 		
 		if(aplayer.vars.stream_mode == 'rtmp') {
 
-            stream.rtmp_host = 'rtmp://localhost:1935/';
+            // stream.rtmp_host = 'rtmp://localhost:1935/';
 
 			var pl = { 'file': stream.file + '?peter&muster',
 		            	'streamer': stream.rtmp_host + stream.rtmp_app + '/',

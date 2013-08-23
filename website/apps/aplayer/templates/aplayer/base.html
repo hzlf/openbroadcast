@@ -1,7 +1,6 @@
-{% load cms_tags sekizai_tags compress %}
-<?xml version="1.0" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+{% load cms_tags sekizai_tags compress value_from_settings %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
 
 
 <!--head -->
@@ -56,7 +55,10 @@
 			// set some variables to be available in script file
 			aplayer.vars.swf_url = '{{ STATIC_URL }}aplayer/swf/lib/jwplayer/jwplayer-5.9.swf';
 			aplayer.vars.skin_url = '{{ STATIC_URL }}aplayer/css/lib/jwplayer/ulysses.zip';
-			
+
+            aplayer.vars.stream_mode = '{% value_from_settings "APLAYER_STREAM_MODE" %}';
+
+
 			base.ui.init();
 			base.ui.iface();
 			

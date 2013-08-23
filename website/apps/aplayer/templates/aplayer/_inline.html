@@ -1,9 +1,11 @@
 {% load sekizai_tags i18n %}
 
-{% addtoblock "js-post" %}
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.li-scroller.1.0.js"></script>{% endaddtoblock %}
-{% addtoblock "js-post" %}
-    <script type="text/javascript" src="{{ STATIC_URL }}aplayer/js/inline.js"></script>{% endaddtoblock %}
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.li-scroller.1.0.js"></script>{% endaddtoblock %}
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}aplayer/js/base.js"></script>{% endaddtoblock %}
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}aplayer/js/ui.js"></script>{% endaddtoblock %}
+
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}aplayer/js/inline.js"></script>{% endaddtoblock %}
+
 {% addtoblock "js-post" %}
     <script>
         var aplayer = aplayer || {};
