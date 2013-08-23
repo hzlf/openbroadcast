@@ -51,6 +51,12 @@ def skip_db():
     env.skip_db = True
 
 def deploy():
+    try:
+        # stop app-server
+        run('supervisorctl stop %s' % env.site_id)
+
+    except Exception, e:
+        pass
     """
     """
     with cd(env.path):  

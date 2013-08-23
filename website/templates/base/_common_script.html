@@ -1,4 +1,4 @@
-{% load sekizai_tags value_from_settings %}
+{% load sekizai_tags value_from_settings nunjucks_tags %}
 
 	<!-- load jquery from cdn, fallback if neccessary -->
 	{% addtoblock "js-head" %}<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>{% endaddtoblock %}
@@ -56,6 +56,10 @@
 	
 	
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/nunjucks/nunjucks-dev.js"></script>{% endaddtoblock %}
+	{% addtoblock "js-post" %}{% nunjucks_scripts %}{% endaddtoblock %}
+
+
+
 	
 	{% addtoblock "js-post" %}<!--
 	<script type="text/javascript" src="{{ STATIC_URL }}js/lib/nunjucks/nunjucks-dev.js"></script>

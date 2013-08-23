@@ -463,6 +463,7 @@ INSTALLED_APPS = (
 
 
     'pushy',
+    'nunjucks',
     'istats',
 
     # custom apps/*
