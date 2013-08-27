@@ -119,6 +119,8 @@ MIDDLEWARE_CLASSES = (
     #'lib.middleware.PrettifyMiddlewareBS',
     #'django_badbrowser.middleware.BrowserSupportDetection',
 
+    #'turbolinks.middleware.TurbolinksMiddleware',
+
     'arating.middleware.AratingIpMiddleware',
     #'lib.middleware.social_auth_extra.SocialAuthExceptionExtraMiddleware',
 
@@ -331,6 +333,7 @@ INSTALLED_APPS = (
     'gunicorn',
     'django_date_extensions',
     'esi',
+
     #'turbolinks',
 
     'haystack',

@@ -333,20 +333,22 @@ var ImportfileApp = function () {
 
         $('.tooltipable', self.container).tooltip();
 
+
         $('.tooltip-inline', self.container).each(function (index) {
 
             var el = $(this);
-            /**/
-            $.get(el.data('resource_uri'), function (data) {
+            /*
+             $.get(el.data('resource_uri'), function (data) {
 
-                data.ct = el.data('ct');
+             data.ct = el.data('ct');
 
-                var d = { item: data }
+             var d = { item: data }
 
-                var html = nj.render('importer/nj/popover.html', d);
+             var html = nj.render('importer/nj/popover.html', d);
 
-                el.popover({content: html, title: data.name, trigger: 'hover', placement: 'top', html: true});
-            });
+             el.popover({content: html, title: data.name, trigger: 'hover', placement: 'top', html: true});
+             });
+             */
 
 
         });
@@ -366,6 +368,8 @@ var ImportfileApp = function () {
         } else {
             debug.debug('ImportfileApp - load: using remote data');
             var url = self.api_url;
+
+            /*
             $.get(url, function (data) {
                 console.log(data);
 
@@ -384,6 +388,31 @@ var ImportfileApp = function () {
                 self.local_data = data;
                 self.display(data);
             })
+            */
+
+
+            jQuery.ajaxQueue({
+                url: url,
+                dataType: "json"
+            }).done(function (data) {
+
+                    try {
+                        data.results_tag = JSON.parse(data.results_tag);
+                        data.results_acoustid = JSON.parse(data.results_acoustid);
+                        data.results_musicbrainz = JSON.parse(data.results_musicbrainz);
+                        data.import_tag = JSON.parse(data.import_tag);
+                        data.messages = JSON.parse(data.messages);
+                    } catch (err) {
+                        data.results_tag = false;
+                        console.log(err);
+                    }
+
+
+                    self.local_data = data;
+                    self.display(data);
+                });
+
+
         }
     };
 

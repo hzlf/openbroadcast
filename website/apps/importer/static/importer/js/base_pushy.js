@@ -58,74 +58,26 @@ ImporterUi = function() {
 			// run update
 			self.update_import_files();
 		});
-		
-		// list items
-		/*
-		$('#result_holder .result-set').live('click', function(e){
-			$('.result-set', $(this).parents('.importfile')).removeClass('selected choosen');
-			$(this).addClass('choosen');
-			
-			self.apply_best_match();
-			
-		});
-		*/
-		
+
 		// item actions
 		var actions = $('#result_holder .importfile.item .result-actions');
-		
-		
-		/*
-		$('.delete-importfile', actions).live('click', function(e){
-			
-			var parent = $(this).parents('.importfile');
-			parent_id = parent.attr('id').split('_')[2];
-			
-			var item = self.current_data[parent_id];
-			
-			$.ajax({
-				type: "DELETE",
-				url: item.resource_uri,
-				dataType: "application/json",
-				contentType: 'application/json',
-  				processData:  false,
-				// data: JSON.stringify(data),
-				success: function(data) {
-					// debug.debug(data);
-					// form_result.hide();
-				},
-				complete: function(jqXHR) {
-					if(jqXHR.status == 204) {
-						parent.hide(200);
-					}
 
-				}
-			});
-			
-		});
-		*/
-		
-		
-		
-		/* moved to importfile app
-		$('.start-import', actions).live('click', function(e) {
-			
-			var parent = $(this).parents('.importfile');
-			parent_id = parent.attr('id').split('_')[2];
-			
-			self.import_by_id(parent_id);
-
-		});
-		*/
-		
 		
 		$('.start-import-all', $('#import_summary')).live('click', function(e){
-			
-			
-			
+
 			var url = self.api_url + 'import-all/';
-			
-			
-			/**/
+
+            // update view for corresponding items
+            $.each(self.importfiles, function(i, item){
+
+                if(item.local_data && item.local_data.status == 'ready') {
+                    // override status for fast display update
+                    item.local_data.status = 'queued';
+                    item.display(item.local_data)
+                }
+            })
+
+            /**/
 			$.ajax({
 				type: "GET",
 				url: url,
@@ -136,16 +88,8 @@ ImporterUi = function() {
 					debug.debug(data);					
 				}
 			});
-			
-			
-			
-			/*
-			$('.importfile.ready').each(function(i, el) {
-				id = $(this).attr('id').split('_')[2];			
-				self.import_by_id(id);
-			});
-			*/
-			
+
+
 		});
 		
 		

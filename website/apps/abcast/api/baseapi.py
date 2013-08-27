@@ -456,6 +456,8 @@ class BaseResource(Resource):
                         'cue_out': float(co.get_duration() - item.cue_out) / 1000,   
                         'fade_in': item.fade_in,              
                         'fade_out': item.fade_out,
+                        #'fade_cross': item.fade_cross,
+                        'fade_cross': 0,
                         'replay_gain': 0,
                         'independent_event': False,
                         'start': "%s" % i_start_str,

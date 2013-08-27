@@ -7,6 +7,12 @@
 	<!-- js-head, rendered in head :) block -->
 	{% addtoblock "js-head" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-1.8.1.min.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-head" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-ui-1.9.2.custom.min.js"></script>{% endaddtoblock %}
+
+	{% addtoblock "js-head" %}
+        <!--
+        <script type="text/javascript" src="{{ STATIC_URL }}js/lib/turbolinks.js"></script>
+        -->
+    {% endaddtoblock %}
 	
 	
 	<!-- base css block -->
@@ -39,16 +45,12 @@
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.timers-1.1.2.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.cookie.min.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.jgrowl.min.js"></script>{% endaddtoblock %}
-	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.ajaxqueue.js"></script>{% endaddtoblock %}
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.ajax-queue.js"></script>{% endaddtoblock %}
 	
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/ba-debug.js"></script>{% endaddtoblock %}
 
 
-	{% addtoblock "js-post" %}
-        <!--
-        <script type="text/javascript" src="{{ STATIC_URL }}js/lib/turbolinks.js"></script>
-        -->
-    {% endaddtoblock %}
+
 
 	{% addtoblock "js-post" %}<!--<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.autocomplete.js"></script>-->{% endaddtoblock %}
 	

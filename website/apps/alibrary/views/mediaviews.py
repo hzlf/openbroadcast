@@ -341,7 +341,8 @@ def stream_html5(request, uuid):
 
     stream_permission = False
 
-    if request.user and request.user.has_perm('alibrary.play_media'):
+    #if request.user and request.user.has_perm('alibrary.play_media'):
+    if request.user:
         stream_permission = True
 
     # check if unrestricted license

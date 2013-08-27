@@ -220,6 +220,15 @@ aplayer.base.load_playlist = function(uri) {
                 // switch to handle releases & media api listings
                 if(uri.indexOf("release") != -1) {
                     aplayer.base.set_playlist(result.media);
+                } else if(uri.indexOf("playlist") != -1) {
+                    var media = [];
+                    $.each(result.items, function(i, item) {
+                        console.log('co:', item.item.content_object)
+                        media.push(item.item.content_object);
+                    })
+                    aplayer.base.set_playlist(media);
+                    aplayer.base.complete_playlist()
+
                 } else {
                     aplayer.base.set_playlist(result.objects);
                 }
@@ -238,6 +247,31 @@ aplayer.base.load_playlist = function(uri) {
 		});
 	}
 };
+
+// Hackish functionto grap missing data from api
+aplayer.base.complete_playlist = function() {
+
+    $.each(aplayer.vars.playlist, function(i, item) {
+        if(!item.release) {
+
+            $.get(item.resource_uri, function(data){
+                item.release = data.release;
+                item.artist = data.artist;
+                console.log('got data:', data)
+                aplayer.vars.playlist[i] = el;
+                aplayer.ui.playlist_display(aplayer, $('#aplayer_playlist'));
+
+
+            })
+        }
+    });
+
+
+
+    //
+    //aplayer.ui.screen_display(idx);
+
+}
 
 /*********************************************************************************
  * Parses and sets the loaded playlist
@@ -696,6 +730,21 @@ aplayer.base.controls = function(args) {
 		if (aplayer.vars.source && aplayer.vars.source == 'alibrary') {
 			var stream = aplayer.vars.playlist[index].stream;
 			console.log('stream:', stream);
+
+            // TODO: Hakish here - try to complete meta data
+            var el = aplayer.vars.playlist[index]
+            var idx = index;
+            console.log('ELEMENT:', aplayer.vars.playlist[index])
+
+
+
+            setTimeout(function(){
+                aplayer.ui.screen_display(index);
+            }, 2000)
+
+
+
+
 		}
 		if (aplayer.vars.source && aplayer.vars.source == 'abcast') {
 			var channel = aplayer.vars.result;
@@ -1175,8 +1224,11 @@ aplayer.base.debug = function(text) {
 	var sec = d.getSeconds();
 	
 	var time = hour + ':' + min + ':' + sec;
-
+    try {
     console.log(text);
+    } catch(err) {
+
+	};
 	
 	// $('.footer > .wrapper').prepend('<p>' + '<span>' + time + '</span> | ' + text + '</p>');
 };

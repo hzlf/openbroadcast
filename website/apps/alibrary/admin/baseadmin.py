@@ -388,6 +388,9 @@ class PlaylistAdmin(GenericAdminModelAdmin):
     
     list_display   = ('name', 'user', 'type', 'duration', 'target_duration', 'is_current', 'rotation', 'updated')
     list_filter = ('type', )
+
+    search_fields = ['name', 'user__username',]
+    date_hierarchy = 'created'
     
     #readonly_fields = ['slug', 'is_current',]
 

@@ -499,7 +499,7 @@ PlaylistEditor = function () {
     // play-flow functions
     this.play_next = function (current_id) {
 
-        console.log('play next');
+        //console.log('play next');
 
         // get ordered list
 
@@ -509,8 +509,8 @@ PlaylistEditor = function () {
             order.push($(e).data('id'));
         });
 
-        console.log(self.position_map);
-        console.log(self.editor_items);
+        //console.log(self.position_map);
+        //console.log(self.editor_items);
 
         var current_item_id = self.position_map.indexOf(current_id);
         var next_item_id = self.position_map[current_item_id + 1];
@@ -522,7 +522,7 @@ PlaylistEditor = function () {
     // play-flow functions
     this.load_next = function (current_id) {
 
-        console.log('play next');
+        // console.log('load next');
 
         // get ordered list
 
@@ -532,8 +532,8 @@ PlaylistEditor = function () {
             order.push($(e).data('id'));
         });
 
-        console.log(self.position_map);
-        console.log(self.editor_items);
+        //console.log(self.position_map);
+        //console.log(self.editor_items);
 
         var current_item_id = self.position_map.indexOf(current_id);
         var next_item_id = self.position_map[current_item_id + 1];
@@ -719,6 +719,18 @@ PlaylistEditorItem = function () {
             ;
 
             if (action == 'play') {
+
+
+                // try to pause aplayer - hackish..
+                try {
+                    if (aplayer.inline.player.states.state == 'playing') {
+                        aplayer.inline.player.base.controls({action: 'pause' })
+                    }
+                } catch(e) {
+
+                }
+                ;
+
                 self.playlist_editor.stop_all();
                 self.player.play().setPosition(self.item.cue_in);
             }
@@ -1237,8 +1249,8 @@ PlaylistEditorItem = function () {
         var remaining = self.co.duration - (self.item.cue_out) - self.player.position;
 
         // console.log('remaining:', remaining);
-
-        if (remaining <= self.item.fade_cross + 5000) {
+        // preload next track
+        if (remaining <= self.item.fade_cross + 10000) {
             self.playlist_editor.load_next(self.item.id);
         }
 
@@ -1253,7 +1265,8 @@ PlaylistEditorItem = function () {
 
 
     this.onload = function () {
-        console.log('sm2 onload');
+
+        // / console.log('sm2 onload');
 
         self.el_buffer.attr({x: self.abs_to_px(self.item.cue_in), width: self.size_x - self.abs_to_px(self.item.cue_in + self.item.cue_out)});
 

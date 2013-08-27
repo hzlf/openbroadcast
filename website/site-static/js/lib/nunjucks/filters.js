@@ -99,24 +99,36 @@ var nunjucks_register_filters = function(nj) {
 				    var out = "";
 				    
 				    if(hours && hours > 0) {
+                        if(hours < 10) {
+                            out += '0';
+                        }
 				    	out += hours + ':';
 				    } else {
 				    	// out += '0' + ':';
 				    }
 				    
 				    if(minutes && minutes > 0) {
+                        if(minutes < 10) {
+                            out += '0';
+                        }
 				    	out += minutes + ':';
 				    } else {
 				    	out += '00' + ':';
 				    }
 				    
 				    if(seconds && seconds > 0) {
+                        if(seconds < 10) {
+                            out += '0';
+                        }
 				    	out += seconds + ':';
 				    } else {
 				    	out += '00' + ':';
 				    }
 				    
 				    if(millis && millis > 0) {
+                        if(millis < 10) {
+                            out += '0';
+                        }
 				    	out += millis + '';
 				    } else {
 				    	out += '000' + '';

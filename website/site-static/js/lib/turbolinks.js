@@ -35,7 +35,88 @@
         }
     };
 
+
     fetchReplacement = function (url) {
+
+        var safeUrl,
+            _this = this;
+        triggerEvent('page:fetch');
+        safeUrl = removeHash(url);
+
+        //if (xhr != null) {
+        //    xhr.abort();
+        //}
+        // xhr = new XMLHttpRequest;
+        console.log('turbolink url: ' + safeUrl)
+
+        $.get(safeUrl, function(data){
+                            console.log('turbolink data: ' + data)
+                var doc;
+                doc = createDocument(data);
+                changePage.apply(null, extractTitleAndBody(doc));
+        })
+
+/*
+        $.ajax({
+            url: safeUrl
+        })
+        .done(function (data) {
+                console.log('turbolink data: ' + data)
+                var doc;
+                doc = createDocument(data);
+                changePage.apply(null, extractTitleAndBody(doc));
+
+                if (assetsChanged(doc)) {
+                    return document.location.reload();
+                } else {
+                    changePage.apply(null, extractTitleAndBody(doc));
+
+                    reflectRedirectedUrl(xhr);
+                    if (document.location.hash) {
+                        document.location.href = document.location.href;
+                    } else {
+                        resetScrollPosition();
+                    }
+                    return triggerEvent('page:load');
+                }
+
+            });*/
+        /*
+         xhr.open('GET', safeUrl, true);
+         xhr.setRequestHeader('Accept', 'text/html, application/xhtml+xml, application/xml');
+         xhr.setRequestHeader('X-XHR-Referer', referer);
+         xhr.onload = function() {
+         var doc;
+         doc = createDocument(xhr.responseText);
+         if (assetsChanged(doc)) {
+         return document.location.reload();
+         } else {
+         changePage.apply(null, extractTitleAndBody(doc));
+         reflectRedirectedUrl(xhr);
+         if (document.location.hash) {
+         document.location.href = document.location.href;
+         } else {
+         resetScrollPosition();
+         }
+         return triggerEvent('page:load');
+         }
+         };
+         xhr.onloadend = function() {
+         return xhr = null;
+         };
+         xhr.onabort = function() {
+         return rememberCurrentUrl();
+         };
+         xhr.onerror = function() {
+         return document.location.href = url;
+         };
+         return xhr.send();
+         */
+    };
+
+
+    __fetchReplacement = function (url) {
+
         var safeUrl,
             _this = this;
         triggerEvent('page:fetch');
@@ -43,12 +124,8 @@
         if (xhr != null) {
             xhr.abort();
         }
-
-        // hack
-        debug.debug('tl - start');
-        $('body').addClass('tl-loading');
-
         xhr = new XMLHttpRequest;
+        console.log('turbolink url: ' + safeUrl)
         xhr.open('GET', safeUrl, true);
         xhr.setRequestHeader('Accept', 'text/html, application/xhtml+xml, application/xml');
         xhr.setRequestHeader('X-XHR-Referer', referer);
@@ -69,8 +146,6 @@
             }
         };
         xhr.onloadend = function () {
-            debug.debug('tl - end');
-            $('body').removeClass('tl-loading');
             return xhr = null;
         };
         xhr.onabort = function () {
@@ -132,7 +207,6 @@
             executeScriptTags();
         }
         currentState = window.history.state;
-        console.log('*** page changed ***');
         return triggerEvent('page:change');
     };
 
@@ -182,9 +256,10 @@
 
     reflectRedirectedUrl = function (xhr) {
         var location;
-        if ((location = xhr.getResponseHeader('X-XHR-Current-Location')) && location !== document.location.pathname + document.location.search) {
-            return window.history.replaceState(currentState, '', location + document.location.hash);
-        }
+        /*
+         if ((location = xhr.getResponseHeader('X-XHR-Current-Location')) && location !== document.location.pathname + document.location.search) {
+         return window.history.replaceState(currentState, '', location + document.location.hash);
+         }*/
     };
 
     rememberCurrentUrl = function () {
@@ -316,6 +391,7 @@
 
     handleClick = function (event) {
         var link;
+
         if (!event.defaultPrevented) {
             link = extractLink(event);
             if (link.nodeName === 'A' && !ignoreClick(event, link)) {

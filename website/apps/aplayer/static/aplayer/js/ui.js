@@ -27,11 +27,14 @@ aplayer.ui.init = function() {
  * Interface bindings (live ones)
  *********************************************************************************/
 aplayer.ui.bind = function() {
-	
-	
+
+    /***************************************************************
+     * LEGACY VERSION !!
+     ***************************************************************/
+
 	// handles '.playable' elements
     // used to play media items
-	$('.playable.popup').live('click', function(e) {
+	$('.___playable.popup').live('click', function(e) {
 
 		e.preventDefault();
 
@@ -69,14 +72,6 @@ aplayer.ui.bind = function() {
 
         }
 
-
-
-
-
-
-		
-
-		
 		aplayer.base.play_in_popup(uri, token, offset, mode, false, source);
 
         /* TESTING:
@@ -87,6 +82,68 @@ aplayer.ui.bind = function() {
 		// return false;
 		
 	});
+
+
+
+	// handles '.playable' elements
+    // used to play media items
+	$('body').on('click', '.playable.popup', function(e) {
+
+		e.preventDefault();
+
+        var ct = $(this).data('ct');
+		var uri = $(this).data('resource_uri');
+		var offset = $(this).data('ofset');
+		var mode = $(this).data('mode');
+		var token = 'xx-yy-zz';
+		var source = 'alibrary';
+
+        // ct based switches
+        if (ct == 'media_set') {
+            // media set -> ignore uri and build one by ourselves
+
+            // get all items currently shown
+            var item_ids = [];
+            var item_id = $(this).parents('.item').data('item_id');
+            var container = $(this).parents('.container');
+
+            $('.item.media', container).each(function(i, el){
+                var current_id = $(el).data('item_id');
+                if (current_id == item_id) {
+                    offset = i;
+                }
+                item_ids.push(current_id)
+            })
+
+            uri = '/api/v1/track/?id__in=' + item_ids.join(',')
+
+        }
+
+		aplayer.base.play_in_popup(uri, token, offset, mode, false, source);
+
+        /* TESTING:
+        aplayer.base.play_in_popup('/api/v1/track/?id__in=11,12', 'xyz', 0, 'replace', false, 'alibrary')
+        http://local.openbroadcast.ch:8080/api/v1/track/?format=json&id__in=11,12
+         */
+
+		// return false;
+
+	});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	
 	// handles '.streamable' elements
     // used to play webstreams

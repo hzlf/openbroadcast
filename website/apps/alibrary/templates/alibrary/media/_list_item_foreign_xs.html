@@ -6,14 +6,39 @@
 
 		<!-- Play icon -->
 		<div class="list_body_item c1 action">
+
+		<ul class="unstyled action">
+			<!-- play action (legacy version)
+			<li class="play">
+				<a href="{{ item.get_api_url }}#0#replace" title="Play" class="playable popup"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
+			</li>
+			<li class="queue">
+				<a href="{{ item.get_api_url }}#0#queue" title="Play" class="playable popup"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
+			</li>
+			-->
+
+            <li class="square">
+                <a href="{{ item.release.get_api_url }}#{{ forloop.counter0 }}#replace" data-ct="media_set"
+                   title="{% trans "Play" %}" class="playable popup"><i class="icon icon-play"></i></a>
+            </li>
+
+            <li class="square">
+                <a href="{{ item.get_api_url }}#0#queue" title="{% trans "Queue" %}" class="playable popup"><i class="icon icon-reorder"></i></a>
+            </li>
+
+
+
+		</ul>
+            <!--
 			<ul>
-				<!-- Play link  -->
+				Play link
 				<li class="play">
 					<a href="{{ item.release.get_api_url }}#{{ forloop.counter0 }}#replace" title="Play" class="playable popup"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play"></a>
 				</li>
+
 				
 				
-			</ul>
+			</ul>-->
 				
 
 		</div>

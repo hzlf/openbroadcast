@@ -500,8 +500,8 @@ CollectorApp = (function () {
 
             // type switch
             if (container.hasClass('media')) {
-                var item_id = container.data('item_id');
-                var item_uuid = container.data('item_uuid');
+                var item_id = container.data('id');
+                var item_uuid = container.data('uuid');
                 media.push({id: item_id, uuid: item_uuid});
 
                 self.media_to_collect = media;
@@ -621,14 +621,21 @@ CollectorApp = (function () {
 
         // item actions
         el.on('click', '.item.playlist', function (e) {
-            var item = {
-                el: $(this),
-                uuid: $(this).data('uuid'),
-                id: $(this).data('id'),
-                resource_uri: $(this).data('resource_uri')
+
+            // don't do if link clicked
+            if(!$(event.target).is("a")) {
+
+                var item = {
+                    el: $(this),
+                    uuid: $(this).data('uuid'),
+                    id: $(this).data('id'),
+                    resource_uri: $(this).data('resource_uri')
+                }
+                var media = self.media_to_collect;
+                self.collect(item, media);
             }
-            var media = self.media_to_collect;
-            self.collect(item, media);
+
+
 
         });
 
@@ -669,8 +676,11 @@ CollectorApp = (function () {
         var el = self.popup_container;
         var local_uuids = [];
         $.each(self.media_to_collect, function (i, media) {
+            console.log(media)
             local_uuids.push(media.uuid);
         })
+
+        console.log('media to collect, uuids:', local_uuids);
 
         $('.collected', el).html('');
 
@@ -679,18 +689,12 @@ CollectorApp = (function () {
             var container = $('.' + item.uuid, el);
             var matches = 0;
 
-
             // loop items and compare
             $.each(item.item_uuids, function (j, uuid) {
 
-
-                if ($.inArray(uuid, local_uuids)) {
+                if ($.inArray(uuid, local_uuids) > -1) {
                     matches++
                 }
-
-                // console.log(uuid);
-                // console.log('in?', local_uuids);
-
 
             })
             if (matches > 0) {
@@ -732,7 +736,10 @@ CollectorApp = (function () {
                 $('.listing.nano', el).nanoScroller({ scroll: 'bottom' });
 
                 // reset the playlist cache
-                self.playlists_local = false;
+                // self.playlists_local = false;
+
+                // append to cache
+                self.playlists_local.objects.push(data)
 
             },
             async: true
@@ -855,7 +862,23 @@ CollectorApp = (function () {
                 var el = $('.' + data.uuid);
                 el.removeClass('loading');
 
-                // self.playlists_local.objects.push(data)
+
+                // kind of hackish... loop lists, compare uuids and ev replace item
+                var exists = false;
+                $.each(self.playlists_local.objects, function (i, playlist) {
+                    if(playlist.uuid == data.uuid) {
+
+                        self.playlists_local.objects[i] = data;
+                        exists = true;
+                    }
+
+                });
+
+                // not found -> push to list
+                if (! exists) {
+                    self.playlists_local.objects.push(data)
+                }
+
                 self.dialog_bindings(self.popup_api);
             },
             async: true

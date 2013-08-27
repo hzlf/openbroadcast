@@ -1,4 +1,4 @@
-<div class="item hoverable playlist {{ item.uuid }}" data-id="{{ item.id }}" data-name="{{ item.name }}"
+<div class="item hoverable playlist {{ item.uuid }}" data-id="{{ item.id }}" data-uuid="{{ item.uuid }}" data-name="{{ item.name }}"
      data-resource_uri="{{ item.resource_uri }}">
 
     <div class="row-fluid">
@@ -18,7 +18,8 @@
             <ul class="unstyled">
 
                 <li>
-                    <strong>{{ item.name|truncate_chars_inner(30) }}</strong>
+
+                    <strong><a class="" title="Click to visit detail page" href="{{ item.absolute_url }}">{{ item.name|truncate_chars_inner(30) }}</a></strong>
 
                     <small class="pull-right">{{ item.item_count }} tracks | {{ item.duration|s2time }}</small>
                 </li>

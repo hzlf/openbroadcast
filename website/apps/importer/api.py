@@ -127,14 +127,11 @@ class ImportResource(ModelResource):
         self.throttle_check(request)
 
         import_session = Import.objects.get(**self.remove_api_resource_names(kwargs))
-        
         import_files = import_session.files.filter(status=2)
         
         for import_file in import_files:
-            print import_file
             import_file.status = 6
             import_file.save()
-        
         
         bundle = self.build_bundle(obj=import_session, request=request)
         bundle = self.full_dehydrate(bundle)

@@ -28,7 +28,7 @@ class PlaylistItemResource(ModelResource):
     
     co_to = {
              Release: ReleaseResource,
-             #Media: MediaResource,
+             Media: MediaResource,
              Media: SimpleMediaResource,
              Jingle: JingleResource,
              }
@@ -41,7 +41,7 @@ class PlaylistItemResource(ModelResource):
         excludes = ['id',]
         
     def dehydrate(self, bundle):
-        bundle.data['content_type'] = '%s' % bundle.obj.content_object.__class__.__name__.lower();
+        bundle.data['content_type'] = '%s' % bundle.obj.content_object.__class__.__name__.lower()
         return bundle
 
 

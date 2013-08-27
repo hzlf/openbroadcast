@@ -4,26 +4,50 @@
 <!-- list item s -->
 
 
-<div class="list_body_row selectable item playlist published {% if item.user == request.user %}owner{% endif %} view edit stream collect download" id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}">
+<div class="list_body_row selectable item playlist published {% if item.user == request.user %}owner{% endif %} view edit stream collect download"
+     id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}">
 
-	<div class="list_body_item c1 image_center_bg" {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 36x36 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
-		<ul class="unstyled">
-			<!-- Play link  -->
-			<li class="play">
-				<a href="{{ item.get_api_url }}#0#replace" title="Play" class="playable popup"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
-			</li>
-		</ul>
-	</div>
-	<div class="list_body_item c2">
-		<ul class="unstyled">
-			<li class="bold">
-				<a href="{{ item.get_absolute_url }}" title="{{ item.name }}">
-					{{ item.name|truncate_chars_inner:24 }}
-					{% topflop_for_object item %}
-				</a>
-			</li>
-			
-			<!--
+    <div class="list_body_item c1 image_center_bg"
+         {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 36x36 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
+
+
+        <ul class="unstyled action">
+
+            <li class="square">
+                <a href="#"
+                   data-ct="playlist"
+                   data-resource_uri="{{ item.get_api_url }}"
+                   data-offset=0
+                   data-mode="replace"
+                   title="{% trans "Play" %}" class="playable popup">
+                    <i class="icon icon-play"></i>
+                </a>
+            </li>
+
+            <li class="square">
+                <a href="#"
+                   data-ct="playlist"
+                   data-resource_uri="{{ item.get_api_url }}"
+                   data-offset=0
+                   data-mode="queue"
+                   title="{% trans "Queue" %}" class="playable popup">
+                    <i class="icon icon-reorder"></i></a>
+                </a>
+            </li>
+
+        </ul>
+
+    </div>
+    <div class="list_body_item c2">
+        <ul class="unstyled">
+            <li class="bold">
+                <a href="{{ item.get_absolute_url }}" title="{{ item.name }}">
+                    {{ item.name|truncate_chars_inner:24 }}
+                    {% topflop_for_object item %}
+                </a>
+            </li>
+
+            <!--
 			<li class="small">
 				{% for tag in item.tags %}
 					<span>{{ tag }}</span>
@@ -34,45 +58,45 @@
 
 			</li>
 			-->
-		</ul>
-	</div>
-	<div class="list_body_item c3">
-		<ul class="unstyled indicator">
+        </ul>
+    </div>
+    <div class="list_body_item c3">
+        <ul class="unstyled indicator">
 
-			<li>
-				<a href="{{ item.user.get_absolute_url }}">{% firstof item.user.username item.user %}</a>
-			</li>
-			
-		</ul>
-	</div>
-	<div class="list_body_item c4">
-		<ul class="unstyled">
-			<li>
-				{{ item.get_duration|divide:1000|sec_to_time }}
-				{% if item.target_duration %}
-				<span class="small">{% trans "of" %} {{ item.target_duration|sec_to_time }}</span>
-				{% endif %}
-			</li>
-			<li class="small">
-				{{ item.items.count }} {% trans "Tracks" %}
-			</li>
-		</ul>
-	</div>
-	<div class="list_body_item c5 timestamps">
-		
-		<ul class="unstyled">
-			<li>
-				{{ item.created|date:"SHORT_DATE_FORMAT" }}
-			</li>
-			<li class="small">
-				{{ item.updated|date:"SHORT_DATE_FORMAT" }}
-			</li>
-		</ul>
-		
-		
-	</div>
-	
-	<!--
+            <li>
+                <a href="{{ item.user.get_absolute_url }}">{% firstof item.user.username item.user %}</a>
+            </li>
+
+        </ul>
+    </div>
+    <div class="list_body_item c4">
+        <ul class="unstyled">
+            <li>
+                {{ item.get_duration|divide:1000|sec_to_time }}
+                {% if item.target_duration %}
+                    <span class="small">{% trans "of" %} {{ item.target_duration|sec_to_time }}</span>
+                {% endif %}
+            </li>
+            <li class="small">
+                {{ item.items.count }} {% trans "Tracks" %}
+            </li>
+        </ul>
+    </div>
+    <div class="list_body_item c5 timestamps">
+
+        <ul class="unstyled">
+            <li>
+                {{ item.created|date:"SHORT_DATE_FORMAT" }}
+            </li>
+            <li class="small">
+                {{ item.updated|date:"SHORT_DATE_FORMAT" }}
+            </li>
+        </ul>
+
+
+    </div>
+
+    <!--
 	<div class="list_body_item c6">
 		<ul class="unstyled">
 			<li>
@@ -86,57 +110,61 @@
 		</ul>
 	</div>
 	-->
-	
-	<div class="list_body_item c7">
-		
 
-		<ul class="unstyled">
-			<li>
-				{{ item.get_type_display }}
-			</li>
-			<li class="small">
-				{{ item.get_status_display }}
-			</li>
-		</ul>
-	</div>
-	
-	
-	<div class="list_body_item c8 action">
-		<!-- Actions sub-view  -->
-		<!-- reworking -->
-		<div class="wrapper">
-			<ul class="unstyled horizontal pull-right">
-				
-				<li>
-					<a href="#" data-action="download" data-ct="playlist" data-id="{{ item.id }}" data-uuid="{{ item.uuid }}" title="{% trans "Download" %}">
-						<i class="icon-download-alt"></i>
-					</a>
-				</li>
-				
-				<li>
-					<a href="#" data-action="basket" data-ct="playlist" data-id="{{ item.id }}" data-uuid="{{ item.uuid }}" title="{% trans "Add to basket" %}">
-						<i class="icon-plus"></i>
-					</a>
-				</li>
-				
-				<li>
-					<a href="#" data-action="schedule" data-ct="playlist" data-id="{{ item.id }}" data-uuid="{{ item.uuid }}" title="{% trans "Schedule" %}">
-						<i class="icon-calendar"></i>
-					</a>
-				</li>
-				
-				{% if user.is_authenticated and user == item.user %}
-				<li>
-					<a href="{{ item.get_edit_url }}" data-action="edit" data-ct="playlist" data-id="{{ item.id }}" data-uuid="{{ item.uuid }}" title="{% trans "Add to basket" %}">
-						<i class="icon-edit"></i>
-					</a>
-				</li>
-				{% endif %}
-				
-			</ul>
-		</div>
+    <div class="list_body_item c7">
 
-	</div>
-	
-	
+
+        <ul class="unstyled">
+            <li>
+                {{ item.get_type_display }}
+            </li>
+            <li class="small">
+                {{ item.get_status_display }}
+            </li>
+        </ul>
+    </div>
+
+
+    <div class="list_body_item c8 action">
+        <!-- Actions sub-view  -->
+        <!-- reworking -->
+        <div class="wrapper">
+            <ul class="unstyled horizontal pull-right">
+
+                <li>
+                    <a href="#" data-action="download" data-ct="playlist" data-id="{{ item.id }}"
+                       data-uuid="{{ item.uuid }}" title="{% trans "Download" %}">
+                        <i class="icon-download-alt"></i>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#" data-action="basket" data-ct="playlist" data-id="{{ item.id }}"
+                       data-uuid="{{ item.uuid }}" title="{% trans "Add to basket" %}">
+                        <i class="icon-plus"></i>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#" data-action="schedule" data-ct="playlist" data-id="{{ item.id }}"
+                       data-uuid="{{ item.uuid }}" title="{% trans "Schedule" %}">
+                        <i class="icon-calendar"></i>
+                    </a>
+                </li>
+
+                {% if user.is_authenticated and user == item.user %}
+                    <li>
+                        <a href="{{ item.get_edit_url }}" data-action="edit" data-ct="playlist" data-id="{{ item.id }}"
+                           data-uuid="{{ item.uuid }}" title="{% trans "Add to basket" %}">
+                            <i class="icon-edit"></i>
+                        </a>
+                    </li>
+                {% endif %}
+
+            </ul>
+        </div>
+
+    </div>
+
+
 </div>

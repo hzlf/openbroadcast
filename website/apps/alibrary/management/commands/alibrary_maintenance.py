@@ -56,7 +56,7 @@ class MaintenanceWorker(object):
 
     def run(self):
 
-        log.info('maintenance malker')
+        log.info('maintenance walker')
         log.info('action: %s' % self.action)
 
         if self.action == 'check_media':
