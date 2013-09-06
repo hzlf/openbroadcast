@@ -52,7 +52,7 @@ ListEditUi = function () {
                     self.merge_items_dialog();
                     break;
                 default:
-                    alert('nothing to do...')
+                    //alert('nothing to do...')
             }
 
         });

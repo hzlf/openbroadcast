@@ -176,6 +176,71 @@
       
       
   &.container
+
+
+    .list_body_item, .list_body_row
+      // primary actions: play/queue
+      ul.action
+
+        li > a.disabled, li > a.disabled:hover
+          color: #a5a5a5 !important
+          background: transparent !important
+          cursor: wait
+          i
+            color: #a5a5a5 !important
+
+
+        li.square
+          padding: 2px 0 0 1px
+          > a
+            border-radius: 1px
+            text-align: center
+            padding: 0 0px 2px 2px
+            color: #00bb00 !important
+            text-decoration: none !important
+
+          &:hover > a
+            background: #00bb00
+            color: #fff !important
+
+
+      // secondary actions: download, collect etc
+      ul.action.secondary
+        li
+          padding: 2px 4px 0 1px
+          > a
+            text-align: center
+            padding: 0 0px 2px 2px
+            color: #6633cc !important
+            text-decoration: none !important
+
+          &:hover > a
+            color: #00bb00 !important
+            background: transparent
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     &.s
       font-size: 90%
       .list_body_item, .list_header_item
@@ -220,22 +285,7 @@
           vertical-align: top
           color: #999999
 
-    // play/queue/etc actions
-    .list_body_item
-      ul.action
 
-        li.square
-          padding: 2px 0 0 1px
-          > a
-            border-radius: 1px
-            text-align: center
-            padding: 0 0px 2px 2px
-            color: #00bb00 !important
-            text-decoration: none !important
-
-          &:hover > a
-            background: #00bb00
-            color: #fff !important
 
               
               
@@ -601,6 +651,7 @@
       width: 197px
       //height: 200px
       height: 235px
+      //height: 255px
       /*background-color: #ff0000 */
       background-repeat: no-repeat
       overflow: hidden
@@ -643,7 +694,7 @@
       /* Play icon */
       .wrapper_icon
         width: 24px
-        height: 24px
+        height: 32px
         padding: 2px 0 0 4px
 
 	
@@ -670,20 +721,56 @@
             background-position: 0 0
             background-repeat: no-repeat
 
-		
-      .spacer 
+
+      // moving pat & inline tagcloud
+      .spacer
+        position: relative
         // height: 150px
-        height: 171px
+        height: 163px
         -webkit-transition-property: height
         -webkit-transition-duration: .2s
         // background-color: #ff00ff
         &.license
           background-position: right bottom
-          
+
+        // cloud
+        ul.tags
+          position: absolute
+          bottom: 0px
+          right: 0
+          opacity: 0.88
+          padding-bottom: 2px
+          li
+            margin: 2px 2px 0 0
+            padding: 0 4px
+            line-height: 14px
+            background: #333
+            color: white
+            border: 1px solid #343434
+            float: right
+            text-transform: uppercase
+            &.active
+              background: #00bb00
+              border-color: #00bb00
+
+
+
+      // animate on item hover
       &.hover .spacer
-        height: 88px
+        height: 82px
         -webkit-transition-property: height
         -webkit-transition-duration: .0s
+
+        ul.tags
+          position: absolute
+          opacity: 1
+          background-color: #333
+          -webkit-transition-property: opacity, background-color
+          -webkit-transition-duration: .1s
+          li
+            border: 1px solid #626262
+
+
 
 		
       /* Adjustable infoo panel */
@@ -692,8 +779,18 @@
         ul li
           /*padding: 2px 2px 2px 5px
         .wrapper_inner
-          height: 102px
+          height: 98px
           overflow: hidden
+
+
+
+      .wrapper_action
+        background: #f5f5f5
+        li
+          float: right
+          i
+            font-size: 120%
+
 
 
 
@@ -799,8 +896,19 @@
     background-color: #DDFFD9
     color: #00BB00
 
+
+
 /* ---------- tagbar/search ---------- */
-.searchbar
+.__searchbar
+
+  &.hover
+    background-color: #333 !important
+
+  // override defaults. TODO: remove original styles
+
+  .tagbar
+    background: none
+    border: none
 
   margin-top: 8px
 
@@ -823,3 +931,66 @@
       color: #00BB00
     &.focus
       color: #333333
+
+
+/* ---------- tagbar/search for gianluca :) ---------- */
+.searchbar
+
+  background-color: #efefef
+  -webkit-transition-property: background-color
+  -webkit-transition-duration: .3s
+
+  &.hover
+    background-color: #333 !important
+    -webkit-transition-property: background-color
+    -webkit-transition-duration: .3s
+
+
+  // search field (wrapper)
+  .search-input
+    margin: 3px 0 0 2px
+    height: 17px
+    padding: 0
+    span
+      display: none
+    input
+      border: 0px none
+      background: none
+      margin: 0px
+      line-height: 10px
+      padding: 0px 2px 0px 4px
+      &.blur
+        color: #999999
+      &.focus
+        color: #333
+    a #searchbar_input
+      margin: 0 0 0 0
+      &.blur
+        color: #00BB00
+      &.focus
+        color: #333333
+
+
+    &.active
+      border: 1px solid white
+      background: #ddffd9
+      span
+        display: inline
+
+
+
+  // override defaults. TODO: remove original styles
+  .tagbar
+    background: none
+    border: none
+
+    a
+      float: right
+      padding: 0px 6px 0px 5px !important
+      margin: 3px 2px 0px 1px !important
+
+  margin-top: 8px
+
+  //position: absolute // TODO: how to achieve this.. ???
+  //width: 100%
+  z-index: 1002

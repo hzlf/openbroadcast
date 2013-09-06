@@ -222,4 +222,10 @@ def restart():
         
     except Exception, e:
         pass
-        
+
+
+def doc_make():
+    local('cd doc && make html')
+
+def doc_push():
+    local('rsync -a doc/_build/html root@node05.daj.anorg.net:/var/www/doc.openbroadcast.ch')

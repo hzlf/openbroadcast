@@ -87,7 +87,7 @@ aplayer.ui.bind = function() {
 
 	// handles '.playable' elements
     // used to play media items
-	$('body').on('click', '.playable.popup', function(e) {
+	$('body').on('click', '.playable.popup:not(".disabled")', function(e) {
 
 		e.preventDefault();
 

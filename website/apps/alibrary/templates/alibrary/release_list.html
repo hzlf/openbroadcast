@@ -48,18 +48,22 @@
 
 {% block searchbar %}
 
-    <div class="searchbar">
+    <div class="searchbar hoverable">
         <div class="tagbar">
 
 
-            {% include "alibrary/searchbar/_relation_filter.html" %}
-
-            {% include "alibrary/searchbar/_filterlist.html" %}
-
             <!-- search field -->
-            <div style="float: left;">
-                <input type="text" id="searchbar_input" name="searchbar_input" value="&lt; Search &gt;" class="blur"/>
+            <div style="float: left;" class="search-input{% if get.q %} active{% endif %}">
+
+                <div>
+                    <span>{% trans "Search" %}:</span>
+                    <input type="text" id="searchbar_input"
+                           name="searchbar_input" placeholder="{% trans "Type to search" %}"
+                           value="{% if get.q %}{{ get.q }}{% endif %}" class="blur"/>
+                </div>
+
             </div>
+
 
             <!-- TODO: rework! -->
             <div style="padding: 4px 3px 0px;" class="pull-right">
@@ -69,6 +73,11 @@
                     </a>
                 {% endif %}
             </div>
+
+
+            {% include "alibrary/searchbar/_relation_filter.html" %}
+
+            {% include "alibrary/searchbar/_filterlist.html" %}
 
             <div class="clear"></div>
         </div>
@@ -95,11 +104,13 @@
                            class="action list_style s {% if list_style == "s" %}active{% endif %}"><img
                                 src="/static/img/base/spacer.png" width="16" height="16" alt="Disply Type"/></a>
                     </li>
+                    <!--
                     <li class="left">
                         <a href="{% spurl base=request.get_full_path set_query="list_style=m" %}" title="Set Style"
                            class="action list_style m {% if list_style == "m" %}active{% endif %}"><img
                                 src="/static/img/base/spacer.png" width="16" height="16" alt="Disply Type"/></a>
                     </li>
+                    -->
                     <li class="left">
                         <a href="{% spurl base=request.get_full_path set_query="list_style=l" %}" title="Set Style"
                            class="action list_style l {% if list_style == "l" %}active{% endif %}"><img

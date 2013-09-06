@@ -67,11 +67,18 @@ class ReleaseListView(PaginationMixin, ListView):
         self.extra_context['filter'] = self.filter
         self.extra_context['relation_filter'] = self.relation_filter
         self.extra_context['tagcloud'] = self.tagcloud
+
+        # active tags
+        if self.request.GET.get('tags', None):
+            tag_ids = []
+            for tag_id in self.request.GET['tags'].split(','):
+                tag_ids.append(int(tag_id))
+            self.extra_context['active_tags'] = tag_ids
         #self.extra_context['release_list'] = self.filter
     
         # hard-coded for the moment
         
-        self.extra_context['list_style'] = self.request.GET.get('list_style', 's')
+        self.extra_context['list_style'] = self.request.GET.get('list_style', 'l')
         #self.extra_context['list_style'] = 's'
         
         self.extra_context['get'] = self.request.GET
@@ -262,7 +269,12 @@ class ReleaseEditView(UpdateView):
     
 
 
-    """"""
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.has_perm('alibrary.edit_release'):
+            return HttpResponseForbidden()
+        return super(ReleaseEditView, self).dispatch(request, *args, **kwargs)
+
+
     def form_valid(self, form):
         context = self.get_context_data()
         # get the inline forms

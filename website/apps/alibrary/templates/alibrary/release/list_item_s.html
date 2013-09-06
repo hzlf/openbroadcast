@@ -1,4 +1,4 @@
-{% load thumbnail i18n truncate display_tags arating_tags spacify_tags spurl %}
+{% load thumbnail i18n truncate display_tags arating_tags spacify_tags spurl guardian_tags %}
 
 
 <!-- list item s -->
@@ -8,31 +8,9 @@
 
 	<div class="list_body_item c1 image_center_bg" {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 36x36 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
 
-        <ul class="unstyled action">
-
-            <li class="square">
-                <a href="#"
-                   data-ct="release"
-                   data-resource_uri="{{ item.get_api_url }}"
-                   data-offset=0
-                   data-mode="replace"
-                   title="{% trans "Play" %}" class="playable popup">
-                    <i class="icon icon-play"></i>
-                </a>
-            </li>
-
-            <li class="square">
-                <a href="#"
-                   data-ct="release"
-                   data-resource_uri="{{ item.get_api_url }}"
-                   data-offset=0
-                   data-mode="queue"
-                   title="{% trans "Queue" %}" class="playable popup">
-                    <i class="icon icon-reorder"></i></a>
-                </a>
-            </li>
-
-        </ul>
+        {% with object=item ct="release" %}
+        {% include "alibrary/element/_item_actions_primary.html" %}
+        {% endwith %}
 
 	</div>
 	<div class="list_body_item c2">
@@ -124,10 +102,9 @@
 	<div class="list_body_item c6">
 		<ul class="unstyled">
 			<li>
-				<!--
-				&nbsp;{{ item.releasedate|date:"SHORT_DATE_FORMAT" }}
-				-->
-				&nbsp;{{ item.releasedate_approx|spacify }}
+                {% if  item.releasedate_approx %}
+				{{ item.releasedate_approx|spacify }}
+				{% endif %}
 			</li>
 			<li class="small">
 				{% if  item.release_country %}
@@ -150,33 +127,41 @@
 		</ul>
 	</div>
 	<div class="list_body_item c8 action">
-		<!-- Actions sub-view  -->
-		<div class="wrapper">
-			<div class="right">
-				<ul class="unstyled">
-
-                    <!-- legacy version
-                    <li class="basket">
-						<a href="#" title="{% trans "Add to basket" %}" class="collectable"><img src="/static/img/base/spacer.png" width="16" height="16" alt="{% trans "Add to basket" %}" /></a>
-					</li>-->
-
-                    <li>
-                        <a href="#" data-action="collect"><i class="icon icon-plus"></i></a>
-                    </li>
 
 
+        <ul class="unstyled action secondary horizontal">
 
+            <li>
+                <a href="#release:{{ item.pk }}:mp3"
+                   class="downloadable queue{% if not perms.alibrary.downoad_media %} disabled{% endif %}"
+                   data-ct="release"
+                   data-resource_uri="{{ item.get_api_url }}"
+                   title="{% trans "Download" %}">
+                    <i class="icon icon-download-alt"></i>
+                </a>
+            </li>
 
-				</ul>
-			</div>
-			<div>
-				<ul class="unstyled">
-					<li class="download">
-						<a href="#release:{{ item.pk }}:mp3" title="{% trans "Download Release" %}" class="downloadable queue"><img src="/static/img/base/spacer.png" width="16" height="16" alt="{% trans "Download Release" %}" /></a>
-					</li>
-				</ul>
-			</div>
-			<div class="clear"></div>
-		</div>
+            <li>
+                <a href="#"
+                   class="{% if not user.is_authenticated %} disabled{% endif %}"
+                   data-action="collect"
+                   title="{% trans "Add to playlist" %}">
+                    <i class="icon icon-plus"></i>
+                </a>
+            </li>
+
+            {% if  perms.alibrary.edit_release %}
+            <li>
+                <a href="{{ item.get_edit_url }}"
+                   class=""
+                   title="{% trans "Edit" %}">
+                    <i class="icon icon-edit"></i>
+                </a>
+            </li>
+            {% endif %}
+
+        </ul>
+
 	</div>
+
 </div>

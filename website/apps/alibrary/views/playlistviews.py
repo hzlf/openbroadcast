@@ -60,7 +60,7 @@ class PlaylistListView(PaginationMixin, ListView):
         self.extra_context['relation_filter'] = self.relation_filter
         self.extra_context['tagcloud'] = self.tagcloud
         
-        self.extra_context['list_style'] = self.request.GET.get('list_style', 's')
+        self.extra_context['list_style'] = self.request.GET.get('list_style', 'l')
         self.extra_context['get'] = self.request.GET
         
         context.update(self.extra_context)
