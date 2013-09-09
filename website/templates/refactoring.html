@@ -8,8 +8,8 @@
     {% include "_head.html" %}
 
     <!-- css -->
-    {% render_block "css" %}
-    {# render_block "css" postprocessor "compressor.contrib.sekizai.compress" #}
+    {# render_block "css" #}
+    {% render_block "css" postprocessor "compressor.contrib.sekizai.compress" %}
 
     <!-- js head -->
     {% render_block "js-head" %}
@@ -182,11 +182,16 @@
 <!--/ js-head -->
 
 <!-- js -->
-{% render_block "js" %}
+{# render_block "js" #}
+{% render_block "js" postprocessor "compressor.contrib.sekizai.compress" %}
 <!--/ js -->
+
+<!-- js ext (like soket.io etc) -->
+{% render_block "js-ext" %}
 
 <!-- js-post -->
 {% render_block "js-post" %}
+{# render_block "js-post" postprocessor "compressor.contrib.sekizai.compress" #}
 
 
 {% include 'autocomplete_light/static.html' %}

@@ -14,14 +14,10 @@
 
     <div class="spacer tag-cloud">
 
-
         <ul class="tags unstyled horizontal">
             {% for tag in item.tags|slice:":8" %}
-
-
                 <li class="{% if tag.pk in active_tags %}active{% endif %}">{{ tag.name|truncate_chars_inner:10 }}</li>
             {% endfor %}
-
         </ul>
 
     </div>
@@ -87,46 +83,6 @@
                 </ul>
             </div>
 
-            <!--
-            <div class="list_body_item c8 action">
-
-                <ul class="unstyled action secondary horizontal clearfix">
-
-
-                    {% if  perms.alibrary.edit_release %}
-                        <li>
-                            <a href="{{ item.get_edit_url }}"
-                               class=""
-                               title="{% trans "Edit" %}">
-                                <i class="icon icon-large icon-edit"></i>
-                            </a>
-                        </li>
-                    {% endif %}
-
-                    <li>
-                        <a href="#release:{{ item.pk }}:mp3"
-                           class="downloadable queue{% if not perms.alibrary.downoad_media %} disabled{% endif %}"
-                           data-ct="release"
-                           data-resource_uri="{{ item.get_api_url }}"
-                           title="{% trans "Download" %}">
-                            <i class="icon icon-large icon-download-alt"></i>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="#"
-                           class="{% if not user.is_authenticated %} disabled{% endif %}"
-                           data-action="collect"
-                           title="{% trans "Add to playlist" %}">
-                            <i class="icon icon-large icon-plus"></i>
-                        </a>
-                    </li>
-
-                </ul>
-
-
-            </div>
-            -->
 
 
         </div>

@@ -1,0 +1,1446 @@
+/* vars.sass */
+/* line 3, ../sass/element/_listview.sass */
+.listhead {
+  padding: 4px 2px 3px 5px;
+  border-bottom: 1px solid #bbbbbb;
+  font-size: 90%;
+  height: 20px;
+  margin-top: 2px;
+}
+/* line 10, ../sass/element/_listview.sass */
+.listhead p.pagination {
+  padding: 0 0 0 0;
+  margin: 0 0 0 0;
+  font-size: 100%;
+}
+/* line 16, ../sass/element/_listview.sass */
+.listhead .wrapper.list_style {
+  padding: 2px 0 0 0;
+  height: 20px;
+}
+/* line 20, ../sass/element/_listview.sass */
+.listhead .wrapper.list_style a.action.list_style {
+  padding: 0 0 0 2px;
+  background-position: 0px 0px;
+  display: block;
+  height: 16px;
+}
+/* line 25, ../sass/element/_listview.sass */
+.listhead .wrapper.list_style a.action.list_style:hover, .listhead .wrapper.list_style a.action.list_style.active {
+  background-position: 0 -16px;
+}
+/* line 27, ../sass/element/_listview.sass */
+.listhead .wrapper.list_style a.action.list_style.s {
+  background-image: url("/static/img/base/listview.style.s.png");
+}
+/* line 29, ../sass/element/_listview.sass */
+.listhead .wrapper.list_style a.action.list_style.m {
+  background-image: url("/static/img/base/listview.style.m.png");
+}
+/* line 31, ../sass/element/_listview.sass */
+.listhead .wrapper.list_style a.action.list_style.l {
+  background-image: url("/static/img/base/listview.style.l.png");
+}
+
+/* line 36, ../sass/element/_listview.sass */
+.listview.container {
+  /*background-color: #ababab; */
+  display: table;
+  width: 100%;
+  border-spacing: 0px;
+}
+/* line 40, ../sass/element/_listview.sass */
+.listview.container .list_body_row ul {
+  margin: 0;
+}
+/* line 44, ../sass/element/_listview.sass */
+.listview.container .list_body_row .license img {
+  height: 10px;
+}
+/* line 53, ../sass/element/_listview.sass */
+.listview.container .list_header {
+  display: table-row;
+  background-color: #e5e5e5;
+  color: #666666;
+  text-transform: uppercase;
+}
+/* line 58, ../sass/element/_listview.sass */
+.listview.container .list_header .list_header_item {
+  display: table-cell;
+  border-bottom: 1px solid #bbbbbb;
+}
+/* line 61, ../sass/element/_listview.sass */
+.listview.container .list_header .list_header_item.sortable {
+  background-color: #dddddd;
+  background-position: right center;
+  background-repeat: no-repeat;
+  background-image: url("/static/img/prototype/table_order_indicator.png");
+}
+/* line 66, ../sass/element/_listview.sass */
+.listview.container .list_header .list_header_item.active {
+  background-color: #cccccc;
+  background-position: right center;
+  background-repeat: no-repeat;
+}
+/* line 70, ../sass/element/_listview.sass */
+.listview.container .list_header .list_header_item.active.ascending {
+  background-image: url("/static/img/prototype/table_order_asc.png");
+}
+/* line 72, ../sass/element/_listview.sass */
+.listview.container .list_header .list_header_item.active.descending {
+  background-image: url("/static/img/prototype/table_order_desc.png");
+}
+/* line 74, ../sass/element/_listview.sass */
+.listview.container .list_header .list_header_item a {
+  color: #666666;
+}
+/* line 76, ../sass/element/_listview.sass */
+.listview.container .list_body {
+  display: table-row-group;
+}
+/* line 78, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_row {
+  display: table-row;
+  /* Status dependant styleing */
+  /* Unpublished, grey text */
+  /* Owner */
+}
+/* line 81, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_row span.badge {
+  height: 10px;
+  margin-top: 3px;
+  background: orange;
+  display: block;
+  padding: 0 3px;
+  color: white;
+  font-size: 9px;
+  line-height: 10px;
+  font-weight: normal;
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+/* line 93, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_row span.badge:first-child {
+  margin-right: 12px;
+}
+/* line 95, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_row span.badge.top {
+  background: #00bb00;
+}
+/* line 97, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_row span.badge.flop {
+  background: red;
+}
+/* line 101, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_row.selection {
+  background-color: #e4ffe4;
+}
+/* line 103, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_row.selection li.indicator {
+  background-image: url(/static/img/base/listview.row.selection.bg.png);
+  background-repeat: no-repeat;
+  background-position: 0 -16px;
+}
+/* line 107, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_row.hover {
+  background-color: #e4e4e4;
+}
+/* line 109, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_row.selection.hover {
+  background-color: #cbe5cb;
+}
+/* line 113, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_row.locked {
+  background-image: url(/static/img/prototype/list_closed_bg.png);
+  background-color: #ffe1d2;
+}
+/* line 116, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_row:hover {
+  background-color: #e9e9e9;
+}
+/* line 121, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_row.unpublished .list_body_item a {
+  color: #666666;
+}
+/* line 124, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_row.owner {
+  background-image: url(/static/img/prototype/list_closed_bg.png);
+}
+/* line 132, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_row {
+  border-bottom: 1px solid #dddddd;
+}
+/* line 138, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_item {
+  vertical-align: top !important;
+  display: table-cell;
+  border-bottom: 1px solid #dddddd;
+  color: #666666;
+}
+/* line 143, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_item .small {
+  line-height: 18px;
+}
+/* line 147, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_item ul.small li {
+  font-weight: normal;
+  font-size: 90%;
+}
+/* line 150, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_item ul.small li.highlight {
+  text-transform: uppercase;
+}
+/* line 152, ../sass/element/_listview.sass */
+.listview.container .list_body .list_body_item ul.small li.highlight small {
+  color: #00bb00;
+}
+/* line 160, ../sass/element/_listview.sass */
+.listview.footer {
+  border-top: none;
+  margin: 0;
+  padding: 8px 2px 3px 5px;
+  font-size: 90%;
+  clear: both;
+}
+/* line 167, ../sass/element/_listview.sass */
+.listview.footer .ipp a.active {
+  color: #00bb00;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+/* line 173, ../sass/element/_listview.sass */
+.listview.footer .control_selection span {
+  color: #999999;
+}
+/* line 175, ../sass/element/_listview.sass */
+.listview.footer .control_selection a.action {
+  /* background: none */
+}
+/* line 179, ../sass/element/_listview.sass */
+.listview.container {
+  /* releases */
+  /* playlists */
+  /* artists */
+  /* labels */
+  /* medias */
+  /* transmissions */
+  /* downloads */
+}
+/* line 186, ../sass/element/_listview.sass */
+.listview.container .list_body_item ul.action li > a.disabled, .listview.container .list_body_item ul.action li > a.disabled:hover, .listview.container .list_body_row ul.action li > a.disabled, .listview.container .list_body_row ul.action li > a.disabled:hover {
+  color: #a5a5a5 !important;
+  background: transparent !important;
+  cursor: wait;
+}
+/* line 190, ../sass/element/_listview.sass */
+.listview.container .list_body_item ul.action li > a.disabled i, .listview.container .list_body_item ul.action li > a.disabled:hover i, .listview.container .list_body_row ul.action li > a.disabled i, .listview.container .list_body_row ul.action li > a.disabled:hover i {
+  color: #a5a5a5 !important;
+}
+/* line 194, ../sass/element/_listview.sass */
+.listview.container .list_body_item ul.action li.square, .listview.container .list_body_row ul.action li.square {
+  padding: 2px 0 0 1px;
+}
+/* line 196, ../sass/element/_listview.sass */
+.listview.container .list_body_item ul.action li.square > a, .listview.container .list_body_row ul.action li.square > a {
+  border-radius: 1px;
+  text-align: center;
+  padding: 0 0px 2px 2px;
+  color: #00bb00 !important;
+  text-decoration: none !important;
+}
+/* line 203, ../sass/element/_listview.sass */
+.listview.container .list_body_item ul.action li.square:hover > a, .listview.container .list_body_row ul.action li.square:hover > a {
+  background: #00bb00;
+  color: white !important;
+}
+/* line 210, ../sass/element/_listview.sass */
+.listview.container .list_body_item ul.action.secondary li, .listview.container .list_body_row ul.action.secondary li {
+  padding: 2px 4px 0 1px;
+}
+/* line 212, ../sass/element/_listview.sass */
+.listview.container .list_body_item ul.action.secondary li > a, .listview.container .list_body_row ul.action.secondary li > a {
+  text-align: center;
+  padding: 0 0px 2px 2px;
+  color: #6633cc !important;
+  text-decoration: none !important;
+}
+/* line 218, ../sass/element/_listview.sass */
+.listview.container .list_body_item ul.action.secondary li:hover > a, .listview.container .list_body_row ul.action.secondary li:hover > a {
+  color: #00bb00 !important;
+  background: transparent;
+}
+/* line 245, ../sass/element/_listview.sass */
+.listview.container.s {
+  font-size: 90%;
+}
+/* line 247, ../sass/element/_listview.sass */
+.listview.container.s .list_body_item, .listview.container.s .list_header_item {
+  padding: 2px;
+}
+/* line 249, ../sass/element/_listview.sass */
+.listview.container.s .c1 {
+  width: 42px;
+}
+/* line 252, ../sass/element/_listview.sass */
+.listview.container .list_body_row {
+  height: 40px;
+}
+/* line 255, ../sass/element/_listview.sass */
+.listview.container .list_body_item.action {
+  padding: 4px 0 0 0;
+}
+/* line 257, ../sass/element/_listview.sass */
+.listview.container .list_body_item.action div.wrapper div {
+  width: 16px;
+}
+/* line 259, ../sass/element/_listview.sass */
+.listview.container .list_body_item.action div.wrapper div ul li {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+/* line 263, ../sass/element/_listview.sass */
+.listview.container .list_body_item.action div.wrapper div ul li a {
+  display: block;
+  width: 16px;
+  height: 16px;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+}
+/* line 269, ../sass/element/_listview.sass */
+.listview.container .list_body_item.action div.wrapper div ul li a:hover {
+  background-position: 0 -16px;
+}
+/* line 271, ../sass/element/_listview.sass */
+.listview.container .list_body_item.action div.wrapper div ul li.play a {
+  background-image: url(/static/img/base/listview.row.play.button.png);
+}
+/* line 273, ../sass/element/_listview.sass */
+.listview.container .list_body_item.action div.wrapper div ul li.download a {
+  background-image: url(/static/img/base/listview.row.download.bg.png);
+}
+/* line 275, ../sass/element/_listview.sass */
+.listview.container .list_body_item.action div.wrapper div ul li.basket a {
+  background-image: url(/static/img/base/listview.row.basket.bg.png);
+}
+/* line 280, ../sass/element/_listview.sass */
+.listview.container .list_body_item a span.filter {
+  padding: 0 0 0 12px;
+  /*background-color: #00ffff */
+  background-image: url(/static/img/base/listview.filter.png);
+  background-repeat: no-repeat;
+  font-size: 9px;
+  vertical-align: top;
+  color: #999999;
+}
+/* line 294, ../sass/element/_listview.sass */
+.listview.container .list_body_item.image_center_bg {
+  background-repeat: no-repeat;
+  background-position: center;
+}
+/* line 298, ../sass/element/_listview.sass */
+.listview.container .list_body ul {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+}
+/* line 303, ../sass/element/_listview.sass */
+.listview.container.s .c1 {
+  width: 64px;
+  background-position: 28px center;
+}
+/* line 309, ../sass/element/_listview.sass */
+.listview.container.s .c1.list_body_item {
+  background-repeat: no-repeat;
+}
+/* line 311, ../sass/element/_listview.sass */
+.listview.container.s .c1 img {
+  width: 62px;
+  height: 36px;
+}
+/* line 314, ../sass/element/_listview.sass */
+.listview.container.s .c1 ul li {
+  display: block;
+  width: 16px;
+  padding: 0px 0 0 0px;
+}
+/* line 318, ../sass/element/_listview.sass */
+.listview.container.s .c1 ul li a {
+  display: block;
+  width: 16px;
+  height: 16px;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+}
+/* line 324, ../sass/element/_listview.sass */
+.listview.container.s .c1 ul li a:hover {
+  background-position: 0 -16px;
+}
+/* line 326, ../sass/element/_listview.sass */
+.listview.container.s .c1 ul li.play a {
+  background-image: url(/static/img/base/listview.row.play.button.png);
+}
+/* line 328, ../sass/element/_listview.sass */
+.listview.container.s .c1 ul li.play span {
+  background-image: url(/static/img/base/listview.row.play.button.disabled.png);
+  display: block;
+  width: 16px;
+  height: 16px;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+}
+/* line 338, ../sass/element/_listview.sass */
+.listview.container.s .playing ul li.play a {
+  background-position: 0 -16px;
+}
+/* line 341, ../sass/element/_listview.sass */
+.listview.container.s .c2 {
+  width: auto;
+}
+/* line 343, ../sass/element/_listview.sass */
+.listview.container.s .c3 {
+  /*width: 64px */
+}
+/* line 345, ../sass/element/_listview.sass */
+.listview.container.s .c4 {
+  width: 126px;
+}
+/* line 347, ../sass/element/_listview.sass */
+.listview.container.s .c5 {
+  width: 78px;
+}
+/* line 349, ../sass/element/_listview.sass */
+.listview.container.s .c6 {
+  width: 60px;
+}
+/* line 352, ../sass/element/_listview.sass */
+.listview.container.s .list_body_item.c6 {
+  text-align: right;
+  padding-right: 24px;
+}
+/* line 355, ../sass/element/_listview.sass */
+.listview.container.s .c7 {
+  width: 80px;
+}
+/* line 357, ../sass/element/_listview.sass */
+.listview.container.s .c8 {
+  width: 32px;
+}
+/* line 363, ../sass/element/_listview.sass */
+.listview.container.releases.s .c1.list_body_item {
+  background-image: url(/static/img/base/defaults/listview.release.xl.png);
+  background-size: 36px 36px;
+}
+/* line 366, ../sass/element/_listview.sass */
+.listview.container.releases.s .c3 {
+  width: 50px;
+  padding-right: 10px;
+}
+/* line 373, ../sass/element/_listview.sass */
+.listview.container.playlists.s .c1.list_body_item, .listview.container.playlist.s .c1.list_body_item {
+  background-image: url(/static/img/base/defaults/listview.playlist.s.png);
+  background-size: 36px 36px;
+}
+/* line 380, ../sass/element/_listview.sass */
+.listview.container.artists.s .c1.list_body_item {
+  background-image: url(/static/img/base/defaults/listview.artist.xl.png);
+  background-size: 36px 36px;
+}
+/* line 383, ../sass/element/_listview.sass */
+.listview.container.artists.s .c6 {
+  width: 30px;
+  padding-right: 0px;
+}
+/* line 389, ../sass/element/_listview.sass */
+.listview.container.labels.s .c6 {
+  width: 30px;
+  padding-right: 0px;
+}
+/* line 395, ../sass/element/_listview.sass */
+.listview.container.medias.s .c1 {
+  width: 28px;
+}
+/* line 397, ../sass/element/_listview.sass */
+.listview.container.medias.s .c1 img {
+  width: 16px;
+  height: 16px;
+}
+/* line 400, ../sass/element/_listview.sass */
+.listview.container.medias.s .c3 {
+  width: 355px;
+}
+/* line 403, ../sass/element/_listview.sass */
+.listview.container.medias.s .c4 {
+  width: 120px;
+}
+/* line 405, ../sass/element/_listview.sass */
+.listview.container.medias.s .c5 {
+  width: 30px;
+}
+/* line 407, ../sass/element/_listview.sass */
+.listview.container.medias.s .c6 {
+  width: 80px;
+}
+/* line 409, ../sass/element/_listview.sass */
+.listview.container.medias.s .c7 {
+  width: 30px;
+}
+/* line 412, ../sass/element/_listview.sass */
+.listview.container.medias.inner.s {
+  margin-top: 20px;
+}
+/* line 414, ../sass/element/_listview.sass */
+.listview.container.medias.inner.s .list_body_row {
+  height: 30px;
+}
+/* line 416, ../sass/element/_listview.sass */
+.listview.container.medias.inner.s .c2 {
+  width: 30px;
+}
+/* line 420, ../sass/element/_listview.sass */
+.listview.container.medias.inner.s .list_body_row:first-child .list_body_item {
+  border-top: 1px solid #dddddd;
+}
+/* line 422, ../sass/element/_listview.sass */
+.listview.container.medias.inner.s .list_body_row .list_body_item {
+  padding: 4px;
+  vertical-align: middle;
+}
+/* line 425, ../sass/element/_listview.sass */
+.listview.container.medias.inner.s .list_body_item.license {
+  width: 100px;
+}
+/* line 427, ../sass/element/_listview.sass */
+.listview.container.medias.inner.s .list_body_item.license a {
+  margin: 0px 0px 0px 25px;
+}
+/* line 435, ../sass/element/_listview.sass */
+.listview.container.transmissions.s .c2 {
+  width: auto;
+}
+/* line 437, ../sass/element/_listview.sass */
+.listview.container.transmissions.s .c3 {
+  width: 80px;
+}
+/* line 439, ../sass/element/_listview.sass */
+.listview.container.transmissions.s .c4 {
+  width: 180px;
+}
+/* line 441, ../sass/element/_listview.sass */
+.listview.container.transmissions.s .c5 {
+  width: 80px;
+}
+/* line 443, ../sass/element/_listview.sass */
+.listview.container.transmissions.s .list_body_item.c3 {
+  text-align: right;
+  padding-right: 24px;
+}
+/* line 449, ../sass/element/_listview.sass */
+.listview.container.downloads.s .list_body_row {
+  height: 22px;
+}
+/* line 451, ../sass/element/_listview.sass */
+.listview.container.downloads.s .c2 {
+  width: auto;
+}
+/* line 453, ../sass/element/_listview.sass */
+.listview.container.downloads.s .c3 {
+  width: 80px;
+  text-align: right;
+  padding-right: 8px;
+}
+/* line 457, ../sass/element/_listview.sass */
+.listview.container.downloads.s .c4 {
+  width: auto;
+  text-align: right;
+  padding-right: 8px;
+}
+/* line 461, ../sass/element/_listview.sass */
+.listview.container.downloads.s .c5 {
+  width: 80px;
+  text-align: right;
+  padding-right: 8px;
+}
+/* line 465, ../sass/element/_listview.sass */
+.listview.container.downloads.s .c6 {
+  width: 80px;
+  text-align: right;
+  padding-right: 8px;
+}
+/* line 470, ../sass/element/_listview.sass */
+.listview.container.s .playing {
+  background-color: #dcffdc;
+}
+
+/**********************************************************
+ * Styles Medium
+ ********************************************************** */
+/* line 484, ../sass/element/_listview.sass */
+.listview.container.releases.m .c1.list_body_item {
+  background-image: url(/static/img/base/defaults/listview.release.xl.png);
+  background-size: 54px 54px;
+}
+/* line 489, ../sass/element/_listview.sass */
+.listview.container.artists.m .c1.list_body_item {
+  background-image: url(/static/img/base/defaults/listview.artist.xl.png);
+  background-size: 54px 54px;
+}
+/* line 492, ../sass/element/_listview.sass */
+.listview.container.artists.m .c2 {
+  width: 214px;
+}
+/* line 496, ../sass/element/_listview.sass */
+.listview.container.playlist.m .c1.list_body_item {
+  background-image: url(/static/img/base/defaults/listview.playlist.xl.png);
+  background-size: 54px 54px;
+}
+/* line 503, ../sass/element/_listview.sass */
+.listview.container.profile.m .c1.list_body_item {
+  background-image: url(/static/img/base/defaults/listview.profile.xl.png);
+  background-size: 54px 54px;
+}
+/* line 508, ../sass/element/_listview.sass */
+.listview.container.profile.m .c3 {
+  width: 178px;
+}
+/* line 510, ../sass/element/_listview.sass */
+.listview.container.profile.m .c4 {
+  width: 320px;
+}
+/* line 512, ../sass/element/_listview.sass */
+.listview.container.profile.m .c4 .inner_row.bottom {
+  width: 316px;
+}
+/* line 515, ../sass/element/_listview.sass */
+.listview.container.m {
+  font-size: 90%;
+}
+/* line 517, ../sass/element/_listview.sass */
+.listview.container.m .list_body_item, .listview.container.m .list_header_item {
+  padding: 2px;
+}
+/* line 520, ../sass/element/_listview.sass */
+.listview.container.m .c1 {
+  width: 84px;
+  background-position: 28px 5px;
+  height: 58px;
+}
+/* line 524, ../sass/element/_listview.sass */
+.listview.container.m .c1 img {
+  width: 84px;
+  height: 58px;
+}
+/* line 527, ../sass/element/_listview.sass */
+.listview.container.m .c1 ul li {
+  display: block;
+  width: 16px;
+  padding: 2px 0 0 0px;
+}
+/* line 532, ../sass/element/_listview.sass */
+.listview.container.m .c1 ul li a {
+  display: block;
+  width: 16px;
+  height: 16px;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+}
+/* line 538, ../sass/element/_listview.sass */
+.listview.container.m .c1 ul li a:hover {
+  background-position: 0 -16px;
+}
+/* line 540, ../sass/element/_listview.sass */
+.listview.container.m .c1 ul li.play a {
+  background-image: url(/static/img/base/listview.row.play.button.png);
+}
+/* line 542, ../sass/element/_listview.sass */
+.listview.container.m .c1 ul li.play span {
+  background-image: url(/static/img/base/listview.row.play.button.disabled.png);
+  display: block;
+  width: 16px;
+  height: 16px;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+}
+/* line 552, ../sass/element/_listview.sass */
+.listview.container.m .playing ul li.play a {
+  background-position: 0 -16px;
+}
+/* line 555, ../sass/element/_listview.sass */
+.listview.container.m .c2 {
+  width: 240px;
+}
+/* line 557, ../sass/element/_listview.sass */
+.listview.container.m .c2.slim {
+  width: 218px;
+}
+/* line 559, ../sass/element/_listview.sass */
+.listview.container.m .c3 {
+  width: 78px;
+}
+/* line 561, ../sass/element/_listview.sass */
+.listview.container.m .c3.external {
+  padding-top: 6px;
+  width: 100px;
+}
+/* line 564, ../sass/element/_listview.sass */
+.listview.container.m .c4 {
+  width: auto;
+}
+/* line 567, ../sass/element/_listview.sass */
+.listview.container.m .c4 .inner_row.top {
+  height: 16px;
+  width: 30px;
+}
+/* line 570, ../sass/element/_listview.sass */
+.listview.container.m .c4 .inner_row.bottom {
+  position: relative;
+  width: 416px;
+  height: 44px;
+}
+/* line 574, ../sass/element/_listview.sass */
+.listview.container.m .c4 .inner_row.bottom ul.tags {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+/* line 578, ../sass/element/_listview.sass */
+.listview.container.m .c4 .inner_row.bottom ul.tags.second_row {
+  bottom: 22px;
+}
+/* line 580, ../sass/element/_listview.sass */
+.listview.container.m .c4 .inner_row.bottom ul.tags li {
+  background-image: url(/static/img/base/element.tag.p.png);
+  background-position: right center;
+  background-repeat: no-repeat;
+  border-left: 1px solid #e3dbf2;
+  height: 18px;
+  margin-bottom: 4px;
+  padding-left: 7px;
+  padding-right: 10px;
+  float: right;
+  margin-right: 4px;
+}
+/* line 591, ../sass/element/_listview.sass */
+.listview.container.m .c4 .inner_row.bottom ul.tags li.active {
+  background-image: url(/static/img/base/element.tag.a.png);
+  border-left: 1px solid #e3ffe8;
+  color: #00bb00;
+}
+
+/**********************************************************
+ * Styles Large
+ ***********************************************************/
+ *
+ * /* Reset all divs to block display (instead of table-way) */
+/* line 616, ../sass/element/_listview.sass */
+.listview.container.releases.l .list_body_row.item {
+  background-image: url(/static/img/base/defaults/listview.release.xl.png);
+}
+/* line 620, ../sass/element/_listview.sass */
+.listview.container.artists.l .list_body_row.item {
+  background-image: url(/static/img/base/defaults/listview.artist.xl.png);
+}
+/* line 624, ../sass/element/_listview.sass */
+.listview.container.playlist.l .list_body_row.item {
+  background-image: url(/static/img/base/defaults/listview.playlist.xl.png);
+}
+
+/* line 627, ../sass/element/_listview.sass */
+.listview.container.l {
+  display: block;
+  font-size: 90%;
+}
+/* line 632, ../sass/element/_listview.sass */
+.listview.container.l .list_body_item, .listview.container.l .list_header_item {
+  padding: 2px;
+}
+/* line 637, ../sass/element/_listview.sass */
+.listview.container.l .list_body_row.item {
+  background-size: 197px 197px;
+}
+/* line 641, ../sass/element/_listview.sass */
+.listview.container.l div.list_body {
+  display: block;
+  /* actually not a real 'row' in this style */
+}
+/* line 644, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.break_line {
+  height: 55px;
+}
+/* line 648, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row {
+  display: block;
+  float: left;
+  width: 197px;
+  height: 235px;
+  /*background-color: #ff0000 */
+  background-repeat: no-repeat;
+  overflow: hidden;
+  border-bottom: 1px solid #dddddd;
+  margin: 9px 14px 0 0;
+  /* Play icon */
+  /* Adjustable infoo panel */
+}
+/* line 662, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row.selection div.wrapper_info, .listview.container.l div.list_body div.list_body_row.selection div.wrapper_action {
+  background-color: #e4ffe4;
+}
+/* line 665, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row.hover {
+  background-color: white;
+}
+/* line 667, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row.hover .wrapper_info {
+  background-color: whitesmoke;
+}
+/* line 669, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row.selection.hover {
+  background-color: white;
+}
+/* line 674, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row.playing ul li.play a {
+  background-position: 0 -16px;
+}
+/* line 680, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row:nth-child(4n) {
+  margin: 9px 0 0 0;
+}
+/* line 686, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row div.list_body_item {
+  display: block;
+  border-bottom: none;
+}
+/* line 691, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row div.list_body_item.action .wrapper {
+  width: 36px;
+  padding: 0 0 0 150px;
+}
+/* line 696, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .wrapper_icon {
+  width: 24px;
+  height: 32px;
+  padding: 2px 0 0 4px;
+}
+/* line 702, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .wrapper_icon ul li {
+  display: block;
+  width: 16px;
+  padding: 2px 0 0 0px;
+}
+/* line 707, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .wrapper_icon ul li a {
+  display: block;
+  width: 16px;
+  height: 16px;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+}
+/* line 713, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .wrapper_icon ul li a:hover {
+  background-position: 0 -16px;
+}
+/* line 715, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .wrapper_icon ul li.play a {
+  background-image: url(/static/img/base/listview.row.play.button.png);
+}
+/* line 717, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .wrapper_icon ul li.play span {
+  background-image: url(/static/img/base/listview.row.play.button.disabled.png);
+  display: block;
+  width: 16px;
+  height: 16px;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+}
+/* line 727, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .spacer {
+  position: relative;
+  cursor: pointer;
+  height: 163px;
+  -webkit-transition-property: height;
+  -webkit-transition-duration: 0.1s;
+}
+/* line 736, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .spacer.license {
+  background-position: right bottom;
+}
+/* line 740, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .spacer ul.tags {
+  position: absolute;
+  bottom: 0px;
+  right: 0;
+  opacity: 0.88;
+  padding-bottom: 2px;
+}
+/* line 746, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .spacer ul.tags li {
+  margin: 2px 2px 0 0;
+  padding: 0 4px;
+  line-height: 14px;
+  background: #333333;
+  color: white;
+  border: 1px solid #343434;
+  float: right;
+  text-transform: uppercase;
+}
+/* line 755, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .spacer ul.tags li.active {
+  background: #00bb00;
+  border-color: #00bb00;
+}
+/* line 762, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row.hover .spacer {
+  height: 82px;
+  -webkit-transition-property: height;
+  -webkit-transition-duration: 0s;
+}
+/* line 767, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row.hover .spacer ul.tags {
+  position: absolute;
+  opacity: 1;
+  background-color: #333333;
+  -webkit-transition-property: opacity, background-color;
+  -webkit-transition-duration: 0.1s;
+}
+/* line 773, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row.hover .spacer ul.tags li {
+  border: 1px solid #626262;
+}
+/* line 780, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .wrapper_info {
+  background-color: white;
+}
+/* line 782, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .wrapper_info ul li {
+  /*padding: 2px 2px 2px 5px */
+}
+/* line 784, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .wrapper_info .wrapper_inner {
+  height: 98px;
+  overflow: hidden;
+}
+/* line 790, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .wrapper_action {
+  background: whitesmoke;
+}
+/* line 792, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .wrapper_action li {
+  float: right;
+}
+/* line 794, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.list_body_row .wrapper_action li i {
+  font-size: 120%;
+}
+
+/* license icon display */
+/* line 830, ../sass/element/_listview.sass */
+.listview.container .list_body_item.links.external ul li {
+  float: left;
+}
+/* line 832, ../sass/element/_listview.sass */
+.listview.container .list_body_item.links.external ul li a {
+  font-size: 16px;
+  color: #5a5a5a;
+}
+/* line 835, ../sass/element/_listview.sass */
+.listview.container .list_body_item.links.external ul li a:hover {
+  color: #6633cc;
+  text-decoration: none;
+}
+/* line 843, ../sass/element/_listview.sass */
+.listview.container.s .list_body_item.license {
+  background-position: center center;
+  background-position-y: 5px;
+}
+/* line 849, ../sass/element/_listview.sass */
+.listview.container.m .list_body_item.license {
+  background-position: 0 4px;
+}
+
+/* overrides for states */
+/* line 856, ../sass/element/_listview.sass */
+.listview.container.downloads .c1 {
+  background-repeat: no-repeat;
+  background-position: 2px 2px;
+  width: 20px;
+}
+/* line 860, ../sass/element/_listview.sass */
+.listview.container.downloads .c1 img {
+  width: 16px;
+  height: 16px;
+}
+/* line 865, ../sass/element/_listview.sass */
+.listview.container.downloads .list_body_row.init .list_body_item {
+  color: #ababab;
+}
+/* line 867, ../sass/element/_listview.sass */
+.listview.container.downloads .list_body_row.init .c1 {
+  background-image: url(/static/img/base/listview.downloads.init.png);
+}
+/* line 871, ../sass/element/_listview.sass */
+.listview.container.downloads .list_body_row.running .list_body_item {
+  color: #ababab;
+}
+/* line 873, ../sass/element/_listview.sass */
+.listview.container.downloads .list_body_row.running .c1 {
+  background-image: url(/static/img/base/listview.downloads.running.png);
+}
+/* line 877, ../sass/element/_listview.sass */
+.listview.container.downloads .list_body_row.done .c1 {
+  background-image: url(/static/img/base/listview.downloads.done.png);
+}
+/* line 881, ../sass/element/_listview.sass */
+.listview.container.downloads .list_body_row.error .list_body_item {
+  background-color: #fff0e1;
+  color: #5a5a5a;
+}
+/* line 884, ../sass/element/_listview.sass */
+.listview.container.downloads .list_body_row.error .c1 {
+  background-image: url(/static/img/base/listview.downloads.error.png);
+}
+/* line 888, ../sass/element/_listview.sass */
+.listview.container.downloads .list_body_row.done.downloaded .list_body_item {
+  background-color: #e4ffe4;
+}
+/* line 890, ../sass/element/_listview.sass */
+.listview.container.downloads .list_body_row.done.downloaded .c1 {
+  /* background-color: #ff00ff */
+  background-image: url(/static/img/base/listview.downloads.downloaded.png);
+}
+
+/* highlighter */
+/* line 898, ../sass/element/_listview.sass */
+.listview.container .list_body span.highlight {
+  background-color: #ddffd9;
+  color: #00bb00;
+}
+
+/* ---------- tagbar/search ---------- */
+/* line 905, ../sass/element/_listview.sass */
+.__searchbar {
+  margin-top: 8px;
+  z-index: 1002;
+}
+/* line 907, ../sass/element/_listview.sass */
+.__searchbar.hover {
+  background-color: #333333 !important;
+}
+/* line 912, ../sass/element/_listview.sass */
+.__searchbar .tagbar {
+  background: none;
+  border: none;
+}
+/* line 921, ../sass/element/_listview.sass */
+.__searchbar #searchbar_input {
+  border: 0px none;
+  background: none repeat scroll 0% 0% transparent;
+  margin: 0px;
+  padding: 2px 2px 0px 4px;
+}
+/* line 927, ../sass/element/_listview.sass */
+.__searchbar #searchbar_input.blur {
+  color: #999999;
+}
+/* line 929, ../sass/element/_listview.sass */
+.__searchbar #searchbar_input.focus {
+  color: #333333;
+}
+/* line 931, ../sass/element/_listview.sass */
+.__searchbar a #searchbar_input {
+  margin: 0 0 0 0;
+}
+/* line 933, ../sass/element/_listview.sass */
+.__searchbar a #searchbar_input.blur {
+  color: #00bb00;
+}
+/* line 935, ../sass/element/_listview.sass */
+.__searchbar a #searchbar_input.focus {
+  color: #333333;
+}
+
+/* ---------- tagbar/search for gianluca :) ---------- */
+/* line 940, ../sass/element/_listview.sass */
+.searchbar {
+  padding: 0 0 3px 0;
+  background-color: #efefef;
+  -webkit-transition-property: background-color;
+  -webkit-transition-duration: 0.3s;
+  margin-top: 8px;
+  z-index: 1002;
+}
+/* line 946, ../sass/element/_listview.sass */
+.searchbar.hover {
+  background-color: #efefef;
+  -webkit-transition-property: background-color;
+  -webkit-transition-duration: 0.3s;
+}
+/* line 954, ../sass/element/_listview.sass */
+.searchbar .search-input {
+  margin: 3px 0 0 2px;
+  height: 17px;
+  padding: 0;
+}
+/* line 958, ../sass/element/_listview.sass */
+.searchbar .search-input ::-webkit-input-placeholder {
+  color: #777777;
+}
+/* line 962, ../sass/element/_listview.sass */
+.searchbar .search-input span, .searchbar .search-input i {
+  display: none;
+}
+/* line 964, ../sass/element/_listview.sass */
+.searchbar .search-input input {
+  border: 0px none;
+  box-shadow: none !important;
+  background: none;
+  margin: 0px;
+  height: 17px;
+  line-height: 17px;
+  padding: 0px 2px 0px 4px;
+}
+/* line 972, ../sass/element/_listview.sass */
+.searchbar .search-input input.blur {
+  color: #5a5a5a;
+}
+/* line 974, ../sass/element/_listview.sass */
+.searchbar .search-input input.focus {
+  color: #333333;
+}
+/* line 976, ../sass/element/_listview.sass */
+.searchbar .search-input a #searchbar_input {
+  margin: 0 0 0 0;
+}
+/* line 978, ../sass/element/_listview.sass */
+.searchbar .search-input a #searchbar_input.blur {
+  color: #00bb00;
+}
+/* line 980, ../sass/element/_listview.sass */
+.searchbar .search-input a #searchbar_input.focus {
+  color: #333333;
+}
+/* line 985, ../sass/element/_listview.sass */
+.searchbar .search-input.active .inner {
+  background: #ddffd9;
+  border: 1px solid white;
+  border-right-color: #7ab89b;
+  border-bottom-color: #7ab89b;
+}
+/* line 990, ../sass/element/_listview.sass */
+.searchbar .search-input.active .inner input {
+  color: #00bb00;
+}
+/* line 992, ../sass/element/_listview.sass */
+.searchbar .search-input.active .inner i {
+  display: inline;
+}
+/* line 994, ../sass/element/_listview.sass */
+.searchbar .search-input.active .inner span {
+  color: #00bb00;
+  padding: 0 0 0 5px;
+  display: inline;
+}
+/* line 1000, ../sass/element/_listview.sass */
+.searchbar .search-clear a {
+  color: #5a5a5a;
+}
+/* line 1002, ../sass/element/_listview.sass */
+.searchbar .search-clear a:hover {
+  color: #00bb00;
+  text-decoration: none;
+}
+/* line 1006, ../sass/element/_listview.sass */
+.searchbar .filter-bar {
+  float: right;
+  margin: 0;
+}
+/* line 1009, ../sass/element/_listview.sass */
+.searchbar .filter-bar a {
+  color: #00bb00;
+  background: #ddffd9;
+  border: 1px solid white;
+  border-right-color: #7ab89b;
+  border-bottom-color: #7ab89b;
+  float: right;
+  padding: 0px 6px 0px 5px !important;
+  margin: 3px 2px 0px 1px !important;
+}
+/* line 1018, ../sass/element/_listview.sass */
+.searchbar .filter-bar a:hover {
+  text-decoration: none;
+}
+/* line 1022, ../sass/element/_listview.sass */
+.searchbar i._icon.icon-delete {
+  background-image: url(/static/img/prototype/tag_remove.png);
+  background-position: 0 11px;
+  white-space: nowrap;
+  padding: 0 0 0 12px;
+}
+/* line 1029, ../sass/element/_listview.sass */
+.searchbar .tagbar {
+  background: none;
+  border: none;
+}
+/* line 1033, ../sass/element/_listview.sass */
+.searchbar .tagbar a {
+  float: right;
+  padding: 0px 6px 0px 5px !important;
+  margin: 3px 2px 0px 1px !important;
+}
+
+/* vars.sass */
+/* line 6, ../sass/element/_itemview.sass */
+section.comments.disqus {
+  margin-top: 36px;
+}
+/* line 9, ../sass/element/_itemview.sass */
+section.comments.disqus #footer {
+  display: none !important;
+  height: 0px;
+  width: 0px;
+}
+
+/* line 15, ../sass/element/_itemview.sass */
+.item_detail section.shaded {
+  background-color: whitesmoke;
+}
+
+/* line 25, ../sass/element/_itemview.sass */
+.item_detail .item_inner section h2 {
+  font-size: 16px;
+  color: #a5a5a5;
+}
+/* line 31, ../sass/element/_itemview.sass */
+.item_detail .item_inner section .s .list_body_row.item:first-child .list_body_item {
+  border-top: 1px solid #dddddd;
+}
+/* line 34, ../sass/element/_itemview.sass */
+.item_detail .item_inner section.top, .item_detail .item_inner section.flop, .item_detail .item_inner section.contribution {
+  margin-top: 15px;
+}
+/* line 37, ../sass/element/_itemview.sass */
+.item_detail .item_inner section.description {
+  margin-top: 15px;
+}
+/* line 42, ../sass/element/_itemview.sass */
+.item_detail .item_inner section.profile {
+  margin-top: 15px;
+}
+/* line 47, ../sass/element/_itemview.sass */
+.item_detail .item_inner section.history {
+  margin-top: 15px;
+}
+/* line 49, ../sass/element/_itemview.sass */
+.item_detail .item_inner section.history div.item {
+  border-bottom: 1px solid #dddddd;
+}
+/* line 53, ../sass/element/_itemview.sass */
+.item_detail .item_inner section.history div.item p {
+  color: #5a5a5a;
+  font-size: 90%;
+}
+/* line 57, ../sass/element/_itemview.sass */
+.item_detail .item_inner section.appearance {
+  margin-top: 15px;
+}
+/* line 61, ../sass/element/_itemview.sass */
+.item_detail .item_inner section.media {
+  margin-top: 15px;
+}
+
+/* line 65, ../sass/element/_itemview.sass */
+.iteminfo {
+  padding: 0;
+  font-size: 90%;
+  line-height: 11px;
+  text-align: left;
+}
+/* line 76, ../sass/element/_itemview.sass */
+.iteminfo .image img {
+  width: 135px;
+  height: 135px;
+}
+/* line 88, ../sass/element/_itemview.sass */
+.iteminfo .container_content dl {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+  width: 100%;
+  margin: 0 0 7px;
+}
+/* line 95, ../sass/element/_itemview.sass */
+.iteminfo .container_content dl.contact div p {
+  line-height: 140%;
+  padding: 0 0 11px !important;
+}
+/* line 98, ../sass/element/_itemview.sass */
+.iteminfo .container_content dl.tags {
+  width: 420px;
+  float: left;
+}
+/* line 104, ../sass/element/_itemview.sass */
+.iteminfo .container_content dl.license p {
+  padding: 4px 0 0 0 !important;
+}
+/* line 106, ../sass/element/_itemview.sass */
+.iteminfo .container_content dl.license img {
+  height: 10px;
+}
+/* line 110, ../sass/element/_itemview.sass */
+.iteminfo .container_content dl dd.relations a {
+  color: #5a5a5a;
+  text-decoration: none;
+}
+/* line 117, ../sass/element/_itemview.sass */
+.iteminfo .container_content dl dd.relations a:hover {
+  color: #6633cc;
+}
+/* line 119, ../sass/element/_itemview.sass */
+.iteminfo .container_content dl dd.relations i {
+  font-size: 200%;
+  line-height: 17px;
+}
+/* line 126, ../sass/element/_itemview.sass */
+.iteminfo .container_content dl.links.external dd {
+  float: none;
+}
+/* line 135, ../sass/element/_itemview.sass */
+.iteminfo .container_content li {
+  padding: 0;
+  margin: 0;
+}
+/* line 140, ../sass/element/_itemview.sass */
+.iteminfo .container_content p {
+  color: #666666;
+}
+/* line 142, ../sass/element/_itemview.sass */
+.iteminfo .container_content p.label {
+  width: 70px;
+  color: black;
+}
+/* line 147, ../sass/element/_itemview.sass */
+.iteminfo .container_image {
+  padding: 14px;
+}
+/* line 149, ../sass/element/_itemview.sass */
+.iteminfo .container_image a {
+  display: block;
+  border: 1px solid whitesmoke;
+}
+/* line 152, ../sass/element/_itemview.sass */
+.iteminfo .container_image a:hover {
+  border: 1px solid #00bb00;
+}
+/* line 157, ../sass/element/_itemview.sass */
+.iteminfo .item_menu h3 {
+  margin: 0;
+  padding: 0;
+  text-transform: uppercase;
+  font-size: 140%;
+}
+/* line 162, ../sass/element/_itemview.sass */
+.iteminfo .item_menu ul {
+  margin: 0px;
+}
+
+/* line 165, ../sass/element/_itemview.sass */
+.item_menu {
+  padding: 0px;
+  margin: 0px;
+  background-color: whitesmoke;
+  height: auto;
+  float: left;
+  width: 100%;
+  font-size: 90%;
+}
+/* line 176, ../sass/element/_itemview.sass */
+.item_menu ul {
+  line-height: 1em;
+  list-style: none outside none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  width: 100%;
+  float: left;
+  bottom: -1px;
+  margin-left: 0px;
+}
+/* line 186, ../sass/element/_itemview.sass */
+.item_menu li {
+  float: left;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #bbbbbb;
+  border: none;
+  padding: 0px;
+  margin: 0 0 0 5px;
+}
+/* line 195, ../sass/element/_itemview.sass */
+.item_menu li.spacer {
+  border: none;
+  border-top: 1px solid whitesmoke;
+  border-bottom: 1px solid #bbbbbb;
+  padding: 5px;
+}
+/* line 200, ../sass/element/_itemview.sass */
+.item_menu li.on, .item_menu li.active {
+  border-bottom: 1px solid white;
+}
+/* line 202, ../sass/element/_itemview.sass */
+.item_menu li.on a, .item_menu li.active a {
+  background-color: white;
+  color: #00bb00;
+}
+/* line 207, ../sass/element/_itemview.sass */
+.item_menu li a {
+  background: none repeat scroll 0 0 #e1e1e1;
+  color: #666666;
+  display: block;
+  margin: 0;
+  text-decoration: none;
+  padding: 5px 10px;
+  padding: 2px 10px;
+}
+/* line 216, ../sass/element/_itemview.sass */
+.item_menu li a.on, .item_menu li a.active {
+  border-bottom: white;
+  background-color: white;
+  color: #00bb00;
+}
+/* line 220, ../sass/element/_itemview.sass */
+.item_menu li a.disabled {
+  color: #c1c1c1;
+  cursor: wait;
+}
+/* line 223, ../sass/element/_itemview.sass */
+.item_menu li a:hover {
+  border-bottom: none;
+  background-color: white;
+  color: #00bb00;
+}
+/* line 227, ../sass/element/_itemview.sass */
+.item_menu li a.disabled:hover {
+  border-bottom: none;
+  background-color: #e1e1e1;
+  color: #c1c1c1;
+}
+
+/* line 239, ../sass/element/_itemview.sass */
+div.item_inner div.container.lyrics {
+  font-size: 115%;
+  line-height: 190%;
+  font-style: italic;
+}
+/* line 244, ../sass/element/_itemview.sass */
+div.item_inner div.container.lyrics p {
+  margin-bottom: 14px;
+}
+
+/* specific items, maybe move to other files some time.. */
+/* line 255, ../sass/element/_itemview.sass */
+section.item_inner .tab-pane section.profile.information h4 {
+  text-transform: none;
+  color: #a5a5a5;
+}
+/* line 258, ../sass/element/_itemview.sass */
+section.item_inner .tab-pane section.profile.information dl {
+  margin: 4px 0 8px;
+}

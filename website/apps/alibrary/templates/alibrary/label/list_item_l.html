@@ -3,14 +3,22 @@
 <div class="list_body_row selectable item artist view edit stream collect download" id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}" {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 200x200 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
 
 	<div class="wrapper_icon">
-		<ul>
-			<li class="play">
-				<a href="{{ item.get_api_url }}#0#replace" title="Play" class="playable popup"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
-			</li>
-		</ul>
+
+        {% with object=item ct="label" %}
+            {% include "alibrary/element/_item_actions_primary.html" %}
+        {% endwith %}
+
 	</div>
 
-	<div class="spacer"></div>
+    <div class="spacer tag-cloud">
+
+        <ul class="tags unstyled horizontal">
+            {% for tag in item.tags|slice:":8" %}
+                <li class="{% if tag.pk in active_tags %}active{% endif %}">{{ tag.name|truncate_chars_inner:10 }}</li>
+            {% endfor %}
+        </ul>
+
+    </div>
 
 	<div class="wrapper_info">
 
@@ -64,29 +72,47 @@
 
 		</div>
 
-		<div class="list_body_item c8 action">
-
-			<!-- Actions sub-view  -->
-			<div class="wrapper">
-				<div class="right">
-					<ul class="unstyled">
-						<li class="basket">
-							<a href="#" title="{% trans "Add to basket" %}" class="collectable"><img src="/static/img/base/spacer.png" width="16" height="16" alt="{% trans "Add to basket" %}" /></a>
-						</li>
-					</ul>
-				</div>
-				<div>
-					<ul class="unstyled">
-						<li class="download">
-							<a href="#release:{{ item.pk }}:mp3" title="{% trans "Download Release" %}" class="downloadable queue"><img src="/static/img/base/spacer.png" width="16" height="16" alt="{% trans "Download Release" %}" /></a>
-						</li>
-					</ul>
-				</div>
-				<div class="clear"></div>
-			</div>
-		</div>
-
 	</div>
+
+
+    <div class="wrapper_action">
+
+
+        <ul class="unstyled action secondary horizontal clearfix">
+
+
+            <li>
+                <a href="#"
+                   class="{% if not user.is_authenticated %} disabled{% endif %}"
+                   data-action="collect"
+                   title="{% trans "Add to playlist" %}">
+                    <i class="icon icon-plus"></i>
+                </a>
+            </li>
+
+            <li>
+                <a href="#label:{{ item.pk }}:mp3"
+                   class="downloadable queue{% if not perms.alibrary.downoad_media %} disabled{% endif %}"
+                   data-ct="release"
+                   data-resource_uri="{{ item.get_api_url }}"
+                   title="{% trans "Download" %}">
+                    <i class="icon icon-download-alt"></i>
+                </a>
+            </li>
+
+            {% if  perms.alibrary.edit_label %}
+                <li>
+                    <a href="{{ item.get_edit_url }}"
+                       class=""
+                       title="{% trans "Edit" %}">
+                        <i class="icon icon-edit"></i>
+                    </a>
+                </li>
+            {% endif %}
+
+        </ul>
+
+    </div>
 
 </div>
 

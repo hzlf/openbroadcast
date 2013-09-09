@@ -467,6 +467,7 @@ INSTALLED_APPS = (
 
     'pushy',
     'nunjucks',
+    'pushy_asset',
     'istats',
 
     # custom apps/*

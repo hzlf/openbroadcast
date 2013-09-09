@@ -70,9 +70,15 @@ class ArtistListView(PaginationMixin, ListView):
         self.extra_context['filter'] = self.filter
         self.extra_context['relation_filter'] = self.relation_filter
         self.extra_context['tagcloud'] = self.tagcloud
-        #self.extra_context['release_list'] = self.filter
+
+        # active tags
+        if self.request.GET.get('tags', None):
+            tag_ids = []
+            for tag_id in self.request.GET['tags'].split(','):
+                tag_ids.append(int(tag_id))
+            self.extra_context['active_tags'] = tag_ids
     
-        self.extra_context['list_style'] = self.request.GET.get('list_style', 's')
+        self.extra_context['list_style'] = self.request.GET.get('list_style', 'l')
         
         self.extra_context['get'] = self.request.GET
         context.update(self.extra_context)
@@ -94,8 +100,10 @@ class ArtistListView(PaginationMixin, ListView):
             qs = Artist.objects.filter(Q(name__istartswith=q))\
             .distinct()
         else:
-            qs = Artist.objects.all()
-            
+            #qs = Artist.objects.all()
+            # only display artists with tracks a.t.m.
+            qs = Artist.objects.filter(media_artist__isnull=False).distinct()
+
             
         order_by = self.request.GET.get('order_by', None)
         direction = self.request.GET.get('direction', None)

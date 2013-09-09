@@ -23,41 +23,15 @@
 
 {% endblock %}
 
+
 {% block searchbar %}
 
-<div class="searchbar">
-	<div class="tagbar">
-
-
-		{% include "alibrary/searchbar/_relation_filter.html" %}
-
-		{% include "alibrary/searchbar/_filterlist.html" %}
-		
-		<!-- search field -->
-		<div style="float: left;">
-			<input type="text" id="searchbar_input" name="searchbar_input" value="&lt; Search &gt;" class="blur" />
-		</div>
-		
-		
-		<!--
-		<a class="pull-right" href="{{ request.path }}">cs</a>
-		-->
-		<!-- TODO: rework! -->
-		<div style="padding: 4px 3px 0px;" class="pull-right">
-			{% if request.path != request.get_full_path %}
-			<a class="pull-right clear-search" href="{{ request.path }}" title="{% trans "Clear Search" %}">
-				<img class="search_clear" src="/static/img/prototype/i_clearsearch.png" alt="Clear search" />
-			</a>
-			{% endif %}
-		</div>
-		
-		<div class="clear"></div>
-	</div>
-</div>
-
-<div id="autocomplete_holder" class="autocomplete holder"></div>
+    {% with object=item ct="artist" %}
+        {% include "alibrary/element/_searchbar.html" %}
+    {% endwith %}
 
 {% endblock %}
+
 
 {% block inner %}
 

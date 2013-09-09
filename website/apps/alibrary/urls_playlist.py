@@ -9,6 +9,7 @@ urlpatterns = patterns('',
     
     url(r'^type/(?P<type>[-\w]+)/user/(?P<user>[-\w]+)/', PlaylistListView.as_view(), name='alibrary-playlist-type-list'),
     url(r'^type/(?P<type>[-\w]+)/', PlaylistListView.as_view(), name='alibrary-playlist-type-list'),
+    url(r'^user/(?P<user>[-\w]+)/', PlaylistListView.as_view(), name='alibrary-playlist-user-list'),
     
     url(r'^create/$', PlaylistCreateView.as_view(), name='alibrary-playlist-create'),
     url(r'^(?P<slug>[-\w]+)/$', PlaylistDetailView.as_view(), name='alibrary-playlist-detail'),

@@ -120,6 +120,8 @@ class PlaylistMenu(CMSAttachMenu):
     def get_nodes(self, request):
         nodes = []
 
+
+        """
         node = NavigationNode(
             _('Broadcast Playlists'),
             reverse('alibrary-playlist-type-list', args=['broadcast']),
@@ -154,6 +156,23 @@ class PlaylistMenu(CMSAttachMenu):
             321
         )
         nodes.append(node)
+        """
+
+
+        node = NavigationNode(
+            _('All Playlists'),
+            reverse('alibrary-playlist-list'),
+            301
+        )
+        nodes.append(node)
+
+        node = NavigationNode(
+            _('My Playlists'),
+            reverse('alibrary-playlist-user-list', kwargs={'user': request.user}),
+            302
+        )
+        nodes.append(node)
+
         
         return nodes
     

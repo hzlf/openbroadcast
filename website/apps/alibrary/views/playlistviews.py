@@ -59,6 +59,13 @@ class PlaylistListView(PaginationMixin, ListView):
         self.extra_context['filter'] = self.filter
         self.extra_context['relation_filter'] = self.relation_filter
         self.extra_context['tagcloud'] = self.tagcloud
+
+        # active tags
+        if self.request.GET.get('tags', None):
+            tag_ids = []
+            for tag_id in self.request.GET['tags'].split(','):
+                tag_ids.append(int(tag_id))
+            self.extra_context['active_tags'] = tag_ids
         
         self.extra_context['list_style'] = self.request.GET.get('list_style', 'l')
         self.extra_context['get'] = self.request.GET
@@ -100,8 +107,10 @@ class PlaylistListView(PaginationMixin, ListView):
             
         if 'user' in self.kwargs:
             user = get_object_or_404(User, username=self.kwargs['user'])
-            qs = qs.filter(type=self.kwargs['type'], user=user)
-            
+            if 'type' in self.kwargs:
+                qs = qs.filter(type=self.kwargs['type'], user=user)
+            else:
+                 qs = qs.filter(type__in=['playlist', 'broadcast'],user=user)
             
         # special relation filters
         self.relation_filter = []

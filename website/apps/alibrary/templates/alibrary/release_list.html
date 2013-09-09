@@ -46,46 +46,15 @@
 
 {% endblock %}
 
+
 {% block searchbar %}
 
-    <div class="searchbar hoverable">
-        <div class="tagbar">
-
-
-            <!-- search field -->
-            <div style="float: left;" class="search-input{% if get.q %} active{% endif %}">
-
-                <div>
-                    <span>{% trans "Search" %}:</span>
-                    <input type="text" id="searchbar_input"
-                           name="searchbar_input" placeholder="{% trans "Type to search" %}"
-                           value="{% if get.q %}{{ get.q }}{% endif %}" class="blur"/>
-                </div>
-
-            </div>
-
-
-            <!-- TODO: rework! -->
-            <div style="padding: 4px 3px 0px;" class="pull-right">
-                {% if request.path != request.get_full_path %}
-                    <a class="pull-right clear-search" href="{{ request.path }}" title="{% trans "Clear Search" %}">
-                        <img class="search_clear" src="/static/img/prototype/i_clearsearch.png" alt="Clear search"/>
-                    </a>
-                {% endif %}
-            </div>
-
-
-            {% include "alibrary/searchbar/_relation_filter.html" %}
-
-            {% include "alibrary/searchbar/_filterlist.html" %}
-
-            <div class="clear"></div>
-        </div>
-    </div>
-
-    <div id="autocomplete_holder" class="autocomplete holder"></div>
+    {% with object=item ct="release" %}
+        {% include "alibrary/element/_searchbar.html" %}
+    {% endwith %}
 
 {% endblock %}
+
 
 {% block inner %}
 

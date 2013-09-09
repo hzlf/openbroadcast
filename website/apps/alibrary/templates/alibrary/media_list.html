@@ -37,34 +37,15 @@
 
 {% endblock %}
 
+
 {% block searchbar %}
 
-<div class="searchbar">
-	<div class="tagbar">
-
-		{% include "alibrary/searchbar/_relation_filter.html" %}
-
-		{% include "alibrary/searchbar/_filterlist.html" %}
-
-		<!-- search field -->
-		<div style="float: left;">
-			<input type="text" id="searchbar_input" name="searchbar_input" value="&lt; Search &gt;" class="blur" />
-		</div>
-
-		<!-- TODO: rework! -->
-		<div style="padding: 4px 3px 0px;" class="pull-right">
-			{% if request.path != request.get_full_path %}
-			<a class="pull-right clear-search" href="{{ request.path }}" title="{% trans "Clear Search" %}"> <img class="search_clear" src="/static/img/prototype/i_clearsearch.png" alt="Clear search" /> </a>
-			{% endif %}
-		</div>
-
-		<div class="clear"></div>
-	</div>
-</div>
-
-<div id="autocomplete_holder" class="autocomplete holder"></div>
+    {% with object=item ct="artist" %}
+        {% include "alibrary/element/_searchbar.html" %}
+    {% endwith %}
 
 {% endblock %}
+
 
 {% block inner %}
 
@@ -81,12 +62,13 @@
 				<li class="left">
 					<a href="{% spurl base=request.get_full_path set_query="list_style=s" %}" title="Set Style" class="action list_style s {% if list_style == "s" %}active{% endif %}"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Disply Type" /></a>
 				</li>
+            <!--
 				<li class="left">
 					<a href="{% spurl base=request.get_full_path set_query="list_style=m" %}" title="Set Style" class="action list_style m {% if list_style == "m" %}active{% endif %}"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Disply Type" /></a>
 				</li>
-				<li class="left">
-					<a href="{% spurl base=request.get_full_path set_query="list_style=l" %}" title="Set Style" class="action list_style l {% if list_style == "l" %}active{% endif %}"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Disply Type" /></a>
-				</li><li class="clear"></li>
+-->
+
+                <li class="clear"></li>
 			</ul>
 		</div>
 	</div>

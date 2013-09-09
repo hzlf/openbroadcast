@@ -17,6 +17,6 @@ output_style = :expanded
 # To disable debugging comments that display the original location of your selectors. Uncomment:
 line_comments = true
 
-sass_options = {:debug_info => true} 
+#sass_options = {:sourcemap => true, :debug_info => true} 
 
 preferred_syntax = :sass

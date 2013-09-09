@@ -70,3 +70,18 @@ sudo -u pypo env/bin/python pypo.py
 
 # varnish
 sudo /usr/local/Cellar/varnish/3.0.3/sbin/varnishd -F -a 0.0.0.0:88 -f ~/code/openbroadcast.ch/conf/openbroadcast.ch.vcl
+
+
+
+
+# sass/compass setup
+sudo gem install sass --pre
+sudo gem install compass --pre
+
+"""
+Go to chrome://flags/ and Enable Developer Tools experiments, then restart Chrome.
+Open Devtools and check Enable source maps in General tab and Support for Sass in Experimental tab.
+Download latest Sass from the console: gem install sass --pre (you might need sudo)
+Just adding sass_options = {:sourcemap => true} to config.rb in Compass won’t work (just yet) and you can even get Compass conflicts with the aforementioned Sass alpha version. In my case, Compass 0.12.2 (Alnilam) does not get on very well with Sass 3.3.0.alpha.103 (Bleeding Edge), though it might be some other gem conflict.
+For that reason, we will have to watch changes using Sass directly, using sourcemap option: sass --watch --sourcemap sources/compass:public/css which generates a .map file for each source. This is the information Devtools will use to let you trace/edit original Sass files directly in the browser.
+"""

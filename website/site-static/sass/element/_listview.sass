@@ -1,4 +1,5 @@
 @import "vars"
+
 .listhead
   padding: 4px 2px 3px 5px
   border-bottom: 1px solid #bbb
@@ -658,7 +659,7 @@
       border-bottom: 1px solid #DDDDDD
 	  
       &.selection
-        div.wrapper_info
+        div.wrapper_info, div.wrapper_action
           background-color: #E4FFE4
 		  
       &.hover
@@ -725,10 +726,12 @@
       // moving pat & inline tagcloud
       .spacer
         position: relative
+        cursor: pointer
         // height: 150px
         height: 163px
+        // height: 82px // simulate hover state
         -webkit-transition-property: height
-        -webkit-transition-duration: .2s
+        -webkit-transition-duration: .1s
         // background-color: #ff00ff
         &.license
           background-position: right bottom
@@ -935,13 +938,14 @@
 
 /* ---------- tagbar/search for gianluca :) ---------- */
 .searchbar
-
+  padding: 0 0 3px 0
   background-color: #efefef
   -webkit-transition-property: background-color
   -webkit-transition-duration: .3s
 
   &.hover
-    background-color: #333 !important
+    // background-color: #333 !important
+    background-color: #efefef
     -webkit-transition-property: background-color
     -webkit-transition-duration: .3s
 
@@ -951,16 +955,22 @@
     margin: 3px 0 0 2px
     height: 17px
     padding: 0
-    span
+    ::-webkit-input-placeholder
+      color: #777
+
+
+    span, i
       display: none
     input
       border: 0px none
+      box-shadow: none !important
       background: none
       margin: 0px
-      line-height: 10px
+      height: 17px
+      line-height: 17px
       padding: 0px 2px 0px 4px
       &.blur
-        color: #999999
+        color: #5a5a5a
       &.focus
         color: #333
     a #searchbar_input
@@ -972,12 +982,48 @@
 
 
     &.active
-      border: 1px solid white
+      .inner
+        background: #ddffd9
+        border: 1px solid white
+        border-right-color: #7ab89b
+        border-bottom-color: #7ab89b
+        input
+          color: #00BB00
+        i
+          display: inline
+        span
+          color: #00BB00
+          padding: 0 0 0 5px
+          display: inline
+
+  .search-clear
+    a
+      color: #5a5a5a
+      &:hover
+        color: #00BB00
+        text-decoration: none
+
+  .filter-bar
+    float: right
+    margin: 0
+    a
+      color: #00BB00
       background: #ddffd9
-      span
-        display: inline
+      border: 1px solid white
+      border-right-color: #7ab89b
+      border-bottom-color: #7ab89b
+      float: right
+      padding: 0px 6px 0px 5px !important
+      margin: 3px 2px 0px 1px !important
+      &:hover
+        text-decoration: none
 
-
+  // hacking icon
+  i._icon.icon-delete
+    background-image: url(/static/img/prototype/tag_remove.png)
+    background-position: 0 11px
+    white-space: nowrap
+    padding: 0 0 0 12px
 
   // override defaults. TODO: remove original styles
   .tagbar
