@@ -1,0 +1,7 @@
+{% load markup %}
+
+<h1>Changelog</h1>
+<div class="alert alert-success">
+    <p>Last code-changes in project repository.</p>
+</div>
+{{ changelog|markdown|linebreaks }}

@@ -271,6 +271,8 @@ CMS_YOUTUBE_DEFAULT_HEIGHT = 467
 MEDIA_ROOT = os.path.join(PROJECT_DIR, 'media')
 MEDIA_URL = '/media/'
 
+
+
 # static files (application js/img etc)
 STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 STATIC_URL = '/static/'
@@ -409,6 +411,8 @@ INSTALLED_APPS = (
     'cmsplugin_vimeo',
     #'cmsplugin_soundcloud',
     'cmsplugin_pagedown',
+
+    'cmsplugin_git',
 
     'shortcutter',
 
@@ -657,6 +661,11 @@ ACCOUNT_USERNAME_REQUIRED = True
 SOCIALACCOUNT_QUERY_EMAIL = ACCOUNT_EMAIL_REQUIRED
 SOCIALACCOUNT_AUTO_SIGNUP = True
 EMAIL_CONFIRMATION_DAYS = 5
+
+
+CMS_GIT_FILE = os.path.join(PROJECT_DIR, 'changelog.txt')
+
+
 
 """
 registration version
