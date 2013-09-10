@@ -178,6 +178,20 @@ def deploy():
             run('/srv/%s/bin/python /%s/src/website/manage.py compress -f' % (env.site_id, env.path))
         except Exception, e:
             pass
+
+
+        """
+        generate git changelog
+        git log > changelog.txt
+        """
+        try:
+            with cd(env.path + '/src/website/'):
+                run('git log > changelog.txt')
+        except Exception, e:
+            pass
+
+
+
             
         """
         (re)start supervisor workers

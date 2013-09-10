@@ -270,11 +270,11 @@ class RelationAdmin(BaseAdmin):
 
     list_display = ('url', 'service', 'name',)
     list_filter = ('service',)
-
+    search_fields = ('url',)
     fieldsets = [
         (None,               {'fields': ['url', 'service']}),
     ]
-    readonly_fields = ['service']
+    #readonly_fields = ['service']
     
 admin.site.register(Relation, RelationAdmin)
       

@@ -107,24 +107,26 @@ section.comments.disqus
           height: 10px
 
       dd.relations
-        a
-          //
-            background: black
-            border-radius: 3px
-            display: block
-          color: #5a5a5a
-          text-decoration: none
-          &:hover
-            color: #6633cc
-        i
-          font-size: 200%
-          line-height: 17px
+
+        li
+          padding: 0 3px 0 0
+          margin: 0 3px 0 0
+          float: left
+          span.service
+            display: none
+          a
+            color: #5a5a5a
+            text-decoration: none
+            &:hover
+              color: #6633cc
+            i
+              font-size: 180%
+              line-height: 17px
 		  
 		
       &.links.external
 
         dd
-          //@include link_external
           float: none
 		  
 
@@ -259,3 +261,34 @@ section.item_inner .tab-pane
         margin: 4px 0 8px
   
   
+
+
+// relations in sidebar
+.sidebar
+  .listing
+    &.relations
+      .relations > ul
+        li
+          cursor: pointer
+          padding: 4px 0 6px 0
+          border-bottom: 1px solid #efefef
+          clear: both
+          a
+            color: #5a5a5a
+            &:hover
+              text-decoration: none
+
+          i
+            font-size: 160%
+            width: 40px
+            display: block
+            float: left
+          span.service
+            top: 3px
+            position: relative
+            display: block
+            width: 100%
+
+          &:hover a
+            color: #6633cc
+

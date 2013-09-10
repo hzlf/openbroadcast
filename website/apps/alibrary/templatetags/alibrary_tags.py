@@ -65,3 +65,7 @@ def m2m_inline(context, items):
     context.update({'items': items})
     return context
 
+@register.inclusion_tag('alibrary/templatetags/relations_inline.html', takes_context=True)
+def relations_inline(context, object):
+    context.update({'object': object})
+    return context

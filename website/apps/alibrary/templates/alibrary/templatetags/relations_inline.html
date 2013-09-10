@@ -1,0 +1,12 @@
+{% load i18n %}
+
+<ul class="unstyled">
+{% for relation in object.relations.specific %}
+    <li>
+        <a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}">
+            <i class="icon-{{ relation.service_icon }}"></i>
+            <span class="service">{{ relation.get_service_display }}</span>
+        </a>
+    </li>
+{% endfor %}
+</ul>

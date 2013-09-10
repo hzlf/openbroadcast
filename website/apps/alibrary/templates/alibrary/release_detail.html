@@ -1,6 +1,6 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags wiki_tags disqus_tags comments dajaxice_templatetags sekizai_tags %}
+{% load truncate i18n thumbnail arating_tags wiki_tags disqus_tags comments dajaxice_templatetags sekizai_tags alibrary_tags %}
 
 {% block heading %}
 <!-- view specific scripts -->
@@ -127,4 +127,23 @@
 
 {% block sidebar %}
 {% include "alibrary/release/sidebar/_detail.html" %}
+
+
+    <div class="listing relations" style="padding-top: 8px;">
+
+	<div class="page-header">
+		<h2>{% trans "Show on" %} <small>{% trans "external links" %}</small></h2>
+	</div>
+
+	<div class="item relations">
+        {% relations_inline object %}
+	</div>
+
+
+</div>
+
+<!-- relations -->
+
+
+
 {% endblock %}

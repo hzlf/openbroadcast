@@ -93,7 +93,7 @@ aplayer.ui.bind = function() {
 
         var ct = $(this).data('ct');
 		var uri = $(this).data('resource_uri');
-		var offset = $(this).data('ofset');
+		var offset = $(this).data('offset');
 		var mode = $(this).data('mode');
 		var token = 'xx-yy-zz';
 		var source = 'alibrary';

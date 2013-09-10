@@ -1,4 +1,4 @@
-{% load truncate i18n thumbnail arating_tags %}
+{% load truncate i18n thumbnail arating_tags alibrary_tags %}
 <div class="span7 padded-h container_content">
 
 	<div class="page-header">
@@ -46,22 +46,14 @@
 			&nbsp;
 		</dd>
 		{% endif %}
-		
-		{% if object.publish_date %}
-		<dt>{% trans "Published" %}:</dt>
-		<dd>
-			{{ object.publish_date|date:"SHORT_DATE_FORMAT" }}
-			{% if object.publisher %}
-				{% trans "by" %}: <a href="#">{{ object.publisher }}</a>
-			{% endif %}
-		</dd>
-		{% endif %}
-		
+
+        <!--
 		{% if object.releasedate %}
 		<dt>{% trans "Releasedate" %}:</dt>
 		<dd>{{ object.releasedate|date:"SHORT_DATE_FORMAT" }}</dd>
 		{% endif %}
-		
+		-->
+
 		{% if object.releasedate_approx %}
 		<dt>{% trans "Released" %}:</dt>
 		<dd>{{ object.releasedate_approx }}</dd>
@@ -71,6 +63,18 @@
 		<dt>{% trans "Catalog Number" %}:</dt>
 		<dd>{{ object.catalognumber }}</dd>
 		{% endif %}
+
+        <!--
+		{% if object.publish_date %}
+		<dt>{% trans "Published" %}:</dt>
+		<dd>
+			{{ object.publish_date|date:"SHORT_DATE_FORMAT" }}
+			{% if object.publisher %}
+				{% trans "by" %}: <a href="#">{{ object.publisher }}</a>
+			{% endif %}
+		</dd>
+		{% endif %}
+		-->
 		
 	</dl>
 
@@ -91,21 +95,21 @@
 
 	</dl>
 
+    <!--
 	<dl class="dl-horizontal">
 
 		<dt>
 			{% trans "Show on" %}:
 		</dt>
 		<dd class="horizontal relations">
-			{% for relation in object.relations.specific %}
-			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}"><i class="icon-{{ relation.service }}"></i></a>
-			
-			{% endfor %}
-			<div class="clear"></div>
+            {% relations_inline object %}
+            <div class="clear"></div>
 		</dd>
 
 	</dl>
+    -->
 
+    <!--
 	<dl class="dl-horizontal">
 
 		<dt>
@@ -120,7 +124,10 @@
 		</dd>
 
 	</dl>
+    -->
 
+
+    {% if object.relations.generic %}
 	<dl class="dl-horizontal">
 
 		<dt>
@@ -129,7 +136,12 @@
 		<dd class="horizontal">
 			<ul class="unstyled">
 			{% for relation in object.relations.generic %}
-			<li><a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.url }}">{{ relation.url }}</a></li>
+			<li>
+                <a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.url }}">{{ relation.url }}</a>
+                {% if relation.service == "official" %}
+                <small> <i class="icon icon-star"></i> {% trans "official" %}</small>
+                {% endif %}
+            </li>
 			
 			{% endfor %}
 			</ul>
@@ -137,6 +149,7 @@
 		</dd>
 
 	</dl>
+    {% endif %}
 
 	<!--
 	<dl class="dl-horizontal links external">
@@ -168,16 +181,26 @@
 			{% if object.creator %}
 			<span class="key">{% trans "Created by" %}:</span> <span class="value"><a href="{{ object.creator.get_absolute_url }}">{{ object.creator }}</a></span> |
 			{% endif %}
-			
-			<!--
-			{% if object.publisher %}
-			<span class="key">{% trans "Published by" %}:</span> <span class="value"><a href="#">{{ object.publisher }}</a></span> |
-			{% endif %}
-			-->
+
 			
 			{% if object.get_last_revision %}
-			<span class="key">{% trans "Last edit by" %}:</span> <span class="value"><a href="{{ object.get_last_revision.user.get_profile.get_absolute_url }}">{{ object.get_last_revision.user }}</a></span>
+			<span class="key">{% trans "Last edit by" %}:</span> <span class="value"><a href="{{ object.get_last_revision.user.get_profile.get_absolute_url }}">{{ object.get_last_revision.user }}</a></span> |
 			{% endif %}
+
+			<!---->
+
+            {% if object.publish_date %}
+            <span class="key">{% trans "Published by" %}: {% if object.publisher %}<a href="#">{{ object.publisher }}</a>{% endif %}</span> <span class="value">
+                {{ object.publish_date|date:"SHORT_DATE_FORMAT" }}
+
+            </span>
+            {% endif %}
+            <!--
+			{% if object.publisher %}
+			<span class="key">{% trans "Published by" %}:</span> <span class="value"><a href="#">{{ object.publisher }}</a></span>
+			{% endif %}
+			-->
+
 			&nbsp;
 		</dd>
 

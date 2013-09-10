@@ -8379,130 +8379,144 @@ ul.tagit input[type="text"] {
   vertical-align: top;
 }
 
-/*    Font Awesome 3.1.0
- *    the iconic font designed for Bootstrap
- *    -------------------------------------------------------
- *    The full suite of pictographic icons, examples, and documentation
- *    can be found at: http://fontawesome.io
- *  
- *    License
- *    -------------------------------------------------------
- *    - The Font Awesome font is licensed under the SIL Open Font License v1.1 -
- *      http://scripts.sil.org/OFL
- *    - Font Awesome CSS, LESS, and SASS files are licensed under the MIT License -
- *      http://opensource.org/licenses/mit-license.html
- *    - Font Awesome documentation licensed under CC BY 3.0 License -
- *      http://creativecommons.org/licenses/by/3.0/
- *    - Attribution is no longer required in Font Awesome 3.0, but much appreciated:
- *      "Font Awesome by Dave Gandy - http://fontawesome.io"
+/*
+ *  Font Awesome 3.2.1
+ *  the iconic font designed for Bootstrap
+ *  ------------------------------------------------------------------------------
+ *  The full suite of pictographic icons, examples, and documentation can be
+ *  found at http://fontawesome.io.  Stay up to date on Twitter at
+ *  http://twitter.com/fontawesome.
  *
- *    Contact
- *    -------------------------------------------------------
- *    Email: dave@fontawesome.io
- *    Twitter: http://twitter.com/fortaweso_me
- *    Work: Lead Product Designer @ http://kyruus.com */
+ *  License
+ *  ------------------------------------------------------------------------------
+ *  - The Font Awesome font is licensed under SIL OFL 1.1 -
+ *    http://scripts.sil.org/OFL
+ *  - Font Awesome CSS, LESS, and SASS files are licensed under MIT License -
+ *    http://opensource.org/licenses/mit-license.html
+ *  - Font Awesome documentation licensed under CC BY 3.0 -
+ *    http://creativecommons.org/licenses/by/3.0/
+ *  - Attribution is no longer required in Font Awesome 3.0, but much appreciated:
+ *    "Font Awesome by Dave Gandy - http://fontawesome.io"
+ *
+ *  Author - Dave Gandy
+ *  ------------------------------------------------------------------------------
+ *  Email: dave@fontawesome.io
+ *  Twitter: http://twitter.com/davegandy
+ *  Work: Lead Product Designer @ Kyruus - http://kyruus.com
+ */
 /* FONT PATH
  * -------------------------- */
 @font-face {
-  font-family: "FontAwesome";
-  src: url("../font/fontawesome-3.1.1/fontawesome-webfont.eot?v=3.1.0");
-  src: url("../font/fontawesome-3.1.1/fontawesome-webfont.eot?#iefix&v=3.1.0") format("embedded-opentype"), url("../font/fontawesome-3.1.1/fontawesome-webfont.woff?v=3.1.0") format("woff"), url("../font/fontawesome-3.1.1/fontawesome-webfont.ttf?v=3.1.0") format("truetype"), url("../font/fontawesome-3.1.1/fontawesome-webfont.svg#fontawesomeregular?v=3.1.0") format("svg");
+  font-family: 'FontAwesome';
+  src: url("../font/fontawesome-3.2.1/fontawesome-webfont.eot?v=3.2.1");
+  src: url("../font/fontawesome-3.2.1/fontawesome-webfont.eot?#iefix&v=3.2.1") format("embedded-opentype"), url("../font/fontawesome-3.2.1/fontawesome-webfont.woff?v=3.2.1") format("woff"), url("../font/fontawesome-3.2.1/fontawesome-webfont.ttf?v=3.2.1") format("truetype"), url("../font/fontawesome-3.2.1/fontawesome-webfont.svg#fontawesomeregular?v=3.2.1") format("svg");
   font-weight: normal;
   font-style: normal;
 }
 
 /* FONT AWESOME CORE
  * -------------------------- */
-/* line 40, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-[class^="icon-"], [class*=" icon-"] {
+/* line 4, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
+[class^="icon-"],
+[class*=" icon-"] {
   font-family: FontAwesome;
   font-weight: normal;
   font-style: normal;
   text-decoration: inherit;
   -webkit-font-smoothing: antialiased;
-  *margin-right: 0.3em;
+  *margin-right: .3em;
 }
 
-/* line 48, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-[class^="icon-"]:before, [class*=" icon-"]:before {
+/* line 9, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
+[class^="icon-"]:before,
+[class*=" icon-"]:before {
   text-decoration: inherit;
   display: inline-block;
   speak: none;
 }
 
 /* makes the font 33% larger relative to the icon container */
-/* line 55, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 17, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
 .icon-large:before {
   vertical-align: -10%;
   font-size: 1.33333em;
 }
 
 /* makes sure icons active on rollover in links */
-/* line 62, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-a [class^="icon-"], a [class*=" icon-"], a [class^="icon-"]:before, a [class*=" icon-"]:before {
+/* line 24, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
+a [class^="icon-"],
+a [class*=" icon-"] {
   display: inline;
 }
 
 /* increased font size for icon-large */
-/* line 67, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-[class^="icon-"].icon-fixed-width, [class*=" icon-"].icon-fixed-width {
+/* line 33, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
+[class^="icon-"].icon-fixed-width,
+[class*=" icon-"].icon-fixed-width {
   display: inline-block;
-  width: 1.28571em;
-  text-align: center;
+  width: 1.14286em;
+  text-align: right;
+  padding-right: 0.28571em;
+}
+/* line 38, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
+[class^="icon-"].icon-fixed-width.icon-large,
+[class*=" icon-"].icon-fixed-width.icon-large {
+  width: 1.42857em;
 }
 
-/* line 72, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-[class^="icon-"].icon-fixed-width.icon-large, [class*=" icon-"].icon-fixed-width.icon-large {
-  width: 1.57143em;
-}
-
-/* line 75, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-ul.icons-ul {
-  list-style-type: none;
-  text-indent: -0.71429em;
+/* line 44, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
+.icons-ul {
   margin-left: 2.14286em;
+  list-style-type: none;
 }
-/* line 79, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-ul.icons-ul > li .icon-li {
-  width: 0.71429em;
-  display: inline-block;
+/* line 48, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
+.icons-ul > li {
+  position: relative;
+}
+/* line 50, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
+.icons-ul .icon-li {
+  position: absolute;
+  left: -2.14286em;
+  width: 2.14286em;
   text-align: center;
+  line-height: inherit;
 }
 
-/* line 84, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-[class^="icon-"].hide, [class*=" icon-"].hide {
+/* line 62, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
+[class^="icon-"].hide,
+[class*=" icon-"].hide {
   display: none;
 }
 
-/* line 87, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 67, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
 .icon-muted {
   color: #eeeeee;
 }
 
-/* line 90, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 68, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
 .icon-light {
   color: white;
 }
 
-/* line 93, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 69, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
 .icon-dark {
   color: #333333;
 }
 
-/* line 96, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 74, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
 .icon-border {
   border: solid 1px #eeeeee;
-  padding: 0.2em 0.25em 0.15em;
+  padding: .2em .25em .15em;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border-radius: 3px;
 }
 
-/* line 103, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 83, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
 .icon-2x {
   font-size: 2em;
 }
-/* line 105, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 85, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
 .icon-2x.icon-border {
   border-width: 2px;
   -webkit-border-radius: 4px;
@@ -8510,11 +8524,11 @@ ul.icons-ul > li .icon-li {
   border-radius: 4px;
 }
 
-/* line 111, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 90, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
 .icon-3x {
   font-size: 3em;
 }
-/* line 113, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 92, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
 .icon-3x.icon-border {
   border-width: 3px;
   -webkit-border-radius: 5px;
@@ -8522,11 +8536,11 @@ ul.icons-ul > li .icon-li {
   border-radius: 5px;
 }
 
-/* line 119, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 97, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
 .icon-4x {
   font-size: 4em;
 }
-/* line 121, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 99, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
 .icon-4x.icon-border {
   border-width: 4px;
   -webkit-border-radius: 6px;
@@ -8534,11 +8548,11 @@ ul.icons-ul > li .icon-li {
   border-radius: 6px;
 }
 
-/* line 127, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 105, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
 .icon-5x {
   font-size: 5em;
 }
-/* line 129, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 107, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
 .icon-5x.icon-border {
   border-width: 5px;
   -webkit-border-radius: 7px;
@@ -8546,31 +8560,33 @@ ul.icons-ul > li .icon-li {
   border-radius: 7px;
 }
 
-/* line 135, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 118, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
 .pull-right {
   float: right;
 }
 
-/* line 138, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 119, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
 .pull-left {
   float: left;
 }
 
-/* line 141, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-[class^="icon-"].pull-left, [class*=" icon-"].pull-left {
-  margin-right: 0.3em;
+/* line 123, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
+[class^="icon-"].pull-left,
+[class*=" icon-"].pull-left {
+  margin-right: .3em;
 }
-
-/* line 144, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-[class^="icon-"].pull-right, [class*=" icon-"].pull-right {
-  margin-left: 0.3em;
+/* line 126, ../sass/bootstrap/addons/font-awesome-3.2.1/_core.scss */
+[class^="icon-"].pull-right,
+[class*=" icon-"].pull-right {
+  margin-left: .3em;
 }
 
 /* BOOTSTRAP SPECIFIC CLASSES
  * -------------------------- */
 /* Bootstrap 2.0 sprites.less reset */
-/* line 151, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-[class^="icon-"], [class*=" icon-"] {
+/* line 5, ../sass/bootstrap/addons/font-awesome-3.2.1/_bootstrap.scss */
+[class^="icon-"],
+[class*=" icon-"] {
   display: inline;
   width: auto;
   height: auto;
@@ -8583,89 +8599,98 @@ ul.icons-ul > li .icon-li {
 }
 
 /* more sprites.less reset */
-/* line 164, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.icon-white {
-  background-image: none;
-}
-
-/* line 168, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.nav-pills > .active > a > [class^="icon-"], .nav-pills > .active > a > [class*=" icon-"] {
-  background-image: none;
-}
-
-/* line 172, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.nav-list > .active > a > [class^="icon-"], .nav-list > .active > a > [class*=" icon-"] {
-  background-image: none;
-}
-
-/* line 176, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.navbar-inverse .nav > .active > a > [class^="icon-"], .navbar-inverse .nav > .active > a > [class*=" icon-"] {
-  background-image: none;
-}
-
-/* line 181, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.dropdown-menu > li > a:hover > [class^="icon-"], .dropdown-menu > li > a:hover > [class*=" icon-"] {
-  background-image: none;
-}
-/* line 184, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.dropdown-menu > .active > a > [class^="icon-"], .dropdown-menu > .active > a > [class*=" icon-"] {
-  background-image: none;
-}
-
-/* line 188, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.dropdown-submenu:hover > a > [class^="icon-"], .dropdown-submenu:hover > a > [class*=" icon-"] {
+/* line 19, ../sass/bootstrap/addons/font-awesome-3.2.1/_bootstrap.scss */
+.icon-white,
+.nav-pills > .active > a > [class^="icon-"],
+.nav-pills > .active > a > [class*=" icon-"],
+.nav-list > .active > a > [class^="icon-"],
+.nav-list > .active > a > [class*=" icon-"],
+.navbar-inverse .nav > .active > a > [class^="icon-"],
+.navbar-inverse .nav > .active > a > [class*=" icon-"],
+.dropdown-menu > li > a:hover > [class^="icon-"],
+.dropdown-menu > li > a:hover > [class*=" icon-"],
+.dropdown-menu > .active > a > [class^="icon-"],
+.dropdown-menu > .active > a > [class*=" icon-"],
+.dropdown-submenu:hover > a > [class^="icon-"],
+.dropdown-submenu:hover > a > [class*=" icon-"] {
   background-image: none;
 }
 
 /* keeps Bootstrap styles with and without icons the same */
-/* line 193, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.btn [class^="icon-"].icon-large, .nav [class^="icon-"].icon-large, .btn [class*=" icon-"].icon-large, .nav [class*=" icon-"].icon-large {
-  line-height: 0.9em;
+/* line 41, ../sass/bootstrap/addons/font-awesome-3.2.1/_bootstrap.scss */
+.btn [class^="icon-"].icon-large,
+.btn [class*=" icon-"].icon-large, .nav [class^="icon-"].icon-large,
+.nav [class*=" icon-"].icon-large {
+  line-height: .9em;
 }
-
-/* line 196, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.btn [class^="icon-"].icon-spin, .nav [class^="icon-"].icon-spin, .btn [class*=" icon-"].icon-spin, .nav [class*=" icon-"].icon-spin {
+/* line 42, ../sass/bootstrap/addons/font-awesome-3.2.1/_bootstrap.scss */
+.btn [class^="icon-"].icon-spin,
+.btn [class*=" icon-"].icon-spin, .nav [class^="icon-"].icon-spin,
+.nav [class*=" icon-"].icon-spin {
   display: inline-block;
 }
 
-/* line 199, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.nav-tabs [class^="icon-"], .nav-pills [class^="icon-"], .nav-tabs [class*=" icon-"], .nav-pills [class*=" icon-"], .nav-tabs [class^="icon-"].icon-large, .nav-pills [class^="icon-"].icon-large, .nav-tabs [class*=" icon-"].icon-large, .nav-pills [class*=" icon-"].icon-large {
-  line-height: 0.9em;
+/* line 48, ../sass/bootstrap/addons/font-awesome-3.2.1/_bootstrap.scss */
+.nav-tabs [class^="icon-"], .nav-tabs [class^="icon-"].icon-large,
+.nav-tabs [class*=" icon-"],
+.nav-tabs [class*=" icon-"].icon-large, .nav-pills [class^="icon-"], .nav-pills [class^="icon-"].icon-large,
+.nav-pills [class*=" icon-"],
+.nav-pills [class*=" icon-"].icon-large {
+  line-height: .9em;
 }
 
-/* line 203, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.btn [class^="icon-"].pull-left.icon-2x, .btn [class*=" icon-"].pull-left.icon-2x, .btn [class^="icon-"].pull-right.icon-2x, .btn [class*=" icon-"].pull-right.icon-2x {
-  margin-top: 0.18em;
+/* line 55, ../sass/bootstrap/addons/font-awesome-3.2.1/_bootstrap.scss */
+.btn [class^="icon-"].pull-left.icon-2x, .btn [class^="icon-"].pull-right.icon-2x,
+.btn [class*=" icon-"].pull-left.icon-2x,
+.btn [class*=" icon-"].pull-right.icon-2x {
+  margin-top: .18em;
 }
-/* line 205, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.btn [class^="icon-"].icon-spin.icon-large, .btn [class*=" icon-"].icon-spin.icon-large {
-  line-height: 0.8em;
+/* line 57, ../sass/bootstrap/addons/font-awesome-3.2.1/_bootstrap.scss */
+.btn [class^="icon-"].icon-spin.icon-large,
+.btn [class*=" icon-"].icon-spin.icon-large {
+  line-height: .8em;
 }
-/* line 208, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.btn.btn-small [class^="icon-"].pull-left.icon-2x, .btn.btn-small [class*=" icon-"].pull-left.icon-2x, .btn.btn-small [class^="icon-"].pull-right.icon-2x, .btn.btn-small [class*=" icon-"].pull-right.icon-2x {
-  margin-top: 0.25em;
+
+/* line 64, ../sass/bootstrap/addons/font-awesome-3.2.1/_bootstrap.scss */
+.btn.btn-small [class^="icon-"].pull-left.icon-2x, .btn.btn-small [class^="icon-"].pull-right.icon-2x,
+.btn.btn-small [class*=" icon-"].pull-left.icon-2x,
+.btn.btn-small [class*=" icon-"].pull-right.icon-2x {
+  margin-top: .25em;
 }
-/* line 211, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.btn.btn-large [class^="icon-"], .btn.btn-large [class*=" icon-"] {
+
+/* line 69, ../sass/bootstrap/addons/font-awesome-3.2.1/_bootstrap.scss */
+.btn.btn-large [class^="icon-"],
+.btn.btn-large [class*=" icon-"] {
   margin-top: 0;
 }
-/* line 213, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.btn.btn-large [class^="icon-"].pull-left.icon-2x, .btn.btn-large [class*=" icon-"].pull-left.icon-2x, .btn.btn-large [class^="icon-"].pull-right.icon-2x, .btn.btn-large [class*=" icon-"].pull-right.icon-2x {
-  margin-top: 0.05em;
+/* line 73, ../sass/bootstrap/addons/font-awesome-3.2.1/_bootstrap.scss */
+.btn.btn-large [class^="icon-"].pull-left.icon-2x, .btn.btn-large [class^="icon-"].pull-right.icon-2x,
+.btn.btn-large [class*=" icon-"].pull-left.icon-2x,
+.btn.btn-large [class*=" icon-"].pull-right.icon-2x {
+  margin-top: .05em;
 }
-/* line 215, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.btn.btn-large [class^="icon-"].pull-left.icon-2x, .btn.btn-large [class*=" icon-"].pull-left.icon-2x {
-  margin-right: 0.2em;
+/* line 75, ../sass/bootstrap/addons/font-awesome-3.2.1/_bootstrap.scss */
+.btn.btn-large [class^="icon-"].pull-left.icon-2x,
+.btn.btn-large [class*=" icon-"].pull-left.icon-2x {
+  margin-right: .2em;
 }
-/* line 217, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.btn.btn-large [class^="icon-"].pull-right.icon-2x, .btn.btn-large [class*=" icon-"].pull-right.icon-2x {
-  margin-left: 0.2em;
+/* line 76, ../sass/bootstrap/addons/font-awesome-3.2.1/_bootstrap.scss */
+.btn.btn-large [class^="icon-"].pull-right.icon-2x,
+.btn.btn-large [class*=" icon-"].pull-right.icon-2x {
+  margin-left: .2em;
+}
+
+/* Fixes alignment in nav lists */
+/* line 81, ../sass/bootstrap/addons/font-awesome-3.2.1/_bootstrap.scss */
+.nav-list [class^="icon-"],
+.nav-list [class*=" icon-"] {
+  line-height: inherit;
 }
 
 /* EXTRAS
  * -------------------------- */
 /* Stacked and layered icon */
-/* line 224, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 25, ../sass/bootstrap/addons/font-awesome-3.2.1/_mixins.scss */
 .icon-stack {
   position: relative;
   display: inline-block;
@@ -8674,8 +8699,9 @@ ul.icons-ul > li .icon-li {
   line-height: 2em;
   vertical-align: -35%;
 }
-/* line 231, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.icon-stack [class^="icon-"], .icon-stack [class*=" icon-"] {
+/* line 32, ../sass/bootstrap/addons/font-awesome-3.2.1/_mixins.scss */
+.icon-stack [class^="icon-"],
+.icon-stack [class*=" icon-"] {
   display: block;
   text-align: center;
   position: absolute;
@@ -8685,14 +8711,14 @@ ul.icons-ul > li .icon-li {
   line-height: inherit;
   *line-height: 2em;
 }
-/* line 240, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 43, ../sass/bootstrap/addons/font-awesome-3.2.1/_mixins.scss */
 .icon-stack .icon-stack-base {
   font-size: 2em;
   *line-height: 1em;
 }
 
 /* Animated rotating icon */
-/* line 246, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 8, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
 .icon-spin {
   display: inline-block;
   -moz-animation: spin 2s infinite linear;
@@ -8701,68 +8727,76 @@ ul.icons-ul > li .icon-li {
   animation: spin 2s infinite linear;
 }
 
+/* Prevent stack and spinners from being taken inline when inside a link */
+/* line 17, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
+a .icon-stack,
+a .icon-spin {
+  display: inline-block;
+  text-decoration: none;
+}
+
 @-moz-keyframes spin {
-  /* line 254, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+  /* line 24, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
   0% {
     -moz-transform: rotate(0deg);
   }
 
-  /* line 256, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+  /* line 25, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
   100% {
     -moz-transform: rotate(359deg);
   }
 }
 
 @-webkit-keyframes spin {
-  /* line 261, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+  /* line 28, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
   0% {
     -webkit-transform: rotate(0deg);
   }
 
-  /* line 263, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+  /* line 29, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
   100% {
     -webkit-transform: rotate(359deg);
   }
 }
 
 @-o-keyframes spin {
-  /* line 268, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+  /* line 32, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
   0% {
     -o-transform: rotate(0deg);
   }
 
-  /* line 270, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+  /* line 33, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
   100% {
     -o-transform: rotate(359deg);
   }
 }
 
 @-ms-keyframes spin {
-  /* line 275, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+  /* line 36, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
   0% {
     -ms-transform: rotate(0deg);
   }
 
-  /* line 277, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+  /* line 37, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
   100% {
     -ms-transform: rotate(359deg);
   }
 }
 
 @keyframes spin {
-  /* line 282, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+  /* line 40, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
   0% {
     transform: rotate(0deg);
   }
 
-  /* line 284, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+  /* line 41, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
   100% {
     transform: rotate(359deg);
   }
 }
 
 /* Icon rotations and mirroring */
-/* line 290, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 45, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
 .icon-rotate-90:before {
   -webkit-transform: rotate(90deg);
   -moz-transform: rotate(90deg);
@@ -8772,7 +8806,7 @@ ul.icons-ul > li .icon-li {
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=1);
 }
 
-/* line 298, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 54, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
 .icon-rotate-180:before {
   -webkit-transform: rotate(180deg);
   -moz-transform: rotate(180deg);
@@ -8782,7 +8816,7 @@ ul.icons-ul > li .icon-li {
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
 }
 
-/* line 306, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 63, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
 .icon-rotate-270:before {
   -webkit-transform: rotate(270deg);
   -moz-transform: rotate(270deg);
@@ -8792,7 +8826,7 @@ ul.icons-ul > li .icon-li {
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
 }
 
-/* line 314, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 72, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
 .icon-flip-horizontal:before {
   -webkit-transform: scale(-1, 1);
   -moz-transform: scale(-1, 1);
@@ -8801,7 +8835,7 @@ ul.icons-ul > li .icon-li {
   transform: scale(-1, 1);
 }
 
-/* line 321, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 80, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
 .icon-flip-vertical:before {
   -webkit-transform: scale(1, -1);
   -moz-transform: scale(1, -1);
@@ -8810,1512 +8844,1834 @@ ul.icons-ul > li .icon-li {
   transform: scale(1, -1);
 }
 
+/* ensure rotation occurs inside anchor tags */
+/* line 91, ../sass/bootstrap/addons/font-awesome-3.2.1/_extras.scss */
+a .icon-rotate-90:before, a .icon-rotate-180:before, a .icon-rotate-270:before, a .icon-flip-horizontal:before, a .icon-flip-vertical:before {
+  display: inline-block;
+}
+
 /* Font Awesome uses the Unicode Private Use Area (PUA) to ensure screen
  * readers do not read off random characters that represent icons */
-/* line 331, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 4, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-glass:before {
   content: "\f000";
 }
 
-/* line 334, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 5, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-music:before {
   content: "\f001";
 }
 
-/* line 337, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 6, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-search:before {
   content: "\f002";
 }
 
-/* line 340, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.icon-envelope:before {
+/* line 7, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-envelope-alt:before {
   content: "\f003";
 }
 
-/* line 343, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 8, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-heart:before {
   content: "\f004";
 }
 
-/* line 346, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 9, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-star:before {
   content: "\f005";
 }
 
-/* line 349, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 10, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-star-empty:before {
   content: "\f006";
 }
 
-/* line 352, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 11, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-user:before {
   content: "\f007";
 }
 
-/* line 355, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 12, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-film:before {
   content: "\f008";
 }
 
-/* line 358, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 13, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-th-large:before {
   content: "\f009";
 }
 
-/* line 361, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 14, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-th:before {
   content: "\f00a";
 }
 
-/* line 364, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 15, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-th-list:before {
   content: "\f00b";
 }
 
-/* line 367, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 16, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-ok:before {
   content: "\f00c";
 }
 
-/* line 370, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 17, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-remove:before {
   content: "\f00d";
 }
 
-/* line 373, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 18, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-zoom-in:before {
   content: "\f00e";
 }
 
-/* line 376, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 19, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-zoom-out:before {
   content: "\f010";
 }
 
-/* line 379, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 20, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-power-off:before,
 .icon-off:before {
   content: "\f011";
 }
 
-/* line 382, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 22, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-signal:before {
   content: "\f012";
 }
 
-/* line 385, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 23, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-gear:before,
 .icon-cog:before {
   content: "\f013";
 }
 
-/* line 388, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 25, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-trash:before {
   content: "\f014";
 }
 
-/* line 391, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 26, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-home:before {
   content: "\f015";
 }
 
-/* line 394, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.icon-file:before {
+/* line 27, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-file-alt:before {
   content: "\f016";
 }
 
-/* line 397, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 28, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-time:before {
   content: "\f017";
 }
 
-/* line 400, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 29, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-road:before {
   content: "\f018";
 }
 
-/* line 403, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 30, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-download-alt:before {
   content: "\f019";
 }
 
-/* line 406, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 31, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-download:before {
   content: "\f01a";
 }
 
-/* line 409, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 32, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-upload:before {
   content: "\f01b";
 }
 
-/* line 412, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 33, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-inbox:before {
   content: "\f01c";
 }
 
-/* line 415, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 34, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-play-circle:before {
   content: "\f01d";
 }
 
-/* line 418, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.icon-repeat:before, .icon-rotate-right:before {
+/* line 35, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-rotate-right:before,
+.icon-repeat:before {
   content: "\f01e";
 }
 
-/* F020 doesn't work in Safari. all shifted one down */
-/* line 423, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 37, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-refresh:before {
   content: "\f021";
 }
 
-/* line 426, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 38, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-list-alt:before {
   content: "\f022";
 }
 
-/* line 429, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 39, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-lock:before {
   content: "\f023";
 }
 
-/* line 432, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 40, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-flag:before {
   content: "\f024";
 }
 
-/* line 435, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 41, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-headphones:before {
   content: "\f025";
 }
 
-/* line 438, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 42, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-volume-off:before {
   content: "\f026";
 }
 
-/* line 441, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 43, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-volume-down:before {
   content: "\f027";
 }
 
-/* line 444, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 44, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-volume-up:before {
   content: "\f028";
 }
 
-/* line 447, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 45, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-qrcode:before {
   content: "\f029";
 }
 
-/* line 450, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 46, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-barcode:before {
   content: "\f02a";
 }
 
-/* line 453, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 47, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-tag:before {
   content: "\f02b";
 }
 
-/* line 456, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 48, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-tags:before {
   content: "\f02c";
 }
 
-/* line 459, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 49, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-book:before {
   content: "\f02d";
 }
 
-/* line 462, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 50, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-bookmark:before {
   content: "\f02e";
 }
 
-/* line 465, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 51, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-print:before {
   content: "\f02f";
 }
 
-/* line 468, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 52, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-camera:before {
   content: "\f030";
 }
 
-/* line 471, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 53, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-font:before {
   content: "\f031";
 }
 
-/* line 474, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 54, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-bold:before {
   content: "\f032";
 }
 
-/* line 477, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 55, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-italic:before {
   content: "\f033";
 }
 
-/* line 480, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 56, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-text-height:before {
   content: "\f034";
 }
 
-/* line 483, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 57, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-text-width:before {
   content: "\f035";
 }
 
-/* line 486, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 58, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-align-left:before {
   content: "\f036";
 }
 
-/* line 489, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 59, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-align-center:before {
   content: "\f037";
 }
 
-/* line 492, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 60, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-align-right:before {
   content: "\f038";
 }
 
-/* line 495, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 61, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-align-justify:before {
   content: "\f039";
 }
 
-/* line 498, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 62, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-list:before {
   content: "\f03a";
 }
 
-/* line 501, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 63, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-indent-left:before {
   content: "\f03b";
 }
 
-/* line 504, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 64, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-indent-right:before {
   content: "\f03c";
 }
 
-/* line 507, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 65, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-facetime-video:before {
   content: "\f03d";
 }
 
-/* line 510, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 66, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-picture:before {
   content: "\f03e";
 }
 
-/* line 513, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 67, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-pencil:before {
   content: "\f040";
 }
 
-/* line 516, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 68, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-map-marker:before {
   content: "\f041";
 }
 
-/* line 519, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 69, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-adjust:before {
   content: "\f042";
 }
 
-/* line 522, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 70, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-tint:before {
   content: "\f043";
 }
 
-/* line 525, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 71, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-edit:before {
   content: "\f044";
 }
 
-/* line 528, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 72, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-share:before {
   content: "\f045";
 }
 
-/* line 531, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 73, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-check:before {
   content: "\f046";
 }
 
-/* line 534, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 74, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-move:before {
   content: "\f047";
 }
 
-/* line 537, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 75, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-step-backward:before {
   content: "\f048";
 }
 
-/* line 540, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 76, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-fast-backward:before {
   content: "\f049";
 }
 
-/* line 543, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 77, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-backward:before {
   content: "\f04a";
 }
 
-/* line 546, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 78, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-play:before {
   content: "\f04b";
 }
 
-/* line 549, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 79, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-pause:before {
   content: "\f04c";
 }
 
-/* line 552, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 80, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-stop:before {
   content: "\f04d";
 }
 
-/* line 555, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 81, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-forward:before {
   content: "\f04e";
 }
 
-/* line 558, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 82, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-fast-forward:before {
   content: "\f050";
 }
 
-/* line 561, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 83, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-step-forward:before {
   content: "\f051";
 }
 
-/* line 564, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 84, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-eject:before {
   content: "\f052";
 }
 
-/* line 567, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 85, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-chevron-left:before {
   content: "\f053";
 }
 
-/* line 570, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 86, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-chevron-right:before {
   content: "\f054";
 }
 
-/* line 573, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 87, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-plus-sign:before {
   content: "\f055";
 }
 
-/* line 576, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 88, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-minus-sign:before {
   content: "\f056";
 }
 
-/* line 579, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 89, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-remove-sign:before {
   content: "\f057";
 }
 
-/* line 582, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 90, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-ok-sign:before {
   content: "\f058";
 }
 
-/* line 585, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 91, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-question-sign:before {
   content: "\f059";
 }
 
-/* line 588, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 92, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-info-sign:before {
   content: "\f05a";
 }
 
-/* line 591, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 93, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-screenshot:before {
   content: "\f05b";
 }
 
-/* line 594, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 94, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-remove-circle:before {
   content: "\f05c";
 }
 
-/* line 597, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 95, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-ok-circle:before {
   content: "\f05d";
 }
 
-/* line 600, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 96, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-ban-circle:before {
   content: "\f05e";
 }
 
-/* line 603, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 97, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-arrow-left:before {
   content: "\f060";
 }
 
-/* line 606, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 98, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-arrow-right:before {
   content: "\f061";
 }
 
-/* line 609, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 99, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-arrow-up:before {
   content: "\f062";
 }
 
-/* line 612, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 100, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-arrow-down:before {
   content: "\f063";
 }
 
-/* line 615, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.icon-share-alt:before, .icon-mail-forward:before {
+/* line 101, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-mail-forward:before,
+.icon-share-alt:before {
   content: "\f064";
 }
 
-/* line 618, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 103, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-resize-full:before {
   content: "\f065";
 }
 
-/* line 621, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 104, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-resize-small:before {
   content: "\f066";
 }
 
-/* line 624, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 105, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-plus:before {
   content: "\f067";
 }
 
-/* line 627, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 106, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-minus:before {
   content: "\f068";
 }
 
-/* line 630, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 107, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-asterisk:before {
   content: "\f069";
 }
 
-/* line 633, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 108, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-exclamation-sign:before {
   content: "\f06a";
 }
 
-/* line 636, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 109, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-gift:before {
   content: "\f06b";
 }
 
-/* line 639, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 110, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-leaf:before {
   content: "\f06c";
 }
 
-/* line 642, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 111, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-fire:before {
   content: "\f06d";
 }
 
-/* line 645, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 112, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-eye-open:before {
   content: "\f06e";
 }
 
-/* line 648, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 113, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-eye-close:before {
   content: "\f070";
 }
 
-/* line 651, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 114, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-warning-sign:before {
   content: "\f071";
 }
 
-/* line 654, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 115, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-plane:before {
   content: "\f072";
 }
 
-/* line 657, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 116, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-calendar:before {
   content: "\f073";
 }
 
-/* line 660, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 117, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-random:before {
   content: "\f074";
 }
 
-/* line 663, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 118, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-comment:before {
   content: "\f075";
 }
 
-/* line 666, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 119, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-magnet:before {
   content: "\f076";
 }
 
-/* line 669, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 120, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-chevron-up:before {
   content: "\f077";
 }
 
-/* line 672, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 121, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-chevron-down:before {
   content: "\f078";
 }
 
-/* line 675, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 122, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-retweet:before {
   content: "\f079";
 }
 
-/* line 678, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 123, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-shopping-cart:before {
   content: "\f07a";
 }
 
-/* line 681, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 124, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-folder-close:before {
   content: "\f07b";
 }
 
-/* line 684, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 125, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-folder-open:before {
   content: "\f07c";
 }
 
-/* line 687, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 126, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-resize-vertical:before {
   content: "\f07d";
 }
 
-/* line 690, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 127, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-resize-horizontal:before {
   content: "\f07e";
 }
 
-/* line 693, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 128, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-bar-chart:before {
   content: "\f080";
 }
 
-/* line 696, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 129, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-twitter-sign:before {
   content: "\f081";
 }
 
-/* line 699, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 130, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-facebook-sign:before {
   content: "\f082";
 }
 
-/* line 702, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 131, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-camera-retro:before {
   content: "\f083";
 }
 
-/* line 705, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 132, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-key:before {
   content: "\f084";
 }
 
-/* line 708, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 133, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-gears:before,
 .icon-cogs:before {
   content: "\f085";
 }
 
-/* line 711, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 135, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-comments:before {
   content: "\f086";
 }
 
-/* line 714, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.icon-thumbs-up:before {
+/* line 136, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-thumbs-up-alt:before {
   content: "\f087";
 }
 
-/* line 717, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.icon-thumbs-down:before {
+/* line 137, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-thumbs-down-alt:before {
   content: "\f088";
 }
 
-/* line 720, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 138, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-star-half:before {
   content: "\f089";
 }
 
-/* line 723, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 139, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-heart-empty:before {
   content: "\f08a";
 }
 
-/* line 726, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 140, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-signout:before {
   content: "\f08b";
 }
 
-/* line 729, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 141, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-linkedin-sign:before {
   content: "\f08c";
 }
 
-/* line 732, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 142, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-pushpin:before {
   content: "\f08d";
 }
 
-/* line 735, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 143, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-external-link:before {
   content: "\f08e";
 }
 
-/* line 738, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 144, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-signin:before {
   content: "\f090";
 }
 
-/* line 741, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 145, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-trophy:before {
   content: "\f091";
 }
 
-/* line 744, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 146, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-github-sign:before {
   content: "\f092";
 }
 
-/* line 747, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 147, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-upload-alt:before {
   content: "\f093";
 }
 
-/* line 750, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 148, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-lemon:before {
   content: "\f094";
 }
 
-/* line 753, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 149, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-phone:before {
   content: "\f095";
 }
 
-/* line 756, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 150, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-unchecked:before,
 .icon-check-empty:before {
   content: "\f096";
 }
 
-/* line 759, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 152, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-bookmark-empty:before {
   content: "\f097";
 }
 
-/* line 762, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 153, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-phone-sign:before {
   content: "\f098";
 }
 
-/* line 765, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 154, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-twitter:before {
   content: "\f099";
 }
 
-/* line 768, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 155, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-facebook:before {
   content: "\f09a";
 }
 
-/* line 771, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 156, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-github:before {
   content: "\f09b";
 }
 
-/* line 774, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 157, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-unlock:before {
   content: "\f09c";
 }
 
-/* line 777, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 158, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-credit-card:before {
   content: "\f09d";
 }
 
-/* line 780, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 159, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-rss:before {
   content: "\f09e";
 }
 
-/* line 783, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 160, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-hdd:before {
   content: "\f0a0";
 }
 
-/* line 786, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 161, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-bullhorn:before {
   content: "\f0a1";
 }
 
-/* line 789, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 162, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-bell:before {
   content: "\f0a2";
 }
 
-/* line 792, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 163, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-certificate:before {
   content: "\f0a3";
 }
 
-/* line 795, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 164, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-hand-right:before {
   content: "\f0a4";
 }
 
-/* line 798, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 165, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-hand-left:before {
   content: "\f0a5";
 }
 
-/* line 801, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 166, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-hand-up:before {
   content: "\f0a6";
 }
 
-/* line 804, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 167, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-hand-down:before {
   content: "\f0a7";
 }
 
-/* line 807, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 168, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-circle-arrow-left:before {
   content: "\f0a8";
 }
 
-/* line 810, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 169, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-circle-arrow-right:before {
   content: "\f0a9";
 }
 
-/* line 813, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 170, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-circle-arrow-up:before {
   content: "\f0aa";
 }
 
-/* line 816, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 171, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-circle-arrow-down:before {
   content: "\f0ab";
 }
 
-/* line 819, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 172, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-globe:before {
   content: "\f0ac";
 }
 
-/* line 822, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 173, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-wrench:before {
   content: "\f0ad";
 }
 
-/* line 825, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 174, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-tasks:before {
   content: "\f0ae";
 }
 
-/* line 828, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 175, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-filter:before {
   content: "\f0b0";
 }
 
-/* line 831, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 176, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-briefcase:before {
   content: "\f0b1";
 }
 
-/* line 834, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 177, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-fullscreen:before {
   content: "\f0b2";
 }
 
-/* line 837, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 178, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-group:before {
   content: "\f0c0";
 }
 
-/* line 840, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 179, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-link:before {
   content: "\f0c1";
 }
 
-/* line 843, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 180, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-cloud:before {
   content: "\f0c2";
 }
 
-/* line 846, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 181, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-beaker:before {
   content: "\f0c3";
 }
 
-/* line 849, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 182, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-cut:before {
   content: "\f0c4";
 }
 
-/* line 852, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 183, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-copy:before {
   content: "\f0c5";
 }
 
-/* line 855, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 184, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-paperclip:before,
 .icon-paper-clip:before {
   content: "\f0c6";
 }
 
-/* line 858, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 186, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-save:before {
   content: "\f0c7";
 }
 
-/* line 861, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 187, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-sign-blank:before {
   content: "\f0c8";
 }
 
-/* line 864, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 188, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-reorder:before {
   content: "\f0c9";
 }
 
-/* line 867, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 189, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-list-ul:before {
   content: "\f0ca";
 }
 
-/* line 870, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 190, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-list-ol:before {
   content: "\f0cb";
 }
 
-/* line 873, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 191, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-strikethrough:before {
   content: "\f0cc";
 }
 
-/* line 876, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 192, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-underline:before {
   content: "\f0cd";
 }
 
-/* line 879, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 193, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-table:before {
   content: "\f0ce";
 }
 
-/* line 882, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 194, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-magic:before {
   content: "\f0d0";
 }
 
-/* line 885, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 195, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-truck:before {
   content: "\f0d1";
 }
 
-/* line 888, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 196, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-pinterest:before {
   content: "\f0d2";
 }
 
-/* line 891, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 197, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-pinterest-sign:before {
   content: "\f0d3";
 }
 
-/* line 894, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 198, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-google-plus-sign:before {
   content: "\f0d4";
 }
 
-/* line 897, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 199, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-google-plus:before {
   content: "\f0d5";
 }
 
-/* line 900, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 200, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-money:before {
   content: "\f0d6";
 }
 
-/* line 903, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 201, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-caret-down:before {
   content: "\f0d7";
 }
 
-/* line 906, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 202, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-caret-up:before {
   content: "\f0d8";
 }
 
-/* line 909, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 203, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-caret-left:before {
   content: "\f0d9";
 }
 
-/* line 912, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 204, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-caret-right:before {
   content: "\f0da";
 }
 
-/* line 915, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 205, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-columns:before {
   content: "\f0db";
 }
 
-/* line 918, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 206, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-sort:before {
   content: "\f0dc";
 }
 
-/* line 921, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 207, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-sort-down:before {
   content: "\f0dd";
 }
 
-/* line 924, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 208, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-sort-up:before {
   content: "\f0de";
 }
 
-/* line 927, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.icon-envelope-alt:before {
+/* line 209, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-envelope:before {
   content: "\f0e0";
 }
 
-/* line 930, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 210, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-linkedin:before {
   content: "\f0e1";
 }
 
-/* line 933, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.icon-undo:before, .icon-rotate-left:before {
+/* line 211, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-rotate-left:before,
+.icon-undo:before {
   content: "\f0e2";
 }
 
-/* line 936, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 213, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-legal:before {
   content: "\f0e3";
 }
 
-/* line 939, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 214, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-dashboard:before {
   content: "\f0e4";
 }
 
-/* line 942, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 215, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-comment-alt:before {
   content: "\f0e5";
 }
 
-/* line 945, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 216, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-comments-alt:before {
   content: "\f0e6";
 }
 
-/* line 948, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 217, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-bolt:before {
   content: "\f0e7";
 }
 
-/* line 951, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 218, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-sitemap:before {
   content: "\f0e8";
 }
 
-/* line 954, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 219, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-umbrella:before {
   content: "\f0e9";
 }
 
-/* line 957, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 220, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-paste:before {
   content: "\f0ea";
 }
 
-/* line 960, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 221, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-lightbulb:before {
   content: "\f0eb";
 }
 
-/* line 963, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 222, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-exchange:before {
   content: "\f0ec";
 }
 
-/* line 966, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 223, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-cloud-download:before {
   content: "\f0ed";
 }
 
-/* line 969, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 224, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-cloud-upload:before {
   content: "\f0ee";
 }
 
-/* line 972, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 225, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-user-md:before {
   content: "\f0f0";
 }
 
-/* line 975, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 226, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-stethoscope:before {
   content: "\f0f1";
 }
 
-/* line 978, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 227, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-suitcase:before {
   content: "\f0f2";
 }
 
-/* line 981, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 228, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-bell-alt:before {
   content: "\f0f3";
 }
 
-/* line 984, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 229, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-coffee:before {
   content: "\f0f4";
 }
 
-/* line 987, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 230, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-food:before {
   content: "\f0f5";
 }
 
-/* line 990, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.icon-file-alt:before {
+/* line 231, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-file-text-alt:before {
   content: "\f0f6";
 }
 
-/* line 993, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 232, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-building:before {
   content: "\f0f7";
 }
 
-/* line 996, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 233, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-hospital:before {
   content: "\f0f8";
 }
 
-/* line 999, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 234, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-ambulance:before {
   content: "\f0f9";
 }
 
-/* line 1002, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 235, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-medkit:before {
   content: "\f0fa";
 }
 
-/* line 1005, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 236, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-fighter-jet:before {
   content: "\f0fb";
 }
 
-/* line 1008, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 237, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-beer:before {
   content: "\f0fc";
 }
 
-/* line 1011, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 238, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-h-sign:before {
   content: "\f0fd";
 }
 
-/* line 1014, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 239, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-plus-sign-alt:before {
   content: "\f0fe";
 }
 
-/* line 1017, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 240, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-double-angle-left:before {
   content: "\f100";
 }
 
-/* line 1020, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 241, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-double-angle-right:before {
   content: "\f101";
 }
 
-/* line 1023, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 242, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-double-angle-up:before {
   content: "\f102";
 }
 
-/* line 1026, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 243, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-double-angle-down:before {
   content: "\f103";
 }
 
-/* line 1029, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 244, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-angle-left:before {
   content: "\f104";
 }
 
-/* line 1032, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 245, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-angle-right:before {
   content: "\f105";
 }
 
-/* line 1035, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 246, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-angle-up:before {
   content: "\f106";
 }
 
-/* line 1038, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 247, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-angle-down:before {
   content: "\f107";
 }
 
-/* line 1041, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 248, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-desktop:before {
   content: "\f108";
 }
 
-/* line 1044, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 249, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-laptop:before {
   content: "\f109";
 }
 
-/* line 1047, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 250, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-tablet:before {
   content: "\f10a";
 }
 
-/* line 1050, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 251, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-mobile-phone:before {
   content: "\f10b";
 }
 
-/* line 1053, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 252, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-circle-blank:before {
   content: "\f10c";
 }
 
-/* line 1056, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 253, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-quote-left:before {
   content: "\f10d";
 }
 
-/* line 1059, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 254, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-quote-right:before {
   content: "\f10e";
 }
 
-/* line 1062, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 255, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-spinner:before {
   content: "\f110";
 }
 
-/* line 1065, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 256, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-circle:before {
   content: "\f111";
 }
 
-/* line 1068, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.icon-reply:before, .icon-mail-reply:before {
+/* line 257, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-mail-reply:before,
+.icon-reply:before {
   content: "\f112";
 }
 
-/* line 1071, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 259, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-github-alt:before {
+  content: "\f113";
+}
+
+/* line 260, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-folder-close-alt:before {
   content: "\f114";
 }
 
-/* line 1074, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 261, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-folder-open-alt:before {
   content: "\f115";
 }
 
-/* line 1077, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 262, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-expand-alt:before {
   content: "\f116";
 }
 
-/* line 1080, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 263, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-collapse-alt:before {
   content: "\f117";
 }
 
-/* line 1083, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 264, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-smile:before {
   content: "\f118";
 }
 
-/* line 1086, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 265, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-frown:before {
   content: "\f119";
 }
 
-/* line 1089, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 266, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-meh:before {
   content: "\f11a";
 }
 
-/* line 1092, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 267, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-gamepad:before {
   content: "\f11b";
 }
 
-/* line 1095, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 268, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-keyboard:before {
   content: "\f11c";
 }
 
-/* line 1098, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 269, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-flag-alt:before {
   content: "\f11d";
 }
 
-/* line 1101, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 270, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-flag-checkered:before {
   content: "\f11e";
 }
 
-/* line 1104, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 271, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-terminal:before {
   content: "\f120";
 }
 
-/* line 1107, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 272, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-code:before {
   content: "\f121";
 }
 
-/* line 1110, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.icon-reply-all:before, .icon-mail-reply-all:before {
+/* line 273, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-reply-all:before {
   content: "\f122";
 }
 
-/* line 1113, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
-.icon-star-half-full:before, .icon-star-half-empty:before {
+/* line 274, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-mail-reply-all:before {
+  content: "\f122";
+}
+
+/* line 275, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-star-half-full:before,
+.icon-star-half-empty:before {
   content: "\f123";
 }
 
-/* line 1116, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 277, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-location-arrow:before {
   content: "\f124";
 }
 
-/* line 1119, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 278, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-crop:before {
   content: "\f125";
 }
 
-/* line 1122, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 279, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-code-fork:before {
   content: "\f126";
 }
 
-/* line 1125, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 280, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-unlink:before {
   content: "\f127";
 }
 
-/* line 1128, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 281, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-question:before {
   content: "\f128";
 }
 
-/* line 1131, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 282, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-info:before {
   content: "\f129";
 }
 
-/* line 1134, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 283, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-exclamation:before {
   content: "\f12a";
 }
 
-/* line 1137, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 284, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-superscript:before {
   content: "\f12b";
 }
 
-/* line 1140, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 285, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-subscript:before {
   content: "\f12c";
 }
 
-/* line 1143, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 286, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-eraser:before {
   content: "\f12d";
 }
 
-/* line 1146, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 287, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-puzzle-piece:before {
   content: "\f12e";
 }
 
-/* line 1149, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 288, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-microphone:before {
   content: "\f130";
 }
 
-/* line 1152, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 289, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-microphone-off:before {
   content: "\f131";
 }
 
-/* line 1155, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 290, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-shield:before {
   content: "\f132";
 }
 
-/* line 1158, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 291, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-calendar-empty:before {
   content: "\f133";
 }
 
-/* line 1161, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 292, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-fire-extinguisher:before {
   content: "\f134";
 }
 
-/* line 1164, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 293, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-rocket:before {
   content: "\f135";
 }
 
-/* line 1167, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 294, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-maxcdn:before {
   content: "\f136";
 }
 
-/* line 1170, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 295, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-chevron-sign-left:before {
   content: "\f137";
 }
 
-/* line 1173, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 296, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-chevron-sign-right:before {
   content: "\f138";
 }
 
-/* line 1176, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 297, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-chevron-sign-up:before {
   content: "\f139";
 }
 
-/* line 1179, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 298, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-chevron-sign-down:before {
   content: "\f13a";
 }
 
-/* line 1182, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 299, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-html5:before {
   content: "\f13b";
 }
 
-/* line 1185, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 300, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-css3:before {
   content: "\f13c";
 }
 
-/* line 1188, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 301, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-anchor:before {
   content: "\f13d";
 }
 
-/* line 1191, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 302, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-unlock-alt:before {
   content: "\f13e";
 }
 
-/* line 1194, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 303, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-bullseye:before {
   content: "\f140";
 }
 
-/* line 1197, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 304, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-ellipsis-horizontal:before {
   content: "\f141";
 }
 
-/* line 1200, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 305, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-ellipsis-vertical:before {
   content: "\f142";
 }
 
-/* line 1203, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 306, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-rss-sign:before {
   content: "\f143";
 }
 
-/* line 1206, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 307, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-play-sign:before {
   content: "\f144";
 }
 
-/* line 1209, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 308, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-ticket:before {
   content: "\f145";
 }
 
-/* line 1212, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 309, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-minus-sign-alt:before {
   content: "\f146";
 }
 
-/* line 1215, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 310, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-check-minus:before {
   content: "\f147";
 }
 
-/* line 1218, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 311, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-level-up:before {
   content: "\f148";
 }
 
-/* line 1221, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 312, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-level-down:before {
   content: "\f149";
 }
 
-/* line 1224, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 313, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-check-sign:before {
   content: "\f14a";
 }
 
-/* line 1227, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 314, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-edit-sign:before {
   content: "\f14b";
 }
 
-/* line 1230, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 315, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-external-link-sign:before {
   content: "\f14c";
 }
 
-/* line 1233, ../sass/bootstrap/addons/_font-awesome-3.1.1.sass */
+/* line 316, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-share-sign:before {
   content: "\f14d";
+}
+
+/* line 317, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-compass:before {
+  content: "\f14e";
+}
+
+/* line 318, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-collapse:before {
+  content: "\f150";
+}
+
+/* line 319, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-collapse-top:before {
+  content: "\f151";
+}
+
+/* line 320, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-expand:before {
+  content: "\f152";
+}
+
+/* line 321, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-euro:before,
+.icon-eur:before {
+  content: "\f153";
+}
+
+/* line 323, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-gbp:before {
+  content: "\f154";
+}
+
+/* line 324, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-dollar:before,
+.icon-usd:before {
+  content: "\f155";
+}
+
+/* line 326, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-rupee:before,
+.icon-inr:before {
+  content: "\f156";
+}
+
+/* line 328, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-yen:before,
+.icon-jpy:before {
+  content: "\f157";
+}
+
+/* line 330, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-renminbi:before,
+.icon-cny:before {
+  content: "\f158";
+}
+
+/* line 332, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-won:before,
+.icon-krw:before {
+  content: "\f159";
+}
+
+/* line 334, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-bitcoin:before,
+.icon-btc:before {
+  content: "\f15a";
+}
+
+/* line 336, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-file:before {
+  content: "\f15b";
+}
+
+/* line 337, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-file-text:before {
+  content: "\f15c";
+}
+
+/* line 338, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-sort-by-alphabet:before {
+  content: "\f15d";
+}
+
+/* line 339, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-sort-by-alphabet-alt:before {
+  content: "\f15e";
+}
+
+/* line 340, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-sort-by-attributes:before {
+  content: "\f160";
+}
+
+/* line 341, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-sort-by-attributes-alt:before {
+  content: "\f161";
+}
+
+/* line 342, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-sort-by-order:before {
+  content: "\f162";
+}
+
+/* line 343, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-sort-by-order-alt:before {
+  content: "\f163";
+}
+
+/* line 344, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-thumbs-up:before {
+  content: "\f164";
+}
+
+/* line 345, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-thumbs-down:before {
+  content: "\f165";
+}
+
+/* line 346, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-youtube-sign:before {
+  content: "\f166";
+}
+
+/* line 347, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-youtube:before {
+  content: "\f167";
+}
+
+/* line 348, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-xing:before {
+  content: "\f168";
+}
+
+/* line 349, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-xing-sign:before {
+  content: "\f169";
+}
+
+/* line 350, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-youtube-play:before {
+  content: "\f16a";
+}
+
+/* line 351, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-dropbox:before {
+  content: "\f16b";
+}
+
+/* line 352, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-stackexchange:before {
+  content: "\f16c";
+}
+
+/* line 353, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-instagram:before {
+  content: "\f16d";
+}
+
+/* line 354, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-flickr:before {
+  content: "\f16e";
+}
+
+/* line 355, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-adn:before {
+  content: "\f170";
+}
+
+/* line 356, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-bitbucket:before {
+  content: "\f171";
+}
+
+/* line 357, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-bitbucket-sign:before {
+  content: "\f172";
+}
+
+/* line 358, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-tumblr:before {
+  content: "\f173";
+}
+
+/* line 359, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-tumblr-sign:before {
+  content: "\f174";
+}
+
+/* line 360, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-long-arrow-down:before {
+  content: "\f175";
+}
+
+/* line 361, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-long-arrow-up:before {
+  content: "\f176";
+}
+
+/* line 362, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-long-arrow-left:before {
+  content: "\f177";
+}
+
+/* line 363, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-long-arrow-right:before {
+  content: "\f178";
+}
+
+/* line 364, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-apple:before {
+  content: "\f179";
+}
+
+/* line 365, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-windows:before {
+  content: "\f17a";
+}
+
+/* line 366, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-android:before {
+  content: "\f17b";
+}
+
+/* line 367, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-linux:before {
+  content: "\f17c";
+}
+
+/* line 368, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-dribbble:before {
+  content: "\f17d";
+}
+
+/* line 369, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-skype:before {
+  content: "\f17e";
+}
+
+/* line 370, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-foursquare:before {
+  content: "\f180";
+}
+
+/* line 371, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-trello:before {
+  content: "\f181";
+}
+
+/* line 372, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-female:before {
+  content: "\f182";
+}
+
+/* line 373, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-male:before {
+  content: "\f183";
+}
+
+/* line 374, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-gittip:before {
+  content: "\f184";
+}
+
+/* line 375, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-sun:before {
+  content: "\f185";
+}
+
+/* line 376, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-moon:before {
+  content: "\f186";
+}
+
+/* line 377, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-archive:before {
+  content: "\f187";
+}
+
+/* line 378, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-bug:before {
+  content: "\f188";
+}
+
+/* line 379, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-vk:before {
+  content: "\f189";
+}
+
+/* line 380, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-weibo:before {
+  content: "\f18a";
+}
+
+/* line 381, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-renren:before {
+  content: "\f18b";
 }
 
 /* ============================================================

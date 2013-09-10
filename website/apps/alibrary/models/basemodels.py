@@ -372,22 +372,44 @@ class Service(models.Model):
 class RelationManager(models.Manager):
 
     def generic(self):
-        return self.get_query_set().filter(service='generic')
+        qs = self.get_query_set().filter(service__in=['generic', 'official',])
+        return qs.order_by('-service')
 
     def specific(self, key=None):
-        
-        if not key:
-            services = Service.objects.values_list('key', 'pattern',)
-        
-        return self.get_query_set().exclude(service='generic')
 
-    """
-    def generic(self):
-        return self.get_query_set().filter(service='generic')
+        qs = self.get_query_set().exclude(service__in=['generic', 'official',])
 
-    def specific(self):
-        return self.get_query_set().exclude(service='generic')
-    """
+        """
+        try to order by dict
+        """
+        services = [
+                    'discogs_master',
+                    'discogs',
+                    'musicbrainz',
+                    'wikipedia',
+                    'soundcloud',
+                    'bandcamp',
+                    'lastfm',
+                    'youtube',
+                    'itunes',
+                    'facebook',
+                    'twitter',
+                    'linkedin',
+                    ]
+
+        objects = dict([(obj.service, obj) for obj in qs])
+
+        sorted = []
+        for service in services:
+            if service in objects:
+                sorted.append(objects[service])
+
+        #sorted = [objects[service] for service in services]
+
+        return sorted
+
+        #return qs.order_by('service')
+
     
 class Relation(models.Model):
     
@@ -405,6 +427,10 @@ class Relation(models.Model):
         ('facebook', _('Facebook')),
         ('youtube', _('YouTube')),
         ('discogs', _('Discogs')),
+        ('lastfm', _('Last.fm')),
+        ('linkedin', _('Linked In')),
+        ('soundcloud', _('Soundcloud')),
+        ('twitter', _('Twitter')),
         ('discogs_master', _('Discogs | master-release')),
         ('wikipedia', _('Wikipedia')),
         ('musicbrainz', _('Musicbrainz')),
@@ -446,31 +472,8 @@ class Relation(models.Model):
     """"""
     def save(self, *args, **kwargs):
 
-        
-        if self.url.find('facebook.com') != -1:
-            self.service = 'facebook'
-            
-        if self.url.find('youtube.com') != -1:
-            self.service = 'youtube' 
-                   
-        if self.url.find('discogs.com') != -1:
-            if self.url.find('/master/') != -1:
-                self.service = 'discogs_master'
-            else:
-                self.service = 'discogs'
-                   
-        if self.url.find('wikipedia.org') != -1:
-            self.service = 'wikipedia'
-                   
-        if self.url.find('musicbrainz.org') != -1:
-            self.service = 'musicbrainz'
-                   
-        if self.url.find('bandcamp.com') != -1:
-            self.service = 'bandcamp'
-                   
-        if self.url.find('itunes.apple.com') != -1:
-            self.service = 'itunes'
-            
+        self.service = self.get_service_by_url(self.url, self.service)
+
         # find already assigned services and delete them
         if self.service != 'generic':
             # TODO: fix unique problem
@@ -478,99 +481,78 @@ class Relation(models.Model):
         
         super(Relation, self).save(*args, **kwargs)    
         
-    
-    
-class __old_Relation__(models.Model):
-    
-    name = models.CharField(max_length=200, blank=True, null=True, help_text=(_('Additionally override the name.')))
-    url = models.URLField(max_length=512)
-
-    content_type = models.ForeignKey(ContentType)
-    #object_id = models.PositiveIntegerField()
-    object_id = UUIDField()
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
 
 
-    SERVICE_CHOICES = (
-        ('generic', _('Generic')),
-        ('facebook', _('Facebook')),
-        ('youtube', _('YouTube')),
-        ('discogs', _('Discogs')),
-        ('discogs_master', _('Discogs | master-release')),
-        ('wikipedia', _('Wikipedia')),
-        ('musicbrainz', _('Musicbrainz')),
-        ('bandcamp', _('Bandcamp')),
-        ('itunes', _('iTunes')),
-        ('official', _('Official website')),
-    )
-    
-    service = models.CharField(max_length=50, default='generic', choices=SERVICE_CHOICES)
-    
-    ACTION_CHOICES = (
-        ('information', _('Information')),
-        ('buy', _('Buy')),
-    )
-    action = models.CharField(max_length=50, default='information', choices=ACTION_CHOICES)
-
-    
-    # auto-update
-    created = models.DateField(auto_now_add=True, editable=False)
-    updated = models.DateField(auto_now=True, editable=False)
-    
-    # manager
-    objects = RelationManager()
-
-    # meta
-    class Meta:
-        app_label = 'alibrary'
-        verbose_name = _('Relation')
-        verbose_name_plural = _('Relations')
-        ordering = ('url', )
-        #unique_together = ('content_type', 'object_id')
-    
-    def __unicode__(self):
-        return self.url
-    
-    
-    def save(self, *args, **kwargs):
+    @property
+    def service_icon(self):
         """
-        try to extract service
+        some mapping is needed to map services
         """
-               
-        if self.url.find('facebook.com') != -1:
-            self.service = 'facebook'
-            
-        if self.url.find('youtube.com') != -1:
-            self.service = 'youtube' 
-                   
-        if self.url.find('discogs.com') != -1:
-            if self.url.find('/master/') != -1:
-                self.service = 'discogs_master'
+
+        icon = self.service
+
+        if icon == 'itunes':
+            icon = 'apple'
+
+        if icon == 'youtube':
+            icon = 'youtube-play'
+
+        if icon == 'discogs_master':
+            icon = 'discogs'
+
+
+        return icon
+
+
+    def get_service_by_url(self, url, service):
+
+        if url.find('facebook.com') != -1:
+            service = 'facebook'
+
+        if url.find('youtube.com') != -1:
+            service = 'youtube'
+
+        if url.find('discogs.com') != -1:
+            if url.find('/master/') != -1:
+                service = 'discogs_master'
             else:
-                self.service = 'discogs'
-                   
-        if self.url.find('wikipedia.org') != -1:
-            self.service = 'wikipedia'
-                   
-        if self.url.find('musicbrainz.org') != -1:
-            self.service = 'musicbrainz'
-                   
-        if self.url.find('bandcamp.com') != -1:
-            self.service = 'bandcamp'
-                   
-        if self.url.find('itunes.apple.com') != -1:
-            self.service = 'itunes'
-            
-        # find already assigned services and delete them
-        if self.service != 'generic':
-            # TODO: fix unique problem
-            reld = Relation.objects.filter(service=self.service, content_type=self.content_type, object_id=self.object_id).delete()
+                service = 'discogs'
 
-        super(Relation, self).save(*args, **kwargs)
-    
+        if url.find('wikipedia.org') != -1:
+            service = 'wikipedia'
+
+        if url.find('last.fm') != -1 or url.find('lastfm') != -1:
+            service = 'lastfm'
+
+        if url.find('musicbrainz.org') != -1:
+            service = 'musicbrainz'
+
+        if url.find('soundcloud.com') != -1:
+            service = 'soundcloud'
+
+        if url.find('bandcamp.com') != -1:
+            service = 'bandcamp'
+
+        if url.find('itunes.apple.com') != -1:
+            service = 'itunes'
+
+        if url.find('linkedin.com') != -1:
+            service = 'linkedin'
+
+        if url.find('twitter.com') != -1:
+            service = 'twitter'
 
 
+        if not service:
+            service = 'generic'
 
-# some helpers...
-def generate_uuid():
-    return str(uuid.uuid4())
+        return service
+
+
+def update_relations():
+    rs = Relation.objects.all()
+    for r in rs:
+        r.save()
+        print 'url:     %s' % r.url
+        print 'service: %s' % r.service
+        print
