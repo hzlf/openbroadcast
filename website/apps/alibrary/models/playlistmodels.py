@@ -224,6 +224,7 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
         permissions = (
             ('view_playlist', 'View Playlist'),
             ('edit_playlist', 'Edit Playlist'),
+            ('schedule_playlist', 'Schedule Playlist'),
             ('admin_playlist', 'Edit Playlist (extended)'),
         )
     
@@ -239,6 +240,10 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
     @models.permalink
     def get_edit_url(self):
         return ('alibrary-playlist-edit', [self.pk])
+
+    def get_admin_url(self):
+        from lib.util.get_admin_url import change_url
+        return change_url(self)
     
     
     def get_duration(self):

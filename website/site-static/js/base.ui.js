@@ -1601,7 +1601,43 @@ base.ui.listview = function () {
  */
 base.ui.listview.selection_update = function () {
 
-    var context = 'release'; // TODO: Make real
+
+    // reworked version
+    // Create array out of selected elements
+    var current_selection = [];
+    $('div.list_body_row.selectable.selection').each(function () {
+        var item_id = $(this).attr('id').split("_").pop();
+        current_selection.push(item_id);
+    });
+
+    // Trigger ui update for elements that relay on selection count
+    // disable all elements
+    $('.action .selection-required').addClass('disabled');
+    $('.action .selection-required.selection-multiple small').html('');
+    $('.action .selection-required.selection-any small').html('');
+    var count = current_selection.length;
+    switch (count) {
+        case 0:
+            // nothing selected
+            $('.action .selection-required').addClass('disabled');
+            break;
+        case 1:
+            // only _one_ single item selected
+            $('.action .selection-required.selection-single').removeClass('disabled');
+            $('.action .selection-required.selection-any').removeClass('disabled');
+            $('.action .selection-required.selection-any small').html(count);
+            break;
+        default:
+            // multiple items selected
+            $('.action .selection-required.selection-multiple').removeClass('disabled');
+            $('.action .selection-required.selection-any').removeClass('disabled');
+            $('.action .selection-required.selection-multiple small').html(count);
+            $('.action .selection-required.selection-any small').html(count);
+            break;
+    }
+
+
+
 
     // Create array out of selected elements
     base.ui.listview.selection_current = [];

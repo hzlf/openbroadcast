@@ -224,6 +224,14 @@ class PlaylistForm(ModelForm):
         cd = super(PlaylistForm, self).clean()
         return cd
 
+    def clean_target_duration(self):
+        target_duration = self.cleaned_data['target_duration']
+
+        try:
+            return int(target_duration)
+        except:
+            return None
+
     def save(self, *args, **kwargs):
         return super(PlaylistForm, self).save(*args, **kwargs)
    

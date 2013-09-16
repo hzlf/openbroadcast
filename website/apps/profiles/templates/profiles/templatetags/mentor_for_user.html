@@ -2,7 +2,7 @@
 
 {% if notes %}
 <li class="notes">
-	<p>
+	<p style="padding-top: 20px;">
 		{{ notes }}
 	</p>
 </li>
@@ -10,10 +10,11 @@
 
 {% for action in actions %}
 
-<li class="action">
-	<span class="left icon"> <a href="{{ action.url }}?next={{ user.get_absolute_url }}">{{ action.name }}</a> </span>
-	<span class="opt"></span>
-	<span class="clear"></span>
+<li class="link">
+    <a class="hoverable" href="{{ action.url }}?next={{ user.get_absolute_url }}" title="{{ action.name }}">
+        <i class="icon icon-{{ action.icon }}"></i>
+        <span>{{ action.name }}</span>
+    </a>
 </li>
 
 {% endfor %}

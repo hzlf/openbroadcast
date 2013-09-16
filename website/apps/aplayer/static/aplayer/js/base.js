@@ -219,8 +219,15 @@ aplayer.base.load_playlist = function(uri) {
 
                 // switch to handle releases & media api listings
                 if(uri.indexOf("release") != -1) {
+
                     aplayer.base.set_playlist(result.media);
+
+                } else if(uri.indexOf("track") != -1) {
+
+                    aplayer.base.set_playlist([result]);
+
                 } else if(uri.indexOf("playlist") != -1) {
+
                     var media = [];
                     $.each(result.items, function(i, item) {
                         console.log('co:', item.item.content_object)

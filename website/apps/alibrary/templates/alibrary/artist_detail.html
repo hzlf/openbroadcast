@@ -115,19 +115,19 @@
                             <span class="pull-right">
                                 <a href="{% spurl path=release_list query="artist={{ object.slug }}" %}">
                                     <i class="icon-chevron-sign-right"></i>
-                                    {% trans "Show all releases by" %} {{ object.name }}
+                                    {% trans "Show all" %} {{ object.get_releases.count }} {% trans "releases by" %} {{ object.name }}
                                 </a>
                             </span>
                         </h2>
 
-                        <div class="listview container releases inner m">
+                        <div class="listview container releases inner l">
 
                             <div class="list_header"></div>
 
                             <div class="list_body">
 
                                 {% for item in releases.object_list %}
-                                    {% include "alibrary/release/list_item_m.html" %}
+                                    {% include "alibrary/release/list_item_l.html" %}
                                 {% endfor %}
                             </div>
                         </div>

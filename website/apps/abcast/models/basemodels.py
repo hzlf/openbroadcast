@@ -86,6 +86,16 @@ class Station(BaseModel):
     def get_absolute_url(self):
         return ('abcast-station-detail', [self.slug])
 
+    """
+    @models.permalink
+    def get_edit_url(self):
+        return ('alibrary-artist-edit', [self.pk])
+    """
+
+    def get_admin_url(self):
+        from lib.util.get_admin_url import change_url
+        return change_url(self)
+
 
 arating.enable_voting_on(Station)
 

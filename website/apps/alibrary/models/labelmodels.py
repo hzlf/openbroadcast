@@ -151,6 +151,10 @@ class Label(MPTTModel, MigrationMixin):
         verbose_name_plural = _('Labels')
         ordering = ('name', )
 
+        permissions = (
+            ('merge_label', 'Merge Labels'),
+        )
+
     class MPTTMeta:
         order_insertion_by = ['name']
     
@@ -175,6 +179,10 @@ class Label(MPTTModel, MigrationMixin):
     @models.permalink
     def get_edit_url(self):
         return ('alibrary-label-edit', [self.pk])
+
+    def get_admin_url(self):
+        from lib.util.get_admin_url import change_url
+        return change_url(self)
     
 
     def save(self, *args, **kwargs):

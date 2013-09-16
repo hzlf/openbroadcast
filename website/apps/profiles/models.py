@@ -146,6 +146,17 @@ class Profile(MigrationMixin):
     def get_absolute_url(self):
         return ('profiles-profile-detail', None, { 'slug': self.user.username })
 
+
+    @models.permalink
+    def get_edit_url(self):
+        return ('profiles-profile-edit',)
+
+    def get_admin_url(self):
+        from lib.util.get_admin_url import change_url
+        return change_url(self)
+
+
+
     @property
     def sms_address(self):
         if (self.mobile and self.mobile_provider):

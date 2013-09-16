@@ -197,6 +197,10 @@ class Artist(MigrationMixin):
     @models.permalink
     def get_edit_url(self):
         return ('alibrary-artist-edit', [self.pk])
+
+    def get_admin_url(self):
+        from lib.util.get_admin_url import change_url
+        return change_url(self)
     
     def get_api_url(self):
         return reverse('api_dispatch_detail', kwargs={  

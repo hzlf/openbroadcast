@@ -1,30 +1,43 @@
 {% load i18n %}
 
-<div id="menu_context" class="menu_context">
-	<div class="set">
-		<ul class="unstyled">
-			<!-- Menu element / Action
-			<li class="action disabled selection_required selection_single selection_delete ">
-				<span class="left icon"> <a href="#release" title="Delete Selection">Delete Selection</a> </span>
-				<span class="opt"></span>
-				<span class="clear"></span>
-			</li> -->
-            <!-- Menu element / Action -->
-			<li class="action disabled selection_required selection_multiple selection_merge ">
-				<span class="left icon"> <a href="#" data-action="merge" data-ct="release" title="Merge Selection">Merge Selection</a> </span>
-				<span class="opt"></span>
-				<span class="clear"></span>
-			</li><!-- Menu element / Action -->
-			<li class="action disabled selection_required selection_any selection_play ">
-				<span class="left icon"> <a href="#release" title="Play Selection">Play Selection</a> </span>
-				<span class="opt"></span>
-				<span class="clear"></span>
-			</li><!-- Menu element / Action -->
-			<li class="action disabled selection_required selection_any selection_download ">
-				<span class="left icon"> <a href="#release" title="Download Selection">Download Selection</a> </span>
-				<span class="opt"></span>
-				<span class="clear"></span>
-			</li>
-		</ul>
-	</div>
+
+<div class="menu-context">
+
+    <div class="action-group">
+        <ul class="unstyled">
+
+            <!--
+            {% if perms.alibrary.upload_media %}
+            <li class="link">
+                <a class="hoverable" href="{% url importer-import-create %}" title="{% trans "Upload Content" %}">
+                    <i class="icon icon-upload-alt"></i>
+                    <span>{% trans "Upload Content" %}</span>
+                </a>
+            </li>
+            {% endif %}
+            -->
+
+            {% if perms.alibrary.downoad_media %}
+                <li class="action">
+                    <a class="hoverable disabled selection-required selection-any" href="#" data-action="download" data-ct="media_set"  title="{% trans "Download Selection" %}">
+                        <i class="icon icon-download-alt"></i>
+                        <span>{% trans "Download Selection" %}</span>
+                        <small class="opt pull-right"></small>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% if perms.alibrary.merge_release %}
+                <li class="action">
+                    <a class="hoverable disabled selection-required selection-multiple" href="#" data-action="merge" data-ct="release" title="{% trans "Merge Selection" %}">
+                        <i class="icon icon-align-justify"></i>
+                        <span>{% trans "Merge Selection" %}</span>
+                        <small class="opt pull-right"></small>
+                    </a>
+                </li>
+            {% endif %}
+
+        </ul>
+    </div>
+
 </div>

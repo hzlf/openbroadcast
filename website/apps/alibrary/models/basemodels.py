@@ -212,6 +212,9 @@ class License(MPTTModel, MigrationMixin):
     uuid = models.CharField(max_length=36, unique=False, default=str(uuid.uuid4()), editable=False)
     
     key = models.CharField(verbose_name=_("License key"), help_text=_("used e.g. for the icon-names"), max_length=36, blank=True, null=True)
+
+    iconset =  models.CharField(verbose_name=_("Iconset"), help_text=_("e.g. cc-by, cc-nc, cc-sa"), max_length=36, blank=True, null=True)
+
     
     link = models.URLField(null=True, blank=True)
     
@@ -253,6 +256,22 @@ class License(MPTTModel, MigrationMixin):
     @models.permalink
     def get_absolute_url(self):
         return ('alibrary-license-detail', [self.slug])
+
+
+    @property
+    def iconset_display(self):
+        from django.utils.html import mark_safe
+        html = ''
+        if self.iconset:
+            icons = self.iconset.split(',')
+            for icon in icons:
+                html += '<i class="icon icon-license-%s"></i>' % icon.strip(' ')
+
+        return mark_safe(html)
+
+    def get_admin_url(self):
+        from lib.util.get_admin_url import change_url
+        return change_url(self)
 
 class ProfessionManager(models.Manager):
 

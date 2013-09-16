@@ -1,70 +1,73 @@
 {% load truncate i18n thumbnail arating_tags alibrary_tags %}
 <div class="span7 padded-h container_content">
 
-	<div class="page-header">
-		<h2>{{ object.name|truncate_chars_inner:40 }} <small>{{ object.get_releasetype_display }}</small></h2>
-	</div>
+<div class="page-header">
+    <h2>{{ object.name|truncate_chars_inner:40 }}
+        <small>{{ object.get_releasetype_display }}</small>
+    </h2>
+</div>
 
-	<dl class="dl-horizontal main">
 
-		<dt>
-			{% trans "Artist" %}:
-		</dt>
-		<dd>
-			{% for artist in object.get_artists %}
-			
-			{# check if extended artist (with join phrase) #}
-			{% if "join_phrase" in artist %}
+<dl class="dl-horizontal main">
 
-				{% with item=artist.artist %}
-				{% if artist.join_phrase %}{{ artist.join_phrase }}{% endif %}
-				{% include "alibrary/element/_inline_link.html" %}
-				{% endwith %}
-			
-			{% else %}
-			
-				{% with item=artist %}
-				{% include "alibrary/element/_inline_link.html" %}
-				{% if not forloop.last %},{% endif %}
-				{% endwith %}
-			
-			{% endif %}
-			
+    <dt>
+        {% trans "Artist" %}:
+    </dt>
+    <dd>
+        {% for artist in object.get_artists %}
 
-			{% endfor %}
-			&nbsp;
-		</dd>
+            {# check if extended artist (with join phrase) #}
+            {% if "join_phrase" in artist %}
 
-		{% if object.label %}
-		<dt>
-			{% trans "Label" %}:
-		</dt>
-		<dd>
-			{% with item=object.label %}
-			{% include "alibrary/element/_inline_link.html" %}
-			{% endwith %}
-			&nbsp;
-		</dd>
-		{% endif %}
+                {% with item=artist.artist %}
+                    {% if artist.join_phrase %}{{ artist.join_phrase }}{% endif %}
+                    {% include "alibrary/element/_inline_link.html" %}
+                {% endwith %}
 
-        <!--
+            {% else %}
+
+                {% with item=artist %}
+                    {% include "alibrary/element/_inline_link.html" %}
+                    {% if not forloop.last %},{% endif %}
+                {% endwith %}
+
+            {% endif %}
+
+
+        {% endfor %}
+        &nbsp;
+    </dd>
+
+    {% if object.label %}
+        <dt>
+            {% trans "Label" %}:
+        </dt>
+        <dd>
+            {% with item=object.label %}
+                {% include "alibrary/element/_inline_link.html" %}
+            {% endwith %}
+            &nbsp;
+        </dd>
+    {% endif %}
+
+    <!--
 		{% if object.releasedate %}
 		<dt>{% trans "Releasedate" %}:</dt>
 		<dd>{{ object.releasedate|date:"SHORT_DATE_FORMAT" }}</dd>
 		{% endif %}
 		-->
 
-		{% if object.releasedate_approx %}
-		<dt>{% trans "Released" %}:</dt>
-		<dd>{{ object.releasedate_approx }}</dd>
-		{% endif %}
-		
-		{% if object.catalognumber %}
-		<dt>{% trans "Catalog Number" %}:</dt>
-		<dd>{{ object.catalognumber }}</dd>
-		{% endif %}
+    {% if object.releasedate_approx %}
+        <dt>{% trans "Released" %}:</dt>
+        <dd>{{ object.releasedate_approx }}</dd>
+    {% endif %}
 
-        <!--
+    {% if object.catalognumber %}
+        <dt>{% trans "Catalog Number" %}:</dt>
+        <dd>{{ object.catalognumber }}</dd>
+    {% endif %}
+
+    <!--
 		{% if object.publish_date %}
 		<dt>{% trans "Published" %}:</dt>
 		<dd>
@@ -75,27 +78,26 @@
 		</dd>
 		{% endif %}
 		-->
-		
-	</dl>
 
-	<dl class="dl-horizontal license">
+</dl>
 
-		<dt>
-			{% trans "License" %}:
-		</dt>
-		<dd>
-			<div class="license {% if object.get_license %}{{ object.get_license.key }}{% endif %}">
-				{% if object.get_license %}
-				<a rel="tooltip" href="{{ object.get_license.get_absolute_url }}" title="License details" class="dialog disabled-modal"><img src="/static/img/icons/transparent_16x16.png" width="78" height="24" alt="License" class="noborder"></a>
-				{% else %}
-				&nbsp;?
-				{% endif %}
-			</div>
-		</dd>
+<dl class="dl-horizontal license">
 
-	</dl>
+    <dt>
+        {% trans "License" %}:
+    </dt>
+    <dd>
+        {% if object.get_license %}
+            <a href="{{ object.get_license.get_absolute_url }}" title="{% trans "License details" %}" class="iconset iconset-license">{{ object.get_license.iconset_display }}</a>
+        {% else %}
+            &nbsp;
+        {% endif %}
+    </dd>
 
-    <!--
+
+</dl>
+
+<!--
 	<dl class="dl-horizontal">
 
 		<dt>
@@ -109,7 +111,7 @@
 	</dl>
     -->
 
-    <!--
+<!--
 	<dl class="dl-horizontal">
 
 		<dt>
@@ -117,7 +119,8 @@
 		</dt>
 		<dd class="horizontal relations">
 			{% for relation in object.relations.specific %}
-			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}">{{ relation.service }}</a>
+			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}">
+    {{ relation.service }}</a>
 			
 			{% endfor %}
 			<div class="clear"></div>
@@ -127,31 +130,32 @@
     -->
 
 
-    {% if object.relations.generic %}
-	<dl class="dl-horizontal">
+{% if object.relations.generic %}
+    <dl class="dl-horizontal">
 
-		<dt>
-			{% trans "Relations" %}:
-		</dt>
-		<dd class="horizontal">
-			<ul class="unstyled">
-			{% for relation in object.relations.generic %}
-			<li>
-                <a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.url }}">{{ relation.url }}</a>
-                {% if relation.service == "official" %}
-                <small> <i class="icon icon-star"></i> {% trans "official" %}</small>
-                {% endif %}
-            </li>
-			
-			{% endfor %}
-			</ul>
-			<div class="clear"></div>
-		</dd>
+        <dt>
+            {% trans "Relations" %}:
+        </dt>
+        <dd class="horizontal">
+            <ul class="unstyled">
+                {% for relation in object.relations.generic %}
+                    <li>
+                        <a href="{{ relation.url }}" class="skip-external"
+                           title="Show on {{ relation.url }}">{{ relation.url }}</a>
+                        {% if relation.service == "official" %}
+                            <small><i class="icon icon-star"></i> {% trans "official" %}</small>
+                        {% endif %}
+                    </li>
 
-	</dl>
-    {% endif %}
+                {% endfor %}
+            </ul>
+            <div class="clear"></div>
+        </dd>
 
-	<!--
+    </dl>
+{% endif %}
+
+<!--
 	<dl class="dl-horizontal links external">
 
 		<dt>
@@ -159,7 +163,8 @@
 		</dt>
 		<dd class="horizontal">
 			{% for relation in object.relations.specific %}
-			<a href="{{ relation.url }}" title="Show on {{ relation.get_service_display }}" class="external {{ relation.service }}"><img src="/static/img/base/spacer.png" alt="{{ relation.get_service_display }}" style="width: 16px; height: 16px;"></a>
+			<a href="{{ relation.url }}" title="Show on {{ relation.get_service_display }}" class="external
+    {{ relation.service }}"><img src="/static/img/base/spacer.png" alt="{{ relation.get_service_display }}" style="width: 16px; height: 16px;"></a>
 			{% endfor %}
 			<div class="clear"></div>
 		</dd>
@@ -167,79 +172,87 @@
 	</dl>
 	-->
 
-	<dl class="dl-horizontal sub">
+<dl class="dl-horizontal sub">
 
-		<dt>
-			{% trans "History" %}:
-		</dt>
-		<dd>
-			
-			{% if object.owner %}
-			<span class="key">{% trans "Owned by" %}:</span> <span class="value"><a href="{{ object.owner.get_absolute_url }}">{{ object.owner }}</a></span> |
-			{% endif %}
-			
-			{% if object.creator %}
-			<span class="key">{% trans "Created by" %}:</span> <span class="value"><a href="{{ object.creator.get_absolute_url }}">{{ object.creator }}</a></span> |
-			{% endif %}
+    <dt>
+        {% trans "History" %}:
+    </dt>
+    <dd>
 
-			
-			{% if object.get_last_revision %}
-			<span class="key">{% trans "Last edit by" %}:</span> <span class="value"><a href="{{ object.get_last_revision.user.get_profile.get_absolute_url }}">{{ object.get_last_revision.user }}</a></span> |
-			{% endif %}
+        {% if object.owner %}
+            <span class="key">{% trans "Owned by" %}:</span>
+            <span class="value"><a href="{{ object.owner.get_absolute_url }}">{{ object.owner }}</a></span> |
+        {% endif %}
 
-			<!---->
+        {% if object.creator %}
+            <span class="key">{% trans "Created by" %}:</span>
+            <span class="value"><a href="{{ object.creator.get_absolute_url }}">{{ object.creator }}</a></span> |
+        {% endif %}
 
-            {% if object.publish_date %}
-            <span class="key">{% trans "Published by" %}: {% if object.publisher %}<a href="#">{{ object.publisher }}</a>{% endif %}</span> <span class="value">
+
+        {% if object.get_last_revision %}
+            <span class="key">{% trans "Last edit by" %}:</span><span class="value"><a
+                href="{{ object.get_last_revision.user.get_profile.get_absolute_url }}">{{ object.get_last_revision.user }}</a></span>
+            |
+        {% endif %}
+
+        <!---->
+
+        {% if object.publish_date %}
+            <span class="key">{% trans "Published by" %}: {% if object.publisher %}<a href="#">{{ object.publisher }}
+                </a>{% endif %}</span> <span class="value">
                 {{ object.publish_date|date:"SHORT_DATE_FORMAT" }}
 
             </span>
-            {% endif %}
-            <!--
+        {% endif %}
+        <!--
 			{% if object.publisher %}
 			<span class="key">{% trans "Published by" %}:</span> <span class="value"><a href="#">{{ object.publisher }}</a></span>
 			{% endif %}
 			-->
 
-			&nbsp;
-		</dd>
+        &nbsp;
+    </dd>
 
-		<dt>
-			{% trans "Stats" %}:
-		</dt>
-		<dd>
-			<span class="value">3</span> <span class="key">{% trans "Airplays" %}</span> |
-			<span class="value">173</span> <span class="key">{% trans "Plays" %}</span> |
-			<span class="value">28</span> <span class="key">{% trans "Downloads" %}</span>
-		</dd>
+    <dt>
+        {% trans "Stats" %}:
+    </dt>
+    <dd>
+        <span class="value">3</span> <span class="key">{% trans "Airplays" %}</span> |
+        <span class="value">173</span> <span class="key">{% trans "Plays" %}</span> |
+        <span class="value">28</span> <span class="key">{% trans "Downloads" %}</span>
+    </dd>
 
-		{% if object.tags %}
-		<dt>
-			{% trans "Tags" %}:
-		</dt>
-		<dd>
-			{% for tag in object.tags %}
-			{{ tag.name }}{% if not forloop.last %},{% endif %}
-			{% endfor %}
-		</dd>
-		{% endif %}
+    {% if object.tags %}
+        <dt>
+            {% trans "Tags" %}:
+        </dt>
+        <dd>
+            {% for tag in object.tags %}
+                {{ tag.name }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        </dd>
+    {% endif %}
 
-	</dl>
+</dl>
+
 
 </div>
 
 <div class="span2 padded-h padded-v">
 
-	<div class="image">
-		{% if object.main_image %}
-		<a href="{% thumbnail object.main_image 1200x1200 crop upscale %}" class="zoomable cboxElement"> <img src="{% thumbnail object.main_image 172x172 crop upscale subject_location=object.main_image.subject_location %}" alt="Cover" /> </a>
-		{% else %}
-		<img src="/static/img/base/defaults/listview.release.xl.png" alt="{% trans "No cover available" %}" />
-		{% endif %}
-	</div>
+    <div class="image">
+        {% if object.main_image %}
+            <a href="{% thumbnail object.main_image 1200x1200 crop upscale %}" class="zoomable cboxElement"> <img
+                    src="{% thumbnail object.main_image 172x172 crop upscale subject_location=object.main_image.subject_location %}"
+                    alt="Cover"/> </a>
+        {% else %}
+            <img src="/static/img/base/defaults/listview.release.xl.png" alt="{% trans "No cover available" %}"/>
+        {% endif %}
+    </div>
 
-	<div class="rating">
-		{% rating_for_object object %}
-	</div>
+    <div class="rating">
+        {% rating_for_object object %}
+    </div>
 
 </div>

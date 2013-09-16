@@ -1,33 +1,22 @@
 {% load i18n %}
 
-<div id="menu_context" class="menu_context">
-    <div class="set">
+
+<div class="menu-context">
+
+    <div class="action-group">
         <ul class="unstyled">
-            <!-- Menu element / Action
-            <li class="action disabled selection_required selection_single selection_delete ">
-                <span class="left icon"> <a href="#release" title="Delete Selection">Delete Selection</a> </span>
-                <span class="opt"></span>
-                <span class="clear"></span>
-            </li> -->
-            <!-- Menu element / Action -->
-            <li class="action disabled selection_required selection_multiple selection_merge ">
-                <span class="left icon"> <a href="#" data-action="merge" data-ct="label" title="Merge Selection">Merge
-                    Selection</a> </span>
-                <span class="opt"></span>
-                <span class="clear"></span>
-            </li>
-            <!-- Menu element / Action
-            <li class="action disabled selection_required selection_any selection_play ">
-                <span class="left icon"> <a href="#release" title="Play Selection">Play Selection</a> </span>
-                <span class="opt"></span>
-                <span class="clear"></span>
-            </li> -->
-            <!-- Menu element / Action
-            <li class="action disabled selection_required selection_any selection_download ">
-                <span class="left icon"> <a href="#release" title="Download Selection">Download Selection</a> </span>
-                <span class="opt"></span>
-                <span class="clear"></span>
-            </li> -->
+
+            {% if perms.alibrary.merge_label %}
+                <li class="action">
+                    <a class="hoverable disabled selection-required selection-multiple" href="#" data-action="merge" data-ct="label" title="{% trans "Merge Selection" %}">
+                        <i class="icon icon-align-justify"></i>
+                        <span>{% trans "Merge Selection" %}</span>
+                        <small class="opt pull-right"></small>
+                    </a>
+                </li>
+            {% endif %}
+
         </ul>
     </div>
+
 </div>

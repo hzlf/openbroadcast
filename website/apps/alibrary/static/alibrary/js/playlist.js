@@ -500,6 +500,9 @@ CollectorApp = (function () {
 
             // type switch
             if (container.hasClass('media')) {
+
+
+
                 var item_id = container.data('id');
                 var item_uuid = container.data('uuid');
                 media.push({id: item_id, uuid: item_uuid});

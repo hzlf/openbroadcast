@@ -125,7 +125,8 @@ class LabelInline(admin.TabularInline):
 
 class MediaInline(admin.TabularInline):
     model = Media
-    exclude = ['description','slug','processed','echoprint_status','conversion_status', 'd_tags']
+    exclude = ['description','slug','processed','echoprint_status','conversion_status', 'd_tags', 'echonest_id', 'danceability', 'energy', 'liveness', 'loudness', 'speechiness', 'start_of_fade_out', 'echonest_duration', 'tempo', 'key', 'sections','master_sha1', 'base_format', 'base_filesize', 'base_duration', 'base_samplerate', 'base_bitrate', 'filename', 'publish_date', 'status', 'owner', 'creator', 'publisher', 'mediamumber', 'master', 'mediatype' ]
+    readonly_fields = ['artist', ]
     extra = 1
     
 class FormatAdmin(BaseAdmin):
@@ -165,11 +166,13 @@ class RelationsInline(GenericTabularInline):
 
 class ReleaseMediaMediaInline(admin.TabularInline):
     model = Media
+
     extra = 1
 
 """"""
 class ReleaseMediaInline(admin.TabularInline):
     model = ReleaseMedia
+
     extra = 1 
     inlines = [ReleaseMediaMediaInline]
 

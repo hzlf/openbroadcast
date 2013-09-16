@@ -2,7 +2,10 @@
 
 <div class="list_body_row selectable item release published owner view edit stream collect download"
      id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}"
-     {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 200x200 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
+     {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 200x200 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}
+     data-id="{{ item.id }}"
+     data-uuid="{{ item.uuid }}"
+     data-ct="release">
 
     <div class="wrapper_icon">
 
@@ -30,7 +33,7 @@
                 <ul class="title">
                     <li class="bold">
                         <a href="{{ item.get_absolute_url }}"
-                           title="{{ item.name }}"> {{ item.name|truncate_chars_inner:24 }}
+                           title="{{ item.name }}"> {{ item.name|truncate_chars_inner:18 }}
                             {% topflop_for_object item %} </a>
                     </li>
                     <li>
@@ -54,34 +57,48 @@
             </div>
 
             <div class="list_body_item">
-                <ul class="unstyled indicator">
-                    {% include "alibrary/element/_track_indicator.html" %}
-                </ul>
-            </div>
+                <ul class="unstyled indicator horizontal">
 
-            <div class="list_body_item">
-                <ul class="horizontal clearfix unstyled">
-                    <li style="white-space:nowrap;">
-                        {% if item.label %}
-
-                            <a href="{{ item.label.get_absolute_url }}"
-                               title="{{ item.label.name }}">{{ item.label.name|truncate_chars_inner:18 }}</a>
-                            &nbsp;
-                            <a href="{% spurl base=request.get_full_path remove_query_param="page" set_query="label={{ item.label.slug }}" %}"
-                               title="{% trans "Only show releases on" %} {{ item.label.name }}"
-                               style="vertical-align: top;"><span class="filter icon"></span></a>
-
+                    <li>
+                        {% if item.get_license %}
+                            <a href="{{ item.get_license.get_absolute_url }}" title="{% trans "License details" %}"
+                               class="iconset iconset-license">{{ item.get_license.iconset_display }}</a>
                         {% else %}
                             &nbsp;
                         {% endif %}
                     </li>
-                    <li class="small">&nbsp;
-                        {% if  item.catalognumber %}
-                            {{ item.catalognumber }}
-                        {% endif %}
-                    </li>
+
+                    {% include "alibrary/element/_track_indicator.html" %}
+
                 </ul>
             </div>
+
+            {% if item.label %}
+                <div class="list_body_item">
+                    <ul class="horizontal clearfix unstyled">
+                        <li style="white-space:nowrap;">
+                            {% if item.label %}
+
+                                <a href="{{ item.label.get_absolute_url }}"
+                                   title="{{ item.label.name }}">{{ item.label.name|truncate_chars_inner:18 }}</a>
+                                &nbsp;
+                                <a href="{% spurl base=request.get_full_path remove_query_param="page" set_query="label={{ item.label.slug }}" %}"
+                                   title="{% trans "Only show releases on" %} {{ item.label.name }}"
+                                   style="vertical-align: top;"><span class="filter icon"></span></a>
+
+                            {% else %}
+                                &nbsp;
+                            {% endif %}
+                        </li>
+                        <li class="small">&nbsp;
+                            {% if  item.catalognumber %}
+                                {{ item.catalognumber }}
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            {% endif %}
+
 
 
 

@@ -2,6 +2,41 @@
 
 
 
+// rework
+.sidebar div.menu-context
+  .action-group
+    ul
+      border-top: 1px solid #AAAAAA
+      li
+        border-bottom: 1px solid #CCCCCC
+        a
+          display: block
+          padding: 2px 0
+          i
+            padding: 3px 0 3px 5px
+            width: 20px
+            display: block
+            float: left
+          span
+
+          small
+            padding-right: 3px
+
+          &.hover
+            background: #eee6ff
+            text-decoration: none
+
+          // state specific styles
+          &.disabled
+            cursor: wait
+            color: #BBBBBB
+            &.hover
+              background: #efefef
+
+// rework end
+
+
+
 div.row .sidebar
   div.menu_context
     div.set
@@ -191,7 +226,7 @@ div.row .sidebar
             display: none
             padding: 0 2px 7px 2px
             input
-              @include shaded_input
+              // @include shaded_input
               width: 98%
               
           div.convert
@@ -405,7 +440,7 @@ div.row .sidebar
             display: none
             padding: 0 2px 7px 2px
             input
-              @include shaded_input
+              //@include shaded_input
               width: 98%
               
           div.convert

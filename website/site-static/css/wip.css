@@ -284,9 +284,9 @@
       width: 16px;
       height: 16px; }
   .listview.container.medias.s .c3 {
-    width: 355px; }
+    width: auto; }
   .listview.container.medias.s .c4 {
-    width: 120px; }
+    min-width: 170px; }
   .listview.container.medias.s .c5 {
     width: 30px; }
   .listview.container.medias.s .c6 {
@@ -758,6 +758,10 @@ section.comments.disqus {
       font-size: 90%; }
 .item_detail .item_inner section.appearance {
   margin-top: 15px; }
+.item_detail .item_inner section.video {
+  margin-top: 15px; }
+.item_detail .item_inner section.statistics {
+  margin-top: 15px; }
 .item_detail .item_inner section.media {
   margin-top: 15px; }
 
@@ -898,6 +902,9 @@ section.item_inner .tab-pane section.profile.information h4 {
 section.item_inner .tab-pane section.profile.information dl {
   margin: 4px 0 8px; }
 
+.sidebar .listing.relations .social {
+  height: 24px;
+  margin: 2px 0 8px; }
 .sidebar .listing.relations .relations > ul li {
   cursor: pointer;
   padding: 4px 0 6px 0;
@@ -919,5 +926,412 @@ section.item_inner .tab-pane section.profile.information dl {
     width: 100%; }
   .sidebar .listing.relations .relations > ul li:hover a {
     color: #6633cc; }
+
+.atracker.event-list h3 {
+  margin: 20px 0 0px !important;
+  text-align: right; }
+.atracker.event-list h3, .atracker.event-list h4 {
+  padding-left: 3px;
+  padding-right: 3px; }
+.atracker.event-list h4 {
+  margin: 14px 0 7px; }
+.atracker.event-list ul.event {
+  border-bottom: 1px solid #efefef;
+  margin: 0; }
+  .atracker.event-list ul.event:nth-child(odd) {
+    background: #fafafa; }
+  .atracker.event-list ul.event li.date {
+    width: 20%; }
+  .atracker.event-list ul.event li.user {
+    width: 20%; }
+  .atracker.event-list ul.event li.type {
+    width: 20%;
+    text-transform: capitalize; }
+  .atracker.event-list ul.event li.co {
+    width: 20%; }
+
+.markdown-inline h1, .markdown-inline h2, .markdown-inline h3 {
+  color: #999999;
+  font-size: 140%;
+  line-height: 140%;
+  padding: 0 !important;
+  margin: 0 0 5px 0 !important; }
+.markdown-inline h4, .markdown-inline h5, .markdown-inline h6 {
+  color: #999999;
+  font-size: 120%;
+  line-height: 120%;
+  padding: 0 !important;
+  margin: 0 0 5px 0 !important; }
+
+/* sidebar */
+.sidebar div.menu-context .action-group ul {
+  border-top: 1px solid #aaaaaa; }
+  .sidebar div.menu-context .action-group ul li {
+    border-bottom: 1px solid #cccccc; }
+    .sidebar div.menu-context .action-group ul li a {
+      display: block;
+      padding: 2px 0; }
+      .sidebar div.menu-context .action-group ul li a i {
+        padding: 3px 0 3px 5px;
+        width: 20px;
+        display: block;
+        float: left; }
+      .sidebar div.menu-context .action-group ul li a small {
+        padding-right: 3px; }
+      .sidebar div.menu-context .action-group ul li a.hover {
+        background: #eee6ff;
+        text-decoration: none; }
+      .sidebar div.menu-context .action-group ul li a.disabled {
+        cursor: wait;
+        color: #bbbbbb; }
+        .sidebar div.menu-context .action-group ul li a.disabled.hover {
+          background: #efefef; }
+
+div.row .sidebar div.menu_context div.set {
+  border-top: 1px solid #aaaaaa;
+  margin-bottom: 23px; }
+  div.row .sidebar div.menu_context div.set ul li {
+    border-bottom: 1px solid #cccccc;
+    padding: 3px 0 2px 19px;
+    background-repeat: no-repeat;
+    background-position: 0 3px;
+    background-image: url("/static/img/prototype/action.png"); }
+    div.row .sidebar div.menu_context div.set ul li a:link, div.row .sidebar div.menu_context div.set ul li a:visited {
+      text-decoration: none; }
+    div.row .sidebar div.menu_context div.set ul li:hover {
+      background-color: #eee6ff;
+      cursor: pointer; }
+    div.row .sidebar div.menu_context div.set ul li.action.disabled, div.row .sidebar div.menu_context div.set ul li.link.disabled {
+      cursor: wait;
+      background-image: none; }
+      div.row .sidebar div.menu_context div.set ul li.action.disabled a:link, div.row .sidebar div.menu_context div.set ul li.action.disabled a:visited, div.row .sidebar div.menu_context div.set ul li.action.disabled span, div.row .sidebar div.menu_context div.set ul li.link.disabled a:link, div.row .sidebar div.menu_context div.set ul li.link.disabled a:visited, div.row .sidebar div.menu_context div.set ul li.link.disabled span {
+        color: #bbbbbb;
+        cursor: wait; }
+      div.row .sidebar div.menu_context div.set ul li.action.disabled:hover, div.row .sidebar div.menu_context div.set ul li.link.disabled:hover {
+        background-color: transparent; }
+    div.row .sidebar div.menu_context div.set ul li.action.locked, div.row .sidebar div.menu_context div.set ul li.link.locked {
+      cursor: wait;
+      background-image: none;
+      display: none; }
+      div.row .sidebar div.menu_context div.set ul li.action.locked .opt, div.row .sidebar div.menu_context div.set ul li.link.locked .opt {
+        display: none; }
+      div.row .sidebar div.menu_context div.set ul li.action.locked a:link, div.row .sidebar div.menu_context div.set ul li.action.locked a:visited, div.row .sidebar div.menu_context div.set ul li.action.locked span, div.row .sidebar div.menu_context div.set ul li.link.locked a:link, div.row .sidebar div.menu_context div.set ul li.link.locked a:visited, div.row .sidebar div.menu_context div.set ul li.link.locked span {
+        color: #bbbbbb !important;
+        text-decoration: line-through !important;
+        cursor: wait !important; }
+      div.row .sidebar div.menu_context div.set ul li.action.locked:hover, div.row .sidebar div.menu_context div.set ul li.link.locked:hover {
+        background-color: transparent; }
+    div.row .sidebar div.menu_context div.set ul li span {
+      display: block;
+      padding: 0 5px 0 0; }
+    div.row .sidebar div.menu_context div.set ul li span.opt {
+      color: #6633cc; }
+    div.row .sidebar div.menu_context div.set ul li.notes {
+      background-image: none;
+      padding-left: 3px; }
+      div.row .sidebar div.menu_context div.set ul li.notes p {
+        padding: 0;
+        margin-bottom: 0; }
+      div.row .sidebar div.menu_context div.set ul li.notes:hover {
+        background-color: transparent; }
+
+div.row .sidebar div.boxitem select.year, div.row .sidebar div.boxitem select.time, div.row .sidebar div.boxitem select.sorting, div.row .sidebar div.boxitem select.country {
+  background-color: white;
+  border: 1px solid #bbbbbb;
+  color: #5a5a5a; }
+  div.row .sidebar div.boxitem select.year.keys, div.row .sidebar div.boxitem select.time.keys, div.row .sidebar div.boxitem select.sorting.keys, div.row .sidebar div.boxitem select.country.keys {
+    width: 100px;
+    margin-right: 7px; }
+  div.row .sidebar div.boxitem select.year.direction, div.row .sidebar div.boxitem select.time.direction, div.row .sidebar div.boxitem select.sorting.direction, div.row .sidebar div.boxitem select.country.direction {
+    width: 80px; }
+  div.row .sidebar div.boxitem select.year.country, div.row .sidebar div.boxitem select.time.country, div.row .sidebar div.boxitem select.sorting.country, div.row .sidebar div.boxitem select.country.country {
+    width: 140px;
+    overflow: hidden; }
+
+div.row .sidebar div.box.sorting {
+  /* margin-bottom: 23px */
+  /* border-bottom: 1px solid #ccc */ }
+
+#filterbox-sort_default .opt {
+  display: none; }
+
+/* Playlists (a.k.a. Basket) */
+div.row .sidebar div.playlist {
+  margin-top: 24px;
+  border-left: 1px solid white;
+  border-right: 1px solid white;
+  border-top: 1px solid #cccccc;
+  border-bottom: 1px solid #cccccc;
+  background-image: none; }
+  div.row .sidebar div.playlist div.wrapper, div.row .sidebar div.playlist div.form {
+    display: none; }
+  div.row .sidebar div.playlist.expanded {
+    border: 1px solid #cccccc;
+    background-color: whitesmoke;
+    padding: 0 2px 2px 2px; }
+    div.row .sidebar div.playlist.expanded div.wrapper, div.row .sidebar div.playlist.expanded div.form {
+      display: block; }
+    div.row .sidebar div.playlist.expanded div.header {
+      padding-right: 4px;
+      background-image: url("/static/img/prototype/box_handler_on.png"); }
+  div.row .sidebar div.playlist.close {
+    background-color: white;
+    padding: 0 2px 0 2px; }
+    div.row .sidebar div.playlist.close div.wrapper, div.row .sidebar div.playlist.close div.form {
+      display: none; }
+  div.row .sidebar div.playlist div.header {
+    background-image: url("/static/img/prototype/box_handler.png");
+    background-repeat: no-repeat;
+    color: #333333;
+    padding: 3px 6px 2px 19px;
+    border-bottom: none;
+    /*background-color: #ff00ff */ }
+  div.row .sidebar div.playlist div.wrapper div.playlist_holder div.header {
+    background-image: none !important; }
+  div.row .sidebar div.playlist div.wrapper div.playlist_holder.open {
+    padding: 0 0 4px 0;
+    /*border: 1px solid #CCCCCC */ }
+    div.row .sidebar div.playlist div.wrapper div.playlist_holder.open div.panel, div.row .sidebar div.playlist div.wrapper div.playlist_holder.open div.list {
+      display: block; }
+    div.row .sidebar div.playlist div.wrapper div.playlist_holder.open div.header {
+      background-image: url("/static/img/prototype/box_handler_on.png"); }
+  div.row .sidebar div.playlist div.wrapper div.playlist_holder.close div.panel, div.row .sidebar div.playlist div.wrapper div.playlist_holder.close div.list {
+    display: none; }
+  div.row .sidebar div.playlist div.wrapper div.playlist_holder.close div.header {
+    background-image: url("/static/img/prototype/box_handler.png"); }
+  div.row .sidebar div.playlist div.wrapper div.playlist_holder div.header {
+    /*background-color: #00ffff */
+    padding: 1px 0 1px 3px; }
+    div.row .sidebar div.playlist div.wrapper div.playlist_holder div.header a.action {
+      display: block;
+      width: 16px;
+      background-position: 0 1px;
+      background-repeat: no-repeat;
+      padding: 0 0 0 0; }
+      div.row .sidebar div.playlist div.wrapper div.playlist_holder div.header a.action:hover {
+        background-position: 0 -15px; }
+      div.row .sidebar div.playlist div.wrapper div.playlist_holder div.header a.action.delete {
+        background-image: url(/static/img/base/sidebar.box.remove.png); }
+      div.row .sidebar div.playlist div.wrapper div.playlist_holder div.header a.action.edit {
+        background-image: url(/static/img/base/sidebar.box.edit.png); }
+      div.row .sidebar div.playlist div.wrapper div.playlist_holder div.header a.action.play {
+        background-image: url(/static/img/base/sidebar.box.play.png);
+        background-color: #d6def7; }
+      div.row .sidebar div.playlist div.wrapper div.playlist_holder div.header a.action.downloadable {
+        background-image: url(/static/img/base/listview.row.download.bg.png); }
+  div.row .sidebar div.playlist div.wrapper div.playlist_holder div.panel {
+    padding: 4px 0 0 0; }
+    div.row .sidebar div.playlist div.wrapper div.playlist_holder div.panel div.edit {
+      display: none;
+      padding: 0 2px 7px 2px; }
+      div.row .sidebar div.playlist div.wrapper div.playlist_holder div.panel div.edit input {
+        width: 98%; }
+    div.row .sidebar div.playlist div.wrapper div.playlist_holder div.panel div.convert {
+      padding: 0 2px 0 2px; }
+      div.row .sidebar div.playlist div.wrapper div.playlist_holder div.panel div.convert a {
+        text-align: center;
+        display: block;
+        background-color: #00bb00;
+        color: white; }
+    div.row .sidebar div.playlist div.wrapper div.playlist_holder div.panel div.duration {
+      color: cyan;
+      text-align: right;
+      padding: 0 2px 0 0;
+      font-size: 80%;
+      color: darkgrey; }
+  div.row .sidebar div.playlist div.wrapper div.playlist_holder div.list div.list.item {
+    color: blue;
+    background-color: #eeeeee;
+    border-bottom: 1px solid #cccccc; }
+    div.row .sidebar div.playlist div.wrapper div.playlist_holder div.list div.list.item:first-child {
+      border-top: 1px solid #cccccc; }
+    div.row .sidebar div.playlist div.wrapper div.playlist_holder div.list div.list.item div.title {
+      margin: 0 0 0 4px; }
+    div.row .sidebar div.playlist div.wrapper div.playlist_holder div.list div.list.item.ct-jingle {
+      background-color: #f8f3ff; }
+    div.row .sidebar div.playlist div.wrapper div.playlist_holder div.list div.list.item a.action {
+      display: block;
+      width: 16px;
+      background-position: 0 1px;
+      background-repeat: no-repeat;
+      padding: 0 0 0 0; }
+      div.row .sidebar div.playlist div.wrapper div.playlist_holder div.list div.list.item a.action:hover {
+        background-position: 0 -15px; }
+      div.row .sidebar div.playlist div.wrapper div.playlist_holder div.list div.list.item a.action.delete {
+        background-image: url(/static/img/base/sidebar.item.remove.png); }
+      div.row .sidebar div.playlist div.wrapper div.playlist_holder div.list div.list.item a.action.play {
+        background-image: url(/static/img/base/sidebar.item.play.png);
+        background-color: #d6def7; }
+  div.row .sidebar div.playlist div.form {
+    color: #333333;
+    padding: 3px 0 2px 0;
+    border-bottom: none;
+    /*background-color: #ff00ff */
+    margin-bottom: 0; }
+    div.row .sidebar div.playlist div.form form {
+      margin: 0 0 0 0; }
+    div.row .sidebar div.playlist div.form form.select label {
+      display: none; }
+    div.row .sidebar div.playlist div.form form.select select {
+      width: 254px;
+      height: 23px;
+      padding: 0 1px 0 4px;
+      line-height: 13px; }
+    div.row .sidebar div.playlist div.form form.create {
+      margin-top: 10px; }
+      div.row .sidebar div.playlist div.form form.create input.name {
+        height: 15px;
+        margin-top: 2px;
+        width: 224px; }
+    div.row .sidebar div.playlist div.form input.create__ {
+      background-color: white;
+      border: 1px solid #bbbbbb;
+      color: #5a5a5a;
+      width: 84px; }
+    div.row .sidebar div.playlist div.form select.default {
+      background-color: white;
+      border: 1px solid #bbbbbb;
+      color: #5a5a5a;
+      width: 86px; }
+
+div.row .sidebar select {
+  font-family: Arial, Helvetica, sans-serif; }
+
+/* Playlists (a.k.a. Basket) */
+div.row .sidebar div.jingle {
+  margin-top: 24px;
+  border-left: 1px solid white;
+  border-right: 1px solid white;
+  border-top: 1px solid #cccccc;
+  border-bottom: 1px solid #cccccc;
+  background-image: none; }
+  div.row .sidebar div.jingle div.wrapper, div.row .sidebar div.jingle div.form {
+    display: none; }
+  div.row .sidebar div.jingle.expanded {
+    border: 1px solid #cccccc;
+    background-color: whitesmoke;
+    padding: 0 2px 2px 2px; }
+    div.row .sidebar div.jingle.expanded div.wrapper, div.row .sidebar div.jingle.expanded div.form {
+      display: block; }
+    div.row .sidebar div.jingle.expanded div.header {
+      padding-right: 4px;
+      background-image: url("/static/img/prototype/box_handler_on.png"); }
+  div.row .sidebar div.jingle.close {
+    background-color: white;
+    padding: 0 2px 0 2px; }
+    div.row .sidebar div.jingle.close div.wrapper, div.row .sidebar div.jingle.close div.form {
+      display: none; }
+  div.row .sidebar div.jingle div.header {
+    background-image: url("/static/img/prototype/box_handler.png");
+    background-repeat: no-repeat;
+    color: #333333;
+    padding: 3px 6px 2px 19px;
+    border-bottom: none;
+    /*background-color: #ff00ff */ }
+  div.row .sidebar div.jingle div.wrapper div.jingle_holder div.header {
+    background-image: none !important; }
+  div.row .sidebar div.jingle div.wrapper div.jingle_holder.open {
+    padding: 0 0 4px 0;
+    /*border: 1px solid #CCCCCC */ }
+    div.row .sidebar div.jingle div.wrapper div.jingle_holder.open div.panel, div.row .sidebar div.jingle div.wrapper div.jingle_holder.open div.list {
+      display: block; }
+    div.row .sidebar div.jingle div.wrapper div.jingle_holder.open div.header {
+      background-image: url("/static/img/prototype/box_handler_on.png"); }
+  div.row .sidebar div.jingle div.wrapper div.jingle_holder.close div.panel, div.row .sidebar div.jingle div.wrapper div.jingle_holder.close div.list {
+    display: none; }
+  div.row .sidebar div.jingle div.wrapper div.jingle_holder.close div.header {
+    background-image: url("/static/img/prototype/box_handler.png"); }
+  div.row .sidebar div.jingle div.wrapper div.jingle_holder div.header {
+    /*background-color: #00ffff */
+    padding: 1px 0 1px 3px; }
+    div.row .sidebar div.jingle div.wrapper div.jingle_holder div.header a.action {
+      display: block;
+      width: 16px;
+      background-position: 0 1px;
+      background-repeat: no-repeat;
+      padding: 0 0 0 0; }
+      div.row .sidebar div.jingle div.wrapper div.jingle_holder div.header a.action:hover {
+        background-position: 0 -15px; }
+      div.row .sidebar div.jingle div.wrapper div.jingle_holder div.header a.action.delete {
+        background-image: url(/static/img/base/sidebar.box.remove.png); }
+      div.row .sidebar div.jingle div.wrapper div.jingle_holder div.header a.action.edit {
+        background-image: url(/static/img/base/sidebar.box.edit.png); }
+      div.row .sidebar div.jingle div.wrapper div.jingle_holder div.header a.action.play {
+        background-image: url(/static/img/base/sidebar.box.play.png);
+        background-color: #d6def7; }
+      div.row .sidebar div.jingle div.wrapper div.jingle_holder div.header a.action.downloadable {
+        background-image: url(/static/img/base/listview.row.download.bg.png); }
+  div.row .sidebar div.jingle div.wrapper div.jingle_holder div.panel {
+    padding: 4px 0 0 0; }
+    div.row .sidebar div.jingle div.wrapper div.jingle_holder div.panel div.edit {
+      display: none;
+      padding: 0 2px 7px 2px; }
+      div.row .sidebar div.jingle div.wrapper div.jingle_holder div.panel div.edit input {
+        width: 98%; }
+    div.row .sidebar div.jingle div.wrapper div.jingle_holder div.panel div.convert {
+      padding: 0 2px 0 2px; }
+      div.row .sidebar div.jingle div.wrapper div.jingle_holder div.panel div.convert a {
+        text-align: center;
+        display: block;
+        background-color: #00bb00;
+        color: white; }
+    div.row .sidebar div.jingle div.wrapper div.jingle_holder div.panel div.duration {
+      color: cyan;
+      text-align: right;
+      padding: 0 2px 0 0;
+      font-size: 80%;
+      color: darkgrey; }
+  div.row .sidebar div.jingle div.wrapper div.jingle_holder div.list div.list.item {
+    color: blue;
+    background-color: #eeeeee;
+    border-bottom: 1px solid #cccccc; }
+    div.row .sidebar div.jingle div.wrapper div.jingle_holder div.list div.list.item:first-child {
+      border-top: 1px solid #cccccc; }
+    div.row .sidebar div.jingle div.wrapper div.jingle_holder div.list div.list.item div.title {
+      margin: 0 0 0 4px; }
+    div.row .sidebar div.jingle div.wrapper div.jingle_holder div.list div.list.item a.action {
+      display: block;
+      width: 16px;
+      background-position: 0 1px;
+      background-repeat: no-repeat;
+      padding: 0 0 0 0; }
+      div.row .sidebar div.jingle div.wrapper div.jingle_holder div.list div.list.item a.action:hover {
+        background-position: 0 -15px; }
+      div.row .sidebar div.jingle div.wrapper div.jingle_holder div.list div.list.item a.action.delete {
+        background-image: url(/static/img/base/sidebar.item.remove.png); }
+      div.row .sidebar div.jingle div.wrapper div.jingle_holder div.list div.list.item a.action.play {
+        background-image: url(/static/img/base/sidebar.item.play.png);
+        background-color: #d6def7; }
+  div.row .sidebar div.jingle div.form {
+    color: #333333;
+    padding: 3px 0 2px 0;
+    border-bottom: none;
+    /*background-color: #ff00ff */
+    margin-bottom: 0; }
+    div.row .sidebar div.jingle div.form form {
+      margin: 0 0 0 0; }
+    div.row .sidebar div.jingle div.form form.select label {
+      display: none; }
+    div.row .sidebar div.jingle div.form form.select select {
+      width: 254px;
+      height: 23px;
+      padding: 0 1px 0 4px;
+      line-height: 13px; }
+    div.row .sidebar div.jingle div.form form.create {
+      margin-top: 10px; }
+      div.row .sidebar div.jingle div.form form.create input.name {
+        height: 15px;
+        margin-top: 2px;
+        width: 224px; }
+    div.row .sidebar div.jingle div.form input.create__ {
+      background-color: white;
+      border: 1px solid #bbbbbb;
+      color: #5a5a5a;
+      width: 84px; }
+    div.row .sidebar div.jingle div.form select.default {
+      background-color: white;
+      border: 1px solid #bbbbbb;
+      color: #5a5a5a;
+      width: 86px; }
 
 /*@ sourceMappingURL=wip.css.map */

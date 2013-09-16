@@ -77,6 +77,9 @@ class ExportItemResource(ModelResource):
         if item['item_type'] == 'release':
             co = Release.objects.get(pk=int(item['item_id']))
 
+        if item['item_type'] == 'media':
+            co = Media.objects.get(pk=int(item['item_id']))
+
         if item['item_type'] == 'playlist':
             co = Playlist.objects.get(pk=int(item['item_id']))
             print '###########################################'

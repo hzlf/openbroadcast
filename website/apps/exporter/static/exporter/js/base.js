@@ -205,14 +205,40 @@ ExporterApp = (function () {
 
     this.bindings = function () {
 
+        // Download multiple items
+        $('.action-group').on('click', 'a[data-action="download"].selection-any:not(".disabled")', function (e) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // var item_type = $(this).data('ct'); // Moved - type should be taken from selected items ct
+            var format = 'mp3';
+
+            items = new Array;
+            $('.list_body_row.selection').each(function (index) {
+                var item_id = $(this).data('id');
+                var item_type = $(this).data('ct');
+                items.push({item_type: item_type, item_id: item_id, format: format});
+
+                if (base.ui.use_effects) {
+                    // $(this).effect("transfer", { to: "#nav_sub-content li a.downloads" }, 300);
+                }
+
+            });
+
+            self.queue(items, false);
+        });
+
 
         //////////////////////////////////////////////////////
+        // Download single item
         // "REAL" VERSION
         // using data- attributes
         //////////////////////////////////////////////////////
-        $('.listview').on('click', 'a[data-action="download"]', function (e) {
+        $('.listview , .action-group').on('click', 'a[data-action="download"]:not(".selection-any"):not(".disabled")', function (e) {
 
             e.preventDefault();
+            e.stopPropagation();
 
             var item_type = $(this).data('ct');
             var item_id = $(this).data('id');
@@ -230,6 +256,9 @@ ExporterApp = (function () {
 
             self.queue(items, false);
         });
+
+
+
 
 
         // handling of 'downloadables' & resp. queues
@@ -267,6 +296,9 @@ ExporterApp = (function () {
         /*
          * Download multiple items
          */
+        //////////////////////////////////////////////////////
+        // LEGACY VERSION
+        //////////////////////////////////////////////////////
         $('.action.selection_download a').live('click', function (e) {
 
             var item_type = $(this).attr('href').substring(1);

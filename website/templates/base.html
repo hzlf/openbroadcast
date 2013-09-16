@@ -1,79 +1,329 @@
-<!doctype html>
+{% load compress cms_tags sekizai_tags value_from_settings esi %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
 
-{% load cms_tags sekizai_tags compress %} <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
-<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
-<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
-<!--[if gt IE 8]><!-->
-<html class="no-js" lang="en">
-	<!--<![endif]-->
-	<!--head -->
-	<head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# alibrary-anorg-net: http://ogp.me/ns/fb/alibrary-anorg-net#">
-		{% include '_head.html' %} <!-- style and js-pre -->
-		{% block extra_head %}{% endblock %}
+<head>
 
-		{% render_block "css" %}
+    {% spaceless %}
+    {% include "base/_common_script.html" %}
+    {% endspaceless %}
 
-		{% render_block "js-pre" %}
+    <title>{% block title %}{% endblock %}{{ request.current_page.get_title }}</title>
 
-		{% block opengraph %}
-		{% endblock %}
-		<meta name="google-site-verification" content="ZaH5s0Vtq5GappaCQYRCMApmkky8XhArOU74i84CraE" />
-	</head>
-	<!--body -->
-	<body class="base {% block body_class %}{% endblock %}">
-		{% cms_toolbar %}
+	<meta charset="utf-8">
+	<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+	<meta name="description" content="{% block meta_description %}{% endblock %}" />
+	<meta name="keywords" content="{% block meta_keywords %}{% endblock %}" />
+	<meta name="author" content="hazelfire gmbh" />
+	<meta name="generator" content="A.W.F." />
+	<meta name="version" content="bouncing beaver | 11.09.01 | 201110011" />
+
+    <meta property="fb:app_id" content="{% value_from_settings "FACEBOOK_APP_ID" %}"/>
+    {% block meta_opengraph %}{% endblock %}
+
+	<link rel="icon" type="image/png" href="{{ STATIC_URL }}img/base/favicon.gif" />
+	<link rel="shortcut icon" type="image/x-icon" href="{{ STATIC_URL }}img/base/favicon.gif">
+
+	<!-- styles -->
+
+	<!-- ie shizzle -->
+	<!--[if lt IE 8]>
+		<link href="{{ STATIC_URL }}css/ie.css" media="screen, projection" rel="stylesheet" type="text/css" />
+	<![endif]-->
+	<!--[if lt IE 9]>
+	    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+    <!-- css -->
+    {# render_block "css" #}
+    {% render_block "css" postprocessor "compressor.contrib.sekizai.compress" %}
+
+    <!-- js head -->
+    {% render_block "js-head" %}
+    {# render_block "js-head" postprocessor "compressor.contrib.sekizai.compress" #}
+
+    <!-- webfonts -->
+    {# include "lib/monotype.html" #}
+
+    <script type="text/javascript">
+        (function () {
+            var config = {
+                kitId: 'ubj1xfa',
+                scriptTimeout: 3000
+            };
+            var h = document.getElementsByTagName("html")[0];
+            h.className += " wf-loading";
+            var t = setTimeout(function () {
+                h.className = h.className.replace(/(\s|^)wf-loading(\s|$)/g, " ");
+                h.className += " wf-inactive"
+            }, config.scriptTimeout);
+            var tk = document.createElement("script"), d = false;
+            tk.src = '//use.typekit.net/' + config.kitId + '.js';
+            tk.type = "text/javascript";
+            tk.async = "true";
+            tk.onload = tk.onreadystatechange = function () {
+                var a = this.readyState;
+                if (d || a && a != "complete" && a != "loaded")return;
+                d = true;
+                clearTimeout(t);
+                try {
+                    Typekit.load(config)
+                } catch (b) {
+                }
+            };
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(tk, s)
+        })();
+    </script>
 
 
-		<h1>TEST</h1>
-		{% block inner %}
-		{% endblock %}
-
-		<!-- main javascript block -->
-		{% render_block "js" %}
-
-		<script type="text/javascript">
-			//<![CDATA[//><!--
-
-			var settings = settings || {};
-			settings.debug = true;
-
-			// local / window-dependent container
-			var	local = local || {};
-			local.type = 'main';
-
-			var nj;
+</head>
 
 
-			// javascript init / user interface
-			$(document).ready(function() {
-
-				// passing some usefull variables for later use in js
-				asite.vars.aplayer_width = 630;
-				asite.vars.aplayer_height = 630;
-
-
-
-
-				asite.base.init();
-
-				asite.ui.init();
-				asite.ui.plugins();
-
-				aplayer.ui.init();
-				aplayer.ui.playhead();
-
-				{% render_block "dom-ready" %}
-
-			});
-			//--><!]]>
-		</script>
+<!-- start: body -->
+<!--
+<body id="body" class="base">
+-->
+<body id="body" class="base {% block body_class %}{% endblock %}" data-spy="scroll" data-target=".subnav"
+      data-offset="50">
+{% cms_toolbar %}
+<div id="dim_content" style="display: none;"></div>
 
 
-		<!-- 3rd-party js initialisation (analytics, facebook etc) -->
-		{% include "asite/js_init.html" %}
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <!-- toolbar -->
+            {% block toolbar %}{% endblock %}
+            <!--/ toolbar -->
+        </div>
+    </div>
+</div>
 
-		<!-- verry last scripts -->
-		{% render_block "js-post" %}
+<div class="container main">
 
-	</body>
+
+    <header class="subhead" id="overview">
+        <div class="row">
+
+
+            <div class="span9">
+                {% block heading %}{% endblock %}
+                <div class="subnav">
+                    {% block modnav %}{% endblock %}
+                </div>
+            </div>
+
+            <div class="span3">
+                {# include "aplayer/_inline.html" #}
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <section id="global">
+        <!--
+        <div class="page-header">
+            <h1>Global styles <small>for CSS reset, typography, and links</small></h1>
+        </div>
+        -->
+
+
+        {% if messages %}
+            <div class="row">
+                <div class="span9 messages">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+
+
+        <!-- col&co handling inside block -->
+        {% block main %}{% endblock %}
+
+
+    </section>
+
+
+    <footer class="footer" id="footer">
+
+        <div class="row">
+            <div class="span9">
+                {% show_placeholder "footer" "base" %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="span19 subline">
+                {% include "skeleton/footer.html" %}
+            </div>
+        </div>
+
+
+    </footer>
+
+
+</div>
+
+
+<!-- start: wrapper_main -->
+<div id="wrapper_main">
+
+
+    <!-- main container -->
+    <div id="container">
+        <div class="hfixw" id="maincontent">
+            {% comment %}
+				{% block main %}{% endblock %}
+				{% endcomment %}
+        </div>
+    </div>
+    <!--/ main container -->
+
+</div>
+<!-- end: wrapper_main -->
+<!-- start: additional divs -->
+<div id="refresh"></div>
+<!-- end: additional divs -->
+<!-- start: dialog/ui -->
+<!-- Alert Dialog -->
+<div class="dialog window" id="dialog_alert" style="display: none;">
+    <h1>DIALOG</h1>
+
+    <p>
+        text.....
+    </p>
+</div>
+
+
+
+
+
+<!-- end: dialog/ui -->
+
+<div id="fb-root"></div>
+
+<!-- start: js_footer -->
+
+
+<!-- js-head -->
+
+<!--/ js-head -->
+
+<!-- js -->
+{# render_block "js" #}
+{% render_block "js" postprocessor "compressor.contrib.sekizai.compress" %}
+<!--/ js -->
+
+<!-- js ext (like soket.io etc) -->
+{% render_block "js-ext" %}
+
+<!-- js-post -->
+{% render_block "js-post" %}
+{# render_block "js-post" postprocessor "compressor.contrib.sekizai.compress" #}
+
+
+{% include 'autocomplete_light/static.html' %}
+<!--/ js-post -->
+
+
+<!-- end: js_footer -->
+
+<!-- start: js_init -->
+<script type="text/javascript">
+    //<![CDATA[//><!--
+    $(document).ready(function () {
+        /* js general init functions */
+
+        if (!nunjucks.env) {
+            nunjucks.env = new nunjucks.Environment(new nunjucks.HttpLoader('{{ STATIC_URL }}'));
+        }
+        nj = nunjucks.env;
+
+        nj = nunjucks_register_filters(nj);
+
+
+        // debug.setLevel(0);
+
+        /*
+         pusher = new PusherApp;
+         pusher.socket_url = '
+        {% value_from_settings "SOCKETIO_URL" %}';
+         pusher.init();
+         */
+
+
+        base.ui.init();
+
+        aplayer.ui.init();
+
+
+        base.ui.skeleton();
+        base.ui.iface();
+        base.ui.loading();
+        base.ui.toolbar();
+        base.ui.searchbar();
+        base.ui.tagcloud();
+        base.ui.sidebar();
+        base.ui.listview();
+        base.ui.itemview();
+        base.ui.load_state();
+        base.ui.tracklist();
+        base.ui.dialog();
+
+
+    });
+
+    $(window).unload(function () {
+
+        base.ui.unload();
+
+    });
+
+    //--><!]]>
+</script>
+<!-- end: js_init -->
+<!-- the fb-root element -->
+
+
+
+
+<script type="text/javascript">
+    var base = base || {};
+    base.vars = base.vars || {};
+
+    base.vars.context = 'content';
+    base.vars.section = 'library';
+    base.vars.subset = 'releases';
+    base.vars.action = '';
+    base.vars.base_url = '/';
+    base.vars.legacy_url = 'https://www.openbroadcast.ch/';
+    base.vars.js_path = '/media/js/';
+    base.vars.irc_chat_url = 'http://webchat.freenode.net/?channels=openbroadcast';
+
+    base.vars.ga_track_events = false;
+
+    base.vars.user_id = '5';
+    base.vars.username = 'jonas';
+
+    base.vars.list_highlight = false;
+
+</script>
+
+
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId={% value_from_settings "FACEBOOK_APP_ID" %}";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+</body>
 </html>

@@ -409,6 +409,91 @@ class Export(BaseModel):
                         txt.write(str)
                     """
 
+                """
+                Media
+                """
+                if item.content_type.name.lower() == 'track':
+
+                    t_item = item.content_object
+
+                    """
+                    create item specific path
+                    < Playlist Name >/...
+                    """
+                    item_cache_dir = os.path.join(archive_cache_dir, safe_name(t_item.name))
+                    os.makedirs(item_cache_dir)
+
+                    # holder for playlist entries
+                    playlist_items = []
+
+                    # string format for filename
+                    filename_format = '%s - %s.%s'
+
+                    for playlist_item in [t_item]:
+
+                        media = playlist_item
+
+                        log.debug('export item: %s | id: %s' % ( media.name, media.pk))
+
+                        if obj.fileformat == 'mp3':
+
+                            filename = filename_format % (media.name, media.artist.name, 'mp3')
+                            filename = safe_name(filename)
+                            #filepath = os.path.join(archive_cache_dir, filename)
+                            filepath = os.path.join(item_cache_dir, filename)
+
+                            shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
+                            try:
+                                process.inject_metadata(filepath, media)
+                            except Exception, e:
+                                pass
+
+                            playlist_items.append({'filename': filename, 'item': media})
+
+                        # just dummy - not possible...
+                        if obj.fileformat == 'flac':
+
+                            filename = filename_format % (media.name, media.artist.name, 'mp3')
+                            filename = safe_name(filename)
+                            filepath = os.path.join(item_cache_dir, filename)
+
+                            shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
+                            try:
+                                process.inject_metadata(filepath, media)
+                            except Exception, e:
+                                pass
+
+                            playlist_items.append({'filename': filename, 'item': media})
+
+                        create_event(obj.user, media, None, 'download')
+
+                    if t_item.release and t_item.release.main_image:
+                        try:
+                            shutil.copyfile(t_item.release.main_image.path, os.path.join(item_cache_dir, 'image.jpg'))
+                        except Exception, e:
+                            print e
+                            pass
+
+
+                            #archive_file.write(t_item.main_image.path, 'cover.jpg')
+
+                    """
+                    Add additional assets
+                    REATME.TXT LICENSE.TXT etc
+                    """
+                    with open(os.path.join(item_cache_dir, 'README.TXT'), "w") as txt:
+                        str = render_to_string('exporter/txt/README.TXT', {'object': t_item})
+                        txt.write(str)
+
+                    with open(os.path.join(item_cache_dir, '00 - playlist.m3u'), "w") as txt:
+                        str = render_to_string('exporter/txt/playlist.m3u', {'objects': playlist_items})
+                        txt.write(str)
+                    """
+                    with open(os.path.join(item_cache_dir, 'LICENSE.TXT'), "w") as txt:
+                        str = render_to_string('exporter/txt/LICENSE.TXT', { 'objects': playlist_items })
+                        txt.write(str)
+                    """
+
             """
             take the 'archive_cache_dir' and compress it to zip format
             """
@@ -468,6 +553,8 @@ def generate_export_filename(qs):
     if qs.count() == 1:
         item = qs.all()[0]
         if item.content_type.name.lower() == 'release':
+            filename = item.content_object.name.encode('ascii', 'ignore')
+        if item.content_type.name.lower() == 'track':
             filename = item.content_object.name.encode('ascii', 'ignore')
 
     if qs.count() > 1:

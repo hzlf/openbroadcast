@@ -306,9 +306,13 @@ INSTALLED_APPS = (
 
     #'admintools_bootstrap',
     'admin_style',
+
+    #'suit',
+
     'admin_tools',
 
     'admin_shortcuts',
+    'django_su',
 
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -348,6 +352,8 @@ INSTALLED_APPS = (
     'django_extensions',
     'django_jenkins',
     'django_filters',
+
+    'missing', # http://django-missing.readthedocs.org/
 
     # base app
     'base',
@@ -527,6 +533,9 @@ INSTALLED_APPS = (
     'csvimport',
     'spf',
 
+    # fprint
+    'fprint',
+
     # monitoring
     #'kitsune',
 )
@@ -704,8 +713,8 @@ AUTHENTICATION_BACKENDS = (
 )
 TWITTER_CONSUMER_KEY = 'Fbp98cYDsI3mY51krZVhVg'
 TWITTER_CONSUMER_SECRET = 'ZTOXzo3zJH4AG1Q6rTHxsiKorDqeQkNWixThiZEfrc'
-FACEBOOK_APP_ID = '154134078100508'
-FACEBOOK_API_SECRET = 'f92f325fa14d5f8fa25c9cdd1700f854'
+FACEBOOK_APP_ID = '230293190458969'
+FACEBOOK_API_SECRET = 'd1976697cff7f61410152af2f7b12db3'
 FACEBOOK_EXTENDED_PERMISSIONS = ['email', ]
 LINKEDIN_CONSUMER_KEY = 'aaa'
 LINKEDIN_CONSUMER_SECRET = 'bbb'
@@ -869,7 +878,7 @@ CELERY_ROUTES = {
     #'importer.models.process_task': {'queue': 'import'},
     # assign import task to single-instance worker
     'importer.models.import_task': {'queue': 'import'},
-    'alibrary.models.generate_media_versions_task': {'queue': 'convert'},
+    #'alibrary.models.generate_media_versions_task': {'queue': 'convert'},
 }
 
 
@@ -1004,8 +1013,8 @@ WYM_CLASSES = ",\n".join([
 ])
 
 ACTSTREAM_SETTINGS = {
-    'MODELS': ('auth.user', 'auth.group', 'alibrary.release', 'alibrary.playlist', 'alibrary.artist', 'alibrary.media',
-               'zinnia.entry', 'abcast.emission'),
+    'MODELS': ('auth.user', 'auth.group', 'alibrary.release', 'alibrary.playlist', 'alibrary.artist', 'alibrary.media', 'alibrary.label',
+               'zinnia.entry', 'abcast.emission', 'abcast.station'),
     #'MANAGER': 'myapp.streams.MyActionManager',
     'FETCH_RELATIONS': True,
     'USE_PREFETCH': True,

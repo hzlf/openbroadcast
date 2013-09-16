@@ -9,12 +9,18 @@ class MembersInline(admin.TabularInline):
     model = Station.members.through
 
 
+class ChannelsInline(admin.TabularInline):
+    model = Channel
+    readonly_fields = ('teaser', 'type', 'stream_server', )
+    exclude = ('description', 'stream_url', 'teaser',)
+
+
 class StationAdmin(admin.ModelAdmin):
     
     list_display = ('name', 'type', 'website',)
     readonly_fields = ('uuid', 'slug', )
     
-    inlines = [MembersInline,]
+    inlines = [ChannelsInline, MembersInline,]
     
 class ChannelAdmin(admin.ModelAdmin):    
     

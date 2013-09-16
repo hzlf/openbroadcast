@@ -30,11 +30,13 @@ def mentor_for_user(context, profile, mentor):
         actions.append({
                         'description': _('asd'),
                         'name': _('Approve profile'),
+                        'icon': 'star',
                         'url': reverse('profiles-profile-mentor-approve', kwargs={'pk': profile.pk}),
                         })
         actions.append({
                         'description': _('asd'),
                         'name': _('Cancel mentorship'),
+                        'icon': 'remove',
                         'url': reverse('profiles-profile-mentor-cancel', kwargs={'pk': profile.pk}),
                         })
     
@@ -45,6 +47,7 @@ def mentor_for_user(context, profile, mentor):
         actions.append({
                         'description': _('asd'),
                         'name': _('Become the mentor'),
+                        'icon': 'female' if mentor.profile.gender == 1 else 'male',
                         'url': reverse('profiles-profile-mentor-become', kwargs={'pk': profile.pk}),
                         })
     

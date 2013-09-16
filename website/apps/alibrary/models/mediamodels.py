@@ -258,6 +258,10 @@ class Media(CachingMixin, MigrationMixin):
 
 
 
+    #force_migration = models.IntegerField(null=True, blank=True) # dummy field, to trigger mermission db-updates
+
+
+
     # tagging
     #tags = TaggableManager(blank=True)
     
@@ -282,6 +286,7 @@ class Media(CachingMixin, MigrationMixin):
             ('downoad_media', 'Download Track'),
             ('merge_media', 'Merge Tracks'),
             ('admin_media', 'Edit Track (extended)'),
+            ('upload_media', 'Upload Track'),
         )
     
     
@@ -327,6 +332,10 @@ class Media(CachingMixin, MigrationMixin):
     @models.permalink
     def get_edit_url(self):
         return ('alibrary-media-edit', [self.pk])
+
+    def get_admin_url(self):
+        from lib.util.get_admin_url import change_url
+        return change_url(self)
     
     @models.permalink
     def get_stream_url(self):
@@ -369,7 +378,11 @@ class Media(CachingMixin, MigrationMixin):
     def generate_sha1(self):
         return sha1_by_file(self.master)
     
-    
+
+    @property
+    def has_video(self):
+        vrs = self.relations.filter(service__in=['youtube', 'vimeo'])
+        return vrs.count() > 0
     
     
     def get_products(self):

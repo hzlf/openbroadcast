@@ -78,12 +78,12 @@ class Request(models.Model):
     def save(self, *args, **kwargs):
 
         if self.recording_date:
-            print 'recording_date'
+            #print 'recording_date'
             struct = time.strptime(self.recording_date, "%d.%m.%Y")
             self.recording_datex = datetime.fromtimestamp(mktime(struct))
 
         if self.publication_date:
-            print 'publication_date'
+            #print 'publication_date'
             struct = time.strptime(self.publication_date, "%d.%m.%Y")
             self.publication_datex = datetime.fromtimestamp(mktime(struct))
 

@@ -272,6 +272,10 @@ def profile_edit(request, template_name='profiles/profile_form.html'):
 
 
 
+# TODO: Implement!
+def profile_force_login(request, username):
+    raise NotImplementedError("Not implemented yet.")
+
 
 
 

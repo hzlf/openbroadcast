@@ -110,7 +110,7 @@ class PlaylistListView(PaginationMixin, ListView):
             if 'type' in self.kwargs:
                 qs = qs.filter(type=self.kwargs['type'], user=user)
             else:
-                 qs = qs.filter(type__in=['playlist', 'broadcast'],user=user)
+                 qs = qs.filter(type__in=['playlist', 'broadcast', 'basket'],user=user)
             
         # special relation filters
         self.relation_filter = []

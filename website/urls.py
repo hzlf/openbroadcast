@@ -34,10 +34,14 @@ dajaxice_autodiscover()
 
 urlpatterns = patterns('',
 
+
     # admin
     #url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    # django-su
+    url(r"^admin/su/", include("django_su.urls")),
     url(r'^admin_tools/', include('admin_tools.urls')),
     url(r"^admin/", include(admin.site.urls)),
+
     
     #url(r"^profiles/", include("profiles.urls")),
     

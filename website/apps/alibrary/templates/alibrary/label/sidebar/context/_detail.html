@@ -1,76 +1,49 @@
-{% load i18n guardian_tags activity_tags ctype %}
-
-{% get_obj_perms request.user for object as "object_perms" %}
-
-<!---->
-{% for perm in object_perms %}
-{{ perm }}
-{% endfor %}
+{% load i18n activity_tags ctype %}
 
 
-{% if "admin_release" in object_perms %}
-<h1>ADMIN</h1>
-{% endif %}
 
 
-<!--
-{{ perms.object }}
--->
+<div class="menu-context">
 
 
-<div id="menu_context" class="menu_context">
-	<div class="set">
-		<ul class="unstyled">
-			
-			<!-- Menu element / Action -->
-			{% if perms.alibrary.change_artist %}
-			<li class="link ">
-				<span class="left icon"><a href="{{ object.get_edit_url }}" title="{% trans "Edit" %}">{% trans "Edit" %}</a></span>
-				<span class="opt"></span>
-				<span class="clear"></span>
-			</li>
-			{% endif %}
-			
+    <div class="action-group">
+        <ul class="unstyled">
 
-			{% if user.is_authenticated %}
-			<li class="action">
-				<span class="left icon">
-					
-					<a href="{% follow_all_url object %}?next={{ request.get_full_path }}">
-					    {% if request.user|is_following:object %}
-					        {% trans "Stop following" %} {{ object|ct_name_by_object }}
-					    {% else %}
-					        {% trans "Follow" %} {{ object|ct_name_by_object }}
-					    {% endif %}
-					</a>
-					
-				</span>
-				<span class="opt"></span>
-				<span class="clear"></span>
-			</li>
-			{% endif %}
-			
-			<!-- Menu element / Action -->
-			<li class="action disabled selection_required selection_single selection_delete ">
-				<span class="left icon"> <a href="#release" title="Delete Selection">Delete Selection</a> </span>
-				<span class="opt"></span>
-				<span class="clear"></span>
-			</li><!-- Menu element / Action -->
-			<li class="action disabled selection_required selection_multiple selection_merge ">
-				<span class="left icon"> <a href="#release" title="Merge Selection">Merge Selection</a> </span>
-				<span class="opt"></span>
-				<span class="clear"></span>
-			</li><!-- Menu element / Action -->
-			<li class="action disabled selection_required selection_any selection_play ">
-				<span class="left icon"> <a href="#release" title="Play Selection">Play Selection</a> </span>
-				<span class="opt"></span>
-				<span class="clear"></span>
-			</li><!-- Menu element / Action -->
-			<li class="action disabled selection_required selection_any selection_download ">
-				<span class="left icon"> <a href="#release" title="Download Selection">Download Selection</a> </span>
-				<span class="opt"></span>
-				<span class="clear"></span>
-			</li>
-		</ul>
-	</div>
+
+            {% if perms.alibrary.change_label %}
+            <li class="link">
+                <a class="hoverable" href="{{ object.get_edit_url }}" title="{% trans "Edit" %}">
+                    <i class="icon icon-edit"></i>
+                    <span>{% trans "Edit" %}</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% if perms.alibrary.change_label and user.is_staff %}
+            <li class="link">
+                <a class="hoverable" href="{{ object.get_admin_url }}?next={{ object.get_absolute_url }}" title="{% trans "Administration view" %}">
+                    <i class="icon icon-lock"></i>
+                    <span>{% trans "Administration view" %}</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% if user.is_authenticated %}
+                <li class="link">
+                    <a class="hoverable" href="{% follow_all_url object %}?next={{ request.get_full_path }}" title="{% trans "Follow/unfollow" %}">
+                    {% if request.user|is_following:object %}
+                        <i class="icon icon-unlink"></i>
+                        <span>{% trans "Stop following" %} {{ object|ct_name_by_object }}</span>
+                    {% else %}
+                        <i class="icon icon-link"></i>
+                        <span>{% trans "Follow" %} {{ object|ct_name_by_object }}</span>
+                    {% endif %}
+                </a>
+                </li>
+            {% endif %}
+
+        </ul>
+    </div>
+
+
 </div>

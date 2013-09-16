@@ -16,7 +16,7 @@ class ImportMenu(CMSAttachMenu):
         
         """"""
         node = NavigationNode(
-            _('My Imports'),
+            _('My Uploads'),
             reverse('importer-import-list'),
             181
         )

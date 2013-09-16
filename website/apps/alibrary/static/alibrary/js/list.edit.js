@@ -39,9 +39,9 @@ ListEditUi = function () {
     this.bindings = function () {
 
         // lookup providers
-        var container = $('#menu_context');
+        var container = $('.action-group');
 
-        $(container).on('click', "li.action:not('.disabled') a", function (e) {
+        $(container).on('click', "li.action a:not('.disabled')", function (e) {
             e.preventDefault();
             var action = $(this).data('action');
             var ct = $(this).data('ct');
