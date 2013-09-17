@@ -83,7 +83,8 @@ class PlaylistListView(PaginationMixin, ListView):
         
         if q:
             qs = Playlist.objects.filter(Q(name__istartswith=q)\
-            | Q(description__icontains=q))\
+            | Q(description__icontains=q)\
+            | Q(user__username__istartswith=q))\
             .distinct()
         else:
             qs = Playlist.objects.all()

@@ -39,15 +39,19 @@
 
 	<dl class="dl-horizontal sub">
 
-		{% if object.target_duration %}
-		<dt>{% trans "Target Duration" %}:</dt>
-		<dd>{{ object.target_duration|divide:60 }}</dd>
-		{% endif %}
+
+		<dt>{% trans "Duration" %}:</dt>
+		<dd>
+            {% if object.duration %}<small>{% trans "actual" %}:</small> {{ object.duration|msec_to_time }}{% endif %}
+            {% if object.target_duration %}<small>{% trans "target" %}:</small> {{ object.target_duration|sec_to_time }}{% endif %}
+        </dd>
+
 
 		{% if object.dayparts.count > 0 %}
 		<dt>{% trans "Broadcast Dayparts" %}:</dt>
 		<dd>{% dayparts_inline object %}</dd>
 		{% endif %}
+
 
 		{% if object.seasons.count > 0 %}
 		<dt>{% trans "Broadcast Seasons" %}:</dt>

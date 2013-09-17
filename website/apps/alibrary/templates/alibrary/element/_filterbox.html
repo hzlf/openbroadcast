@@ -11,7 +11,6 @@
 
         {% for filter_entry in item.entries %}
 
-
             {% if filter_entry.0 %}
 
                 {% spurl base=request.get_full_path active_mquery="{{ item.name }}={{ filter_entry.0 }}" as is_active %}

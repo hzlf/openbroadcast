@@ -34,6 +34,9 @@ from easy_thumbnails.files import get_thumbnailer
 
 from django.db.models import Q
 from lib.util import tagging_extra
+from lib.util import change_message
+
+import reversion
 
 
 
@@ -270,6 +273,8 @@ class ArtistDetailView(DetailView):
 
         m_contrib = Media.objects.filter(extra_artists=obj)
         self.extra_context['m_contrib'] = m_contrib
+
+        self.extra_context['history'] = obj.get_versions()
         
 
         context.update(self.extra_context)
@@ -352,7 +357,13 @@ class ArtistEditView(UpdateView):
             if relation_form.is_valid():                
                 relation_form.save()
 
-                obj = form.save()
+               # obj = form.save()
+
+                msg = change_message.construct(self.request, form, [relation_form,])
+                with reversion.create_revision():
+                    obj = form.save()
+                    reversion.set_comment(msg)
+
                 form.save_m2m()
 
 

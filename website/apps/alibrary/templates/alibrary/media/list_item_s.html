@@ -1,57 +1,113 @@
-{% load calc i18n arating_tags %}
+{% load calc i18n arating_tags truncate spurl %}
 
 <div class="list_body_row selectable item media published {{ item.uuid }}" id="list_item_{{ item.id }}"
      data-item_id="{{ item.id }}" data-item_uuid="{{ item.uuid }}" data-ct="media">
 
     <!-- Play icon -->
     <div class="list_body_item c1 action">
-        <ul>
-            <!-- Play link  -->
-            <li class="play">
-                <a href="{{ item.release.get_api_url }}#{{ forloop.counter0 }}#replace" data-ct="media_set"
-                   title="{% trans "Play" %}" class="playable popup"><img src="/static/img/base/spacer.png" width="16"
-                                                                          height="16" alt="{% trans "Play" %}"></a>
-            </li>
-        </ul>
-
+        {% with object=item ct="media" %}
+            {% include "alibrary/element/_item_actions_primary.html" %}
+        {% endwith %}
     </div>
 
     <!-- Track title -->
-    <div class="list_body_item c2 bold">
+    <div class="list_body_item c2">
 
         <ul class="unstyled">
-            <li>
-                {% include "alibrary/element/_inline_link.html" %}
+            <li class="bold">
+
+				<a href="{{ item.get_absolute_url }}" title="{{ item.name }}">
+				{{ item.name|truncate_chars_inner:32 }}
+				{% if item.country %}({{ item.country }}){% endif %}
+				{% topflop_for_object item %} </a>
+
+                <small class="type">{{ item.get_mediatype_display }}</small>
             </li>
             <li>
-                {% with item=item.artist %}
-                    {% include "alibrary/element/_inline_link.html" %}
-                {% endwith %}
+                {% if item.artist %}
+
+                    {% if item.artist.get_absolute_url %}
+                        <a href="{{ item.artist.get_absolute_url }}"
+                           title="{{ item.artist.name }}">{{ item.artist.name|truncate_chars_inner:28 }}</a>
+                    {% else %}
+                        <span>{{ item.artist.name|truncate_chars_inner:28 }}</span>
+                    {% endif %}
+
+                    &nbsp;
+                    <a href="{% spurl base=request.get_full_path remove_query_param="page" set_query="artist={{ item.artist.slug }}" %}"
+                       title="{% trans "Only show releases by" %} {{ item.artist.name }}"
+                       style="vertical-align: top;"><span class="filter icon"></span></a>
+
+
+                {% else %}
+                    &nbsp;
+                {% endif %}
             </li>
         </ul>
 
         <ul class="__horizontal unstyled small">
+
+            <!--
+            {% regroup item.extraartist_media.all by artist.profession as eas %}
+            <ul>
+            {% for ea in eas %}
+                <li>{{ ea.grouper }}
+                <ul>
+                    {% for item in ea.list %}
+                      <li>{{ item.artist.name }}: {{ item.profession.name }}</li>
+                    {% endfor %}
+                </ul>
+                </li>
+            {% endfor %}
+            </ul>
+            -->
+
             {% for ea in item.extraartist_media.all %}
                 <li>
                     <a href="{{ ea.artist.get_absolute_url }}">{{ ea.artist.name }}</a>
                     <small>[{{ ea.profession.name }}]</small>
                 </li>
             {% endfor %}
+
         </ul>
 
     </div>
     <!-- Artist name -->
     <div class="list_body_item c3">
         <ul class="unstyled">
-            <li>
-                {% with item=item.release %}
-                    {% include "alibrary/element/_inline_link.html" %}
-                {% endwith %}
+             <li class="bold">
+                {% if item.release %}
+
+                    {% if item.release.get_absolute_url %}
+                        <a href="{{ item.release.get_absolute_url }}"
+                           title="{{ item.release.name }}">{{ item.release.name|truncate_chars_inner:28 }}</a>
+                    {% else %}
+                        <span>{{ item.release.name|truncate_chars_inner:28 }}</span>
+                    {% endif %}
+
+                    &nbsp;
+                    <a href="{% spurl base=request.get_full_path remove_query_param="page" set_query="release={{ item.release.slug }}" %}"
+                       title="{% trans "Only show releases on" %} {{ item.release.name }}"
+                       style="vertical-align: top;"><span class="filter icon"></span></a>
+
+
+                {% else %}
+                    &nbsp;
+                {% endif %}
             </li>
             <li>
-                {% with item=item.release.label %}
-                    {% include "alibrary/element/_inline_link.html" %}
-                {% endwith %}
+                {% if item.release.label %}
+
+                    {% if item.release.label.get_absolute_url %}
+                        <a href="{{ item.release.label.get_absolute_url }}"
+                           title="{{ item.release.label.name }}">{{ item.release.label.name|truncate_chars_inner:18 }}</a>
+                    {% else %}
+                        <span>{{ item.release.label.name|truncate_chars_inner:18 }}</span>
+                    {% endif %}
+
+                {% else %}
+                    &nbsp;
+                {% endif %}
             </li>
 
         </ul>
@@ -69,57 +125,50 @@
     <!-- License -->
 
     <div class="list_body_item c5 license {% if item.license %}{{ item.license.key }}{% endif %}">
-
-        <div class="left license">
-            {% if item.license %}
-                <a href="{{ item.license.get_absolute_url }}" title="License details" class="dialog disabled-modal"><img
-                        src="/static/img/icons/transparent_16x16.png" width="48" height="24" alt="License"
-                        class="noborder"></a>
-            {% endif %}
-        </div>
-        <div class="clear"></div>
+        {% if item.license %}
+            <a href="{{ item.license.get_absolute_url }}" title="{% trans "License details" %}" class="iconset iconset-license">{{ item.license.iconset_display }}</a>
+        {% else %}
+            &nbsp;
+        {% endif %}
     </div>
 
 
     <div class="list_body_item c6 action">
-        <!-- Actions sub-view  -->
-        <div class="wrapper">
-            <div class="right">
-                <ul>
-                    <!--
-					<li class="basket">
-						<a href="#media:75206:default" title="Add to Basket" class="collectable"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play"></a>
-					</li>
-                    -->
-                    <li>
-                        <a href="#" data-action="collect"><i class="icon icon-plus"></i></a>
-                    </li>
-                </ul>
-            </div>
-            <div>
-                <ul>
-                    <li class="download">
-                        <a href="#media:75206:mp3" title="Download Media" class="downloadable queue"><img
-                                src="/static/img/base/spacer.png" width="16" height="16" alt="Play"></a>
-                    </li>
-                </ul>
-            </div>
-            <div class="clear"></div>
-        </div>
+
+        <ul class="unstyled action secondary horizontal">
+
+            <li>
+                <a href="#"
+                   class="downloadable queue{% if not perms.alibrary.downoad_media %} disabled{% endif %}"
+                   data-ct="artist"
+                   data-resource_uri="{{ item.get_api_url }}"
+                   title="{% trans "Download" %}">
+                    <i class="icon icon-download-alt"></i>
+                </a>
+            </li>
+
+            <li>
+                <a href="#"
+                   class="{% if not user.is_authenticated %} disabled{% endif %}"
+                   data-action="collect"
+                   title="{% trans "Add to playlist" %}">
+                    <i class="icon icon-plus"></i>
+                </a>
+            </li>
+
+            {% if  perms.alibrary.change_media %}
+                <li>
+                    <a href="{{ item.get_edit_url }}"
+                       class=""
+                       title="{% trans "Edit" %}">
+                        <i class="icon icon-edit"></i>
+                    </a>
+                </li>
+            {% endif %}
+
+        </ul>
+
     </div>
 
-    <!--
-	<div class="row-fluid extra-artists" style="clear: both;">
-	<div class="span4">&nbsp;</div>
-	<div class="span8">
-	<dl class="dl-horizontal">
-	{% for ea in item.extraartist_media.all %}
-	<dt>{{ ea.artist.name }}</dt>
-	<dd>{{ ea.profession.name }}</dd>
-	{% endfor %}
-	</dl>
-	</div>
-	</div>
-	-->
 
 </div>

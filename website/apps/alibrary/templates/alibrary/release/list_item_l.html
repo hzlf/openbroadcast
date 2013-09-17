@@ -1,4 +1,4 @@
-{% load thumbnail i18n truncate display_tags arating_tags spurl %}
+{% load thumbnail i18n truncate display_tags arating_tags spurl spacify_tags %}
 
 <div class="list_body_row selectable item release published owner view edit stream collect download"
      id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}"
@@ -39,18 +39,38 @@
                     <li>
 
                         {% for artist in item.get_artists %}
-                            {% if artist.get_absolute_url %}
-                                <a href="{{ artist.get_absolute_url }}">{{ artist.name|truncate_chars_inner:32 }}</a>
-                                &nbsp;
-                                <a href="{% spurl base=request.get_full_path remove_query_param="page" set_query="artist={{ artist.slug }}" %}"
-                                   title="{% trans "Only show releases by" %} {{ artist.name }}"
-                                   style="vertical-align: top;"><span class="filter icon"></span></a>
-                                {% if not forloop.last %},{% endif %}
+
+                            {% if "join_phrase" in artist %}
+
+
+                                {% if artist.join_phrase %}{{ artist.join_phrase }}{% endif %}
+                                {% if artist.artist.get_absolute_url %}
+                                    <a href="{{ artist.artist.get_absolute_url }}"
+                                       title="{{ artist.artist.name }}">{{ artist.artist.name|truncate_chars_inner:12 }}</a>
+                                {% else %}
+                                    <span>{{ artist.artist.name|truncate_chars_inner:12 }}</span>
+                                {% endif %}
+
+
                             {% else %}
-                                <span>{{ artist.name|truncate_chars_inner:32 }}</span>{% if not forloop.last %},
+
+
+                                {% if artist.get_absolute_url %}
+                                    <a href="{{ artist.get_absolute_url }}">{{ artist.name|truncate_chars_inner:32 }}</a>
+                                    &nbsp;
+                                    <a href="{% spurl base=request.get_full_path remove_query_param="page" set_query="artist={{ artist.slug }}" %}"
+                                       title="{% trans "Only show releases by" %} {{ artist.name }}"
+                                       style="vertical-align: top;"><span class="filter icon"></span></a>
+                                    {% if not forloop.last %},{% endif %}
+                                {% else %}
+                                    <span>{{ artist.name|truncate_chars_inner:32 }}</span>{% if not forloop.last %},
+                                {% endif %}
+                                {% endif %}
+
                             {% endif %}
-                            {% endif %}
+
                         {% endfor %}
+
 
                     </li>
                 </ul>
@@ -98,8 +118,6 @@
                     </ul>
                 </div>
             {% endif %}
-
-
 
 
         </div>

@@ -174,18 +174,38 @@ class MediaFilter(django_filters.FilterSet):
         return self._filterlist
 
 
+
+DAY_CHOICES = (
+    (0, _('Mon')),
+    (1, _('Tue')),
+    (2, _('Wed')),
+    (3, _('Thu')),
+    (4, _('Fri')),
+    (5, _('Sat')),
+    (6, _('Sun')),
+)
+
 class PlaylistFilter(django_filters.FilterSet):
     # releasedate = django_filters.DateFilter()
     type = CharListFilter(label=_("Type"))
     status = CharListFilter(label=_("Status"))
     target_duration = CharListFilter(label=_("Target Duration"))
-    dayparts__day = CharListFilter(label="Dayparts")
+    dayparts = django_filters.ChoiceFilter(label="Dayparts")
     weather__name = CharListFilter(label="Weather")
+    seasons__name = CharListFilter(label="Season")
     #media_release__license__name = CharListFilter(label="License")
     #main_format__name = CharListFilter(label="Release Format")
     class Meta:
         model = Playlist
-        fields = ['type', 'status', 'target_duration', 'dayparts__day', 'weather__name', ]
+        fields = ['type', 'status', 'target_duration', 'dayparts', 'weather__name', 'seasons__name', ]
+
+    def __init__(self, *args, **kwargs):
+        super(PlaylistFilter, self).__init__(*args, **kwargs)
+        self.filters['dayparts'].extra.update(
+            {
+                'choices': DAY_CHOICES
+            })
+
 
     @property
     def filterlist(self):
@@ -194,16 +214,27 @@ class PlaylistFilter(django_filters.FilterSet):
 
         if not hasattr(self, '_filterlist'):
 
-
             for name, filter_ in self.filters.iteritems():
 
                 ds = self.queryset.values_list(name, flat=False).annotate(
                     n=models.Count("pk", distinct=True)).distinct()
 
+                """
+                if name == 'dayparts':
+                    print '************* DPF ****'
+                    tlist = []
+                    for d in ds:
+                        print d
+                        # tlist.append([d[0], d[1], DAY_CHOICES[d[0]]])
+                        tlist.append([d[0], d[1], DAY_CHOICES[0] ])
+
+                    ds = tlist
+                """
+
                 filter_.entries = ds
 
                 if ds not in flist:
-                    #pass                 
+                    #pass
                     flist.append(filter_)
 
             self._filterlist = flist

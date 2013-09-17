@@ -124,14 +124,14 @@
   padding: 8px 2px 3px 5px;
   font-size: 90%;
   clear: both; }
+  .listview.footer .ipp li {
+    padding-left: 7px; }
   .listview.footer .ipp a.active {
     color: #00bb00;
     padding-left: 2px;
     padding-right: 2px; }
   .listview.footer .control_selection span {
     color: #999999; }
-  .listview.footer .control_selection a.action {
-    /* background: none */ }
 .listview.container {
   /* releases */
   /* playlists */
@@ -212,7 +212,7 @@
     padding-left: 0px !important;
     padding-right: 0px !important; }
   .listview.container.s .c1 {
-    width: 64px;
+    width: 72px;
     background-position: 28px center; }
     .listview.container.s .c1.list_body_item {
       background-repeat: no-repeat; }
@@ -262,35 +262,67 @@
   .listview.container.releases.s .c1.list_body_item {
     background-image: url(/static/img/base/defaults/listview.release.xl.png);
     background-size: 36px 36px; }
+  .listview.container.releases.s .c2 {
+    width: 300px; }
   .listview.container.releases.s .c3 {
     width: 50px;
     padding-right: 10px; }
+  .listview.container.releases.s .c4 {
+    width: 160px; }
+  .listview.container.releases.s .c5 {
+    width: 68px;
+    text-align: center; }
+    .listview.container.releases.s .c5 .iconset-license {
+      position: relative;
+      top: 10px;
+      font-size: 14px; }
+  .listview.container.releases.s .c6 {
+    width: 70px;
+    padding-right: 12px; }
+  .listview.container.releases.s .c7 {
+    width: 70px; }
+  .listview.container.releases.s .c8 {
+    width: 40px; }
   .listview.container.playlists.s .c1.list_body_item, .listview.container.playlist.s .c1.list_body_item {
     background-image: url(/static/img/base/defaults/listview.playlist.s.png);
     background-size: 36px 36px; }
   .listview.container.artists.s .c1.list_body_item {
     background-image: url(/static/img/base/defaults/listview.artist.xl.png);
     background-size: 36px 36px; }
+  .listview.container.artists.s .c4 .relations > ul {
+    position: relative;
+    top: 10px; }
+    .listview.container.artists.s .c4 .relations > ul li {
+      padding-right: 7px; }
+      .listview.container.artists.s .c4 .relations > ul li a > span.service {
+        display: none; }
   .listview.container.artists.s .c6 {
-    width: 30px;
+    width: 40px;
     padding-right: 0px; }
   .listview.container.labels.s .c6 {
     width: 30px;
     padding-right: 0px; }
   .listview.container.medias.s .c1 {
-    width: 40px;
-    padding-top: 3px !important; }
-    .listview.container.medias.s .c1 img {
-      width: 16px;
-      height: 16px; }
+    width: 40px; }
+    .listview.container.medias.s .c1 li {
+      float: left; }
+  .listview.container.medias.s .c2 small.type {
+    font-weight: normal;
+    font-size: 90%; }
   .listview.container.medias.s .c3 {
     width: auto; }
   .listview.container.medias.s .c4 {
-    min-width: 170px; }
+    width: 100px; }
   .listview.container.medias.s .c5 {
-    width: 30px; }
+    width: 68px;
+    text-align: center; }
+    .listview.container.medias.s .c5 .iconset-license {
+      position: relative;
+      top: 10px;
+      font-size: 14px; }
   .listview.container.medias.s .c6 {
-    width: 80px; }
+    width: 40px;
+    padding-right: 0px; }
   .listview.container.medias.s .c7 {
     width: 30px; }
   .listview.container.medias.inner.s {
@@ -446,6 +478,8 @@
  * /* Reset all divs to block display (instead of table-way) */
 .listview.container.releases.l .list_body_row.item {
   background-image: url(/static/img/base/defaults/listview.release.xl.png); }
+  .listview.container.releases.l .list_body_row.item .iconset-license {
+    font-size: 14px; }
 .listview.container.artists.l .list_body_row.item {
   background-image: url(/static/img/base/defaults/listview.artist.xl.png); }
 .listview.container.playlist.l .list_body_row.item {
@@ -472,6 +506,7 @@
       background-repeat: no-repeat;
       overflow: hidden;
       border-bottom: 1px solid #dddddd;
+      background-color: #333333;
       margin: 9px 14px 0 0;
       /* Play icon */
       /* Adjustable infoo panel */ }
@@ -782,9 +817,13 @@ section.comments.disqus {
     .iteminfo .container_content dl.contact div p {
       line-height: 140%;
       padding: 0 0 11px !important; }
-    .iteminfo .container_content dl.tags {
-      width: 420px;
-      float: left; }
+    .iteminfo .container_content dl span.tag {
+      margin: 2px 2px 0 0;
+      padding: 0 4px;
+      background: #333333;
+      color: white;
+      border: 1px solid #333333;
+      text-transform: uppercase; }
     .iteminfo .container_content dl.license p {
       padding: 4px 0 0 0 !important; }
     .iteminfo .container_content dl.license img {

@@ -1,6 +1,8 @@
 {% load thumbnail i18n truncate display_tags arating_tags spurl %}
 
-<div class="list_body_row selectable item artist view edit stream collect download" id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}" {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 200x200 crop bw upscale subject_location=item.main_image.subject_location %});"{% endif %}>
+<div class="list_body_row selectable item artist view edit stream collect download" id="list_item_{{ item.pk }}"
+     data-resource_uri="{{ item.get_api_url }}"
+     {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 200x200 crop bw upscale subject_location=item.main_image.subject_location %});"{% endif %}>
 
     <div class="wrapper_icon">
 
@@ -20,63 +22,75 @@
 
     </div>
 
-	<div class="wrapper_info">
+    <div class="wrapper_info">
 
-		<div class="wrapper_inner">
+        <div class="wrapper_inner">
 
-			<div class="list_body_item">
-				<ul class="title">
-			<li class="bold">
+            <div class="list_body_item">
+                <ul class="title">
+                    <li class="bold">
 
-				<a href="{{ item.get_absolute_url }}" title="{{ item.name }}">
-				{{ item.name|truncate_chars_inner:24 }}
-				{% if item.country %}({{ item.country }}){% endif %}
-				{% topflop_for_object item %} </a>
-			</li>
-			<li>
-				{% if item.disambiguation %}
-				{{ item.disambiguation }}
-				{% endif %}&nbsp;
-			</li>
-				</ul>
-			</div>
+                        <a href="{{ item.get_absolute_url }}" title="{{ item.name }}">
+                            {{ item.name|truncate_chars_inner:24 }}
 
-			<div class="list_body_item">
-				<ul class="unstyled">
-					{% if item.get_releases.count > 0 %}
-					<li>
-						{% url alibrary-release-list as release_list %}
-						{% trans "Releases" %}:&nbsp;<a href="{% spurl path=release_list query="artist={{ item.slug }}" %}" title="{% trans "Only show releases by" %} {{ item.name }}" style="vertical-align: top;">{{ item.get_releases.count }}<span class="filter icon"></span></a>
-					</li>
-					{% endif %}
-					{% if item.media_artist.count > 0 %}
-					<li>
-						{% trans "Tracks" %}:&nbsp;<a href="#" style="vertical-align: top;">{{ item.media_artist.count }}<span class="filter icon"></span></a>
-					</li>
-					{% endif %}
-				</ul>
-			</div>
+                            {% topflop_for_object item %} </a>
+                    </li>
 
-			<div class="list_body_item links external">
-				<ul class="links external unstyled">
-					{% for relation in item.relations.specific %}
-					<li>
-					<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}"><i class="cicon-{{ relation.service }}"></i></a>
-					<!--
+                    <li>
+                        {% if item.country %}
+                            {{ item.country }}
+                        {% endif %}&nbsp;
+                        <!--
+                        {% if item.disambiguation %}
+                            {{ item.disambiguation }}
+                        {% endif %}&nbsp;
+                        -->
+                    </li>
+                </ul>
+            </div>
+
+            <div class="list_body_item">
+                <ul class="unstyled">
+                    {% if item.get_releases.count > 0 %}
+                        <li>
+                            {% url alibrary-release-list as release_list %}
+                            {% trans "Releases" %}:&nbsp;<a
+                                href="{% spurl path=release_list query="artist={{ item.slug }}" %}"
+                                title="{% trans "Only show releases by" %} {{ item.name }}"
+                                style="vertical-align: top;">{{ item.get_releases.count }}<span
+                                class="filter icon"></span></a>
+                        </li>
+                    {% endif %}
+                    {% if item.media_artist.count > 0 %}
+                        <li>
+                            {% trans "Tracks" %}:&nbsp;<a href="#"
+                                                          style="vertical-align: top;">{{ item.media_artist.count }}<span
+                                class="filter icon"></span></a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="list_body_item links external">
+                <ul class="links external unstyled">
+                    {% for relation in item.relations.specific %}
+                        <li>
+                            <a href="{{ relation.url }}" class="skip-external"
+                               title="Show on {{ relation.get_service_display }}"><i
+                                    class="cicon-{{ relation.service }}"></i></a>
+                            <!--
 					<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}">{{ relation.service }}</a>
 					-->
-					</li>
-					{% endfor %}
-				</ul>
-			</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
 
 
-		</div>
+        </div>
 
 
-	</div>
-
-
+    </div>
 
 
     <div class="wrapper_action">
@@ -117,8 +131,6 @@
         </ul>
 
     </div>
-
-
 
 
 </div>

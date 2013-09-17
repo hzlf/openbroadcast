@@ -1,5 +1,8 @@
 @import "vars"
 
+
+// table width: 830px
+
 .listhead
   padding: 4px 2px 3px 5px
   border-bottom: 1px solid #bbb
@@ -163,6 +166,9 @@
     padding: 8px 2px 3px 5px
     font-size: 90%
     clear: both
+
+    .ipp li
+      padding-left: 7px
     
     .ipp a.active
       color: $main-color-b
@@ -172,8 +178,7 @@
     .control_selection
       span
         color: #999999
-      a.action
-        /* background: none */
+
       
       
   &.container
@@ -301,7 +306,7 @@
 
     &.s
       .c1
-        width: 64px
+        width: 72px
         background-position: 28px center
 
 
@@ -363,9 +368,27 @@
         &.list_body_item
           background-image: url(/static/img/base/defaults/listview.release.xl.png)
           background-size: 36px 36px
-      .c3
+      .c2 // name
+        width: 300px
+      .c3 // indicator
         width: 50px
         padding-right: 10px
+      .c4 // label / release
+        width: 160px
+      .c5 // license
+        width: 68px
+        text-align: center
+        .iconset-license
+          position: relative
+          top: 10px
+          font-size: 14px
+      .c6 // date
+        width: 70px
+        padding-right: 12px
+      .c7 // type
+        width: 70px
+      .c8 // secondary actions
+        width: 40px
     
     /* playlists */
     &.playlists.s, &.playlist.s, 
@@ -380,8 +403,19 @@
         &.list_body_item
           background-image: url(/static/img/base/defaults/listview.artist.xl.png) 
           background-size: 36px 36px
+      .c4 // links
+        .relations > ul
+          position: relative
+          top: 10px
+
+          li
+            padding-right: 7px
+            a > span.service
+              display: none
+
+
       .c6
-        width: 30px
+        width: 40px
         padding-right: 0px
 		
     /* labels */
@@ -394,20 +428,28 @@
     &.medias.s
       .c1
         width: 40px
-        padding-top: 3px !important
-        img
-          width: 16px
-          height: 16px
+        li
+          float: left
+      .c2
+        small.type
+          font-weight: normal
+          font-size: 90%
       .c3
         width: auto
         //max-width: 285px 
       .c4
-        //width: 120px
-        min-width: 170px
-      .c5
-        width: 30px
+        width: 100px
+        // min-width: 170px
+      .c5 // license
+        width: 68px
+        text-align: center
+        .iconset-license
+          position: relative
+          top: 10px
+          font-size: 14px
       .c6
-        width: 80px
+        width: 40px
+        padding-right: 0px
       .c7
         width: 30px
         
@@ -618,6 +660,9 @@
     .list_body_row.item
       background-image: url(/static/img/base/defaults/listview.release.xl.png)
 
+      .iconset-license
+        font-size: 14px
+
   &.artists.l
     .list_body_row.item
       background-image: url(/static/img/base/defaults/listview.artist.xl.png)
@@ -659,6 +704,8 @@
       background-repeat: no-repeat
       overflow: hidden
       border-bottom: 1px solid #DDDDDD
+
+      background-color: #333
 	  
       &.selection
         div.wrapper_info, div.wrapper_action
@@ -738,7 +785,7 @@
         &.license
           background-position: right bottom
 
-        // cloud
+        // cloud (inline)
         ul.tags
           position: absolute
           bottom: 0px

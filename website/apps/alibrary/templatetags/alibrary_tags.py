@@ -60,6 +60,13 @@ def dayparts_inline(context, object):
     context.update({'object': object})
     return context
 
+@register.inclusion_tag('alibrary/templatetags/dayparts_visual.html', takes_context=True)
+def dayparts_visual(context, object):
+    context.update({'object': object})
+    context.update({'object_dayparts': object.dayparts.all()})
+    context.update({'available_dayparts': Daypart.objects.active().order_by('day')})
+    return context
+
 @register.inclusion_tag('alibrary/templatetags/m2m_inline.html', takes_context=True)
 def m2m_inline(context, items):
     context.update({'items': items})

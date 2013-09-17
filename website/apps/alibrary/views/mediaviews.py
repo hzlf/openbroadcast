@@ -21,7 +21,7 @@ from easy_thumbnails.files import get_thumbnailer
 
 from pure_pagination.mixins import PaginationMixin
 
-from alibrary.models import Media, Playlist, PlaylistItem
+from alibrary.models import Media, Playlist, PlaylistItem, Artist, Release
 from alibrary.forms import MediaForm, MediaActionForm, MediaRelationFormSet
 from alibrary.filters import MediaFilter
 
@@ -123,18 +123,18 @@ class MediaListView(PaginationMixin, ListView):
         
         artist_filter = self.request.GET.get('artist', None)
         if artist_filter:
-            qs = qs.filter(media_release__artist__slug=artist_filter).distinct()
+            qs = qs.filter(artist__slug=artist_filter).distinct()
             # add relation filter
             fa = Artist.objects.filter(slug=artist_filter)[0]
             f = {'item_type': 'artist' , 'item': fa, 'label': _('Artist')}
             self.relation_filter.append(f)
             
-        label_filter = self.request.GET.get('label', None)
-        if label_filter:
-            qs = qs.filter(label__slug=label_filter).distinct()
+        release_filter = self.request.GET.get('release', None)
+        if release_filter:
+            qs = qs.filter(release__slug=release_filter).distinct()
             # add relation filter
-            fa = Label.objects.filter(slug=label_filter)[0]
-            f = {'item_type': 'label' , 'item': fa, 'label': _('Label')}
+            fa = Release.objects.filter(slug=release_filter)[0]
+            f = {'item_type': 'release' , 'item': fa, 'label': _('Release')}
             self.relation_filter.append(f)
             
         # filter by import session

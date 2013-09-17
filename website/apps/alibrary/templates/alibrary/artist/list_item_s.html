@@ -1,22 +1,19 @@
-{% load thumbnail i18n truncate display_tags arating_tags spurl %}
+{% load thumbnail i18n truncate display_tags arating_tags spurl alibrary_tags %}
 
 <!-- list item s -->
 
 <div class="list_body_row selectable view edit stream collect download" id="list_item_{{ item.pk }}">
 	<div class="list_body_item c1 image_center_bg" {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 36x36 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
-		<ul class="unstyled">
-			<!-- Play link  -->
-			<li class="play">
-				<a href="{{ item.get_api_url }}#0#replace" title="Play" class="playable popup"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
-			</li>
-		</ul>
+        {% with object=item ct="artist" %}
+            {% include "alibrary/element/_item_actions_primary.html" %}
+        {% endwith %}
 	</div>
 
 	<div class="list_body_item c2">
 		<ul class="unstyled">
 			<li class="bold">
 				<a href="{{ item.get_absolute_url }}" title="{{ item.name }}">
-				{{ item.name|truncate_chars_inner:32 }}
+				{{ item.name|truncate_chars_inner:24 }}
 				{% if item.country %}({{ item.country }}){% endif %}
 				{% topflop_for_object item %} </a>
 			</li>
@@ -44,16 +41,9 @@
 	</div>
 
 	<div class="list_body_item c4 links external">
-		<ul class="links external unstyled">
-			{% for relation in item.relations.specific %}
-			<li>
-			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}"><i class="cicon-{{ relation.service }}"></i></a>
-			<!--
-			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}">{{ relation.service }}</a>
-			-->
-			</li>
-			{% endfor %}
-		</ul>
+        <div class="relations">
+            {% relations_inline item %}
+        </div>
 	</div>
 
 	<div class="list_body_item c5">
@@ -62,31 +52,49 @@
 				{{ item.updated|date:"SHORT_DATE_FORMAT" }}
 			</li>
 			<li class="small">
-				1 Edit
+                {% if item.get_last_revision %}
+                {% trans "by" %}:
+				<a href="{{ item.get_last_revision.user.get_profile.get_absolute_url }}">{{ item.get_last_revision.user }}</a>
+                {% endif %}
 			</li>
 		</ul>
 	</div>
 
 	<div class="list_body_item c6 action">
 
-		<!-- Actions sub-view  -->
-		<div class="wrapper">
-			<div class="right">
-				<ul class="unstyled">
-					<li class="basket">
-						<a href="#" title="{% trans "Add to basket" %}" class="collectable"><img src="/static/img/base/spacer.png" width="16" height="16" alt="{% trans "Add to basket" %}" /></a>
-					</li>
-				</ul>
-			</div>
-			<div>
-				<ul class="unstyled">
-					<li class="download">
-						<a href="#artist:{{ item.pk }}:mp3" title="{% trans "Download Release" %}" class="downloadable queue"><img src="/static/img/base/spacer.png" width="16" height="16" alt="{% trans "Download Discography" %}" /></a>
-					</li>
-				</ul>
-			</div>
-			<div class="clear"></div>
-		</div>
+        <ul class="unstyled action secondary horizontal">
+
+            <li>
+                <a href="#"
+                   class="downloadable queue{% if not perms.alibrary.downoad_media %} disabled{% endif %}"
+                   data-ct="artist"
+                   data-resource_uri="{{ item.get_api_url }}"
+                   title="{% trans "Download" %}">
+                    <i class="icon icon-download-alt"></i>
+                </a>
+            </li>
+
+            <li>
+                <a href="#"
+                   class="{% if not user.is_authenticated %} disabled{% endif %}"
+                   data-action="collect"
+                   title="{% trans "Add to playlist" %}">
+                    <i class="icon icon-plus"></i>
+                </a>
+            </li>
+
+            {% if  perms.alibrary.change_artist %}
+                <li>
+                    <a href="{{ item.get_edit_url }}"
+                       class=""
+                       title="{% trans "Edit" %}">
+                        <i class="icon icon-edit"></i>
+                    </a>
+                </li>
+            {% endif %}
+
+        </ul>
+
 	</div>
 
 </div>

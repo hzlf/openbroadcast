@@ -1,6 +1,6 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags wiki_tags spurl %}
+{% load truncate i18n thumbnail arating_tags wiki_tags spurl alibrary_tags url_tags %}
 
 {% block heading %} <!-- heading / icon (large one) -->
     <div id="heading">
@@ -218,4 +218,20 @@
 
 {% block sidebar %}
     {% include "alibrary/artist/sidebar/_detail.html" %}
+
+    <div class="listing relations" style="padding-top: 8px;">
+
+	<div class="page-header">
+		<h2>{% trans "Show/share on" %} <small>{% trans "external links" %}</small></h2>
+
+        <div class="item social">
+            <div class="fb-like" data-href="{% fullurl %}" data-width="200" data-layout="button_count" data-show-faces="false" data-send="true"></div>
+        </div>
+
+    </div>
+
+	<div class="item relations">
+        {% relations_inline object %}
+	</div>
+
 {% endblock %}

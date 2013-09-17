@@ -104,7 +104,7 @@ class Artist(MigrationMixin):
 
     
     # cms field
-    placeholder_1 = PlaceholderField('placeholder_1')
+    #placeholder_1 = PlaceholderField('placeholder_1')
 
     #multiple = models.NullBooleanField(null=True, blank=True)
     

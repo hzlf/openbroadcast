@@ -1,8 +1,8 @@
-{% load truncate i18n thumbnail arating_tags spurl %}
+{% load truncate i18n thumbnail arating_tags spurl spacify_tags %}
 <div class="span7 padded-h container_content">
 
 	<div class="page-header">
-		<h2>{{ object.name|truncate_chars_inner:40 }} <small>{{ object.type }}</small></h2>
+		<h2>{{ object.name|truncate_chars_inner:40 }}{% if object.country %} ({{ object.country }}){% endif %} <small>{{ object.type }}</small></h2>
 	</div>
 
 	<dl class="dl-horizontal main">
@@ -88,7 +88,7 @@
 	</dl>
 
 
-
+    <!--
 	<dl class="dl-horizontal">
 
 		<dt>
@@ -118,25 +118,32 @@
 		</dd>
 
 	</dl>
-
-	<!--
-	<dl class="dl-horizontal">
-
-		<dt>
-			{% trans "Relations" %}:
-		</dt>
-		<dd class="horizontal">
-			<ul class="unstyled">
-			{% for relation in object.relations.generic %}
-			<li><a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.url }}">{{ relation.url }}</a></li>
-			
-			{% endfor %}
-			</ul>
-			<div class="clear"></div>
-		</dd>
-
-	</dl>
 	-->
+
+{% if object.relations.generic %}
+    <dl class="dl-horizontal">
+
+        <dt>
+            {% trans "Relations" %}:
+        </dt>
+        <dd class="horizontal">
+            <ul class="unstyled">
+                {% for relation in object.relations.generic %}
+                    <li>
+                        <a href="{{ relation.url }}" class="skip-external"
+                           title="Show on {{ relation.url }}">{{ relation.url }}</a>
+                        {% if relation.service == "official" %}
+                            <small><i class="icon icon-star"></i> {% trans "official" %}</small>
+                        {% endif %}
+                    </li>
+
+                {% endfor %}
+            </ul>
+            <div class="clear"></div>
+        </dd>
+
+    </dl>
+{% endif %}
 
 	<dl class="dl-horizontal sub">
 
@@ -172,16 +179,29 @@
 		</dd>
 		-->
 		
-		{% if object.tags %}
-		<dt>
-			{% trans "Tags" %}:
-		</dt>
-		<dd>
-			{% for tag in object.tags %}
-			{{ tag.name }}{% if not forloop.last %},{% endif %}
-			{% endfor %}
-		</dd>
-		{% endif %}
+
+    {% if object.tags %}
+        <dt>
+            {% trans "Tags" %}:
+        </dt>
+        <dd>
+            {% for tag in object.tags %}
+                {{ tag.name }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        </dd>
+    {% endif %}
+    <!--
+    {% if object.tags %}
+        <dt>
+            {% trans "Tags" %}:
+        </dt>
+        <dd>
+            {% for tag in object.tags %}
+                <span class="tag">{{ tag.name|spacify }}</span>
+            {% endfor %}
+        </dd>
+    {% endif %}
+-->
 
 	</dl>
 

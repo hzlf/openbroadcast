@@ -246,7 +246,7 @@ class ArtistAdmin(PlaceholderAdmin, BaseAdmin):
     fieldsets = [
         (None,               {'fields': ['name', 'slug', 'main_image', 'aliases', 'real_name', 'country', ('listed', 'disable_link',), 'enable_comments', 'biography', 'excerpt', 'folder', ]}),
         ('Users', {'fields' : ['owner', 'creator', 'publisher']}),
-        ('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
+        #('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
     ]
     
 admin.site.register(Artist, ArtistAdmin)

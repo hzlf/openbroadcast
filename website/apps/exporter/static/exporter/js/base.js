@@ -238,7 +238,7 @@ ExporterApp = (function () {
         $('.listview , .action-group').on('click', 'a[data-action="download"]:not(".selection-any"):not(".disabled")', function (e) {
 
             e.preventDefault();
-            e.stopPropagation();
+            //e.stopPropagation();
 
             var item_type = $(this).data('ct');
             var item_id = $(this).data('id');
