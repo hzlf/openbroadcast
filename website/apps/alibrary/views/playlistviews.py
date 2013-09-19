@@ -115,6 +115,24 @@ class PlaylistListView(PaginationMixin, ListView):
             
         # special relation filters
         self.relation_filter = []
+
+        user_filter = self.request.GET.get('user', None)
+        if user_filter:
+            user = get_object_or_404(User, username=user_filter)
+            #qs = qs.filter(media_release__artist__slug=artist_filter).distinct()
+            # incl album_artists
+            qs = qs.filter(user=user).distinct()
+
+            # add relation filter
+            fa = user # for consistency
+            f = {'item_type': 'user' , 'item': fa, 'label': _('User')}
+            self.relation_filter.append(f)
+
+
+
+
+
+
         
         # apply filters
         self.filter = PlaylistFilter(self.request.GET, queryset=qs)

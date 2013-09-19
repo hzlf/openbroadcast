@@ -46,11 +46,11 @@
 
 <!--body -->
 <body class="popup aplayer" data-spy="scroll">
-	
+
 
 	{% block inner %}
 	{% endblock %}
-	
+
 	{% block extras %}
 	{% endblock %}
 
@@ -61,25 +61,25 @@
 
 	<!-- main javascript block -->
 	{% render_block "js" %}
-	
-	
+
+
 	<script type="text/javascript" src="{{ STATIC_URL }}aplayer/js/lib/jwplayer/jwplayer-5.9.js"></script>
 	<script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/playlist.js"></script>
-	
+
 	<script type="text/javascript">
 		//<![CDATA[//><!--
-		
+
 		var settings = settings || {};
 		settings.debug = true;
-				
+
 		// local / window-dependent container
 		var local = local || {};
 		local.type = 'popup';
-		
+
 		parent_win = window.opener;
-		
+
 		$(document).ready(function() {
-			
+
 			// set some variables to be available in script file
 			aplayer.vars.swf_url = '{{ STATIC_URL }}aplayer/swf/lib/jwplayer/jwplayer-5.9.swf';
 			aplayer.vars.skin_url = '{{ STATIC_URL }}aplayer/css/lib/jwplayer/ulysses.zip';
@@ -89,26 +89,27 @@
 
 			base.ui.init();
 			base.ui.iface();
-			
+
 			aplayer.base.init();
 			aplayer.ui.init();
 			aplayer.ui.playhead();
-			
+
+            /*
 			// collector
 			aplayer.collector = new CollectorApp;
-			// aplayer.collector.use_effects = false;
 			aplayer.collector.animation_target = 'footer';
 			aplayer.collector.api_url = "{% url api_dispatch_list resource_name='playlist' api_name='v1'%}";
 			aplayer.collector.init();
-			
+
 			// selector
 			aplayer.selector = new PlaylistSelector();
 			aplayer.selector.interval_duration = 10000;
 			aplayer.selector.dom_id = 'playlists_inline_selector';
 			aplayer.selector.api_url_simple = "{% url api_dispatch_list resource_name='simpleplaylist' api_name='v1'%}";
 			aplayer.selector.init();
-			
-			
+            */
+
+
 		});
 		//--><!]]>
 	</script>
@@ -117,7 +118,7 @@
 	{% render_block "js-post" %}
 
 
-	
+
 </body>
-  
+
 </html>

@@ -266,7 +266,26 @@ aplayer.ui.bind = function() {
 
 	aplayer.ui.bind_controls($("div.aplayer-controls li > a", '.aplayer'));
 
-	
+
+    // set status (mode / version)
+    $('#aplayer_mode', $('footer')).html(aplayer.vars.stream_mode)
+    $('#aplayer_version', $('footer')).html(aplayer.vars.version)
+
+
+    $('#aplayer_volume', $('footer')).noUiSlider({
+        range: [0, 100]
+       ,start: 80
+       ,step: 1
+       ,handles: 1
+       ,connect: 'lower'
+       ,slide: function(){
+          var values = $(this).val();
+            aplayer.player.setVolume(values)
+       }
+    });
+
+
+
 
 	aplayer.ui.rebind();
 

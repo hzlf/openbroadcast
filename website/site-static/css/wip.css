@@ -5,13 +5,18 @@
   font-size: 90%;
   height: 20px;
   margin-top: 2px; }
-  .listhead p.pagination {
-    padding: 0 0 0 0;
-    margin: 0 0 0 0;
-    font-size: 100%; }
+  .listhead .pagination-holder {
+    float: right; }
+    .listhead .pagination-holder p.pagination {
+      padding: 0 0 0 0;
+      margin: 0 0 0 0;
+      font-size: 100%; }
   .listhead .wrapper.list_style {
     padding: 2px 0 0 0;
-    height: 20px; }
+    height: 20px;
+    float: left; }
+    .listhead .wrapper.list_style > div {
+      background-color: red; }
     .listhead .wrapper.list_style a.action.list_style {
       padding: 0 0 0 2px;
       background-position: 0px 0px;
@@ -138,6 +143,7 @@
   /* artists */
   /* labels */
   /* medias */
+  /* overide if list-view is displayed inside a detail-view */
   /* transmissions */
   /* downloads */ }
   .listview.container .list_body_item ul.action li > a.disabled, .listview.container .list_body_item ul.action li > a.disabled:hover, .listview.container .list_body_row ul.action li > a.disabled, .listview.container .list_body_row ul.action li > a.disabled:hover {
@@ -286,6 +292,8 @@
   .listview.container.playlists.s .c1.list_body_item, .listview.container.playlist.s .c1.list_body_item {
     background-image: url(/static/img/base/defaults/listview.playlist.s.png);
     background-size: 36px 36px; }
+  .listview.container.playlists.s .c8, .listview.container.playlist.s .c8 {
+    width: 40px; }
   .listview.container.artists.s .c1.list_body_item {
     background-image: url(/static/img/base/defaults/listview.artist.xl.png);
     background-size: 36px 36px; }
@@ -327,19 +335,19 @@
     width: 30px; }
   .listview.container.medias.inner.s {
     margin-top: 20px; }
-    .listview.container.medias.inner.s .list_body_row {
-      height: 30px; }
-    .listview.container.medias.inner.s .c2 {
-      width: 30px; }
+    .listview.container.medias.inner.s .c1 {
+      width: 60px; }
+      .listview.container.medias.inner.s .c1 .tracknumber {
+        text-align: right;
+        font-weight: bold;
+        padding: 2px 9px 0 0; }
+    .listview.container.medias.inner.s .c3 {
+      width: 180px; }
     .listview.container.medias.inner.s .list_body_row:first-child .list_body_item {
       border-top: 1px solid #dddddd; }
     .listview.container.medias.inner.s .list_body_row .list_body_item {
-      padding: 4px;
+      padding: 4px 2px 0px 2px;
       vertical-align: middle; }
-    .listview.container.medias.inner.s .list_body_item.license {
-      width: 100px; }
-      .listview.container.medias.inner.s .list_body_item.license a {
-        margin: 0px 0px 0px 25px; }
   .listview.container.transmissions.s .c2 {
     width: auto; }
   .listview.container.transmissions.s .c3 {
@@ -602,8 +610,6 @@
         background: whitesmoke; }
         .listview.container.l div.list_body div.list_body_row .wrapper_action li {
           float: right; }
-          .listview.container.l div.list_body div.list_body_row .wrapper_action li i {
-            font-size: 120%; }
 
 /* license icon display */
 .listview.container .list_body_item.links.external ul li {

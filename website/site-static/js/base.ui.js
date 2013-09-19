@@ -1176,9 +1176,12 @@ base.ui.tagcloud = function () {
 
     $('a#tagcloud_inline_toggle').live('click', function (e) {
 
+
+
         e.preventDefault();
 
         var display = $('#tagcloud_inline').css('display');
+
 
         if (display == 'none') {
             $('#tagcloud_inline').data('uistate', 'expanded');

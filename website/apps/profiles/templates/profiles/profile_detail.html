@@ -1,285 +1,295 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags wiki_tags sekizai_tags activity_tags %}
+{% load truncate i18n thumbnail arating_tags wiki_tags sekizai_tags activity_tags spurl %}
 
 {% block heading %}
-<!-- heading / icon (large one) -->
-{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/bootstrap-tab.js"></script>
-{% endaddtoblock %}
-{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.history.js"></script>{% endaddtoblock %}
+    <!-- heading / icon (large one) -->
+    {% addtoblock "js-post" %}
+        <script type="text/javascript" src="{{ STATIC_URL }}js/lib/bootstrap-tab.js"></script>
+    {% endaddtoblock %}
+    {% addtoblock "js-post" %}
+        <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.history.js"></script>{% endaddtoblock %}
 
-<div id="heading">
-	{% include "skeleton/heading.html" %}
-</div>
-<!-- heading / icon (large one) -->
+    <div id="heading">
+        {% include "skeleton/heading.html" %}
+    </div>
+    <!-- heading / icon (large one) -->
 {% endblock %}
 
 {% block modnav %} <!-- start: intra-module navigation -->
-<div id="modnav">
-	{% include "skeleton/modnav.html" %}
-</div>
-<!-- end: intra-module navigation -->
+    <div id="modnav">
+        {% include "skeleton/modnav.html" %}
+    </div>
+    <!-- end: intra-module navigation -->
 {% endblock %}
 
 {% block inner %}
-<div class="item_detail" style="">
+    <div class="item_detail" style="">
 
-	<section class="shaded">
-		<div class="row iteminfo release">
-			{% include "profiles/profile/_detail_info.html" %}
-		</div>
-	</section>
+    <section class="shaded">
+        <div class="row iteminfo release">
+            {% include "profiles/profile/_detail_info.html" %}
+        </div>
+    </section>
 
-	<div class="item_menu" id="item_menu">
-		<ul class="nav nav-tabs">
-			<li class="active">
-				<a href="#profile" data-toggle="tab">{% trans "Profile" %}</a>
-			</li>
-			<li>
-				<a href="#activities" data-toggle="tab">{% trans "Activities" %}</a>
-			</li>
-			<li>
-				<a href="#broadcasts" data-toggle="tab">{% trans "Broadcasts" %}</a>
-			</li>
-		</ul>
-	</div>
+    <div class="item_menu" id="item_menu">
+        <ul class="nav nav-tabs">
+            <li class="active">
+                <a href="#profile" data-toggle="tab">{% trans "Profile" %}</a>
+            </li>
+            <li>
+                <a href="#activities" data-toggle="tab">{% trans "Activities" %}</a>
+            </li>
+            <li>
+                <a href="#broadcasts" data-toggle="tab">{% trans "Broadcasts" %}</a>
+            </li>
+        </ul>
+    </div>
 
-	<div class="clear"></div>
+    <div class="clear"></div>
 
-	<section class="tabbed item_inner">
+    <section class="tabbed item_inner">
 
-		<div class="tab-content">
-
-
-
-			<div class="tab-pane active" id="profile">
-				
-				<section class="profile">
-					<h2>{% trans "Profile" %}</h2>
-					<div class="description markdown padded-h">
-						{% wikify object.description %}
-					</div>
-
-				</section>
+    <div class="tab-content">
 
 
+    <div class="tab-pane active" id="profile">
 
-				<section class="profile information">
-					<h4>{% trans "Personal Information" %}</h4>
-					
-					<dl class="dl-horizontal">
-						
-						{% if object.birth_date %}
-						<dt>{% trans "Date of birth" %}</dt>
-						<dd>{{ object.birth_date }}</dd>
-						{% endif %}
-						
-						{% if object.gender %}
-						<dt>{% trans "Gender" %}</dt>
-						<dd>{{ object.get_gender_display }}</dd>
-						{% endif %}
-						
-					</dl>
+        <section class="profile">
+            <h2>{% trans "Profile" %}</h2>
 
-				</section>
+            <div class="description markdown padded-h markdown-inline">
+                {% wikify object.description %}
+            </div>
+
+        </section>
 
 
+        {% if user == object.user or perms.profiles.view_profiles_private or user == object.mentor %}
+            <!-- restricted access -->
+            <section class="profile information">
+                <h4>{% trans "Personal Information" %}</h4>
 
-				<section class="profile information">
-					<h4>{% trans "Contact Information" %}</h4>
-					
-					<dl class="dl-horizontal">
-						
-						{% if object.address1 %}
-						<dt>{% trans "Address" %}</dt>
-						<dd>
-							<ul class="unstyled">
-								
-								{% if object.address1 %}
-								<li>{{ object.address1 }}</li>
-								{% endif %}
-								
-								{% if object.address2 %}
-								<li>{{ object.address2 }}</li>
-								{% endif %}
-								
-								{% if object.zip or object.city %}
-								<li>{{ object.zip }} {{ object.city }}</li>
-								{% endif %}
-								
-								{% if object.country %}
-								<li>{{ object.get_country_display }}</li>
-								{% endif %}
-								
-							</ul>
-						</dd>
-						{% endif %}
-						
-						{% if object.mobile %}
-						<dt>{% trans "Mobile" %}</dt>
-						<dd>{{ object.mobile }}</dd>
-						{% endif %}
-						
-						{% if object.phone %}
-						<dt>{% trans "Phone" %}</dt>
-						<dd>{{ object.phone }}</dd>
-						{% endif %}
-						
-						{% if object.fax %}
-						<dt>{% trans "Fax" %}</dt>
-						<dd>{{ object.fax }}</dd>
-						{% endif %}
-						
-					</dl>
+                <dl class="dl-horizontal">
 
-				</section>
+                    {% if object.birth_date %}
+                        <dt>{% trans "Date of birth" %}</dt>
+                        <dd>{{ object.birth_date }}</dd>
+                    {% endif %}
+
+                    {% if object.gender %}
+                        <dt>{% trans "Gender" %}</dt>
+                        <dd>{{ object.get_gender_display }}</dd>
+                    {% endif %}
+
+                </dl>
+
+            </section>
+        {% endif %}
 
 
 
-				<section class="profile information">
-					<h4>{% trans "Skills & Knowledge" %}</h4>
-					
-					<dl class="dl-horizontal">
+        {% if user == object.user or perms.profiles.view_profiles_private or user == object.mentor %}
+            <!-- restricted access -->
+            <section class="profile information">
+                <h4>{% trans "Contact Information" %}</h4>
 
-						
+                <dl class="dl-horizontal">
 
-						<dt>{% trans "Expertise" %}</dt>
-						<dd>
-							<ul class="unstyled horizontal">
-								{% for item in object.expertise.all %}
-								
-								<li>
-									{{ item.name }}{% if not forloop.last %},&nbsp;	{% endif %}
-									
-								</li>
-								
-								{% endfor %}
-								
-							</ul>
-							<div class="clear"></div>
-						</dd>
-						
-						
+                    {% if object.address1 %}
+                        <dt>{% trans "Address" %}</dt>
+                        <dd>
+                            <ul class="unstyled">
 
-						
-					</dl>
+                                {% if object.address1 %}
+                                    <li>{{ object.address1 }}</li>
+                                {% endif %}
 
-				</section>
+                                {% if object.address2 %}
+                                    <li>{{ object.address2 }}</li>
+                                {% endif %}
+
+                                {% if object.zip or object.city %}
+                                    <li>{{ object.zip }} {{ object.city }}</li>
+                                {% endif %}
+
+                                {% if object.country %}
+                                    <li>{{ object.country.name }}</li>
+                                {% endif %}
+
+                            </ul>
+                        </dd>
+                    {% endif %}
+
+                    {% if object.user.email %}
+                        <dt>{% trans "EMail" %}</dt>
+                        <dd><a href="mailto:{{ object.user.email }}">{{ object.user.email }}</a></dd>
+                    {% endif %}
+
+                    {% if object.mobile %}
+                        <dt>{% trans "Mobile" %}</dt>
+                        <dd>{{ object.mobile }}</dd>
+                    {% endif %}
+
+                    {% if object.phone %}
+                        <dt>{% trans "Phone" %}</dt>
+                        <dd>{{ object.phone }}</dd>
+                    {% endif %}
+
+                    {% if object.fax %}
+                        <dt>{% trans "Fax" %}</dt>
+                        <dd>{{ object.fax }}</dd>
+                    {% endif %}
+
+                </dl>
+
+            </section>
+        {% endif %}
 
 
 
-				<section class="profile information">
-					<h4>{% trans "Communication & services" %}</h4>
-					
-					<dl class="dl-horizontal">
+        <section class="profile information">
+            <h4>{% trans "Skills & Knowledge" %}</h4>
 
-						{% for service in object.service_set.all %}
-
-						<dt>{{ service.service }}</dt>
-						<dd>
-							<ul class="unstyled">
-								<li><a href="{{ service.service_url }}">{{ service.service_url }}</a></li>
-								<li>{% trans "User" %}: {{ service.username }}</li>
-							</ul>
-						</dd>
-						
-						{% endfor %}
-
-						
-					</dl>
-
-				</section>
+            <dl class="dl-horizontal">
 
 
+                <dt>{% trans "Expertise" %}</dt>
+                <dd>
+                    <ul class="unstyled horizontal">
+                        {% for item in object.expertise.all %}
 
-				<section class="profile information">
-					<h4>{% trans "Additional links" %}</h4>
-					
-					<dl class="dl-horizontal">
+                            <li>
+                                {{ item.name }}{% if not forloop.last %},&nbsp;    {% endif %}
 
-						{% for link in object.link_set.all %}
+                            </li>
 
-						<dt>{% if link.title %}{{ link.title }}{% endif %}</dt>
-						<dd>
-							<a href="{{ link.url }}">{{ link.url }}</a>
-						</dd>
-						
-						{% endfor %}
+                        {% endfor %}
 
-						
-					</dl>
+                    </ul>
+                    <div class="clear"></div>
+                </dd>
 
-				</section>
 
-			</div>
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			<div class="tab-pane" id="activities">
-				<table class="table table-condensed striped action">
-					<tbody>
+            </dl>
 
-						{% for action in user_stream|slice:":50" %}
-						<tr>
-							<td>#</td>
-							
-							<td>{% display_action action %}</td>
-							
-							<!--
+        </section>
+
+
+        <section class="profile information">
+            <h4>{% trans "Communication & services" %}</h4>
+
+            <dl class="dl-horizontal">
+
+                {% for service in object.service_set.all %}
+
+                    <dt>{{ service.service }}</dt>
+                    <dd>
+                        <ul class="unstyled">
+                            <li><a href="{{ service.service_url }}">{{ service.service_url }}</a></li>
+                            <li>{% trans "User" %}: {{ service.username }}</li>
+                        </ul>
+                    </dd>
+
+                {% endfor %}
+
+
+            </dl>
+
+        </section>
+
+
+        <section class="profile information">
+            <h4>{% trans "Additional links" %}</h4>
+
+            <dl class="dl-horizontal">
+
+                {% for link in object.link_set.all %}
+
+                    <dt>{% if link.title %}{{ link.title }}{% endif %}</dt>
+                    <dd>
+                        <a href="{{ link.url }}">{{ link.url }}</a>
+                    </dd>
+
+                {% endfor %}
+
+
+            </dl>
+
+        </section>
+
+    </div>
+
+
+    <div class="tab-pane" id="activities">
+        <table class="table table-condensed striped action">
+            <tbody>
+
+            {% for action in user_stream|slice:":50" %}
+                <tr>
+                    <td>#</td>
+
+                    <td>{% display_action action %}</td>
+
+                    <!--
 							<td> {% if action.action_object %}
-							{{ action.action_object.classname }} <a href="{{ action.action_object.get_absolute_url }}">{{ action.action_object }}</a> {% trans "was" %}
+							{{ action.action_object.classname }} <a href="{{ action.action_object.get_absolute_url }}">
+                        {{ action.action_object }}</a> {% trans "was" %}
 							{% endif %}
 							{{ action.verb }}
 
 							{% if action.actor %}
-							{% trans "by" %} <a href="{{ action.actor.get_profile.get_absolute_url }}">{% firstof action.actor.get_full_name action.actor %}</a> {% endif %} </td>
+							{% trans "by" %} <a href="{{ action.actor.get_profile.get_absolute_url }}">
+                        {% firstof action.actor.get_full_name action.actor %}</a> {% endif %} </td>
 							-->
-							<td><span class="pull-right">{{ action.timestamp|timesince }} {% trans "ago" %}</span></td>
-						</tr>
+                    <td><span class="pull-right">{{ action.timestamp|timesince }} {% trans "ago" %}</span></td>
+                </tr>
 
-						{% endfor %}
+            {% endfor %}
 
-					</tbody>
-				</table>
+            </tbody>
+        </table>
 
-			</div>
+    </div>
 
-			<div class="tab-pane" id="broadcasts">
-				
-				<div class="listview container playlist s">
+    <div class="tab-pane" id="broadcasts">
 
-					<div class="list_body">
-					{% for item in broadcasts %}
-						{% include "alibrary/playlist/list_item_s.html" %}
-					{% endfor %}
-					</div>
-				</div>
-				
-				
+        <section class="broadcasts">
 
-			</div>
-		</div>
+            {% url alibrary-playlist-list as playlist_list %}
 
-	</section>
+            <h2>
+                {% trans "Recently updated Playlists" %}
+                            <span class="pull-right">
+                                <a href="{% spurl path=playlist_list query="user={{ object.user.username }}" %}">
+                                    <i class="icon-chevron-sign-right"></i>
+                                    {% trans "Show users playlists" %} ({{ broadcasts.count }})
+                                </a>
+                            </span>
+            </h2>
 
-</div>
+
+            <div class="listview container playlist l">
+
+                <div class="list_body">
+                    {% for item in broadcasts|slice:":8" %}
+                        {% include "alibrary/playlist/list_item_l.html" %}
+                    {% endfor %}
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+    </div>
+
+    </section>
+
+    </div>
 
 {% endblock %}
 
 {% block sidebar %}
-{% include "profiles/profile/sidebar/_detail.html" %}
+    {% include "profiles/profile/sidebar/_detail.html" %}
 {% endblock %}
 

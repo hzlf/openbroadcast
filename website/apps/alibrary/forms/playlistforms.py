@@ -114,7 +114,7 @@ class PlaylistForm(ModelForm):
     class Meta:
         model = Playlist
         #fields = ('name','label','releasetype','release_country','catalognumber','description', 'main_image', 'releasedate', 'd_tags')
-        fields = ('name', 'd_tags', 'description', 'main_image', 'dayparts', 'weather', 'seasons', 'target_duration')
+        fields = ('name', 'd_tags', 'description', 'main_image', 'rotation', 'dayparts', 'weather', 'seasons', 'target_duration', 'series', 'series_number')
         
         
         widgets = {
@@ -172,9 +172,30 @@ class PlaylistForm(ModelForm):
         )
         """
         
+        series_layout = Fieldset(
+                "%s %s" % ('<i class="icon-tags"></i>', _('Series')),
+                Div(
+                    Field('series'),
+                    css_class='series'
+                ),
+                Div(
+                    Field('series_number'),
+                    css_class='series-number'
+                ),
+        )
+
         tagging_layout = Fieldset(
                 "%s %s" % ('<i class="icon-tags"></i>', _('Tags')),
                 'd_tags',
+        )
+
+        rotation_layout = Fieldset(
+                "%s %s" % ('<i class="icon-random"></i>', _('Random Rotation')),
+                 #Div(
+                 #       HTML('<p>%s</p>' % (_('Allow this broadcast to be aired at random time if nothing else is scheduled.'))),
+                 #       css_class='notes-form notes-inline notes-info',
+                #),
+                'rotation',
         )
         
         daypart_layout = Fieldset(
@@ -197,9 +218,9 @@ class PlaylistForm(ModelForm):
         layout = Layout(
                         #ACTION_LAYOUT,
                         base_layout,
-                        #image_layout,
-                        #catalog_layout,
+                        series_layout,
                         tagging_layout,
+                        rotation_layout,
                         daypart_layout,
                         #ACTION_LAYOUT,
                         )
@@ -211,7 +232,11 @@ class PlaylistForm(ModelForm):
     
     main_image = forms.Field(widget=FileInput(), required=False)
     d_tags = TagField(widget=TagAutocompleteTagIt(max_tags=9), required=False, label=_('Tags'))
-    description = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")   
+    description = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")
+
+    rotation = forms.BooleanField(required=False, label=_('Include in rotation'), help_text=_('Allow this broadcast to be aired at random time if nothing else is scheduled.'))
+
+    series = selectable.AutoCompleteSelectField(PlaylistSeriesLookup, allow_new=True, required=False)
 
     #dayparts = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple, queryset=Daypart.objects.active())
     target_duration = forms.ChoiceField(widget=forms.RadioSelect, choices=TARGET_DURATION_CHOICES, required=False)
@@ -222,6 +247,15 @@ class PlaylistForm(ModelForm):
 
     def clean(self, *args, **kwargs):
         cd = super(PlaylistForm, self).clean()
+
+        series = cd['series']
+        try:
+            if not series.pk:
+                print "SEEMS TO BE NEW SERIES..."
+                series.save()
+        except:
+            pass
+
         return cd
 
     def clean_target_duration(self):

@@ -59,14 +59,13 @@
 {% block inner %}
 
     <div class="listhead">
-        <div style="float: right;">
 
+        <div class="pagination-holder">
             {% include "element/_pagination.html" %}
-
         </div>
 
         <div class="wrapper list_style">
-            <div>
+
                 <ul class="unstyled">
                     <li class="left">
                         <a href="{% spurl base=request.get_full_path set_query="list_style=s" %}" title="Set Style"
@@ -87,7 +86,7 @@
                     </li>
                     <li class="clear"></li>
                 </ul>
-            </div>
+
         </div>
 
     </div>

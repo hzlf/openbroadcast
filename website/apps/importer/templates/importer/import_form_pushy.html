@@ -1,6 +1,6 @@
 {% extends "layout_edit.html" %}
 
-{% load i18n sekizai_tags verbatim dajaxice_templatetags straight_include mustache pushy_tags %}
+{% load i18n sekizai_tags verbatim dajaxice_templatetags straight_include mustache pushy_tags istats_tags %}
 
 {% block object_type %}import{% endblock %}
 
@@ -8,6 +8,7 @@
 {% block heading %} <!-- heading / icon (large one) -->
 
 {% addtoblock "js-ext" %}{% pushy_scripts %}{% endaddtoblock %}
+{% addtoblock "js-post" %}{% istats_scripts %}{% endaddtoblock %}
 
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}importer/js/lib/tmpl.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}importer/js/lib/fileupload/jquery.iframe-transport.js"></script>{% endaddtoblock %}
@@ -61,6 +62,8 @@
 		</ul>
 	</div>
 </div>
+
+
 {% endblock %}
 
 
@@ -209,7 +212,11 @@ $(document).ready(function() {
 
 {% endblock %}
 
+
+
+
 {% block form_sidebar %}
+{% include "importer/_import_list_sidebar.html" %}
 <div class="sidebar form-sidebar holder">
 	{% include "importer/form_import/_form_sidebar.html" %}
 </div>
@@ -217,7 +224,8 @@ $(document).ready(function() {
 
 
 {% load alibrary_tags %}
-<div class="sidebar playlist-container">
+<!--
+    <div class="sidebar playlist-container">
 	
 	{% playlists_inline %}
 
@@ -227,5 +235,5 @@ $(document).ready(function() {
 
 
 </div>
-
+-->
 {% endblock %}

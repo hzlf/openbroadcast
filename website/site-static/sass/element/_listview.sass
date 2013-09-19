@@ -10,15 +10,23 @@
   height: 20px
   // margin-top: 36px
   margin-top: 2px
-  p.pagination
-    padding: 0 0 0 0
-    margin: 0 0 0 0
-    font-size: 100%
+
+  .pagination-holder
+    float: right
+
+    p.pagination
+      padding: 0 0 0 0
+      margin: 0 0 0 0
+      font-size: 100%
     
 	
   .wrapper.list_style
     padding: 2px 0 0 0
     height: 20px
+    float: left
+
+    > div
+      background-color: #ff0000
 
     a.action.list_style
       padding: 0 0 0 2px
@@ -396,6 +404,8 @@
         &.list_body_item
           background-image: url(/static/img/base/defaults/listview.playlist.s.png)
           background-size: 36px 36px
+      .c8 // secondary actions
+        width: 40px
       
     /* artists */
     &.artists.s
@@ -452,24 +462,32 @@
         padding-right: 0px
       .c7
         width: 30px
-        
+
+    /* overide if list-view is displayed inside a detail-view */
     &.medias.inner.s
       margin-top: 20px
       .list_body_row
-        height: 30px
-      .c2
-        width: 30px
+        // height: 30px
+      .c1
+        width: 60px
+        .tracknumber
+          text-align: right
+          font-weight: bold
+          padding: 2px 9px 0 0
+
+      .c3
+        width: 180px
+
       .list_body_row
+
         &:first-child
           .list_body_item
             border-top: 1px solid #DDDDDD
+
         .list_body_item
-          padding: 4px
+          padding: 4px 2px 0px 2px
           vertical-align: middle
-      .list_body_item.license
-        width: 100px
-        a
-          margin: 0px 0px 0px 25px
+
 
 
 
@@ -840,8 +858,9 @@
         background: #f5f5f5
         li
           float: right
-          i
-            font-size: 120%
+
+          //
+          //  font-size: 120%
 
 
 

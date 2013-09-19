@@ -45,7 +45,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
-USE_CELERYD = True
+USE_CELERYD = False
 
 GENERIC_STATUS_CHOICES = (
     (0, _('Init')),

@@ -4,7 +4,6 @@ from django.db.models import Avg
 from arating.models import VOTE_CHOICES 
 
 register = template.Library()
-from alibrary.models import Release
      
 @register.inclusion_tag('arating/inline.html', takes_context=True)
 def rating_for_object(context, object):
@@ -33,8 +32,6 @@ def rating_for_object(context, object):
      
 @register.inclusion_tag('arating/topflop.html', takes_context=True)
 def topflop_for_object(context, object):
-    
-    request = context['request']
     
     avg_vote = object.votes.aggregate(Avg('vote')).values()[0]
     upvotes = object.votes.filter(vote__gt=0).count()

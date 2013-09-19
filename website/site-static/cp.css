@@ -1,55 +1,112 @@
-/** initial setup **/
-.nano {
-  position : relative;
-  width    : 100%;
-  height   : 100%;
-  overflow : hidden;
+	.noUiSlider,
+	.noUiSlider * {
+-webkit-box-sizing: border-box;
+   -moz-box-sizing: border-box;
+		box-sizing: border-box;
+-webkit-user-select: none;
+   -moz-user-select: none;
+	-ms-user-select: none;
+		display: block;
+		cursor: default;
+	}
+	.noUiSlider {
+		position: relative;
+	}
+	.noUiSlider a {
+		position: absolute;
+		z-index: 1;
+	}
+	.noUiSlider a:nth-child(2) {
+		background: inherit !important;
+	}
+	.noUiSlider.vertical a {
+		width: 100%;
+		bottom: 0;
+	}
+	.noUiSlider.horizontal a {
+		height: 100%;
+		right: 0;
+	}
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+	.noUiSlider:before,
+	body.TOUCH,
+	.noUiSlider div {
+		-ms-touch-action: none;
+	}
+	.noUiSlider:before {
+		display: block;
+		position: absolute;
+		width: 150%;
+		left: -25%;
+		height: 400%;
+		top: -150%;
+		content: "";
+		z-index: -1;
+	}
+	.noUiSlider.vertical:before {
+		width: 400%;
+		left: -150%;
+		height: 150%;
+		top: -25%;
+	}
 }
-.nano .content {
-  position      : absolute;
-  overflow      : scroll;
-  overflow-x    : hidden;
-  top           : 0;
-  right         : 0;
-  bottom        : 0;
-  left          : 0;
-}
-.nano .content:focus {
-  outline: thin dotted;
-}
-.nano .content::-webkit-scrollbar {
-  visibility: hidden;
-}
-.has-scrollbar .content::-webkit-scrollbar {
-  visibility: visible;
-}
-.nano > .pane {
-  background : rgba(0,0,0,.25);
-  position   : absolute;
-  width      : 10px;
-  right      : 0;
-  top        : 0;
-  bottom     : 0;
-  visibility : hidden\9; /* Target only IE7 and IE8 with this hack */
-  opacity    : .01; 
-  -webkit-transition    : .2s;
-  -moz-transition       : .2s;
-  -o-transition         : .2s;
-  transition            : .2s;
-  -moz-border-radius    : 5px;
-  -webkit-border-radius : 5px;  
-  border-radius         : 5px;
-}
-.nano > .pane > .slider {
-  background: #444;
-  background: rgba(0,0,0,.5);
-  position              : relative;
-  margin                : 0 1px;
-  -moz-border-radius    : 3px;
-  -webkit-border-radius : 3px;  
-  border-radius         : 3px;
-}
-.nano:hover > .pane, .pane.active, .pane.flashed {
-  visibility : visible\9; /* Target only IE7 and IE8 with this hack */
-  opacity    : 0.99;
-}
+	.noUiSlider {
+		background: #000;
+		border: 0 solid #000;
+	}
+	.noUiSlider.disabled div:before,
+	.noUiSlider.disabled {
+		background: #ccc;
+		border-color: #ccc;
+	}
+	.noUiSlider.horizontal {
+		border-width: 0 12px;
+	}
+	.noUiSlider.vertical {
+		border-width: 12px 0;
+	}
+	.noUiSlider div {
+		height: 44px;
+		width: 44px;
+		position: relative;
+	}
+	.noUiSlider div:before {
+		position: absolute;
+		background: #000;
+		content: "";
+	}
+	.noUiSlider.horizontal div:before {
+		left: 10px;
+		height: 4px;
+		width: 24px;
+	}
+	.noUiSlider.vertical div:before {
+		top: 10px;
+		width: 4px;
+		height: 24px;
+	}
+	.noUiSlider:not(.disabled) div.active:after,
+	.noUiSlider:not(.disabled) div:hover:after {
+		height: 30px;
+		width: 30px;
+		border: 1px solid #333;
+		position: absolute;
+		top: 6px;
+		left: 6px;
+		content: "";
+		border-radius: 30px;
+	}
+	.noUiSlider.horizontal {
+		width: 300px;
+		height: 1px;
+	}
+	.noUiSlider.horizontal div {
+		margin: 1px 0 0 -22px;
+	}
+	.noUiSlider.vertical {
+		width: 1px;
+		height: 300px;
+	}
+	.noUiSlider.vertical div {
+		margin: -22px 0 0 1px;
+	}

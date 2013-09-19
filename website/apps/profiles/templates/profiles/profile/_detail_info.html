@@ -2,7 +2,14 @@
 <div class="span7 padded-h container_content">
 
 	<div class="page-header">
-		<h2>{% firstof object.user.get_full_name|truncate_chars_inner:40  object.user.username %} <small>{{ object.city }}{% if object.city and object.country %}, {% endif %}{{ object.country }}</small></h2>
+		<h2>
+            {% firstof object.user.get_full_name|truncate_chars_inner:40  object.user.username %}
+            <small>
+                {% if object.city %}{{ object.city }}{% endif %}
+                {% if object.city and object.country %}, {% endif %}
+                {% if object.country %}{{ object.country }}{% endif %}
+            </small>
+        </h2>
 	</div>
 
 	<dl class="dl-horizontal main">
@@ -62,6 +69,7 @@
 		{% endif %}
 	
 
+        {% if object.link_set.all %}
 		<dt>
 			{% trans "Links" %}:
 		</dt>
@@ -71,6 +79,7 @@
 			{% endfor %}
 			&nbsp;
 		</dd>
+        {% endif %}
 
 	</dl>
 

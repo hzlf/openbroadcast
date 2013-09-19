@@ -1,35 +1,14 @@
 {% load thumbnail i18n truncate display_tags arating_tags spurl calc %}
 
-<div class="list_body_row selectable item playlist published {% if item.user == request.user %}owner{% endif %} view edit stream collect download" id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}" {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 200x200 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
+<div class="list_body_row selectable item playlist published {% if item.user == request.user %}owner{% endif %} view edit stream collect download"
+     id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}"
+     {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 200x200 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
 
     <div class="wrapper_icon">
 
-
-        <ul class="unstyled action">
-
-            <li class="square">
-                <a href="#"
-                   data-ct="playlist"
-                   data-resource_uri="{{ item.get_api_url }}"
-                   data-offset=0
-                   data-mode="replace"
-                   title="{% trans "Play" %}" class="playable popup">
-                    <i class="icon icon-play"></i>
-                </a>
-            </li>
-
-            <li class="square">
-                <a href="#"
-                   data-ct="playlist"
-                   data-resource_uri="{{ item.get_api_url }}"
-                   data-offset=0
-                   data-mode="queue"
-                   title="{% trans "Queue" %}" class="playable popup">
-                    <i class="icon icon-reorder"></i></a>
-                </a>
-            </li>
-
-        </ul>
+        {% with object=item ct="playlist" %}
+            {% include "alibrary/element/_item_actions_primary.html" %}
+        {% endwith %}
 
     </div>
 
@@ -43,62 +22,71 @@
 
     </div>
 
-	<div class="wrapper_info">
+    <div class="wrapper_info">
 
-		<div class="wrapper_inner">
+        <div class="wrapper_inner">
 
-			<div class="list_body_item">
-				<ul class="title">
-					<li class="bold">
-						<a href="{{ item.get_absolute_url }}" title="{{ item.name }}">
-						{{ item.name|truncate_chars_inner:24 }}
-						{% if item.country %}({{ item.country }}){% endif %}
-						{% topflop_for_object item %} </a>
-					</li>
-					<li>
-						<a href="{{ item.user.get_absolute_url }}">{% firstof item.user.username item.user %}</a>
-					</li>
-					
-					<li class="small">
-						{{ item.get_type_display }} | {{ item.get_status_display }}
-					</li>
-					
-				</ul>
-			</div>
+            <div class="list_body_item">
+                <ul class="title">
+                    <li class="bold">
+                        <a href="{{ item.get_absolute_url }}" title="{{ item.name }}">
+                            {{ item.name|truncate_chars_inner:24 }}
+                            {% if item.country %}({{ item.country }}){% endif %}
+                            {% topflop_for_object item %} </a>
+                    </li>
+                    <li>
+                        <a href="{{ item.user.get_absolute_url }}">{% firstof item.user.username item.user %}</a>
 
-			<div class="list_body_item">
-				<ul class="unstyled">
-					<li>
-						{{ item.duration|divide:1000|sec_to_time }}
-						{% if item.target_duration %}
-						<span class="small">{% trans "of" %} {{ item.target_duration|sec_to_time }}</span>
-						{% endif %}
-					</li>
-					<li class="small">
-						{{ item.items.count }} {% trans "Tracks" %}
-					</li>
-				</ul>
+                        {% url alibrary-playlist-list as playlist_list %}
+                        <a href="{% spurl path=playlist_list query="user={{ item.user.username }}" %}"
+                           title="{% trans "Only show playlists by" %} {% firstof item.user.username item.user %}"
+                           style="vertical-align: top;"><span class="filter icon"></span></a>
 
-		
-			</div>
 
-			<div class="list_body_item links external">
-				<ul class="links external unstyled">
-					{% for relation in item.relations.specific %}
-					<li>
-					<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}"><i class="cicon-{{ relation.service }}"></i></a>
-					<!--
+                    </li>
+
+                    <li class="small">
+                        {{ item.get_type_display }} | {{ item.get_status_display }}
+                    </li>
+
+                </ul>
+            </div>
+
+            <div class="list_body_item">
+                <ul class="unstyled">
+                    <li>
+                        {{ item.duration|divide:1000|sec_to_time }}
+                        {% if item.target_duration %}
+                            <span class="small">{% trans "of" %} {{ item.target_duration|sec_to_time }}</span>
+                        {% endif %}
+                    </li>
+                    <li class="small">
+                        {{ item.items.count }} {% trans "Tracks" %}
+                    </li>
+                </ul>
+
+
+            </div>
+
+            <div class="list_body_item links external">
+                <ul class="links external unstyled">
+                    {% for relation in item.relations.specific %}
+                        <li>
+                            <a href="{{ relation.url }}" class="skip-external"
+                               title="Show on {{ relation.get_service_display }}"><i
+                                    class="cicon-{{ relation.service }}"></i></a>
+                            <!--
 					<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}">{{ relation.service }}</a>
 					-->
-					</li>
-					{% endfor %}
-				</ul>
-			</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
 
 
-		</div>
+        </div>
 
-	</div>
+    </div>
 
 
     <div class="wrapper_action">
@@ -106,6 +94,15 @@
 
         <ul class="unstyled action secondary horizontal clearfix">
 
+            <li>
+                <a href="#release:{{ item.pk }}:mp3"
+                   class="downloadable queue{% if not perms.alibrary.downoad_media %} disabled{% endif %}"
+                   data-ct="playlist"
+                   data-resource_uri="{{ item.get_api_url }}"
+                   title="{% trans "Download" %}">
+                    <i class="icon icon-download-alt"></i>
+                </a>
+            </li>
 
             <li>
                 <a href="#"
@@ -117,15 +114,24 @@
             </li>
 
             <li>
-                <a href="#playlist:{{ item.pk }}:mp3"
-                   class="downloadable queue{% if not perms.alibrary.downoad_media %} disabled{% endif %}"
-                   data-ct="playlist"
-                   data-resource_uri="{{ item.get_api_url }}"
-                   title="{% trans "Download" %}">
-                    <i class="icon icon-download-alt"></i>
+                <a href="{{ item.get_edit_url }}"
+                   class="{% if user.is_authenticated and user == item.user %}{% else %} disabled{% endif %}"
+                   title="{% trans "Edit" %}">
+                    <i class="icon icon-edit"></i>
                 </a>
             </li>
 
+            <li>
+                <a href="#"
+                   class="{% if not perms.alibrary.schedule_playlist or not item.type == "broadcast" %} disabled{% endif %}"
+                   data-action="schedule"
+                   data-ct="playlist"
+                   data-id="{{ item.id }}"
+                   data-uuid="{{ item.uuid }}"
+                   title="{% trans "Schedule" %}">
+                    <i class="icon icon-calendar"></i>
+                </a>
+            </li>
 
         </ul>
 

@@ -311,6 +311,8 @@ class Process(object):
     
     
     def get_aid(self, file):
+
+        print "### GET AID START"
         
 
         log = logging.getLogger('importer.process.get_aid')
@@ -334,6 +336,12 @@ class Process(object):
             log.info('got result - score: %s | mb_id: %s' % (d[0], d[1]))
             res.append(t)
             i += 1
+
+        print "### GET AID END"
+
+        print '** RES:'
+        print res
+        print
 
         return res
 

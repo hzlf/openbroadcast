@@ -105,7 +105,7 @@ class ReleaseListView(PaginationMixin, ListView):
             | Q(label__name__icontains=q))\
             .distinct()
         else:
-            qs = Release.objects.all()
+            qs = Release.objects.select_related('label','media','license').all()
             
             
         order_by = self.request.GET.get('order_by', None)
@@ -191,7 +191,7 @@ class ReleaseListView(PaginationMixin, ListView):
         self.filter = ReleaseFilter(self.request.GET, queryset=qs)
         
         # tagging / cloud generation
-        tagcloud = Tag.objects.usage_for_queryset(qs, counts=True, min_count=0)
+        tagcloud = Tag.objects.usage_for_queryset(qs, counts=True, min_count=2)
         #print '** CLOUD: **'
         #print tagcloud
         #print '** END CLOUD **'

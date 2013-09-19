@@ -1,6 +1,6 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags wiki_tags spurl alibrary_tags url_tags %}
+{% load truncate i18n thumbnail arating_tags wiki_tags atracker_tags spurl alibrary_tags url_tags %}
 
 {% block heading %} <!-- heading / icon (large one) -->
     <div id="heading">
@@ -39,6 +39,9 @@
                 <li>
                     <a href="#history" data-toggle="tab">{% trans "History" %}</a>
                 </li>
+                <li>
+                    <a href="#statistics" data-toggle="tab">{% trans "Statistics" %}</a>
+                </li>
             </ul>
         </div>
 
@@ -69,6 +72,7 @@
                                 {# for item in media.object_list #}
                                 {% for item in m_top %}
                                     {% include "alibrary/media/_list_item_foreign_xs.html" %}
+                                    {# include "alibrary/media/list_item_s.html" #}
                                 {% empty %}
                                     <p>
                                         {% trans "Not enough ratings to calculate the 'Tops'." %}
@@ -91,6 +95,7 @@
 
                                 {% for item in m_flop %}
                                     {% include "alibrary/media/_list_item_foreign_xs.html" %}
+                                    {# include "alibrary/media/list_item_s.html" #}
                                 {% empty %}
                                     <p>
                                         {% trans "Not enough ratings to calculate the 'Flops'." %}
@@ -197,6 +202,23 @@
 
                         </section>
                     {% endif %}
+
+                </div>
+
+                <div class="tab-pane" id="statistics">
+
+                    <section class="statistics">
+
+                        <h2>{% trans "Statistics" %}</h2>
+                        {% for item in object.get_media %}
+                            <div class="clear clearfix"><strong><a href="{{ item.get_absolute_url }}">{{ item.name }}</a></strong></div>
+                            <ul class="horizontal unstyled" style="padding-bottom: 17px">
+                            {% stats_for_object item %}
+                            <li class="clear"></li>
+                            </ul>
+                        {% endfor %}
+
+                    </section>
 
                 </div>
 

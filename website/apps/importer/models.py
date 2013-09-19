@@ -322,6 +322,7 @@ class ImportFile(BaseModel):
 
         try:
             metadata = processor.extract_metadata(obj.file)
+
         except Exception, e:
             print e
             obj.error = '%s' % e

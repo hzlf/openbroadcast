@@ -213,16 +213,16 @@
 
 
             {% if object.has_video %}
-            <div class="tab-pane" id="video">
+                <div class="tab-pane" id="video">
 
-                <section class="video">
+                    <section class="video">
 
-                    <h2>{% trans "Video Clip" %}</h2>
+                        <h2>{% trans "Video Clip" %}</h2>
 
-                </section>
+                    </section>
 
-            </div>
-        {% endif %}
+                </div>
+            {% endif %}
 
 
             <div class="tab-pane" id="history">
@@ -272,18 +272,21 @@
 
     <div class="listing relations" style="padding-top: 8px;">
 
-	<div class="page-header">
-		<h2>{% trans "Show/share on" %} <small>{% trans "external links" %}</small></h2>
+    <div class="page-header">
+        <h2>{% trans "Show/share on" %}
+            <small>{% trans "external links" %}</small>
+        </h2>
 
         <div class="item social">
-            <div class="fb-like" data-href="{% fullurl %}" data-width="200" data-layout="button_count" data-show-faces="false" data-send="true"></div>
+            <div class="fb-like" data-href="{% fullurl %}" data-width="200" data-layout="button_count"
+                 data-show-faces="false" data-send="true"></div>
         </div>
 
     </div>
 
-	<div class="item relations">
+    <div class="item relations">
         {% relations_inline object %}
-	</div>
+    </div>
 
 {% endblock %}
 

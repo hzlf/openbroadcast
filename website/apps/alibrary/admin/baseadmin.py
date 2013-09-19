@@ -434,6 +434,8 @@ class WeatherAdmin(TranslationAdmin):
 admin.site.register(Season, SeasonAdmin)
 admin.site.register(Weather, WeatherAdmin)
 
+admin.site.register(Series)
+
 
 
 

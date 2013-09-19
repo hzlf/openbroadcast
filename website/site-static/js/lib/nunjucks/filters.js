@@ -151,14 +151,15 @@ var nunjucks_register_filters = function(nj) {
 
 					time = Math.abs(time);
 
-					var millis= time % 1000;
-				    time = parseInt(time/1000);
-				    var seconds = time % 60;
+
+				    var seconds = time % 60*60;
 				    time = parseInt(time/60);
 				    var minutes = time % 60;
 				    time = parseInt(time/60);
 				    var hours = time % 24;
 				    var out = "";
+
+
 
 				    if(hours && hours > 0) {
 				    	out += hours + ':';

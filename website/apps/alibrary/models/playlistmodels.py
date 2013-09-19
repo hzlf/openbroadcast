@@ -135,6 +135,23 @@ class Weather(models.Model):
     
     def __unicode__(self):
         return '%s' % (self.name)
+
+
+class Series(models.Model):
+
+    name = models.CharField(max_length=200)
+    slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
+    uuid = UUIDField()
+    description = extra.MarkdownTextField(blank=True, null=True)
+
+    class Meta:
+        app_label = 'alibrary'
+        verbose_name = _('Series')
+        verbose_name_plural = _('Series')
+        ordering = ('-name', )
+
+    def __unicode__(self):
+        return '%s' % (self.name)
     
 
 
@@ -196,7 +213,10 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
     dayparts = models.ManyToManyField(Daypart, null=True, blank=True, related_name='daypart_plalists')
     seasons = models.ManyToManyField('Season', null=True, blank=True, related_name='season_plalists')
     weather = models.ManyToManyField('Weather', null=True, blank=True, related_name='weather_plalists')
-    
+
+    # series
+    series = models.ForeignKey(Series, null=True, blank=True, on_delete=models.SET_NULL)
+    series_number = models.PositiveIntegerField(null=True, blank=True)
     
     #season = models.PositiveIntegerField(default=0, null=True, choices=TARGET_DURATION_CHOICES)
     

@@ -114,7 +114,8 @@ class Profile(MigrationMixin):
         ordering = ('-user__last_login',)
         
         permissions = (
-            ('mentor_profiles', 'Mentoring profiles'),
+            ('mentor_profiles', _('Mentoring profiles')),
+            ('view_profiles_private', _('View private profile-data. (Contact information & co)')),
         )
 
     def __unicode__(self):

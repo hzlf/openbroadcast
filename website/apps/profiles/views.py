@@ -205,7 +205,7 @@ class ProfileDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = kwargs
         context_object_name = self.get_context_object_name(self.object)
-        context['broadcasts'] = Playlist.objects.filter(user=self.object.user)
+        context['broadcasts'] = Playlist.objects.filter(user=self.object.user).order_by('-updated')
         if context_object_name:
             context[context_object_name] = self.object
             context['user_stream'] = actor_stream(self.object.user)

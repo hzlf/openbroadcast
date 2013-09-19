@@ -58,6 +58,10 @@ class ProfileForm(ModelForm):
         profile_layout = Layout(
             Fieldset(
                 _('Personal Information'),
+                 Div(
+                        HTML('<h2>%s</h2><p>%s</p>' % (_('Privacy!'), _('Your birth date is only visible to your mentor, and to team-members with administrative rights.'))),
+                        css_class='notes-form notes-inline notes-info',
+                ),
                 Field('gender', css_class='input-xlarge'),
                 Field('birth_date', css_class='input-xlarge'),
                 Field('description', css_class='input-xlarge'),
@@ -72,7 +76,7 @@ class ProfileForm(ModelForm):
             Fieldset(
                 _('Contact'),
                  Div(
-                        HTML('<h2>%s</h2><p>%s</p>' % ('lala', 'blubbl askjdhg kajhsgd kajgs dkjahgs dkjahg sdkjahg sdkjahg sdkjahgs dkjahgs dkjahsgd kjahgdskjahgdkjahgs dkjahgds kjahgsd kjahgds kjah gsdkjag sdkja gub')),
+                        HTML('<h2>%s</h2><p>%s</p>' % (_('Privacy!'), _('Except for "City" and "Country", this information is only visible to your mentor, and to team-members with administrative rights.'))),
                         css_class='notes-form notes-inline notes-info',
                 ),
                 Field('mobile', css_class='input-xlarge'),
@@ -91,7 +95,7 @@ class ProfileForm(ModelForm):
             Fieldset(
                 _('Accounts'),
                  Div(
-                        HTML('<h2>%s</h2><p>%s</p>' % ('Account data', 'In case you see a reason to recieve some money from us :)')),
+                        HTML('<h2>%s</h2><p>%s</p>' % (_('Account data'), _('In case you see a reason to recieve some money from us :) This information is not visible on the plattform.'))),
                         css_class='notes-form notes-inline notes-info',
                 ),
                 Field('iban', css_class='input-xlarge'),
