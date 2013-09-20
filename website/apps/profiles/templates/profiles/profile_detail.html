@@ -1,6 +1,6 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags wiki_tags sekizai_tags activity_tags spurl %}
+{% load truncate i18n thumbnail arating_tags markup wiki_tags sekizai_tags activity_tags spurl %}
 
 {% block heading %}
     <!-- heading / icon (large one) -->
@@ -55,148 +55,169 @@
 
     <div class="tab-pane active" id="profile">
 
+
         <section class="profile">
+
             <h2>{% trans "Profile" %}</h2>
 
             <div class="description markdown padded-h markdown-inline">
-                {% wikify object.description %}
+                {{ object.description|markdown|wikilink|safe }}
             </div>
 
         </section>
 
-
         {% if user == object.user or perms.profiles.view_profiles_private or user == object.mentor %}
-            <!-- restricted access -->
-            <section class="profile information">
-                <h4>{% trans "Personal Information" %}</h4>
+            <div class="row-fluid">
+                <div class="span6">
+                    <!-- restricted access -->
+                    <section class="profile information">
+                        <h4>{% trans "Contact Information" %}</h4>
 
-                <dl class="dl-horizontal">
+                        <dl class="dl-horizontal">
 
-                    {% if object.birth_date %}
-                        <dt>{% trans "Date of birth" %}</dt>
-                        <dd>{{ object.birth_date }}</dd>
-                    {% endif %}
+                            {% if object.address1 %}
+                                <dt>{% trans "Address" %}</dt>
+                                <dd>
+                                    <ul class="unstyled">
 
-                    {% if object.gender %}
-                        <dt>{% trans "Gender" %}</dt>
-                        <dd>{{ object.get_gender_display }}</dd>
-                    {% endif %}
+                                        {% if object.address1 %}
+                                            <li>{{ object.address1 }}</li>
+                                        {% endif %}
 
-                </dl>
+                                        {% if object.address2 %}
+                                            <li>{{ object.address2 }}</li>
+                                        {% endif %}
 
-            </section>
+                                        {% if object.zip or object.city %}
+                                            <li>{{ object.zip }} {{ object.city }}</li>
+                                        {% endif %}
+
+                                        {% if object.country %}
+                                            <li>{{ object.country.name }}</li>
+                                        {% endif %}
+
+                                    </ul>
+                                </dd>
+                            {% endif %}
+
+                            {% if object.user.email %}
+                                <dt>{% trans "EMail" %}</dt>
+                                <dd><a href="mailto:{{ object.user.email }}">{{ object.user.email }}</a></dd>
+                            {% endif %}
+
+                            {% if object.mobile %}
+                                <dt>{% trans "Mobile" %}</dt>
+                                <dd>{{ object.mobile }}</dd>
+                            {% endif %}
+
+                            {% if object.phone %}
+                                <dt>{% trans "Phone" %}</dt>
+                                <dd>{{ object.phone }}</dd>
+                            {% endif %}
+
+                            {% if object.fax %}
+                                <dt>{% trans "Fax" %}</dt>
+                                <dd>{{ object.fax }}</dd>
+                            {% endif %}
+
+                        </dl>
+
+                    </section>
+                </div>
+                <div class="span6">
+                    <!-- restricted access -->
+                    <section class="profile information">
+                        <h4>{% trans "Personal Information" %}</h4>
+
+                        <dl class="dl-horizontal">
+
+                            {% if object.birth_date %}
+                                <dt>{% trans "Date of birth" %}</dt>
+                                <dd>{{ object.birth_date }} <small> ({% trans "Age" %}: {{ object.age }} )</small></dd>
+                            {% endif %}
+
+                            {% if object.gender %}
+                                <dt>{% trans "Gender" %}</dt>
+                                <dd>{{ object.get_gender_display }}</dd>
+                            {% endif %}
+
+                        </dl>
+
+                    </section>
+                </div>
+
+
+            </div>
         {% endif %}
 
 
 
-        {% if user == object.user or perms.profiles.view_profiles_private or user == object.mentor %}
-            <!-- restricted access -->
-            <section class="profile information">
-                <h4>{% trans "Contact Information" %}</h4>
-
-                <dl class="dl-horizontal">
-
-                    {% if object.address1 %}
-                        <dt>{% trans "Address" %}</dt>
-                        <dd>
-                            <ul class="unstyled">
-
-                                {% if object.address1 %}
-                                    <li>{{ object.address1 }}</li>
-                                {% endif %}
-
-                                {% if object.address2 %}
-                                    <li>{{ object.address2 }}</li>
-                                {% endif %}
-
-                                {% if object.zip or object.city %}
-                                    <li>{{ object.zip }} {{ object.city }}</li>
-                                {% endif %}
-
-                                {% if object.country %}
-                                    <li>{{ object.country.name }}</li>
-                                {% endif %}
-
-                            </ul>
-                        </dd>
-                    {% endif %}
-
-                    {% if object.user.email %}
-                        <dt>{% trans "EMail" %}</dt>
-                        <dd><a href="mailto:{{ object.user.email }}">{{ object.user.email }}</a></dd>
-                    {% endif %}
-
-                    {% if object.mobile %}
-                        <dt>{% trans "Mobile" %}</dt>
-                        <dd>{{ object.mobile }}</dd>
-                    {% endif %}
-
-                    {% if object.phone %}
-                        <dt>{% trans "Phone" %}</dt>
-                        <dd>{{ object.phone }}</dd>
-                    {% endif %}
-
-                    {% if object.fax %}
-                        <dt>{% trans "Fax" %}</dt>
-                        <dd>{{ object.fax }}</dd>
-                    {% endif %}
-
-                </dl>
-
-            </section>
-        {% endif %}
 
 
 
-        <section class="profile information">
-            <h4>{% trans "Skills & Knowledge" %}</h4>
-
-            <dl class="dl-horizontal">
 
 
-                <dt>{% trans "Expertise" %}</dt>
-                <dd>
-                    <ul class="unstyled horizontal">
-                        {% for item in object.expertise.all %}
 
-                            <li>
-                                {{ item.name }}{% if not forloop.last %},&nbsp;    {% endif %}
 
-                            </li>
+
+
+
+
+        <div class="row-fluid">
+            <div class="span6">
+                <section class="profile information">
+                    <h4>{% trans "Communication & services" %}</h4>
+
+                    <dl class="dl-horizontal">
+
+                        {% for service in object.service_set.all %}
+
+                            <dt>{{ service.service }}</dt>
+                            <dd>
+                                <ul class="unstyled">
+                                    <li><a href="{{ service.service_url }}">{{ service.service_url }}</a></li>
+                                    <li>{% trans "User" %}: {{ service.username }}</li>
+                                </ul>
+                            </dd>
 
                         {% endfor %}
 
-                    </ul>
-                    <div class="clear"></div>
-                </dd>
+
+                    </dl>
+
+                </section>
+            </div>
+            <div class="span6">
+                <section class="profile information">
+                    <h4>{% trans "Skills & Knowledge" %}</h4>
+
+                    <dl class="dl-horizontal">
 
 
-            </dl>
+                        <dt>{% trans "Expertise" %}</dt>
+                        <dd>
+                            <ul class="unstyled horizontal">
+                                {% for item in object.expertise.all %}
 
-        </section>
+                                    <li>
+                                        {{ item.name }}{% if not forloop.last %},&nbsp;    {% endif %}
 
+                                    </li>
 
-        <section class="profile information">
-            <h4>{% trans "Communication & services" %}</h4>
+                                {% endfor %}
 
-            <dl class="dl-horizontal">
-
-                {% for service in object.service_set.all %}
-
-                    <dt>{{ service.service }}</dt>
-                    <dd>
-                        <ul class="unstyled">
-                            <li><a href="{{ service.service_url }}">{{ service.service_url }}</a></li>
-                            <li>{% trans "User" %}: {{ service.username }}</li>
-                        </ul>
-                    </dd>
-
-                {% endfor %}
+                            </ul>
+                            <div class="clear"></div>
+                        </dd>
 
 
-            </dl>
+                    </dl>
 
-        </section>
+                </section>
+            </div>
+
+
+        </div>
 
 
         <section class="profile information">

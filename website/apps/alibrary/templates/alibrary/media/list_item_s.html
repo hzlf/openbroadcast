@@ -1,13 +1,40 @@
 {% load calc i18n arating_tags truncate spurl %}
 
-<div class="list_body_row selectable item media published {{ item.uuid }}" id="list_item_{{ item.id }}"
-     data-item_id="{{ item.id }}" data-item_uuid="{{ item.uuid }}" data-ct="media">
+<div class="list_body_row selectable item media {{ item.uuid }} {% if item.release.publish_date %} published{% else %} unpublished{% endif %}{% if item.creator == user %} owner{% endif %}"
+     id="list_item_{{ item.id }}"
+     data-item_id="{{ item.id }}"
+     data-item_uuid="{{ item.uuid }}"
+     data-id="{{ item.id }}"
+     data-uuid="{{ item.uuid }}"
+     data-ct="media">
 
     <!-- Play icon -->
     <div class="list_body_item c1 action">
-        {% with object=item ct="media" %}
-            {% include "alibrary/element/_item_actions_primary.html" %}
-        {% endwith %}
+        <ul class="unstyled action">
+            <li class="square">
+                <a href="#"
+                   class="playable popup{% if not perms.alibrary.play_media %} disabled{% endif %}"
+                   data-ct="media_set"
+                   data-offset="{{ forloop.counter0 }}"
+                   data-mode="replace"
+                   title="{% trans "Play" %}">
+                    <i class="icon icon-play"></i>
+                </a>
+            </li>
+
+            <li class="square">
+                <a href="#"
+                   class="playable popup{% if not perms.alibrary.play_media %} disabled{% endif %}"
+                   data-ct="media"
+                   data-resource_uri="{{ item.get_api_url }}"
+                   data-offset="0"
+                   data-mode="queue"
+                   title="{% trans "Queue" %}">
+                    <i class="icon icon-reorder"></i></a>
+                </a>
+            </li>
+        </ul>
+
     </div>
 
     <!-- Track title -->
@@ -139,9 +166,10 @@
 
             <li>
                 <a href="#"
-                   class="downloadable queue{% if not perms.alibrary.downoad_media %} disabled{% endif %}"
-                   data-ct="artist"
-                   data-resource_uri="{{ item.get_api_url }}"
+                   class="{% if not perms.alibrary.downoad_media or not item.release.publish_date %} disabled{% endif %}"
+                   data-ct="media"
+                   data-id="{{ item.pk }}"
+                   data-action="download"
                    title="{% trans "Download" %}">
                     <i class="icon icon-download-alt"></i>
                 </a>

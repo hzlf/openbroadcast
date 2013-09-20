@@ -43,5 +43,10 @@ class LabelResource(ModelResource):
                 pass
 
 
+
+        # try to get all media
+
+
+
         return bundle
         

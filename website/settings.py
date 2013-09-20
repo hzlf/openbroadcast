@@ -849,7 +849,7 @@ WIKISYNTAX = (
     ('r', 'alibrary.util.object_linker.WikiRelease'),
     ('a', 'alibrary.util.object_linker.WikiArtist'),
 )
-WIKISYNTAX_DISABLE_CACHE = True
+WIKISYNTAX_DISABLE_CACHE = False
 
 """
 sendfile, delivers bought relases/tracks

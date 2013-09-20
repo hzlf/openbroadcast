@@ -1,85 +1,105 @@
-{% load thumbnail i18n truncate display_tags arating_tags spurl %}
+{% load thumbnail i18n truncate display_tags arating_tags spurl alibrary_tags %}
 
-<div class="list_body_row selectable item artist view edit stream collect download" id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}">
+<div class="list_body_row selectable item label {{ item.uuid }} {% if item.creator == user %} owner{% endif %}"
+     id="list_item_{{ item.pk }}"
+     data-id="{{ item.id }}"
+     data-uuid="{{ item.uuid }}"
+     data-ct="label"
+     data-resource_uri="{{ item.get_api_url }}">
 
-	<div class="list_body_item c1 image_center_bg" {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 54x54 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
-		<ul class="unstyled">
-			<li class="play">
-				<a href="{{ item.get_api_url }}#0#replace" title="Play" class="playable popup"><img src="/static/img/base/spacer.png" width="16" height="16" alt="Play" /></a>
-			</li>
-		</ul>
-	</div>
-	<div class="list_body_item c2">
-		<ul class="unstyled">
-			<li class="bold">
-				<a href="{{ item.get_absolute_url }}" title="{{ item.name }}">
-				{{ item.name|truncate_chars_inner:24 }}
-				{% if item.country %}({{ item.country }}){% endif %}
-				{% topflop_for_object item %} </a>
-			</li>
-			{% if item.get_releases.count > 0 %}
-			<li>
-				{% url alibrary-release-list as release_list %}
-				{% trans "Releases" %}:&nbsp;<a href="{% spurl path=release_list query="artist={{ item.slug }}" %}" title="{% trans "Only show releases by" %} {{ item.name }}" style="vertical-align: top;">{{ item.get_releases.count }}<span class="filter icon"></span></a>
-			</li>
-			{% endif %}
-			{% if item.media_artist.count > 0 %}
-			<li>
-				{% trans "Tracks" %}:&nbsp;<a href="#" style="vertical-align: top;">{{ item.media_artist.count }}<span class="filter icon"></span></a>
-			</li>
-			{% endif %}
-			
-		</ul>
-	</div>
+    <div class="list_body_item c1 image_center_bg"
+         {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 54x54 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
+
+        {% with object=item ct="label" %}
+            {% include "alibrary/element/_item_actions_primary.html" %}
+        {% endwith %}
+
+    </div>
+    <div class="list_body_item c2">
+        <ul class="unstyled">
+            <li class="bold">
+                <a href="{{ item.get_absolute_url }}" title="{{ item.name }}">
+                    {{ item.name|truncate_chars_inner:24 }}
+                    {% if item.country %}<small> {{ item.country }}</small>{% endif %}
+                    {% topflop_for_object item %} </a>
+            </li>
+
+            <li>
+                {{ item.get_type_display }}
+            </li>
+
+            {% if item.release_label.count > 0 %}
+                <li>
+                    {% url alibrary-release-list as release_list %}
+                    {% trans "Releases" %}:&nbsp;<a href="{% spurl path=release_list query="label={{ item.slug }}" %}"
+                                                    title="{% trans "Only show releases on" %} {{ item.name }}"
+                                                    style="vertical-align: top;">{{ item.release_label.count }}<span
+                        class="filter icon"></span></a>
+                </li>
+            {% endif %}
+            {% if item.media_artist.count > 0 %}
+                <li>
+                    {% trans "Tracks" %}:&nbsp;<a href="#"
+                                                  style="vertical-align: top;">{{ item.media_artist.count }}<span class="filter icon"></span></a>
+                </li>
+            {% endif %}
+
+        </ul>
+    </div>
 
 	<div class="list_body_item c3 links external">
-		<ul class="links external unstyled">
-			{% for relation in item.relations.specific %}
-			<li>
-			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}"><i class="cicon-{{ relation.service }}"></i></a>
-			<!--
-			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}">{{ relation.service }}</a>
-			-->
-			</li>
-			{% endfor %}
-		</ul>
+        <div class="relations">
+            {% relations_inline item %}
+        </div>
 	</div>
 
-	<div class="list_body_item c4 action">
-		<div class="inner_row top right">
-			<!-- Actions sub-view  -->
-		<div class="wrapper">
-			<div class="right">
-				<ul class="unstyled">
-					<li class="basket">
-						<a href="#" title="{% trans "Add to basket" %}" class="collectable"><img src="/static/img/base/spacer.png" width="16" height="16" alt="{% trans "Add to basket" %}" /></a>
-					</li>
-				</ul>
-			</div>
-			<div>
-				<ul class="unstyled">
-					<li class="download">
-						<a href="#release:{{ item.pk }}:mp3" title="{% trans "Download Release" %}" class="downloadable queue"><img src="/static/img/base/spacer.png" width="16" height="16" alt="{% trans "Download Release" %}" /></a>
-					</li>
-				</ul>
-			</div>
-			<div class="clear"></div>
-		</div>
-		</div>
-		<div class="clear"></div>
-		<div class="inner_row bottom left">
-			<ul class="tags unstyled">
-				{% for tag in item.tags|slice:":8" %}
-				<li>{{ tag.name }}</li>
-				{% endfor %}
-			</ul>
-			<!--
-			<ul class="tags second_row">
-			</ul>
-			-->
-		</div>
+    <div class="list_body_item c4">
 
-	</div>
+        <ul class="tags unstyled">
+            {% for tag in item.tags|slice:":9" %}
+                <li class="{% if tag.pk in active_tags %}active{% endif %}">{{ tag.name|truncate_chars_inner:10 }}</li>
+            {% endfor %}
+        </ul>
+
+    </div>
+
+    <div class="list_body_item c5 action">
+
+        <ul class="unstyled action secondary horizontal">
+
+            <li>
+                <a href="#"
+                   class="{% if not perms.alibrary.downoad_media or not item.publish_date %} disabled{% endif %}"
+                   data-ct="label"
+                   data-id="{{ item.pk }}"
+                   data-action="download"
+                   title="{% trans "Download" %}">
+                    <i class="icon icon-download-alt"></i>
+                </a>
+            </li>
+
+            <li>
+                <a href="#"
+                   class="{% if not user.is_authenticated %} disabled{% endif %}"
+                   data-action="collect"
+                   title="{% trans "Add to playlist" %}">
+                    <i class="icon icon-plus"></i>
+                </a>
+            </li>
+
+            {% if  perms.alibrary.change_label %}
+                <li>
+                    <a href="{{ item.get_edit_url }}"
+                       class=""
+                       title="{% trans "Edit" %}">
+                        <i class="icon icon-edit"></i>
+                    </a>
+                </li>
+            {% endif %}
+
+        </ul>
+
+    </div>
 
 </div>
 

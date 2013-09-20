@@ -1,6 +1,6 @@
 {% load thumbnail i18n truncate display_tags arating_tags spurl spacify_tags %}
 
-<div class="list_body_row selectable item release published owner view edit stream collect download"
+<div class="list_body_row selectable item release {{ item.uuid }} {% if item.publish_date %} published{% else %} unpublished{% endif %}{% if item.creator == user %} owner{% endif %}"
      id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}"
      {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 200x200 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}
      data-id="{{ item.id }}"
@@ -142,10 +142,11 @@
             </li>
 
             <li>
-                <a href="#release:{{ item.pk }}:mp3"
-                   class="downloadable queue{% if not perms.alibrary.downoad_media %} disabled{% endif %}"
+                <a href="#"
+                   class="{% if not perms.alibrary.downoad_media or not item.publish_date %} disabled{% endif %}"
                    data-ct="release"
-                   data-resource_uri="{{ item.get_api_url }}"
+                   data-id="{{ item.pk }}"
+                   data-action="download"
                    title="{% trans "Download" %}">
                     <i class="icon icon-download-alt"></i>
                 </a>

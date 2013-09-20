@@ -227,8 +227,31 @@ table.front td
 
 
 
-/* ----------- container ------------ */
 
+// heading new
+#heading
+  position: relative
+  div.inner
+    clear: both
+    height: 60px
+    div.icon
+      float: left
+      i
+        font-size: 50px
+        line-height: 50px
+        color: #00BB00
+    div.title
+      padding: 14px 0 0 66px !important
+      h1
+        font-size: 26px
+        line-height: 26px
+        color: #00BB00
+        font-family: "quatro-slab"
+        font-weight: 700
+        font-style: italic
+
+
+// heading legacy. TODO: remove after refactoring
 #heading
   position: relative
   /* margin: 10px 250px 19px 0px */
@@ -246,6 +269,12 @@ table.front td
   margin-top: 19px
   float: right
   width: 200px
+
+
+
+
+
+
 
 /* mod nav */
 
@@ -1572,13 +1601,26 @@ div.tagcloud.inline
       margin: 0
 
 .tagcloud.inline a
+
   &.on
     background: #d4f3da
+
   &:hover
     text-decoration: none
     color: #ffffff
     background-color: $main-b
-    
+
+  // overrides, just testing
+  // color: #333
+  // background: #efefef
+  // background: white
+  // color: #5a5a5a
+  // border: 1px solid #dfdfdf
+  &.on
+    background: #00bb00
+    color: white
+
+
   &.tag-hidden
     display: none
       

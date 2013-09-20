@@ -99,8 +99,8 @@ aplayer.ui.bind = function() {
 		var source = 'alibrary';
 
         // ct based switches
+        // media set -> ignore uri and build one by ourselves
         if (ct == 'media_set') {
-            // media set -> ignore uri and build one by ourselves
 
             // get all items currently shown
             var item_ids = [];
@@ -115,7 +115,7 @@ aplayer.ui.bind = function() {
                 item_ids.push(current_id)
             })
 
-            uri = '/api/v1/track/?id__in=' + item_ids.join(',')
+            uri = '/api/v1/track/?id__in=' + item_ids.join(','); // sorry, kind of ugly..
 
         }
 

@@ -1,12 +1,30 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags wiki_tags disqus_tags comments %}
+{% load truncate i18n thumbnail arating_tags wiki_tags disqus_tags comments sekizai_tags %}
 
-{% block heading %} <!-- heading / icon (large one) -->
-<div id="heading">
-	{% include "skeleton/heading.html" %}
-</div>
-<!-- heading / icon (large one) -->
+{% block heading %}
+    <!-- view specific scripts -->
+
+
+    {% addtoblock "js-post" %}
+        <script type="text/javascript" src="{{ STATIC_URL }}exporter/js/base.js"></script>{% endaddtoblock %}
+
+    {% addtoblock "js-post" %}
+        <script>
+            var exporter = exporter || {};
+            $(function () {
+                exporter = new ExporterApp();
+                exporter.api_url = '{% url api_dispatch_list resource_name='export' api_name='v1'%}';
+                exporter.init();
+            });
+        </script>
+    {% endaddtoblock %}
+
+    <!-- heading / icon (large one) -->
+    <div id="heading">
+        {% include "skeleton/heading.html" %}
+    </div>
+    <!-- heading / icon (large one) -->
 {% endblock %}
 
 {% block modnav %} <!-- start: intra-module navigation -->

@@ -88,6 +88,9 @@
           background: #00bb00; }
         .listview.container .list_body .list_body_row span.badge.flop {
           background: red; }
+      .listview.container .list_body .list_body_row a > small {
+        color: #5a5a5a;
+        font-weight: normal; }
       .listview.container .list_body .list_body_row.selection {
         background-color: #e4ffe4; }
         .listview.container .list_body .list_body_row.selection li.indicator {
@@ -342,7 +345,7 @@
         font-weight: bold;
         padding: 2px 9px 0 0; }
     .listview.container.medias.inner.s .c3 {
-      width: 180px; }
+      width: 200px; }
     .listview.container.medias.inner.s .list_body_row:first-child .list_body_item {
       border-top: 1px solid #dddddd; }
     .listview.container.medias.inner.s .list_body_row .list_body_item {
@@ -393,6 +396,38 @@
   background-size: 54px 54px; }
 .listview.container.artists.m .c2 {
   width: 214px; }
+.listview.container.labels.m .c2 {
+  width: 260px; }
+.listview.container.labels.m .c3 .relations > ul {
+  position: relative;
+  top: 16px; }
+  .listview.container.labels.m .c3 .relations > ul li {
+    padding-right: 7px; }
+    .listview.container.labels.m .c3 .relations > ul li a > span.service {
+      display: none; }
+.listview.container.labels.m .c4 {
+  position: relative; }
+  .listview.container.labels.m .c4 ul.tags {
+    position: absolute;
+    bottom: 0px;
+    right: 0;
+    opacity: 0.88;
+    padding-bottom: 2px; }
+    .listview.container.labels.m .c4 ul.tags li {
+      margin: 2px 2px 0 0;
+      padding: 0 4px;
+      line-height: 14px;
+      background: white;
+      color: #333333;
+      border: 1px solid #dfdfdf;
+      float: right;
+      text-transform: uppercase; }
+      .listview.container.labels.m .c4 ul.tags li.active {
+        background: #00bb00;
+        border-color: #00bb00;
+        color: white; }
+.listview.container.labels.m .c5 {
+  width: 40px; }
 .listview.container.playlist.m .c1.list_body_item {
   background-image: url(/static/img/base/defaults/listview.playlist.xl.png);
   background-size: 54px 54px; }
@@ -450,34 +485,6 @@
       width: 100px; }
   .listview.container.m .c4 {
     width: auto; }
-    .listview.container.m .c4 .inner_row.top {
-      height: 16px;
-      width: 30px; }
-    .listview.container.m .c4 .inner_row.bottom {
-      position: relative;
-      width: 416px;
-      height: 44px; }
-      .listview.container.m .c4 .inner_row.bottom ul.tags {
-        position: absolute;
-        bottom: 0;
-        right: 0; }
-        .listview.container.m .c4 .inner_row.bottom ul.tags.second_row {
-          bottom: 22px; }
-        .listview.container.m .c4 .inner_row.bottom ul.tags li {
-          background-image: url(/static/img/base/element.tag.p.png);
-          background-position: right center;
-          background-repeat: no-repeat;
-          border-left: 1px solid #e3dbf2;
-          height: 18px;
-          margin-bottom: 4px;
-          padding-left: 7px;
-          padding-right: 10px;
-          float: right;
-          margin-right: 4px; }
-          .listview.container.m .c4 .inner_row.bottom ul.tags li.active {
-            background-image: url(/static/img/base/element.tag.a.png);
-            border-left: 1px solid #e3ffe8;
-            color: #00bb00; }
 
 /**********************************************************
  * Styles Large
@@ -995,18 +1002,107 @@ section.item_inner .tab-pane section.profile.information dl {
   .atracker.event-list ul.event li.co {
     width: 20%; }
 
-.markdown-inline h1, .markdown-inline h2, .markdown-inline h3 {
-  color: #999999;
-  font-size: 140%;
-  line-height: 140%;
-  padding: 0 !important;
-  margin: 0 0 5px 0 !important; }
-.markdown-inline h4, .markdown-inline h5, .markdown-inline h6 {
-  color: #999999;
-  font-size: 120%;
-  line-height: 120%;
-  padding: 0 !important;
-  margin: 0 0 5px 0 !important; }
+.markdown-inline {
+  margin: 10px 0; }
+  .markdown-inline h1, .markdown-inline h2, .markdown-inline h3, .markdown-inline h4, .markdown-inline h5, .markdown-inline h6 {
+    font-family: helvetica, arial, sans-serif;
+    text-transform: none; }
+  .markdown-inline h1, .markdown-inline h2, .markdown-inline h3 {
+    color: #5a5a5a !important;
+    font-size: 130%;
+    line-height: 140%;
+    padding: 0 !important;
+    margin: 0 0 5px 0 !important; }
+  .markdown-inline h4, .markdown-inline h5, .markdown-inline h6 {
+    color: #5a5a5a !important;
+    font-size: 110%;
+    line-height: 120%;
+    padding: 0 !important;
+    margin: 0 0 5px 0 !important; }
+  .markdown-inline ul > li {
+    color: #5a5a5a !important; }
+
+.postman {
+  margin: 10px 0 10px;
+  padding: 0 0px; }
+  .postman .row-fluid > .span8 {
+    width: 65.9%; }
+  .postman thead tr > th {
+    padding: 2px 2px 10px;
+    text-align: left; }
+    .postman thead tr > th.action {
+      width: 60px; }
+    .postman thead tr > th.sender, .postman thead tr > th.recipient {
+      width: 160px; }
+    .postman thead tr > th.date {
+      width: 140px; }
+  .postman tbody tr > td {
+    padding: 4px 2px 4px;
+    text-align: left; }
+    .postman tbody tr > td.select {
+      text-align: center; }
+    .postman tbody tr > td .body-preview {
+      color: #5a5a5a;
+      font-weight: normal;
+      font-style: italic; }
+  .postman .message .header {
+    background-color: #efefef;
+    padding: 5px; }
+    .postman .message .header .sender {
+      font-weight: bold; }
+    .postman .message .header .date {
+      color: #999999; }
+    .postman .message .header .subject {
+      font-weight: bold; }
+    .postman .message .header form {
+      margin: 0; }
+    .postman .message .header .actions li {
+      padding: 0 0 0 10px; }
+      .postman .message .header .actions li a {
+        color: #5a5a5a; }
+        .postman .message .header .actions li a:hover {
+          color: #6633cc;
+          text-decoration: none; }
+      .postman .message .header .actions li button {
+        border: none;
+        background: transparent;
+        color: #5a5a5a;
+        padding: 0;
+        line-height: 0; }
+        .postman .message .header .actions li button:hover {
+          color: #6633cc; }
+  .postman .message .body {
+    padding: 20px 0;
+    line-height: 180%;
+    color: #333333;
+    text-align: justify;
+    font-family: monospace; }
+  .postman .message.deleted {
+    text-decoration: line-through; }
+    .postman .message.deleted .pm_body {
+      display: none; }
+  .postman .message.archived {
+    font-style: italic;
+    color: grey; }
+  .postman .message.unread .subject {
+    font-weight: bolder; }
+  .postman .message.pending .header {
+    background-color: #ffffcc; }
+  .postman .message.rejected .header {
+    background-color: #ffdddd; }
+  .postman .write {
+    padding: 5px 0; }
+    .postman .write label {
+      font-weight: bold;
+      width: 120px;
+      float: left; }
+    .postman .write p {
+      clear: both; }
+      .postman .write p input, .postman .write p textarea {
+        font-family: monospace;
+        width: 680px;
+        border: none;
+        background-color: #f2f2f2; }
 
 /* sidebar */
 .sidebar div.menu-context .action-group ul {

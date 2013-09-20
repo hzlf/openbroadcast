@@ -72,9 +72,11 @@
                 <li>
                     <a href="#history" data-toggle="tab">{% trans "History" %}</a>
                 </li>
+                <!--
                 <li>
                     <a href="#statistics" data-toggle="tab">{% trans "Statistics" %}</a>
                 </li>
+                -->
             </ul>
         </div>
 
@@ -140,7 +142,7 @@
 
                         <h2>{% trans "Statistics" %}</h2>
                         {% for item in object.get_media %}
-                            <div class="clear clearfix"><strong>#{{ item.tracknumber }} | <a href="{{ item.get_absolute_url }}">{{ item.name }}</a></strong></div>
+                            <div class="clear clearfix"><span><a href="{{ item.get_absolute_url }}">{{ item.name }}</a></span></div>
                             <ul class="horizontal unstyled" style="padding-bottom: 17px">
                             {% stats_for_object item %}
                             <li class="clear"></li>

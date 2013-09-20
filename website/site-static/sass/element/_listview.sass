@@ -107,6 +107,12 @@
             background: #0b0
           &.flop
             background: red
+
+
+        // inline smalls (eg country)
+        a > small
+          color: #5a5a5a
+          font-weight: normal
           		
         /* Status dependant styleing */
         &.selection
@@ -476,7 +482,7 @@
           padding: 2px 9px 0 0
 
       .c3
-        width: 180px
+        width: 200px
 
       .list_body_row
 
@@ -553,6 +559,51 @@
         background-size: 54px 54px  
       .c2
         width: 214px
+
+    &.labels.m
+
+      .c1
+        // width: 112px
+
+      .c2
+        width: 260px
+
+      .c3 // links
+        .relations > ul
+          position: relative
+          top: 16px
+
+          li
+            padding-right: 7px
+            a > span.service
+              display: none
+
+      .c4 // tags
+        //background-color: orangered
+        // cloud (inline)
+        position: relative
+        ul.tags
+          position: absolute
+          bottom: 0px
+          right: 0
+          opacity: 0.88
+          padding-bottom: 2px
+          li
+            margin: 2px 2px 0 0
+            padding: 0 4px
+            line-height: 14px
+            background: white
+            color: #333
+            border: 1px solid #dfdfdf
+            float: right
+            text-transform: uppercase
+            &.active
+              background: #00bb00
+              border-color: #00bb00
+              color: white
+
+      .c5
+        width: 40px
         
     &.playlist.m
       .c1.list_body_item
@@ -625,35 +676,37 @@
           width: 100px
       .c4
         width: auto
-        .inner_row
-          &.top
-            height: 16px
-            width: 30px
-          &.bottom
-            position: relative
-            width: 416px
-            height: 44px
-            ul.tags 
-              position: absolute
-              bottom: 0
-              right: 0
-              &.second_row
-                bottom: 22px
-              li
-                background-image: url(/static/img/base/element.tag.p.png)
-                background-position: right center
-                background-repeat: no-repeat
-                border-left: 1px solid #E3DBF2
-                height: 18px
-                margin-bottom: 4px
-                padding-left: 7px
-                padding-right: 10px
-                float: right
-                margin-right: 4px
-                &.active
-                  background-image: url(/static/img/base/element.tag.a.png)
-                  border-left: 1px solid #e3ffe8
-                  color: #00BB00
+
+        // old layout
+          .inner_row
+            &.top
+              height: 16px
+              width: 30px
+            &.bottom
+              position: relative
+              width: 416px
+              height: 44px
+              ul.tags
+                position: absolute
+                bottom: 0
+                right: 0
+                &.second_row
+                  bottom: 22px
+                li
+                  background-image: url(/static/img/base/element.tag.p.png)
+                  background-position: right center
+                  background-repeat: no-repeat
+                  border-left: 1px solid #E3DBF2
+                  height: 18px
+                  margin-bottom: 4px
+                  padding-left: 7px
+                  padding-right: 10px
+                  float: right
+                  margin-right: 4px
+                  &.active
+                    background-image: url(/static/img/base/element.tag.a.png)
+                    border-left: 1px solid #e3ffe8
+                    color: #00BB00
               
 		
 

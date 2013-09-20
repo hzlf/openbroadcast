@@ -205,6 +205,14 @@ ExporterApp = (function () {
 
     this.bindings = function () {
 
+        // prevent on disabled TODO: maybe do globally
+        /**/
+        $('body').on('click', 'a[data-action].disabled', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+
         // Download multiple items
         $('.action-group').on('click', 'a[data-action="download"].selection-any:not(".disabled")', function (e) {
 
@@ -268,6 +276,7 @@ ExporterApp = (function () {
         // LEGACY VERSION
         // using href
         //////////////////////////////////////////////////////
+        /*
         $('.downloadable.queue').live('click', function (e) {
 
             e.preventDefault();
@@ -279,19 +288,13 @@ ExporterApp = (function () {
             var item_id = action[1];
             var format = action[2];
 
-            /*
-             *  The controller takes a list of items as argument 'items'
-             *  So the same controller can also be used to implement download
-             *  of multiple items at once. we here just pack this single item
-             *  into an object
-             */
-
             items = new Array;
             items.push({item_type: item_type, item_id: item_id, format: format});
 
             self.queue(items, false);
 
         });
+        */
 
         /*
          * Download multiple items
@@ -299,6 +302,7 @@ ExporterApp = (function () {
         //////////////////////////////////////////////////////
         // LEGACY VERSION
         //////////////////////////////////////////////////////
+        /*
         $('.action.selection_download a').live('click', function (e) {
 
             var item_type = $(this).attr('href').substring(1);
@@ -319,8 +323,9 @@ ExporterApp = (function () {
 
             return false;
         });
-
+        */
     };
+
 
 
     this.queue = function (items, redirect) {

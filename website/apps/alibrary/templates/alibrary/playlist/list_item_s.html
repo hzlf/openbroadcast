@@ -122,10 +122,11 @@
         <ul class="unstyled action secondary horizontal">
 
             <li>
-                <a href="#release:{{ item.pk }}:mp3"
-                   class="downloadable queue{% if not perms.alibrary.downoad_media %} disabled{% endif %}"
+                <a href="#"
+                   class="{% if not perms.alibrary.downoad_media %} disabled{% endif %}"
                    data-ct="playlist"
-                   data-resource_uri="{{ item.get_api_url }}"
+                   data-id="{{ item.pk }}"
+                   data-action="download"
                    title="{% trans "Download" %}">
                     <i class="icon icon-download-alt"></i>
                 </a>

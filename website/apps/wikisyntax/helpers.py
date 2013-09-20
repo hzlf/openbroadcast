@@ -21,13 +21,9 @@ def wikify(match): # Excepts a regexp match
 	print match
 
 	for i in settings.WIKISYNTAX:
-		
-		print i
-		
+
 		name = i[0]
-		
-		print 'name name = i[0]', 
-		print name
+
 		
 		modstring = i[1]
 		module = __import__(".".join(modstring.split(".")[:-1]))
@@ -43,9 +39,7 @@ def wikify(match): # Excepts a regexp match
 	token, trail = match.groups() # we track the 'trail' because it may be a plural 's' or something useful
 
 	if '=' in token:
-		
-		print ' : in token'
-		
+
 		"""
 		First we're checking if the text is attempting to find a specific type of object.
 
@@ -56,20 +50,10 @@ def wikify(match): # Excepts a regexp match
 		[[card:Jack of Hearts]]
 
 		"""
-		#prefix = token.split(':',1)[0].lower().rstrip()
-		#name = token.split(':',1)[1].rstrip()
+
 		prefix = token.split('=',1)[0].lower().rstrip()
 		name = token.split('=',1)[1].rstrip()
-		
-		
-		print 'prefix:',
-		print prefix
-		
-		print 'name:',
-		print name
-		
-		print 'wiki.name:',
-		#print wiki.name
+
 		
 		for wiki in wikis:
 			if prefix == wiki.name:

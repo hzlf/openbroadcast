@@ -10,6 +10,11 @@ register = template.Library()
 def wikimarkdown(value):
 	return wikisafe_markdown(value)
 
+@register.filter
+@template.defaultfilters.stringfilter
+def wikilink(value):
+	return wikify_string(value)
+
 class WikiFormat(template.Node):
 	def __init__(self, string):
 		self.string = string

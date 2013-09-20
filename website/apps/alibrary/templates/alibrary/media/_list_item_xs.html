@@ -1,7 +1,12 @@
-{% load calc i18n arating_tags truncate spurl %}
+{% load calc i18n arating_tags truncate spurl atracker_tags %}
 
-<div class="list_body_row selectable item media published {{ item.uuid }}" id="list_item_{{ item.id }}"
-     data-item_id="{{ item.id }}" data-item_uuid="{{ item.uuid }}" data-ct="media">
+<div class="list_body_row selectable item media {{ item.uuid }} {% if item.release.publish_date %} published{% else %} unpublished{% endif %}{% if item.creator == user %} owner{% endif %}"
+     id="list_item_{{ item.id }}"
+     data-item_id="{{ item.id }}"
+     data-item_uuid="{{ item.uuid }}"
+     data-id="{{ item.id }}"
+     data-uuid="{{ item.uuid }}"
+     data-ct="media">
 
     <!-- Play icon -->
     <div class="list_body_item c1 action">
@@ -86,6 +91,12 @@
                 {% endif %}
             </li>
 
+            <li>
+                <ul class="unstyled horizontal">
+                    {% stats_for_object item %}
+                </ul>
+            </li>
+
         </ul>
 
     </div>
@@ -116,9 +127,10 @@
 
             <li>
                 <a href="#"
-                   class="downloadable queue{% if not perms.alibrary.downoad_media %} disabled{% endif %}"
-                   data-ct="artist"
-                   data-resource_uri="{{ item.get_api_url }}"
+                   class="{% if not perms.alibrary.downoad_media or not item.release.publish_date %} disabled{% endif %}"
+                   data-ct="media"
+                   data-id="{{ item.pk }}"
+                   data-action="download"
                    title="{% trans "Download" %}">
                     <i class="icon icon-download-alt"></i>
                 </a>

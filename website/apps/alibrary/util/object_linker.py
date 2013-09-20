@@ -12,8 +12,7 @@ class WikiRelease(object):
         return Q(name=token) | Q(catalognumber=token)
     
     def attempt(self, token, **kwargs):
-        # if Release.objects.filter(name=token).count() == 1:
-        if Release.objects.filter(self.get_query(token)).count() == 1:
+        if Release.objects.filter(self.get_query(token)).count() > 0:
             return True
         return False
 
@@ -39,10 +38,9 @@ class WikiArtist(object):
         return Q(name=token)
     
     def attempt(self, token, **kwargs):
-        if Artist.objects.filter(self.get_query(token)).count() == 1:
+        if Artist.objects.filter(self.get_query(token)).count() > 0:
             self.obj = Artist.objects.filter(self.get_query(token))[0]
             return True
-        
         return False
 
     def render(self, token, trail=None, **kwargs):

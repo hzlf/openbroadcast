@@ -216,7 +216,17 @@ aplayer.base.load_playlist = function (uri) {
 
                 } else if (uri.indexOf("track") != -1) {
 
-                    aplayer.base.set_playlist([result]);
+
+
+                    if(result.objects) {
+                        // got collection of tracks (playing media_set eg)
+                        aplayer.base.set_playlist(result.objects);
+                    } else {
+                        // single media
+                        aplayer.base.set_playlist([result]);
+                    }
+
+
 
                 } else if (uri.indexOf("playlist") != -1) {
 

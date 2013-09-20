@@ -1,12 +1,11 @@
 {% load thumbnail i18n truncate display_tags arating_tags spacify_tags spurl guardian_tags %}
 
-
-<!-- list item s -->
-
-
-<div class="list_body_row selectable item release {% if item.publish_date %}published{% else %}unpublished{% endif %} {% if item.creator == user %}owner{% endif %} view edit stream collect download"
-     id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}" data-id="{{ item.id }}"
-     data-uuid="{{ item.uuid }}" data-ct="release">
+<div class="list_body_row selectable item release {{ item.uuid }} {% if item.publish_date %} published{% else %} unpublished{% endif %}{% if item.creator == user %} owner{% endif %}"
+     id="list_item_{{ item.pk }}"
+     data-resource_uri="{{ item.get_api_url }}"
+     data-id="{{ item.id }}"
+     data-uuid="{{ item.uuid }}"
+     data-ct="release">
 
     <div class="list_body_item c1 image_center_bg"
          {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 36x36 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
@@ -136,10 +135,11 @@
         <ul class="unstyled action secondary horizontal">
 
             <li>
-                <a href="#release:{{ item.pk }}:mp3"
-                   class="downloadable queue{% if not perms.alibrary.downoad_media or not item.publish_date %} disabled{% endif %}"
+                <a href="#"
+                   class="{% if not perms.alibrary.downoad_media or not item.publish_date %} disabled{% endif %}"
                    data-ct="release"
-                   data-resource_uri="{{ item.get_api_url }}"
+                   data-id="{{ item.pk }}"
+                   data-action="download"
                    title="{% trans "Download" %}">
                     <i class="icon icon-download-alt"></i>
                 </a>

@@ -153,10 +153,11 @@ class BaseWriteForm(forms.ModelForm):
 class WriteForm(BaseWriteForm):
     """The form for an authenticated user, to compose a message."""
     # specify help_text only to avoid the possible default 'Enter text to search.' of ajax_select v1.2.5
-    recipients = CommaSeparatedUserField(label=(_("Recipients"), _("Recipient")), help_text='')
+    # recipients = CommaSeparatedUserField(label=(_("Recipients"), _("Recipient")), help_text='')
 
     class Meta(BaseWriteForm.Meta):
-        fields = ('recipients', 'subject', 'body')
+        #fields = ('recipients', 'subject', 'body')
+        fields = ('subject', 'body')
 
 
 class AnonymousWriteForm(BaseWriteForm):
@@ -166,10 +167,11 @@ class AnonymousWriteForm(BaseWriteForm):
     can_overwrite_limits = False
 
     email = forms.EmailField(label=_("Email"))
-    recipients = CommaSeparatedUserField(label=(_("Recipients"), _("Recipient")), help_text='', max=1)  # one recipient is enough
+    #recipients = CommaSeparatedUserField(label=(_("Recipients"), _("Recipient")), help_text='', max=1)  # one recipient is enough
 
     class Meta(BaseWriteForm.Meta):
-        fields = ('email', 'recipients', 'subject', 'body')
+        #fields = ('email', 'recipients', 'subject', 'body')
+        fields = ('email', 'subject', 'body')
 
 
 class BaseReplyForm(BaseWriteForm):
@@ -202,9 +204,11 @@ class QuickReplyForm(BaseReplyForm):
 allow_copies = not getattr(settings, 'POSTMAN_DISALLOW_COPIES_ON_REPLY', False)
 class FullReplyForm(BaseReplyForm):
     """The complete reply form."""
+    """
     if allow_copies:
         recipients = CommaSeparatedUserField(
             label=(_("Additional recipients"), _("Additional recipient")), help_text='', required=False)
-
+    """
     class Meta(BaseReplyForm.Meta):
-        fields = (['recipients'] if allow_copies else []) + ['subject', 'body']
+        # fields = (['recipients'] if allow_copies else []) + ['subject', 'body']
+        fields = ['subject', 'body']

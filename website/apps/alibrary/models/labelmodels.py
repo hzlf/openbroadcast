@@ -183,7 +183,16 @@ class Label(MPTTModel, MigrationMixin):
     def get_admin_url(self):
         from lib.util.get_admin_url import change_url
         return change_url(self)
-    
+
+
+    def get_api_url(self):
+        return reverse('api_dispatch_detail', kwargs={
+            'api_name': 'v1',
+            'resource_name': 'label',
+            'pk': self.pk
+        }) + ''
+
+
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)

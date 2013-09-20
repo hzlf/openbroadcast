@@ -1,5 +1,27 @@
 {% load cms_tags %}
-<div class="left icontitle green icon60-library">
-	{{ page_title }}{% page_attribute "page_title" %}
-</div>
-<div class="clear"></div>
+
+
+<!-- new version using vector icons-->
+{% if icon %}
+    <div class="inner">
+        <div class="icon">
+            <i class="icon {{ icon }}"></i>
+        </div>
+        <div class="title">
+            <h1>{{ page_title }}{% page_attribute "page_title" %}</h1>
+        </div>
+    </div>
+
+
+
+
+{% else %}
+
+    <div class="left icontitle green icon60-library">
+
+
+        {{ page_title }}{% page_attribute "page_title" %}
+    </div>
+    <div class="clear"></div>
+
+{% endif %}
