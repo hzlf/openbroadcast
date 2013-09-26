@@ -2,7 +2,7 @@
 <div class="span7 padded-h container_content">
 
 	<div class="page-header">
-		<h2>{{ object.name|truncate_chars_inner:40 }}{% if object.country %} ({{ object.country }}){% endif %} <small>{{ object.type }}</small></h2>
+		<h2>{{ object.name|truncate_chars_inner:40 }}{% if object.country %} ({{ object.country.iso2_code }}){% endif %} <small>{{ object.type }}</small></h2>
 	</div>
 
 	<dl class="dl-horizontal main">

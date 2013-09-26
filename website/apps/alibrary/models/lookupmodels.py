@@ -174,6 +174,8 @@ class APILookup(models.Model):
 
     def get_artist_from_discogs(self):
 
+        log = logging.getLogger('alibrary.lookupmodels.get_artist_from_discogs')
+
         log.info('uri: %s' % self.uri)
 
 
@@ -181,12 +183,14 @@ class APILookup(models.Model):
         v1_id = self.uri.split('/')[-1]
         v1_url = 'http://dgs.anorg.net/artist/%s?f=json' % v1_id
 
-        print "#########################################"
+        print 'mapping from v1 url:'
         print v1_url
         r = requests.get(v1_url)
         v1_data= r.json()
 
         d_id = v1_data['resp']['artist']['id']
+
+        print 'extracted id: %s' % d_id
 
 
         #d_id = 8760
@@ -196,6 +200,11 @@ class APILookup(models.Model):
         discogs = discogs_client.Client(USER_AGENT)
 
         d_artist = discogs.artist(d_id)
+
+        # strange... without print the dict is not loaded at all... so let's print!
+        print d_artist
+
+
 
 
         res = {}

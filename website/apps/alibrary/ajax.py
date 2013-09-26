@@ -60,13 +60,7 @@ def api_lookup(request, *args, **kwargs):
 
         data = al.get_from_api()
 
-
-        # js = serializers.get_serializer("json")()
-        #data = js.serialize(data, ensure_ascii=False)
-
-        print '***** LOOKUP DATA ***************************'
         print data
-        print '*********************************************'
 
 
     except Exception, e:

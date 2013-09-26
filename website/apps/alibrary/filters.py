@@ -48,7 +48,7 @@ class ReleaseFilter(django_filters.FilterSet):
     #releasedate = DekadeFilter(label="Release date")
     class Meta:
         model = Release
-        fields = ['releasetype', 'release_country', 'main_format__name', 'media_release__license__name', ]
+        fields = ['releasetype', 'release_country', 'main_format__name', 'media_release__license__name', 'label__type', ]
 
     @property
     def filterlist(self):
