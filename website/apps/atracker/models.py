@@ -4,6 +4,7 @@ from django.contrib.auth.models import SiteProfileNotAvailable
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models.signals import post_save
 from django.template.defaultfilters import date
 from django.utils.timesince import timesince
 from django.utils.timezone import now
@@ -152,4 +153,16 @@ class Event(models.Model):
     
     
     
-    
+def actstream_link(sender, instance, created, **kwargs):
+
+    from actstream import action
+
+    print 'actstream_link:'
+    print instance
+    try:
+        action.send(instance.user, verb=instance.event_type.title, target=instance.content_object)
+    except Exception, e:
+        print e
+    print 'DONE!!'
+
+post_save.connect(actstream_link, sender=Event)

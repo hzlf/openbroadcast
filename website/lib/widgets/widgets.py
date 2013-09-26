@@ -18,12 +18,20 @@ class ReadOnlyField(Widget):
 
 class ReadOnlyIconField(Widget):
 
+    def __init__(self, *args, **kwargs):
+        self.url = kwargs.pop('url',None)
+        super(ReadOnlyIconField, self).__init__(*args, **kwargs)
+
     def render(self, name, value, attrs=None):
 
-        if not value:
-            value = 'unknown'
+        if not value or value == 'generic':
+            value = 'angle-right'
 
-        return mark_safe('<ul class="links external"><li class="icon external %s"></li></ul>' % value)
+        if self.instance and self.instance.url:
+            return mark_safe('<ul class="relations external %s unstyled"><li><a class="skip-external" href="%s"><i class="icon-%s"></i></a></li></ul>' % (value, self.instance.url, value))
+        else:
+            return mark_safe('')
+
 
 class AdvancedFileInput(ClearableFileInput):
 

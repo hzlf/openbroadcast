@@ -41,6 +41,8 @@ from ac_tagging.widgets import TagAutocompleteTagIt
 
 from lib.widgets.widgets import ReadOnlyIconField
 
+from lib.util.filer_extra import url_to_file
+
 
 
 ACTION_LAYOUT =  action_layout = FormActions(
@@ -84,6 +86,8 @@ class LabelForm(ModelForm):
                   'type',
                   'labelcode',
                   'parent',
+                  'date_start',
+                  'date_end',
                   'description',
                   'address',
                   'country',
@@ -133,7 +137,34 @@ class LabelForm(ModelForm):
                 LookupField('type', css_class='input-xlarge'),
                 LookupField('labelcode', css_class='input-xlarge'),
                 LookupField('parent', css_class='input-xlarge'),
+                """
+                Row(
+                    Column(
+                        HTML('<label>ksjdh</label>'),
+                           css_class='span2'
+                    ),
+                    Column(
+                           LookupField('date_start', css_class='input-small'),
+                           css_class='span2'
+                           ),
+                    Column(
+                           LookupField('date_end', css_class='input-small'),
+                           css_class='span2'
+                           ),
+                    css_class='row relation-row',
+                ),
+                """
         )
+
+
+        activity_layout = Fieldset(
+                _('Activity'),
+                LookupField('date_start', css_class='input-xlarge'),
+                LookupField('date_end', css_class='input-xlarge'),
+        )
+
+
+
         
         contact_layout = Fieldset(
                 _('Contact'),
@@ -147,16 +178,18 @@ class LabelForm(ModelForm):
         meta_layout = Fieldset(
                 'Meta',
                 LookupField('description', css_class='input-xxlarge'),
-                'main_image',
+                LookupImageField('main_image',),
+                LookupField('remote_image',),
         )
         
         tagging_layout = Fieldset(
                 'Tags',
-                'd_tags',
+                LookupField('d_tags'),
         )
             
         layout = Layout(
                         base_layout,
+                        activity_layout,
                         contact_layout,
                         meta_layout,
                         tagging_layout,
@@ -168,6 +201,7 @@ class LabelForm(ModelForm):
 
     
     main_image = forms.Field(widget=FileInput(), required=False)
+    remote_image = forms.URLField(required=False)
     d_tags = TagField(widget=TagAutocompleteTagIt(max_tags=9), required=False, label=_('Tags'))
     description = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")   
     parent = selectable.AutoCompleteSelectField(ParentLabelLookup, allow_new=True, required=False, label=_('Parent Label'))
@@ -189,7 +223,10 @@ class LabelForm(ModelForm):
         except:
             pass
         
-        if 'main_image' in cd and cd['main_image'] != None:
+        main_image = cd.get('main_image', None)
+        remote_image = cd.get('remote_image', None)
+
+        if main_image:
             try:
                 ui = cd['main_image']
                 dj_file = DjangoFile(open(ui.temporary_file_path()), name='cover.jpg')
@@ -201,6 +238,16 @@ class LabelForm(ModelForm):
             except Exception, e:
                 print e
                 pass
+
+
+
+
+        elif remote_image:
+            print "adding image (remote)"
+            try:
+                cd['main_image'] = url_to_file(remote_image, self.instance.folder)
+            except Exception, e:
+                print e
             
         else:
             cd['main_image'] = self.instance.main_image
@@ -264,6 +311,7 @@ class BaseLabelReleationForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(BaseLabelReleationForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
+        self.fields['service'].widget.instance = instance
         if instance and instance.id:
             self.fields['service'].widget.attrs['readonly'] = True
         

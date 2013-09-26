@@ -1,3 +1,45 @@
+// form sidebar
+.lookup.provider
+
+  &.listing
+    &.fixed
+      position: fixed
+      width: 260px
+      top: 120px
+
+  h2
+    border-bottom: 1px solid #efefef
+
+  .item
+    padding: 4px 4px 4px 4px
+    margin: 0px 0 0px 0
+    border-bottom: 1px solid #efefef
+
+    span.name
+      font-size: 120%
+
+    // override actiuon background
+    li > a
+      background: none
+
+    &.available
+      // color: green
+      cursor: pointer
+      &.hover
+        background-color: #DDFFD9
+
+    &.unavailable
+      // color: green
+      cursor: wait
+      span.name
+        color: #a5a5a5
+        text-decoration: line-through
+      &.hover
+        background-color: #efefef
+
+
+
+// popup window
 .popup-provider-search
   width: 703px !important
   max-width: 703px !important

@@ -14,8 +14,66 @@ section.comments.disqus
 .item_detail section
   &.shaded
     background-color: #F5F5F5
-    
-    
+
+
+
+
+  // inline player
+  #aplayer_detail
+    height: 128px
+    position: relative
+    // loading notice
+    p.notice
+      padding: 50px 0
+      text-align: center
+
+    // playhead container
+    .playhead
+
+      .overlay
+        position: absolute
+        width: 32px
+        z-index: 10
+        // alignment
+        &.primary
+
+        &.secondary
+          right: 10px
+          width: 16px
+
+
+        // inner elements
+        ul.action
+          margin: 0
+          padding-left: 0px
+
+          li
+            float: left
+
+          li > a
+            padding: 1px 1px 1px 3px
+            width: 12px
+            display: block
+
+            &:hover
+              text-decoration: none
+              color: white !important
+
+        // color overrides
+        &.primary
+          ul.action li > a
+            color: #00BB00
+            &:hover
+              background: #00BB00
+        &.secondary
+          ul.action li > a
+            &:hover
+              background: #6633cc
+
+
+
+
+
     
 // inner listing & sections
 .item_detail .item_inner section
@@ -66,6 +124,12 @@ section.comments.disqus
         
   &.media
     margin-top: 15px
+
+
+
+
+
+
 
 
 .iteminfo
@@ -176,6 +240,64 @@ section.comments.disqus
       font-size: 140%
     ul
       margin: 0px
+
+
+
+
+// analyse display
+.item_detail
+  section.analyse
+    // background: #ff0000
+    table
+      thead tr
+        padding-bottom: 1px
+        th
+          // font-weight: normal
+          text-align: left
+      tbody
+        td.value
+          // width: 100px
+        td.bar
+          width: 120px
+          .holder
+            margin: 4px 10px 0 0
+            background: #efefef
+            border: 1px solid #cdcdcd
+            .indicator
+              height: 10px
+              background-color: #cdcdcd
+              position: relative
+              span
+                font-weight: bold
+                position: absolute
+                top: 2px
+                left: 3px
+                font-size: 9px
+                line-height: 9px
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 .item_menu
   padding: 0px

@@ -126,6 +126,11 @@ def write(request, recipients=None, form_classes=(WriteForm, AnonymousWriteForm)
         ``auto_moderators``: a list of auto-moderation functions
 
     """
+
+    print 'WRITE:'
+    print recipients
+
+
     user = request.user
     form_class = form_classes[0] if user.is_authenticated() else form_classes[1]
     if isinstance(autocomplete_channels, tuple) and len(autocomplete_channels) == 2:
@@ -140,10 +145,15 @@ def write(request, recipients=None, form_classes=(WriteForm, AnonymousWriteForm)
             max=max)
         if form.is_valid():
             is_successful = form.save(auto_moderators=auto_moderators)
+
+            print '******'
+            print is_successful
+            print '*******'
+
             if is_successful:
-                messages.success(request, _("Message successfully sent."), fail_silently=True)
+                messages.success(request, _("Message successfully sent."), fail_silently=False)
             else:
-                messages.warning(request, _("Message rejected for at least one recipient."), fail_silently=True)
+                messages.warning(request, _("Message rejected for at least one recipient."), fail_silently=False)
             return redirect(request.GET.get('next', success_url or next_url or 'postman_inbox'))
     else:
         initial = dict(request.GET.items())  # allow optional initializations by query string

@@ -22,6 +22,8 @@ from django.http import HttpResponse # needed for absolute url
 
 from settings import *
 
+from l10n.models import Country
+
 import eav
 from eav.models import Attribute
 
@@ -30,9 +32,16 @@ from jsonfield import JSONField
 from urlparse import urlparse
 import requests
 
+from django.conf import settings
+
+from alibrary.util.relations import get_service_by_url
+
 # logging
 import logging
 logger = logging.getLogger(__name__)
+
+
+MUSICBRAINZ_HOST = getattr(settings, 'MUSICBRAINZ_HOST', 'musicbrainz.org')
 
 
 ################
@@ -94,7 +103,7 @@ class APILookup(models.Model):
         
         
     """
-    Generic Wrapper - distributes to corresponding method
+    Generic wrapper - distributes to corresponding method
     """
     def get_from_api(self):
         
@@ -103,6 +112,9 @@ class APILookup(models.Model):
         
         if self.provider == 'discogs':
             return self.get_from_discogs()
+
+        if self.provider == 'musicbrainz':
+            return self.get_from_musicbrainz()
         
 
 
@@ -112,11 +124,12 @@ class APILookup(models.Model):
 
 
 
-
+    """
+    Discogs wrapper - distribute to entities
+    """
     def get_from_discogs(self):
         
         log = logging.getLogger('alibrary.lookupmodels.get_from_discogs')
-        
         log.debug('content_object: %s' % self.content_object)
 
         self.uri = self.content_object.relations.filter(service='discogs')[0].url
@@ -126,6 +139,34 @@ class APILookup(models.Model):
 
         if '/artist/' in self.uri:
             return self.get_artist_from_discogs()
+
+        if '/label/' in self.uri:
+            return self.get_label_from_discogs()
+
+
+
+
+    """
+    Muscicbrainz wrapper - distribute to entities
+    """
+    def get_from_musicbrainz(self):
+
+        log = logging.getLogger('alibrary.lookupmodels.get_from_musicbrainz')
+        log.debug('content_object: %s' % self.content_object)
+
+        self.uri = self.content_object.relations.filter(service='musicbrainz')[0].url
+
+        if '/release/' in self.uri:
+            return self.get_release_from_musicbrainz()
+
+        if '/artist/' in self.uri:
+            return self.get_artist_from_musicbrainz()
+
+        if '/label/' in self.uri:
+            return self.get_label_from_musicbrainz()
+
+        if '/recording/' in self.uri:
+            return self.get_media_from_musicbrainz()
 
 
 
@@ -138,7 +179,7 @@ class APILookup(models.Model):
 
         # some hacks to convert site url to api id
         v1_id = self.uri.split('/')[-1]
-        v1_url = 'http://api.discogs.com/artist/%s?f=json' % v1_id
+        v1_url = 'http://dgs.anorg.net/artist/%s?f=json' % v1_id
 
         print "#########################################"
         print v1_url
@@ -155,10 +196,6 @@ class APILookup(models.Model):
         discogs = discogs_client.Client(USER_AGENT)
 
         d_artist = discogs.artist(d_id)
-        print '***********************'
-        print d_artist
-        print '***********************'
-
 
 
         res = {}
@@ -254,11 +291,12 @@ class APILookup(models.Model):
         d_release = discogs.Release(self.ressource_id)
         
         # check if there is a master release
+        """ don't do this, as makes errors in case oif wrongly assigned master release
         try:
             d_release = d_release.master.key_release
         except Exception, e:
             print e
-            
+        """
         
         """ release:
          |  artists
@@ -369,9 +407,362 @@ class APILookup(models.Model):
         self.save()
         
         return res
-    
-        
 
- 
-#eav.register(APILookup)
-        
+
+
+
+
+    def get_label_from_discogs(self):
+
+        log.info('uri: %s' % self.uri)
+
+
+        # some hacks to convert site url to api id
+        v1_id = self.uri.split('/')[-1]
+        v1_url = 'http://api.discogs.com/label/%s?f=json' % v1_id
+
+        print "#########################################"
+        print v1_url
+        r = requests.get(v1_url)
+        v1_data= r.json()
+
+        d_id = v1_data['resp']['label']['id']
+
+
+        #d_id = 8760
+
+        # the v2 client
+        from dgs2 import discogs_client
+        discogs = discogs_client.Client(USER_AGENT)
+
+        d_label = discogs.label(d_id)
+        print '***********************'
+        print d_label
+        print '***********************'
+
+
+
+        res = {}
+        d_tags = [] # needed as merged from different keys
+
+        for k in d_label.data:
+            print k
+            #print d_artist.data[k]
+
+            # kind of ugly data mapping
+            mk = k
+            if k == 'title':
+                mk = 'name'
+
+            if k == 'profile':
+                mk = 'description'
+
+            if k == 'contact_info':
+                mk = 'address'
+
+            if k == 'parent_label':
+                res['parent_0'] = d_label.data[k]['name']
+
+            # image
+            if k == 'images':
+                image = None
+                try:
+                    d = d_label.data[k]
+                    for v in d:
+                        if v['type'] == 'primary':
+                            image = v['resource_url']
+                        print v
+                except:
+                    pass
+
+                # sorry, kind of ugly...
+                if not image:
+                    try:
+                        d = d_label.data[k]
+                        for v in d:
+                            if v['type'] == 'secondary':
+                                image = v['resource_url']
+                            print v
+                    except:
+                        pass
+
+                try:
+                    res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', 'dgs.anorg.net')
+                except:
+                    res['remote_image'] = res['main_image'] = None
+
+            res[mk] = d_label.data[k]
+
+        self.api_data = res
+        self.save()
+
+        return res
+    
+
+
+
+        """
+        Methods for Musicbrainz
+        ------------------------------------------------------------
+        """
+
+
+
+
+
+    def get_release_from_musicbrainz(self):
+
+        log.info('uri: %s' % self.uri)
+
+
+        # TODO: make more dynamic...
+        # some hacks to convert site url to api id
+        id = self.uri.split('/')[-1]
+        url = "http://%s/ws/2/release/%s?fmt=json&inc=aliases+url-rels+annotation+tags+artist-rels+recordings+artists+labels" % (MUSICBRAINZ_HOST, id)
+
+        print "#########################################"
+        print url
+        r = requests.get(url)
+        data= r.json()
+
+        print data
+
+        res = {}
+        d_tags = [] # needed as merged from different keys
+
+        for k in data:
+            print k
+
+            # kind of ugly data mapping
+            mk = k
+
+            if k == 'annotation':
+                mk = 'description'
+
+            if k == 'title':
+                mk = 'name'
+
+            if k == 'country':
+                mk = 'release_country'
+
+            if k == 'date':
+                mk = 'releasedate_approx'
+
+            # wrong type-map
+            """
+            if k == 'type':
+                mk = '__unused__'
+            """
+
+            if k == 'label-info':
+                try:
+                    print '*******************************************'
+                    print data[k][0]
+
+                    if 'label' in data[k][0] and 'name' in data[k][0]['label']:
+                        res['label_0'] = data[k][0]['label']['name']
+
+                    if 'catalog-number' in data[k][0]:
+                        res['catalognumber'] = data[k][0]['catalog-number']
+
+                except:
+                    pass
+
+
+            # tagging
+            if k == 'tags':
+                try:
+                    d = data[k]
+                    for v in d:
+                        d_tags.append(v['name'])
+                except:
+                    pass
+
+            res[mk] = data[k]
+
+        # try to remap country
+        if 'release_country' in res:
+            try:
+                c = Country.objects.get(iso2_code=res['release_country'])
+                #res['release_country'] = c.pk
+            except:
+                pass
+
+        print 'DTAGS:'
+        print d_tags
+
+        res['d_tags'] = ', '.join(d_tags)
+
+        self.api_data = res
+        self.save()
+
+        return res
+
+
+
+
+
+    def get_artist_from_musicbrainz(self):
+
+        log.info('uri: %s' % self.uri)
+
+
+        # TODO: make more dynamic...
+        # some hacks to convert site url to api id
+        id = self.uri.split('/')[-1]
+        url = "http://%s/ws/2/artist/%s?fmt=json&inc=aliases+url-rels+annotation+tags+artist-rels" % (MUSICBRAINZ_HOST, id)
+
+        print "#########################################"
+        print url
+        r = requests.get(url)
+        data= r.json()
+
+        print data
+
+        res = {}
+        d_tags = [] # needed as merged from different keys
+
+        for k in data:
+            print k
+
+            # kind of ugly data mapping
+            mk = k
+
+            if k == 'annotation':
+                mk = 'description'
+
+            # wrong type-map
+            """
+            if k == 'type':
+                mk = '__unused__'
+            """
+
+            if k == 'life-span':
+                if 'begin' in data[k]:
+                    res['date_start'] = data[k]['begin']
+
+                if 'end' in data[k]:
+                    res['date_end'] = data[k]['end']
+
+
+
+
+            if k == 'relations':
+                mapped = []
+                for rel in data[k]:
+                    if 'url' in rel:
+                        #print rel['url']
+                        #print get_service_by_url(rel['url'], None)
+                        mapped.append({
+                            'url': rel['url'],
+                            'service': get_service_by_url(rel['url'], None),
+                            })
+
+                data[k] = mapped
+
+            # tagging
+            if k == 'tags':
+                try:
+                    d = data[k]
+                    for v in d:
+                        d_tags.append(v['name'])
+                except:
+                    pass
+
+            res[mk] = data[k]
+
+        # try to remap country
+        if 'country' in res:
+
+            c = Country.objects.get(iso2_code=res['country'])
+            res['country'] = c.pk
+
+        print 'DTAGS:'
+        print d_tags
+
+        res['d_tags'] = ', '.join(d_tags)
+
+        self.api_data = res
+        self.save()
+
+        return res
+
+
+
+
+
+    def get_label_from_musicbrainz(self):
+
+        log.info('uri: %s' % self.uri)
+
+
+        # TODO: make more dynamic...
+        # some hacks to convert site url to api id
+        id = self.uri.split('/')[-1]
+        url = "http://%s/ws/2/label/%s?fmt=json&inc=aliases+url-rels+annotation+tags" % (MUSICBRAINZ_HOST, id)
+
+        print "#########################################"
+        print url
+        r = requests.get(url)
+        data= r.json()
+
+        print data
+
+        res = {}
+        d_tags = [] # needed as merged from different keys
+
+        for k in data:
+            print k
+            #print d_artist.data[k]
+
+            # kind of ugly data mapping
+            mk = k
+            if k == 'label-code':
+                mk = 'labelcode'
+
+            if k == 'annotation':
+                mk = 'description'
+
+            # wrong type-map
+            if k == 'type':
+                mk = '__unused__'
+
+
+            if k == 'life-span':
+                if 'begin' in data[k]:
+                    res['date_start'] = data[k]['begin']
+
+                if 'end' in data[k]:
+                    res['date_end'] = data[k]['end']
+
+
+            if k == 'parent_label':
+                res['parent_0'] = data[k]['name']
+
+
+            # tagging
+            if k == 'tags':
+                try:
+                    d = data[k]
+                    for v in d:
+                        d_tags.append(v['name'])
+                except:
+                    pass
+
+            res[mk] = data[k]
+
+        # try to remap country
+        if 'country' in res:
+
+            c = Country.objects.get(iso2_code=res['country'])
+            res['country'] = c.pk
+
+        print 'DTAGS:'
+        print d_tags
+
+        res['d_tags'] = ', '.join(d_tags)
+
+        self.api_data = res
+        self.save()
+
+        return res

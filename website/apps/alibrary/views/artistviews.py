@@ -21,7 +21,7 @@ from sendfile import sendfile
 from ashop.util.base import get_download_permissions
 
 #from alibrary.forms import ReleaseForm
-from alibrary.forms import ArtistForm, ArtistActionForm, ArtistRelationFormSet
+from alibrary.forms import ArtistForm, ArtistActionForm, ArtistRelationFormSet, MemberFormSet
 
 from alibrary.filters import ArtistFilter
 
@@ -318,6 +318,7 @@ class ArtistEditView(UpdateView):
         
         context['action_form'] = ArtistActionForm(instance=self.object)
         context['relation_form'] = ArtistRelationFormSet(instance=self.object)
+        context['member_form'] = MemberFormSet(instance=self.object)
         context['user'] = self.request.user
         context['request'] = self.request
 
@@ -331,29 +332,20 @@ class ArtistEditView(UpdateView):
 
         # validation
         if form.is_valid():
-            print 'form valid'
-            
+
             self.object.tags = form.cleaned_data['d_tags']
             
             # temporary instance to validate inline forms against
             tmp = form.save(commit=False)
 
-            # bloody hack
-            
-            print self.request.POST
-            
             aliases_text = self.request.POST.get('aliases_text', None)
             aliases = self.request.POST.get('aliases', None)
-        
-            print "***"
-            print aliases_text
-            print aliases
+
+            member_form = MemberFormSet(self.request.POST, instance=tmp)
+            if member_form.is_valid():
+                member_form.save()
         
             relation_form = ArtistRelationFormSet(self.request.POST, instance=tmp)
-            print "relation_form.cleaned_data:",
-            print relation_form.is_valid()
-            print relation_form.errors
-        
             if relation_form.is_valid():                
                 relation_form.save()
 

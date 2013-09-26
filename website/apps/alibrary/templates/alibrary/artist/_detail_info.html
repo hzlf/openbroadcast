@@ -84,6 +84,21 @@
 		</dd>
 		{% endif %}
 
+        {% if object.get_membership %}
+		<dt>
+			{% trans "Member of" %}:
+		</dt>
+		<dd>
+			{% for artist in object.get_membership %}
+			{% with item=artist %}
+			{% include "alibrary/element/_inline_link.html" %}
+			{% if not forloop.last %},{% endif %}
+			{% endwith %}
+			{% endfor %}
+		</dd>
+        {% endif %}
+
+
 
 	</dl>
 

@@ -261,7 +261,8 @@ class ReleaseEditView(UpdateView):
 
 
         context['relation_form'] = ReleaseRelationFormSet(instance=self.object)
-        
+        context['albumartist_form'] = AlbumartistFormSet(instance=self.object)
+
         context['user'] = self.request.user
         context['request'] = self.request
         
@@ -287,18 +288,19 @@ class ReleaseEditView(UpdateView):
 
         if form.is_valid():
 
-            print 'form valid'
-
             self.object.tags = form.cleaned_data['d_tags']
-
 
             # temporary instance to validate inline forms against
             tmp = form.save(commit=False)
             releasemedia_form = ReleaseMediaFormSet(self.request.POST, instance=tmp)
             relation_form = ReleaseRelationFormSet(self.request.POST, instance=tmp)
+            albumartist_form = AlbumartistFormSet(self.request.POST, instance=tmp)
 
         if relation_form.is_valid():
             relation_form.save()
+
+        if albumartist_form.is_valid():
+            albumartist_form.save()
 
         if releasemedia_form.is_valid():
 

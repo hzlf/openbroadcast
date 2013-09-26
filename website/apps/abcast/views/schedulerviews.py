@@ -58,6 +58,11 @@ def schedule(request):
 
 
     data = {}
+
+    # pet all available channels
+    data['channels'] = Channel.objects.filter(has_scheduler=True)
+
+
     data['list_style'] = request.GET.get('list_style', 's')
     data['days_offset'] = request.GET.get('days_offset', 0)
     data['get'] = request.GET
@@ -94,9 +99,15 @@ def schedule(request):
     
     
     channel_id = request.GET.get('channel_id', SCHEDULER_DEFAULT_CHANNEL_ID)
+
+    channel_id = int(channel_id)
+
+
+
     channel = Channel.objects.get(pk=channel_id)
     dayparts = channel.get_dayparts(days[0])
     data['dayparts'] = dayparts
+    data['channel'] = channel
     
     print dayparts
     

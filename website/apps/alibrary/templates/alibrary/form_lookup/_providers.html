@@ -15,7 +15,7 @@
 		<div class="row-fluid ">
 			
 			<div class="span8">
-				<h4><i class="cicon-{{ provider.key }}"></i> {{ provider.name }}</h4>
+				<span class="name"><i class="icon-{{ provider.key }}"></i> {{ provider.name }}</span>
 			</div>
 			
 			<div class="span4">
@@ -23,11 +23,11 @@
 				<ul class="unstyled">
 					{% if provider.relation %}
 					<li class="pull-right" style="float: right !important;">
-						<a class="action" href="#">{% trans "Change" %} <i class="icon-exchange icon-white"></i></a>
+						<a class="action" title="{% trans "Reselect on" %} {{ provider.name }}" href="#">{% trans "Change" %} <i class="icon-exchange icon-white"></i></a>
 					</li>
 					{% else %}
 					<li class="pull-right" style="float: right !important;">
-						<a class="action"  href="#">{% trans "Search" %} <i class="icon-search icon-white"></i></a>
+						<a class="action" title="{% trans "Search on" %} {{ provider.name }}"  href="#">{% trans "Search" %} <i class="icon-search icon-white"></i></a>
 					</li>
 					{% endif %}
 				</ul>
@@ -35,14 +35,6 @@
 			</div>
 		</div>
 
-        <!--
-        <small>
-            <a href="{{ provider.relation }}" title="{% trans "Link" %}: {{ provider.relation }}">
-                {% trans "Link" %}
-            </a>
-
-        </small>
-        -->
 	</div>
 	{% endfor %}
 	

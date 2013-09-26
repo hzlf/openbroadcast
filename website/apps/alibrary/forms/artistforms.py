@@ -82,7 +82,7 @@ class ArtistForm(ModelForm):
 
     class Meta:
         model = Artist
-        fields = ('name', 'real_name', 'aliases', 'type', 'country', 'biography', 'main_image', 'd_tags')
+        fields = ('name', 'real_name', 'aliases', 'type', 'country', 'biography', 'main_image', 'date_start', 'date_end', 'd_tags', 'ipi_code',)
         
 
     def __init__(self, *args, **kwargs):
@@ -125,11 +125,17 @@ class ArtistForm(ModelForm):
                 LookupField('type', css_class='input-xlarge'),
                 LookupField('country', css_class='input-xlarge'),
         )
+
+
+        activity_layout = Fieldset(
+                _('Activity'),
+                LookupField('date_start', css_class='input-xlarge'),
+                LookupField('date_end', css_class='input-xlarge'),
+        )
         
         alias_layout = Fieldset(
                 _('Alias(es)'),
                 Field('aliases', css_class='input-xlarge'),
-                Field('members', css_class='input-xlarge'),    
         )
         
         catalog_layout = Fieldset(
@@ -143,7 +149,7 @@ class ArtistForm(ModelForm):
         
 
         meta_layout = Fieldset(
-                'Meta',
+                _('Meta information'),
                 LookupField('biography', css_class='input-xxlarge'),
                 LookupImageField('main_image',),
                 LookupField('remote_image',),
@@ -151,15 +157,22 @@ class ArtistForm(ModelForm):
         
         tagging_layout = Fieldset(
                 'Tags',
-                'd_tags',
+                LookupField('d_tags'),
+        )
+
+        identifiers_layout = Fieldset(
+                _('Identifiers'),
+                LookupField('ipi_code', css_class='input-xlarge'),
         )
             
         layout = Layout(
                         base_layout,
+                        activity_layout,
                         # artist_layout,
                         meta_layout,
-                        alias_layout,
                         tagging_layout,
+                        identifiers_layout,
+                        alias_layout,
                         )
 
         self.helper.add_layout(layout)
@@ -179,7 +192,7 @@ class ArtistForm(ModelForm):
     aliases = selectable.AutoCompleteSelectMultipleField(ArtistLookup, required=False)
     # aliases  = make_ajax_field(Artist,'aliases','aliases',help_text=None)
     
-    members = selectable.AutoCompleteSelectMultipleField(ArtistLookup, required=False)
+    #members = selectable.AutoCompleteSelectMultipleField(ArtistLookup, required=False)
     
 
     def clean(self, *args, **kwargs):
@@ -229,6 +242,88 @@ class ArtistForm(ModelForm):
     
     
 
+"""
+Artists members / membership
+"""
+class BaseMemberFormSet(BaseInlineFormSet):
+
+
+    def __init__(self, *args, **kwargs):
+
+        self.instance = kwargs['instance']
+
+        super(BaseMemberFormSet, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.form_id = "id_artists_form_%s" % 'inline'
+        self.helper.form_class = 'form-horizontal'
+        self.helper.form_method = 'post'
+        self.helper.form_action = ''
+        self.helper.form_tag = False
+
+        base_layout = Row(
+                Column(
+                       Field('child', css_class='input-xlarge'),
+                       css_class='span9'
+                       ),
+                Column(
+                       Field('DELETE', css_class='input-mini'),
+                       css_class='span3'
+                       ),
+                css_class='albumartist-row row-fluid form-autogrow',
+        )
+
+        self.helper.add_layout(base_layout)
+
+
+
+
+    def add_fields(self, form, index):
+        # allow the super class to create the fields as usual
+        super(BaseMemberFormSet, self).add_fields(form, index)
+
+        # created the nested formset
+        try:
+            instance = self.get_queryset()[index]
+            pk_value = instance.pk
+        except IndexError:
+            instance=None
+            pk_value = hash(form.prefix)
+
+
+class BaseMemberForm(ModelForm):
+
+    class Meta:
+        model = ArtistMembership
+        parent_model = Artist
+        fields = ('child',)
+
+    def __init__(self, *args, **kwargs):
+        super(BaseMemberForm, self).__init__(*args, **kwargs)
+        instance = getattr(self, 'instance', None)
+
+    child = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False, label=_('Artist'))
+    #service = forms.CharField(label='', widget=ReadOnlyIconField(**{'url': 'whatever'}), required=False)
+    #url = forms.URLField(label=_('Website / URL'), required=False)
+
+
+    def save(self, *args, **kwargs):
+        instance = super(BaseMemberForm, self).save(*args, **kwargs)
+        return instance
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   
 class BaseArtistReleationFormSet(BaseGenericInlineFormSet):
@@ -250,17 +345,17 @@ class BaseArtistReleationFormSet(BaseGenericInlineFormSet):
         base_layout = Row(
                 Column(
                        Field('url', css_class='input-xlarge'),
-                       css_class='span5'
+                       css_class='span6 relation-url'
                        ),
                 Column(
-                       Field('service', css_class='input-small'),
-                       css_class='span1'
+                       Field('service', css_class='input-mini'),
+                       css_class='span4'
                        ),
                 Column(
                        Field('DELETE', css_class='input-mini'),
-                       css_class='span1'
+                       css_class='span2'
                        ),
-                css_class='row relation-row',
+                css_class='row-fluid relation-row form-autogrow',
         )
  
         self.helper.add_layout(base_layout)
@@ -278,6 +373,9 @@ class BaseArtistReleationForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(BaseArtistReleationForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
+
+        self.fields['service'].widget.instance = instance
+
         if instance and instance.id:
             self.fields['service'].widget.attrs['readonly'] = True
         
@@ -290,10 +388,22 @@ class BaseArtistReleationForm(ModelForm):
 
 
 # Compose Formsets
-ArtistRelationFormSet = generic_inlineformset_factory(Relation, form=BaseArtistReleationForm, formset=BaseArtistReleationFormSet, extra=3, exclude=('action',), can_delete=True)
+ArtistRelationFormSet = generic_inlineformset_factory(Relation,
+                                                      form=BaseArtistReleationForm,
+                                                      formset=BaseArtistReleationFormSet,
+                                                      extra=10, exclude=('action',),
+                                                      can_delete=True,)
 
 
-
+MemberFormSet = inlineformset_factory(Artist,
+                                       ArtistMembership,
+                                       form=BaseMemberForm,
+                                       formset=BaseMemberFormSet,
+                                       fk_name = 'parent',
+                                       extra=4,
+                                       exclude=('position',),
+                                       can_delete=True,
+                                       can_order=False,)
 
 
 

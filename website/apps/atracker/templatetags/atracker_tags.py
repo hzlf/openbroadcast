@@ -35,6 +35,19 @@ def stats_for_object(context, obj):
     return {}
 
 
+@register.inclusion_tag('atracker/templatetags/stats_for_user.html', takes_context=True)
+def stats_for_user(context, user):
+
+    events = Event.objects.filter(user=user)
+
+    return {
+        'request': context['request'],
+        'events': events
+    }
+
+    return {}
+
+
 
 
 

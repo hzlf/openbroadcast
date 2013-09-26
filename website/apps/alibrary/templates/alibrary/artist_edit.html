@@ -35,6 +35,8 @@
 
                 edit.ui.init();
 
+                //
+
 
             });
         </script>
@@ -95,14 +97,29 @@
 
             {% crispy form %}
 
-
             <fieldset>
+                <legend>
+                    {% trans "Members" %}<span class="pull-right"></span>
+                </legend>
+                <div class="notes-form notes-inline notes-info">
+                    <p>
+                        {% trans "Allows you to add individual Artists as 'group-members'" %}</br>
+                    </p>
+                </div>
+
+                {% crispy member_form %}
+
+            </fieldset>
+
+            <fieldset class="relations">
                 <legend>
                     Relations<span class="pull-right"></span>
                 </legend>
 
 
                 {% crispy relation_form %}
+
+                <div class="lookup-container"></div>
 
             </fieldset>
 

@@ -10,6 +10,9 @@
 {% addtoblock "js-post" %}{% dajaxice_js_import %}{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}dajax/jquery.dajax.core.js"></script>{% endaddtoblock %}
 
+{% addtoblock "js-post" %} <script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/edit.js"></script>{% endaddtoblock %}
+
+
 {% addtoblock "js-post" %}<!--<script type="text/javascript" src="{{ STATIC_URL }}js/ajax_select.js"></script>-->{% endaddtoblock %}
 
 
@@ -25,7 +28,7 @@
 			$(el).parents('.control-group').html('<span>' + val + '</span>');
 		});
 		
-
+        edit.ui.init();
 		
 	});
 </script>
@@ -109,7 +112,7 @@
 
 {% block form_sidebar %}
 <div class="sidebar form-sidebar holder">
-	{% with providers=object.get_lookup_providers%}
+	{% with providers=object.get_lookup_providers ct="label"%}
 	{% include "alibrary/form_lookup/_providers.html" %}
 	{% endwith %}
 </div>

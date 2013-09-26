@@ -14,7 +14,8 @@
     {% addtoblock "js-post" %}
         <script type="text/javascript" src="{{ STATIC_URL }}dajax/jquery.dajax.core.js"></script>{% endaddtoblock %}
 
-    {% addtoblock "js-post" %} <script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/edit.js"></script>{% endaddtoblock %}
+    {% addtoblock "js-post" %}
+        <script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/edit.js"></script>{% endaddtoblock %}
 
 
     {% addtoblock "js-post" %}
@@ -106,6 +107,7 @@
 
                 <div class="alert alert-error">
                     <strong>{% trans "Errors in form" %}</strong>
+
                     <p>{% trans "Please check the given data and correct where marked." %}</p>
                 </div>
 
@@ -122,7 +124,23 @@
 
             <fieldset>
                 <legend>
-                    Relations<span class="pull-right">Help</span>
+                    {% trans "Albumartists" %}<span class="pull-right"></span>
+                </legend>
+                <div class="notes-form notes-inline notes-info">
+                    <p>
+                        {% trans "Allows you to customize artist-credits an the appearance of the 'Albumartist'" %}</br>
+                        {% trans "Use this to generate 'composite' names, like:" %} <strong>'Soviet France feat. Beck & Madonna'</strong>
+                    </p>
+                </div>
+
+                {% crispy albumartist_form %}
+
+            </fieldset>
+
+
+            <fieldset>
+                <legend>
+                    {% trans "Relations" %}<span class="pull-right">Help</span>
                 </legend>
 
 
@@ -135,7 +153,7 @@
 
             <fieldset>
                 <legend>
-                    Tracklist
+                    {% trans "Tracklist" %}
                 </legend>
             </fieldset>
 

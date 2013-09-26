@@ -65,6 +65,7 @@ logger = logging.getLogger(__name__)
 from alibrary.models import *
 from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
+from alibrary.util.relations import get_service_by_url
 
 from lib.fields import extra
 
@@ -491,7 +492,7 @@ class Relation(models.Model):
     """"""
     def save(self, *args, **kwargs):
 
-        self.service = self.get_service_by_url(self.url, self.service)
+        self.service = get_service_by_url(self.url, self.service)
 
         # find already assigned services and delete them
         if self.service != 'generic':
@@ -522,7 +523,7 @@ class Relation(models.Model):
 
         return icon
 
-
+    """ moved to util.relations
     def get_service_by_url(self, url, service):
 
         if url.find('facebook.com') != -1:
@@ -566,6 +567,7 @@ class Relation(models.Model):
             service = 'generic'
 
         return service
+    """
 
 
 def update_relations():

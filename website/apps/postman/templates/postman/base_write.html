@@ -10,14 +10,14 @@
         <div class="write">
 
             <form action="{% if next_url %}?next={{ next_url|urlencode }}{% endif %}" method="post">{% csrf_token %}
-
                 {% block pm_write_recipient %}{% endblock %}
 
                 {{ form.as_p }}
                 {# crispy form #}
 
-
-                <button type="submit">{% trans "Send" %}</button>
+                <div class="actions">
+                    <button class="btn btn-primary pull-right" type="submit">{% trans "Send" %}</button>
+                </div>
             </form>
 
 

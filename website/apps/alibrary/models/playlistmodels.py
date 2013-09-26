@@ -21,7 +21,7 @@ from settings import *
 
 # django-extensions (http://packages.python.org/django-extensions/)
 from django_extensions.db.fields import UUIDField, AutoSlugField
-
+from django_extensions.db.fields.json import JSONField
 # cms
 from cms.models import CMSPlugin, Page
 from cms.models.fields import PlaceholderField
@@ -179,7 +179,18 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
         ('other', _('Other')),
     )
     type = models.CharField(max_length=12, default='other', null=True, choices=TYPE_CHOICES)
-    
+
+
+    BROADCAST_STATUS_CHOICES = (
+        (0, _('Undefined')),
+        (1, _('OK')),
+        (2, _('Warning')),
+        (99, _('Error')),
+    )
+    broadcast_status = models.PositiveIntegerField(default=0, choices=BROADCAST_STATUS_CHOICES)
+    broadcast_status_messages = JSONField(blank=True, null=True, default=None)
+
+
     EDIT_MODE_CHOICES = (
         (0, _('Compact')),
         (1, _('Medium')),
@@ -406,14 +417,64 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
         return items
 
 
+
+    def self_check(self):
+        log = logging.getLogger()
+        log.debug('Self check: %s' % self.name)
+
+        status = 1 # set to 'OK'
+        messages = []
+
+        try:
+
+            # check ready-status of related media
+
+            for item in self.items.all():
+                log.debug('Self check content object: %s' % item.content_object)
+                log.debug('Self check master: %s' % item.content_object.master)
+                log.debug('Self check path: %s' % item.content_object.master.path)
+
+                # check if file available
+                try:
+                    with open(item.content_object.master.path): pass
+                except IOError, e:
+                    log.warning(_('File does not exists: %s | %s') % (e, item.content_object.master.path))
+                    status = 99
+                    messages.append(_('File does not exists: %s | %s') % (e, item.content_object.master.path))
+
+                """
+                pip = PlaylistItemPlaylist.objects.get(playlist=self, item=item)
+                duration -= pip.cue_in
+                duration -= pip.cue_out
+                duration -= pip.fade_cross
+                """
+
+
+            # check duration & matching target_duration
+            """
+            compare durations. target: in seconds | calculated duration in milliseconds
+            """
+            diff = self.get_duration() - self.target_duration * 1000
+            if abs(diff) > 500:
+                messages.append(_('durations do not match. difference is: %s seconds' % int(diff / 1000)) )
+                status = 2
+
+        except Exception, e:
+            messages.append(_('Validation error: %s ' % e) )
+            status = 99
+
+
+
+        return status, messages
+
+
     def save(self, *args, **kwargs):
         
         
         # status update
         if self.status == 0:
             self.status = 2
-        
-        """"""
+
         duration = 0
         try:
             duration = self.get_duration()
@@ -423,6 +484,11 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
             pass
         
         self.duration = duration
+
+        """
+        TODO: maybe move
+        """
+        self.broadcast_status, self.broadcast_status_messages = self.self_check()
         
         # update d_tags
         try:
@@ -443,7 +509,6 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
 
     
 try:
-    pass
     tagging.register(Playlist)
 except:
     pass

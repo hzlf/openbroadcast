@@ -329,7 +329,7 @@ class BaseReleaseReleationFormSet(BaseGenericInlineFormSet):
         super(BaseReleaseReleationFormSet, self).__init__(*args, **kwargs)
 
         self.helper = FormHelper()
-        self.helper.form_id = "id_releasemediainline_form_%s" % 'asdfds'
+        self.helper.form_id = "id_releasemediainline_form_%s" % 'relations'
         self.helper.form_class = 'form-horizontal'
         self.helper.form_method = 'post'
         self.helper.form_action = ''

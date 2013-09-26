@@ -88,13 +88,14 @@
 			{% trans "License" %}:
 		</dt>
 		<dd>
-			<div class="license {% if object.license %}{{ object.license.key }}{% endif %}">
-				{% if object.license %}
-				<a rel="tooltip" href="{{ object.license.get_absolute_url }}" title="License details" class="dialog disabled-modal"><img src="/static/img/icons/transparent_16x16.png" width="78" height="24" alt="License" class="noborder"></a>
-				{% else %}
-				&nbsp;?
-				{% endif %}
-			</div>
+
+        {% if object.license %}
+            <a href="{{ object.license.get_absolute_url }}" title="{% trans "License details" %}" class="iconset iconset-license">{{ object.license.iconset_display }}</a>
+        {% else %}
+            &nbsp;
+        {% endif %}
+
+
 		</dd>
 
 	</dl>

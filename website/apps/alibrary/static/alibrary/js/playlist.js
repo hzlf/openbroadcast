@@ -501,8 +501,6 @@ CollectorApp = (function () {
             // type switch
             if (container.hasClass('media')) {
 
-
-
                 var item_id = container.data('id');
                 var item_uuid = container.data('uuid');
                 media.push({id: item_id, uuid: item_uuid});
@@ -735,6 +733,9 @@ CollectorApp = (function () {
                 debug.debug('the data:', data)
                 var el = self.popup_container;
                 var html = nj.render('alibrary/nj/playlist/select_popup_item.html', { item: data });
+
+                $('.listing .content p.notice', el).fadeOut(500);
+
                 $('.listing .content', el).append(html);
                 $('.listing.nano', el).nanoScroller({ scroll: 'bottom' });
 

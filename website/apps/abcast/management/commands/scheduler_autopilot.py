@@ -17,8 +17,8 @@ from random import choice
 import logging
 logger = logging.getLogger(__name__)
 
-START_OFFSET = 0 # hours to look ahead
-RANGE = 24 * 28 # hours to fill
+START_OFFSET = -1 # hours to look ahead
+RANGE = 12 # hours to fill
 
 
 

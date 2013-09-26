@@ -277,6 +277,7 @@ class BaseMediaReleationForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(BaseMediaReleationForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
+        self.fields['service'].widget.instance = instance
         if instance and instance.id:
             self.fields['service'].widget.attrs['readonly'] = True
         

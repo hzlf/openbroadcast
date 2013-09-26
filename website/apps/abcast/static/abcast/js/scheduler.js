@@ -77,31 +77,30 @@ SchedulerApp = function() {
 		// playlist search
 		
 		$("input.autocomplete").live('keyup focus', function (e) {
-			
+
 			var q = $(this).val();
 			var ct = $(this).attr('data-ct');
 			var target = $('.ac-result', $(this).parent());
-			
+            var extra_query = 'type=broadcast';
 
 			if(e.keyCode == 13 || e.keyCode == 9) {
 				return false;
 			} else {
-				
-				debug.debug(q, ct, target)
-				self.ac.search(q, ct, target);
+				self.ac.search(q, ct, target, extra_query);
 			}
 			
 		});
+
 		$("input.autocomplete").live('blur', function (e) {
 			var target = $('.ac-result', $(this).parent());
 			self.ac.clear(target);
 		});
+
 		// autocomplete (result)
 		$(".ac-result .item").live('click', function (e) {
 			var resource_uri = $(this).attr('data-resource_uri');
 			self.set_selection('playlist', resource_uri);
 		});
-		
 		
 		// copy-paster
 		$('.day-actions').on('click', 'a', function(e){
@@ -242,11 +241,9 @@ SchedulerApp = function() {
 		$.get(resource_uri + '?all=1', function(data) {
 			self.selected_object = data;
 			self.display_selection(data);
-			// call view to save state to session
+			// call view to save state to session. (hmm...what for?)
 			var url = '/program/scheduler/select-playlist/?playlist_id=' + data.id;
-			$.get(url, function(data) {
-	
-			});
+			$.get(url, function(data) { });
 		});
 		
 
@@ -853,19 +850,24 @@ BaseAcApp = function() {
 	this.template = 'abcast/nj/autocomplete.html';
 	this.q_min = 2;
 	
-	this.search = function(q, ct, target) {
+	this.search = function(q, ct, target, extra_query) {
 		
-		console.log('AutocompleteApp - search', q, ct, target);
+		console.log('AutocompleteApp - search', q, ct, target, extra_query);
 		
 		var url = '/api/v1/' + ct + '/autocomplete-name/?q=' + q + '&';
+
+        if(extra_query != undefined) {
+            url += extra_query;
+        }
+
 		
 		if(q.length >= this.q_min) {
 			$.get(url, function(data){
 				self.display(target, data);
 			});
 		} else {
+            // clear element
 			target.html('');
-			// a bit hackish..
 		}
 		
 	};

@@ -15,6 +15,15 @@
 
 <section class="listing nano" id="playlist_list">
     <div class="content">
+
+        {% if not data.objects.length > 0 %}
+
+        <p class="notice">
+        You don't have any playlists yet.<br />
+        Use the "Create a new list" function below.
+        </p>
+        {% endif %}
+
         {% for item in data.objects %}
             {% include "alibrary/nj/playlist/select_popup_item.html" %}
         {% endfor %}

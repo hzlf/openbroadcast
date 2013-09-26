@@ -39,11 +39,42 @@ EditUi = function () {
 
     this.iface = function () {
         this.floating_sidebar('lookup_providers', 120)
+        self.autogrow();
+    };
+
+
+    this.autogrow = function(){
+        // hide formsets until limit
+
+        $('fieldset').each(function(i, el){
+        var j = 4; // the limit
+            $('.form-autogrow', $(el)).removeClass('hidden');
+            $('.form-autogrow', $(el)).each(function(i, el){
+
+                // get the input
+                var value = $('.controls input', $(el)).val();
+                if(value.length > 0) {
+                    j++;
+                }
+                j--;
+
+                if(j < 3){
+                   $(el).addClass('hidden')
+                };
+            });
+        });
+
+
     };
 
     this.bindings = function () {
         // lookup providers
         var container = $('.lookup.provider.listing');
+
+        // handle autogrow
+        $('.form-autogrow', $('fieldset')).on('blur', '.controls input', function(e){
+            self.autogrow();
+        });
 
         // handle links
         $(container).on('click', '.item a.external', function (e) {
@@ -80,7 +111,7 @@ EditUi = function () {
             if (item.hasClass('available')) {
                 self.api_lookup(item_type, item_id, provider);
             } else {
-                alert('not implemented - sorry.');
+                debug.debug('provider url not set');
             }
             // else show research dialog
 
@@ -231,6 +262,55 @@ EditUi = function () {
         $('#release_media_form .mode-l').parents('.control-group').addClass('mode-l');
 
 
+
+
+        // relation mapping for lookup results
+
+
+
+        $('fieldset.relations').on('click', '.relation', function (e) {
+
+            e.preventDefault();
+
+            var el = $(this);
+
+            if(el.hasClass('match')){
+                return;
+            }
+
+            var url = el.data('url');
+
+
+            if(el.parents('.lookup-container').length) {
+                // if item is in generic container
+                // find last 'unused' input & assign value
+
+                var container = $('fieldset.relations .relation-row:not(".hidden")').last();
+                $('.controls input', container).val(url);
+                el.remove();
+
+                // reqrow...
+                self.autogrow();
+
+
+
+            } else {
+                // attached to a specific service
+                var container = el.parents('.relation-url');
+                $('.controls input', container).val(url);
+                el.removeClass('diff');
+                el.addClass('match');
+            }
+
+
+
+        });
+
+
+
+
+
+
     };
 
 
@@ -339,6 +419,8 @@ EditUi = function () {
         var exclude_mark = [
             'description',
             'biography',
+            'date_start',
+            'date_end',
             'd_tags'
         ];
 
@@ -385,6 +467,9 @@ EditUi = function () {
                 switch(key) {
                     case 'main_image':
                         self.image_lookup(key);
+                        break;
+                    case 'relations':
+                        self.relation_lookup(key);
                         break;
                     default:
                         $('#' + self.lookup_prefix + key).html(obj);
@@ -441,6 +526,87 @@ EditUi = function () {
 
         image_container.html(html);
         image_container.parent().fadeIn(200);
+
+
+    };
+
+
+    this.relation_lookup = function (key) {
+        var val = self.lookup_data[key];
+        debug.debug('relation_lookup:', val);
+
+        $('fieldset.relations .lookup-container').html('');
+
+        $(val).each(function(i, item){
+            debug.debug(item);
+
+            // try to find relation in form - not extremly nice :(
+            var container = $('.controls input', $('.external.' + item.service).parents('.relation-row'))
+
+            if(container.length) {
+                // if so, add form-extra
+                //container.css('background-color', '#f0f')
+                var inner = $('.relation-url', container)
+                var inner = container.parents('.relation-url')
+                //inner.css('background-color', '#ff0')
+
+                var match = false;
+                var no_match = false;
+
+                if(container.val() == item.url) {
+                    match=true;
+                } else {
+                    no_match = true
+                }
+
+                var data = {
+                    object: item,
+                    match: match,
+                    no_match: no_match
+                }
+                var html = nj.render('alibrary/nj/provider/relation_inline.html', data);
+
+                if($('.relation', inner).length) {
+                    $('.relation', inner).replaceWith(html);
+                } else {
+                    inner.append(html);
+                }
+
+
+
+
+            } else {
+                // if not - add to generic panel
+
+                // check if link is already set
+                var match = false;
+
+
+                $('.relation-url', $('.relations.external')).fadeOut(5000)
+
+                $('.controls input', $('.relation-row')).each(function(i, el){
+                   if($(el).val() == item.url) {
+                       match = true;
+                   }
+                });
+
+
+                var data = {
+                    object: item,
+                    match: match
+                }
+                html = nj.render('alibrary/nj/provider/relation_inline.html', data);
+
+                if(match) {
+                    $('fieldset.relations .lookup-container').prepend(html);
+                } else {
+                    $('fieldset.relations .lookup-container').append(html);
+                }
+            }
+
+
+
+        })
 
 
     };

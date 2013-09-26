@@ -14,8 +14,11 @@ DetailPlayer = function () {
     this.el_waveform;
     this.el_indicator;
     this.player;
+    this.aplayer_states;
     this.waveform_fill = '90-#999-#444:50-#999';
     this.state;
+
+    this.perms = {};
 
     this.size_x = 810;
     this.size_y = 80;
@@ -62,11 +65,21 @@ DetailPlayer = function () {
 
 
         $('.waveform', self.dom_element).live('click', function (e) {
-            console.log(e.offsetX);
+            // console.log(e.offsetX);
             // console.log(self.px_to_abs(e.offsetX));
 
             var pos = Number(e.offsetX / self.size_x * self.item.duration / 1000);
-            self.player.seek(pos);
+
+            // check if media is currently playing
+
+            // console.log('playing item:', self.aplayer_states.uuid);
+            // console.log('seeking item:', self.item.uuid)
+
+            if (self.item && self.aplayer_states && self.aplayer_states.uuid == self.item.uuid) {
+                self.player.seek(pos);
+            }
+
+
 
         });
 
@@ -117,7 +130,8 @@ DetailPlayer = function () {
     this.init_player = function (data) {
 
         var html = nj.render('aplayer/nj/detail_player.html', {
-            object: data
+            object: data,
+            perms: self.perms
         });
 
         self.dom_element.html(html);
@@ -155,59 +169,42 @@ DetailPlayer = function () {
 
         console.log('init_markers:', sections)
 
-        $(sections).each(function (i, section) {
-            console.log('section', section);
+        if (sections.length > 1) {
 
-            var pos_x = section.start / self.item.duration * 1000 * self.size_x;
+            $(sections).each(function (i, section) {
+                console.log('section', section);
 
-            var width_x = section.duration / self.item.duration * 1000 * self.size_x;
+                var pos_x = section.start / self.item.duration * 1000 * self.size_x;
 
-            var height = 10;
+                var width_x = section.duration / self.item.duration * 1000 * self.size_x;
 
-
-            self.r.rect(pos_x, 90 - height, 1, height).attr({ stroke: "none", fill: '#63c', 'fill-opacity': 0.8 });
-
-            self.r.rect(pos_x + 1, 90 - height, width_x - 1, height).attr({ stroke: "none", fill: '#63c', 'fill-opacity': 0.3 })
-                .mouseover(function () {
-                    this.animate({"fill-opacity": .55, y: 0, height: 90}, 100);
-                })
-                .mouseout(function () {
-                    this.animate({"fill-opacity": .3, y: 90 - height, height: 10}, 100);
-                })
-                .click(function (e) {
-                    e.stopPropagation();
-                    var el = this;
-                    var pos_x = el.attrs.x - 1;
-                    var pos = Number(pos_x / self.size_x * self.item.duration / 1000 - 1);
-                    if (pos < 0) {
-                        pos = 0;
-                    }
-                    self.player.seek(pos);
+                var height = 10;
 
 
-                });
-            /*
-             self.r.set(
-             self.r.rect(pos_x, 90 - height, 1, height).attr({ stroke: "none", fill: '#63c', 'fill-opacity': 0.8 }),
-             self.r.rect(pos_x + 1, 90 - height, width_x - 1, height).attr({ stroke: "none", fill: '#63c', 'fill-opacity': 0.3 })
-             )
-             .mouseover(function () {
-             this.animate({"fill-opacity": .55, y: 0, height: 90}, 100);
-             })
-             .mouseout(function () {
-             this.animate({"fill-opacity": .3, y: 90 - height, height: 10}, 100);
-             })
-             .click(function (e, i, pos_x) {
-             e.stopPropagation();
-             console.log(e)
-             console.log(i)
-             console.log(pos_x)
-             });
-             */
+                self.r.rect(pos_x, 90 - height, 1, height).attr({ stroke: "none", fill: '#63c', 'fill-opacity': 0.8 });
 
-        })
+                self.r.rect(pos_x + 1, 90 - height, width_x - 1, height).attr({ stroke: "none", fill: '#63c', 'fill-opacity': 0.3 })
+                    .mouseover(function () {
+                        this.animate({"fill-opacity": .55, y: 0, height: 90}, 100);
+                    })
+                    .mouseout(function () {
+                        this.animate({"fill-opacity": .3, y: 90 - height, height: 10}, 100);
+                    })
+                    .click(function (e) {
+                        e.stopPropagation();
+                        var el = this;
+                        var pos_x = el.attrs.x - 1;
+                        var pos = Number(pos_x / self.size_x * self.item.duration / 1000 - 1);
+                        if (pos < 0) {
+                            pos = 0;
+                        }
+                        self.player.seek(pos);
 
-        // self.el_indicator = this.r.rect(-10, 0, 2, self.size_y).attr({ stroke: "none", fill: '#00bb00' });
+                    });
+
+            });
+
+        }
 
 
     };
@@ -221,6 +218,7 @@ DetailPlayer = function () {
 
             //console.log(aplayer);
             self.player = aplayer.player;
+            self.aplayer_states = aplayer.states;
 
             var pos_x = self.size_x / 100 * aplayer.states.position_rel;
 

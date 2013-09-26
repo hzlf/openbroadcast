@@ -137,7 +137,7 @@ class MediaFilter(django_filters.FilterSet):
 
     class Meta:
         model = Media
-        fields = ['license__name', 'mediatype', 'base_bitrate', 'base_format', 'base_samplerate', 'processed', 'tempo']
+        fields = ['license__name', 'mediatype', 'base_bitrate', 'base_format', 'base_samplerate', 'processed', 'tempo', 'key']
 
     @property
     def filterlist(self):

@@ -34,6 +34,8 @@ from filer.models.audiomodels import *
 from filer.models.imagemodels import *
 from filer.fields.image import FilerImageField
 
+from django_date_extensions.fields import ApproximateDateField
+
 # modules
 #from taggit.managers import TaggableManager
 from django_countries import CountryField
@@ -70,7 +72,7 @@ from lib.fields import extra
 
 LOOKUP_PROVIDERS = (
     ('discogs', _('Discogs')),
-    #('musicbrainz', _('Musicbrainz')),
+    ('musicbrainz', _('Musicbrainz')),
 )
 
 class LabelManager(models.Manager):
@@ -108,7 +110,11 @@ class Label(MPTTModel, MigrationMixin):
     # auto-update
     created = models.DateField(auto_now_add=True, editable=False)
     updated = models.DateField(auto_now=True, editable=False)
-    
+
+    # life-span
+    date_start = ApproximateDateField(verbose_name="Life-span begin", blank=True, null=True)
+    date_end = ApproximateDateField(verbose_name="Life-span end", blank=True, null=True)
+
     # relations
     parent = TreeForeignKey('self', null=True, blank=True, related_name='label_children')
     folder = models.ForeignKey(Folder, blank=True, null=True, related_name='label_folder')
@@ -167,6 +173,19 @@ class Label(MPTTModel, MigrationMixin):
         return folder
 
 
+
+    def get_lookup_providers(self):
+
+        providers = []
+        for key, name in LOOKUP_PROVIDERS:
+            relations = self.relations.filter(service=key)
+            relation = None
+            if relations.count() == 1:
+                relation = relations[0]
+
+            providers.append({'key': key, 'name': name, 'relation': relation})
+
+        return providers
 
 
     @models.permalink

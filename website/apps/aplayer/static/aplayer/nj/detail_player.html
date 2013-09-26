@@ -1,63 +1,66 @@
-<div class="list_body_row item hoverable editable {{ object.uuid }} {{ object.item.content_type }}"
-     data-updated="{{ object.updated }}" data-resource_uri="{{ object.resource_uri }}" data-uuid="{{ object.uuid }}"
+<div class="list_body_row item hoverable media {{ object.uuid }} {{ object.item.content_type }}"
+     data-updated="{{ object.updated }}" data-resource_uri="{{ object.resource_uri }}" data-ct="media" data-uuid="{{ object.uuid }}"
      data-id="{{ object.id }}" id="playlist_item_{{ object.id }}">
 
 
     <div class="row-fluid playhead">
         <div class="span12">
 
+            <div class="overlay primary">
+                <ul class="unstyled action">
+                    {% if perms.play %}
+                    <li class="square">
+                        <a href="#"
+                           class="playable popup"
+                           data-ct="media"
+                           data-resource_uri="{{ object.resource_uri }}"
+                           data-offset="0"
+                           data-mode="replace"
+                           title="Play">
+                            <i class="icon icon-play"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% if perms.play %}
+                    <li class="square">
+                        <a href="#"
+                           class="playable popup"
+                           data-ct="media"
+                           data-resource_uri="{{ object.resource_uri }}"
+                           data-offset="0"
+                           data-mode="queue"
+                           title="Queue">
+                            <i class="icon icon-reorder"></i></a>
+
+                    </li>
+                    {% endif %}
+
+                </ul>
+            </div>
+
+            <div class="overlay secondary">
+                <ul class="unstyled action">
+                    {% if perms.add %}
+
+                    <li>
+                        <a href="#"
+                           class=""
+                           data-action="collect"
+                           title="Add to playlist">
+                            <i class="icon icon-plus"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                </ul>
+            </div>
+
+
             <div class="waveform" id="detail_player_waveform_{{ object.id }}"></div>
 
         </div>
 
     </div>
-
-
-    <div class="row-fluid base player_actions" style="">
-
-        <div class="span6 actions">
-
-            <ul class="unstyled">
-                <li>
-                    <!--
-                    <a href="#" data-action="stop" class="visible-while-playing">
-                        <i class=" icon-stop icon-large" style="color: #0b0"></i>
-                    </a>
-                    -->
-                    <a href="/en/api/v1/release/18/#1#replace" data-action="play__" class="hidden-while-playing__ playable popup">
-                        <i class=" icon-play icon-large"></i>
-                    </a>
-                    <!--
-                    <a href="#" data-action="pause" class="">
-                        <i class=" icon-pause icon-large"></i>
-                    </a>
-                    -->
-                </li>
-            </ul>
-            <!--
-			<span>{{ object.duration|ms2time }}</span>
-			-->
-        </div>
-
-
-        <div class="span6 actions pull-right">
-
-            <ul class="unstyled">
-                <li>
-                    <a href="#" data-action="collect" class=" pull-right">
-                        <i class="icon-plus icon-large"></i>
-                    </a>
-                    <!--
-                    <a href="#" data-action="delete" class=" pull-right">
-                        <i class="icon-trash icon-large"></i>
-                    </a>
-                    -->
-                </li>
-            </ul>
-
-        </div>
-
-    </div>
-
 
 </div>

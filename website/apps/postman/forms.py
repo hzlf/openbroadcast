@@ -111,6 +111,10 @@ class BaseWriteForm(forms.ModelForm):
         Return False if one of the messages is rejected.
 
         """
+
+        print '***** SAVE POSTMAN!!'
+        print self.cleaned_data
+
         recipients = self.cleaned_data.get('recipients', [])
         if parent and not parent.thread_id:  # at the very first reply, make it a conversation
             parent.thread = parent
@@ -127,7 +131,14 @@ class BaseWriteForm(forms.ModelForm):
                 recipients.remove(recipient)
             recipients.insert(0, recipient)
         is_successful = True
+
+        print recipients
+
         for r in recipients:
+
+            print 'recipient:'
+            print r
+
             if isinstance(r, get_user_model()):
                 self.instance.recipient = r
             else:

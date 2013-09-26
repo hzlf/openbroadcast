@@ -2,11 +2,16 @@
 {% load i18n %}
 {% block content %}
 
-  <form method='post' class="form-horizontal" action=''>{% csrf_token %}
-    {% include 'invitation/form_fields.html' %}
+    <form method='post' class="form-horizontal" action=''>{% csrf_token %}
 
-    <input type="submit" class="btn" value="{% trans "Send invitation email" %}" />
-  </form>
+
+        {% include 'invitation/form_fields.html' %}
+
+
+        <div class="actions">
+            <input type="submit" class="btn btn-primary pull-right" value="{% trans "Send invitation email" %}"/>
+        </div>
+    </form>
 
 
 {% endblock %}

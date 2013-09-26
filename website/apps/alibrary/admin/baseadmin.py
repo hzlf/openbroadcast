@@ -390,7 +390,7 @@ class PlaylistItemPlaylistInline(admin.TabularInline):
 class PlaylistAdmin(GenericAdminModelAdmin):
     
     list_display   = ('name', 'user', 'type', 'duration', 'target_duration', 'is_current', 'rotation', 'updated')
-    list_filter = ('type', )
+    list_filter = ('type', 'broadcast_status', )
 
     search_fields = ['name', 'user__username',]
     date_hierarchy = 'created'

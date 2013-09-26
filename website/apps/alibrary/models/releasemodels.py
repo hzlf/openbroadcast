@@ -87,7 +87,7 @@ from lib.fields import extra
 
 LOOKUP_PROVIDERS = (
     ('discogs', _('Discogs')),
-    #('musicbrainz', _('Musicbrainz')),
+    ('musicbrainz', _('Musicbrainz')),
 )
 
 
@@ -112,7 +112,8 @@ class Release(MigrationMixin):
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
     license = models.ForeignKey(License, blank=True, null=True, related_name='release_license')
-    
+
+    # TODO: Refactor to l10n !!
     release_country = CountryField(blank=True, null=True)
     
     uuid = UUIDField()
@@ -677,12 +678,14 @@ class ReleaseAlbumartists(models.Model):
     artist = models.ForeignKey('Artist', related_name='release_albumartist_artist')
     release = models.ForeignKey('Release', related_name='release_albumartist_release')
     JOIN_PHRASE_CHOICES = (
-        ('&', _('"&"')),
-        (',', _('","')),
-        ('and', _('"and"')),
-        ('feat.', _('"feat."')),
+        ('&', _('&')),
+        (',', _(',')),
+        ('and', _('and')),
+        ('feat.', _('feat.')),
+        ('vs.', _('vs.')),
+        ('-', _('-')),
     )
-    join_phrase = models.CharField(verbose_name="join character(s)", max_length=12, default=None, choices=JOIN_PHRASE_CHOICES, blank=True, null=True)
+    join_phrase = models.CharField(verbose_name="join phrase", max_length=12, default=None, choices=JOIN_PHRASE_CHOICES, blank=True, null=True)
     position = models.PositiveIntegerField(null=True, blank=True)
     
     class Meta:

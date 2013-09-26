@@ -38,6 +38,8 @@ from filer.fields.image import FilerImageField
 from filer.fields.audio import FilerAudioField
 from filer.fields.file import FilerFileField
 
+from django_date_extensions.fields import ApproximateDateField
+
 # modules
 #from taggit.managers import TaggableManager
 from django_countries import CountryField
@@ -66,7 +68,7 @@ from alibrary.util.slug import unique_slugify
 
 LOOKUP_PROVIDERS = (
     ('discogs', _('Discogs')),
-    #('musicbrainz', _('Musicbrainz')),
+    ('musicbrainz', _('Musicbrainz')),
 )
 
 class ArtistManager(models.Manager):
@@ -89,8 +91,11 @@ class Artist(MigrationMixin):
     #country = CountryField(blank=True, null=True)
     country = models.ForeignKey(Country, blank=True, null=True)
     
-    date_start = models.DateField(null=True, blank=True)
-    date_end = models.DateField(null=True, blank=True)
+    #date_start = models.DateField(null=True, blank=True)
+    #date_end = models.DateField(null=True, blank=True)
+
+    date_start = ApproximateDateField(verbose_name=_("Begin"), blank=True, null=True, help_text=_("date of formation / date of birth"))
+    date_end = ApproximateDateField(verbose_name=_("End"), blank=True, null=True, help_text=_("date of breakup / date of death"))
     
     
     PRIORITY_CHOICES = (
@@ -139,7 +144,10 @@ class Artist(MigrationMixin):
     creator = models.ForeignKey(User, blank=True, null=True, related_name="artists_creator", on_delete=models.SET_NULL)
     publisher = models.ForeignKey(User, blank=True, null=True, related_name="artists_publisher", on_delete=models.SET_NULL)
 
-    
+    # identifiers
+    ipi_code = models.CharField(verbose_name=_('IPI Code'), max_length=32, blank=True, null=True)
+
+
     
     # tagging
     #tags = TaggableManager(blank=True)

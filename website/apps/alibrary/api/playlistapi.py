@@ -211,9 +211,12 @@ class PlaylistResource(ModelResource):
     
     
     def dehydrate(self, bundle):
-        bundle.data['edit_url'] = bundle.obj.get_edit_url();
+        bundle.data['edit_url'] = bundle.obj.get_edit_url()
 
-        bundle.data['item_count'] = bundle.obj.items.count();
+        bundle.data['item_count'] = bundle.obj.items.count()
+
+        # somehow needed to get data as json...
+        bundle.data['broadcast_status_messages'] = bundle.obj.broadcast_status_messages
 
         # a bit hackish maybe, provide uuids of all items in playlist
         items = bundle.obj.get_items()
@@ -374,6 +377,10 @@ class PlaylistResource(ModelResource):
         self.throttle_check(request)
         
         q = request.GET.get('q', None)
+
+        # bit hakish here...
+        type = request.GET.get('type', None)
+
         result = []
         object_list = []
         objects = []
@@ -385,6 +392,9 @@ class PlaylistResource(ModelResource):
             
             #qs = Playlist.objects.filter(name__istartswith=q)
             qs = Playlist.objects.filter(name__icontains=q)
+
+            if type:
+                qs = qs.filter(type=type)
         
 
             object_list = qs.distinct()[0:20]

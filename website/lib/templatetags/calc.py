@@ -8,18 +8,22 @@ register = template.Library()
 
 @register.filter 
 def multiply(value, arg):
-    return int(value) * int(arg) 
+    return float(value) * float(arg)
 
 @register.filter 
 def divide(value, arg):
     try:
-        return int(int(value) / int(arg))
+        return int(float(value) / float(arg))
     except:
         return None
 
 @register.filter 
 def subtract(value, arg):
-    return int(int(value) - int(arg)) 
+    return int(float(value) - float(arg))
+
+@register.filter
+def roundint(value):
+    return int(value)
 
 @register.filter 
 def squaretuple(value):

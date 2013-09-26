@@ -31,6 +31,19 @@ form input
 
 
 
+// overrides
+.help-block
+  display: inline
+  margin: 2px 4px 0 10px
+  color: #999
+  float: left
+  margin-left: 10px
+
+.ui-helper-hidden-accessible
+  display: none
+
+
+
 // Horizontal-specific styles / Overrides
 // --------------------------
 
@@ -38,7 +51,6 @@ form.form-horizontal
   // Increase spacing between groups
   .control-group
     margin-bottom: $baseLineHeight / 2
-    +clearfix
   // Float the labels left
   .control-label
     float: left
@@ -58,7 +70,7 @@ form.form-horizontal
   .form-actions
     padding-left: 160px
     border-top: none
-    
+
   .span2
     .controls
       margin-left: 50px
@@ -79,17 +91,17 @@ form.form-horizontal
 
     &:nth-child(odd)
       background: #fafafa
-    
+
     > .formColumn
       //border-bottom: 1px solid #ccc
-      
+
     &.relation-row
       padding: 0 0 0 0
       margin-top: 0
       margin-bottom: 0
       .controls
         // margin-left: 40px
-        
+
     &.releasemedia-row
       margin-left: 0px
     
@@ -213,38 +225,7 @@ body
       background-color: red
       
       
-// sidebar
-.lookup.provider
 
-  &.listing
-    &.fixed
-      position: fixed
-      width: 260px
-      top: 120px
-      
-  h2
-    border-bottom: 1px solid #efefef
-      
-  .item
-    padding: 4px 4px 4px 4px
-    margin: 0px 0 0px 0
-    border-bottom: 1px solid #efefef
-
-
-    
-    &.available
-      // color: green
-      cursor: pointer
-      &.hover
-        background-color: #DDFFD9
-    
-    &.unavailable
-      // color: green
-      cursor: wait
-      h4
-        color: #a5a5a5
-      &.hover
-        background-color: #efefef
 
 
 
@@ -321,6 +302,14 @@ div.bulk_edit
 
 
 
+// hm..
+fieldset
+  ul.label-select
+    margin-left: 127px
+    li
+      background: #efefef
+      padding: 1px 4px 1px 4px
+      margin-right: 10px
 
 
 
@@ -329,8 +318,45 @@ div.bulk_edit
 
 
 
+.relation-row
+  .span1
+    .controls
+      margin-left: 80px !important
+ul.relations.external
+  //width: 20px
+  //height: 18px
+  //background: red
+  li > a
+    color: #5a5a5a
+    &:hover
+      color: #6633cc
+    i
+      font-size: 130%
 
-ul.links.external
+// relation lookup
+fieldset.relations
+  .relation
+    border: 1px solid #efefef
+    background: #efefef
+    padding: 1px 4px 1px 4px
+    margin: 2px 0 2px 127px
+    // float: left
+    &:hover
+      border: 1px solid #a5a5a5
+
+    a
+      color: #5a5a5a
+      &:hover
+        text-decoration: none
+
+    &.match
+      background: #ddffd9
+    &.diff
+      background: #fff4d9
+
+
+// unused, refactored to custom font icons
+___ul.links.external
 
   li.name
     margin-left: 12px
