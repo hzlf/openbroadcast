@@ -5,113 +5,136 @@
 {% load thumbnail i18n truncate %}
 
 {% block heading %} <!-- heading / icon (large one) -->
-{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}selectable/js/jquery.dj.selectable.js"></script>{% endaddtoblock %}
-{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}ac_tagging/js/jquery.tag-it.js"></script>{% endaddtoblock %}
-{% addtoblock "js-post" %}{% dajaxice_js_import %}{% endaddtoblock %}
-{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}dajax/jquery.dajax.core.js"></script>{% endaddtoblock %}
+    {% addtoblock "js-post" %}
+        <script type="text/javascript" src="{{ STATIC_URL }}selectable/js/jquery.dj.selectable.js"></script>
+    {% endaddtoblock %}
+    {% addtoblock "js-post" %}
+        <script type="text/javascript" src="{{ STATIC_URL }}ac_tagging/js/jquery.tag-it.js"></script>{% endaddtoblock %}
+    {% addtoblock "js-post" %}{% dajaxice_js_import %}{% endaddtoblock %}
+    {% addtoblock "js-post" %}
+        <script type="text/javascript" src="{{ STATIC_URL }}dajax/jquery.dajax.core.js"></script>{% endaddtoblock %}
 
-{% addtoblock "js-post" %}<!--<script type="text/javascript" src="{{ STATIC_URL }}js/ajax_select.js"></script>-->{% endaddtoblock %}
+    {% addtoblock "js-post" %}
+        <script type="text/javascript" src="{{ STATIC_URL }}alibrary/js/edit.js"></script>{% endaddtoblock %}
 
 
-{% addtoblock "js-post" %}
-<script>
-	$(function(){
-		$('.save-and-publish').click(function(){
-			$('.form-actions #div_id_publish input').prop('checked', true);
-		});
-		
-		$('select[readonly] option[selected]').each(function(i, el){
-			var val = $(el).text();
-			$(el).parents('.control-group').html('<span>' + val + '</span>');
-		});
-		
+    {% addtoblock "js-post" %}<!--<script type="text/javascript" src="{{ STATIC_URL }}js/ajax_select.js"></script>-->
+    {% endaddtoblock %}
 
-		
-	});
-</script>
-{% endaddtoblock %}
 
-{% addtoblock "css" %}
-<style>
-	.form-actions #div_id_publish {
-		display: none;
-	}
-</style>
-{% endaddtoblock %}
+    {% addtoblock "js-post" %}
+        <script>
+            $(function () {
+                $('.save-and-publish').click(function () {
+                    $('.form-actions #div_id_publish input').prop('checked', true);
+                });
 
-<div id="heading">
-	{% include "skeleton/heading.html" %}
-</div>
-<!-- heading / icon (large one) -->
+                $('select[readonly] option[selected]').each(function (i, el) {
+                    var val = $(el).text();
+                    $(el).parents('.control-group').html('<span>' + val + '</span>');
+                });
+
+                edit.ui.init();
+
+
+            });
+        </script>
+    {% endaddtoblock %}
+
+    {% addtoblock "css" %}
+        <style>
+            .form-actions #div_id_publish {
+                display: none;
+            }
+        </style>
+    {% endaddtoblock %}
+
+    <div id="heading">
+        {% include "skeleton/heading.html" %}
+    </div>
+    <!-- heading / icon (large one) -->
 {% endblock %}
 
 {% block modnav %} <!-- start: intra-module navigation -->
-<div id="modnav">
-	{% include "skeleton/modnav.html" %}
-</div>
-<!-- end: intra-module navigation -->
+    <div id="modnav">
+        {% include "skeleton/modnav.html" %}
+    </div>
+    <!-- end: intra-module navigation -->
 {% endblock %}
 
 {% block inner %}
-<div class="item_detail" style="">
+    <div class="item_detail" style="">
 
-	<section class="shaded">
-		<div class="row iteminfo release">
-			{% include "alibrary/media/_detail_info.html" %}
-		</div>
-	</section>
+        <section class="shaded">
+            <div class="row iteminfo release">
+                {% include "alibrary/media/_detail_info.html" %}
+            </div>
+        </section>
 
-	<div class="item_menu" id="item_menu"></div>
+        <div class="item_menu" id="item_menu"></div>
 
-	<div class="clear"></div>
+        <div class="clear"></div>
 
-</div>
+    </div>
 {% endblock %}
 
 {% block sidebar %}
-{% include "alibrary/media/sidebar/_edit.html" %}
+    {% include "alibrary/media/sidebar/_edit.html" %}
 {% endblock %}
 
 {% block form %}
-<div class="item_inner">
+    <div class="item_inner">
 
-	<form class="form-horizontal form-compact form-release" method="post" id="" enctype="multipart/form-data">
+        <form class="form-horizontal form-compact form-release" method="post" id="" enctype="multipart/form-data">
 
-		{{ form.management_form }}
-		{{ relation_form.management_form }}
-		{{ releasemedia_form.management_form }}
+            {{ form.management_form }}
+            {{ relation_form.management_form }}
+            {{ releasemedia_form.management_form }}
 
-		{% crispy action_form %}
-
-
-		{% crispy form %}
-		
-		
-
-		<fieldset>
-			<legend>
-				Relations<span class="pull-right"></span>
-			</legend>
-		
-
-		{% crispy relation_form %}
-		
-		</fieldset>
-		
-		{% crispy action_form %}
-		
+            {% crispy action_form %}
 
 
-	</form>
+            {% crispy form %}
 
-</div>
+            <fieldset>
+                <legend>
+                    {% trans "Extra artists" %}<span class="pull-right"></span>
+                </legend>
+                <div class="notes-form notes-inline notes-info">
+                    <p>
+                        {% trans "Allows you to add additional Artists and their 'roles'" %}<br>
+                    </p>
+                </div>
+
+                {% crispy extraartist_form %}
+
+            </fieldset>
+
+
+            <fieldset class="relations">
+                <legend>
+                    Relations<span class="pull-right"></span>
+                </legend>
+
+
+                {% crispy relation_form %}
+                <div class="lookup-container"></div>
+
+            </fieldset>
+
+            {% crispy action_form %}
+
+
+        </form>
+
+    </div>
 {% endblock %}
 
 {% block form_sidebar %}
-<div class="sidebar form-sidebar holder">
-	{% with providers=object.get_lookup_providers%}
-	{% include "alibrary/form_lookup/_providers.html" %}
-	{% endwith %}
-</div>
+    <div class="sidebar form-sidebar holder">
+        {% with providers=object.get_lookup_providers ct="media" %}
+            {% include "alibrary/form_lookup/_providers.html" %}
+        {% endwith %}
+    </div>
 {% endblock %}
 

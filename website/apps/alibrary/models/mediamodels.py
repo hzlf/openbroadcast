@@ -96,6 +96,11 @@ import arating
 
 USE_CELERYD = True
 
+LOOKUP_PROVIDERS = (
+    #('discogs', _('Discogs')),
+    ('musicbrainz', _('Musicbrainz')),
+)
+
 
 from caching.base import CachingMixin, CachingManager
 
@@ -135,7 +140,6 @@ class Media(CachingMixin, MigrationMixin):
     status = models.PositiveIntegerField(default=0, choices=STATUS_CHOICES)
 
 
-    isrc = models.CharField(verbose_name='ISRC', max_length=12, null=True, blank=True)
     
     publish_date = models.DateTimeField(blank=True, null=True)
 
@@ -205,7 +209,8 @@ class Media(CachingMixin, MigrationMixin):
     creator = models.ForeignKey(User, blank=True, null=True, related_name="media_creator", on_delete=models.SET_NULL)
     publisher = models.ForeignKey(User, blank=True, null=True, related_name="media_publisher", on_delete=models.SET_NULL)
 
-    
+    # identifiers
+    isrc = models.CharField(verbose_name='ISRC', max_length=12, null=True, blank=True)
     
     # relations a.k.a. links
     relations = generic.GenericRelation(Relation)
@@ -323,6 +328,21 @@ class Media(CachingMixin, MigrationMixin):
         
         else:
             return None
+
+
+
+    def get_lookup_providers(self):
+
+        providers = []
+        for key, name in LOOKUP_PROVIDERS:
+            relations = self.relations.filter(service=key)
+            relation = None
+            if relations.count() == 1:
+                relation = relations[0]
+
+            providers.append({'key': key, 'name': name, 'relation': relation})
+
+        return providers
 
     
     @models.permalink
@@ -463,7 +483,10 @@ class Media(CachingMixin, MigrationMixin):
                 # celeryd version
                 self.create_waveform_image.delay(self)
                 waveform_image = self.get_cache_file('png', 'waveform')
-            except:
+            except Exception, e:
+                print '""""""""""""""""""""""""""'
+                print e
+                print '""""""""""""""""""""""""""'
                 waveform_image = None
             
         return waveform_image
@@ -1248,7 +1271,7 @@ class MediaExtraartists(models.Model):
     profession = models.ForeignKey(Profession, verbose_name='Role/Profession', related_name='media_extraartist_profession', blank=True, null=True)   
     class Meta:
         app_label = 'alibrary'
-        ordering = ('profession__name', 'artist__name', )
+        ordering = ('artist__name', 'profession__name', )
     
     
 

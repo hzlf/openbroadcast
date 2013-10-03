@@ -69,15 +69,28 @@ class ImportFileResource(ModelResource):
         Little switch to play with jquery fileupload
         """
         try:
-            import_id = request.GET['import_session']
+
+            #import_id = request.GET['import_session']
+            import_id = request.GET.get('import_session', None)
+            uuid_key = request.GET.get('uuid_key', None)
 
 
             print "####################################"
             print request.FILES[u'files[]']
 
+            if import_id:
+                imp = Import.objects.get(pk=import_id)
+                bundle.data['import_session'] = imp
 
-            imp = Import.objects.get(pk=import_id)
-            bundle.data['import_session'] = imp
+            elif uuid_key:
+                imp, created = Import.objects.get_or_create(uuid_key=uuid_key, user=request.user)
+                bundle.data['import_session'] = imp
+
+            else:
+                bundle.data['import_session'] = None
+
+
+
             bundle.data['file'] = request.FILES[u'files[]']
             
             

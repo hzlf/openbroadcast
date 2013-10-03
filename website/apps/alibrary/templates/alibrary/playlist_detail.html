@@ -28,78 +28,79 @@
 {% endblock %}
 
 {% block modnav %} <!-- start: intra-module navigation -->
-<div id="modnav">
-	{% include "skeleton/modnav.html" %}
-</div>
-<!-- end: intra-module navigation -->
+    <div id="modnav">
+        {% include "skeleton/modnav.html" %}
+    </div>
+    <!-- end: intra-module navigation -->
 {% endblock %}
 
 {% block inner %}
 
 
 
-<div class="item_detail">
+    <div class="item_detail">
 
-	<section class="shaded">
-		<div class="row iteminfo release">
-			{% include "alibrary/playlist/_detail_info.html" %}
-		</div>
-	</section>
+    <section class="shaded">
+        <div class="row iteminfo release">
+            {% include "alibrary/playlist/_detail_info.html" %}
+        </div>
+    </section>
 
-	<div class="item_menu" id="item_menu">
-		<ul class="nav nav-tabs">
-			<li class="active">
-				<a href="#tracklist" data-toggle="tab">{% trans "Tracklist" %}</a>
-			</li>
-			<li>
-				<a href="#description" data-toggle="tab">{% trans "Description" %}</a>
-			</li>
-			<li>
-				<a href="#history" data-toggle="tab">{% trans "History" %}</a>
-			</li>
-		</ul>
-	</div>
+    <div class="item_menu" id="item_menu">
+        <ul class="nav nav-tabs">
+            <li class="active">
+                <a href="#tracklist" data-toggle="tab">{% trans "Tracklist" %}</a>
+            </li>
+            <li>
+                <a href="#description" data-toggle="tab">{% trans "Description" %}</a>
+            </li>
+            <li>
+                <a href="#history" data-toggle="tab">{% trans "History" %}</a>
+            </li>
+            <li>
+                <a href="#emissions" data-toggle="tab">{% trans "Emissions" %} ({{ object.get_emissions.count }})</a>
+            </li>
+        </ul>
+    </div>
 
-	<div class="clear"></div>
+    <div class="clear"></div>
 
-	<section class="tabbed item_inner">
+    <section class="tabbed item_inner">
 
-		<div class="tab-content">
+        <div class="tab-content">
 
-			<div class="tab-pane active" id="tracklist">
+            <div class="tab-pane active" id="tracklist">
 
-				<div class="listview container medias s">
+                <div class="listview container medias s">
 
-					<div class="list_header"></div>
+                    <div class="list_header"></div>
 
-					<div class="list_body">
-						{% for item in object.items.all %}
+                    <div class="list_body">
+                        {% for item in object.items.all %}
 
-						{% if item.content_type.model == "media" %}
-							{% with item=item.content_object %}
-							{% include "alibrary/media/_list_item_foreign_xs.html" %}
-							{% endwith %}
-						{% endif %}
+                            {% if item.content_type.model == "media" %}
+                                {% with item=item.content_object %}
+                                    {% include "alibrary/media/_list_item_foreign_xs.html" %}
+                                {% endwith %}
+                            {% endif %}
 
-						{% if item.content_type.model == "release" %}
-							{% with item=item.content_object %}
-							<h1>{{ item.name }}</h1>
-							{% endwith %}
-						{% endif %}
-						
-						
-						{% endfor %}
-					</div>
-				</div>
-			
-			</div>
+                            {% if item.content_type.model == "release" %}
+                                {% with item=item.content_object %}
+                                    <h1>{{ item.name }}</h1>
+                                {% endwith %}
+                            {% endif %}
 
-			<div class="tab-pane" id="history">
 
-				
+                        {% endfor %}
+                    </div>
+                </div>
 
-				
-				<!--
+            </div>
+
+            <div class="tab-pane" id="history">
+
+
+                <!--
 				<table class="table table-condensed history">
 
 					<thead>
@@ -125,55 +126,103 @@
 				</table>
 				-->
 
-			</div>
+            </div>
 
-			<div class="tab-pane" id="description">
-				<section class="description">
-			
-					<div class="description markdown padded-h">
-						{% wikify object.description %}
-					</div>
-			
-				</section>
-			</div>
+            <div class="tab-pane" id="description">
+                <section class="description">
 
-			<div class="tab-pane" id="broadcasts">
-				...
-			</div>
-		</div>
+                    <div class="description markdown padded-h">
+                        {% wikify object.description %}
+                    </div>
 
-	</section>
+                </section>
+            </div>
 
 
+            <div class="tab-pane" id="emissions">
+
+                <section class="emissions">
+
+                    <h2>{% trans "Emissions" %}</h2>
 
 
-	<section class="comments on-site">
-		
-		<div class="header">
-			<h3>{% trans "Comments" %}</h3>
-		</div>
-		
-		<div class="form">
-			{% if user.is_authenticated %}
-				{% render_comment_form for object %}
-			{% else %}
-				<p>{% trans "Please login to join the conversation" %}</p>
-			{% endif %}
-		</div>
-		
-		<!-- TODO: maybe move to template tag.. just testing here... -->
-		{% with router=object.get_api_url %}
-		{% include "element/chat/_message_list.html" %}
-		{% endwith %}
-		
-		{% render_comment_list for object %}
-	</section>
-	
-	<section class="comments disqus">
-	{# disqus_show_comments #}
-	</section>
-	
-</div>
+                    <div class="emission-list">
+
+                        {% for item in object.get_emissions %}
+
+                            {% ifchanged %}<h4>{{ item.time_start|date:"F Y" }}</h4>{% endifchanged %}
+
+                            <!-- actual entry -->
+
+                            <ul class="event unstyled horizontal clearfix">
+
+                                <li class="date">{{ item.time_start|date:"D m - H:i:s" }}</li>
+
+                                <li class="channel">
+
+                                    <a href="{{ item.channel.get_absolute_url }}">
+                                        {{ item.channel.name }} | {{ item.channel.station.name }}
+                                    </a>
+
+                                </li>
+
+                                <li class="user">
+                                    {% if  item.user %}
+                                        <a href="{{ item.user.get_absolute_url }}">
+                                            {% firstof item.user.get_full_name item.user.username %}
+                                        </a>
+                                    {% else %}
+                                        {% trans "Autopilot" %}
+                                    {% endif %}
+
+                                </li>
+
+                            </ul>
+
+
+                        {% endfor %}
+
+
+                    </div>
+
+
+                </section>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <section class="comments on-site">
+
+        <div class="header">
+            <h3>{% trans "Comments" %}</h3>
+        </div>
+
+        <div class="form">
+            {% if user.is_authenticated %}
+                {% render_comment_form for object %}
+            {% else %}
+                <p>{% trans "Please login to join the conversation" %}</p>
+            {% endif %}
+        </div>
+
+        <!-- TODO: maybe move to template tag.. just testing here... -->
+        {% with router=object.get_api_url %}
+            {% include "element/chat/_message_list.html" %}
+        {% endwith %}
+
+        {% render_comment_list for object %}
+    </section>
+
+    <section class="comments disqus">
+        {# disqus_show_comments #}
+    </section>
+
+    </div>
 
 
 
@@ -181,5 +230,5 @@
 {% endblock %}
 
 {% block sidebar %}
-{% include "alibrary/playlist/sidebar/_detail.html" %}
+    {% include "alibrary/playlist/sidebar/_detail.html" %}
 {% endblock %}

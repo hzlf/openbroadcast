@@ -169,7 +169,29 @@ class MediaFilter(django_filters.FilterSet):
                 if ds not in flist:
                     flist.append(filter_)
 
+
+
+
+            """
+            add some custom queries
+            """
+            cf = {
+                'label': 'Extra filters',
+                'name': 'extra_filter',
+                'entries': [
+                    ['unassigned', '', 'Unassigned tracks'],
+                ]
+            }
+            flist.append(cf)
+
+
+
+
             self._filterlist = flist
+
+
+
+
 
         return self._filterlist
 

@@ -226,7 +226,9 @@ class MediaExtraartistsInline(admin.TabularInline):
     extra=1
 
 
-
+class AgencyArtistInline(admin.TabularInline):
+    model = Agency.artists.through
+    extra = 1
          
 class ArtistAdmin(PlaceholderAdmin, BaseAdmin):
     
@@ -238,7 +240,7 @@ class ArtistAdmin(PlaceholderAdmin, BaseAdmin):
     # inlines = [LabelInline]
     
     # RelationsInline, 
-    inlines = [RelationsInline, ArtistProfessionsInline, ArtistMembersInline, ArtistParentsInline,]
+    inlines = [RelationsInline, ArtistProfessionsInline, ArtistMembersInline, ArtistParentsInline, AgencyArtistInline]
     
     readonly_fields = ["folder",]
     
@@ -371,6 +373,26 @@ class DistributorAdmin(PlaceholderAdmin, BaseAdmin):
     ]
     
 admin.site.register(Distributor, DistributorAdmin)
+
+
+
+class AgencyAdmin(BaseAdmin):
+
+    # inlines = [LabelInline]
+    #prepopulated_fields = {"slug": ("name",)}
+    readonly_fields = ['slug', 'd_tags']
+
+    inlines = [AgencyArtistInline, RelationsInline]
+
+    fieldsets = [
+        (None,               {'fields': ['name', 'slug', 'type', 'description']}),
+        ('Contact', {'fields' : ['address', 'country', ('phone', 'fax'), 'email']}),
+        ('Relations', {'fields': ['parent'], 'classes': ['']}),
+        ('Users', {'fields' : [('owner', 'creator', 'publisher'),]}),
+    ]
+
+admin.site.register(Agency, AgencyAdmin)
+admin.site.register(AgencyScope)
 
 
     

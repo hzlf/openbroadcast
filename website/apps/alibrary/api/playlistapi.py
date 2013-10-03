@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls.defaults import *
+from django.db.models import Q
 
 from tastypie import fields
 from tastypie.authentication import *
@@ -225,8 +226,19 @@ class PlaylistResource(ModelResource):
             item_uuids.append(item.content_object.uuid)
         bundle.data['item_uuids'] = item_uuids
 
+
+        bundle.data['main_image'] = None
+        try:
+            opt = THUMBNAIL_OPT
+            main_image = get_thumbnailer(bundle.obj.main_image).get_thumbnail(opt)
+            bundle.data['main_image'] = main_image.url
+        except:
+            pass
+
         #bundle.data['reorder_url'] = bundle.obj.get_reorder_url();
         return bundle
+
+
 
     """
     def hydrate_m2m(self, bundle):
@@ -265,6 +277,8 @@ class PlaylistResource(ModelResource):
             # collecting
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/collect%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('collect_specific'), name="playlist_api_collect_specific"),
             url(r"^(?P<resource_name>%s)/collect%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('collect'), name="playlist_api_collect"),
+            url(r"^(?P<resource_name>%s)/autocomplete%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('autocomplete'), name="alibrary-playlist_api-autocomplete"),
+            # legacy
             url(r"^(?P<resource_name>%s)/autocomplete-name%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('autocomplete'), name="alibrary-playlist_api-autocomplete"),
 
         ]
@@ -380,6 +394,7 @@ class PlaylistResource(ModelResource):
 
         # bit hakish here...
         type = request.GET.get('type', None)
+        broadcast_status = request.GET.get('broadcast_status', None)
 
         result = []
         object_list = []
@@ -389,12 +404,14 @@ class PlaylistResource(ModelResource):
         qs = None
         
         if q and len(q) > 1:
-            
-            #qs = Playlist.objects.filter(name__istartswith=q)
-            qs = Playlist.objects.filter(name__icontains=q)
+            qs = Playlist.objects.filter(Q(name__istartswith=q)\
+                | Q(user__username__icontains=q))
 
             if type:
                 qs = qs.filter(type=type)
+
+            if broadcast_status:
+                qs = qs.filter(broadcast_status=broadcast_status)
         
 
             object_list = qs.distinct()[0:20]
@@ -432,13 +449,16 @@ class PlaylistResource(ModelResource):
         bundle.data['ct'] = 'playlist'
         bundle.data['get_absolute_url'] = bundle.obj.get_absolute_url()
         bundle.data['resource_uri'] = bundle.obj.get_api_url()
-        bundle.data['main_image'] = None
+
+        bundle.data['type'] = bundle.obj.get_type_display()
+        bundle.data['status'] = bundle.obj.get_status_display()
         
         try:
-            bundle.data['user'] = bundle.obj.user.get_full_name()
+            bundle.data['user'] = bundle.obj.user.get_ful__l_name()
         except:
             bundle.data['user'] = bundle.obj.user.username
-            
+
+        bundle.data['main_image'] = None
         try:
             opt = THUMBNAIL_OPT
             main_image = get_thumbnailer(bundle.obj.main_image).get_thumbnail(opt)

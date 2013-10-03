@@ -232,10 +232,8 @@ class PlaylistEditView(UpdateView):
         
         context['action_form'] = ActionForm()        
         context['releasemedia_form'] = ReleaseMediaFormSet(instance=self.object)
-        
         context['user'] = self.request.user
         context['request'] = self.request
-        
         context['permission_form'] =  UserObjectPermissionsForm(self.request.user, self.object, self.request.POST or None)
         
         return context
@@ -267,14 +265,12 @@ class PlaylistEditView(UpdateView):
 def playlist_convert(request, pk, type):
     
     playlist = get_object_or_404(Playlist, pk=pk)
-    
     playlist.convert_to(type)
-    
 
     return HttpResponseRedirect(playlist.get_edit_url())
 
         
-"""
+""" Refactored to api
 def playlist_collect(request, pk):
     playlist = get_object_or_404(Playlist, pk=pk)
 

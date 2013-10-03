@@ -211,6 +211,9 @@ class Release(MigrationMixin):
     creator = models.ForeignKey(User, blank=True, null=True, related_name="releases_creator", on_delete=models.SET_NULL)
     publisher = models.ForeignKey(User, blank=True, null=True, related_name="releases_publisher", on_delete=models.SET_NULL)
 
+    # identifiers
+    barcode = models.CharField(max_length=32, blank=True, null=True)
+
     # generic reverse relations
     # import_items = generic.GenericRelation('importer.ImportItem')
 

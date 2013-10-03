@@ -1,1 +1,23 @@
 {% load i18n %}
+
+<div class="menu-context">
+
+
+    <div class="action-group">
+        <ul class="unstyled">
+            {% if user.is_authenticated %}
+                <li class="link">
+                    <a class="hoverable"
+                       href="{% url alibrary-playlist-create %}"
+                       title="{% trans "Create a playlist" %}">
+                        <i class="icon icon-reorder"></i>
+                        <span>{% trans "Create a playlist" %}</span>
+                    </a>
+                </li>
+            {% endif %}
+
+        </ul>
+    </div>
+
+
+</div>

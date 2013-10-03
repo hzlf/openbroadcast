@@ -151,7 +151,7 @@
 
             <li>
                 <a href="#"
-                   class="{% if not perms.alibrary.schedule_playlist or not item.type == "broadcast" %} disabled{% endif %}"
+                   class="{% if not perms.alibrary.schedule_playlist or not item.type == "broadcast" or not item.broadcast_status == 1 %}  disabled{% endif %}"
                    data-action="schedule"
                    data-ct="playlist"
                    data-id="{{ item.id }}"

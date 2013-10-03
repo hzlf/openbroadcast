@@ -87,27 +87,34 @@ $theme-4-bright: #f2dacc
 // object placement (drag n drop)
 // sidebar
 .object-to-schedule
-  background: #ddffd9
-  border: 1px solid #95d182
+  cursor: pointer
+
+
+  background: #333
+  border: 1px solid #444
   padding: 2px 4px
-  
+  color: white
+  p
+    color: #ccc
 
+  img
+    width: 44px
+    height: 44px
 
-.object-to-schedule
+  // while dragging on scheduler
   &.ui-draggable-dragging
-    background: yellow
+    padding: 0 !important
     // width: 108px !important
     .item-list
       display: none
     .tags
       display: none
-    h4 small
-      display: none
-    h4
+
+    img, small
       display: none
       
     &.colision
-      background: red
+      //background: #f99
       
       
       

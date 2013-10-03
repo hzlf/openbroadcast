@@ -31,6 +31,8 @@ from dajaxice.core import dajaxice_autodiscover, dajaxice_config
 dajaxice_autodiscover()
 
 
+from urls_api import api
+
 
 urlpatterns = patterns('',
 
@@ -58,9 +60,18 @@ urlpatterns = patterns('',
     #url(r'^ac_lookup/lookups/', include('ajax_select.urls')),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     
-    
-    url(r"^api/", include("alibrary.urls_api")),
-    url(r'^api/', include('urls_api')),
+
+
+    url(r'^api/', include(api.urls)),
+    #url(r'^api/', include('tastytools.urls'), {'api_name': api.api_name}),
+    #url(r'^apidocs/', include("tastydocs.urls"), {"api": api}),
+
+
+    #url(r"^api/", include("alibrary.urls_api")),
+    #url(r'^api/', include('urls_api')),
+
+
+
 
     # oauth
     url(r'^oauth2/', include('provider.oauth2.urls', namespace = 'oauth2')),

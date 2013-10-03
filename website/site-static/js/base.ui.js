@@ -1081,6 +1081,7 @@ AutocompleteApp = function () {
     var self = this;
     this.api_url;
     this.container;
+    this.ct;
     this.template = 'alibrary/nj/release/autocomplete.html';
     this.q_min = 2;
 
@@ -1111,13 +1112,25 @@ base.ui.searchbar = function () {
 
     var self = this;
 
+    var container = $('#searchbar');
+    var ct = container.data('ct');
+
+
+
     this.autocomplete = new AutocompleteApp();
-    this.autocomplete.api_url = '/api/v1/release/autocomplete/';
+    this.autocomplete.ct = ct;
+    this.autocomplete.template = 'alibrary/nj/' + ct + '/autocomplete.html';
+
+    // hackish api mapping :(
+    if(ct == 'media') {
+        ct = 'track';
+    }
+    this.autocomplete.api_url = '/api/v1/' + ct + '/autocomplete/';
     this.autocomplete.container = $('#autocomplete_holder');
 
 
     // Submit on 'ENTER'
-    $("#searchbar_input").live('keyup', function (e) {
+    $("#searchbar_input", container).live('keyup', function (e) {
 
         var q = $(this).val();
 
@@ -1130,18 +1143,8 @@ base.ui.searchbar = function () {
             return false;
         } else {
 
-            console.log(q);
+            debug.debug('query:', q);
             self.autocomplete.search(q);
-
-            /*
-             if(q.length > 1){
-             //$('#dim_content').css('display', 'block');
-             $('#autocomplete_holder').load('/de/inhalt/library/releases/autocomplete/?q=' + encodeURIComponent(q));
-             } else {
-             //$('#dim_content').css('display', 'none');
-             $('#autocomplete_holder').html('');
-             }
-             */
         }
 
     });

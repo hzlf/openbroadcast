@@ -81,7 +81,7 @@ SchedulerApp = function() {
 			var q = $(this).val();
 			var ct = $(this).attr('data-ct');
 			var target = $('.ac-result', $(this).parent());
-            var extra_query = 'type=broadcast';
+            var extra_query = 'type=broadcast&broadcast_status=1';
 
 			if(e.keyCode == 13 || e.keyCode == 9) {
 				return false;
@@ -256,7 +256,7 @@ SchedulerApp = function() {
 			object : data
 		}
 		var html = nj.render('abcast/nj/selected_object.html', d);
-		container.html(html);
+		container.append(html);
 
 		// drag bindings
 		

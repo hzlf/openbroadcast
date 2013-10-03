@@ -60,8 +60,12 @@ from alibrary.models.artistmodels import *
 from alibrary.models.releasemodels import *
 from alibrary.models.mediamodels import *
 
+
+
 from caching.base import CachingMixin, CachingManager
 
+
+DURATION_MAX_DIFF = 2000 # one second...
 
 
 TARGET_DURATION_CHOICES = (
@@ -178,7 +182,7 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
         ('broadcast', _('Broadcast')),
         ('other', _('Other')),
     )
-    type = models.CharField(max_length=12, default='other', null=True, choices=TYPE_CHOICES)
+    type = models.CharField(max_length=12, default='basket', null=True, choices=TYPE_CHOICES)
 
 
     BROADCAST_STATUS_CHOICES = (
@@ -198,7 +202,7 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
     )
     edit_mode = models.PositiveIntegerField(default=2, choices=EDIT_MODE_CHOICES)
     
-    rotation = models.BooleanField(default=False)
+    rotation = models.BooleanField(default=True)
     
     main_image = models.ImageField(verbose_name=_('Image'), upload_to=filename_by_uuid, null=True, blank=True)
     
@@ -228,10 +232,7 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
     # series
     series = models.ForeignKey(Series, null=True, blank=True, on_delete=models.SET_NULL)
     series_number = models.PositiveIntegerField(null=True, blank=True)
-    
-    #season = models.PositiveIntegerField(default=0, null=True, choices=TARGET_DURATION_CHOICES)
-    
-    
+
     # is currently selected as default?
     is_current = models.BooleanField(_('Currently selected?'), default=False)
     
@@ -282,6 +283,9 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
 
         try:
             for item in self.items.all():
+
+
+
                 duration += item.content_object.get_duration()
                 pip = PlaylistItemPlaylist.objects.get(playlist=self, item=item)
                 duration -= pip.cue_in
@@ -294,6 +298,13 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
         # duration = self.target_duration * 1000
             
         return duration
+
+
+    def get_emissions(self):
+        from abcast.models import Emission
+        ctype = ContentType.objects.get_for_model(self)
+        emissions = Emission.objects.filter(content_type__pk=ctype.id, object_id=self.id).order_by('-time_start')
+        return emissions
     
     #@models.permalink
     #def get_reorder_url(self):
@@ -419,6 +430,9 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
 
 
     def self_check(self):
+        """
+        check if everything is fine to be 'schedulable'
+        """
         log = logging.getLogger()
         log.debug('Self check: %s' % self.name)
 
@@ -455,7 +469,7 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
             compare durations. target: in seconds | calculated duration in milliseconds
             """
             diff = self.get_duration() - self.target_duration * 1000
-            if abs(diff) > 500:
+            if abs(diff) > DURATION_MAX_DIFF:
                 messages.append(_('durations do not match. difference is: %s seconds' % int(diff / 1000)) )
                 status = 2
 
@@ -489,7 +503,20 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
         TODO: maybe move
         """
         self.broadcast_status, self.broadcast_status_messages = self.self_check()
-        
+        print '%s - %s (id: %s)' % (self.broadcast_status, self.name, self.pk)
+        print ', '.join(self.broadcast_status_messages)
+        # map to object status (not extremly dry - we know...)
+        if self.broadcast_status == 1:
+            self.status = 1 # 'ready'
+        else:
+            self.status = 99 # 'error'
+
+        # check if scheduled, if yes update status
+        if self.scheduler_broadcasts.all().count() > 1:
+            self.status = 3
+
+
+
         # update d_tags
         try:
             t_tags = ''
@@ -588,3 +615,49 @@ class PlaylistItem(models.Model):
     def save(self, *args, **kwargs):
         super(PlaylistItem, self).save(*args, **kwargs)         
   
+
+
+"""
+maintenance tasks
+(called via celerybeat, or management command)
+"""
+
+@task
+def self_check_playlists():
+
+    """
+    (0, _('Undefined')),
+    (1, _('OK')),
+    (2, _('Warning')),
+    (99, _('Error')),
+    """
+
+    # do check
+    ps = Playlist.objects.filter(type='broadcast')
+    for p in ps:
+        p.broadcast_status, p.broadcast_status_messages = p.self_check()
+
+        # map to object status (not extremly dry - we know...)
+        if p.broadcast_status == 1:
+            p.status = 1 # 'ready'
+        else:
+            p.status = 99 # 'errot'
+
+        p.save()
+
+    # display summary
+    ps = Playlist.objects.filter(type='broadcast').order_by('-broadcast_status')
+    for p in ps:
+
+        print '------------------------------------------------------------'
+        print '%s - %s (id: %s)' % (p.broadcast_status, p.name, p.pk)
+        print ', '.join(p.broadcast_status_messages)
+        print
+
+    print '============================================================'
+    print 'Total plalyists (broadcast): %s' % ps.count()
+    print 'Undefined:                   %s' % ps.filter(broadcast_status=0).count()
+    print 'OK:                          %s' % ps.filter(broadcast_status=1).count()
+    print 'Warning:                     %s' % ps.filter(broadcast_status=2).count()
+    print 'Error:                       %s' % ps.filter(broadcast_status=99).count()
+    print

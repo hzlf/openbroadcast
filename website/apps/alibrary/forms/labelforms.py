@@ -283,17 +283,17 @@ class BaseLabelReleationFormSet(BaseGenericInlineFormSet):
         base_layout = Row(
                 Column(
                        Field('url', css_class='input-xlarge'),
-                       css_class='span5'
+                       css_class='span6 relation-url'
                        ),
                 Column(
-                       Field('service', css_class='input-small'),
-                       css_class='span1'
+                       Field('service', css_class='input-mini'),
+                       css_class='span4'
                        ),
                 Column(
                        Field('DELETE', css_class='input-mini'),
-                       css_class='span1'
+                       css_class='span2'
                        ),
-                css_class='row relation-row',
+                css_class='row-fluid relation-row form-autogrow',
         )
  
         self.helper.add_layout(base_layout)

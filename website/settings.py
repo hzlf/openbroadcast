@@ -464,6 +464,9 @@ INSTALLED_APPS = (
 
     # api
     'tastypie',
+    #'tastytools',
+    #'tastydocs',
+    #'chocolate',
     # oauth
     'provider',
     'provider.oauth2',

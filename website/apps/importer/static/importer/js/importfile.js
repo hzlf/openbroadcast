@@ -8,6 +8,8 @@ var ImportfileApp = function () {
     this.ac;
     this.api_lock = false;
 
+    this.update_callback = false;
+
 
     this.init = function (use_local_data) {
         debug.debug('ImportfileApp - init');
@@ -418,6 +420,13 @@ var ImportfileApp = function () {
 
     this.display = function (data) {
 
+        // TODO: make more nice!!!
+
+        if(self.update_callback) {
+            self.update_callback(data);
+        }
+
+
         var d = {
             object: data,
         };
@@ -437,7 +446,12 @@ var ImportfileApp = function () {
         self.api_lock = false;
 
         // update importer app
-        self.importer.update_summary();
+        try {
+            self.importer.update_summary();
+        } catch (e) {
+            // pass
+        }
+
 
 
     };

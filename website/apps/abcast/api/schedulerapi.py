@@ -69,19 +69,12 @@ class PlaylistResource(ModelResource):
 
 
 class EmissionResource(ModelResource):
-    
-    # set = fields.ForeignKey('abcast.api.JingleSetResource', 'set', null=True, full=True, max_depth=2)
-    
-    
-    #playlist = fields.ForeignKey('alibrary.api.PlaylistResource', 'playlist', null=True, full=True, max_depth=3)
 
-    """"""    
     co_to = {
              Playlist: PlaylistResource,
              }
     
     content_object = GenericForeignKeyField(to=co_to, attribute='content_object', null=False, full=True)
-    
 
     class Meta:
         queryset = Emission.objects.order_by('name').all()
@@ -111,7 +104,7 @@ class EmissionResource(ModelResource):
         bundle.data['type_display'] = obj.get_type_display()
         
         bundle.data['overlap'] = False
-        if obj.time_start.hour < 6:
+        if obj.time_start.hour < SCHEDULER_OFFSET:
                 tt = obj.time_start + datetime.timedelta(days=-1)
                 bundle.data['day_id'] = tt.strftime("%Y-%m-%d")
                 bundle.data['overlap'] = True
@@ -208,7 +201,9 @@ class EmissionResource(ModelResource):
         
         time_start = time_start + datetime.timedelta(hours=SCHEDULER_OFFSET)
         
-        time_end = time_start + datetime.timedelta(milliseconds=e.content_object.get_duration())
+        # time_end = time_start + datetime.timedelta(milliseconds=e.content_object.get_duration())
+        # for duration calculation we use the 'target duration' (to avoid blocked slots)
+        time_end = time_start + datetime.timedelta(seconds=e.content_object.target_duration)
     
         log.debug('time_start: %s' % time_start)
         log.debug('time_end: %s' % time_end)
@@ -223,7 +218,7 @@ class EmissionResource(ModelResource):
             success = False
         
         # check if slot is free
-        es = Emission.objects.filter(time_end__gt=time_start, time_start__lt=time_end).exclude(pk=e.pk)
+        es = Emission.objects.filter(time_end__gt=time_start + datetime.timedelta(seconds=2), time_start__lt=time_end).exclude(pk=e.pk)
         if es.count() > 0:
             data = { 'message': _('Sorry, but the desired time does not seem to be available.') }
             success = False

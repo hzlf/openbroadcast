@@ -132,6 +132,18 @@ class MaintenanceWorker(object):
                 # m = Media.objects.get(pk=item.)
 
 
+        if self.action == 'self_check_playlists':
+
+            from alibrary.models import Playlist
+            from alibrary.models.mediamodels import self_check_playlists
+
+            # reset
+            # ps = Playlist.objects.all()
+            # ps.update(status=11)
+
+            self_check_playlists()
+
+
 
 
         if self.action == 'map_tags':

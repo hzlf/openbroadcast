@@ -63,6 +63,8 @@ class Broadcast(BaseModel):
     
     # relations
     user = models.ForeignKey(User, blank=True, null=True, related_name="scheduler_broadcasts", on_delete=models.SET_NULL)
+
+    # REFACTORED: playlist not used, modeled via emission -> co
     playlist = models.ForeignKey(Playlist, blank=True, null=True, related_name="scheduler_broadcasts", on_delete=models.SET_NULL)
 
     # manager

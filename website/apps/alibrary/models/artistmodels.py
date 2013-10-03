@@ -90,6 +90,10 @@ class Artist(MigrationMixin):
     
     #country = CountryField(blank=True, null=True)
     country = models.ForeignKey(Country, blank=True, null=True)
+
+
+    booking_contact = models.CharField(verbose_name=_('Booking'), max_length=256, blank=True, null=True)
+
     
     #date_start = models.DateField(null=True, blank=True)
     #date_end = models.DateField(null=True, blank=True)
@@ -146,6 +150,7 @@ class Artist(MigrationMixin):
 
     # identifiers
     ipi_code = models.CharField(verbose_name=_('IPI Code'), max_length=32, blank=True, null=True)
+    isni_code = models.CharField(verbose_name=_('ISNI Code'), max_length=32, blank=True, null=True)
 
 
     

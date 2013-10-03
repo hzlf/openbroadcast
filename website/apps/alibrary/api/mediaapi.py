@@ -1,16 +1,21 @@
 from django.conf import settings
+from django.conf.urls import *
+from django.db.models import Q
 
 from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
 from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
 from tastypie.cache import SimpleCache
+from tastypie.utils import trailing_slash
 
 from easy_thumbnails.files import get_thumbnailer
 
 from alibrary.models import Media
 
 from ep.API import fp
+
+THUMBNAIL_OPT = dict(size=(70, 70), crop=True, bw=False, quality=80)
 
 
 class MediaResource(ModelResource):
@@ -56,15 +61,25 @@ class MediaResource(ModelResource):
             stream = None
 
         bundle.data['stream'] = stream
-        bundle.data['waveform_image'] = None
+
         bundle.data['duration'] = bundle.obj.get_duration()
         try:
             waveform_image = bundle.obj.get_waveform_image()
+            print '****'
+            print waveform_image
             if waveform_image:
-                bundle.data['waveform_image'] = bundle.obj.get_waveform_url()
+                waveform_image = bundle.obj.get_waveform_url()
 
         except:
             pass
+
+        if not waveform_image:
+            # actually very bad place to put the default image...
+            waveform_image = '%s%s' % (settings.STATIC_URL, 'img/base/defaults/waveform.png')
+
+
+        bundle.data['waveform_image'] = waveform_image
+
 
         return bundle
 
@@ -109,6 +124,86 @@ class MediaResource(ModelResource):
                 pass
 
         return orm_filters
+
+
+    # additional methods
+    def prepend_urls(self):
+
+        return [
+              url(r"^(?P<resource_name>%s)/autocomplete%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('autocomplete'), name="alibrary-media_api-autocomplete"),
+        ]
+
+    def autocomplete(self, request, **kwargs):
+
+        self.method_check(request, allowed=['get'])
+        self.throttle_check(request)
+
+        q = request.GET.get('q', None)
+        result = []
+        object_list = []
+        objects = []
+        object_count = 0
+
+        qs = None
+
+        if q and len(q) > 1:
+            qs = Media.objects.filter(Q(name__istartswith=q)\
+                | Q(artist__name__icontains=q)\
+                | Q(release__name__icontains=q))
+
+
+
+            object_list = qs.distinct()[0:20]
+            object_count = qs.distinct().count()
+
+            for result in object_list:
+                bundle = self.build_bundle(obj=result, request=request)
+                bundle = self.autocomplete_dehydrate(bundle, q)
+                objects.append(bundle)
+
+
+        data = {
+            'meta': {
+                     'query': q,
+                     'total_count': object_count
+                     },
+            'objects': objects,
+        }
+
+
+
+        self.log_throttled_access(request)
+        return self.create_response(request, data)
+
+
+
+    def autocomplete_dehydrate(self, bundle, q):
+
+        bundle.data['name'] = bundle.obj.name
+        bundle.data['id'] = bundle.obj.pk
+        bundle.data['ct'] = 'media'
+        bundle.data['get_absolute_url'] = bundle.obj.get_absolute_url()
+        bundle.data['resource_uri'] = bundle.obj.get_api_url()
+        bundle.data['main_image'] = None
+        bundle.data['duration'] = bundle.obj.get_duration()
+        try:
+            bundle.data['artist'] = bundle.obj.artist.name
+        except:
+            bundle.data['artist'] = None
+        try:
+            bundle.data['release'] = bundle.obj.release.name
+        except:
+            bundle.data['release'] = None
+        try:
+            opt = THUMBNAIL_OPT
+            main_image = get_thumbnailer(bundle.obj.release.main_image).get_thumbnail(opt)
+            bundle.data['main_image'] = main_image.url
+        except:
+            pass
+
+
+        return bundle
+
 
 
 class SimpleMediaResource(ModelResource):

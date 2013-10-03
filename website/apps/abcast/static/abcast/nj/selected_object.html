@@ -7,6 +7,45 @@
     <div class="ac-result"></div>
 </div>
 
+
+
+{% if object.id %}
+    <div class="_container object-to-schedule" id="{{ object.uuid }}">
+
+			<div class="row-fluid">
+
+				<div class="span3">
+
+					{% if object.main_image %}
+					<img src="{{ object.main_image }}" />
+					{% else %}
+					<img src="/static/img/base/defaults/listview.{{ object.ct }}.xl.png" width="90" height="90" />
+					{% endif %}
+
+				</div>
+
+				<div class="span9">
+
+
+
+					<!---->
+					<ul class="unstyled">
+
+						<li><strong>{{ object.name|truncate_chars_inner(30) }}</strong>  <small class="pull-right">{{ object.target_duration / 60 }} min</small></li>
+						<p class="tags">{{ object.d_tags|shorten(60) }}</p>
+					</ul>
+
+				</div>
+
+			</div>
+
+
+    </div>
+{% endif %}
+
+
+
+<!--
 {% if object.id %}
     <div class="_container object-to-schedule" id="{{ object.uuid }}">
         <span class="name">{{ object.name }} <small class="pull-right">{{ object.target_duration / 60 }} min
@@ -14,15 +53,10 @@
 
         <p class="tags">{{ object.d_tags|shorten(60) }}</p>
 
-        <p>{{ object.description }}</p>
-
-
         {% for message in object.broadcast_status_messages %}
         {{ message }}
         {% endfor %}
 
-
-        <h1>{{ object.duration / 60 /1000 }}</h1>
-
     </div>
 {% endif %}
+-->

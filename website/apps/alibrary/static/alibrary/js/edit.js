@@ -258,8 +258,8 @@ EditUi = function () {
         // apply classes based on state
         // $("#release_media_form *[class*='mode-']").parents('.control-group').hide(5000);
 
-        $('#release_media_form .mode-m').parents('.control-group').addClass('mode-m');
-        $('#release_media_form .mode-l').parents('.control-group').addClass('mode-l');
+        //$('#release_media_form .mode-m').parents('.control-group').addClass('mode-m');
+        //$('#release_media_form .mode-l').parents('.control-group').addClass('mode-l');
 
 
 
@@ -454,6 +454,13 @@ EditUi = function () {
             };
 
 
+            // check for errors
+            if(data.error) {
+                alert(data.error);
+                return;
+            }
+
+
             // generic data
             for (var key in data) {
 
@@ -499,12 +506,18 @@ EditUi = function () {
 
 
             // remove eventual non-track data
+            /*
             var ros = 0;
             $.each(tbd, function (i, el) {
                 // data.tracklist.remove(el - ros);
-                data.tracklist = arrRemove(data.tracklist, (el-ros));
-                ros++;
+                try {
+                    data.tracklist = arrRemove(data.tracklist, (el-ros));
+                    ros++;
+                } catch(err) {
+                    console.log('error:', err)
+                }
             });
+            */
 
 
             // display dta
@@ -546,7 +559,7 @@ EditUi = function () {
             if(container.length) {
                 // if so, add form-extra
                 //container.css('background-color', '#f0f')
-                var inner = $('.relation-url', container)
+                //var inner = $('.relation-url', container)
                 var inner = container.parents('.relation-url')
                 //inner.css('background-color', '#ff0')
 
@@ -566,11 +579,13 @@ EditUi = function () {
                 }
                 var html = nj.render('alibrary/nj/provider/relation_inline.html', data);
 
+
                 if($('.relation', inner).length) {
                     $('.relation', inner).replaceWith(html);
                 } else {
                     inner.append(html);
                 }
+
 
 
 

@@ -578,6 +578,41 @@ class APILookup(models.Model):
                     pass
 
 
+            if k == 'relations':
+                mapped = []
+                for rel in data[k]:
+                    if 'url' in rel:
+                        #print rel['url']
+                        #print get_service_by_url(rel['url'], None)
+                        mapped.append({
+                            'url': rel['url'],
+                            'service': get_service_by_url(rel['url'], None),
+                            })
+
+                data[k] = mapped
+
+
+
+
+
+            if k == 'media':
+                mapped = []
+                # initials
+                pos = 1
+                disc = 1
+                for disc in data[k]:
+                    for m in disc['tracks']:
+                        mapped.append({
+                            'position': '%s-%s' % (disc, pos),
+                            'duration': m['length'],
+                            'title': m['title'],
+                            })
+
+                #res['tracklist'] = mapped
+
+
+
+
             # tagging
             if k == 'tags':
                 try:
@@ -682,9 +717,100 @@ class APILookup(models.Model):
 
         # try to remap country
         if 'country' in res:
+            try:
+                c = Country.objects.get(iso2_code=res['country'])
+                res['country'] = c.pk
+            except:
+                pass
 
-            c = Country.objects.get(iso2_code=res['country'])
-            res['country'] = c.pk
+        print 'DTAGS:'
+        print d_tags
+
+        res['d_tags'] = ', '.join(d_tags)
+
+        self.api_data = res
+        self.save()
+
+        return res
+
+
+    def get_media_from_musicbrainz(self):
+
+        log.info('uri: %s' % self.uri)
+
+
+        # TODO: make more dynamic...
+        # some hacks to convert site url to api id
+        id = self.uri.split('/')[-1]
+        #url = "http://%s/ws/2/recording/%s?fmt=json&inc=aliases+url-rels+annotation+tags+artists+isrcs+artist-credits+work-rels+work-level-rels" % (MUSICBRAINZ_HOST, id)
+        url = "http://%s/ws/2/recording/%s?fmt=json&inc=aliases+url-rels+annotation+tags+artists+isrcs+artist-credits+artist-rels+work-rels" % (MUSICBRAINZ_HOST, id)
+
+        print "#########################################"
+        print url
+        r = requests.get(url)
+        data= r.json()
+
+        print data
+
+        res = {}
+        d_tags = [] # needed as merged from different keys
+
+        for k in data:
+            print k
+
+            # kind of ugly data mapping
+            mk = k
+
+            if k == 'title':
+                mk = 'name'
+
+            if k == 'annotation':
+                mk = 'description'
+
+            # wrong type-map
+            """
+            if k == 'type':
+                mk = '__unused__'
+            """
+
+
+            # we just take the first isrc code..
+            if k == 'isrcs' and len(data['isrcs']) > 0:
+                res['isrc'] = data['isrcs'][0]
+
+
+
+            if k == 'relations':
+                mapped = []
+                for rel in data[k]:
+                    if 'url' in rel:
+                        #print rel['url']
+                        #print get_service_by_url(rel['url'], None)
+                        mapped.append({
+                            'url': rel['url'],
+                            'service': get_service_by_url(rel['url'], None),
+                            })
+
+                data[k] = mapped
+
+            # tagging
+            if k == 'tags':
+                try:
+                    d = data[k]
+                    for v in d:
+                        d_tags.append(v['name'])
+                except:
+                    pass
+
+            res[mk] = data[k]
+
+        # try to remap country
+        if 'country' in res:
+            try:
+                c = Country.objects.get(iso2_code=res['country'])
+                res['country'] = c.pk
+            except:
+                pass
 
         print 'DTAGS:'
         print d_tags
@@ -708,7 +834,7 @@ class APILookup(models.Model):
         # TODO: make more dynamic...
         # some hacks to convert site url to api id
         id = self.uri.split('/')[-1]
-        url = "http://%s/ws/2/label/%s?fmt=json&inc=aliases+url-rels+annotation+tags" % (MUSICBRAINZ_HOST, id)
+        url = "http://%s/ws/2/label/%s?fmt=json&inc=aliases+url-rels+annotation+tags+label-rels" % (MUSICBRAINZ_HOST, id)
 
         print "#########################################"
         print url
@@ -749,6 +875,18 @@ class APILookup(models.Model):
                 res['parent_0'] = data[k]['name']
 
 
+
+            if k == 'relations':
+                mapped = []
+                for rel in data[k]:
+                    if 'url' in rel:
+                        mapped.append({
+                            'url': rel['url'],
+                            'service': get_service_by_url(rel['url'], None),
+                            })
+
+                data[k] = mapped
+
             # tagging
             if k == 'tags':
                 try:
@@ -762,9 +900,11 @@ class APILookup(models.Model):
 
         # try to remap country
         if 'country' in res:
-
-            c = Country.objects.get(iso2_code=res['country'])
-            res['country'] = c.pk
+            try:
+                c = Country.objects.get(iso2_code=res['country'])
+                res['country'] = c.pk
+            except:
+                pass
 
         print 'DTAGS:'
         print d_tags

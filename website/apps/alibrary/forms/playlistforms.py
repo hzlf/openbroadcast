@@ -151,26 +151,9 @@ class PlaylistForm(ModelForm):
                 ),
                 Field('description', css_class='input-xxlarge'),
                 'main_image',
-                #LookupField('releasetype', css_class='input-xlarge'),
+                css_class='base'
         )
 
-        """
-        catalog_layout = Fieldset(
-                _('Label/Catalog'),
-                LookupField('label', css_class='input-xlarge'),
-                LookupField('catalognumber', css_class='input-xlarge'),
-                LookupField('release_country', css_class='input-xlarge'),
-                LookupField('releasedate', css_class='input-xlarge'),
-        )
-        """
-        
-        """
-        image_layout = Fieldset(
-                'Meta',
-                LookupField('description', css_class='input-xxlarge'),
-                'main_image',
-        )
-        """
         
         series_layout = Fieldset(
                 "%s %s" % ('<i class="icon-tags"></i>', _('Series')),
@@ -182,20 +165,19 @@ class PlaylistForm(ModelForm):
                     Field('series_number'),
                     css_class='series-number'
                 ),
+                css_class='series'
         )
 
         tagging_layout = Fieldset(
                 "%s %s" % ('<i class="icon-tags"></i>', _('Tags')),
                 'd_tags',
+                css_class='tagging'
         )
 
         rotation_layout = Fieldset(
                 "%s %s" % ('<i class="icon-random"></i>', _('Random Rotation')),
-                 #Div(
-                 #       HTML('<p>%s</p>' % (_('Allow this broadcast to be aired at random time if nothing else is scheduled.'))),
-                 #       css_class='notes-form notes-inline notes-info',
-                #),
                 'rotation',
+                css_class='rotation'
         )
         
         daypart_layout = Fieldset(
@@ -212,6 +194,7 @@ class PlaylistForm(ModelForm):
                     Field('weather'),
                     css_class='weather'
                 ),
+                css_class='daypart'
                 
         )
             

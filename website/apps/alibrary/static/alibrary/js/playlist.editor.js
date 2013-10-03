@@ -18,6 +18,9 @@ PlaylistEditor = function () {
 
     this.mode;
 
+    // readonly mode for locked playlists
+    this.readonly = false;
+
     // holding the playlist
     this.current_playlist;
     // local cache of items
@@ -33,19 +36,21 @@ PlaylistEditor = function () {
 
     this.init = function () {
 
-        console.log('PlaylistEditor: init');
-        console.log(self.api_url);
+        debug.debug('PlaylistEditor: init');
+        debug.debug(self.api_url);
 
         self.dom_element = $('#' + this.dom_id);
-
 
         self.iface();
         self.bindings();
 
         // set subscription, if failed an interval and run once
         try {
-            pusher.subscribe(self.api_url, self.update);
+            pushy.subscribe(self.api_url, self.update);
         } catch (e) {
+
+            debug.debug('error', e);
+
             if (self.interval_duration) {
                 self.set_interval(self.run_interval, self.interval_duration);
             }
@@ -69,20 +74,25 @@ PlaylistEditor = function () {
         /*
          * Playlist main-editor
          */
-        self.dom_element.sortable(
-            {
-                placeholder: "item drop-placeholder",
-                axis: "y",
-                cursor: "move",
-                //cursorAt: { left: 5 },
-                delay: 150,
-                handle: '.base',
-                scroll: true,
-                scrollSensitivity: 10
-            }
-        );
 
-        self.dom_element.disableSelection();
+        if (!self.readonly) {
+            self.dom_element.sortable(
+                {
+                    placeholder: "item drop-placeholder",
+                    axis: "y",
+                    cursor: "move",
+                    //cursorAt: { left: 5 },
+                    delay: 150,
+                    handle: '.base',
+                    scroll: true,
+                    scrollSensitivity: 10
+                }
+            );
+
+            self.dom_element.disableSelection();
+        }
+        ;
+
 
         self.dom_element.on("sortupdate", function (e, ui) {
 
@@ -91,7 +101,7 @@ PlaylistEditor = function () {
             // check if dropped from outside
             if (dom_item.hasClass('sidebar list item source')) {
 
-                console.log('dropped from outside');
+                debug.debug('dropped from outside');
 
                 var post_data = {};
 
@@ -103,7 +113,7 @@ PlaylistEditor = function () {
                     contentType: "application/json",
                     //processData:  false,
                     success: function (data) {
-                        console.log(data);
+                        debug.debug(data);
                         try {
                             post_data = {
                                 ids: [data.item.object_id].join(','),
@@ -136,7 +146,7 @@ PlaylistEditor = function () {
 
                         var item = data.items.pop();
 
-                        console.log('created item:', item);
+                        debug.debug('created item:', item);
 
                         //data = data;
                         var temp_html = '<div class="temporary item editable" id="playlist_item_' + item.id + '" data-uuid="' + item.uuid + '"><i class="icon-spinner icon-spin icon-2x"></i></div>'
@@ -155,11 +165,11 @@ PlaylistEditor = function () {
 
 
             if (ui.sender && ui.sender[0].id == 'jingle_list') {
-                console.log('jingle dropped!!');
+                debug.debug('jingle dropped!!');
             }
 
             if (ui.sender && ui.sender[0].id == 'inline_playlist_holder') {
-                console.log('jingle dropped!!');
+                debug.debug('jingle dropped!!');
             }
 
             self.reorder();
@@ -172,9 +182,9 @@ PlaylistEditor = function () {
 
                 var container = $(this).parents('.item');
                 var uuid = container.data('uuid');
-                console.log(uuid + ' - blur');
+                debug.debug(uuid + ' - blur');
                 self.input_blur[uuid] = setTimeout(function () {
-                    console.log('blur - timeout -> post')
+                    debug.debug('blur - timeout -> post')
                     container.trigger('blur_batch')
                 }, 100)
 
@@ -183,13 +193,13 @@ PlaylistEditor = function () {
 
                 var container = $(this).parents('.item');
                 var uuid = container.data('uuid');
-                console.log(uuid + ' - focus');
+                debug.debug(uuid + ' - focus');
 
                 // clearTimeout(self.input_blur[uuid]);
 
             })
         $('.item.editable', self.dom_element).live('blur_batch', function (e) {
-            console.log('blur_batch triggered!');
+            debug.debug('blur_batch triggered!');
 
             self.update_by_uuid($(this).data('uuid'));
         });
@@ -203,6 +213,87 @@ PlaylistEditor = function () {
             $('#playlist_editor').removeClass('condensed extended');
             $('#playlist_editor').addClass(mode);
 
+
+        });
+
+
+        /*
+         * playlist autocompletion
+         * to search libraery for more tracks & adding them to the current playlist
+         */
+
+        // autocomplete search box TODO: maybe move
+        self.ac = new AutocompleteApp();
+        self.ac.api_url = '/api/v1/track/autocomplete/';
+        self.ac.container = $("#playlist_editor_search .result");
+        this.ac.template = 'alibrary/nj/playlist/editor_search.html';
+
+        // state toggler
+        $("#playlist_editor_search")
+            .on('focus', 'input',function (e) {
+                $(this).parents('#playlist_editor_search').addClass('focus');
+            }).on('blur', 'input', function (e) {
+                $(this).parents('#playlist_editor_search').removeClass('focus');
+            });
+
+
+        // Select on 'ENTER' >TODO: implement
+        $("#playlist_editor_search").on('keyup', 'input', function (e) {
+
+            var q = $(this).val();
+
+
+            if (e.keyCode == 13 || e.keyCode == 9) {
+                // e.preventDefault();
+                var uri = util.uri_param_insert(window.location.href, 'q', q, true);
+                uri = util.uri_param_insert(uri, 'page', 1, true);
+                window.location = uri;
+                return false;
+            } else {
+
+                console.log(q);
+                self.ac.search(q);
+
+            }
+
+        });
+
+        // add selected item
+        $("#playlist_editor_search").on('click', '.result .item', function (e) {
+
+            // get item details
+            $.ajax({
+                url: $(this).data('resource_uri'),
+                type: 'GET',
+                dataType: "json",
+                contentType: "application/json",
+                success: function (data) {
+                    $.ajax({
+                        url: self.api_url + 'collect/',
+                        type: 'POST',
+                        data: {
+                            ids: [data.id].join(','),
+                            ct: 'media'
+                        },
+                        dataType: "json",
+                        contentType: "application/json",
+                        success: function (data) {
+                            var item = data.items.pop();
+                            debug.debug('created item:', item);
+                            //data = data;
+                            var html = '<div class="temporary item editable" id="playlist_item_' + item.id + '" data-uuid="' + item.uuid + '"><i class="icon-spinner icon-spin icon-2x"></i></div>'
+                            $('#playlist_editor_list').append(html);
+
+                            // reset
+                            $('input', $('#playlist_editor_search')).val('');
+                            $('.result', $('#playlist_editor_search')).html('');
+
+                            self.reorder();
+                        }
+                    });
+
+                }
+            });
 
         });
 
@@ -244,7 +335,7 @@ PlaylistEditor = function () {
 
         });
 
-        console.log('order:', order);
+        debug.debug('order:', order);
 
         $.ajax({
             url: reorder_url,
@@ -279,7 +370,7 @@ PlaylistEditor = function () {
         var item = self.current_playlist.items[self.uuid_map[uuid]];
         var container = $('.' + uuid, this.dom_element);
 
-        console.log('container', container);
+        debug.debug('container', container);
 
         // aquire data
         var fade_in = $('input.fade_in', container).val();
@@ -291,8 +382,8 @@ PlaylistEditor = function () {
         delete item.item.content_object;
         delete item.item.content_type;
 
-        console.log('fade_in:', fade_in)
-        console.log('fade_out:', fade_out)
+        debug.debug('fade_in:', fade_in)
+        debug.debug('fade_out:', fade_out)
 
         item.fade_in = fade_in;
         item.fade_out = fade_out;
@@ -300,7 +391,7 @@ PlaylistEditor = function () {
         item.cue_in = cue_in;
         item.cue_out = cue_out;
 
-        console.log('pre-post');
+        debug.debug('pre-post');
         $.ajax({
             url: item.resource_uri,
             type: 'PUT',
@@ -309,9 +400,9 @@ PlaylistEditor = function () {
             contentType: "application/json",
             processData: false,
             success: function (data) {
-                // console.log('data:', data);
+                // debug.debug('data:', data);
                 if (refresh_item == true) {
-                    console.log(self.editor_items);
+                    debug.debug(self.editor_items);
                     // TODO: not working
                     self.editor_items[item.id].update(item, self);
                 }
@@ -319,7 +410,7 @@ PlaylistEditor = function () {
             },
             async: false
         });
-        console.log('post-post');
+        debug.debug('post-post');
 
         self.run_interval();
 
@@ -327,25 +418,21 @@ PlaylistEditor = function () {
 
     this.update_editor = function () {
         $.getJSON(self.api_url, function (data) {
-            self.update_editor_callback(data);
+            self.current_playlist = data;
+
+            for (i in data.items) {
+                item = data.items[i];
+                self.uuid_map[item.uuid] = i;
+                self.position_map[item.position] = item.id;
+            }
+
+            // main editor
+            self.update_editor_playlist(data);
+
+            self.update_editor_summary();
+            self.update_editor_transform();
+            self.rebind();
         });
-    };
-
-    this.update_editor_callback = function (data) {
-
-        self.current_playlist = data;
-
-
-        for (i in data.items) {
-            item = data.items[i];
-            self.uuid_map[item.uuid] = i;
-            self.position_map[item.position] = item.id;
-        }
-
-        self.update_editor_playlist(data);
-        self.update_editor_summary();
-        self.update_editor_transform();
-        self.rebind();
     };
 
 
@@ -406,9 +493,6 @@ PlaylistEditor = function () {
             object: self.current_playlist
         }
 
-        html = ich.tpl_playlists_editor_summary(data);
-
-        $('#playlist_editor_summary').html(html)
 
 
         // TODO: make modular
@@ -442,7 +526,7 @@ PlaylistEditor = function () {
 
     this.update_editor_playlist = function (data) {
 
-        // console.log(data)
+        // debug.debug(data)
 
         var status_map = new Array;
         status_map[0] = 'init';
@@ -483,8 +567,6 @@ PlaylistEditor = function () {
                         this.editor_items[item.id].init(item, self);
                     }
 
-                    // TODO: jingles...
-
                 }
 
                 self.current_items[item.id] = item;
@@ -499,7 +581,7 @@ PlaylistEditor = function () {
     // play-flow functions
     this.play_next = function (current_id) {
 
-        //console.log('play next');
+        //debug.debug('play next');
 
         // get ordered list
 
@@ -509,8 +591,8 @@ PlaylistEditor = function () {
             order.push($(e).data('id'));
         });
 
-        //console.log(self.position_map);
-        //console.log(self.editor_items);
+        //debug.debug(self.position_map);
+        //debug.debug(self.editor_items);
 
         var current_item_id = self.position_map.indexOf(current_id);
         var next_item_id = self.position_map[current_item_id + 1];
@@ -522,7 +604,7 @@ PlaylistEditor = function () {
     // play-flow functions
     this.load_next = function (current_id) {
 
-        // console.log('load next');
+        // debug.debug('load next');
 
         // get ordered list
 
@@ -532,8 +614,8 @@ PlaylistEditor = function () {
             order.push($(e).data('id'));
         });
 
-        //console.log(self.position_map);
-        //console.log(self.editor_items);
+        //debug.debug(self.position_map);
+        //debug.debug(self.editor_items);
 
         var current_item_id = self.position_map.indexOf(current_id);
         var next_item_id = self.position_map[current_item_id + 1];
@@ -570,6 +652,9 @@ PlaylistEditorItem = function () {
     this.dom_element;
     this.ct;
     this.co;
+
+    // readonly mode for locked playlists
+    this.readonly = false;
 
     this.el_background;
     this.el_buffer;
@@ -610,8 +695,9 @@ PlaylistEditorItem = function () {
 
         self.item = item;
         this.playlist_editor = playlist_editor;
+        this.readonly = playlist_editor.readonly;
 
-        //console.log('PlaylistEditorItem - init');
+        //debug.debug('PlaylistEditorItem - init');
         self.api_url = self.item.resource_uri;
         self.ct = self.item.item.content_type;
         self.co = self.item.item.content_object;
@@ -620,23 +706,29 @@ PlaylistEditorItem = function () {
 
         var html = '';
         if (self.ct == 'media') {
-            html = ich.tpl_playlists_editor_media({
-                object: self.item
-            });
+            /*
+             html = ich.tpl_playlists_editor_media({
+             object: self.item
+             });
+             */
 
             html = nj.render('alibrary/nj/playlist/editor_item.html', {
-                object: self.item
+                object: self.item,
+                readonly: self.readonly
             });
         }
 
         if (self.ct == 'jingle') {
-            html = ich.tpl_playlists_editor_media({
-                object: self.item
-            });
+            /*
+             html = ich.tpl_playlists_editor_media({
+             object: self.item
+             });
+             */
             this.waveform_fill = '90-#aaa-#63c:50-#aaa';
 
             html = nj.render('alibrary/nj/playlist/editor_item.html', {
-                object: self.item
+                object: self.item,
+                readonly: self.readonly
             });
 
 
@@ -644,7 +736,7 @@ PlaylistEditorItem = function () {
 
         // check if append or replace
         if ($('#playlist_item_' + self.item.id).length) {
-            console.log('!!! replacing item !!!')
+            debug.debug('!!! replacing item !!!')
             $('#playlist_item_' + self.item.id).replaceWith(html);
         } else {
             self.editor_container.append(html);
@@ -688,8 +780,8 @@ PlaylistEditorItem = function () {
 
 
         $('.waveform', self.dom_element).live('click', function (e) {
-            console.log(e.offsetX);
-            console.log(self.px_to_abs(e.offsetX));
+            debug.debug(e.offsetX);
+            debug.debug(self.px_to_abs(e.offsetX));
 
             self.player.setPosition(self.px_to_abs(e.offsetX));
 
@@ -726,7 +818,7 @@ PlaylistEditorItem = function () {
                     if (aplayer.inline.player.states.state == 'playing') {
                         aplayer.inline.player.base.controls({action: 'pause' })
                     }
-                } catch(e) {
+                } catch (e) {
 
                 }
                 ;
@@ -793,13 +885,13 @@ PlaylistEditorItem = function () {
     this.run_interval = function () {
         self.interval_loops += 1;
         // Put functions needed in interval here
-        //console.log('run_interval');
-        //console.log(self.player);
+        //debug.debug('run_interval');
+        //debug.debug(self.player);
 
         var paused = self.player.paused;
         var playState = self.player.playState;
-        //console.log('paused: ', paused);
-        //console.log('playState: ', playState);
+        //debug.debug('paused: ', paused);
+        //debug.debug('playState: ', playState);
 
         if (paused) {
             self.dom_element.addClass('paused');
@@ -810,7 +902,7 @@ PlaylistEditorItem = function () {
     };
 
     this.update = function (item, playlist_editor) {
-        console.log('PlaylistEditorItem - update');
+        debug.debug('PlaylistEditorItem - update');
         // self.dom_element.hide(5000);
         self.item = item;
         this.playlist_editor = playlist_editor;
@@ -829,8 +921,8 @@ PlaylistEditorItem = function () {
         }
 
         // update cues
-        console.log('t' + Math.floor(self.abs_to_px(self.item.cue_in)) + ',0')
-        console.log(self.el_controls_cue[0].transform());
+        debug.debug('t' + Math.floor(self.abs_to_px(self.item.cue_in)) + ',0')
+        debug.debug(self.el_controls_cue[0].transform());
         self.el_controls_cue[0].transform('T' + Math.floor(self.abs_to_px(self.item.cue_in)) + ',0');
 
         /*
@@ -845,17 +937,23 @@ PlaylistEditorItem = function () {
     };
 
     this.trigger_hover = function (e) {
-        //console.log('el hover', e);
-        self.el_controls_cue.attr({stroke: self.envelope_color});
+        //debug.debug('el hover', e);
+        if (self.el_controls_cue) {
+            self.el_controls_cue.attr({stroke: self.envelope_color});
+        }
+
     }
     this.trigger_hout = function (e) {
-        //console.log('el hout', e);
-        self.el_controls_cue.attr({stroke: "none"});
+        //debug.debug('el hout', e);
+        if (self.el_controls_cue) {
+            self.el_controls_cue.attr({stroke: "none"});
+        }
+
     }
 
     this.init_waveform = function () {
 
-        // console.log('PlaylistEditorItem - init_waveform');
+        // debug.debug('PlaylistEditorItem - init_waveform');
         this.r = Raphael(self.waveform_dom_id, 830, self.size_y + 6);
 
         self.el_background = this.r.rect(0, 0, self.size_x, self.size_y).attr({ stroke: "none", fill: '90-#efefef-#bbb:50-#efefef' });
@@ -865,11 +963,11 @@ PlaylistEditorItem = function () {
 
         self.el_indicator = this.r.rect(-10, 0, 2, 40).attr({ stroke: "none", fill: '#00bb00' });
 
-        self.set_envelope();
+        self.set_envelope(true);
 
     };
 
-    this.set_envelope = function () {
+    this.set_envelope = function (rw) {
 
 
         var x = self.get_x_points();
@@ -878,136 +976,140 @@ PlaylistEditorItem = function () {
         self.el_envelope = this.r.path(path).attr({stroke: self.envelope_color, "stroke-width": 1, 'opacity': 1, "stroke-linecap": "round"});
 
 
-        /*
-         * cue handling
-         */
-        var c_cue_size = 8;
-        var c_cue_attr = { stroke: self.envelope_color, 'stroke-width': 2, 'fill-opacity': .1, r: 0, cursor: 'move'};
+        if (!self.readonly === true) {
 
-        var cp = [];
-        cp[0] = [
-            ["M", c_cue_size, 2],
-            ["L", 0, 2],
-            ["L", 0, self.size_y],
-            ["L", c_cue_size, self.size_y]
-        ];
-        cp[1] = [
-            ["M", 0, 2],
-            ["L", c_cue_size, 2],
-            ["L", c_cue_size, self.size_y],
-            ["L", 0, self.size_y]
-        ];
+            /*
+             * cue handling
+             */
+            var c_cue_size = 8;
+            var c_cue_attr = { stroke: self.envelope_color, 'stroke-width': 2, 'fill-opacity': .1, r: 0, cursor: 'move'};
 
-        self.el_controls_cue = this.r.set(
-                this.r.path(cp[0]).attr(c_cue_attr),
-                this.r.path(cp[1]).attr(c_cue_attr)
-            ).mouseover(function (set) {
-                console.log('set', set)
-                this.animate({"fill-opacity": .55, fill: self.envelope_color}, 100);
-            }).mouseout(function () {
-                this.animate(c_cue_attr, 300);
-            });
+            var cp = [];
+            cp[0] = [
+                ["M", c_cue_size, 2],
+                ["L", 0, 2],
+                ["L", 0, self.size_y],
+                ["L", c_cue_size, self.size_y]
+            ];
+            cp[1] = [
+                ["M", 0, 2],
+                ["L", c_cue_size, 2],
+                ["L", c_cue_size, self.size_y],
+                ["L", 0, self.size_y]
+            ];
 
-        // specific update functions
-        self.el_controls_cue[0].update = function (x, y) {
-            // get X
-            var X = this.transform()[0][1] + x;
+            self.el_controls_cue = this.r.set(
+                    this.r.path(cp[0]).attr(c_cue_attr),
+                    this.r.path(cp[1]).attr(c_cue_attr)
+                ).mouseover(function (set) {
+                    debug.debug('set', set)
+                    this.animate({"fill-opacity": .55, fill: self.envelope_color}, 100);
+                }).mouseout(function () {
+                    this.animate(c_cue_attr, 300);
+                });
 
-            // set envelope
-            path[1][1] = X + self.abs_to_px(self.item.fade_in);
-            path[0][1] = X;
-            self.el_envelope.animate({path: path}, 0);
+            // specific update functions
+            self.el_controls_cue[0].update = function (x, y) {
+                // get X
+                var X = this.transform()[0][1] + x;
 
-            // set envelope controls
-            self.el_controls_fade[0].attr({x: X + self.abs_to_px(self.item.fade_in)});
+                // set envelope
+                path[1][1] = X + self.abs_to_px(self.item.fade_in);
+                path[0][1] = X;
+                self.el_envelope.animate({path: path}, 0);
 
-            // set self + update display
-            this.transform('T' + X + ',0')
-            $('.cue_in', self.dom_element).val(Math.floor(self.px_to_abs(X)));
-        };
-        self.el_controls_cue[1].update = function (x, y) {
-            // get X
-            var X = this.transform()[0][1] + x;
+                // set envelope controls
+                self.el_controls_fade[0].attr({x: X + self.abs_to_px(self.item.fade_in)});
 
-            // set envelope
-            path[2][1] = X - self.abs_to_px(self.item.fade_out);
-            path[3][1] = X;
-            self.el_envelope.animate({path: path}, 0);
+                // set self + update display
+                this.transform('T' + X + ',0')
+                $('.cue_in', self.dom_element).val(Math.floor(self.px_to_abs(X)));
+            };
+            self.el_controls_cue[1].update = function (x, y) {
+                // get X
+                var X = this.transform()[0][1] + x;
 
-            // set envelope controls
-            self.el_controls_fade[1].attr({x: X - self.abs_to_px(self.item.fade_out)});
+                // set envelope
+                path[2][1] = X - self.abs_to_px(self.item.fade_out);
+                path[3][1] = X;
+                self.el_envelope.animate({path: path}, 0);
 
-            // set self + update display
-            this.transform('T' + X + ',0')
-            $('.cue_out', self.dom_element).val(Math.floor(self.co.duration - self.px_to_abs(X + c_cue_size)));
-        };
+                // set envelope controls
+                self.el_controls_fade[1].attr({x: X - self.abs_to_px(self.item.fade_out)});
 
-        // transform to current values
-        self.el_controls_cue[0].transform('T' + x[0] + ',0');
-        self.el_controls_cue[1].transform('T' + (x[3] - c_cue_size ) + ',0');
-        self.el_controls_cue.drag(self.controls_cue_onmove, self.controls_cue_onstart, self.controls_cue_onend);
+                // set self + update display
+                this.transform('T' + X + ',0')
+                $('.cue_out', self.dom_element).val(Math.floor(self.co.duration - self.px_to_abs(X + c_cue_size)));
+            };
 
-
-        /*
-         * fade handling
-         */
-        var c_fade_size = 6;
-        var c_fade_attr = { fill: self.envelope_color, 'stroke-width': 10, 'stroke-opacity': .20, r: 1, cursor: 'move'};
-
-        self.el_controls_fade = this.r.set(
-                this.r.rect(x[1] - c_fade_size / 2, this.envelope_top - c_fade_size / 2, c_fade_size, c_fade_size).attr(c_fade_attr),
-                this.r.rect(x[2] - c_fade_size / 2, this.envelope_top - c_fade_size / 2, c_fade_size, c_fade_size).attr(c_fade_attr)
-            ).mouseover(function () {
-                this.animate({"stroke-opacity": .75, stroke: self.envelope_color}, 100);
-            }).mouseout(function () {
-                this.animate(c_fade_attr, 300);
-            });
-
-        // specific update functions
-        self.el_controls_fade[0].update = function (x, y) {
-            var X = this.attr("x") + x, Y = this.attr("y") + y;
-            this.attr({x: X});
-            path[1][1] = X;
-            self.el_envelope.animate({path: path}, 0);
-            $('.fade_in', self.dom_element).val(Math.floor(self.px_to_abs(X)) - self.item.cue_in);
-        };
-        self.el_controls_fade[1].update = function (x, y) {
-            var X = this.attr("x") + x, Y = this.attr("y") + y;
-            this.attr({x: X});
-            path[2][1] = X;
-            self.el_envelope.animate({path: path}, 0);
-            $('.fade_out', self.dom_element).val(Math.floor(self.co.duration - self.px_to_abs(X)) - self.item.cue_out);
-        };
-        self.el_controls_fade.drag(self.controls_fade_onmove, self.controls_fade_onstart, self.controls_fade_onend);
-        self.el_controls_fade.dblclick(self.controls_fade_dbclick);
+            // transform to current values
+            self.el_controls_cue[0].transform('T' + x[0] + ',0');
+            self.el_controls_cue[1].transform('T' + (x[3] - c_cue_size ) + ',0');
+            self.el_controls_cue.drag(self.controls_cue_onmove, self.controls_cue_onstart, self.controls_cue_onend);
 
 
-        // crossfade handler
-        var c_cross_size = 8;
-        var c_cross_attr = { y: self.size_y - 2, height: 12, stroke: "red", 'stroke-opacity': 0.1, 'stroke-width': 8, fill: '#ff0000', cursor: 'move'};
+            /*
+             * fade handling
+             */
+            var c_fade_size = 6;
+            var c_fade_attr = { fill: self.envelope_color, 'stroke-width': 10, 'stroke-opacity': .20, r: 1, cursor: 'move'};
+
+            self.el_controls_fade = this.r.set(
+                    this.r.rect(x[1] - c_fade_size / 2, this.envelope_top - c_fade_size / 2, c_fade_size, c_fade_size).attr(c_fade_attr),
+                    this.r.rect(x[2] - c_fade_size / 2, this.envelope_top - c_fade_size / 2, c_fade_size, c_fade_size).attr(c_fade_attr)
+                ).mouseover(function () {
+                    this.animate({"stroke-opacity": .75, stroke: self.envelope_color}, 100);
+                }).mouseout(function () {
+                    this.animate(c_fade_attr, 300);
+                });
+
+            // specific update functions
+            self.el_controls_fade[0].update = function (x, y) {
+                var X = this.attr("x") + x, Y = this.attr("y") + y;
+                this.attr({x: X});
+                path[1][1] = X;
+                self.el_envelope.animate({path: path}, 0);
+                $('.fade_in', self.dom_element).val(Math.floor(self.px_to_abs(X)) - self.item.cue_in);
+            };
+            self.el_controls_fade[1].update = function (x, y) {
+                var X = this.attr("x") + x, Y = this.attr("y") + y;
+                this.attr({x: X});
+                path[2][1] = X;
+                self.el_envelope.animate({path: path}, 0);
+                $('.fade_out', self.dom_element).val(Math.floor(self.co.duration - self.px_to_abs(X)) - self.item.cue_out);
+            };
+            self.el_controls_fade.drag(self.controls_fade_onmove, self.controls_fade_onstart, self.controls_fade_onend);
+            self.el_controls_fade.dblclick(self.controls_fade_dbclick);
 
 
-        self.el_controls_cross = this.r.rect(-10, self.size_y - 2, 2, self.size_y + 6).attr(c_cross_attr)
-            .mouseover(function (set) {
-                this.animate({"fill-opacity": .55, y: 0, height: self.size_y + 6}, 100);
-            }).mouseout(function () {
-                this.animate(c_cross_attr, 300);
-            });
+            // crossfade handler
+            var c_cross_size = 8;
+            var c_cross_attr = { y: self.size_y - 2, height: 12, stroke: "red", 'stroke-opacity': 0.1, 'stroke-width': 8, fill: '#ff0000', cursor: 'move'};
 
 
-        self.el_controls_cross.update = function (x, y) {
-            var X = this.attr("x") + x, Y = this.attr("y") + y;
-            this.attr({x: X});
-            $('.fade_cross', self.dom_element).val(self.co.duration - (Math.floor(self.px_to_abs(X)) + self.item.cue_out));
-        };
+            self.el_controls_cross = this.r.rect(-10, self.size_y - 2, 2, self.size_y + 6).attr(c_cross_attr)
+                .mouseover(function (set) {
+                    this.animate({"fill-opacity": .55, y: 0, height: self.size_y + 6}, 100);
+                }).mouseout(function () {
+                    this.animate(c_cross_attr, 300);
+                });
 
-        if (self.item.fade_cross && self.item.fade_cross > 0) {
-            this.el_controls_cross.animate({x: self.abs_to_px(self.co.duration - self.item.cue_out - self.item.fade_cross - 1)}, 100);
-        } else {
-            this.el_controls_cross.animate({x: self.abs_to_px(self.co.duration) - 2}, 100);
+
+            self.el_controls_cross.update = function (x, y) {
+                var X = this.attr("x") + x, Y = this.attr("y") + y;
+                this.attr({x: X});
+                $('.fade_cross', self.dom_element).val(self.co.duration - (Math.floor(self.px_to_abs(X)) + self.item.cue_out));
+            };
+
+            if (self.item.fade_cross && self.item.fade_cross > 0) {
+                this.el_controls_cross.animate({x: self.abs_to_px(self.co.duration - self.item.cue_out - self.item.fade_cross - 1)}, 100);
+            } else {
+                this.el_controls_cross.animate({x: self.abs_to_px(self.co.duration) - 2}, 100);
+            }
+
+            self.el_controls_cross.drag(self.controls_cross_onmove, self.controls_cross_onstart, self.controls_cross_onend);
+
         }
-
-        self.el_controls_cross.drag(self.controls_cross_onmove, self.controls_cross_onstart, self.controls_cross_onend);
 
 
     };
@@ -1021,11 +1123,11 @@ PlaylistEditorItem = function () {
     }
 
     this.controls_fade_onstart = function (x, y) {
-        console.log('controls_fade_onstart', x, y);
+        debug.debug('controls_fade_onstart', x, y);
     }
 
     this.controls_fade_onend = function (e) {
-        console.log('controls_fade_onend', e.offsetX);
+        debug.debug('controls_fade_onend', e.offsetX);
         this.dx = this.dy = 0;
         var pos_new = e.offsetX;
         self.playlist_editor.update_by_uuid(self.item.uuid);
@@ -1033,7 +1135,7 @@ PlaylistEditorItem = function () {
 
 
     this.controls_fade_dbclick = function (e) {
-        console.log('dbclick', this);
+        debug.debug('dbclick', this);
         self.item.fade_in = prompt('fade-in', self.item.fade_in);
         $('.fade_in', self.dom_element).val(Math.floor(self.item.fade_in));
         self.playlist_editor.update_by_uuid(self.item.uuid, true);
@@ -1048,11 +1150,11 @@ PlaylistEditorItem = function () {
     }
 
     this.controls_cue_onstart = function (x, y) {
-        console.log('controls_cue_onstart', x, y);
+        debug.debug('controls_cue_onstart', x, y);
     }
 
     this.controls_cue_onend = function (e) {
-        console.log('controls_cue_onend', e.offsetX);
+        debug.debug('controls_cue_onend', e.offsetX);
         this.dx = this.dy = 0;
         var pos_new = e.offsetX;
         self.playlist_editor.update_by_uuid(self.item.uuid);
@@ -1067,11 +1169,11 @@ PlaylistEditorItem = function () {
     }
 
     this.controls_cross_onstart = function (x, y) {
-        console.log('controls_fade_onstart', x, y);
+        debug.debug('controls_fade_onstart', x, y);
     }
 
     this.controls_cross_onend = function (e) {
-        console.log('controls_fade_onend', e.offsetX);
+        debug.debug('controls_fade_onend', e.offsetX);
         self.playlist_editor.update_by_uuid(self.item.uuid);
     }
 
@@ -1123,13 +1225,13 @@ PlaylistEditorItem = function () {
         classes: ['playing', 'paused'],
 
         play: function () {
-            console.log('events: ', 'play');
+            debug.debug('events: ', 'play');
             self.dom_element.removeClass('paused');
             self.dom_element.addClass('playing');
         },
 
         stop: function () {
-            console.log('events: ', 'stop');
+            debug.debug('events: ', 'stop');
             self.dom_element.removeClass('paused');
             self.dom_element.removeClass('playing');
 
@@ -1137,19 +1239,19 @@ PlaylistEditorItem = function () {
         },
 
         pause: function () {
-            console.log('events: ', 'pause');
+            debug.debug('events: ', 'pause');
             self.dom_element.removeClass('playing');
             self.dom_element.addClass('paused');
         },
 
         resume: function () {
-            console.log('events: ', 'resume');
+            debug.debug('events: ', 'resume');
             self.dom_element.removeClass('paused');
             self.dom_element.addClass('playing');
         },
 
         finish: function () {
-            console.log('events: ', 'finish');
+            debug.debug('events: ', 'finish');
             self.dom_element.removeClass('paused');
             self.dom_element.removeClass('playing');
         }
@@ -1208,7 +1310,7 @@ PlaylistEditorItem = function () {
 
         // check for neccessary fade
 
-        // console.log('pos:', self.player.position, self.item.cue_in);
+        // debug.debug('pos:', self.player.position, self.item.cue_in);
 
         var vol = 0;
         // ins
@@ -1238,7 +1340,7 @@ PlaylistEditorItem = function () {
         }
         if (self.player.position <= self.co.duration - self.item.cue_out && self.player.position > self.co.duration - self.item.cue_out - self.item.fade_out) {
             var diff = self.co.duration - self.item.cue_out - self.player.position;
-            // console.log('t/diff:', diff);
+            // debug.debug('t/diff:', diff);
 
 
             var p = diff / self.item.fade_out;
@@ -1248,7 +1350,7 @@ PlaylistEditorItem = function () {
         // check for next
         var remaining = self.co.duration - (self.item.cue_out) - self.player.position;
 
-        // console.log('remaining:', remaining);
+        // debug.debug('remaining:', remaining);
         // preload next track
         if (remaining <= self.item.fade_cross + 10000) {
             self.playlist_editor.load_next(self.item.id);
@@ -1266,7 +1368,7 @@ PlaylistEditorItem = function () {
 
     this.onload = function () {
 
-        // / console.log('sm2 onload');
+        // / debug.debug('sm2 onload');
 
         self.el_buffer.attr({x: self.abs_to_px(self.item.cue_in), width: self.size_x - self.abs_to_px(self.item.cue_in + self.item.cue_out)});
 
@@ -1275,24 +1377,4 @@ PlaylistEditorItem = function () {
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

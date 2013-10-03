@@ -49,6 +49,13 @@ def api_lookup(request, *args, **kwargs):
             if created:
                 log.debug('APILookup created: %s' % (al.pk))
 
+        if item_type == 'media':
+            i = Media.objects.get(pk=item_id)
+            ctype = ContentType.objects.get_for_model(i)
+            al, created = APILookup.objects.get_or_create(content_type=ctype, object_id=i.id, provider=provider)
+            if created:
+                log.debug('APILookup created: %s' % (al.pk))
+
         if item_type == 'label':
             i = Label.objects.get(pk=item_id)
             ctype = ContentType.objects.get_for_model(i)
@@ -90,6 +97,11 @@ def provider_search_query(request, *args, **kwargs):
 
         if item_type == 'artist':
             item = Artist.objects.get(pk=item_id)
+            ctype = ContentType.objects.get_for_model(item)
+            data = {'query': '%s' % (item.name)}
+
+        if item_type == 'media':
+            item = Media.objects.get(pk=item_id)
             ctype = ContentType.objects.get_for_model(item)
             data = {'query': '%s' % (item.name)}
 

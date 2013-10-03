@@ -156,7 +156,8 @@ class ReleaseForm(ModelForm):
                   'description',
                   'main_image',
                   'releasedate_approx',
-                  'd_tags',)
+                  'd_tags',
+                  'barcode',)
 
 
     def __init__(self, *args, **kwargs):
@@ -230,6 +231,11 @@ class ReleaseForm(ModelForm):
                 LookupField('d_tags'),
         )
 
+        identifiers_layout = Fieldset(
+                _('Identifiers'),
+                LookupField('barcode', css_class='input-xlarge'),
+        )
+
         layout = Layout(
                         #ACTION_LAYOUT,
                         base_layout,
@@ -237,6 +243,7 @@ class ReleaseForm(ModelForm):
                         image_layout,
                         catalog_layout,
                         tagging_layout,
+                        identifiers_layout,
                         #ACTION_LAYOUT,
                         )
 
@@ -346,13 +353,16 @@ class BaseReleaseMediaFormSet(BaseInlineFormSet):
                        Field('tracknumber', css_class='input-small'),
                        Field('mediatype', css_class='input-small'),
                        Field('license', css_class='input-small mode-m mode-l'),
+
+                       Field('DELETE', css_class='input-mini'),
+
                        css_class='span3'
                        ),
                 Column(
                         LookupField('name', css_class='input-large'),
                         LookupField('artist', css_class='input-large'),
                         Field('isrc', css_class='input-large mode-m mode-l'),
-                       Field('filename', css_class='input-large mode-m mode-l'),
+                        Field('filename', css_class='input-large mode-m mode-l'),
                        css_class='span9'
                        ),
                 css_class='releasemedia-row row-fluid',
@@ -442,7 +452,7 @@ class BaseAlbumartistFormSet(BaseInlineFormSet):
                        Field('DELETE', css_class='input-mini'),
                        css_class='span2'
                        ),
-                css_class='albumartist-row row-fluid',
+                css_class='albumartist-row row-fluid form-autogrow',
         )
 
         self.helper.add_layout(base_layout)
@@ -475,8 +485,7 @@ class BaseAlbumartistForm(ModelForm):
         instance = getattr(self, 'instance', None)
 
     artist = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False)
-    #service = forms.CharField(label='', widget=ReadOnlyIconField(**{'url': 'whatever'}), required=False)
-    #url = forms.URLField(label=_('Website / URL'), required=False)
+
 
 
 
@@ -511,7 +520,7 @@ class BaseReleaseReleationFormSet(BaseGenericInlineFormSet):
         base_layout = Row(
                 Column(
                        Field('url', css_class='input-xlarge'),
-                       css_class='span6'
+                       css_class='span6 relation-url'
                        ),
                 Column(
                        Field('service', css_class='input-mini'),
@@ -521,7 +530,7 @@ class BaseReleaseReleationFormSet(BaseGenericInlineFormSet):
                        Field('DELETE', css_class='input-mini'),
                        css_class='span2'
                        ),
-                css_class='row-fluid relation-row',
+                css_class='row-fluid relation-row form-autogrow',
         )
 
         self.helper.add_layout(base_layout)
@@ -562,26 +571,26 @@ ReleaseMediaFormSet = inlineformset_factory(Release,
                                             Media,
                                             form=BaseReleaseMediaForm,
                                             formset=BaseReleaseMediaFormSet,
-                                            can_delete=False,
+                                            can_delete=True,
                                             extra=0,
                                             fields=('name', 'tracknumber', 'isrc', 'artist', 'license', 'mediatype','filename'),
                                             can_order=False)
-
-ReleaseRelationFormSet = generic_inlineformset_factory(Relation,
-                                                       form=BaseReleaseReleationForm,
-                                                       formset=BaseReleaseReleationFormSet,
-                                                       extra=3,
-                                                       exclude=('action',),
-                                                       can_delete=True)
 
 AlbumartistFormSet = inlineformset_factory(Release,
                                            ReleaseAlbumartists,
                                            form=BaseAlbumartistForm,
                                            formset=BaseAlbumartistFormSet,
-                                           extra=2,
+                                           extra=10,
                                            exclude=('position',),
                                            can_delete=True,
                                            can_order=False,)
+
+ReleaseRelationFormSet = generic_inlineformset_factory(Relation,
+                                                       form=BaseReleaseReleationForm,
+                                                       formset=BaseReleaseReleationFormSet,
+                                                       extra=10,
+                                                       exclude=('action',),
+                                                       can_delete=True)
 
 
 

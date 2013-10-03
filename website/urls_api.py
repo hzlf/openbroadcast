@@ -2,6 +2,7 @@ from django.conf.urls.defaults import *
 
 
 from tastypie.api import Api
+#from tastytools.api import Api
 
 from base.api import BaseResource
 
@@ -17,7 +18,7 @@ from istats.api import StatsResource
 
 from fluent_comments.api import CommentResource
 
-api = Api(api_name='v1')
+api = Api()
 
 # base
 api.register(BaseResource())
@@ -59,7 +60,8 @@ api.register(CommentResource())
 # server stats
 api.register(StatsResource())
 
-    
+"""
 urlpatterns = patterns('',
     (r'^', include(api.urls)),
 )
+"""

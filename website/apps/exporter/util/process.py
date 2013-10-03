@@ -13,10 +13,8 @@ log = logging.getLogger(__name__)
 
 class Process(object):
 
-
     def __init__(self):
         log = logging.getLogger('util.process.Process.__init__')
-
 
 
     def inject_metadata(self, path, media):
@@ -24,14 +22,17 @@ class Process(object):
         log = logging.getLogger('util.process.Process.inject_metadata')
         log.debug('inject metadata to: %s' % (path))
         log.debug('source: %s' % (media))
-        
-        
+
         """
         audiotools.MetaData
+        http://audiotools.sourceforge.net/programming/audiotools.html?highlight=set_metadata#audiotools.MetaData
+        class audiotools.MetaData([track_name][, track_number][, track_total][, album_name][, artist_name]
+        [, performer_name][, composer_name][, conductor_name][, media][, ISRC][, catalog][, copyright]
+        [, publisher][, year][, data][, album_number][, album_total][, comment][, images])
         """
         meta = MetaData()
-        
-        
+
+
         """
         prepare metadata object
         """

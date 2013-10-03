@@ -22,7 +22,7 @@ from easy_thumbnails.files import get_thumbnailer
 from pure_pagination.mixins import PaginationMixin
 
 from alibrary.models import Media, Playlist, PlaylistItem, Artist, Release
-from alibrary.forms import MediaForm, MediaActionForm, MediaRelationFormSet
+from alibrary.forms import MediaForm, MediaActionForm, MediaRelationFormSet, ExtraartistFormSet
 from alibrary.filters import MediaFilter
 
 from lib.util import tagging_extra
@@ -146,6 +146,26 @@ class MediaListView(PaginationMixin, ListView):
             ctype = ContentType.objects.get(model='media')
             ids = import_session.importitem_set.filter(content_type=ctype.pk).values_list('object_id',)
             qs = qs.filter(pk__in=ids).distinct()
+
+
+
+
+        # "extra-filters" (to provide some arbitary searches)
+        extra_filter = self.request.GET.get('extra_filter', None)
+
+        print 'EXTRA FILTER!!!!!!!!!!!!!!!!!!!'
+        print extra_filter
+        print '-------'
+
+        if extra_filter:
+
+            if extra_filter == 'unassigned':
+
+                qs = qs.filter(release=None).distinct()
+                # add relation filter
+                #fa = Release.objects.filter(slug=release_filter)[0]
+                #f = {'item_type': 'release' , 'item': fa, 'label': _('Release')}
+                #self.relation_filter.append(f)
             
 
         # base queryset        
@@ -255,6 +275,7 @@ class MediaEditView(UpdateView):
         
         context['action_form'] = MediaActionForm(instance=self.object)
         context['relation_form'] = MediaRelationFormSet(instance=self.object)
+        context['extraartist_form'] = ExtraartistFormSet(instance=self.object)
         context['user'] = self.request.user
         context['request'] = self.request
 
@@ -265,6 +286,11 @@ class MediaEditView(UpdateView):
     
         context = self.get_context_data()
         relation_form = context['relation_form']
+
+
+
+
+
         
         if form.is_valid():
 
@@ -274,6 +300,14 @@ class MediaEditView(UpdateView):
             tmp = form.save(commit=False)
 
             relation_form = MediaRelationFormSet(self.request.POST, instance=tmp)
+            extraartist_form = ExtraartistFormSet(self.request.POST, instance=tmp)
+
+
+
+
+            if extraartist_form.is_valid():
+                extraartist_form.save()
+
         
             if relation_form.is_valid():        
                         

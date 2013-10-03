@@ -19,7 +19,7 @@ from django.contrib.admin import widgets as admin_widgets
 
 import autocomplete_light
 
-from alibrary.models import Media, Relation, Artist
+from alibrary.models import Media, Relation, Artist, MediaExtraartists
 
 from pagedown.widgets import PagedownWidget
 
@@ -81,7 +81,7 @@ class MediaForm(ModelForm):
 
     class Meta:
         model = Media
-        fields = ('name', 'description', 'artist', 'tracknumber', 'mediatype', 'license', 'release', 'd_tags')
+        fields = ('name', 'description', 'artist', 'tracknumber', 'mediatype', 'license', 'release', 'd_tags', 'isrc', )
 
 
     def __init__(self, *args, **kwargs):
@@ -148,7 +148,12 @@ class MediaForm(ModelForm):
         
         tagging_layout = Fieldset(
                 'Tags',
-                'd_tags',
+                LookupField('d_tags'),
+        )
+
+        identifiers_layout = Fieldset(
+                _('Identifiers'),
+                LookupField('isrc', css_class='input-xlarge'),
         )
             
         layout = Layout(
@@ -157,6 +162,7 @@ class MediaForm(ModelForm):
                         meta_layout,
                         license_layout,
                         tagging_layout,
+                        identifiers_layout,
                         )
 
         self.helper.add_layout(layout)
@@ -226,7 +232,84 @@ class MediaForm(ModelForm):
         return super(MediaForm, self).save(*args, **kwargs)
    
     
-    
+
+
+
+
+
+
+"""
+Album Artists
+"""
+class BaseExtraartistFormSet(BaseInlineFormSet):
+
+
+    def __init__(self, *args, **kwargs):
+
+        self.instance = kwargs['instance']
+
+        super(BaseExtraartistFormSet, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.form_id = "id_artists_form_%s" % 'inline'
+        self.helper.form_class = 'form-horizontal'
+        self.helper.form_method = 'post'
+        self.helper.form_action = ''
+        self.helper.form_tag = False
+
+        base_layout = Row(
+                Column(
+                       Field('artist', css_class='input-large'),
+                       css_class='span5'
+                       ),
+                Column(
+                       Field('profession', css_class='input-large'),
+                       css_class='span5'
+                       ),
+                Column(
+                       Field('DELETE', css_class='input-mini'),
+                       css_class='span2'
+                       ),
+                css_class='albumartist-row row-fluid form-autogrow',
+        )
+
+        self.helper.add_layout(base_layout)
+
+
+
+
+    def add_fields(self, form, index):
+        # allow the super class to create the fields as usual
+        super(BaseExtraartistFormSet, self).add_fields(form, index)
+
+        # created the nested formset
+        try:
+            instance = self.get_queryset()[index]
+            pk_value = instance.pk
+        except IndexError:
+            instance=None
+            pk_value = hash(form.prefix)
+
+
+class BaseExtraartistForm(ModelForm):
+
+    class Meta:
+        model = MediaExtraartists
+        parent_model = Media
+        fields = ('artist','profession',)
+
+    def __init__(self, *args, **kwargs):
+        super(BaseExtraartistForm, self).__init__(*args, **kwargs)
+        instance = getattr(self, 'instance', None)
+
+    artist = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False)
+
+
+
+
+
+
+
 
 
   
@@ -249,17 +332,17 @@ class BaseMediaReleationFormSet(BaseGenericInlineFormSet):
         base_layout = Row(
                 Column(
                        Field('url', css_class='input-xlarge'),
-                       css_class='span5'
+                       css_class='span6 relation-url'
                        ),
                 Column(
-                       Field('service', css_class='input-small'),
-                       css_class='span1'
+                       Field('service', css_class='input-mini'),
+                       css_class='span4'
                        ),
                 Column(
                        Field('DELETE', css_class='input-mini'),
-                       css_class='span1'
+                       css_class='span2'
                        ),
-                css_class='row relation-row',
+                css_class='row-fluid relation-row form-autogrow',
         )
  
         self.helper.add_layout(base_layout)
@@ -290,9 +373,21 @@ class BaseMediaReleationForm(ModelForm):
 
 
 # Compose Formsets
-MediaRelationFormSet = generic_inlineformset_factory(Relation, form=BaseMediaReleationForm, formset=BaseMediaReleationFormSet, extra=3, exclude=('action',), can_delete=True)
+MediaRelationFormSet = generic_inlineformset_factory(Relation,
+                                                     form=BaseMediaReleationForm,
+                                                     formset=BaseMediaReleationFormSet,
+                                                     extra=10, exclude=('action',),
+                                                     can_delete=True)
 
-
+ExtraartistFormSet = inlineformset_factory(Media,
+                                       MediaExtraartists,
+                                       form=BaseExtraartistForm,
+                                       formset=BaseExtraartistFormSet,
+                                       fk_name = 'media',
+                                       extra=10,
+                                       #exclude=('position',),
+                                       can_delete=True,
+                                       can_order=False,)
 
 
 

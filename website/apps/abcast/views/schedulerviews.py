@@ -303,8 +303,10 @@ def schedule_object(request):
     
     time_start = time_start + datetime.timedelta(hours=SCHEDULER_OFFSET)
     
-    time_end = time_start + datetime.timedelta(milliseconds=obj.get_duration())
-    
+    # time_end = time_start + datetime.timedelta(milliseconds=obj.get_duration())
+    # for duration calculation we use the 'target duration' (to avoid blocked slots)
+    time_end = time_start + datetime.timedelta(seconds=(obj.target_duration))
+
     log.debug('time_start: %s' % time_start)
     log.debug('time_end: %s' % time_end)
     
@@ -315,7 +317,8 @@ def schedule_object(request):
         return { 'message': _('You cannot schedule things in the past!') }
     
     # check if slot is free
-    es = Emission.objects.filter(time_end__gt=time_start, time_start__lt=time_end)
+    # hm just allow some seconds of tolerance (in case of mini-overlaps)
+    es = Emission.objects.filter(time_end__gt=time_start + datetime.timedelta(seconds=2), time_start__lt=time_end)
     if es.count() > 0:
         for em in es:
             print 'Blocking emission: %s' % em.id

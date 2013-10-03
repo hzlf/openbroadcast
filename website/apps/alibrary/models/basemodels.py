@@ -203,7 +203,146 @@ class DistributorLabel(models.Model):
         verbose_name = _('Labels in catalog')
         verbose_name_plural = _('Labels in catalog')
         
-        
+
+
+
+
+
+
+
+
+
+
+
+
+class Agency(MPTTModel, MigrationMixin):
+
+    # core fields
+    uuid = UUIDField(primary_key=False)
+    name = models.CharField(max_length=400)
+    slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
+
+    country = models.ForeignKey(Country, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+
+    email = models.EmailField(blank=True, null=True)
+    phone = PhoneNumberField(blank=True, null=True)
+    fax = PhoneNumberField(blank=True, null=True)
+
+    description = extra.MarkdownTextField(blank=True, null=True)
+
+    # auto-update
+    created = models.DateField(auto_now_add=True, editable=False)
+    updated = models.DateField(auto_now=True, editable=False)
+
+    # relations
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='agency_children')
+
+    artists = models.ManyToManyField('Artist', through='AgencyArtist', blank=True, null=True, related_name="agencies")
+
+    # user relations
+    owner = models.ForeignKey(User, blank=True, null=True, related_name="agencies_owner", on_delete=models.SET_NULL)
+    creator = models.ForeignKey(User, blank=True, null=True, related_name="agencies_creator", on_delete=models.SET_NULL)
+    publisher = models.ForeignKey(User, blank=True, null=True, related_name="agencies_publisher", on_delete=models.SET_NULL)
+
+    TYPE_CHOICES = (
+        ('unknown', _('Unknown')),
+        ('major', _('Major Agency')),
+        ('indy', _('Independent Agency')),
+    )
+    type = models.CharField(verbose_name="Agency type", max_length=12, default='unknown', choices=TYPE_CHOICES)
+
+    # relations a.k.a. links
+    relations = generic.GenericRelation('Relation')
+
+    # tagging (d_tags = "display tags")
+    d_tags = tagging.fields.TagField(max_length=1024, verbose_name="Tags", blank=True, null=True)
+
+
+    # manager
+    objects = models.Manager()
+
+    # meta
+    class Meta:
+        app_label = 'alibrary'
+        verbose_name = _('Agency')
+        verbose_name_plural = _('Agencies')
+        ordering = ('name', )
+
+    class MPTTMeta:
+        order_insertion_by = ['name']
+
+    def __unicode__(self):
+        return self.name
+
+
+
+    @models.permalink
+    def get_absolute_url(self):
+        if self.disable_link:
+            return None
+
+        return ('alibrary-agency-detail', [self.slug])
+
+    @models.permalink
+    def get_edit_url(self):
+        return ('alibrary-agency-edit', [self.pk])
+
+
+    def save(self, *args, **kwargs):
+
+        unique_slugify(self, self.name)
+
+        # update d_tags
+        t_tags = ''
+        for tag in self.tags:
+            t_tags += '%s, ' % tag
+
+        self.tags = t_tags;
+        self.d_tags = t_tags;
+
+        super(Agency, self).save(*args, **kwargs)
+
+
+
+
+try:
+    tagging.register(Agency)
+except:
+    pass
+
+
+class AgencyScope(models.Model):
+    name = models.CharField(max_length=300)
+    class Meta:
+        app_label = 'alibrary'
+        verbose_name = _('Scope (Agency)')
+        verbose_name_plural = _('Scopes (Agency)')
+
+    def __unicode__(self):
+        return self.name
+
+
+class AgencyArtist(models.Model):
+    agency = models.ForeignKey('Agency')
+    artist = models.ForeignKey('Artist')
+    exclusive = models.BooleanField(default=False)
+    countries = models.ManyToManyField(Country, related_name="agency_countries")
+    scopes = models.ManyToManyField(AgencyScope, related_name="agency_scopes")
+    class Meta:
+        app_label = 'alibrary'
+        verbose_name = _('Managing')
+        verbose_name_plural = _('Managing')
+
+
+
+
+
+
+
+
+
+
 
 class License(MPTTModel, MigrationMixin):
     

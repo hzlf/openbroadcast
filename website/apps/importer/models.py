@@ -82,7 +82,9 @@ class Import(BaseModel):
     
     
     user = models.ForeignKey(User, blank=True, null=True, related_name="import_user", on_delete=models.SET_NULL)
-        
+
+    uuid_key = models.CharField(max_length=60, null=True, blank=True)
+
     STATUS_CHOICES = (
         (0, _('Init')),
         (1, _('Done')),
@@ -374,7 +376,6 @@ class ImportFile(BaseModel):
         obj.save()
         
         # requeue if no results yet
-        print 'MB YET!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
         if len(obj.results_musicbrainz) < 1:
             s = {'skip_tracknumber': True}
             obj.settings = s
@@ -408,6 +409,7 @@ class ImportFile(BaseModel):
         
     @task
     def import_task(obj):
+
         log = logging.getLogger('importer.models.import_task')
         log.info('Starting import task for:  %s' % (obj.pk))
         # to prevent circular import errors
@@ -448,7 +450,7 @@ class ImportFile(BaseModel):
 
         if self.status == 2: # ready
             # try to apply import_tag to other files of this import session
-            if not skip_apply_import_tag:
+            if not skip_apply_import_tag and self.import_session:
                 self.import_session.apply_import_tag(self)
                 
         # check import_tag for completeness

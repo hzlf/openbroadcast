@@ -1,6 +1,5 @@
-from django.conf.urls.defaults import *
 from django.conf import settings
-
+from django.conf.urls.defaults import *
 from django.db.models import Q
 
 from tastypie import fields

@@ -82,7 +82,7 @@ class ArtistForm(ModelForm):
 
     class Meta:
         model = Artist
-        fields = ('name', 'real_name', 'aliases', 'type', 'country', 'biography', 'main_image', 'date_start', 'date_end', 'd_tags', 'ipi_code',)
+        fields = ('name', 'real_name', 'aliases', 'type', 'country', 'booking_contact', 'biography', 'main_image', 'date_start', 'date_end', 'd_tags', 'ipi_code', 'isni_code',)
         
 
     def __init__(self, *args, **kwargs):
@@ -124,6 +124,7 @@ class ArtistForm(ModelForm):
                 LookupField('real_name', css_class='input-xlarge'),
                 LookupField('type', css_class='input-xlarge'),
                 LookupField('country', css_class='input-xlarge'),
+                LookupField('booking_contact', css_class='input-xlarge'),
         )
 
 
@@ -163,6 +164,7 @@ class ArtistForm(ModelForm):
         identifiers_layout = Fieldset(
                 _('Identifiers'),
                 LookupField('ipi_code', css_class='input-xlarge'),
+                LookupField('isni_code', css_class='input-xlarge'),
         )
             
         layout = Layout(

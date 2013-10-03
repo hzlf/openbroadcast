@@ -125,20 +125,26 @@
 			</div>
 
 			<div class="tab-pane" id="tracklist_editor">
-				
-				{% if object.type != "broadcast"  %}
-				{% include "alibrary/playlist/_tracklist_editor.html" %}
-				{% else %}
-				
+
+				{% if object.type == "broadcast"  %}
+
 					<div class="alert alert-info">
-					
-					  <h4>{% trans "Playlist editing blocked" %}</h4>
+
+					  <h4><i class="icon-lock"></i> {% trans "Playlist editing locked" %}</h4>
 					  {% blocktrans %}
 					  This broadcast has already ben sheduled or played. To edit this tracklist you will have to convert this broadcast to a playlist.
 					  {% endblocktrans %}
 					</div>
-					
+
 				{% endif %}
+
+                {% include "alibrary/playlist/_tracklist_editor.html" %}
+
+
+
+
+
+
 			</div>
 			
 			
