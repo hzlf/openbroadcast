@@ -229,6 +229,11 @@ class MediaExtraartistsInline(admin.TabularInline):
 class AgencyArtistInline(admin.TabularInline):
     model = Agency.artists.through
     extra = 1
+
+
+class NameVariationInline(admin.TabularInline):
+    model = NameVariation
+    extra = 3
          
 class ArtistAdmin(PlaceholderAdmin, BaseAdmin):
     
@@ -240,19 +245,20 @@ class ArtistAdmin(PlaceholderAdmin, BaseAdmin):
     # inlines = [LabelInline]
     
     # RelationsInline, 
-    inlines = [RelationsInline, ArtistProfessionsInline, ArtistMembersInline, ArtistParentsInline, AgencyArtistInline]
+    inlines = [NameVariationInline, RelationsInline, ArtistProfessionsInline, ArtistMembersInline, ArtistParentsInline, AgencyArtistInline]
     
     readonly_fields = ["folder",]
     
     """"""
     fieldsets = [
-        (None,               {'fields': ['name', 'slug', 'main_image', 'aliases', 'real_name', 'country', ('listed', 'disable_link',), 'enable_comments', 'biography', 'excerpt', 'folder', ]}),
+        (None,               {'fields': ['name', 'slug', 'main_image', 'real_name', 'country', ('listed', 'disable_link',), 'enable_comments', 'biography', 'excerpt', 'folder', ]}),
         ('Users', {'fields' : ['owner', 'creator', 'publisher']}),
         #('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
     ]
     
 admin.site.register(Artist, ArtistAdmin)
-      
+admin.site.register(NameVariation)
+
 class LicenseAdmin(reversion.VersionAdmin, MultilingualModelAdmin):
     
     inline_instances = ('name_translated', 'restricted', 'parent',)

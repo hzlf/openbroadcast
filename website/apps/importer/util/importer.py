@@ -251,11 +251,7 @@ class Importer(object):
         try:
             ctype = ContentType.objects.get(app_label="alibrary", model="release")
             ii_ids = obj.import_session.get_importitem_ids(ctype)
-            print 'ii_ids: '
-            print ii_ids
             ir = Release.objects.filter(pk__in=ii_ids, name=release)
-            #print ir
-            #log.info('found release in import session: %s' % ir)
         except:
             ir = None
         
@@ -327,11 +323,7 @@ class Importer(object):
         try:
             ctype = ContentType.objects.get(app_label="alibrary", model="artist")
             ii_ids = obj.import_session.get_importitem_ids(ctype)
-            print 'ii_ids: '
-            print ii_ids
             ia = Artist.objects.filter(pk__in=ii_ids, name=artist)
-            #print ia
-            #log.info('found artist in import session: %s' % ia)
         except:
             ia = None
         
@@ -393,7 +385,7 @@ class Importer(object):
         
         
         
-        # for debugging completeion, place here
+        # for debugging completion, place here
         # m = self.mb_complete_media(m, mb_track_id)
                  
         # try to complete release metadata
@@ -401,7 +393,8 @@ class Importer(object):
             log.info('release created, try to complete: %s' % r)
             r.creator = obj.import_session.user
             r = self.mb_complete_release(r, mb_release_id)
-     
+
+
         # try to complete artist metadata
         if a_created:
             log.info('artist created, try to complete: %s' % a)
@@ -409,7 +402,6 @@ class Importer(object):
             a = self.mb_complete_artist(a, mb_artist_id)
         
 
-        
         # try to complete media metadata
         # comes after artist creation ,to prevent duplicates!
         if m_created:
@@ -418,19 +410,7 @@ class Importer(object):
             m = self.mb_complete_media(m, mb_track_id, mb_release_id,  excludes=(mb_artist_id,))
             
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
         # save assignments
         m.save()
         

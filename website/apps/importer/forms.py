@@ -49,7 +49,7 @@ class ImportCreateModelForm(forms.ModelForm):
     
     class Meta:
         model = Import
-        exclude = ('user', 'type', 'status', )
+        exclude = ('user', 'type', 'status', 'uuid_key', )
 
         widgets = {
             #'image': AdvancedFileInput(image_width=76),

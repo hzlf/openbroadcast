@@ -21,12 +21,14 @@ form select, form file
   
   &.autocompletewidget
     background: yellow
-  
+
+// autocomplete
 form input
   &.autocompletewidget    
     background-image: url(/static/img/css/autocomplete.png) !important
     background-position: center right !important
     background-repeat: no-repeat !important
+
 
 
 
@@ -498,18 +500,28 @@ form
   width: 16px
 
 ul.selectable-deck
-  width: 296px
+  width: 276px
   margin: 10px 0 4px 0
   background-color: transparent !important
   
   > li
-  
-    .selectable-deck-remove
-      background: green
-      .ui-button-text
-        display: block
-        width: 16px
-        height: 16px
+    color: #5a5a5a
+    border-bottom: 1px solid #ececec
+    padding: 1px 4px 1px 4px
+    margin-right: 10px
+    a.selectable-deck-remove
+      color: #999
+      i
+        font-size: 14px
+      &:hover
+        text-decoration: none
+        color: #6633cc
+      //.ui-button-text
+      //  display: block
+      //  width: 16px
+      //  height: 16px
+
+
     
 
 .control-group

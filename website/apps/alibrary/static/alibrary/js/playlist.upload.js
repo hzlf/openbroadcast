@@ -9,13 +9,12 @@ PlaylistEditorUpload = function () {
     this.fileupload_options = false
     this.api_url;
 
+    this.uploaded = [];
+
 
     this.init = function () {
 
         self.fileupload = $('#fileupload');
-
-        console.log(self.fileupload_options)
-
         self.fileupload.fileupload('option', self.fileupload_options);
         this.bindings();
 
@@ -23,9 +22,10 @@ PlaylistEditorUpload = function () {
 
     this.bindings = function () {
 
+
         self.fileupload.bind('fileuploaddone', function (e, data, whatever) {
 
-            console.log(data.result)
+            // console.log(data.result)
 
             var item = data.result;
 
@@ -52,32 +52,38 @@ PlaylistEditorUpload = function () {
 
         if (data.status == 'done' || data.status == 'duplicate') {
 
-            $.ajax({
-                url: self.api_url + 'collect/',
-                type: 'POST',
-                data: {
-                    ids: [data.media.id].join(','),
-                    ct: 'media'
-                },
-                dataType: "json",
-                contentType: "application/json",
-                success: function (data) {
-                    var item = data.items.pop();
-                    debug.debug('created item:', item);
-                    //data = data;
-                    var html = '<div class="temporary item editable" id="playlist_item_' + item.id + '" data-uuid="' + item.uuid + '"><i class="icon-time icon-spin icon-2x"></i>Computing waveform</div>'
-                    $('#playlist_editor_list').append(html);
+            // if (!$.inArray(data.id, self.uploaded)) {
+            if (! self.uploaded.indexOf(data.id) > -1) {
+                self.uploaded.push(data.id);
 
-                    // reset
-                    $('input', $('#playlist_editor_search')).val('');
-                    $('.result', $('#playlist_editor_search')).html('');
+                $.ajax({
+                    url: self.api_url + 'collect/',
+                    type: 'POST',
+                    data: {
+                        ids: [data.media.id].join(','),
+                        ct: 'media'
+                    },
+                    dataType: "json",
+                    contentType: "application/json",
+                    success: function (data) {
+                        var item = data.items.pop();
+                        debug.debug('created item:', item);
+                        //data = data;
+                        var html = '<div class="temporary item editable" id="playlist_item_' + item.id + '" data-uuid="' + item.uuid + '"><i class="icon-time icon-spin icon-2x"></i>Computing waveform</div>'
+                        $('#playlist_editor_list').append(html);
 
-                    setTimeout(function(){
-                        alibrary.playlist_editor.reorder();
-                    }, 10000)
+                        // reset
+                        $('input', $('#playlist_editor_search')).val('');
+                        $('.result', $('#playlist_editor_search')).html('');
 
-                }
-            });
+                        setTimeout(function () {
+                            alibrary.playlist_editor.reorder();
+                        }, 10000)
+
+                    }
+                });
+            }
+
 
         }
     }

@@ -175,11 +175,19 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
         (11, _('Other')),
     )
     status = models.PositiveIntegerField(default=0, choices=STATUS_CHOICES)
-    
+
+    """
     TYPE_CHOICES = (
         ('basket', _('Basket')),
         ('playlist', _('Playlist')),
         ('broadcast', _('Broadcast')),
+        ('other', _('Other')),
+    )
+    """
+    TYPE_CHOICES = (
+        ('basket', _('Private Playlist')),
+        ('playlist', _('Public Playlist')),
+        ('broadcast', _('Broadcast Playlist')),
         ('other', _('Other')),
     )
     type = models.CharField(max_length=12, default='basket', null=True, choices=TYPE_CHOICES)
@@ -323,7 +331,111 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
             'resource_name': 'simpleplaylist',  
             'pk': self.pk  
         }) + ''
-        
+
+
+    def get_transform_status(self, target_type):
+        """
+        check if transformation is possible /
+        what needs to be done
+        Not so nicely here - but...
+        """
+
+        status = False
+
+        """
+        criterias = [
+            {
+                'key': 'tags',
+                'name': _('Tags'),
+                'status': True,
+                'warning': _('Please add some tags'),
+            },
+            {
+                'key': 'description',
+                'name': _('Description'),
+                'status': False,
+                'warning': _('Please add a description'),
+            }
+        ]
+        """
+
+        criterias = []
+
+        # "basket" only used while dev...
+        if target_type == 'basket':
+            status = True
+
+        if target_type == 'playlist':
+            status = True
+            # tags
+            tag_count = self.tags.count()
+            if tag_count < 1:
+                status = False
+            criteria = {
+                'key': 'tags',
+                'name': _('Tags'),
+                'status': tag_count > 0,
+                'warning': _('Please add some tags'),
+            }
+            criterias.append(criteria)
+            # scheduled
+            if self.type == 'broadcast':
+                schedule_count = self.get_emissions().count()
+                if schedule_count > 0:
+                    status = False
+                criteria = {
+                    'key': 'scheduled',
+                    'name': _('Playlist scheduled'),
+                    'status': schedule_count < 1,
+                    'warning': _('This playlist has already ben scheduled %s times. Remove all scheduler entries to "un-broadcast" this playlist.' % schedule_count),
+                }
+                criterias.append(criteria)
+
+        if target_type == 'broadcast':
+            status = True
+            # tags
+            tag_count = self.tags.count()
+            if tag_count < 1:
+                status = False
+            criteria = {
+                'key': 'tags',
+                'name': _('Tags'),
+                'status': tag_count > 0,
+                'warning': _('Please add some tags'),
+            }
+            criterias.append(criteria)
+
+            # dayparts
+            dp_count = self.dayparts.count()
+            if not dp_count:
+                status = False
+            criteria = {
+                'key': 'dayparts',
+                'name': _('Dayparts'),
+                'status': dp_count > 0,
+                'warning': _('Please specify the dayparts'),
+            }
+            criterias.append(criteria)
+
+            # duration
+            if not self.broadcast_status == 1:
+                status = False
+            criteria = {
+                'key': 'duration',
+                'name': _('Duration'),
+                'status': True if self.broadcast_status == 1 else False,
+                'warning': _('Durations do not match'),
+                # 'warning': ', '.join(self.broadcast_status_messages),
+            }
+            criterias.append(criteria)
+
+        transformation = {
+            'criterias': criterias,
+            'status': status
+        }
+
+        return transformation
+
 
 
     def add_items_by_ids(self, ids, ct, timing=None):
@@ -410,8 +522,23 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
         
 
     def convert_to(self, type):
-        self.type = type
-        self.save()
+
+        status = False
+
+        transformation = self.get_transform_status(type)
+        status = transformation['status']
+
+        if type == 'broadcast':
+            _status, messages = self.self_check()
+            if _status == 1:
+                status = True
+
+        if status:
+            self.type = type
+            self.save()
+
+        return self, status
+
         
         
     def get_items(self):

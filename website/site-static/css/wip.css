@@ -330,15 +330,21 @@ form div.form-help {
   width: 16px; }
 
 ul.selectable-deck {
-  width: 296px;
+  width: 276px;
   margin: 10px 0 4px 0;
   background-color: transparent !important; }
-  ul.selectable-deck > li .selectable-deck-remove {
-    background: green; }
-    ul.selectable-deck > li .selectable-deck-remove .ui-button-text {
-      display: block;
-      width: 16px;
-      height: 16px; }
+  ul.selectable-deck > li {
+    color: #5a5a5a;
+    border-bottom: 1px solid #ececec;
+    padding: 1px 4px 1px 4px;
+    margin-right: 10px; }
+    ul.selectable-deck > li a.selectable-deck-remove {
+      color: #999999; }
+      ul.selectable-deck > li a.selectable-deck-remove i {
+        font-size: 14px; }
+      ul.selectable-deck > li a.selectable-deck-remove:hover {
+        text-decoration: none;
+        color: #6633cc; }
 
 .control-group.error label {
   color: #ff743e; }
@@ -1656,6 +1662,9 @@ section.item_inner .tab-pane section.profile.information dl {
   .popup-provider-search > div section.form label {
     color: #efefef; }
 
+.tab-pane .alert {
+  margin-top: 20px; }
+
 #playlist_editor {
   margin: 20px 0 20px; }
   #playlist_editor.condensed .item {
@@ -1838,6 +1847,12 @@ section.item_inner .tab-pane section.profile.information dl {
           width: 100%; }
         #playlist_editor .upload form .fileupload-buttonbar span, #playlist_editor .upload table .fileupload-buttonbar span {
           width: 786px; }
+    #playlist_editor .upload table > .files {
+      background: white; }
+      #playlist_editor .upload table > .files .progress-holder {
+        width: 200px; }
+      #playlist_editor .upload table > .files .cancel {
+        text-align: right; }
     #playlist_editor .upload .importfile.item {
       padding: 5px;
       margin-bottom: 2px;
@@ -1901,28 +1916,47 @@ section.item_inner .tab-pane section.profile.information dl {
       #playlist_editor .summary span.duration-difference {
         color: red; }
 
+.playlist-edit.transform .criterias {
+  margin-top: 20px; }
+  .playlist-edit.transform .criterias .title {
+    font-weight: bold; }
+.playlist-edit.transform .action-group ul {
+  border-top: 1px solid #cccccc !important; }
 .playlist-edit.transform.listing.fixed {
   position: fixed;
   width: 260px;
   top: 120px; }
 .playlist-edit.transform .item {
-  padding: 4px 4px 4px 4px;
+  padding: 2px 4px 2px 4px;
   margin: 5px 0 5px 0;
-  border-bottom: 1px solid #efefef; }
+  background-color: #fafafa; }
   .playlist-edit.transform .item a.toggle {
     color: #333333; }
     .playlist-edit.transform .item a.toggle:hover {
       text-decoration: none; }
-  .playlist-edit.transform .item .information {
-    display: none; }
+  .playlist-edit.transform .item .information p {
+    padding: 4px 0 0 0;
+    margin: 0; }
+  .playlist-edit.transform .item .information dl {
+    margin: 0; }
+    .playlist-edit.transform .item .information dl dt {
+      font-weight: normal;
+      text-align: left; }
+    .playlist-edit.transform .item .information dl dd {
+      font-style: italic;
+      text-align: right;
+      padding-right: 4px; }
+    .playlist-edit.transform .item .information dl dd.mark, .playlist-edit.transform .item .information dl dt.mark {
+      font-weight: bold;
+      color: orangered; }
+  .playlist-edit.transform .item .title {
+    font-weight: normal; }
   .playlist-edit.transform .item.warning {
-    background-color: #fcf8e3;
-    color: #c09853; }
+    background-color: #fcf8e3; }
     .playlist-edit.transform .item.warning .information {
       display: block; }
   .playlist-edit.transform .item.success {
-    background-color: #ddffd9;
-    color: #00bb00; }
+    background-color: #ddffd9; }
   .playlist-edit.transform .item.hover.done {
     background-color: #ddffd9; }
   .playlist-edit.transform .item.hover.ready {

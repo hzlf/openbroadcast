@@ -103,19 +103,19 @@
     </div>
     <div class="row-fluid status">
         <div class="progress">
-            <div class="bar" style="width: 0%;"></div>
+            <div class="bar bar{{ object.id }}" style="width: 0%;"></div>
         </div>
 
 
         <script>
 
-            var progress = setInterval(function () {
-                var $bar = $('.bar');
-                if ($bar.width() > 770) {
-                    clearInterval(progress);
-                    $('.progress').removeClass('active');
+            var progress{{ object.id }} = setInterval(function () {
+                var $bar{{ object.id }} = $('.bar.bar{{ object.id }}');
+                if ($bar{{ object.id }}.width() > 770) {
+                    clearInterval(progress{{ object.id }});
+                    //$('.progress').removeClass('active');
                 } else {
-                    $bar.width($bar.width() + 10);
+                    $bar{{ object.id }}.width($bar{{ object.id }}.width() + 10);
                 }
             }, 80);
 
@@ -160,13 +160,13 @@
 
         <script>
 
-            var progress = setInterval(function () {
-                var $bar = $('.bar');
-                if ($bar.width() > 770) {
-                    clearInterval(progress);
-                    $('.progress').removeClass('active');
+            var progress{{ object.id }} = setInterval(function () {
+                var $bar{{ object.id }} = $('.bar.bar{{ object.id }}');
+                if ($bar{{ object.id }}.width() > 770) {
+                    clearInterval(progress{{ object.id }});
+                    //$('.progress').removeClass('active');
                 } else {
-                    $bar.width($bar.width() + 10);
+                    $bar{{ object.id }}.width($bar{{ object.id }}.width() + 10);
                 }
             }, 80);
 

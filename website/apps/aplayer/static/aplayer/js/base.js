@@ -196,6 +196,11 @@ aplayer.base.load_playlist = function (uri) {
     if (uri) {
         data = {};
 
+        // hack - sorry
+        if (uri.indexOf("playlist") != -1) {
+            uri += '?all=true';
+        }
+
         aplayer.base.debug('aplayer.base.load_playlist() - ' + uri);
 
         $.ajax({

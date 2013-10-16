@@ -113,7 +113,7 @@ class SimplePlaylistResource(ModelResource):
     def dehydrate(self, bundle):
         bundle.data['item_count'] = bundle.obj.items.count();
 
-        # a bit hackish maybe, provide uuids of all items in playlist
+        # a bit hackish maybe, return uuids of all items in playlist
         items = bundle.obj.get_items()
         item_uuids = []
         for item in items:

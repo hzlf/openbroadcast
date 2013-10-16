@@ -236,6 +236,7 @@
         },
 
         _onProgress: function (e, data) {
+
             if (e.lengthComputable) {
                 var now = +(new Date()),
                     total,

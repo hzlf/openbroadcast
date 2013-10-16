@@ -14,14 +14,14 @@ from django.template import RequestContext
 from pure_pagination.mixins import PaginationMixin
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 
-from alibrary.models import Artist, Label, Release, Profession, Media, License, Playlist
+from alibrary.models import Artist, Label, Release, Profession, Media, License, Playlist, NameVariation
 
 from sendfile import sendfile
 
 from ashop.util.base import get_download_permissions
 
 #from alibrary.forms import ReleaseForm
-from alibrary.forms import ArtistForm, ArtistActionForm, ArtistRelationFormSet, MemberFormSet
+from alibrary.forms import ArtistForm, ArtistActionForm, ArtistRelationFormSet, MemberFormSet, AliasFormSet
 
 from alibrary.filters import ArtistFilter
 
@@ -319,6 +319,7 @@ class ArtistEditView(UpdateView):
         context['action_form'] = ArtistActionForm(instance=self.object)
         context['relation_form'] = ArtistRelationFormSet(instance=self.object)
         context['member_form'] = MemberFormSet(instance=self.object)
+        context['alias_form'] = AliasFormSet(instance=self.object)
         context['user'] = self.request.user
         context['request'] = self.request
 
@@ -341,9 +342,24 @@ class ArtistEditView(UpdateView):
             aliases_text = self.request.POST.get('aliases_text', None)
             aliases = self.request.POST.get('aliases', None)
 
+            # hack
+            namevariations_text = form.cleaned_data['namevariations']
+            if namevariations_text:
+                variations = namevariations_text.split(',')
+                print '#'
+                print variations
+                self.object.namevariations.all().delete()
+                for v in variations:
+                    nv = NameVariation(name=v.strip(), artist=self.object)
+                    nv.save()
+
             member_form = MemberFormSet(self.request.POST, instance=tmp)
             if member_form.is_valid():
                 member_form.save()
+
+            alias_form = AliasFormSet(self.request.POST, instance=tmp)
+            if alias_form.is_valid():
+                alias_form.save()
         
             relation_form = ArtistRelationFormSet(self.request.POST, instance=tmp)
             if relation_form.is_valid():                

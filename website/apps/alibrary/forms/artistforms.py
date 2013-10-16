@@ -82,7 +82,19 @@ class ArtistForm(ModelForm):
 
     class Meta:
         model = Artist
-        fields = ('name', 'real_name', 'aliases', 'type', 'country', 'booking_contact', 'biography', 'main_image', 'date_start', 'date_end', 'd_tags', 'ipi_code', 'isni_code',)
+        fields = ('name',
+                  'real_name',
+                  #'aliases',
+                  'type',
+                  'country',
+                  'booking_contact',
+                  'biography',
+                  'main_image',
+                  'date_start',
+                  'date_end',
+                  'd_tags',
+                  'ipi_code',
+                  'isni_code',)
         
 
     def __init__(self, *args, **kwargs):
@@ -121,6 +133,7 @@ class ArtistForm(ModelForm):
                                
                 _('General'),
                 LookupField('name', css_class='input-xlarge'),
+                LookupField('namevariations', css_class='input-xlarge'),
                 LookupField('real_name', css_class='input-xlarge'),
                 LookupField('type', css_class='input-xlarge'),
                 LookupField('country', css_class='input-xlarge'),
@@ -184,17 +197,11 @@ class ArtistForm(ModelForm):
     
     main_image = forms.Field(widget=FileInput(), required=False)
     remote_image = forms.URLField(required=False)
-    #releasedate = forms.DateField(required=False,widget=forms.DateInput(format = '%Y-%m-%d'), input_formats=('%Y-%m-%d',))
-    #releasedate_approx = ApproximateDateFormField(label="Releasedate", required=False)
     d_tags = TagField(widget=TagAutocompleteTagIt(max_tags=9), required=False, label=_('Tags'))
-    #name = forms.CharField(widget=selectable.AutoCompleteWidget(ReleaseNameLookup), required=True)
-    #label = selectable.AutoCompleteSelectField(ReleaseLabelLookup, allow_new=True, required=False)    
-    biography = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")   
+    namevariations = forms.CharField(required=False, label=_('Variations'))
+    biography = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")
+    # aliases = selectable.AutoCompleteSelectMultipleField(ArtistLookup, required=False)
 
-    aliases = selectable.AutoCompleteSelectMultipleField(ArtistLookup, required=False)
-    # aliases  = make_ajax_field(Artist,'aliases','aliases',help_text=None)
-    
-    #members = selectable.AutoCompleteSelectMultipleField(ArtistLookup, required=False)
     
 
     def clean(self, *args, **kwargs):
@@ -304,13 +311,85 @@ class BaseMemberForm(ModelForm):
         super(BaseMemberForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
 
-    child = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False, label=_('Artist'))
+    child = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False, label=_('Member'))
     #service = forms.CharField(label='', widget=ReadOnlyIconField(**{'url': 'whatever'}), required=False)
     #url = forms.URLField(label=_('Website / URL'), required=False)
 
 
     def save(self, *args, **kwargs):
         instance = super(BaseMemberForm, self).save(*args, **kwargs)
+        return instance
+
+
+"""
+Artists alias / "other projects"
+"""
+
+""""""
+class BaseAliasFormSet(BaseInlineFormSet):
+
+
+    def __init__(self, *args, **kwargs):
+
+        self.instance = kwargs['instance']
+
+        super(BaseAliasFormSet, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.form_id = "id_artists_form_%s" % 'inline'
+        self.helper.form_class = 'form-horizontal'
+        self.helper.form_method = 'post'
+        self.helper.form_action = ''
+        self.helper.form_tag = False
+
+        base_layout = Row(
+                Column(
+                       Field('child', css_class='input-xlarge'),
+                       css_class='span9'
+                       ),
+                Column(
+                       Field('DELETE', css_class='input-mini'),
+                       css_class='span3'
+                       ),
+                css_class='albumartist-row row-fluid form-autogrow',
+        )
+
+        self.helper.add_layout(base_layout)
+
+
+
+
+    def add_fields(self, form, index):
+        # allow the super class to create the fields as usual
+        super(BaseAliasFormSet, self).add_fields(form, index)
+
+        # created the nested formset
+        try:
+            instance = self.get_queryset()[index]
+            pk_value = instance.pk
+        except IndexError:
+            instance=None
+            pk_value = hash(form.prefix)
+
+
+class BaseAliasForm(ModelForm):
+
+    class Meta:
+        model = Artist
+        parent_model = Artist
+        #fields = ('child',)
+
+    def __init__(self, *args, **kwargs):
+        super(BaseAliasForm, self).__init__(*args, **kwargs)
+        instance = getattr(self, 'instance', None)
+
+    child = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False, label=_('Alias'))
+    #service = forms.CharField(label='', widget=ReadOnlyIconField(**{'url': 'whatever'}), required=False)
+    #url = forms.URLField(label=_('Website / URL'), required=False)
+
+
+    def save(self, *args, **kwargs):
+        instance = super(BaseAliasForm, self).save(*args, **kwargs)
         return instance
 
 
@@ -408,5 +487,15 @@ MemberFormSet = inlineformset_factory(Artist,
                                        can_order=False,)
 
 
+AliasFormSet = inlineformset_factory(Artist,
+                                       ArtistAlias,
+                                       form=BaseAliasForm,
+                                       formset=BaseAliasFormSet,
+                                       fk_name = 'parent',
+                                       extra=4,
+                                       #exclude=('position',),
+                                       can_delete=True,
+                                       can_order=False,)
 
-    
+
+#AliasFormSet = inlineformset_factory(Artist, Artist)

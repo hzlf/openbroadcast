@@ -429,26 +429,19 @@ PlaylistEditor = function () {
             // main editor
             self.update_editor_playlist(data);
 
-            self.update_editor_summary();
-            self.update_editor_transform();
+            // self.update_editor_summary(data);
+            self.update_editor_transform(data);
             self.rebind();
         });
     };
 
 
-    this.update_editor_transform = function () {
+    /*
+    LEGACY VERSION
+     */
+    this.__update_editor_transform = function () {
 
         var container = $('#playlist_transform');
-
-        /*
-         if(this.current_playlist.target_duration > 900) {
-         $('.target-duration', container).removeClass('warning');
-         $('.target-duration', container).addClass('success');
-         } else {
-         $('.target-duration', container).removeClass('success');
-         $('.target-duration', container).addClass('warning');
-         }
-         */
 
         if (this.current_playlist.dayparts.length > 0) {
             $('.dayparts', container).removeClass('warning');
@@ -461,7 +454,65 @@ PlaylistEditor = function () {
 
     };
 
-    this.update_editor_summary = function () {
+
+
+    this.update_editor_transform = function (data) {
+        /*
+        most information is displayed while page rendering. just override some states for duration
+         */
+        debug.debug('update_editor_summary')
+        debug.debug(data)
+
+        var container = $('.criterias-broadcast');
+
+        var total_duration = 0;
+        for (i in self.current_items) {
+            if (isInt(i)) {
+                var item = self.current_items[i];
+                total_duration += item.item.content_object.duration;
+                total_duration -= (item.cue_in + item.cue_out + item.fade_cross);
+            }
+        }
+
+        var error = true;
+        if (Math.abs(self.current_playlist.target_duration * 1000 - total_duration) < 2000) {
+            error = false;
+        } else {
+            error = 'Durations do not match.'
+        }
+
+        var durations = {
+            total: total_duration,
+            target: self.current_playlist.target_duration * 1000,
+            difference: self.current_playlist.target_duration * 1000 - total_duration,
+            error: error
+        }
+
+
+        console.log('durations', durations)
+
+
+        html = nj.render('alibrary/nj/playlist/_transform_duration.html', {
+            durations: durations
+        });
+
+        $('.criteria.duration', container).replaceWith(html);
+
+        /**/
+        if (error) {
+            $('.link a', container).addClass('disabled');
+        } else {
+            $('.link a', container).removeClass('disabled');
+        }
+
+
+
+    };
+
+    /*
+    LEGACY VERSION
+     */
+    this.__update_editor_summary = function () {
 
 
         var total_duration = 0;
@@ -502,7 +553,7 @@ PlaylistEditor = function () {
             object: self.current_playlist
         });
 
-        $('.sommary-holder', container).html(html);
+        $('.summary-holder', container).html(html);
 
         // TODO: make modular
         if (error) {
@@ -510,19 +561,9 @@ PlaylistEditor = function () {
         } else {
             $('.convert_broadcast', container).removeClass('disabled');
         }
-
-
-        /*
-         if(this.current_playlist.target_duration > 1 && error == false) {
-         $('.target-duration', container).removeClass('warning');
-         $('.target-duration', container).addClass('success');
-         } else {
-         $('.target-duration', container).removeClass('success');
-         $('.target-duration', container).addClass('warning');
-         }*/
-
-
     };
+
+
 
     this.update_editor_playlist = function (data) {
 

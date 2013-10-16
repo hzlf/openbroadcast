@@ -138,7 +138,17 @@ class PlaylistForm(ModelForm):
         self.helper.form_method = 'post'
         self.helper.form_action = ''
         self.helper.form_tag = False
-        
+
+        if self.instance.type == 'broadcast':
+            self.fields['d_tags'].required = True
+            self.fields['dayparts'].required = True
+            self.fields['target_duration'].required = True
+            self.fields['target_duration'].widget.attrs['disabled'] = 'disabled'
+
+        if self.instance.type == 'playlist':
+            self.fields['d_tags'].required = True
+
+
         
         base_layout = Fieldset(
         
@@ -221,7 +231,6 @@ class PlaylistForm(ModelForm):
 
     series = selectable.AutoCompleteSelectField(PlaylistSeriesLookup, allow_new=True, required=False)
 
-    #dayparts = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple, queryset=Daypart.objects.active())
     target_duration = forms.ChoiceField(widget=forms.RadioSelect, choices=TARGET_DURATION_CHOICES, required=False)
     dayparts = forms.ModelMultipleChoiceField(label='...%s' % _('Dayparts'), widget=DaypartWidget(), queryset=Daypart.objects.active(), required=False)
 

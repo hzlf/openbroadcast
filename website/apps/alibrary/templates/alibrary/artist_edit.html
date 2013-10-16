@@ -97,6 +97,25 @@
 
             {% crispy form %}
 
+
+
+
+
+            <fieldset>
+                <legend>
+                    {% trans "Aliases" %}<span class="pull-right"></span>
+                </legend>
+                <div class="notes-form notes-inline notes-info">
+                    <p>
+                        {% trans "Allows you to add individual Artists as 'group-members'" %}</br>
+                    </p>
+                </div>
+
+                {% crispy alias_form %}
+
+            </fieldset>
+
+
             <fieldset>
                 <legend>
                     {% trans "Members" %}<span class="pull-right"></span>
@@ -110,6 +129,10 @@
                 {% crispy member_form %}
 
             </fieldset>
+
+
+
+
 
             <fieldset class="relations">
                 <legend>

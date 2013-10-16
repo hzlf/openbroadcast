@@ -253,7 +253,12 @@ aplayer.ui.bind = function() {
 	$('.playlist .item.playlist').live('click', function(e){
 		
 		var uuid = $(this).attr('id');
-		var index = aplayer.vars.uuid_map[uuid]
+        try {
+            var index = aplayer.vars.uuid_map[uuid];
+        } catch (e) {
+            var index = 0;
+        }
+
 		
 		var args = {
 			action: 'play',

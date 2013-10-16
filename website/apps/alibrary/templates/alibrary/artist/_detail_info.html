@@ -56,6 +56,19 @@
 		{% endif %}
 
 
+		{% if object.namevariations.count > 0 %}
+		<dt>
+			{% trans "Variations" %}:
+		</dt>
+		<dd>
+			{% for name in object.namevariations.all %}
+            {{ name }}
+			{% if not forloop.last %},{% endif %}
+			{% endfor %}
+		</dd>
+		{% endif %}
+
+
 		{% if object.aliases.count > 0 %}
 		<dt>
 			{% trans "Aliases" %}:
@@ -135,6 +148,7 @@
 	</dl>
 	-->
 
+    <!--
 {% if object.relations.generic %}
     <dl class="dl-horizontal">
 
@@ -159,6 +173,8 @@
 
     </dl>
 {% endif %}
+    -->
+
 
 	<dl class="dl-horizontal sub">
 
@@ -170,7 +186,11 @@
 		<dd>
 			
 			{% if object.owner %}
-			<span class="key">{% trans "Created by" %}:</span> <span class="value"><a href="{{ object.owner.get_absolute_url }}">{{ object.owner }}</a></span> |
+			<span class="key">{% trans "Owned by" %}:</span> <span class="value"><a href="{{ object.owner.get_absolute_url }}">{{ object.owner }}</a></span> |
+			{% endif %}
+
+			{% if object.creator %}
+			<span class="key">{% trans "Created by" %}:</span> <span class="value"><a href="{{ object.creator.get_absolute_url }}">{{ object.creator }}</a></span> |
 			{% endif %}
 			
 			{% if object.publisher %}

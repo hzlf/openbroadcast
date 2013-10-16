@@ -73,7 +73,7 @@
                     },
                     text: false
                 },
-                button = $('<a>')
+                button = $('<a><i class="icon-remove-sign"></i></a>')
                 .attr('href', '#')
                 .addClass('selectable-deck-remove')
                 .button(options);

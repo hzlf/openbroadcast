@@ -71,6 +71,24 @@ LOOKUP_PROVIDERS = (
     ('musicbrainz', _('Musicbrainz')),
 )
 
+
+
+class NameVariation(models.Model):
+
+    name = models.CharField(max_length=200, db_index=True)
+    artist = models.ForeignKey('Artist', related_name="namevariations", on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        app_label = 'alibrary'
+        verbose_name = _('Name variation')
+        verbose_name_plural = _('Name variation')
+        ordering = ('name', )
+
+    def __unicode__(self):
+        return self.name
+
+
+
 class ArtistManager(models.Manager):
 
     def listed(self):
@@ -81,8 +99,7 @@ class Artist(MigrationMixin):
     uuid = UUIDField(primary_key=False)
     name = models.CharField(max_length=200, db_index=True)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
-    
-    
+
     type = models.CharField(verbose_name="Artist type", max_length=120, blank=True, null=True)
     main_image = FilerImageField(null=True, blank=True, related_name="artist_main_image", rel='')
     real_name = models.CharField(max_length=200, blank=True, null=True)
@@ -91,12 +108,7 @@ class Artist(MigrationMixin):
     #country = CountryField(blank=True, null=True)
     country = models.ForeignKey(Country, blank=True, null=True)
 
-
     booking_contact = models.CharField(verbose_name=_('Booking'), max_length=256, blank=True, null=True)
-
-    
-    #date_start = models.DateField(null=True, blank=True)
-    #date_end = models.DateField(null=True, blank=True)
 
     date_start = ApproximateDateField(verbose_name=_("Begin"), blank=True, null=True, help_text=_("date of formation / date of birth"))
     date_end = ApproximateDateField(verbose_name=_("End"), blank=True, null=True, help_text=_("date of breakup / date of death"))
@@ -111,13 +123,6 @@ class Artist(MigrationMixin):
     )
     #priority = models.IntegerField(default=1, choices=PRIORITY_CHOICES, help_text=_('Priority for sorting'))
 
-    
-    # cms field
-    #placeholder_1 = PlaceholderField('placeholder_1')
-
-    #multiple = models.NullBooleanField(null=True, blank=True)
-    
-    
     # properties to create 'special' objects. (like 'Unknown')
     listed = models.BooleanField(verbose_name='Include in listings', default=True, help_text=_('Should this Artist be shown on the default Artist-list?'))
     disable_link = models.BooleanField(verbose_name='Disable Link', default=False, help_text=_('Disable Linking. Useful e.g. for "Varius Artists"'))
@@ -128,10 +133,10 @@ class Artist(MigrationMixin):
     biography = models.TextField(blank=True, null=True)    
     
     # relations
-    # parent = TreeManyToManyField('self', null=True, blank=True, related_name='artist_parent')
     members = models.ManyToManyField('self', through='ArtistMembership', symmetrical=False)
-    aliases = models.ManyToManyField("self", related_name='artist_aliases', blank=True, null=True)
-    
+    #aliases = models.ManyToManyField("self", related_name='artist_aliases', blank=True, null=True)
+    aliases = models.ManyToManyField("self", through='ArtistAlias', related_name='artist_aliases', blank=True, null=True, symmetrical=False)
+
     folder = models.ForeignKey(Folder, blank=True, null=True, related_name='artist_folder', on_delete=models.SET_NULL)
     
     # relations a.k.a. links
@@ -348,6 +353,17 @@ class ArtistMembership(models.Model):
         app_label = 'alibrary'
         verbose_name = _('Membersip')
         verbose_name_plural = _('Membersips')
+
+class ArtistAlias(models.Model):
+
+    parent = models.ForeignKey(Artist, related_name='alias_parent')
+    child = models.ForeignKey(Artist, related_name='alias_child')
+
+    # meta
+    class Meta:
+        app_label = 'alibrary'
+        verbose_name = _('Alias')
+        verbose_name_plural = _('Aliases')
     
 
 class ArtistProfessions(models.Model):

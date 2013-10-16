@@ -27,29 +27,11 @@
     <script type="text/javascript" src="{{ STATIC_URL }}importer/js/importfile.js"></script>{% endaddtoblock %}
 
 
+{% addtoblock "css" %}<link rel="stylesheet" href="{{ STATIC_URL }}css/lib/multiuploader/jquery.fileupload-ui.css">{% endaddtoblock %}
+
 {% addtoblock "js-post" %}
-    <script id="template-upload" type="text/x-tmpl">
-        {% straight_include "importer/template-upload.html" %}
-    </script>
 
-    <!-- Not used a.t.m. -->
-    <script id="template-download" type="text/x-tmpl">
-        {% straight_include "importer/template-download.html" %}
-    </script>
 
-    <!-- The template to handle the ImportFiles -->
-    <script id="template-import" type="text/x-tmpl">
-        {% straight_include "importer/template-import.html" %}
-    </script>
-
-    <!-- The template to handle the musicbrainz results -->
-    <script id="template-result-musicbrainz" type="text/x-tmpl">
-        {% straight_include "importer/template-result-musicbrainz.html" %}
-    </script>
-
-    <script id="template-result-imported" type="text/x-tmpl">
-        {% straight_include "importer/template-result-imported.html" %}
-    </script>
 {% endaddtoblock %}
 
 
@@ -82,7 +64,19 @@
     <p>{% trans "... or upload new music." %}<br>
     {% trans "Either use the button below - or just drag'n'drop the files into the browser window." %}</p>
 </div>
+    <script id="template-upload" type="text/x-tmpl">
+        {% straight_include "importer/template-upload.html" %}
+    </script>
 
+    <!-- Not used a.t.m. -->
+    <script id="template-download" type="text/x-tmpl">
+        {% straight_include "importer/template-download.html" %}
+    </script>
+
+    <!-- The template to handle the ImportFiles -->
+    <script id="template-import" type="text/x-tmpl">
+        {% straight_include "importer/template-import.html" %}
+    </script>
 
 <div id="playlist_editor_upload" class="upload hoverable">
     <div class="uploader">

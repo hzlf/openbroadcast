@@ -223,6 +223,9 @@ class APILookup(models.Model):
             if k == 'realname':
                 mk = 'real_name'
 
+            if k == 'namevariations':
+                res['namevariations'] = ', '.join(d_artist.data[k])
+
             # image
             if k == 'images':
                 image = None
@@ -252,7 +255,8 @@ class APILookup(models.Model):
                     res['remote_image'] = res['main_image'] = None
                 #res['remote_image'] = 'http://dgs.anorg.net/image/R-5081-1147456810.jpeg'
 
-            res[mk] = d_artist.data[k]
+            if not mk in res:
+                res[mk] = d_artist.data[k]
 
 
         #res['d_tags'] = ', '.join(d_tags)

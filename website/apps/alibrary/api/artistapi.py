@@ -72,8 +72,10 @@ class ArtistResource(ModelResource):
         qs = None
         
         if q and len(q) > 1:
-            
-            qs = Artist.objects.filter(name__istartswith=q)
+
+            # qs = Artist.objects.filter(name__istartswith=q)
+            qs = Artist.objects.filter(Q(name__istartswith=q)\
+                | Q(namevariations__name__istartswith=q))
         
 
             object_list = qs.distinct()[0:20]
@@ -114,6 +116,11 @@ class ArtistResource(ModelResource):
             bundle.data['main_image'] = main_image.url
         except:
             pass
+
+        # namevariations
+        bundle.data['namevariations'] = []
+        for name in bundle.obj.namevariations.all():
+            bundle.data['namevariations'].append(name.name)
         
 
         return bundle

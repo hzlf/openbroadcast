@@ -4,9 +4,11 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django import http
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect
 from django.utils import simplejson as json
+from django.utils.translation import ugettext as _
 from django.template import RequestContext
 from django.db.models import Q
 from django.conf import settings
+from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -261,65 +263,16 @@ class PlaylistEditView(UpdateView):
         
 
 
-
+@login_required
 def playlist_convert(request, pk, type):
     
-    playlist = get_object_or_404(Playlist, pk=pk)
-    playlist.convert_to(type)
+    playlist = get_object_or_404(Playlist, pk=pk, user=request.user)
+
+    playlist, status = playlist.convert_to(type)
+    if status:
+        messages.add_message(request, messages.INFO, _('Successfully converted "%s" to "%s"' % (playlist.name, playlist.get_type_display())))
+    else:
+        messages.add_message(request, messages.ERROR,_('There occured an error while converting "%s"' % (playlist.name)))
 
     return HttpResponseRedirect(playlist.get_edit_url())
 
-        
-""" Refactored to api
-def playlist_collect(request, pk):
-    playlist = get_object_or_404(Playlist, pk=pk)
-
-    ids = request.POST.get('ids', None)
-    ct = request.POST.get('ct', None)
-
-    if ids:
-        
-        ids = ids.split(',')
-        playlist.add_items_by_ids(ids, ct)
-    
-    content = {'session': 'OK!'}
-    
-    return http.HttpResponse(json.dumps(content), content_type='application/json')        
-        
-    
-def playlist_reorder(request, pk):
-    
-    playlist = get_object_or_404(Playlist, pk=pk)
-
-    order = request.POST.get('order', None)
-
-    if order:
-        order = order.split(',')
-        playlist.reorder_items_by_uuids(order)
-        
-    print order
-    
-    content = {
-               'session': 'OK!',
-               'order': order,
-               'pk': playlist.pk
-    }
-    
-    return http.HttpResponse(json.dumps(content), content_type='application/json')        
-        
-    
-def playlist_collect__old(request, pk):
-    playlist = get_object_or_404(Playlist, pk=pk)
-
-    ids = request.POST.get('ids', None)
-
-    if ids:
-        
-        ids = ids.split(',')
-        playlist.add_media_by_ids(ids)
-    
-    content = {'session': 'OK!'}
-    
-    return http.HttpResponse(json.dumps(content), content_type='application/json')
-    
-"""

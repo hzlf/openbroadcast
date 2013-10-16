@@ -1,3 +1,8 @@
+// hack
+.tab-pane .alert
+  margin-top: 20px
+
+
 #playlist_editor
 
   &.condensed
@@ -281,6 +286,16 @@
         span
           width: 786px
 
+      // upload items
+    table > .files
+      background: white
+      .progress-holder
+        width: 200px
+      .preview, .start
+        // display: none
+      .cancel
+        text-align: right
+
 
     .importfile.item
       padding: 5px
@@ -377,6 +392,17 @@
 // sidebar
 .playlist-edit.transform
 
+  // override global siebar styles
+
+  .criterias
+    margin-top: 20px
+    .title
+      font-weight: bold
+
+  .action-group ul
+    border-top: 1px solid #ccc !important
+
+
   &.listing
     &.fixed
       position: fixed
@@ -384,10 +410,10 @@
       top: 120px
 
   .item
-    padding: 4px 4px 4px 4px
+    padding: 2px 4px 2px 4px
     margin: 5px 0 5px 0
-    border-bottom: 1px solid #efefef
-    //background-color: #efefef
+    // border-bottom: 1px solid #efefef
+    background-color: #fafafa
 
     a.toggle
       color: #333
@@ -396,17 +422,38 @@
 
 
     .information
-      display: none
+      // display: none
+      p
+        padding: 4px 0 0 0
+        margin: 0
+
+      dl
+        margin: 0
+        dt
+          font-weight: normal
+          text-align: left
+        dd
+          font-style: italic
+          text-align: right
+          padding-right: 4px
+        dd, dt
+          &.mark
+            font-weight: bold
+            color: orangered
+
+    .title
+      // font-weight: bold
+      font-weight: normal
 
     &.warning
       background-color: $warningBackground
-      color: $warningText
+      //color: $warningText
       .information
         display: block
 
     &.success
       background-color: $successBackground
-      color: $successText
+      //color: $successText
 
 
 

@@ -1,6 +1,14 @@
 
 		<div class="summary item target-duration {% if durations.error %}warning{% else %}success{% endif %}">
-			<h4><i class="icon-check"></i> Target Duration</h4>
+			<span class="title">
+                {% if durations.error %}
+                    <i class="icon-warning-sign"></i>
+                {% else %}
+                    <i class="icon-check-sign"></i>
+                {% endif %}
+
+                Target Duration
+            </span>
 			
 			{% if durations.error %}
 			<div class="row-fluid information">
@@ -24,7 +32,7 @@
 	
 		
 		<div class="summary item dayparts">
-			<h4><i class="icon-check"></i>Broadcast Dayparts</h4>
+			<span class="title"><i class="icon-check-sign"></i> Broadcast Dayparts</span>
 			<div class="row-fluid information">
 				<div class="span12">
 					<p>Please specify the best Broadcast Dayparts</p>

@@ -20,6 +20,10 @@ def download_url(obj, format, version):
 def quality_indicator(obj):
     return obj.get_media_indicator()
 
+@register.assignment_tag(takes_context=True)
+def transform_status(context, obj, target_type):
+    return obj.get_transform_status(target_type)
+
 
 @register.filter
 def parse_cuepoints(text):
