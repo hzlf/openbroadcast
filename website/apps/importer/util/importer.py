@@ -40,6 +40,7 @@ log = logging.getLogger(__name__)
 
 MUSICBRAINZ_HOST = getattr(settings, 'MUSICBRAINZ_HOST', None)
 MUSICBRAINZ_RATE_LIMIT = getattr(settings, 'MUSICBRAINZ_RATE_LIMIT', True)
+MUSICBRAINZ_RATE_LIMIT = getattr(settings, 'MUSICBRAINZ_RATE_LIMIT', True)
 
 # promt for continuation
 DEBUG_WAIT = False

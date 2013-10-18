@@ -154,7 +154,10 @@ class APILookup(models.Model):
         log = logging.getLogger('alibrary.lookupmodels.get_from_musicbrainz')
         log.debug('content_object: %s' % self.content_object)
 
-        self.uri = self.content_object.relations.filter(service='musicbrainz')[0].url
+        try:
+            self.uri = self.content_object.relations.filter(service='musicbrainz')[0].url
+        except IndexError:
+            return None
 
         if '/release/' in self.uri:
             return self.get_release_from_musicbrainz()
@@ -665,7 +668,7 @@ class APILookup(models.Model):
         r = requests.get(url)
         data= r.json()
 
-        print data
+        #print data
 
         res = {}
         d_tags = [] # needed as merged from different keys

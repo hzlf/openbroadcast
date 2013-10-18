@@ -192,13 +192,20 @@ class ArtistForm(ModelForm):
 
         self.helper.add_layout(layout)
 
+        if self.instance:
+            print '***************'
+            print self.instance.namevariations.values('name')
+            print self.instance.namevariations.values_list('name', flat=True).distinct()
+
+            self.fields['namevariations'].initial = ', '.join(self.instance.namevariations.values_list('name', flat=True).distinct())
+
         
 
     
     main_image = forms.Field(widget=FileInput(), required=False)
     remote_image = forms.URLField(required=False)
     d_tags = TagField(widget=TagAutocompleteTagIt(max_tags=9), required=False, label=_('Tags'))
-    namevariations = forms.CharField(required=False, label=_('Variations'))
+    namevariations = forms.CharField(widget=forms.Textarea(attrs={'rows':'2'}), required=False, label=_('Variations'))
     biography = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")
     # aliases = selectable.AutoCompleteSelectMultipleField(ArtistLookup, required=False)
 

@@ -25,35 +25,38 @@
 
         <div class="item result" data-uri="{{ result.uri }}">
 
-            <div class="row-fluid">
+            {% if provider == "discogs" %}
+                <div class="row-fluid">
 
-                <div class="span2">
-                    {% if  result.thumb %}
-                    <img src="{{ result.thumb }}">
-                    {% endif %}
-                </div>
+                    <div class="span2">
+                        {% if  result.thumb %}
+                            <img src="{{ result.thumb }}">
+                        {% endif %}
+                    </div>
 
-                <div class="span10">
-                    <strong>{{ result.title }}</strong>
-                    <ul class="unstyled">
 
-                        <li>
+                    <div class="span10">
+                        <strong>{{ result.title }}</strong>
+                        <ul class="unstyled">
+
+                            {% if item_type == "release" %}
+                            <li>
 
                             <span class="value">
                                 <strong>{{ result.year }} | {{ result.country }}</strong>
                             </span>
-                        </li>
+                            </li>
 
-                        <li>
+                            <li>
                             <span class="title">
                                 Catalog #:
                             </span>
                             <span class="value">
                                 <strong>{{ result.catno }}</strong>
                             </span>
-                        </li>
+                            </li>
 
-                        <li>
+                            <li>
                             <span class="title">
                                 Format:
                             </span>
@@ -64,12 +67,148 @@
                                     {% endfor %}
                                 </strong>
                             </span>
-                        </li>
+                            {% endif %}
 
-                    </ul>
+                            </li>
+
+                        </ul>
+                    </div>
+
+
                 </div>
+            {% endif %}
 
-            </div>
+            {% if provider == "musicbrainz" %}
+                <div class="row-fluid">
+
+                    <div class="span12">
+
+
+
+                        {% if item_type == "release" %}
+                        <strong>{{ result.title }}</strong>
+                        <ul class="unstyled">
+
+                            <li>
+
+                            <span class="value">
+                                <strong>{{ result.date }} | {{ result.country }}</strong>
+                            </span>
+                            </li>
+
+                            {% if result["label-info"] %}
+                                {% for l in result["label-info"] %}
+                                    <li>
+
+                                        <span class="title">
+                                            Catalog #:
+                                        </span>
+                                        <span class="value">
+                                        <strong>{{ l["catalog-number"] }}</strong>
+                                        </span>
+                                    </li>
+                                {% endfor %}
+                            {% endif %}
+
+
+                            <li>
+                            <span class="title">
+                                Barcode:
+                            </span>
+                            <span class="value">
+                                <strong>
+                                    {{ result.barcode }}
+
+                                </strong>
+                            </span>
+                            </li>
+
+                        </ul>
+                        {% endif %}
+
+
+
+                        {% if item_type == "artist" %}
+                        <strong>{{ result.name }} | {{ result.country }}</strong>
+                        <ul class="unstyled">
+
+
+                            <li>
+                            <span class="title">
+                                Type:
+                            </span>
+                            <span class="value">
+                                <strong>
+                                    {{ result.type }}
+
+                                </strong>
+                            </span>
+                            </li>
+
+                        </ul>
+                        {% endif %}
+
+
+
+                        {% if item_type == "label" %}
+                        <strong>{{ result.name }} | {{ result.country }}</strong>
+                        <ul class="unstyled">
+
+                            {% if result["life-span"]["begin"] %}
+                            <li>
+                            <span class="title">
+                                Dates:
+                            </span>
+                            <span class="value">
+                                {% if result["life-span"]["begin"] %}
+                                <strong>
+                                    * {{ result["life-span"]["begin"] }}
+                                </strong>
+                                {% endif %}
+                                {% if result["life-span"]["end"] %}
+                                <strong>
+                                    ✝ {{ result["life-span"]["end"] }}
+                                </strong>
+                                {% endif %}
+                            </span>
+                            </li>
+                            {% endif %}
+
+                        </ul>
+                        {% endif %}
+
+
+
+                        {% if item_type == "media" %}
+                        <strong>{{ result.title }}</strong> | <span>{{ result.length|ms2time }}</span>
+                        <ul class="unstyled">
+
+                            {% if result["artist-credit"] %}
+                            <li>
+                            <span class="title">
+                                Artist:
+                            </span>
+                            <span class="value">
+
+                                <strong>
+                                    {{ result["artist-credit"][0]["artist"]["name"] }}
+                                </strong>
+
+                            </span>
+                            </li>
+                            {% endif %}
+
+                        </ul>
+                        {% endif %}
+
+
+
+
+                    </div>
+
+
+                </div>
+            {% endif %}
 
 
         </div>

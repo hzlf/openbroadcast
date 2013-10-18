@@ -945,6 +945,14 @@ base.ui.iface = function () {
     });
 
 
+
+    // limited lists
+    $('dd.limit').on('click', 'a.toggle', function(e){
+        e.preventDefault();
+        $('.limited', $(this).parents('dd')).toggle();
+    });
+
+
 };
 
 

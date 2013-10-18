@@ -184,12 +184,14 @@ class Channel(BaseModel):
         
         if self.stream_url:
             return self.stream_url
-        
-        stream_server = self.stream_server
-        format = self.stream_server.formats.all()[0]
-        
-        return '%s%s-%s.%s' % (stream_server.host, self.mount, format.bitrate, format.type)
 
+        if self.stream_server:
+            stream_server = self.stream_server
+            format = self.stream_server.formats.all()[0]
+
+            return '%s%s-%s.%s' % (stream_server.host, self.mount, format.bitrate, format.type)
+
+        return None
 
 
     def get_dayparts(self, day):

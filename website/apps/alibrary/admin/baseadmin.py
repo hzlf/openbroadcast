@@ -354,9 +354,8 @@ class LabelAdmin(PlaceholderAdmin, BaseAdmin):
         (None,               {'fields': ['name', 'slug', 'type', 'description']}),
         ('Contact', {'fields' : ['address', 'country', ('phone', 'fax'), 'email']}),
         ('Settings', {'fields' : ['listed', 'disable_link', 'disable_editing']}),
-        ('Relations', {'fields': ['parent'], 'classes': ['']}),
+        ('Relations', {'fields': ['parent',], 'classes': ['']}),
         ('Users', {'fields' : [('owner', 'creator', 'publisher'),]}),
-        ('Other content', {'fields': ['first_placeholder'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
     ]
     
 admin.site.register(Label, LabelAdmin)

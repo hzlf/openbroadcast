@@ -105,7 +105,7 @@ class Label(MPTTModel, MigrationMixin):
     
     description = extra.MarkdownTextField(blank=True, null=True)
     
-    first_placeholder = PlaceholderField('first_placeholder')
+    #first_placeholder = PlaceholderField('first_placeholder')
     
     # auto-update
     created = models.DateField(auto_now_add=True, editable=False)

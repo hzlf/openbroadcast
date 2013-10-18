@@ -1,22 +1,24 @@
 from django.core import serializers
-
-from dajaxice.decorators import dajaxice_register
 from dajax.core import Dajax
-
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
-from alibrary.models import APILookup, Release, Relation, Label, Artist, Media
+from dajaxice.decorators import dajaxice_register
 
+from alibrary.models import APILookup, Release, Relation, Label, Artist, Media
 from lib.util.merge import merge_model_objects
 
 import requests
-
 import json
 
 # logging
 import logging
 logger = logging.getLogger(__name__)
+
+MUSICBRAINZ_HOST = getattr(settings, 'MUSICBRAINZ_HOST', None)
+DISCOGS_HOST = getattr(settings, 'DISCOGS_HOST', None)
+
 
 
 @dajaxice_register
@@ -67,7 +69,7 @@ def api_lookup(request, *args, **kwargs):
 
         data = al.get_from_api()
 
-        print data
+        #print data
 
 
     except Exception, e:
@@ -90,20 +92,30 @@ def provider_search_query(request, *args, **kwargs):
 
     data = {}
     try:
-        if item_type == 'release':
+        if item_type == 'release' and provider == 'discogs':
             item = Release.objects.get(pk=item_id)
             ctype = ContentType.objects.get_for_model(item)
-            data = {'query': '%s %s' % (item.name, item.get_artists()[0])}
+            data = {'query': '%s %s' % (item.name, item.get_artist_display())}
+
+        if item_type == 'release' and provider == 'musicbrainz':
+            item = Release.objects.get(pk=item_id)
+            ctype = ContentType.objects.get_for_model(item)
+            data = {'query': '%s' % (item.name)}
 
         if item_type == 'artist':
             item = Artist.objects.get(pk=item_id)
             ctype = ContentType.objects.get_for_model(item)
             data = {'query': '%s' % (item.name)}
 
-        if item_type == 'media':
+        if item_type == 'media' and provider == 'discogs':
             item = Media.objects.get(pk=item_id)
             ctype = ContentType.objects.get_for_model(item)
             data = {'query': '%s' % (item.name)}
+
+        if item_type == 'media' and provider == 'musicbrainz':
+            item = Media.objects.get(pk=item_id)
+            ctype = ContentType.objects.get_for_model(item)
+            data = {'query': "%s AND artist:%s" % (item.name, item.artist.name)}
 
         if item_type == 'label':
             item = Label.objects.get(pk=item_id)
@@ -131,15 +143,44 @@ def provider_search(request, *args, **kwargs):
 
     log.debug('query: %s' % (query))
 
+    if provider == 'discogs':
+        url = 'http://%s/database/search?q=%s&type=%s&per_page=%s' % (DISCOGS_HOST, query, item_type, 50)
+        log.debug('query url: %s' % (url))
+        r = requests.get(url)
+        text = r.text
+        text = text.replace('api.discogs.com', 'dgs.anorg.net')
+        results = json.loads(text)['results']
+        for result in results:
+            result['uri'] = 'http://www.discogs.com%s' % result['uri']
 
-    url = 'http://dgs.anorg.net/database/search?q=%s&type=%s&per_page=%s' % (query, item_type, 50)
+    if provider == 'musicbrainz':
 
-    #r = requests.get('http://api.discogs.com/database/search?q=the+fat+of+the+land+the+prodigy&type=release')
-    r = requests.get(url)
-    results = r.json()['results']
-    text = r.text
-    #text = text.replace('api.discogs.com', 'dgs.anorg.net')
-    results = json.loads(text)['results']
+        _type = item_type
+        if item_type == 'media':
+            _type = 'recording'
+
+        url = 'http://%s/ws/2/%s?query=%s&fmt=json' % (MUSICBRAINZ_HOST, _type, query)
+        log.debug('query url: %s' % (url))
+        r = requests.get(url)
+        if item_type == 'release':
+            results = json.loads(r.text)['releases']
+            for result in results:
+                result['uri'] = 'http://musicbrainz.org/release/%s' % result['id']
+
+        if item_type == 'artist':
+            results = json.loads(r.text)['artist']
+            for result in results:
+                result['uri'] = 'http://musicbrainz.org/artist/%s' % result['id']
+
+        if item_type == 'label':
+            results = json.loads(r.text)['labels']
+            for result in results:
+                result['uri'] = 'http://musicbrainz.org/label/%s' % result['id']
+
+        if item_type == 'media':
+            results = json.loads(r.text)['recording']
+            for result in results:
+                result['uri'] = 'http://musicbrainz.org/recording/%s' % result['id']
 
 
     print r.json()
@@ -186,6 +227,9 @@ def provider_update(request, *args, **kwargs):
 
         if item_type == 'label':
             item = Label.objects.get(pk=item_id)
+
+        if item_type == 'media':
+            item = Media.objects.get(pk=item_id)
 
 
         if item and uri:

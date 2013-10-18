@@ -106,6 +106,7 @@ class ChannelResource(ModelResource):
                   'uuid': bundle.obj.uuid,
                   }
         bundle.data['stream'] = stream
+        bundle.data['stream_url'] = bundle.obj.get_stream_url()
         bundle.data['images'] = []
         bundle.data['media'] = None
 

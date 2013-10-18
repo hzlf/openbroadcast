@@ -100,7 +100,7 @@ class ArtistListView(PaginationMixin, ListView):
         q = self.request.GET.get('q', None)
         
         if q:
-            qs = Artist.objects.filter(Q(name__istartswith=q))\
+            qs = Artist.objects.filter(name__istartswith=q)\
             .distinct()
         else:
             #qs = Artist.objects.all()
@@ -136,6 +136,14 @@ class ArtistListView(PaginationMixin, ListView):
             # add relation filter
             fa = Label.objects.filter(slug=label_filter)[0]
             f = {'item_type': 'label' , 'item': fa, 'label': _('Label')}
+            self.relation_filter.append(f)
+
+        date_start_filter = self.request.GET.get('date_start', None)
+        if date_start_filter:
+
+            qs = qs.filter(date_start__lte='%s-12-31' % date_start_filter, date_start__gte='%s-00-00' % date_start_filter).distinct()
+            # add relation filter
+            f = {'item_type': 'label' , 'item': '%s-12-31' % date_start_filter, 'label': _('Date start')}
             self.relation_filter.append(f)
             
             
@@ -343,12 +351,12 @@ class ArtistEditView(UpdateView):
             aliases = self.request.POST.get('aliases', None)
 
             # hack
+            self.object.namevariations.all().delete()
             namevariations_text = form.cleaned_data['namevariations']
             if namevariations_text:
                 variations = namevariations_text.split(',')
                 print '#'
                 print variations
-                self.object.namevariations.all().delete()
                 for v in variations:
                     nv = NameVariation(name=v.strip(), artist=self.object)
                     nv.save()

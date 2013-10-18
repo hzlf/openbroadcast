@@ -168,11 +168,11 @@ EditUi = function () {
         $('#search_dialog_container .item').live('click', function () {
 
             var uri = $(this).data('uri');
-            uri = 'http://www.discogs.com' + uri
-
             self.current_data = $.extend(self.current_data, {
                 uri: uri
             });
+
+            console.log(self.current_data);
 
             Dajaxice.alibrary.provider_update(function (data) {
 
@@ -186,11 +186,25 @@ EditUi = function () {
                     ;
 
                     // TODO: maybe make a bit nicer...
-                    // replace link in form
-                    var field = $('.controls input', $('.external.' + self.current_data.provider)
-                        .parents('.relation-row'))
-                        .val(self.current_data.uri);
+                    // set button classes
+                    $(".item[data-provider='" + self.current_data.provider + "']", container).addClass('available');
+                    $(".item[data-provider='" + self.current_data.provider + "']", container).removeClass('unavailable');
 
+
+                    // replace link in form
+
+                    if($('.external.' + self.current_data.provider).length) {
+
+                        var field = $('.controls input', $('.external.' + self.current_data.provider)
+                            .parents('.relation-row'))
+                            .val(self.current_data.uri);
+
+                    } else {
+                        var _container = $('fieldset.relations .relation-row:not(".hidden")').last();
+                        $('.controls input', _container).val(self.current_data.uri);
+                        // reqrow...
+                        self.autogrow();
+                    }
 
                     // TODO: refactor
                     self.api_lookup(
@@ -198,7 +212,6 @@ EditUi = function () {
                         self.current_data.item_id,
                         self.current_data.provider
                     )
-
 
                 }
 
@@ -208,10 +221,7 @@ EditUi = function () {
 
         $('#search_dialog_container .query .search').live('click', function () {
             var query = $('#search_dialog_container .query .query').val();
-
-
             self.provider_search_update_dialog(query);
-
         });
 
         // reset
@@ -320,20 +330,14 @@ EditUi = function () {
 
     this.provider_search = function (item_type, item_id, provider) {
         debug.debug(item_type, item_id, provider);
-        /*
-         var data = {
-         'item_type': item_type,
-         'item_id': item_id,
-         'provider': provider
-         }
-         self.current_data = $.extend(self.current_data, data);
-         */
         self.current_data = $.extend(self.current_data, {
             'item_type': item_type,
             'item_id': item_id,
             'provider': provider
         });
 
+        // ask api what query string to use
+        // exmple return: Human After All Daft Punk
         Dajaxice.alibrary.provider_search_query(function (data) {
             console.log('data:', data);
             if (data && data.query) {
@@ -343,7 +347,7 @@ EditUi = function () {
 
     };
 
-
+    // create dialog container
     this.provider_search_dialog = function (query) {
 
 
@@ -397,7 +401,12 @@ EditUi = function () {
 
 
         Dajaxice.alibrary.provider_search(function (data) {
-            console.log('dataaaaaa:', data);
+
+            data.item_type = self.current_data.item_type;
+            data.provider = self.current_data.provider;
+
+            console.log('data:', data);
+
             var html = nj.render('alibrary/nj/provider/search_dialog.html', data);
             setTimeout(function () {
                 $('#search_dialog_container').html(html);
@@ -421,6 +430,9 @@ EditUi = function () {
             'biography',
             'date_start',
             'date_end',
+            'main_image',
+            'namevariations',
+            'releasedate_approx',
             'd_tags'
         ];
 
@@ -847,23 +859,12 @@ EditUi = function () {
         el.parent().removeClass('lookup-diff');
         el.parent().addClass('lookup-match');
 
-        // some keys need special treatment...
-        /*
-         switch (key) {
-         case 'd_tags':
-         var tags = val.split(',');
-         $(tags).each(function (i, el) {
-         $("#id_d_tags").tagit("createTag", $.trim(el));
-         });
-         break;
-         case 2:
-         break;
-         default:
-         target.val($.decodeHTML(val));
-         }
-         */
-
         target.val($.decodeHTML(val));
+
+        // hack for autocomlete fields - trigger search dialog
+        if (key.endsWith('_0')) {
+            target.djselectable('search', $.decodeHTML(val));
+        }
 
     };
 

@@ -914,10 +914,13 @@ ICECAST_HOST = '127.0.0.2'
 ICECAST_PORT = '8000'
 
 """
-mb server
+api server
 """
 MUSICBRAINZ_HOST = 'mb.anorg.net'
 MUSICBRAINZ_RATE_LIMIT = False
+
+DISCOGS_HOST = 'dgs.anorg.net'
+DISCOGS_RATE_LIMIT = False
 
 """
 pusher / nodejs
