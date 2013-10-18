@@ -40,6 +40,20 @@ from lib.util import tagging_extra
 ALIBRARY_PAGINATE_BY = getattr(settings, 'ALIBRARY_PAGINATE_BY', (12,24,36,120))
 ALIBRARY_PAGINATE_BY_DEFAULT = getattr(settings, 'ALIBRARY_PAGINATE_BY_DEFAULT', 12)
 
+ORDER_BY = [
+    {
+        'key': 'name',
+        'name': _('Name')
+    },
+    {
+        'key': 'updated',
+        'name': _('Last modified')
+    },
+    {
+        'key': 'created',
+        'name': _('Creation date')
+    },
+]
 
 class LabelListView(PaginationMixin, ListView):
     
@@ -70,6 +84,8 @@ class LabelListView(PaginationMixin, ListView):
         self.extra_context['filter'] = self.filter
         self.extra_context['relation_filter'] = self.relation_filter
         self.extra_context['tagcloud'] = self.tagcloud
+        # for the ordering-box
+        self.extra_context['order_by'] = ORDER_BY
 
         # active tags
         if self.request.GET.get('tags', None):

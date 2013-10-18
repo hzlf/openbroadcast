@@ -238,6 +238,30 @@ class Artist(MigrationMixin):
             pass
         
         return parents
+
+
+    def get_alias_ids(self, exclude=[]):
+
+        alias_ids = []
+        parent_alias_ids = ArtistAlias.objects.filter(child__pk=self.pk).values_list('parent__pk', flat=True).distinct()
+        child_alias_ids = ArtistAlias.objects.filter(parent__pk=self.pk).values_list('child__pk', flat=True).distinct()
+
+        alias_ids.extend(parent_alias_ids)
+        alias_ids.extend(child_alias_ids)
+
+        for alias_id in alias_ids:
+            print 'loop: alias_id: %s' % alias_id
+
+            if not alias_id == self.pk and not alias_id in exclude:
+                exclude.append(alias_id)
+                alias_ids.extend(Artist.objects.get(pk=alias_id).get_alias_ids(exclude=exclude))
+
+        return alias_ids
+
+    def get_aliases(self):
+
+        aliases = Artist.objects.filter(pk__in=self.get_alias_ids([])).exclude(pk=self.pk).distinct()
+        return aliases
     
     # release collection
     def get_releases(self):

@@ -37,6 +37,36 @@ import audiotranscode
 ALIBRARY_PAGINATE_BY = getattr(settings, 'ALIBRARY_PAGINATE_BY', (12,24,36,120))
 ALIBRARY_PAGINATE_BY_DEFAULT = getattr(settings, 'ALIBRARY_PAGINATE_BY_DEFAULT', 12)
 
+ORDER_BY = [
+    {
+        'key': 'name',
+        'name': _('Name')
+    },
+    {
+        'key': 'duration',
+        'name': _('Duration')
+    },
+    {
+        'key': 'tempo',
+        'name': _('BPM')
+    },
+    {
+        'key': 'danceability',
+        'name': _('Danceability')
+    },
+    {
+        'key': 'energy',
+        'name': _('Energy')
+    },
+    {
+        'key': 'updated',
+        'name': _('Last modified')
+    },
+    {
+        'key': 'created',
+        'name': _('Creation date')
+    },
+]
 
 class MediaListView(PaginationMixin, ListView):
     
@@ -67,6 +97,8 @@ class MediaListView(PaginationMixin, ListView):
         self.extra_context['filter'] = self.filter
         self.extra_context['relation_filter'] = self.relation_filter
         self.extra_context['tagcloud'] = self.tagcloud
+        # for the ordering-box
+        self.extra_context['order_by'] = ORDER_BY
 
         # active tags
         if self.request.GET.get('tags', None):

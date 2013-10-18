@@ -71,12 +71,14 @@
 		{% endif %}
 
 
-		{% if object.aliases.count > 0 %}
+
+
+        {% if object.get_aliases.count > 0 %}
 		<dt>
 			{% trans "Aliases" %}:
 		</dt>
 		<dd>
-			{% for artist in object.aliases.all %}
+			{% for artist in object.get_aliases %}
 			{% with item=artist %}
 			{% include "alibrary/element/_inline_link.html" %}
 			{% if not forloop.last %},{% endif %}
@@ -84,6 +86,7 @@
 			{% endfor %}
 		</dd>
 		{% endif %}
+
 
 		{% if object.members.count > 0 %}
 		<dt>

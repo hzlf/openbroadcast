@@ -43,6 +43,29 @@ import reversion
 ALIBRARY_PAGINATE_BY = getattr(settings, 'ALIBRARY_PAGINATE_BY', (12,24,36,120))
 ALIBRARY_PAGINATE_BY_DEFAULT = getattr(settings, 'ALIBRARY_PAGINATE_BY_DEFAULT', 12)
 
+ORDER_BY = [
+    {
+        'key': 'name',
+        'name': _('Name')
+    },
+    {
+        'key': 'date_start',
+        'name': _('Date of formation / date of birth')
+    },
+    {
+        'key': 'date_end',
+        'name': _('Date of breakup / date of death')
+    },
+    {
+        'key': 'updated',
+        'name': _('Last modified')
+    },
+    {
+        'key': 'created',
+        'name': _('Creation date')
+    },
+]
+
 
 class ArtistListView(PaginationMixin, ListView):
     
@@ -73,6 +96,8 @@ class ArtistListView(PaginationMixin, ListView):
         self.extra_context['filter'] = self.filter
         self.extra_context['relation_filter'] = self.relation_filter
         self.extra_context['tagcloud'] = self.tagcloud
+        # for the ordering-box
+        self.extra_context['order_by'] = ORDER_BY
 
         # active tags
         if self.request.GET.get('tags', None):
