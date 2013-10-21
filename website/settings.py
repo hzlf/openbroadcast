@@ -882,6 +882,7 @@ CELERY_ROUTES = {
     #'importer.models.process_task': {'queue': 'import'},
     # assign import task to single-instance worker
     'importer.models.import_task': {'queue': 'import'},
+    'importer.models.process_task': {'queue': 'process'},
     #'alibrary.models.generate_media_versions_task': {'queue': 'convert'},
 }
 

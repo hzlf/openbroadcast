@@ -85,8 +85,14 @@ class Importer(object):
         log = logging.getLogger('util.importer.run')
         it = obj.import_tag
         rt = obj.results_tag
+        
 
-
+        print '*****************************'
+        self.pp.pprint(it)
+        self.pp.pprint(rt)
+        print '*****************************'
+        
+        
         """
         get import settings
         """
@@ -203,7 +209,9 @@ class Importer(object):
         print '  force_label:        %s' % force_label
         print
         print '***************************************************************'
-
+        
+        
+        time.sleep(1)
 
         if DEBUG_WAIT:
             raw_input("Press Enter to continue...")
@@ -215,15 +223,13 @@ class Importer(object):
         """        
         m = None
         m_created = False
-        # log.info('media, force creation: %s' % name)
-        log.info('creati media: %s' % name)
+        log.info('media, force creation: %s' % name)
         m = Media(name=name)
         m.filename = filename
         if tracknumber:
             m.tracknumber = tracknumber
         m.save()
         m_created = True
-
         
         """
         get or create release

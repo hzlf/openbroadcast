@@ -77,17 +77,20 @@ ImporterUi = function() {
                 }
             })
 
-            /**/
-			$.ajax({
-				type: "GET",
-				url: url,
-				dataType: "application/json",
-				contentType: 'application/json',
-				processData:  false,
-				success: function(data) {
-					debug.debug(data);					
-				}
-			});
+            setTimeout(function(){
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    dataType: "application/json",
+                    contentType: 'application/json',
+                    processData:  false,
+                    success: function(data) {
+                        debug.debug(data);
+                    }
+                });
+            }, 0);
+
+
 
 
 		});

@@ -78,47 +78,52 @@ class Process(object):
         if MUSICBRAINZ_HOST:
             musicbrainzngs.set_hostname(MUSICBRAINZ_HOST)
     
-    """
-    look for a duplicate by sha1
-    """
+    
     def id_by_sha1(self, file):
         sha1 = sha1_by_file(file)
         print 'SHA1: %s' % sha1
         try:
-            from alibrary.models import Media
             return Media.objects.filter(master_sha1=sha1)[0].pk
-        except Exception, e:
-            print "SHA1 EXCEPTION:"
-            print e
+        except:
             return None
     
-    """
-    look for a duplicate by fingerprint
-    """
+    
     def id_by_echoprint(self, file):
-
-        log = logging.getLogger()
-
+        
         from ep.API import fp
         from lib.analyzer.echoprint import Echoprint
         e = Echoprint()
         code, version, duration, echoprint = e.echoprint_from_path(file.path, offset=10, duration=100)
+        
+        
+        # print code
+        # code = fp.decode_code_string(code)
 
         try:
             res = fp.best_match_for_query(code_string=code)
-
+            
+            print 'ECHOPRINT!!!!!!!!!!'
+            
+            print 'TRID'
+            print res.TRID
+            print 'END TRID'
+            
             if res.match():
-                log.info('echoprint match - score: %s trid: %s' % (res.score, res.TRID))
-                #print res.message()
-                #print res.match()
-                #print res.score
-                #print res.TRID
+            
+                print res.message()
+                print res.match()
+                print res.score
+                print res.TRID
+                #ids = [int(res.TRID),]
+                
                 return int(res.TRID)
             
         except Exception, e:
-            log.warning('echoprint error: %s' % (e))
-
-
+            print e
+            pass
+            
+            
+        print 'ECHOPRINT!!!!!!!!!!'
         return None
     
     
@@ -129,6 +134,7 @@ class Process(object):
         log.info('Extracting metadata for: %s' % (file.path))
         
         enc = locale.getpreferredencoding()
+        
         try:
             meta = EasyID3(file.path)
             log.debug('using EasyID3')
@@ -144,23 +150,22 @@ class Process(object):
         """
         
         # Media
-
         try:
             dataset['media_name'] = meta['title'][0]
         except Exception, e:
-            log.info('metadata missing "media_name": %s' % (e))
+            print e
             
         try:
             dataset['media_mb_id'] = meta['musicbrainz_trackid'][0]
         except Exception, e:
-            log.debug('metadata missing "media_mb_id": %s' % (e))
+            print e
             
         try:
 
             try:
                 dataset['media_tracknumber'] = int(meta['tracknumber'][0])
             except Exception, e:
-                log.debug('metadata missing "media_tracknumber": %s' % (e))
+                print e
                 
             try:
                 tn = meta['tracknumber'][0].split('/')
@@ -168,6 +173,9 @@ class Process(object):
                 dataset['media_totaltracks'] = int(tn[1])
             except Exception, e:
                 print e
+                
+            # TODO: extract tracknumber from filename if not found
+        
 
         except Exception, e:
             print e
@@ -250,7 +258,7 @@ class Process(object):
             try:
                 dataset['label_name'] = meta['label'][0]
             except Exception, e:
-                pass
+                print e
             
         except Exception, e:
             print e
@@ -258,7 +266,7 @@ class Process(object):
         try:
             dataset['label_code'] = meta['labelno'][0]
         except Exception, e:
-            pass
+            print e
             
             
             
@@ -271,12 +279,13 @@ class Process(object):
         try:
             dataset['media_comment'] = meta['comment'][0]
         except Exception, e:
-            pass
+            print e
             
         try:
             dataset['media_bpm'] = meta['bpm'][0]
         except Exception, e:
             print e
+
 
         # debug
         if meta:
@@ -286,37 +295,30 @@ class Process(object):
                     pass        
                     #print "%s:   %s" % (k, m)
 
-
-
-        """"""
+        """
         print
         print
-        print "******************************************************************"
-        print "* Aquired metadata"
         print "******************************************************************"
         for k in dataset:
             m = dataset[k]
-            try:
-                print "%s:   %s" % (k, m)
-            except:
-                # encoding problem.. don't care
-                pass
+            print "%s:   %s" % (k, m)
         print "******************************************************************"
         print
         print
-
+        """
         
         return dataset
     
-    """
-    acoustid lookup
-    returns musicbrainz "recording" ids
-    """
+    
     def get_aid(self, file):
+
+        print "### GET AID START"
+        
 
         log = logging.getLogger('importer.process.get_aid')
         log.info('Lookup acoustid for: %s' % (file.path))
-
+        
+        
         data = acoustid.match(AC_API_KEY, file.path)
         
         res = []
@@ -331,10 +333,15 @@ class Process(object):
                  'selected': selected,
                  }
 
-            log.info('acoustid: got result - score: %s | mb id: %s' % (d[0], d[1]))
-            if i < 5:
-                res.append(t)
+            log.info('got result - score: %s | mb_id: %s' % (d[0], d[1]))
+            res.append(t)
             i += 1
+
+        print "### GET AID END"
+
+        print '** RES:'
+        print res
+        print
 
         return res
 
@@ -355,7 +362,9 @@ class Process(object):
         try loading settings
         """
         skip_tracknumber = obj.settings.get('skip_tracknumber', False)
-
+        
+        
+        """"""
         try:
             tracknumber = obj.results_tag['media_tracknumber']
             log.debug('Got tracknumber: %s' % tracknumber)
@@ -367,7 +376,9 @@ class Process(object):
             log.debug('Got releasedate: %s' % releasedate)
         except Exception, e:
             log.debug('Unable to get releasedate') 
-
+        
+            
+        # tracknumber = 5
         
         """
          - loop recording ids
@@ -411,7 +422,7 @@ class Process(object):
         releases = []
         for e in obj.results_acoustid:
             recording_id = e['id']
-            print 'recording mb_id: %s' % recording_id
+            print recording_id
         
             """
             search query e.g.:
@@ -432,7 +443,8 @@ class Process(object):
             r = requests.get(url)
             
             result = r.json()
-
+            
+            print 'try recording'
             if 'recording' in result:
                 print 'got recording: %s' % recording_id
                 if len(result['recording']) > 0:
@@ -544,11 +556,9 @@ class Process(object):
             
             
 
-        print "PRE COMPLETE"
+        
         releases = self.complete_releases(releases)
-        print "POST COMPLETE"
         releases = self.format_releases(releases)
-
         
         self.pp.pprint(releases)
         

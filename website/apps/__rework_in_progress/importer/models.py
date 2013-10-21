@@ -317,16 +317,13 @@ class ImportFile(BaseModel):
         
         # duplicate check by sha1
         media_id = processor.id_by_sha1(obj.file)
-        log.debug('Got something by sha1?: %s' % media_id)
+        
         # duplicate check by echoprint
         if not media_id:
             media_id = processor.id_by_echoprint(obj.file)
-            log.debug('Got something by echoprint?: %s' % media_id)
 
         try:
             metadata = processor.extract_metadata(obj.file)
-            if metadata:
-                log.info('sucessfully extracted metadata')
 
         except Exception, e:
             print e
@@ -340,13 +337,6 @@ class ImportFile(BaseModel):
         if media_id:
             try:
                 media = Media.objects.get(pk=media_id)
-                if media:
-                    obj.status = 5
-                    obj.media = media
-                    obj.import_session.add_importitem(obj)
-                    obj.save()
-
-                    return
             except:
                 pass
         
@@ -367,22 +357,22 @@ class ImportFile(BaseModel):
             
     
         #time.sleep(1)
-        """
-        """
+
         obj.results_tag = metadata
+        print "DONE!!!"
+        print metadata
+        print 
         obj.status = 3
         obj.results_tag_status = True
         obj.save()
-        log.info('sucessfully aquired metadata')
-
-        """
-        """
+        
+        
         obj.results_acoustid = processor.get_aid(obj.file)
         obj.results_acoustid_status = True
         obj.save()
 
         obj.results_musicbrainz = processor.get_musicbrainz(obj)
-        obj.results_discogs_status = True # TODO: ???
+        obj.results_discogs_status = True
         obj.save()
         
         # requeue if no results yet
@@ -489,15 +479,12 @@ def post_save_importfile(sender, **kwargs):
     print 'post_save_importfile - kwargs'
 
     obj = kwargs['instance']
-
-
-    # init: newly uploaded/created file. let's process (gather data) it
+    if not obj.mimetype:
+        mime = magic.Magic(mime=True)
+        obj.mimetype = mime.from_file(obj.file.path.encode('ascii', 'ignore'))
+        obj.save()
+        
     if obj.status == 0:
-
-        if not obj.mimetype:
-            mime = magic.Magic(mime=True)
-            obj.mimetype = mime.from_file(obj.file.path.encode('ascii', 'ignore'))
-
         obj.process()
         
     
