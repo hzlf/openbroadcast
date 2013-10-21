@@ -130,36 +130,6 @@
 
 
 
-	<dl class="dl-horizontal">
-
-		<dt>
-			{% trans "Show on" %}:
-		</dt>
-		<dd class="horizontal relations">
-			{% for relation in object.relations.specific %}
-			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}"><i class="cicon-{{ relation.service }}"></i></a>
-			
-			{% endfor %}
-			<div class="clear"></div>
-		</dd>
-
-	</dl>
-
-	<dl class="dl-horizontal">
-
-		<dt>
-			{% trans "Show on (debug)" %}:
-		</dt>
-		<dd class="horizontal relations">
-			{% for relation in object.relations.specific %}
-			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}">{{ relation.service }}</a>
-			
-			{% endfor %}
-			<div class="clear"></div>
-		</dd>
-
-	</dl>
-
 	<!--
 	<dl class="dl-horizontal">
 

@@ -851,6 +851,7 @@ wikisyntax, eg allows tor resolve [a:Artists Name] to object
 WIKISYNTAX = (
     ('r', 'alibrary.util.object_linker.WikiRelease'),
     ('a', 'alibrary.util.object_linker.WikiArtist'),
+    ('l', 'alibrary.util.object_linker.WikiLabel'),
 )
 WIKISYNTAX_DISABLE_CACHE = False
 

@@ -32,11 +32,13 @@ from tagging.utils import calculate_cloud
 
 from easy_thumbnails.files import get_thumbnailer
 
+import reversion
+
 from django.db.models import Q
 from lib.util import tagging_extra
 from lib.util import change_message
 
-import reversion
+
 
 
 
@@ -274,10 +276,11 @@ class ArtistDetailView(DetailView):
         
         
         page_num = self.request.GET.get('r_page', 1)
-        release_list = Release.objects.filter(media_release__artist=obj).distinct()
+        release_list = Release.objects.filter(Q(media_release__artist=obj)\
+            | Q(album_artists=obj))\
+            .distinct()
         p = Paginator(release_list, m_ipp, request=self.request, query_param_prefix='r_')
         r_list = p.page(page_num)
-
         self.extra_context['releases'] = r_list
         
         
@@ -380,8 +383,6 @@ class ArtistEditView(UpdateView):
             namevariations_text = form.cleaned_data['namevariations']
             if namevariations_text:
                 variations = namevariations_text.split(',')
-                print '#'
-                print variations
                 for v in variations:
                     nv = NameVariation(name=v.strip(), artist=self.object)
                     nv.save()
@@ -393,6 +394,9 @@ class ArtistEditView(UpdateView):
             alias_form = AliasFormSet(self.request.POST, instance=tmp)
             if alias_form.is_valid():
                 alias_form.save()
+            else:
+                print 'ALIAS FORM NOT VALID!!!'
+                print alias_form.errors
         
             relation_form = ArtistRelationFormSet(self.request.POST, instance=tmp)
             if relation_form.is_valid():                

@@ -484,6 +484,16 @@ class BaseAlbumartistForm(ModelForm):
         super(BaseAlbumartistForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
 
+
+    def clean_artist(self):
+
+        artist = self.cleaned_data['artist']
+        if not artist.pk:
+            logger.debug('saving not existant artist: %s' % artist.name)
+            artist.save()
+
+        return artist
+
     artist = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False)
 
 

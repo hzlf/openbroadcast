@@ -306,7 +306,6 @@ class Media(CachingMixin, MigrationMixin):
         return self.base_duration
     
     def get_versions(self):
-       
         try:
             return reversion.get_for_object(self)
         except:
@@ -320,15 +319,11 @@ class Media(CachingMixin, MigrationMixin):
             return None
         
     def get_last_editor(self):
-        
         latest_revision = self.get_last_revision()
-        
         if latest_revision:
             return latest_revision.user
-        
         else:
             return None
-
 
 
     def get_lookup_providers(self):

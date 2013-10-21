@@ -167,6 +167,25 @@ class Label(MPTTModel, MigrationMixin):
     def __unicode__(self):
         return self.name
 
+    def get_versions(self):
+        try:
+            return reversion.get_for_object(self)
+        except:
+            return None
+
+    def get_last_revision(self):
+        try:
+            return reversion.get_unique_for_object(self)[0].revision
+        except:
+            return None
+
+    def get_last_editor(self):
+        latest_revision = self.get_last_revision()
+        if latest_revision:
+            return latest_revision.user
+        else:
+            return None
+
     
     def get_folder(self, name):
         folder, created = Folder.objects.get_or_create(name=name, parent=self.folder)
@@ -235,4 +254,11 @@ except:
 # register
 post_save.connect(library_post_save, sender=Label)   
 arating.enable_voting_on(Label)
-   
+
+from actstream import action
+def action_handler(sender, instance, created, **kwargs):
+
+    action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
+
+
+post_save.connect(action_handler, sender=Label)

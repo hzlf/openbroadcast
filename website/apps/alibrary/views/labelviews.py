@@ -32,8 +32,10 @@ from django.db.models import Q
 
 from easy_thumbnails.files import get_thumbnailer
 
+import reversion
 
 from lib.util import tagging_extra
+from lib.util import change_message
 
 
 
@@ -294,6 +296,8 @@ class LabelDetailView(DetailView):
 
         context.update(self.extra_context)
 
+        self.extra_context['history'] = obj.get_versions()
+
         return context
 
     
@@ -372,8 +376,12 @@ class LabelEditView(UpdateView):
             if relation_form.is_valid():                
                 relation_form.save()
 
-                obj = form.save()
-                form.save_m2m()
+
+                msg = change_message.construct(self.request, form, [relation_form,])
+                with reversion.create_revision():
+                    obj = form.save()
+                    reversion.set_comment(msg)
+                    form.save_m2m()
 
 
             return HttpResponseRedirect('#')

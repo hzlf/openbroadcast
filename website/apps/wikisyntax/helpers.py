@@ -68,6 +68,9 @@ def wikify(match): # Excepts a regexp match
 					
 					if prefix == 'a':
 						return '<a href="http://www.discogs.com/search?q=%s&type=artist">%s</a>' % (name, name)
+
+					if prefix == 'l':
+						return '<a href="http://www.discogs.com/search?q=%s&type=label">%s</a>' % (name, name)
 					
 					return '* %s *' % name
 				

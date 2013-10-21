@@ -32,42 +32,68 @@
                 </div>
 
                 <div class="span10">
-                    <strong>{{ object.name }}
-                    <small class="pull-right"> {{ object.media.length }} Tracks
-                    </small>
-                    </strong>
-                    <ul class="unstyled">
-
-                        <li>
-
-                            <span class="value">
-                                <strong>{{ object.releasedate }} | {{ object.release_country }}</strong>
-                            </span>
-                        </li>
-
-                        <li>
-                            <span class="title">
-                                Artist:
-                            </span>
-                            <span class="value">
-                                {% for artist in object.artist %}
-                                    <strong>{{ artist }}</strong>
-                                {% endfor %}
-                            </span>
-                        </li>
 
 
-                        <li>
-                            <span class="title">
-                                Catalog #:
-                            </span>
-                            <span class="value">
-                                <strong>{{ object.catalognumber }}</strong>
-                            </span>
-                        </li>
+
+                        <strong>{{ object.name }}
+                            {% if item_type == "release" %}
+                            <small class="pull-right"> {{ object.media.length }} Tracks</small>
+                            {% endif %}
+                            {% if item_type == "label" %}
+                            <small class="pull-right"> {{ object.release_count }} Releases</small>
+                            {% endif %}
+                        </strong>
+
+                        <ul class="unstyled">
+                            {% if item_type == "release" %}
+                                <li>
+                                    <span class="value">
+                                        <strong>{{ object.releasedate }} | {{ object.release_country }}</strong>
+                                    </span>
+                                </li>
+                                <li>
+                                    <span class="title">
+                                        Artist:
+                                    </span>
+                                    <span class="value">
+                                        {% for artist in object.artist %}
+                                            <strong>{{ artist }}</strong>
+                                        {% endfor %}
+                                    </span>
+                                </li>
+                                <li>
+                                    <span class="title">
+                                        Catalog #:
+                                    </span>
+                                    <span class="value">
+                                        <strong>{{ object.catalognumber }}</strong>
+                                    </span>
+                                </li>
+                            {% endif %}
 
 
-                    </ul>
+                            {% if item_type == "label" %}
+                                <li>
+                                    <span class="value">{{ object.type_display }}</span>
+                                </li>
+                                {% if object.labelcode %}
+                                <li>
+                                    <span class="title">
+                                        Label code:
+                                    </span>
+                                    <span class="value">
+                                        <strong>{{ object.labelcode }}</strong>
+                                    </span>
+                                </li>
+                                {% endif %}
+                            {% endif %}
+
+                        </ul>
+
+
+
+
+
                 </div>
 
             </div>

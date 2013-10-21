@@ -250,8 +250,6 @@ class Artist(MigrationMixin):
         alias_ids.extend(child_alias_ids)
 
         for alias_id in alias_ids:
-            print 'loop: alias_id: %s' % alias_id
-
             if not alias_id == self.pk and not alias_id in exclude:
                 exclude.append(alias_id)
                 alias_ids.extend(Artist.objects.get(pk=alias_id).get_alias_ids(exclude=exclude))

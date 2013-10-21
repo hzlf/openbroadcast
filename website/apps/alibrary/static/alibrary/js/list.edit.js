@@ -212,17 +212,19 @@ ListEditUi = function () {
 
 
         // not so nice, but have to map type as names differ in api
-        var item_type = data.item_type
+        var item_type = data.item_type;
+        var _item_type = item_type;
 
-        if(item_type == 'media') {
-            item_type = 'track';
+        if(_item_type == 'media') {
+            _item_type = 'track';
         }
 
-        var url = '/api/v1/' + item_type + '/';
+        var url = '/api/v1/' + _item_type + '/';
         var query = '?id__in=' + data.item_ids.join(',');
 
         $.get(url + query, function (data) {
             debug.debug(data);
+            data.item_type = item_type;
             var html = nj.render('alibrary/nj/merge/merge_dialog.html', data);
             setTimeout(function () {
                 $('#merge_dialog_container').html(html);

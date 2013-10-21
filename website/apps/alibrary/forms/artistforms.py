@@ -17,6 +17,9 @@ from filer.models.imagemodels import Image
 
 from django.contrib.admin import widgets as admin_widgets
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 from alibrary.models import Release, Media, Relation
 
@@ -84,7 +87,6 @@ class ArtistForm(ModelForm):
         model = Artist
         fields = ('name',
                   'real_name',
-                  #'aliases',
                   'type',
                   'country',
                   'booking_contact',
@@ -102,10 +104,9 @@ class ArtistForm(ModelForm):
         self.user = kwargs['initial']['user']
         self.instance = kwargs['instance']
         
-        print self.instance
-        
-        print self.user.has_perm("alibrary.edit_release")
-        print self.user.has_perm("alibrary.admin_release", self.instance)
+
+        # print self.user.has_perm("alibrary.edit_release")
+        # print self.user.has_perm("alibrary.admin_release", self.instance)
 
         
         self.label = kwargs.pop('label', None)
@@ -146,21 +147,6 @@ class ArtistForm(ModelForm):
                 LookupField('date_start', css_class='input-xlarge'),
                 LookupField('date_end', css_class='input-xlarge'),
         )
-        
-        alias_layout = Fieldset(
-                _('Alias(es)'),
-                Field('aliases', css_class='input-xlarge'),
-        )
-        
-        catalog_layout = Fieldset(
-                _('Label/Catalog'),
-                LookupField('label', css_class='input-xlarge'),
-                LookupField('catalognumber', css_class='input-xlarge'),
-                LookupField('release_country', css_class='input-xlarge'),
-                # LookupField('releasedate', css_class='input-xlarge'),
-                LookupField('releasedate_approx', css_class='input-xlarge'),
-        )
-        
 
         meta_layout = Fieldset(
                 _('Meta information'),
@@ -187,16 +173,11 @@ class ArtistForm(ModelForm):
                         meta_layout,
                         tagging_layout,
                         identifiers_layout,
-                        alias_layout,
                         )
 
         self.helper.add_layout(layout)
 
         if self.instance:
-            print '***************'
-            print self.instance.namevariations.values('name')
-            print self.instance.namevariations.values_list('name', flat=True).distinct()
-
             self.fields['namevariations'].initial = ', '.join(self.instance.namevariations.values_list('name', flat=True).distinct())
 
         
@@ -215,7 +196,7 @@ class ArtistForm(ModelForm):
         
         cd = super(ArtistForm, self).clean()
 
-        print "*************************************"
+        print "** ArtistForm cleaned data **********"
         print cd
         print "*************************************"
         
@@ -323,6 +304,15 @@ class BaseMemberForm(ModelForm):
     #url = forms.URLField(label=_('Website / URL'), required=False)
 
 
+    def clean_child(self):
+
+        child = self.cleaned_data['child']
+        if not child.pk:
+            logger.debug('saving not existant child: %s' % child.name)
+            child.save()
+        return child
+
+
     def save(self, *args, **kwargs):
         instance = super(BaseMemberForm, self).save(*args, **kwargs)
         return instance
@@ -393,6 +383,19 @@ class BaseAliasForm(ModelForm):
     child = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False, label=_('Alias'))
     #service = forms.CharField(label='', widget=ReadOnlyIconField(**{'url': 'whatever'}), required=False)
     #url = forms.URLField(label=_('Website / URL'), required=False)
+
+    def clean_child(self):
+
+        child = self.cleaned_data['child']
+        if not child.pk:
+            logger.debug('saving not existant child: %s' % child.name)
+            child.save()
+        return child
+
+    def clean(self, *args, **kwargs):
+
+        cd = super(BaseAliasForm, self).clean()
+        return cd
 
 
     def save(self, *args, **kwargs):
@@ -504,5 +507,3 @@ AliasFormSet = inlineformset_factory(Artist,
                                        can_delete=True,
                                        can_order=False,)
 
-
-#AliasFormSet = inlineformset_factory(Artist, Artist)

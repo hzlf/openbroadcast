@@ -459,9 +459,9 @@ class ImportFile(BaseModel):
             artist = self.import_tag.get('artist', None)
             release = self.import_tag.get('release', None)
             
-            print 'media: %s' % media
-            print 'artist: %s' % artist
-            print 'release: %s' % release
+            #print 'media: %s' % media
+            #print 'artist: %s' % artist
+            #print 'release: %s' % release
             
             if media and artist and release:
                 print 'all ok'

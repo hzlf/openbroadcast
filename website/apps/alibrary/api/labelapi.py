@@ -44,6 +44,9 @@ class LabelResource(ModelResource):
             except:
                 pass
 
+        bundle.data['release_count'] = bundle.obj.release_label.count()
+        bundle.data['type_display'] = bundle.obj.get_type_display()
+
         return bundle
 
 
