@@ -772,12 +772,12 @@ class Importer(object):
                 r = requests.get(url)
                 dgs_result = r.json()
                     
-                styles = dgs_result.get('styles', None)
+                styles = dgs_result.get('styles', [])
                 for style in styles:
                     log.debug('got style: %s' % (style))
                     Tag.objects.add_tag(obj, '"%s"' % style)
                     
-                genres = dgs_result.get('genres', None)
+                genres = dgs_result.get('genres', [])
                 for genre in genres:
                     log.debug('got genre: %s' % (genre))
                     Tag.objects.add_tag(obj, '"%s"' % genre)
@@ -799,12 +799,12 @@ class Importer(object):
                 r = requests.get(url)
                 dgs_result = r.json()
                     
-                styles = dgs_result.get('styles', None)
+                styles = dgs_result.get('styles', [])
                 for style in styles:
                     log.debug('got style: %s' % (style))
                     Tag.objects.add_tag(obj, '"%s"' % style)
                     
-                genres = dgs_result.get('genres', None)
+                genres = dgs_result.get('genres', [])
                 for genre in genres:
                     log.debug('got genre: %s' % (genre))
                     Tag.objects.add_tag(obj, '"%s"' % genre)
