@@ -878,12 +878,18 @@ BROKER_USER = "guest"
 BROKER_PASSWORD = "guest"
 BROKER_VHOST = "/"
 
+CELERY_IMPORTS = (
+    'importer.util.importer', # ?
+)
 CELERY_ROUTES = {
     #'importer.models.process_task': {'queue': 'import'},
     # assign import task to single-instance worker
     'importer.models.import_task': {'queue': 'import'},
     'importer.models.process_task': {'queue': 'process'},
-    #'alibrary.models.generate_media_versions_task': {'queue': 'convert'},
+    'importer.util.importer.mb_complete_media_task': {'queue': 'complete'},
+    #
+    'alibrary.models.generate_media_versions_task': {'queue': 'convert'},
+    'alibrary.models.create_waveform_image': {'queue': 'convert'},
 }
 
 

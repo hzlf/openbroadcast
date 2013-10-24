@@ -33,7 +33,7 @@ import shutil
 
 
 from base import discogs_image_by_url, discogs_id_by_url
-
+from celery.task import task
 import logging
 log = logging.getLogger(__name__)
 
@@ -44,6 +44,8 @@ MUSICBRAINZ_RATE_LIMIT = getattr(settings, 'MUSICBRAINZ_RATE_LIMIT', True)
 
 # promt for continuation
 DEBUG_WAIT = False
+
+USE_CELERYD = True
 
 
 def clean_filename(filename):
@@ -433,672 +435,36 @@ class Importer(object):
     
     
     
-
+    """
+    method mappers to send to background queue
+    """
     def mb_complete_media(self, obj, mb_id, mb_release_id, excludes=()):
 
-        log = logging.getLogger('util.importer.mb_complete_media')
-        log.info('complete media, m: %s | mb_id: %s' % (obj.name, mb_id))
-
-        #raw_input("Press Enter to continue...")
-        time.sleep(1.1)
-
-        inc = ('artists', 'url-rels', 'aliases', 'tags', 'recording-rels', 'artist-rels', 'work-level-rels', 'artist-credits')
-        url = 'http://%s/ws/2/recording/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, mb_id, "+".join(inc))
-
-        r = requests.get(url)
-        result = r.json()
-
-        print '*****************************************************************'
-        print url
-        print '*****************************************************************'
-
-        # get release based information (to map track- and disc-number)
-        inc = ('recordings',)
-        url = 'http://%s/ws/2/release/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, mb_release_id, "+".join(inc))
-
-        r = requests.get(url)
-        result_release = r.json()
-        print '*****************************************************************'
-        print url
-        print '*****************************************************************'
-
-        print(result)
-
-        print
-
-        print(result_release)
-
-
-        print '*****************************************************************'
-
-        if DEBUG_WAIT:
-            raw_input("Press Enter to continue...")
-
-
-
-        # loop release recordings, trying to get our track...
-        if 'media' in result_release:
-            disc_index = 0
-            media_index = 0
-            media_offset = 0
-            for disc in result_release['media']:
-
-                for m in disc['tracks']:
-
-                    x_mb_id = m['recording']['id']
-                    x_pos = m['number']
-
-                    if x_mb_id == mb_id:
-                        """
-                        print 'id:  %s' % x_mb_id
-                        print 'pos: %s' % x_pos
-                        print 'disc_index: %s' % disc_index
-                        print 'media_offset: %s' % media_offset
-                        print 'final pos: %s' % (int(media_offset) + int(x_pos))
-                        """
-
-                        try:
-                            obj.tracknumber = (int(media_offset) + int(x_pos))
-                        except:
-                            pass
-
-                        try:
-                            obj.mediamumber = int(disc_index)
-                        except:
-                            pass
-
-                    media_index =+ 1
-
-                disc_index += 1
-                media_offset += int(disc['track-count'])
-
-
-
-
-
-
-
-
-
-
-
-        if DEBUG_WAIT:
-            raw_input("Press Enter to continue...")
-
-
-
-
-
-
-
-
-        # self.pp.pprint(result)
-        if 'relations' in result:
-            for relation in result['relations']:
-
-
-                # map artists
-                if 'artist' in relation:
-                    print 'artist: %s' % relation['artist']['name']
-                    print 'mb_id:   %s' % relation['artist']['id']
-                    print 'role:   %s' % relation['type']
-                    print
-                    time.sleep(0.1)
-                    l_as = lookup.artist_by_mb_id(relation['artist']['id'])
-                    l_a = None
-
-
-                    #if len(l_as) < 1 and relation['artist']['id'] not in self.mb_completed:
-                    if len(l_as) < 1 and relation['artist']['id'] not in excludes:
-                        self.mb_completed.append(relation['artist']['id'])
-                        l_a = Artist(name=relation['artist']['name'])
-                        l_a.save()
-
-                        url = 'http://musicbrainz.org/artist/%s' % relation['artist']['id']
-                        print 'musicbrainz_url: %s' % url
-                        rel = Relation(content_object=l_a, url=url)
-                        rel.save()
-
-                        print 'artist created'
-                    if len(l_as) == 1:
-                        print 'got artist!'
-                        l_a = l_as[0]
-                        print l_as[0]
-
-                    profession = None
-                    if 'type' in relation:
-                        profession, created = Profession.objects.get_or_create(name=relation['type'])
-
-
-                    """"""
-                    if l_a:
-                        mea, created = MediaExtraartists.objects.get_or_create(artist=l_a, media=obj, profession=profession)
-                        l_a = self.mb_complete_artist(l_a, relation['artist']['id'])
-                    #self.pp.pprint(relation['artist']['name'])
-
-        tags = result.get('tags', ())
-        for tag in tags:
-            log.debug('got tag: %s' % (tag['name']))
-            Tag.objects.add_tag(obj, '"%s"' % tag['name'])
-
-
-
-        # add mb relation
-        mb_url = 'http://musicbrainz.org/recording/%s' % (mb_id)
-        try:
-            rel = Relation.objects.get(object_id=obj.pk, url=mb_url)
-        except:
-            log.debug('relation not here yet, add it: %s' % (mb_url))
-            rel = Relation(content_object=obj, url=mb_url)
-            rel.save()
-
-
+        if USE_CELERYD:
+            mb_complete_media_task.delay(obj, mb_id, mb_release_id, excludes=())
+        else:
+            mb_complete_media_task(obj, mb_id, mb_release_id, excludes=())
         return obj
-
 
 
     def mb_complete_release(self, obj, mb_id):
-        
-        log = logging.getLogger('util.importer.mb_complete_release')
-        log.info('complete release, r: %s | mb_id: %s' % (obj.name, mb_id))
-        
-        inc = ('artists', 'url-rels', 'aliases', 'tags', 'recording-rels', 'work-rels', 'work-level-rels', 'artist-credits', 'labels', 'label-rels', 'release-groups')
-        url = 'http://%s/ws/2/release/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, mb_id, "+".join(inc))
-        
-        r = requests.get(url)
-        result = r.json()
-        
-        self.pp.pprint(result)
-        
-        rg_id = None
-        release_group = result.get('release-group', None)
-        if release_group:
-            rg_id = release_group.get('id', None)
-            
-        log.debug('release-group id: %s' % rg_id)
-        
-        discogs_url = None
-        discogs_master_url = None
-        discogs_image = None
-        # try to get relations
-        if 'relations' in result:
-            for relation in result['relations']:
-                
-                if relation['type'] == 'discogs':
-                    log.debug('got discogs url for release: %s' % relation['url'])
-                    discogs_url = relation['url']
-                    
-                    # obj.save()
-                    
-                if relation['type'] == 'purchase for download':
-                    log.debug('got purchase url for release: %s' % relation['url'])
 
-                    try:
-                        rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
-                    except:
-                        rel = Relation(content_object=obj, url=relation['url'])
-                        rel.save()
-                        
-        
-
-            
-        if rg_id:
-            # try to get discogs master url
-            inc = ('url-rels',)
-            url = 'http://%s/ws/2/release-group/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, rg_id, "+".join(inc))
-            
-            r = requests.get(url)
-            rg_result = r.json()
-            
-            print "*******************************************************************"
-            self.pp.pprint(rg_result)
-
-            # try to get relations from master
-            if 'relations' in rg_result:
-                for relation in rg_result['relations']:
-                    
-                    if relation['type'] == 'discogs':
-                        log.debug('got discogs master-url for release: %s' % relation['url'])
-                        discogs_master_url = relation['url']
-
-                        
-                    if relation['type'] == 'wikipedia':
-                        log.debug('got wikipedia url for release: %s' % relation['url'])
-    
-                        try:
-                            rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
-                        except:
-                            rel = Relation(content_object=obj, url=relation['url'])
-                            rel.save()
-
-                        
-                    if relation['type'] == 'lyrics':
-                        log.debug('got lyrics url for release: %s' % relation['url'])
-    
-                        try:
-                            rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
-                        except:
-                            rel = Relation(content_object=obj, url=relation['url'])
-                            rel.save()
-
-                        
-                    if relation['type'] == 'allmusic':
-                        log.debug('got allmusic url for release: %s' % relation['url'])
-    
-                        try:
-                            rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
-                        except:
-                            rel = Relation(content_object=obj, url=relation['url'])
-                            rel.save()
-
-                        
-                    if relation['type'] == 'review':
-                        log.debug('got review url for release: %s' % relation['url'])
-    
-                        try:
-                            rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
-                        except:
-                            rel = Relation(content_object=obj, url=relation['url'])
-                            rel.save()
-        
-        
-        if discogs_url:
-            
-            try:
-                rel = Relation.objects.get(object_id=obj.pk, url=discogs_url)
-            except:
-                rel = Relation(content_object=obj, url=discogs_url)
-                rel.save()
-                
-            # try to get image
-            try:
-                discogs_image = discogs_image_by_url(discogs_url, 'resource_url')
-                log.debug('discogs image located at: %s' % discogs_image)
-            except:
-                pass
-            
-        if discogs_master_url:
-            
-            try:
-                rel = Relation.objects.get(object_id=obj.pk, url=discogs_master_url)
-            except:
-                rel = Relation(content_object=obj, url=discogs_master_url)
-                rel.save()
-                
-            # try to get image from master
-            if not discogs_image:
-                try:
-                    discogs_image = discogs_image_by_url(discogs_master_url, 'resource_url')
-                    log.debug('discogs image located at: %s' % discogs_master_url)
-                except:
-                    pass
-            
-            
-            
-        # try to load & assign image
-        if discogs_image:
-            try:
-                img = filer_extra.url_to_file(discogs_image, obj.folder)
-                obj.main_image = img
-                obj.save()
-            except:
-                log.info('unable to assign discogs image')
-                
+        if USE_CELERYD:
+            mb_complete_release_task.delay(obj, mb_id)
         else:
-            # try at coverartarchive...
-            url = 'http://coverartarchive.org/release/%s' % mb_id
-            try:    
-                r = requests.get(url)
-                ca_result = r.json()
-                ca_url = ca_result['images'][0]['image']
-                img = filer_extra.url_to_file(ca_url, obj.folder)
-                obj.main_image = img
-                obj.save()
-            except:
-                pass
-            
-            
-        # try to get some additional information from discogs
-        if discogs_url:
-            discogs_id = None
-            try:
-                discogs_id = re.findall(r'\d+', discogs_url)[0]
-                log.info('extracted discogs id: %s' % discogs_id)
-            except:
-                pass
-            
-            if discogs_id:
-                url = 'http://api.discogs.com/releases/%s' % discogs_id
-                r = requests.get(url)
-                dgs_result = r.json()
-                    
-                styles = dgs_result.get('styles', [])
-                for style in styles:
-                    log.debug('got style: %s' % (style))
-                    Tag.objects.add_tag(obj, '"%s"' % style)
-                    
-                genres = dgs_result.get('genres', [])
-                for genre in genres:
-                    log.debug('got genre: %s' % (genre))
-                    Tag.objects.add_tag(obj, '"%s"' % genre)
-                    
-                notes = dgs_result.get('notes', None)
-                if notes:
-                    obj.description = notes
-                    
-        if discogs_master_url:
-            discogs_id = None
-            try:
-                discogs_id = re.findall(r'\d+', discogs_master_url)[0]
-                log.info('extracted discogs id: %s' % discogs_id)
-            except:
-                pass
-            
-            if discogs_id:
-                url = 'http://api.discogs.com/masters/%s' % discogs_id
-                r = requests.get(url)
-                dgs_result = r.json()
-                    
-                styles = dgs_result.get('styles', [])
-                for style in styles:
-                    log.debug('got style: %s' % (style))
-                    Tag.objects.add_tag(obj, '"%s"' % style)
-                    
-                genres = dgs_result.get('genres', [])
-                for genre in genres:
-                    log.debug('got genre: %s' % (genre))
-                    Tag.objects.add_tag(obj, '"%s"' % genre)
-                    
-                notes = dgs_result.get('notes', None)
-                if notes:
-                    obj.description = notes
-                
-
-                    
-        tags = result.get('tags', ())
-        for tag in tags:
-            log.debug('got tag: %s' % (tag['name']))
-            Tag.objects.add_tag(obj, '"%s"' % tag['name'])
-            
-        status = result.get('status', None)
-        if status:
-            log.debug('got status: %s' % (status))
-            obj.releasestatus = status
-            
-        country = result.get('country', None)
-        if country:
-            log.debug('got country: %s' % (country))
-            obj.release_country = country
-            
-        date = result.get('date', None)
-        if date:
-            log.debug('got date: %s' % (date))
-            # TODO: rework field
-            if len(date) == 4:
-                date = '%s-00-00' % (date)
-            elif len(date) == 7:
-                date = '%s-00' % (date)
-            elif len(date) == 10:
-                date = '%s' % (date)
-                
-            re_date = re.compile('^\d{4}-\d{2}-\d{2}$')
-            if re_date.match(date) and date != '0000-00-00':
-                obj.releasedate_approx = '%s' % date
-            
-            
-        asin = result.get('asin', None)
-        if asin:
-            log.debug('got asin: %s' % (asin))
-            obj.asin = asin
-            
-        barcode = result.get('barcode', None)
-        if barcode:
-            log.debug('got barcode: %s' % (barcode))
-            # obj.barcode = barcode
-            
-                    
-        # add mb relation
-        mb_url = 'http://musicbrainz.org/release/%s' % (mb_id)
-        try:
-            rel = Relation.objects.get(object_id=obj.pk, url=mb_url)
-        except:
-            log.debug('relation not here yet, add it: %s' % (mb_url))
-            rel = Relation(content_object=obj, url=mb_url)
-            rel.save()
-
-        obj.save()
-        
-        
+            mb_complete_release_task(obj, mb_id)
         return obj
-    
-    
+
+
     def mb_complete_artist(self, obj, mb_id):
-        
-        log = logging.getLogger('util.importer.mb_complete_artist')
-        log.info('complete artist, a: %s | mb_id: %s' % (obj.name, mb_id))
-        
-        self.mb_completed.append(mb_id)
-        
-        inc = ('url-rels', 'tags')
-        url = 'http://%s/ws/2/artist/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, mb_id, "+".join(inc))
-        
-        r = requests.get(url)
-        result = r.json()
-        
-        
-        
-        print '#########################################################################'
-        self.pp.pprint(result)
-        
-        
-        discogs_url = None
-        discogs_image = None
-        
-        valid_relations = ('wikipedia', 'allmusic', 'BBC Music page', 'social network', 'official homepage', 'youtube', 'myspace',)
-        
-        relations = result.get('relations', ())
 
-        for relation in relations:
-            
-            if relation['type'] == 'discogs':
-                log.debug('got discogs url for artist: %s' % relation['url'])
-                discogs_url = relation['url']
-                
-            if relation['type'] in valid_relations:
-                log.debug('got %s url for artist: %s' % (relation['type'], relation['url']))
-                
-
-                try:
-                    rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
-                except:
-                    rel = Relation(content_object=obj, url=relation['url'])
-                    
-                    if relation['type'] == 'official homepage':
-                        rel.service = 'official'
-                    
-                    rel.save()
-
-            
-            
-            
-        if discogs_url:
-            
-            try:
-                rel = Relation.objects.get(object_id=obj.pk, url=discogs_url)
-            except:
-                rel = Relation(content_object=obj, url=discogs_url)
-                rel.save()
-                
-            # try to get image
-            try:
-                discogs_image = discogs_image_by_url(discogs_url, 'resource_url')
-                log.debug('discogs image located at: %s' % discogs_image)
-            except:
-                pass
-            
-            
-        # try to load & assign image
-        if discogs_image:
-            try:
-                img = filer_extra.url_to_file(discogs_image, obj.folder)
-                obj.main_image = img
-                obj.save()
-            except:
-                log.info('unable to assign discogs image')
-                
-                
-        if discogs_url:
-
-            discogs_id = None
-            try:
-                # TODO: not sure if always working
-                discogs_id = discogs_id_by_url(discogs_url)
-                log.info('extracted discogs id: %s' % discogs_id)
-            except:
-                pass
-            
-            if discogs_id:
-                url = 'http://api.discogs.com/artists/%s' % discogs_id
-                r = requests.get(url)
-                dgs_result = r.json()
-                
-                self.pp.pprint(dgs_result)
-  
-                """                  
-                styles = dgs_result.get('styles', ())
-                for style in styles:
-                    log.debug('got style: %s' % (style))
-                    Tag.objects.add_tag(obj, '"%s"' % style)
-                """ 
-                profile = dgs_result.get('profile', None)
-                if profile:
-                    obj.biography = profile
-                    
-                realname = dgs_result.get('realname', None)
-                if realname:
-                    obj.real_name = realname
-                    
-                """
-                verry hackish part here, just as proof-of-concept
-                """
-                aliases = dgs_result.get('aliases', ())
-                for alias in aliases:
-                    try:
-                        log.debug('got alias: %s' % alias['name'])
-                        # TODO: improve! handle duplicates!
-                        time.sleep(1.1)
-                        r = requests.get(alias['resource_url'])
-                        aa_result = r.json()
-                        aa_discogs_url = aa_result.get('uri', None)
-                        aa_name = aa_result.get('name', None)
-                        aa_profile = aa_result.get('profile', None)
-                        if aa_discogs_url and aa_name:
-                            
-                            l_as = lookup.artist_by_relation_url(aa_discogs_url)
-                            l_a = None
-                                
-                            if len(l_as) < 1:
-                                l_a = Artist(name=aa_name, biography=aa_profile)
-                                l_a.save()
-    
-                                rel = Relation(content_object=l_a, url=aa_discogs_url)
-                                rel.save()
-                                
-                            if len(l_as) == 1:
-                                l_a = l_as[0]
-                                print l_as[0]
-                                
-                            if l_a:
-                                obj.aliases.add(l_a)
-                    except:
-                        pass
-                    
-                """
-                verry hackish part here, just as proof-of-concept
-                """
-                members = dgs_result.get('members', ())
-                for member in members:
-                    try:
-                        log.debug('got member: %s' % member['name'])
-                        # TODO: improve! handle duplicates!
-                        time.sleep(1.1)
-                        r = requests.get(member['resource_url'])
-                        ma_result = r.json()
-                        ma_discogs_url = ma_result.get('uri', None)
-                        ma_name = ma_result.get('name', None)
-                        ma_profile = ma_result.get('profile', None)
-                        if ma_discogs_url and ma_name:
-                            
-                            l_as = lookup.artist_by_relation_url(ma_discogs_url)
-                            l_a = None
-                                
-                            if len(l_as) < 1:
-                                l_a = Artist(name=ma_name, biography=ma_profile)
-                                l_a.save()
-    
-                                rel = Relation(content_object=l_a, url=ma_discogs_url)
-                                rel.save()
-                                
-                            if len(l_as) == 1:
-                                l_a = l_as[0]
-                                print l_as[0]
-                                
-                            if l_a:                                
-                                ma = ArtistMembership.objects.get_or_create(parent=obj, child=l_a)
-                                
-                    except:
-                        pass
-                        
-                
-            
-        type = result.get('type', None)
-        if type:
-            log.debug('got type: %s' % (type))
-            obj.type = type
-            
-        disambiguation = result.get('disambiguation', None)
-        if disambiguation:
-            log.debug('got disambiguation: %s' % (disambiguation))
-            obj.disambiguation = disambiguation
-                    
-        tags = result.get('tags', ())
-
-        for tag in tags:
-            log.debug('got tag: %s' % (tag['name']))
-            Tag.objects.add_tag(obj, '"%s"' % tag['name'])
-            
-                    
-        # add mb relation
-        mb_url = 'http://musicbrainz.org/artist/%s' % (mb_id)
-        try:
-            rel = Relation.objects.get(object_id=obj.pk, url=mb_url)
-        except:
-            log.debug('relation not here yet, add it: %s' % (mb_url))
-            rel = Relation(content_object=obj, url=mb_url)
-            rel.save()
-        
-        obj.save()
-        
-        
+        if USE_CELERYD:
+            mb_complete_artist_task.delay(obj, mb_id)
+        else:
+            mb_complete_artist_task(obj, mb_id)
         return obj
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
 
         
         
@@ -1203,190 +569,652 @@ class Importer(object):
         
         
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
 
-    def run__(self, obj):
         
-        log = logging.getLogger('util.importer.run')
         
-        # map
-        it = obj.import_tag
         
-        print '*****************************'
-        print it
-        print '*****************************'
         
-        if 'mb_track_id' in it:
-            log.info('mb_track_id: %s' % (it['mb_track_id']))
+        
+        
+"""
+task definitions
+"""
 
-        m = Media(name=it['name'])
+@task
+def mb_complete_media_task(obj, mb_id, mb_release_id, excludes=()):
 
-        # get/create release
-        
-        # lookup by mb_id
-        r = None
-        if 'mb_release_id' in it:
-            lrs = lookup.release_by_mb_id(it['mb_release_id'])
-            #print 'LRS!:'
-            #print lrs
-            if lrs.count() > 0:
-                r = lrs[0]
-            
-        if not r:
-            r, created = Release.objects.get_or_create(name=it['release'])
-            # assign mb_relation
-            if 'mb_release_id' in it:
-                url = 'http://musicbrainz.org/release/%s' % it['mb_release_id']
-                print 'musicbrainz_url: %s' % url
-                rel = Relation(content_object=r, url=url)
-                rel.save()
-                
-                # complete medatata
-                self.complete_release_meta(r, it)
-        
-        try:
-            if r:
-                m.release = r 
-                
-        except Exception, e:
-            print e
-        
-        
-        # TODO: move
-        if m.release and 'mb_release_id' in it:
-            print 'Trying to get tracknumber'
-            includes = ["recordings",]
-            mb_result = musicbrainzngs.get_release_by_id(id=it['mb_release_id'], includes=includes)
-            
-            tnumber = None
-            
-            try:
-                for t in mb_result['release']['medium-list'][0]['track-list']:
-                    #print '*******************'
-                    #print t['recording']['id']
-                    #print t['number']
-                    
-                    if t['recording']['id'] == it['mb_track_id']:
-                        #print 'NUMBER ASSIGNED!!! %s' % t['number']
-                        m.tracknumber = int(t['number'])
-                    
-            except Exception, e:
-                print e
-                
-            
-        
-        
-        
-        
-        # get/create artist
-        a, created = Artist.objects.get_or_create(name=it['artist'])
-        try:
-            if a:
-                m.artist = a 
-        except Exception, e:
-            print e
-        
+    log = logging.getLogger('util.importer.mb_complete_media')
+    log.info('complete media, m: %s | mb_id: %s' % (obj.name, mb_id))
 
-        m.status = 1
-        m.save()
+    #raw_input("Press Enter to continue...")
+    time.sleep(1.1)
 
-        status = 1
+    inc = ('artists', 'url-rels', 'aliases', 'tags', 'recording-rels', 'artist-rels', 'work-level-rels', 'artist-credits')
+    url = 'http://%s/ws/2/recording/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, mb_id, "+".join(inc))
 
-        folder = "private/%s/" % (m.uuid.replace('-', '/'))
-        src = obj.file.path
-        filename, extension = os.path.splitext(obj.file.path)
-        dst = os.path.join(folder, "master%s" % extension.lower())
-        try:
-            os.makedirs("%s/%s" % (MEDIA_ROOT, folder))
-            shutil.copy(src, "%s/%s" % (MEDIA_ROOT, dst))
-            m.master = dst
-            
-            m.save()
-            
-        except Exception, e:
-            print e
-        
-        return m, status
-    
-    def complete_release_meta(self, r, it):
-        includes = [
-        "artists", "labels", "recordings", "release-groups", "media",
-        "artist-credits", "discids", "puids", "isrcs",
-        "artist-rels", "label-rels", "recording-rels", "release-rels",
-        "release-group-rels", "url-rels", "work-rels", "recording-level-rels",
-        "work-level-rels"
-        ]
-        mb_release = musicbrainzngs.get_release_by_id(id=it['mb_release_id'], includes=includes)
+    r = requests.get(url)
+    result = r.json()
 
-        mbr = mb_release['release']
-            
-        print '***************************************'
-            
-        if 'status' in mbr:
-            print mbr['status']
-            
-        if 'title' in mbr:
-            print mbr['title']
-        
-        if 'url-relation-list' in mbr:
-            # print mbr['url-relation-list']
-            
-            for rel in mbr['url-relation-list']:
-                print rel
-                if rel['type'] == 'discogs':
-                    print 'DISCOGS: %s' % rel['target']
+    print '*****************************************************************'
+    print url
+    print '*****************************************************************'
+
+    # get release based information (to map track- and disc-number)
+    inc = ('recordings',)
+    url = 'http://%s/ws/2/release/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, mb_release_id, "+".join(inc))
+
+    r = requests.get(url)
+    result_release = r.json()
+    print '*****************************************************************'
+    print url
+    print '*****************************************************************'
+
+    print(result)
+
+    print
+
+    print(result_release)
+
+
+    print '*****************************************************************'
+
+    if DEBUG_WAIT:
+        raw_input("Press Enter to continue...")
+
+
+
+    # loop release recordings, trying to get our track...
+    if 'media' in result_release:
+        disc_index = 0
+        media_index = 0
+        media_offset = 0
+        for disc in result_release['media']:
+
+            for m in disc['tracks']:
+
+                x_mb_id = m['recording']['id']
+                x_pos = m['number']
+
+                if x_mb_id == mb_id:
+                    """
+                    print 'id:  %s' % x_mb_id
+                    print 'pos: %s' % x_pos
+                    print 'disc_index: %s' % disc_index
+                    print 'media_offset: %s' % media_offset
+                    print 'final pos: %s' % (int(media_offset) + int(x_pos))
+                    """
 
                     try:
-                        # pass
-                        rel = Relation(content_object=r, url=rel['target'])
-                        rel.save()
-                    except Exception, e:
-                        print 'RELATION EXCEPTION'
-                        print e
-                        
-                    try:
-                        discogs_image = discogs_image_by_url(rel['target'])
-                        img = filer_extra.url_to_file(discogs_image, r.folder)
-                        r.main_image = img
+                        obj.tracknumber = (int(media_offset) + int(x_pos))
                     except:
                         pass
-        r.save()
+
+                    try:
+                        obj.mediamumber = int(disc_index)
+                    except:
+                        pass
+
+                media_index =+ 1
+
+            disc_index += 1
+            media_offset += int(disc['track-count'])
+
+
+
+    if DEBUG_WAIT:
+        raw_input("Press Enter to continue...")
+
+
+    if 'relations' in result:
+        for relation in result['relations']:
+
+
+            # map artists
+            if 'artist' in relation:
+                print 'artist: %s' % relation['artist']['name']
+                print 'mb_id:   %s' % relation['artist']['id']
+                print 'role:   %s' % relation['type']
+                print
+                time.sleep(0.1)
+                l_as = lookup.artist_by_mb_id(relation['artist']['id'])
+                l_a = None
+
+
+                if len(l_as) < 1 and relation['artist']['id'] not in excludes:
+                    #instance.mb_completed.append(relation['artist']['id'])
+                    l_a = Artist(name=relation['artist']['name'])
+                    l_a.save()
+
+                    url = 'http://musicbrainz.org/artist/%s' % relation['artist']['id']
+                    print 'musicbrainz_url: %s' % url
+                    rel = Relation(content_object=l_a, url=url)
+                    rel.save()
+
+                    print 'artist created'
+                if len(l_as) == 1:
+                    print 'got artist!'
+                    l_a = l_as[0]
+                    print l_as[0]
+
+                profession = None
+                if 'type' in relation:
+                    profession, created = Profession.objects.get_or_create(name=relation['type'])
+
+
+                """"""
+                if l_a:
+                    mea, created = MediaExtraartists.objects.get_or_create(artist=l_a, media=obj, profession=profession)
+
+                    if USE_CELERYD:
+                        mb_complete_artist_task.delay(l_a, relation['artist']['id'])
+                    else:
+                        mb_complete_artist_task(l_a, relation['artist']['id'])
+
+
+    tags = result.get('tags', ())
+    for tag in tags:
+        log.debug('got tag: %s' % (tag['name']))
+        Tag.objects.add_tag(obj, '"%s"' % tag['name'])
+
+    # add mb relation
+    mb_url = 'http://musicbrainz.org/recording/%s' % (mb_id)
+    try:
+        rel = Relation.objects.get(object_id=obj.pk, url=mb_url)
+    except:
+        log.debug('relation not here yet, add it: %s' % (mb_url))
+        rel = Relation(content_object=obj, url=mb_url)
+        rel.save()
+
+
+    return obj
         
-        print '***************************************'
         
-        
-        
-        
-        
-        
-        
-        
-        
-        return mb_release
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+@task
+def mb_complete_release_task(obj, mb_id):
+
+    log = logging.getLogger('util.importer.mb_complete_release')
+    log.info('complete release, r: %s | mb_id: %s' % (obj.name, mb_id))
+
+    inc = ('artists', 'url-rels', 'aliases', 'tags', 'recording-rels', 'work-rels', 'work-level-rels', 'artist-credits', 'labels', 'label-rels', 'release-groups')
+    url = 'http://%s/ws/2/release/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, mb_id, "+".join(inc))
+
+    r = requests.get(url)
+    result = r.json()
+
+
+
+    rg_id = None
+    release_group = result.get('release-group', None)
+    if release_group:
+        rg_id = release_group.get('id', None)
+
+    log.debug('release-group id: %s' % rg_id)
+
+    discogs_url = None
+    discogs_master_url = None
+    discogs_image = None
+    # try to get relations
+    if 'relations' in result:
+        for relation in result['relations']:
+
+            if relation['type'] == 'discogs':
+                log.debug('got discogs url for release: %s' % relation['url'])
+                discogs_url = relation['url']
+
+                # obj.save()
+
+            if relation['type'] == 'purchase for download':
+                log.debug('got purchase url for release: %s' % relation['url'])
+
+                try:
+                    rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
+                except:
+                    rel = Relation(content_object=obj, url=relation['url'])
+                    rel.save()
+
+
+
+
+    if rg_id:
+        # try to get discogs master url
+        inc = ('url-rels',)
+        url = 'http://%s/ws/2/release-group/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, rg_id, "+".join(inc))
+
+        r = requests.get(url)
+        rg_result = r.json()
+
+        print "*******************************************************************"
+
+
+        # try to get relations from master
+        if 'relations' in rg_result:
+            for relation in rg_result['relations']:
+
+                if relation['type'] == 'discogs':
+                    log.debug('got discogs master-url for release: %s' % relation['url'])
+                    discogs_master_url = relation['url']
+
+
+                if relation['type'] == 'wikipedia':
+                    log.debug('got wikipedia url for release: %s' % relation['url'])
+
+                    try:
+                        rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
+                    except:
+                        rel = Relation(content_object=obj, url=relation['url'])
+                        rel.save()
+
+
+                if relation['type'] == 'lyrics':
+                    log.debug('got lyrics url for release: %s' % relation['url'])
+
+                    try:
+                        rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
+                    except:
+                        rel = Relation(content_object=obj, url=relation['url'])
+                        rel.save()
+
+
+                if relation['type'] == 'allmusic':
+                    log.debug('got allmusic url for release: %s' % relation['url'])
+
+                    try:
+                        rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
+                    except:
+                        rel = Relation(content_object=obj, url=relation['url'])
+                        rel.save()
+
+
+                if relation['type'] == 'review':
+                    log.debug('got review url for release: %s' % relation['url'])
+
+                    try:
+                        rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
+                    except:
+                        rel = Relation(content_object=obj, url=relation['url'])
+                        rel.save()
+
+
+    if discogs_url:
+
+        try:
+            rel = Relation.objects.get(object_id=obj.pk, url=discogs_url)
+        except:
+            rel = Relation(content_object=obj, url=discogs_url)
+            rel.save()
+
+        # try to get image
+        try:
+            discogs_image = discogs_image_by_url(discogs_url, 'resource_url')
+            log.debug('discogs image located at: %s' % discogs_image)
+        except:
+            pass
+
+    if discogs_master_url:
+
+        try:
+            rel = Relation.objects.get(object_id=obj.pk, url=discogs_master_url)
+        except:
+            rel = Relation(content_object=obj, url=discogs_master_url)
+            rel.save()
+
+        # try to get image from master
+        if not discogs_image:
+            try:
+                discogs_image = discogs_image_by_url(discogs_master_url, 'resource_url')
+                log.debug('discogs image located at: %s' % discogs_master_url)
+            except:
+                pass
+
+
+
+    # try to load & assign image
+    if discogs_image:
+        try:
+            img = filer_extra.url_to_file(discogs_image, obj.folder)
+            obj.main_image = img
+            obj.save()
+        except:
+            log.info('unable to assign discogs image')
+
+    else:
+        # try at coverartarchive...
+        url = 'http://coverartarchive.org/release/%s' % mb_id
+        try:
+            r = requests.get(url)
+            ca_result = r.json()
+            ca_url = ca_result['images'][0]['image']
+            img = filer_extra.url_to_file(ca_url, obj.folder)
+            obj.main_image = img
+            obj.save()
+        except:
+            pass
+
+
+    # try to get some additional information from discogs
+    if discogs_url:
+        discogs_id = None
+        try:
+            discogs_id = re.findall(r'\d+', discogs_url)[0]
+            log.info('extracted discogs id: %s' % discogs_id)
+        except:
+            pass
+
+        if discogs_id:
+            url = 'http://api.discogs.com/releases/%s' % discogs_id
+            r = requests.get(url)
+            dgs_result = r.json()
+
+            styles = dgs_result.get('styles', [])
+            for style in styles:
+                log.debug('got style: %s' % (style))
+                Tag.objects.add_tag(obj, '"%s"' % style)
+
+            genres = dgs_result.get('genres', [])
+            for genre in genres:
+                log.debug('got genre: %s' % (genre))
+                Tag.objects.add_tag(obj, '"%s"' % genre)
+
+            notes = dgs_result.get('notes', None)
+            if notes:
+                obj.description = notes
+
+    if discogs_master_url:
+        discogs_id = None
+        try:
+            discogs_id = re.findall(r'\d+', discogs_master_url)[0]
+            log.info('extracted discogs id: %s' % discogs_id)
+        except:
+            pass
+
+        if discogs_id:
+            url = 'http://api.discogs.com/masters/%s' % discogs_id
+            r = requests.get(url)
+            dgs_result = r.json()
+
+            styles = dgs_result.get('styles', [])
+            for style in styles:
+                log.debug('got style: %s' % (style))
+                Tag.objects.add_tag(obj, '"%s"' % style)
+
+            genres = dgs_result.get('genres', [])
+            for genre in genres:
+                log.debug('got genre: %s' % (genre))
+                Tag.objects.add_tag(obj, '"%s"' % genre)
+
+            notes = dgs_result.get('notes', None)
+            if notes:
+                obj.description = notes
+
+
+
+    tags = result.get('tags', ())
+    for tag in tags:
+        log.debug('got tag: %s' % (tag['name']))
+        Tag.objects.add_tag(obj, '"%s"' % tag['name'])
+
+    status = result.get('status', None)
+    if status:
+        log.debug('got status: %s' % (status))
+        obj.releasestatus = status
+
+    country = result.get('country', None)
+    if country:
+        log.debug('got country: %s' % (country))
+        obj.release_country = country
+
+    date = result.get('date', None)
+    if date:
+        log.debug('got date: %s' % (date))
+        # TODO: rework field
+        if len(date) == 4:
+            date = '%s-00-00' % (date)
+        elif len(date) == 7:
+            date = '%s-00' % (date)
+        elif len(date) == 10:
+            date = '%s' % (date)
+
+        re_date = re.compile('^\d{4}-\d{2}-\d{2}$')
+        if re_date.match(date) and date != '0000-00-00':
+            obj.releasedate_approx = '%s' % date
+
+
+    asin = result.get('asin', None)
+    if asin:
+        log.debug('got asin: %s' % (asin))
+        obj.asin = asin
+
+    barcode = result.get('barcode', None)
+    if barcode:
+        log.debug('got barcode: %s' % (barcode))
+        # obj.barcode = barcode
+
+
+    # add mb relation
+    mb_url = 'http://musicbrainz.org/release/%s' % (mb_id)
+    try:
+        rel = Relation.objects.get(object_id=obj.pk, url=mb_url)
+    except:
+        log.debug('relation not here yet, add it: %s' % (mb_url))
+        rel = Relation(content_object=obj, url=mb_url)
+        rel.save()
+
+    obj.save()
+
+
+    return obj
+
+
+
+
+@task
+def mb_complete_artist_task(obj, mb_id):
+
+    log = logging.getLogger('util.importer.mb_complete_artist')
+    log.info('complete artist, a: %s | mb_id: %s' % (obj.name, mb_id))
+
+
+
+    inc = ('url-rels', 'tags')
+    url = 'http://%s/ws/2/artist/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, mb_id, "+".join(inc))
+
+    r = requests.get(url)
+    result = r.json()
+
+
+
+    discogs_url = None
+    discogs_image = None
+
+    valid_relations = ('wikipedia', 'allmusic', 'BBC Music page', 'social network', 'official homepage', 'youtube', 'myspace',)
+
+    relations = result.get('relations', ())
+
+    for relation in relations:
+
+        if relation['type'] == 'discogs':
+            log.debug('got discogs url for artist: %s' % relation['url'])
+            discogs_url = relation['url']
+
+        if relation['type'] in valid_relations:
+            log.debug('got %s url for artist: %s' % (relation['type'], relation['url']))
+
+
+            try:
+                rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
+            except:
+                rel = Relation(content_object=obj, url=relation['url'])
+
+                if relation['type'] == 'official homepage':
+                    rel.service = 'official'
+
+                rel.save()
+
+
+
+
+    if discogs_url:
+
+        try:
+            rel = Relation.objects.get(object_id=obj.pk, url=discogs_url)
+        except:
+            rel = Relation(content_object=obj, url=discogs_url)
+            rel.save()
+
+        # try to get image
+        try:
+            discogs_image = discogs_image_by_url(discogs_url, 'resource_url')
+            log.debug('discogs image located at: %s' % discogs_image)
+        except:
+            pass
+
+
+    # try to load & assign image
+    if discogs_image:
+        try:
+            img = filer_extra.url_to_file(discogs_image, obj.folder)
+            obj.main_image = img
+            obj.save()
+        except:
+            log.info('unable to assign discogs image')
+
+
+    if discogs_url:
+
+        discogs_id = None
+        try:
+            # TODO: not sure if always working
+            discogs_id = discogs_id_by_url(discogs_url)
+            log.info('extracted discogs id: %s' % discogs_id)
+        except:
+            pass
+
+        if discogs_id:
+            url = 'http://api.discogs.com/artists/%s' % discogs_id
+            r = requests.get(url)
+            dgs_result = r.json()
+
+
+            """
+            styles = dgs_result.get('styles', ())
+            for style in styles:
+                log.debug('got style: %s' % (style))
+                Tag.objects.add_tag(obj, '"%s"' % style)
+            """
+            profile = dgs_result.get('profile', None)
+            if profile:
+                obj.biography = profile
+
+            realname = dgs_result.get('realname', None)
+            if realname:
+                obj.real_name = realname
+
+            """
+            verry hackish part here, just as proof-of-concept
+            """
+            aliases = dgs_result.get('aliases', ())
+            for alias in aliases:
+                try:
+                    log.debug('got alias: %s' % alias['name'])
+                    # TODO: improve! handle duplicates!
+                    time.sleep(1.1)
+                    r = requests.get(alias['resource_url'])
+                    aa_result = r.json()
+                    aa_discogs_url = aa_result.get('uri', None)
+                    aa_name = aa_result.get('name', None)
+                    aa_profile = aa_result.get('profile', None)
+                    if aa_discogs_url and aa_name:
+
+                        l_as = lookup.artist_by_relation_url(aa_discogs_url)
+                        l_a = None
+
+                        if len(l_as) < 1:
+                            l_a = Artist(name=aa_name, biography=aa_profile)
+                            l_a.save()
+
+                            rel = Relation(content_object=l_a, url=aa_discogs_url)
+                            rel.save()
+
+                        if len(l_as) == 1:
+                            l_a = l_as[0]
+                            print l_as[0]
+
+                        if l_a:
+                            obj.aliases.add(l_a)
+                except:
+                    pass
+
+            """
+            verry hackish part here, just as proof-of-concept
+            """
+            members = dgs_result.get('members', ())
+            for member in members:
+                try:
+                    log.debug('got member: %s' % member['name'])
+                    # TODO: improve! handle duplicates!
+                    time.sleep(1.1)
+                    r = requests.get(member['resource_url'])
+                    ma_result = r.json()
+                    ma_discogs_url = ma_result.get('uri', None)
+                    ma_name = ma_result.get('name', None)
+                    ma_profile = ma_result.get('profile', None)
+                    if ma_discogs_url and ma_name:
+
+                        l_as = lookup.artist_by_relation_url(ma_discogs_url)
+                        l_a = None
+
+                        if len(l_as) < 1:
+                            l_a = Artist(name=ma_name, biography=ma_profile)
+                            l_a.save()
+
+                            rel = Relation(content_object=l_a, url=ma_discogs_url)
+                            rel.save()
+
+                        if len(l_as) == 1:
+                            l_a = l_as[0]
+                            print l_as[0]
+
+                        if l_a:
+                            ma = ArtistMembership.objects.get_or_create(parent=obj, child=l_a)
+
+                except:
+                    pass
+
+
+
+    type = result.get('type', None)
+    if type:
+        log.debug('got type: %s' % (type))
+        obj.type = type
+
+    disambiguation = result.get('disambiguation', None)
+    if disambiguation:
+        log.debug('got disambiguation: %s' % (disambiguation))
+        obj.disambiguation = disambiguation
+
+    tags = result.get('tags', ())
+
+    for tag in tags:
+        log.debug('got tag: %s' % (tag['name']))
+        Tag.objects.add_tag(obj, '"%s"' % tag['name'])
+
+
+    # add mb relation
+    mb_url = 'http://musicbrainz.org/artist/%s' % (mb_id)
+    try:
+        rel = Relation.objects.get(object_id=obj.pk, url=mb_url)
+    except:
+        log.debug('relation not here yet, add it: %s' % (mb_url))
+        rel = Relation(content_object=obj, url=mb_url)
+        rel.save()
+
+    obj.save()
+
+
+    return obj
+
         
