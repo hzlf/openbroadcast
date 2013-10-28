@@ -239,6 +239,28 @@ def restart():
     except Exception, e:
         pass
 
+def stop_workers():
+
+    """
+    (re)start supervisor workers
+    """
+    try:
+        # restart gunicorn celeryd-worker
+        run('supervisorctl stop worker.celery.%s' % env.site_id)
+        run('supervisorctl stop worker.import.%s' % env.site_id)
+        run('supervisorctl stop worker.convert.%s' % env.site_id)
+        run('supervisorctl stop worker.complete.%s' % env.site_id)
+        run('supervisorctl stop worker.process.%s' % env.site_id)
+        # restart other supervisor services
+        run('supervisorctl stop echoprint.%s' % env.site_id)
+        run('supervisorctl stop ttserver.%s' % env.site_id)
+        run('supervisorctl stop pushy.%s' % env.site_id)
+
+        run('supervisorctl status')
+
+    except Exception, e:
+        pass
+
 
 def doc_make():
     local('cd doc && make html')

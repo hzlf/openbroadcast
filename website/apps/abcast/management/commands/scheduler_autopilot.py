@@ -1,6 +1,8 @@
 #-*- coding: utf-8 -*-
 from django.core.files import File as DjangoFile
 from django.core.management.base import BaseCommand, NoArgsCommand
+from django.conf import settings
+from django.contrib.auth.models import User
 from optparse import make_option
 import os
 import sys
@@ -18,13 +20,21 @@ import logging
 logger = logging.getLogger(__name__)
 
 START_OFFSET = -1 # hours to look ahead
-RANGE = 12 # hours to fill
+SCHEDULE_AHEAD = 12 # hours to fill
 
+SCHEDULER_DEFAULT_CHANNEL_ID = getattr(settings, 'SCHEDULER_DEFAULT_CHANNEL_ID', 1)
+SCHEDULER_DEFAULT_USERNAME = 'root'
 
+SCHEDULER_DEFAULT_THEME = 3
 
 class Autopilot(object):
     def __init__(self, * args, **kwargs):
         self.action = kwargs.get('action')
+        self.schedule_ahead = int(kwargs.get('schedule_ahead', SCHEDULE_AHEAD))
+        self.channel_id = int(kwargs.get('channel_id', SCHEDULER_DEFAULT_CHANNEL_ID))
+        self.channel = Channel.objects.get(pk=self.channel_id)
+        self.username = kwargs.get('username', SCHEDULER_DEFAULT_USERNAME)
+        self.user = User.objects.get(username=self.username)
         self.verbosity = int(kwargs.get('verbosity', 1))
         
         
@@ -34,7 +44,7 @@ class Autopilot(object):
         log.debug('auto-adding emission, slot start: %s' % slot_start)
             
         # check if overlapping emission exists
-        ces = Emission.objects.filter(time_start__lt=slot_start, time_end__gt=slot_start)
+        ces = Emission.objects.filter(time_start__lt=slot_start, time_end__gt=slot_start, channel=self.channel)
         print 'coliding emissions'
         print ces
         if ces.count() > 0:
@@ -45,7 +55,7 @@ class Autopilot(object):
         print 'next_start: %s' % next_start
             
         # check how much time is available until next emission
-        fes = Emission.objects.filter(time_start__gte=next_start).order_by('time_start')
+        fes = Emission.objects.filter(time_start__gte=next_start, channel=self.channel).order_by('time_start')
         print fes
         free_slot = 14400
         if fes.count() > 0:
@@ -72,12 +82,12 @@ class Autopilot(object):
         else:
             p = None
         
-        print 'The random selection iiiiiiiiiiiiiis!!'
+        print 'The random selection i!!'
         print p
         
         # create the scheduler entry
         if p:
-            e = Emission(content_object=p, time_start=next_start)
+            e = Emission(content_object=p, time_start=next_start, channel=self.channel, user=self.user, color=SCHEDULER_DEFAULT_THEME)
             e.save()
             
             print 'Created emission, will run until: %s' % e.time_end
@@ -96,7 +106,7 @@ class Autopilot(object):
         #print 'range_seconds %s' % range_seconds
         
         emissions_total = 0
-        es = Emission.objects.filter(time_end__gte=range_start, time_start__lte=range_end)
+        es = Emission.objects.filter(time_end__gte=range_start, time_start__lte=range_end, channel=self.channel)
         for e in es:
             print e
             emissions_total += int(e.content_object.get_duration())
@@ -123,7 +133,7 @@ class Autopilot(object):
             
             now = datetime.datetime.now()
             range_start = now.replace(minute=0, second=0, microsecond=0) + datetime.timedelta(hours=1 + START_OFFSET)
-            range_end = range_start + datetime.timedelta(hours=RANGE)
+            range_end = range_start + datetime.timedelta(hours=self.schedule_ahead)
             
             log.debug('range_start: %s' % range_start)
             log.debug('range_end:   %s' % range_end)
@@ -153,7 +163,22 @@ class Command(NoArgsCommand):
             action='store',
             dest='action',
             default=False,
-            help='Fill up the scheduler!!'),
+            help='Action to do. (--action=schedule)'),
+        make_option('--channel_id',
+            action='store',
+            dest='channel_id',
+            default=False,
+            help='Specify the channel id'),
+        make_option('--username',
+            action='store',
+            dest='username',
+            default=False,
+            help='Specify user to assign for autopilot scheduling'),
+        make_option('--schedule_ahead',
+            action='store',
+            dest='schedule_ahead',
+            default=False,
+            help='Number of hours to schedule ahead. Default 12'),
         )
 
     def handle_noargs(self, **options):
