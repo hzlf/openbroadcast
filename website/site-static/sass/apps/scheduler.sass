@@ -2,6 +2,8 @@
  * Scheduler stylesheet
  */
 
+@import apps/datepicker
+
 body.scheduler
   #modnav
     border-bottom-color: #999999
@@ -23,6 +25,8 @@ $theme-3-bright: #cce3f2
 
 $theme-4-dark: #cc6833
 $theme-4-bright: #f2dacc
+
+
 
 
 
@@ -84,11 +88,18 @@ $theme-4-bright: #f2dacc
 
 
 
-// object placement (drag n drop)
+
 // sidebar
+// datepicker
+#inline_calendar
+  margin: 46px 0 20px
+
+// object placement (drag n drop)
 .object-to-schedule
   cursor: pointer
 
+  strong a
+    color: white
 
   background: #333
   border: 1px solid #444
@@ -103,6 +114,10 @@ $theme-4-bright: #f2dacc
 
   // while dragging on scheduler
   &.ui-draggable-dragging
+
+    background: #999
+    opacity: 0.7
+
     padding: 0 !important
     // width: 108px !important
     .item-list
@@ -110,7 +125,7 @@ $theme-4-bright: #f2dacc
     .tags
       display: none
 
-    img, small
+    img, small, li
       display: none
       
     &.colision
@@ -130,6 +145,7 @@ $theme-4-bright: #f2dacc
   background: #ddffd9
   a
     color: #333 !important
+    font-size: 90%
   &.colision
     background: #f99 !important
   &.ui-draggable-dragging
@@ -192,7 +208,16 @@ $theme-4-bright: #f2dacc
   dd, dt
     padding: 0 2px 0 4px
   dl
-    padding: 2px 0 1px
+    //padding: 2px 0 1px
+    padding: 0 0 0 0
+    position: relative
+    .time
+      position: absolute
+      bottom: 1px
+      right: 2px
+      font-weight: normal
+      font-size: 90%
+
   dd
     line-height: 1.1
       
@@ -242,6 +267,34 @@ $theme-4-bright: #f2dacc
 
 .wk-daynames th
   // width: 110px
+
+// range navigation
+#scheduler_navigation
+  ul
+    position: relative
+    li
+      a
+        font-size: 130%
+        background: #f2f2f2
+        padding: 1px 5px
+        &:hover
+          text-decoration: none
+          background: #ddffd9
+        small
+          color: #999
+          font-size: 70%
+          padding: 0 0 4px 4px
+
+
+      &.pull-right
+        position: absolute
+        right: 0
+      &.week-number
+        width: 56%
+        color: #999
+        text-transform: uppercase
+        text-align: center
+
 
 ul.day-actions
   height: 14px

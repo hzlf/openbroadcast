@@ -807,7 +807,6 @@ class Media(CachingMixin, MigrationMixin):
     
     
     def generate_media_versions(self):
-        time.sleep(2)
         log = logging.getLogger('alibrary.mediamodels.generate_media_versions')
         self.generate_media_versions_task.delay(self)
         
@@ -837,8 +836,8 @@ class Media(CachingMixin, MigrationMixin):
         
         
         
-        print 'Sleeping 2 secs.. To be sure the transaction is completed.'
-        time.sleep(2)
+        print 'Sleeping 0.2 secs.. To be sure the transaction is completed.'
+        time.sleep(0.2)
         print
         
 

@@ -13,6 +13,7 @@ SchedulerApp = function() {
 	this.lookup_prefix = 'lookup_id_';
 	this.field_prefix = 'id_';
 	this.api_url = false;
+	this.channel_id;
 	this.ac;
 	
 	this.station_time;
@@ -39,6 +40,7 @@ SchedulerApp = function() {
 	this.copy_paste_source = false;
 
 	this.init = function() {
+
 		debug.debug('scheduler: init');
 		debug.debug(self.api_url);
 		
@@ -53,6 +55,9 @@ SchedulerApp = function() {
 
 		self.iface();
 		// self.bindings(); // called from display method
+
+        self.bindings();
+
 
 		pushy.subscribe(self.api_url, function() {
 			self.load();
@@ -114,6 +119,10 @@ SchedulerApp = function() {
 				self.copy_paste_source = date;
 				$.cookie('scheduler_copy_paste_source', date);
 			}
+
+			if (action == 'delete') {
+				alert('delete: ' + date);
+			}
 			if (action == 'paste') {
 				if( ! self.copy_paste_source) {
 					alert('Nothing selected.');
@@ -122,8 +131,10 @@ SchedulerApp = function() {
 					var url = '/program/scheduler/copy-paste-day/';
 					var data = {
 						source: self.copy_paste_source,
-						target: date
-					} 
+						target: date,
+                        channel_id: self.channel_id
+					}
+
 					$.ajax({
 						type : "POST",
 						url : url,
@@ -185,7 +196,7 @@ SchedulerApp = function() {
 			self.display(self.local_data);
 		} else {
 			debug.debug('SchedulerApp - load: using remote data');
-			var url = self.api_url + '?limit=500' + self.range_filter;
+			var url = self.api_url + '?channel_id=' + self.channel_id  + '&limit=500' + self.range_filter;
 			$.get(url, function(data) {
 				self.local_data = data;
 				self.display(data);
@@ -229,7 +240,7 @@ SchedulerApp = function() {
 			$('.container.scheduler .emission.delete-flag').remove();
 		}, 500)
 
-		self.bindings();
+		// self.bindings();
 
 	};
 
@@ -256,7 +267,7 @@ SchedulerApp = function() {
 			object : data
 		}
 		var html = nj.render('abcast/nj/selected_object.html', d);
-		container.append(html);
+		container.html(html);
 
 		// drag bindings
 		
@@ -359,9 +370,9 @@ SchedulerApp = function() {
 			num_days: self.num_days,
 			range_start: self.range[0],
 			range_end: self.range[self.range.length -1],
+            channel_id: self.channel_id
 		}
-		
-		
+
 		// call creation view, maybe refactor this to tp later
 
 		var url = '/program/scheduler/schedule-object/';
@@ -679,6 +690,8 @@ var EmissionApp = function() {
 
 	this.drag_handler = function(event, ui) {
 
+
+        /*
 		var collision = $(event.target).collision("div.chip.fix", {
 			mode : "collision",
 			colliderData : "cdata",
@@ -687,20 +700,14 @@ var EmissionApp = function() {
 
 		if (collision.length > 1) {
 			for (var i = 1; i < collision.length; i++) {
-
 				var hit = collision[i];
-
-				//var o = $(hit).data("odata");
 				var c = $(hit).data("cdata");
-
-				//console.log('collider:', c)
-
 				$(c).addClass('colision');
-
 			}
 		} else {
 			$(event.target).removeClass('colision');
 		}
+        */
 
 		if (event.type == 'dragstop') {
 
@@ -726,6 +733,7 @@ var EmissionApp = function() {
 				left : parseInt(el.position().left),
 				top : parseInt(el.css('top')),
 				num_days: self.num_days,
+                channel_id: self.scheduler_app.channel_id
 			};
 
 			/**/

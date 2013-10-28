@@ -6,7 +6,7 @@
 	style="top:{{ top }}px;left:-1px;width:100%;
 ">
 	
-	<dl class="cbrd" style="height:{{ height - 4 }}px;">
+	<dl class="cbrd" style="height:{{ height - 1 }}px;">
 		<dt style="">
 			
 			<a href="{{ object.content_object.absolute_url }}" data-resource_uri="{{ object.resource_uri }}">
@@ -20,6 +20,12 @@
 			{% if object.locked %}
 			<i class="icon-lock pull-right"></i>
 			{% endif %}
+            {% if height > 20 %}
+            <div class="time">
+                <span>{{ object.start }} - {{ object.end }}</span>
+            </div>
+            {% endif %}
+
 		</dt>
 
 	</dl>

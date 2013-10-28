@@ -17,7 +17,7 @@ from tastypie.utils import trailing_slash
 from tastypie.exceptions import ImmediateHttpResponse
 
 from alibrary.models import Playlist
-from abcast.models import Emission
+from abcast.models import Emission, Channel
 
 from easy_thumbnails.files import get_thumbnailer
 
@@ -93,6 +93,15 @@ class EmissionResource(ModelResource):
         }
         max_limit = 100000
         #cache = SimpleCache(timeout=120)
+
+    def obj_get_list(self, request=None, **kwargs):
+
+        channel_id =  request.GET['channel_id']
+        objects = Emission.objects.order_by('name').filter(channel__pk=int(channel_id))
+
+
+        #fetch objects based on param
+        return objects
 
 
     def dehydrate(self, bundle):
@@ -173,6 +182,9 @@ class EmissionResource(ModelResource):
         left = request.POST.get('left', None)
         
         num_days = request.POST.get('num_days', SCHEDULER_NUM_DAYS)
+        channel_id = request.POST.get('channel_id', SCHEDULER_DEFAULT_CHANNEL_ID)
+
+        channel = Channel.objects.get(pk=int(channel_id))
 
         e = Emission.objects.get(**self.remove_api_resource_names(kwargs))
 
@@ -218,7 +230,7 @@ class EmissionResource(ModelResource):
             success = False
         
         # check if slot is free
-        es = Emission.objects.filter(time_end__gt=time_start + datetime.timedelta(seconds=2), time_start__lt=time_end).exclude(pk=e.pk)
+        es = Emission.objects.filter(time_end__gt=time_start + datetime.timedelta(seconds=2), time_start__lt=time_end, channel=channel).exclude(pk=e.pk)
         if es.count() > 0:
             data = { 'message': _('Sorry, but the desired time does not seem to be available.') }
             success = False

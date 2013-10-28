@@ -18,8 +18,8 @@ admin.site.register(Broadcast, BroadcastAdmin)
 
 class EmissionAdmin(GenericAdminModelAdmin):
     # inlines = [RelatedContentInline,]
-    list_display = ('name', 'time_start', 'time_end', 'type', 'user', 'source', 'locked', 'status')
-    list_filter = ('type', 'status',)
+    list_display = ('name', 'time_start', 'time_end', 'channel', 'type', 'user', 'source', 'locked', 'status')
+    list_filter = ('type', 'status','channel')
     date_hierarchy = 'time_start'
     readonly_fields = ('duration', 'uuid', 'slug', )
     

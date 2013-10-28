@@ -51,6 +51,8 @@ SCHEDULER_NUM_DAYS = 7
 SCHEDULER_OFFSET = getattr(settings, 'SCHEDULER_OFFSET', 6)
 SCHEDULER_DEFAULT_CHANNEL_ID = getattr(settings, 'SCHEDULER_DEFAULT_CHANNEL_ID', 1)
 
+OVERLAP_TOLERANCE = 2 # seconds
+
 def schedule(request):
         
     log = logging.getLogger('abcast.schedulerviews.schedule')
@@ -91,20 +93,20 @@ def schedule(request):
     # build a range-filter string for the API
     range_start = days[0] + datetime.timedelta(hours=SCHEDULER_OFFSET)
     range_end = days[-1] + datetime.timedelta(hours=SCHEDULER_OFFSET + 24)
-    
-    range_start = range_start.strftime("%Y-%m-%dT%H:%M:%S")
-    range_end = range_end.strftime("%Y-%m-%dT%H:%M:%S")
-    
-    data['range_filter'] = '&time_start__gte=%s&time_end__lte=%s&' % (range_start, range_end)
+
+    data['range_start'] = range_start
+    data['range_end'] = range_end
+
+    range_start_s = range_start.strftime("%Y-%m-%dT%H:%M:%S")
+    range_end_s = range_end.strftime("%Y-%m-%dT%H:%M:%S")
+
+
+
+    data['range_filter'] = '&time_start__gte=%s&time_end__lte=%s&' % (range_start_s, range_end_s)
     
     
     channel_id = request.GET.get('channel_id', SCHEDULER_DEFAULT_CHANNEL_ID)
-
-    channel_id = int(channel_id)
-
-
-
-    channel = Channel.objects.get(pk=channel_id)
+    channel = Channel.objects.get(pk=int(channel_id))
     dayparts = channel.get_dayparts(days[0])
     data['dayparts'] = dayparts
     data['channel'] = channel
@@ -270,6 +272,8 @@ def schedule_object(request):
     left = request.POST.get('left', None)
     range_start = request.POST.get('range_start', None)
     range_end = request.POST.get('range_end', None)
+    channel_id = request.POST.get('channel_id', SCHEDULER_DEFAULT_CHANNEL_ID)
+    channel = Channel.objects.get(pk=channel_id)
     
     num_days = request.POST.get('num_days', SCHEDULER_NUM_DAYS)
     
@@ -318,7 +322,7 @@ def schedule_object(request):
     
     # check if slot is free
     # hm just allow some seconds of tolerance (in case of mini-overlaps)
-    es = Emission.objects.filter(time_end__gt=time_start + datetime.timedelta(seconds=2), time_start__lt=time_end)
+    es = Emission.objects.filter(time_end__gt=time_start + datetime.timedelta(seconds=OVERLAP_TOLERANCE), time_start__lt=time_end + datetime.timedelta(seconds=OVERLAP_TOLERANCE), channel=channel)
     if es.count() > 0:
         for em in es:
             print 'Blocking emission: %s' % em.id
@@ -328,7 +332,7 @@ def schedule_object(request):
     
     
     # if no errors so far -> create emission and attach object
-    e = Emission(content_object=obj, time_start=time_start, user=request.user)
+    e = Emission(content_object=obj, time_start=time_start, user=request.user, channel=channel)
     e.save()
     
     
@@ -367,24 +371,35 @@ def copy_paste_day(request):
         source_start = source + datetime.timedelta(hours=SCHEDULER_OFFSET)
         source_end = source_start + datetime.timedelta(hours=24)
 
-        
         log.debug('source: %s to %s' % (source_start, source_end))
         log.debug('offset: %s' % (offset))
         
         # get emissions
-        es = Emission.objects.filter(time_start__gte=source_start, time_end__lte=source_end)
+        es = Emission.objects.filter(time_start__gte=source_start, time_end__lte=source_end, channel=channel)
         for e in es:
             print e
-            e.pk = None
-            e.uuid = None
-            e.locked = False
-            e.time_start = e.time_start + offset
-            e.save()
-            #ne = Emission()
-        
-    
+            # check if slot is available
+            slot_free = True
 
-    
+            # blocking before
+            bloking_emissions = Emission.objects.filter(time_start__lte=e.time_start + offset, time_end__gte=e.time_start + offset + datetime.timedelta(seconds=OVERLAP_TOLERANCE), channel=channel)
+            if bloking_emissions.count() > 0:
+                slot_free = False
+
+            # blocking after
+            bloking_emissions = Emission.objects.filter(time_start__lte=e.time_end + offset - datetime.timedelta(seconds=OVERLAP_TOLERANCE), time_end__gte=e.time_end + offset, channel=channel)
+            if bloking_emissions.count() > 0:
+                slot_free = False
+
+            if slot_free:
+                e.pk = None
+                e.uuid = None
+                e.locked = False
+                e.time_start = e.time_start + offset
+                e.save()
+            else:
+                print 'slot not free'
+
     
     now = datetime.datetime.now()
 

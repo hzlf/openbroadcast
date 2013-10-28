@@ -21,6 +21,10 @@ from abcast.util import notify
 
 from easy_thumbnails.files import get_thumbnailer
 
+
+
+SCHEDULE_AHEAD = 60 * 60 # seconds
+
 class StationResource(ModelResource):
     
     # label = fields.ForeignKey('alibrary.api.LabelResource', 'label', null=True, full=True, max_depth=2)
@@ -410,17 +414,30 @@ class BaseResource(Resource):
 
     def get_schedule(self, request, **kwargs):
         
-        """
-        get schedule data and put it into airtime format
-        TODO: maybe refactor airtime/pypo to match api format
-        """
-        
+        range_start = datetime.datetime.now()
+        range_end = datetime.datetime.now() + datetime.timedelta(seconds=SCHEDULE_AHEAD)
+
+        es = Emission.objects.filter(time_end__gte=range_start, time_start__lte=range_end)
+
+
+        # es = Emission.objects.future()
         media = {}
-        
-        es = Emission.objects.future()
-        print es
-        
+        print
+        print '--------------------------------------------------------------------'
+        print '| getting schedule'
+        print '--------------------------------------------------------------------'
+        print 'range start             : %s ' % range_start
+        print 'range end               : %s ' % range_end
+        print 'total emissions in range: %s' % es.count()
+        print '--------------------------------------------------------------------'
+        print
+
+
         for e in es:
+            print
+            print 'emission: %s | %s - %s' % (e.name, e.pk, e.get_absolute_url())
+            print 'co      : %s | %s - %s' % (e.content_object.name, e.content_object.pk, e.content_object.get_absolute_url())
+
             e_start = e.time_start
             offset = 0
             items = e.content_object.get_items()
@@ -428,25 +445,24 @@ class BaseResource(Resource):
                 co = item.content_object
                 i_start = e_start + datetime.timedelta(milliseconds=offset)
                 i_end = e_start + datetime.timedelta(milliseconds=offset + co.get_duration())
-                
+
+                # map to airtime format
                 i_start_str = i_start.strftime('%Y-%m-%d-%H-%M-%S')
                 i_end_str = i_end.strftime('%Y-%m-%d-%H-%M-%S')
-                
-                print '## item'
-                print 'cue_in:     %s' % item.cue_in
-                print 'cue_out:    %s' % item.cue_out
-                print 'fade_in:    %s' % item.fade_in
-                print 'fade_out:   %s' % item.fade_out
-                print 'fade_cross: %s' % item.fade_cross
-                print 'id:         %s' % co.pk
-                print 
-                print '## timing'
-                print 'start:      %s' % i_start
-                print 'start str:  %s' % i_start_str
-                print 'end:        %s' % i_end
-                print 'end str:    %s' % i_end_str
+
+                print
                 print item.content_object
-                
+
+
+                print 'cue_in  -  cue_out  -  fade_in  -  fade_out  -  fade_cross'
+                print '%06d     %06d      %06d      %06d       %06d' % (item.cue_in, item.cue_out, item.fade_in, item.fade_out, item.fade_cross)
+                print 'start:      %s' % i_start
+                #print 'start str:  %s' % i_start_str
+                print 'end:        %s' % i_end
+                #print 'end str:    %s' % i_end_str
+                #print item.content_object
+
+
                 """
                 compose media data
                 """
@@ -457,8 +473,8 @@ class BaseResource(Resource):
                         'cue_out': float(co.get_duration() - item.cue_out) / 1000,   
                         'fade_in': item.fade_in,              
                         'fade_out': item.fade_out,
-                        #'fade_cross': item.fade_cross,
-                        'fade_cross': 0,
+                        'fade_cross': item.fade_cross,
+                        #'fade_cross': 0,
                         'replay_gain': 0,
                         'independent_event': False,
                         'start': "%s" % i_start_str,
@@ -475,7 +491,7 @@ class BaseResource(Resource):
                 offset += ( co.get_duration() - (item.cue_in + item.cue_out) )
          
 
-        print media
+        #print media
 
         data = {'media': media}
         #data = {"media":{"2013-05-24-08-20-00":{"id":3,"type":"file","row_id":10,"uri":"\/srv\/airtime\/stor\/imported\/1\/Swell Sounds\/[chase 056] - Swell Sounds - SK-8 Ep\/2-Eidolan-320kbps.mp3","fade_in":500,"fade_out":500,"cue_in":0.1,"cue_out":316.3,"start":"2013-05-24-08-20-00","end":"2013-05-24-08-25-16","show_name":"Untitled Show","replay_gain":-9,"independent_event":False},"2013-05-24-08-25-16":{"id":2,"type":"file","row_id":11,"uri":"\/srv\/airtime\/stor\/imported\/1\/Swell Sounds\/[chase 056] - Swell Sounds - SK-8 Ep\/4-I Feel-320kbps.mp3","fade_in":500,"fade_out":500,"cue_in":18.3,"cue_out":249.5,"start":"2013-05-24-08-25-16","end":"2013-05-24-08-29-07","show_name":"Untitled Show","replay_gain":-8.76,"independent_event":False},"2013-05-24-08-29-07":{"id":4,"type":"file","row_id":12,"uri":"\/srv\/airtime\/stor\/imported\/1\/Swell Sounds\/[chase 056] - Swell Sounds - SK-8 Ep\/3-Luminance-320kbps.mp3","fade_in":500,"fade_out":500,"cue_in":0,"cue_out":254.7,"start":"2013-05-24-08-29-07","end":"2013-05-24-08-33-22","show_name":"Untitled Show","replay_gain":-9.35,"independent_event":False},"2013-05-24-08-33-22":{"id":1,"type":"file","row_id":13,"uri":"\/srv\/airtime\/stor\/imported\/1\/Swell Sounds\/[chase 056] - Swell Sounds - SK-8 Ep\/1-Sk-8-320kbps.mp3","fade_in":500,"fade_out":500,"cue_in":0.1,"cue_out":398,"start":"2013-05-24-08-33-22","end":"2013-05-24-08-40-00","show_name":"Untitled Show","replay_gain":-8.52,"independent_event":False}}}

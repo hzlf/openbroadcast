@@ -53,17 +53,19 @@ class Autopilot(object):
             diff = fes[0].time_start - next_start
             free_slot = int(diff.total_seconds())
 
+
         log.debug('length of free slot is: %s seconds' % free_slot)
         log.debug('length of free slot is: %s hours' % (int(free_slot) / 60 / 60))
             
-        if free_slot == 0:
-            print 'FREE SLOT IS ZERO - FUCK!'
+        if free_slot == 0 or free_slot < 5:
+            print 'FREE SLOT IS %s. ENDS AT:' % free_slot
+            print fes[0].time_end
             return fes[0].time_end
             
         """
         look for possible playlists to schedule
         """
-        ps = Playlist.objects.filter(target_duration__lte=free_slot, rotation=True).order_by('?')
+        ps = Playlist.objects.filter(target_duration__lte=free_slot, rotation=True, status=1, type="broadcast", duration__gte=29*60*1000).order_by('?')
         
         if ps.count() > 0:
             p = ps[0]
@@ -75,7 +77,6 @@ class Autopilot(object):
         
         # create the scheduler entry
         if p:
-            pass
             e = Emission(content_object=p, time_start=next_start)
             e.save()
             
@@ -90,11 +91,9 @@ class Autopilot(object):
         log.debug('range_start: %s' % range_start)
         log.debug('range_end: %s' % range_end)
         
-        
-        
-        
+
         range_seconds = int((range_end - range_start).total_seconds())
-        print 'range_seconds %s' % range_seconds
+        #print 'range_seconds %s' % range_seconds
         
         emissions_total = 0
         es = Emission.objects.filter(time_end__gte=range_start, time_start__lte=range_end)
@@ -103,8 +102,8 @@ class Autopilot(object):
             emissions_total += int(e.content_object.get_duration())
         
             
-        print 'range_seconds:   %s' % range_seconds
-        print 'emissions_total: %s' % (int(emissions_total) / 1000)
+        #print 'range_seconds:   %s' % range_seconds
+        #print 'emissions_total: %s' % (int(emissions_total) / 1000)
             
         free_time = range_seconds - (int(emissions_total) / 1000)
         
@@ -130,65 +129,17 @@ class Autopilot(object):
             log.debug('range_end:   %s' % range_end)
             
             slot_start = range_start
-            
-            
-            print 'FREEEEEE'
+
+            print
+            print 'free time in range:'
             print self.free_time_in_range(range_start, range_end)
-            
+
+
             """"""
-            while self.free_time_in_range(range_start, range_end) > 0:
+            while self.free_time_in_range(range_start, range_end) > 10:
                 slot_start = self.add_emission(slot_start)
-            
-             
-        
-        if self.action == 'schedule__':
-            print 'schedule!!'
-            
-            now = datetime.datetime.now()
-            
-            time_start = now + datetime.timedelta(hours=4)
-            time_end = now + datetime.timedelta(hours=48)
-        
-            print time_start
-            print time_end
-            
-            """
-            Check if there are any emissions scheduled for that range
-            """
-            
-            ses = Emission.objects.filter(time_end__gte=time_start, time_end__lte=time_end).order_by('-time_end')
-            print ses
-            for se in ses:
-                print se.time_end
-                
-            if ses.count() > 0:
-                print 'got one'
-                pass
-            else:
-                
-                print 'put something...'
-                se = Emission.objects.filter(time_end__lte=time_start).order_by('-time_end')[0]
-                print se.time_end
-                """
-                get random playlist by dayparting
-                """
-                pl = Playlist.objects.get(pk=1009)
-                
-                e = Emission()
-                e.source = 'autopilot'
-                e.name = pl.name
-                e.content_object = pl
-                e.time_start = se.time_end
-                
-                h = (0,1,2,3)
-                m = (0, 15, 30, 45)
-                
-                e.time_end = se.time_end + datetime.timedelta(hours=choice(h), minutes=choice(m))
-                e.save()
-                
-                
-                
-                
+
+
             
 
 

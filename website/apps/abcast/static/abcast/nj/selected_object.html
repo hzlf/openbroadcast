@@ -26,12 +26,12 @@
 
 				<div class="span9">
 
-
-
-					<!---->
 					<ul class="unstyled">
 
-						<li><strong>{{ object.name|truncate_chars_inner(30) }}</strong>  <small class="pull-right">{{ object.target_duration / 60 }} min</small></li>
+						<li>
+                            <strong><a href="{{ object.absolute_url }}">{{ object.name|truncate_chars_inner(30) }}</a></strong>
+                            <small class="pull-right">{{ object.target_duration / 60 }} min</small>
+                        </li>
 						<p class="tags">{{ object.d_tags|shorten(60) }}</p>
 					</ul>
 
@@ -42,21 +42,3 @@
 
     </div>
 {% endif %}
-
-
-
-<!--
-{% if object.id %}
-    <div class="_container object-to-schedule" id="{{ object.uuid }}">
-        <span class="name">{{ object.name }} <small class="pull-right">{{ object.target_duration / 60 }} min
-        </small></span>
-
-        <p class="tags">{{ object.d_tags|shorten(60) }}</p>
-
-        {% for message in object.broadcast_status_messages %}
-        {{ message }}
-        {% endfor %}
-
-    </div>
-{% endif %}
--->
