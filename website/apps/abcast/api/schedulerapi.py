@@ -34,7 +34,7 @@ SCHEDULER_GRID_OFFSET = getattr(settings, 'SCHEDULER_GRID_OFFSET', 60)
 SCHEDULER_PPH = getattr(settings, 'SCHEDULER_PPH', 42)
 SCHEDULER_PPD = getattr(settings, 'SCHEDULER_PPD', 110) # actually should be calculated
 # how long ahead should the schedule be locked
-SCHEDULER_LOCK_AHEAD = getattr(settings, 'SCHEDULER_LOCK_AHEAD', 60) # 1 minute, to allow caching of files
+SCHEDULER_LOCK_AHEAD = getattr(settings, 'SCHEDULER_LOCK_AHEAD', -60*60) # 1 minute, to allow caching of files
 SCHEDULER_NUM_DAYS = 7
 # hours to offset the schedule
 # 6: day starts at 6:00 and goes until 6:00
@@ -196,7 +196,8 @@ class EmissionResource(ModelResource):
         ppd = (SCHEDULER_GRID_WIDTH - SCHEDULER_GRID_OFFSET) / int(num_days)
         
         top = float(top) / pph * 60
-        offset_min = int(15 * round(float(top)/15))
+        #offset_min = int(15 * round(float(top)/15))
+        offset_min = int(5 * round(float(top)/5))
     
         left = float(left) / ppd
         offset_d = int(round(float(left)))

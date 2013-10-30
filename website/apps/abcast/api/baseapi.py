@@ -17,13 +17,14 @@ from tastypie.utils import trailing_slash
 from tastypie.exceptions import ImmediateHttpResponse
 
 from abcast.models import Station, Channel, Emission
-from abcast.util import notify
+from abcast.util import notify, pypo
+from lib.pypo_gateway import send as pypo_send
 
 from easy_thumbnails.files import get_thumbnailer
 
 
 
-SCHEDULE_AHEAD = 60 * 60 # seconds
+SCHEDULE_AHEAD = 60 * 60 * 6 # seconds
 
 class StationResource(ModelResource):
     
@@ -268,6 +269,11 @@ class BaseResource(Resource):
                 self._meta.resource_name, trailing_slash()),
                 self.wrap_view('get_stream_parameters'),
                 name="base_api_get_stream_parameters"),
+
+            url(r"^(?P<resource_name>%s)/rabbitmq-do-push%s$" % (
+                self._meta.resource_name, trailing_slash()),
+                self.wrap_view('rabbitmq_do_push'),
+                name="base_api_rabbitmq_do_push"),
             
             url(r"^(?P<resource_name>%s)/get-stream-settings%s$" % (
                 self._meta.resource_name, trailing_slash()),
@@ -328,6 +334,26 @@ class BaseResource(Resource):
         data = {"stream_params":{"s1":{"enable":"true","output":"icecast","type":"mp3","bitrate":"256","host":"ubuntu","port":"8000","user":"","pass":"donthackme","admin_user":"admin","admin_pass":"donthackme","mount":"airtime_128","url":"http:\/\/airtime.sourcefabric.org","description":"Airtime Radio! Stream #1","genre":"genre","name":"Airtime!","channels":"stereo","liquidsoap_error":"OK"},"s2":{"enable":"false","output":"icecast","type":"","bitrate":"","host":"","port":"","user":"","pass":"","admin_user":"","admin_pass":"","mount":"","url":"","description":"","genre":"","name":"","channels":"stereo"},"s3":{"enable":"false","output":"icecast","type":"","bitrate":"","host":"","port":"","user":"","pass":"","admin_user":"","admin_pass":"","mount":"","url":"","description":"","genre":"","name":"","channels":"stereo"}}}
         return self.json_response(request, data)
 
+    def rabbitmq_do_push(self, request, **kwargs):
+
+        """ airtime
+        /* This action is for use by our dev scripts, that make
+         * a change to the database and we want rabbitmq to send
+         * out a message to pypo that a potential change has been made. */
+        public function rabbitmqDoPushAction()
+        {
+            Logging::info("Notifying RabbitMQ to send message to pypo");
+
+            Application_Model_RabbitMq::SendMessageToPypo("reset_liquidsoap_bootstrap", array());
+            Application_Model_RabbitMq::PushSchedule();
+        }
+        """
+
+        pypo_send({'event_type': 'reset_liquidsoap_bootstrap'})
+
+        data = {}
+        return self.json_response(request, data)
+
     def update_stream_settings(self, request, **kwargs):
         
         print '** update_stream_settings **'
@@ -361,7 +387,7 @@ class BaseResource(Resource):
         print '** update_liquidsoap_status **'
         print request.POST
         
-        data = {'status': 'session!'}
+        data = {'status': True}
         return self.json_response(request, data)
 
     def notify_start_play(self, request, **kwargs):
@@ -392,7 +418,11 @@ class BaseResource(Resource):
             print 'item: %s' % item.name
             print 'channel: %s' % channel.name
             
-        data = {'status': 'session!'}
+        data = {
+            'status': True,
+            'item': '%s' % item.name,
+            'channel': '%s' % channel.name,
+        }
         return self.json_response(request, data)
 
     def get_bootstrap_info(self, request, **kwargs):
@@ -413,91 +443,16 @@ class BaseResource(Resource):
     
 
     def get_schedule(self, request, **kwargs):
-        
+
         range_start = datetime.datetime.now()
         range_end = datetime.datetime.now() + datetime.timedelta(seconds=SCHEDULE_AHEAD)
 
-        es = Emission.objects.filter(time_end__gte=range_start, time_start__lte=range_end)
-
-
-        # es = Emission.objects.future()
-        media = {}
-        print
-        print '--------------------------------------------------------------------'
-        print '| getting schedule'
-        print '--------------------------------------------------------------------'
-        print 'range start             : %s ' % range_start
-        print 'range end               : %s ' % range_end
-        print 'total emissions in range: %s' % es.count()
-        print '--------------------------------------------------------------------'
-        print
-
-
-        for e in es:
-            print
-            print 'emission: %s | %s - %s' % (e.name, e.pk, e.get_absolute_url())
-            print 'co      : %s | %s - %s' % (e.content_object.name, e.content_object.pk, e.content_object.get_absolute_url())
-
-            e_start = e.time_start
-            offset = 0
-            items = e.content_object.get_items()
-            for item in items:
-                co = item.content_object
-                i_start = e_start + datetime.timedelta(milliseconds=offset)
-                i_end = e_start + datetime.timedelta(milliseconds=offset + co.get_duration())
-
-                # map to airtime format
-                i_start_str = i_start.strftime('%Y-%m-%d-%H-%M-%S')
-                i_end_str = i_end.strftime('%Y-%m-%d-%H-%M-%S')
-
-                print
-                print item.content_object
-
-
-                print 'cue_in  -  cue_out  -  fade_in  -  fade_out  -  fade_cross'
-                print '%06d     %06d      %06d      %06d       %06d' % (item.cue_in, item.cue_out, item.fade_in, item.fade_out, item.fade_cross)
-                print 'start:      %s' % i_start
-                #print 'start str:  %s' % i_start_str
-                print 'end:        %s' % i_end
-                #print 'end str:    %s' % i_end_str
-                #print item.content_object
-
-
-                """
-                compose media data
-                """
-                data = {
-                        #'id': co.pk, 
-                        'id': co.uuid,     
-                        'cue_in': float(item.cue_in) / 1000,  
-                        'cue_out': float(co.get_duration() - item.cue_out) / 1000,   
-                        'fade_in': item.fade_in,              
-                        'fade_out': item.fade_out,
-                        'fade_cross': item.fade_cross,
-                        #'fade_cross': 0,
-                        'replay_gain': 0,
-                        'independent_event': False,
-                        'start': "%s" % i_start_str,
-                        'end': "%s" % i_end_str,
-                        'show_name': "%s" % e.name,
-                        'uri': "http://%s%s" % (self.base_url, co.get_stream_url()),
-                        'row_id': co.uuid,
-                        'type': "file",
-                        
-                        }
-                
-                media['%s' % i_start_str] = data
-                
-                offset += ( co.get_duration() - (item.cue_in + item.cue_out) )
-         
-
-        #print media
-
+        media = pypo.get_schedule_for_pypo(range_start, range_end)
+        # map
         data = {'media': media}
-        #data = {"media":{"2013-05-24-08-20-00":{"id":3,"type":"file","row_id":10,"uri":"\/srv\/airtime\/stor\/imported\/1\/Swell Sounds\/[chase 056] - Swell Sounds - SK-8 Ep\/2-Eidolan-320kbps.mp3","fade_in":500,"fade_out":500,"cue_in":0.1,"cue_out":316.3,"start":"2013-05-24-08-20-00","end":"2013-05-24-08-25-16","show_name":"Untitled Show","replay_gain":-9,"independent_event":False},"2013-05-24-08-25-16":{"id":2,"type":"file","row_id":11,"uri":"\/srv\/airtime\/stor\/imported\/1\/Swell Sounds\/[chase 056] - Swell Sounds - SK-8 Ep\/4-I Feel-320kbps.mp3","fade_in":500,"fade_out":500,"cue_in":18.3,"cue_out":249.5,"start":"2013-05-24-08-25-16","end":"2013-05-24-08-29-07","show_name":"Untitled Show","replay_gain":-8.76,"independent_event":False},"2013-05-24-08-29-07":{"id":4,"type":"file","row_id":12,"uri":"\/srv\/airtime\/stor\/imported\/1\/Swell Sounds\/[chase 056] - Swell Sounds - SK-8 Ep\/3-Luminance-320kbps.mp3","fade_in":500,"fade_out":500,"cue_in":0,"cue_out":254.7,"start":"2013-05-24-08-29-07","end":"2013-05-24-08-33-22","show_name":"Untitled Show","replay_gain":-9.35,"independent_event":False},"2013-05-24-08-33-22":{"id":1,"type":"file","row_id":13,"uri":"\/srv\/airtime\/stor\/imported\/1\/Swell Sounds\/[chase 056] - Swell Sounds - SK-8 Ep\/1-Sk-8-320kbps.mp3","fade_in":500,"fade_out":500,"cue_in":0.1,"cue_out":398,"start":"2013-05-24-08-33-22","end":"2013-05-24-08-40-00","show_name":"Untitled Show","replay_gain":-8.52,"independent_event":False}}}
+
         return self.json_response(request, data)
-    
-    
+
     
     def get_now_playing(self, request, **kwargs):
         """
@@ -616,7 +571,9 @@ class BaseResource(Resource):
     
     
     
-    
+"""
+kind of hackish - function is here to hav access via api and other places
+"""
     
     
     

@@ -6,7 +6,7 @@ import datetime
 import re
 
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 from django.core.urlresolvers import reverse
@@ -185,6 +185,9 @@ class Emission(BaseModel, CachingMixin):
 
     @property
     def has_lock(self):
+
+        return False
+
         if self.locked:
             return self.locked
         
@@ -220,7 +223,60 @@ class Emission(BaseModel, CachingMixin):
         super(Emission, self).save(*args, **kwargs)
         
         
-        
+def post_save_emission(sender, **kwargs):
+    print 'post_save_emission - kwargs'
+    obj = kwargs['instance']
+
+    """
+    check if emission is in a critical range (eg it should start soon)
+    """
+    SCHEDULE_AHEAD = 60 * 60 * 6 # seconds
+    range_start = datetime.datetime.now() - datetime.timedelta(seconds=SCHEDULE_AHEAD)
+    range_end = datetime.datetime.now() + datetime.timedelta(seconds=SCHEDULE_AHEAD)
+
+    if obj.time_start > range_start and obj.time_start < range_end:
+        # notify pypy
+        print 'emission in critical range: notify pypo'
+        from lib.pypo_gateway import send as pypo_send
+        from abcast.util import pypo
+        data = pypo.get_schedule_for_pypo(range_start, range_end)
+
+        message = {
+            'event_type': 'update_schedule',
+            'schedule': {'media': data},
+        }
+        pypo_send(message)
+
+
+post_save.connect(post_save_emission, sender=Emission)
+
+
+def pre_delete_emission(sender, **kwargs):
+    print 'post_save_emission - kwargs'
+    obj = kwargs['instance']
+
+    """
+    check if emission is in a critical range (eg it should start soon)
+    """
+    SCHEDULE_AHEAD = 60 * 60 * 6 # seconds
+    range_start = datetime.datetime.now() - datetime.timedelta(seconds=SCHEDULE_AHEAD)
+    range_end = datetime.datetime.now() + datetime.timedelta(seconds=SCHEDULE_AHEAD)
+
+    if obj.time_start > range_start and obj.time_start < range_end:
+        # notify pypy
+        print 'emission in critical range: notify pypo'
+        from lib.pypo_gateway import send as pypo_send
+        from abcast.util import pypo
+        data = pypo.get_schedule_for_pypo(range_start, range_end)
+
+        message = {
+            'event_type': 'update_schedule',
+            'schedule': {'media': data},
+        }
+        pypo_send(message)
+
+
+pre_delete.connect(pre_delete_emission, sender=Emission)
         
         
         

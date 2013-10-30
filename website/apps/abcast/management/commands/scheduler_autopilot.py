@@ -67,7 +67,7 @@ class Autopilot(object):
         log.debug('length of free slot is: %s seconds' % free_slot)
         log.debug('length of free slot is: %s hours' % (int(free_slot) / 60 / 60))
             
-        if free_slot == 0 or free_slot < 5:
+        if free_slot == 0 or free_slot < 60:
             print 'FREE SLOT IS %s. ENDS AT:' % free_slot
             print fes[0].time_end
             return fes[0].time_end

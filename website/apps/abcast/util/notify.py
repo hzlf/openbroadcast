@@ -24,10 +24,11 @@ def start_play(item, channel=None, user=None):
     """
     Add stat information
     """
-    """
+    """"""
     try:
         from atracker.util import create_event
+        user = None
         create_event(user, item, channel, 'playout')
     except Exception, e:
         log.warning('exception: %s' % e)
-    """
+

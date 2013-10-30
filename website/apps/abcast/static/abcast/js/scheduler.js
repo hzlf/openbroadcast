@@ -653,7 +653,7 @@ var EmissionApp = function() {
 
 			self.dom_element.draggable({
 				containment : "#board",
-				grid : [self.ppd, self.pph / 4],
+				grid : [self.ppd, self.pph / 4 / 3], // TODO: remove 3
 				// snap: true,
 			});
 

@@ -44,7 +44,7 @@ SCHEDULER_GRID_OFFSET = getattr(settings, 'SCHEDULER_GRID_OFFSET', 60)
 SCHEDULER_PPH = getattr(settings, 'SCHEDULER_PPH', 42)
 SCHEDULER_PPD = getattr(settings, 'SCHEDULER_PPD', 110) # actually should be calculated
 # how long ahead should the schedule be locked
-SCHEDULER_LOCK_AHEAD = getattr(settings, 'SCHEDULER_LOCK_AHEAD', 60) # 1 minute, to allow caching of files
+SCHEDULER_LOCK_AHEAD = getattr(settings, 'SCHEDULER_LOCK_AHEAD', -60*60) # 1 minute, to allow caching of files
 SCHEDULER_NUM_DAYS = 7
 # hours to offset the schedule
 # 6: day starts at 6:00 and goes until 6:00

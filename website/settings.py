@@ -870,7 +870,7 @@ BADBROWSER_SUGGEST = ("firefox", "chrome", "safari", "opera", "microsoft interne
 #BADBROWSER_BASE_TEMPLATE = "base.html"
 
 """
-celeryd
+rabbitmq
 """
 BROKER_HOST = "localhost"
 BROKER_PORT = 5672
@@ -880,6 +880,7 @@ BROKER_VHOST = "/"
 
 CELERY_IMPORTS = (
     'importer.util.importer', # ?
+    'lib.pypo_gateway.gateway',
 )
 CELERY_ROUTES = {
     #'importer.models.process_task': {'queue': 'import'},
