@@ -2,168 +2,76 @@
 <div class="span7 padded-h container_content">
 
 	<div class="page-header">
-		<h2>{{ object.name|truncate_chars_inner:40 }} <small>{{ object.type }}</small></h2>
+		<h2>{{ object.name|truncate_chars_inner:40 }} <small>{{ object.get_type_display }}</small></h2>
 	</div>
 
 	<dl class="dl-horizontal main">
 
-
-
 		<dt>
-			{% trans "Releases" %}:
+			{% trans "Scheduled by" %}:
 		</dt>
 		<dd>
-			<ul class="unstyled">
-				{% if object.get_releases.count > 0 %}
-				<li>
-					{% url alibrary-release-list as release_list %}
-					<a href="{% spurl path=release_list query="artist={{ object.slug }}" %}" title="{% trans "Only show releases by" %} {{ object.name }}">
-					{{ object.get_releases.count }}<i class="icon-search"></i>	
-					</a>
-				</li>
-				{% else %}		
-				<li>{{ object.get_releases.count }}</li>
-				{% endif %}
-			</ul>
+			<a href="{{ object.user.get_absolute_url }}">{% firstof object.user.username object.user %}</a>
+		</dd>
+
+        {% if object.content_object and object.content_object.user %}
+		<dt>
+			{% trans "Content" %}:
+		</dt>
+		<dd>
+			<a href="{{ object.content_object.get_absolute_url }}">{{ object.content_object.name }}</a>
+		</dd>
+        {% endif %}
+
+		<dt>
+			{% trans "Airplay channel" %}:
+		</dt>
+		<dd>
+            <a href="{{ object.channel.get_absolute_url }}">
+                {{ object.channel.name }}
+            </a>
+            {% if object.channel.station %}
+            <small> -
+                 <a href="{{ object.channel.station.get_absolute_url }}">
+                    {{ object.channel.station.name }}
+                </a>
+            </small>
+            {% endif %}
 		</dd>
 
 		<dt>
-			{% trans "Tracks" %}:
+			{% trans "Airplay date" %}:
 		</dt>
 		<dd>
-			<ul class="unstyled">
-				{% if object.get_media.count > 0 %}
-				<li>
-					{% url alibrary-media-list as media_list %}
-					<a href="{% spurl path=media_list query="artist={{ object.slug }}" %}" title="{% trans "Only show tracks by" %} {{ object.name }}">
-					{{ object.get_media.count }}<i class="icon-search"></i>	
-					</a>
-				</li>
-				{% else %}		
-				<li>{{ object.get_media.count }}</li>
-				{% endif %}
-			</ul>
+            <span>{{ object.time_start|date:"SHORT_DATETIME_FORMAT" }}</span> -
+            <span>{{ object.time_end|date:"SHORT_DATETIME_FORMAT" }}</span>
 		</dd>
 
 
-		{% if object.real_name %}
-		<dt>
-			{% trans "Realname" %}:
-		</dt>
-		<dd>
-			{{ object.real_name }}
-		</dd>
-		{% endif %}
-
-
-		{% if object.aliases.count > 0 %}
-		<dt>
-			{% trans "Aliases" %}:
-		</dt>
-		<dd>
-			{% for artist in object.aliases.all %}
-			{% with item=artist %}
-			{% include "alibrary/element/_inline_link.html" %}
-			{% if not forloop.last %},{% endif %}
-			{% endwith %}
-			{% endfor %}
-		</dd>
-		{% endif %}
-
-		{% if object.members.count > 0 %}
-		<dt>
-			{% trans "Members" %}:
-		</dt>
-		<dd>
-			{% for artist in object.members.all %}
-			{% with item=artist %}
-			{% include "alibrary/element/_inline_link.html" %}
-			{% if not forloop.last %},{% endif %}
-			{% endwith %}
-			{% endfor %}
-		</dd>
-		{% endif %}
 
 
 	</dl>
 
 
 
-	<dl class="dl-horizontal">
-
-		<dt>
-			{% trans "Show on" %}:
-		</dt>
-		<dd class="horizontal relations">
-			{% for relation in object.relations.specific %}
-			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}"><i class="cicon-{{ relation.service }}"></i></a>
-			
-			{% endfor %}
-			<div class="clear"></div>
-		</dd>
-
-	</dl>
-
-	<dl class="dl-horizontal">
-
-		<dt>
-			{% trans "Show on (debug)" %}:
-		</dt>
-		<dd class="horizontal relations">
-			{% for relation in object.relations.specific %}
-			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}">{{ relation.service }}</a>
-			
-			{% endfor %}
-			<div class="clear"></div>
-		</dd>
-
-	</dl>
 
 
 	<dl class="dl-horizontal sub">
 
-
+		<dt>
+			{% trans "Created" %}:
+		</dt>
+        <dd>
+            <span>{{ object.created|date:"SHORT_DATETIME_FORMAT" }}</span>
+        </dd>
 
 		<dt>
-			{% trans "History" %}:
+			{% trans "Last updated" %}:
 		</dt>
-		<dd>
-			
-			{% if object.owner %}
-			<span class="key">{% trans "Created by" %}:</span> <span class="value"><a href="{{ object.owner.get_absolute_url }}">{{ object.owner }}</a></span> |
-			{% endif %}
-			
-			{% if object.publisher %}
-			<span class="key">{% trans "Published by" %}:</span> <span class="value"><a href="#">{{ object.publisher }}</a></span> |
-			{% endif %}
-			
-			{% if object.get_last_revision %}
-			<span class="key">{% trans "Last edit by" %}:</span> <span class="value"><a href="{{ object.get_last_revision.user.get_profile.get_absolute_url }}">{{ object.get_last_revision.user }}</a></span>
-			{% endif %}
-			&nbsp;
-		</dd>
+        <dd>
+            <span>{{ object.updated|date:"SHORT_DATETIME_FORMAT" }}</span>
+        </dd>
 
-		<!--
-		<dt>
-			{% trans "Stats" %}:
-		</dt>
-		<dd>
-			<span class="value">3</span> <span class="key">{% trans "Airplays" %}</span> /
-			<span class="value">173</span> <span class="key">{% trans "Plays" %}</span> /
-			<span class="value">28</span> <span class="key">{% trans "Downloads" %}</span>
-		</dd>
-		-->
-		
-		{% if object.tags %}
-		<dt>
-			{% trans "Tags" %}:
-		</dt>
-		<dd>
-			{% for tag in object.tags %}
-			{{ tag.name }}{% if not forloop.last %},{% endif %}
-			{% endfor %}
-		</dd>
-		{% endif %}
 
 	</dl>
 
@@ -172,15 +80,18 @@
 <div class="span2 padded-h padded-v">
 
 	<div class="image">
-		{% if object.main_image %}
-		<a href="{% thumbnail object.main_image 1200x1200 crop upscale %}" class="zoomable cboxElement"> <img src="{% thumbnail object.main_image 172x172 crop upscale subject_location=object.main_image.subject_location %}" alt="Cover" /> </a>
+
+		{% if object.content_object and object.content_object.main_image %}
+		<a href="{% thumbnail object.content_object.main_image 1200x1200 crop upscale %}" class="zoomable cboxElement"> <img src="{% thumbnail object.content_object.main_image 172x172 crop upscale subject_location=object.content_object.main_image.subject_location %}" alt="Cover" /> </a>
 		{% else %}
 		<img src="/static/img/base/defaults/listview.artist.xl.png" alt="{% trans "No cover available" %}" />
 		{% endif %}
 	</div>
 
 	<div class="rating">
-		{# rating_for_object object #}
+        {% if object.content_object %}
+		{% rating_for_object object.content_object %}
+        {% endif %}
 	</div>
 
 </div>

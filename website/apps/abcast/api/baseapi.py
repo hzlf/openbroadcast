@@ -427,7 +427,7 @@ class BaseResource(Resource):
 
     def get_bootstrap_info(self, request, **kwargs):
 
-        data = {"switch_status":{"live_dj":"off","master_dj":"off","scheduled_play":"on"},"station_name":"","stream_label":"","transition_fade":"00.000000"}
+        data = {"switch_status":{"live_dj":"off","master_dj":"off","scheduled_play":"on"},"station_name":"My Station","stream_label":"","transition_fade":"00.000000"}
         return self.json_response(request, data)
 
     def recorded_shows(self, request, **kwargs):

@@ -3,6 +3,7 @@ from django.core.files import File as DjangoFile
 from django.core.management.base import BaseCommand, NoArgsCommand
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.utils import translation
 from optparse import make_option
 import os
 import sys
@@ -29,6 +30,9 @@ SCHEDULER_DEFAULT_THEME = 3
 
 class Autopilot(object):
     def __init__(self, * args, **kwargs):
+
+        translation.activate('en')
+
         self.action = kwargs.get('action')
         self.schedule_ahead = int(kwargs.get('schedule_ahead', SCHEDULE_AHEAD))
         self.channel_id = int(kwargs.get('channel_id', SCHEDULER_DEFAULT_CHANNEL_ID))

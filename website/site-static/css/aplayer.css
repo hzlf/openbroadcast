@@ -13553,21 +13553,30 @@ body.popup #progress_bar > div.indicator .wrapper .inner {
   border-right: 1px solid #00bb00;
 }
 
-/* line 304, ../sass/aplayer/_style.sass */
+/* line 299, ../sass/aplayer/_style.sass */
+body.abcast .indicator.playhead {
+  opacity: 0;
+}
+/* line 302, ../sass/aplayer/_style.sass */
+body.abcast .aplayer-controls .next, body.abcast .aplayer-controls .prev {
+  display: none;
+}
+
+/* line 320, ../sass/aplayer/_style.sass */
 body.popup footer .status ul {
   padding-right: 8px;
 }
-/* line 306, ../sass/aplayer/_style.sass */
+/* line 322, ../sass/aplayer/_style.sass */
 body.popup footer .status ul li {
   padding-right: 8px;
 }
-/* line 308, ../sass/aplayer/_style.sass */
+/* line 324, ../sass/aplayer/_style.sass */
 body.popup footer .status ul li span {
   font-size: 11px;
   color: #a5a5a5;
   padding-right: 4px;
 }
-/* line 312, ../sass/aplayer/_style.sass */
+/* line 328, ../sass/aplayer/_style.sass */
 body.popup footer .status ul li small {
   font-size: 11px;
   color: #666666;

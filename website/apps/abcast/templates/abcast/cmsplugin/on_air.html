@@ -21,7 +21,7 @@
 <div class="on-air-container" id="on_air_app">
 	<div class="actions">
 		<ul class="unstyled horizontal pull-right">
-			<li class=""><a href="#" class="streamable popup" data-resource_uri="{{ object.get_api_url }}"><i class="icon-play"></i> {% trans "Tune in" %}</a></li>
+			<li class=""><a href="#" class="streamable popup" data-channel_uuid="{{ object.uuid }}" data-resource_uri="{{ object.get_api_url }}"><i class="icon-play"></i> {% trans "Tune in" %}</a></li>
 		</ul>
 		<div class="clear"></div>
 	</div>

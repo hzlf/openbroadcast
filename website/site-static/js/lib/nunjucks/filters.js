@@ -188,6 +188,16 @@ var nunjucks_register_filters = function(nj) {
 				    return out.trim();
 				});
 
+				nj.addFilter('linebreaksbr', function(str) {
+                    var breakTag = '<br>';
+                    return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2');
+				});
+
+
+
+
+
+
 
 				return nj;
 };

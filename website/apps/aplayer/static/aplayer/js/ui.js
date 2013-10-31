@@ -85,6 +85,33 @@ aplayer.ui.bind = function() {
 
 
 
+	// handles '.streamable' elements
+    // used to play webstreams
+	$('.___streamable.popup').live('click', function(e) {
+
+
+		e.preventDefault();
+
+		var resource_uri = $(this).data('resource_uri');
+
+		console.log(resource_uri);
+
+		var action = $(this).attr('href').split('#');
+
+		var uri = resource_uri;
+		var offset = 0;
+		var mode = 'replace';
+		var token = 'xx-yy-zz';
+		var source = 'abcast';
+
+		aplayer.base.play_in_popup(uri, token, offset, mode, false, source);
+
+		return false;
+
+	});
+
+
+
 	// handles '.playable' elements
     // used to play media items
 	$('body').on('click', '.playable.popup:not(".disabled")', function(e) {
@@ -131,44 +158,32 @@ aplayer.ui.bind = function() {
 	});
 
 
+	$('body').on('click', '.streamable.popup:not(".disabled")', function(e) {
 
-
-
-
-
-
-
-
-
-
-
-
-
-	
-	// handles '.streamable' elements
-    // used to play webstreams
-	$('.streamable.popup').live('click', function(e) {
-
-		
 		e.preventDefault();
-		
-		var resource_uri = $(this).data('resource_uri');
-		
-		console.log(resource_uri);
-		
-		var action = $(this).attr('href').split('#');
 
-		var uri = resource_uri;
+		var uri = $(this).data('resource_uri');
 		var offset = 0;
 		var mode = 'replace';
 		var token = 'xx-yy-zz';
 		var source = 'abcast';
-		
-		aplayer.base.play_in_popup(uri, token, offset, mode, false, source);
-		
-		return false;
-		
-	});
+
+        aplayer.base.play_in_popup(uri, token, offset, mode, false, source);
+
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
 	
 	
 	// handles cuepoints
@@ -423,11 +438,12 @@ aplayer.ui.update = function(aplayer) {
 	// TODO: check if this is a good way
 	var media = false;
 	if (aplayer.vars.source && aplayer.vars.source == 'alibrary') {
+
 		media = aplayer.vars.playlist[aplayer.states.current];
 	}
 
 	if (aplayer.vars.source && aplayer.vars.source == 'abcast') {
-		//console.log('we\'re in abcast mode..');	
+		//console.log('we\'re in abcast mode..');
 		var channel = aplayer.vars.playlist[aplayer.states.current];
 		
 		//console.log('channel:', channel);

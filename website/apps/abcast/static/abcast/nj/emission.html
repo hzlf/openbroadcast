@@ -2,7 +2,7 @@
 	class="chip fix {{ object.source }} emission theme-{{ object.color }}" 
 	data-resource-uri={{ object.resource_uri }}
 	id="{{ object.uuid }}" 
-	data-tip="<strong><i class='icon-tasks'></i> {{ object.type }}</strong><br>{{ object.start }} - {{ object.end }}<br>by: {{ object.user.username }}{{ object.content_object.description_html }}" 
+	data-tip="<div class='tooltip-emission'><strong><i class='icon-tasks'></i> {{ object.type }}</strong><br>{{ object.start }} - {{ object.end }}<br>scheduled by: {{ object.user.username }}<div class='description markdown-remove'>{{ object.content_object.description_html}}</div></div>"
 	style="top:{{ top }}px;left:-1px;width:100%;
 ">
 	

@@ -25,6 +25,8 @@
 
 	
 	{% addtoblock "css" %}<link type="text/css" href="{{ STATIC_URL }}selectable/css/dj.selectable.css" rel="stylesheet" />{% endaddtoblock %}
+	{% addtoblock "css" %}<link type="text/css" href="{{ STATIC_URL }}css/lib/pageguide.css" rel="stylesheet" />{% endaddtoblock %}
+
 
   
   	<!-- js-pre, rendered BEFORE the default "js" block -->
@@ -91,6 +93,8 @@
 
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.nouislider.js"></script>{% endaddtoblock %}
 
+	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/pageguide.js"></script>{% endaddtoblock %}
+
 
 
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.history.js"></script>{% endaddtoblock %}
@@ -134,6 +138,7 @@
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/util/util.base.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/util/util.notify.js"></script>{% endaddtoblock %}
 	{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/util/util.dialog.js"></script>{% endaddtoblock %}
+
 
 
 

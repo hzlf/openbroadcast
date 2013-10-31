@@ -765,6 +765,25 @@ form.form-playlist div.dayparts div.controls ul {
     .listview.container.medias.inner.s .list_body_row .list_body_item {
       padding: 4px 2px 0px 2px;
       vertical-align: middle; }
+  .listview.container .item.timestamp .c1 {
+    width: 90px !important; }
+    .listview.container .item.timestamp .c1 .timestamp {
+      width: 36px;
+      float: left;
+      font-weight: bold;
+      padding: 2px 0 0 4px; }
+  .listview.container .item.hidden-future {
+    display: table-row;
+    background: #efefef; }
+    .listview.container .item.hidden-future .inner {
+      display: table-cell;
+      border-bottom: 1px solid #dddddd;
+      height: 36px; }
+      .listview.container .item.hidden-future .inner.icon i {
+        padding-left: 15px;
+        font-size: 200%;
+        line-height: 33px;
+        color: #aaaaaa; }
   .listview.container.transmissions.s .c2 {
     width: auto; }
   .listview.container.transmissions.s .c3 {
@@ -1247,6 +1266,8 @@ section.comments.disqus {
 .item_detail .item_inner section.top, .item_detail .item_inner section.flop, .item_detail .item_inner section.contribution {
   margin-top: 15px; }
 .item_detail .item_inner section.description {
+  margin-top: 15px; }
+.item_detail .item_inner section.tracklist {
   margin-top: 15px; }
 .item_detail .item_inner section.profile {
   margin-top: 15px; }

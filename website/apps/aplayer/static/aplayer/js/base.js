@@ -156,6 +156,20 @@ aplayer.base.load = function (play) {
     console.log(play);
     console.log('******************************')
 
+    // set mode
+    if(play.source == 'abcast') {
+        $('body').removeClass('alibrary');
+        $('body').addClass('abcast');
+    } else {
+        $('body').addClass('alibrary');
+        $('body').removeClass('abcast');
+    }
+
+
+
+
+
+
     aplayer.vars.uri = play.uri;
 
     if (play.mode === undefined) {
@@ -654,6 +668,17 @@ aplayer.base.update_channel_data = function (channel) {
                 aplayer.vars.playlist[aplayer.states.current].media = media_data;
 
 
+                console.log('got media_data:', media_data)
+
+                var container = $('.aplayer-information');
+
+                var d = {
+                    object : media_data
+                }
+                var html = nj.render('aplayer/nj/popup_information_abcast.html', d);
+                container.html(html);
+
+
                 console.log('got data:', data)
 
                 if (data.start_next) {
@@ -751,21 +776,40 @@ aplayer.base.controls = function (args) {
 
         }
         if (aplayer.vars.source && aplayer.vars.source == 'abcast') {
-            var channel = aplayer.vars.result;
-
-            console.log('channel:', channel);
-            aplayer.vars.playlist = [];
-            aplayer.vars.playlist[0] = channel;
 
 
-            aplayer.base.subscribe_channel_data(channel);
+            console.log(aplayer.vars)
+            console.log(aplayer.vars.result)
 
-            var stream = channel.stream;
+            // get channel data - non-async
+            var stream;
+            $.ajax({
+                url: aplayer.vars.uri,
+                type: "GET",
+                async: false,
+                success: function (data) {
+                    console.log(data);
+
+                    var channel = data;
+
+                    console.log('channel:', channel);
+                    aplayer.vars.playlist = [];
+                    aplayer.vars.playlist[0] = channel;
+
+
+                    aplayer.base.subscribe_channel_data(channel);
+
+                    stream = channel.stream;
+
+                }
+            });
+
+
         }
 
 
         if (aplayer.vars.debug) {
-            console.log(stream);
+            console.log("STREAM:", stream);
         }
 
         console.log('play via: ' + aplayer.vars.stream_mode);

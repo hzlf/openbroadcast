@@ -32,7 +32,6 @@ $theme-4-bright: #f2dacc
 
 
 // styles popup
-
 .popup-emission
   width: 1000px !important
   
@@ -44,10 +43,38 @@ $theme-4-bright: #f2dacc
         small:
           text-transform: none !important
           font-size: 60%
+      ul > li
+        i
+          margin-right: 4px
+
+        a
+          color: white
+        small
+          font-size: 92%
+          color: #a5a5a5
           
     section.description
       p
         color: #efefef
+
+      .description
+        border-top: 1px solid#5a5a5a
+        border-bottom: 1px solid#5a5a5a
+        max-height: 260px
+        overflow: hidden
+
+
+      .markdown-remove
+        *
+          color: #efefef
+          font-size: 12px
+          line-height: 14px
+          margin: 2px 0 !important
+          padding: 2px 0
+
+      .object-links
+        padding-top: 12px
+
       a
         background: #6633cc
         color: white
@@ -86,7 +113,19 @@ $theme-4-bright: #f2dacc
 
           // padding: 0 10px 0 0
 
+.tooltip-emission
 
+  .description
+    border-top: 1px solid#5a5a5a
+    max-height: 60px
+
+  .markdown-remove
+    *
+      color: #efefef
+      font-size: 12px
+      line-height: 14px
+      margin: 2px 0 !important
+      padding: 2px 0
 
 
 // sidebar

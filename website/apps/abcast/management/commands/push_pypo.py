@@ -13,6 +13,7 @@ from abcast.util import pypo
 class Pusher(object):
     def __init__(self, * args, **kwargs):
         self.action = kwargs.get('action')
+        self.message = kwargs.get('message')
         self.verbosity = int(kwargs.get('verbosity', 1))
         
     def run(self):
@@ -40,6 +41,14 @@ class Pusher(object):
             }
             pypo_send(message)
 
+        if self.action == 'custom_message':
+
+            message = {
+                'event_type': '%s' % self.message,
+                'schedule': {'media': []},
+            }
+            pypo_send(message)
+
 
 
 class Command(NoArgsCommand):
@@ -48,6 +57,11 @@ class Command(NoArgsCommand):
         make_option('--action',
             action='store',
             dest='action',
+            default=False,
+            help='Fill up the scheduler!!'),
+        make_option('--message',
+            action='store',
+            dest='message',
             default=False,
             help='Fill up the scheduler!!'),
         )

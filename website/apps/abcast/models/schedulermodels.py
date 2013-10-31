@@ -203,6 +203,22 @@ class Emission(BaseModel, CachingMixin):
             playing = True
         return playing
 
+
+    def get_timestamped_media(self):
+
+        items = self.content_object.get_items()
+        offset = 0
+        for item in items:
+            item.timestamp = self.time_start + datetime.timedelta(milliseconds=offset)
+            if item.timestamp > datetime.datetime.now():
+                item.is_future = True
+            offset += item.playout_duration
+
+        return items
+
+
+
+
     def save(self, *args, **kwargs):
         
         print 'save'

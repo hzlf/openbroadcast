@@ -19,7 +19,7 @@ def generate_settings(channel):
     """
     global settings
     """
-    settings['off_air_meta'] = u'%s - offline' % channel.name
+    settings['off_air_meta'] = u'%s - OFF-AIR' % channel.name
     settings['output_sound_device'] = False
     settings['output_sound_device_type'] = 'ALSA'
     settings['icecast_vorbis_metadata'] = True

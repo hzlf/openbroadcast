@@ -551,6 +551,13 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
             item.fade_in = pi.fade_in
             item.fade_out = pi.fade_out
             item.fade_cross = pi.fade_cross
+
+            # get the actual playout duration
+            try:
+                item.playout_duration = item.content_object.duration - item.cue_in - item.cue_out - item.fade_cross
+            except:
+                item.playout_duration = 0
+
             items.append(item)
         return items
 
