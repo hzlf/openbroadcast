@@ -1,7 +1,12 @@
 /*********************************************************************************
  * APLAYER BASE
- * Copyright 2012, Jonas Ohrstrom  - ohrstrom@gmail.com
+ * Copyright 2009, Jonas Ohrstrom  - ohrstrom@gmail.com
  * See LICENSE.txt
+ *
+ * WARNING!!!
+ * this code is extremly bad. it is taken from an old (also bad) project and
+ * extended again and again.
+ * refactoring is neccessary - but at the moment no time and no budget
  *********************************************************************************/
 
 
@@ -25,7 +30,7 @@ aplayer.states_last = aplayer.states_last || false;
 aplayer.vars.states = { current: 0, next: false, prev: false};
 
 // polling interval
-aplayer.vars.len_interval = 500;
+aplayer.vars.len_interval = 2000;
 
 aplayer.vars.debug = true;
 aplayer.vars.version = '0.2.17b';
@@ -146,29 +151,23 @@ aplayer.base.ready = function () {
  *********************************************************************************/
 aplayer.base.load = function (play) {
 
-    console.log('aplayer.base.load - callback from remote window');
-
-    if (aplayer.vars.debug) {
-        // console.log(play);
-    }
-
-    console.log('******************************')
-    console.log(play);
-    console.log('******************************')
+    console.log('aplayer.base.load - callback from remote window. object to play:', play);
 
     // set mode
     if(play.source == 'abcast') {
         $('body').removeClass('alibrary');
         $('body').addClass('abcast');
+
+        $('.nav li[data-source="alibrary"]').removeClass('active');
+        $('.nav li[data-source="abcast"]').addClass('active');
+
     } else {
         $('body').addClass('alibrary');
         $('body').removeClass('abcast');
+
+        $('.nav li[data-source="alibrary"]').addClass('active');
+        $('.nav li[data-source="abcast"]').removeClass('active');
     }
-
-
-
-
-
 
     aplayer.vars.uri = play.uri;
 
@@ -190,7 +189,7 @@ aplayer.base.load = function (play) {
 
     aplayer.vars.source = play.source;
 
-    aplayer.base.debug('uri - ' + play.uri);
+    console.log('uri - ' + play.uri);
 
     aplayer.ui.hide_overlay();
 
@@ -215,8 +214,6 @@ aplayer.base.load_playlist = function (uri) {
             uri += '?all=true';
         }
 
-        aplayer.base.debug('aplayer.base.load_playlist() - ' + uri);
-
         $.ajax({
             //url : uri + "?format=json", // FUCK U IE! TODO: do we support ie???
             url: uri,
@@ -226,7 +223,7 @@ aplayer.base.load_playlist = function (uri) {
             dataType: "json",
             success: function (result, textStatus, jqXHR) {
 
-                console.log('RESULT', result);
+                console.log('loaded playlist:', result);
 
                 // switch to handle releases & media api listings
                 if (uri.indexOf("release") != -1) {
@@ -257,6 +254,8 @@ aplayer.base.load_playlist = function (uri) {
                     aplayer.base.set_playlist(media);
                     aplayer.base.complete_playlist()
 
+                } else if (uri.indexOf("channel") != -1) {
+                    aplayer.base.set_playlist([result]);
                 } else {
                     aplayer.base.set_playlist(result.objects);
                 }
@@ -304,8 +303,6 @@ aplayer.base.complete_playlist = function () {
  *********************************************************************************/
 aplayer.base.set_playlist = function (media) {
 
-    aplayer.base.debug('start - aplayer.base.set_playlist()');
-
     console.log('setting playlist to:', media);
 
 
@@ -332,10 +329,11 @@ aplayer.base.set_playlist = function (media) {
 
     // force start if replace mode
     if (aplayer.vars.mode == 'replace') {
-
-        aplayer.base.debug('if(aplayer.vars.mode == replace)');
-
-        aplayer.base.controls({action: 'play', index: aplayer.vars.offset, force_seek: aplayer.vars.force_seek});
+        aplayer.base.controls({
+            action: 'play',
+            index: aplayer.vars.offset,
+            force_seek: aplayer.vars.force_seek
+        });
     }
 
     // map the tracks to an uuid-indexed array
@@ -417,9 +415,6 @@ aplayer.base.grab_player = function (focus) {
     // check if the player is already attached to the window
     if (typeof (local.aplayer) != 'undefined') {
 
-        if (aplayer.vars.debug) {
-            console.log('found player. re-attach and call: this.aplayer.base.ready();');
-        }
 
         this.aplayer = local.aplayer;
         this.aplayer.base.ready();
@@ -650,59 +645,122 @@ aplayer.base.on_complete = function () {
 
 
 aplayer.base.subscribe_channel_data = function (channel) {
+
     console.log('aplayer.base.subscribe_channel_data: ', channel)
-    aplayer.base.update_channel_data(channel)
+
+    aplayer.vars.playlist[aplayer.states.current].media = {
+        name: 'loading'
+    }
+
+
+    // call update
+    aplayer.base.update_channel_data(channel);
+    // and subscribe for changes
+    pushy.subscribe(channel.resource_uri + 'on-air/', function(){
+        aplayer.base.update_channel_data(channel);
+    });
+
 
 }
 aplayer.base.unsubscribe_channel_data = function () {
     console.log('aplayer.base.unsubscribe_channel_data: ')
 
+
 }
+
+
 aplayer.base.update_channel_data = function (channel) {
+
     console.log('aplayer.base.update_channel_data: ', channel)
 
     $.get(channel.resource_uri + 'on-air/', function (data) {
+
+        console.log('on air:', data);
+
+        var media;
+        var emission;
+
+
+
+
         if (data.playing && data.playing.item) {
-            $.get(data.playing.item, function (media_data, start_next) {
-
-                aplayer.vars.playlist[aplayer.states.current].media = media_data;
 
 
-                console.log('got media_data:', media_data)
-
-                var container = $('.aplayer-information');
-
-                var d = {
-                    object : media_data
-                }
-                var html = nj.render('aplayer/nj/popup_information_abcast.html', d);
-                container.html(html);
+            $.get(data.playing.item, function(media){
+                console.log('media on air:', media)
+                aplayer.vars.playlist[aplayer.states.current].media = media;
 
 
-                console.log('got data:', data)
 
+                aplayer.ui.screen_display(aplayer.states.current);
+
+                /*
                 if (data.start_next) {
-                    console.log('next update:' + ((Math.floor(data.start_next) + 1) * 1000));
-                    setTimeout(function () {
-                        aplayer.base.update_channel_data(channel);
-                    }, (Math.floor(data.start_next) + 1) * 1000)
+                    // alert(data.start_next)
+                    var cnt_holder = $('.countdown > span');
+                    cnt_holder.countdown({
+                        until: data.start_next,
+                        format: 'HMS',
+                        compact: true,
+                        significant: 4
+                    });
+
                 }
+                */
 
-            });
+            })
+
+            // make sure api has data updated
+            setTimeout(function(){
+                $.get(data.playing.emission, function(data){
+                    console.log('emission on air:', data)
+                    aplayer.vars.playlist[aplayer.states.current].emission = emission;
+                    aplayer.ui.screen_display(aplayer.states.current);
+
+                    aplayer.ui.update_emission(data);
+
+                })
+            }, 2000);
+
+        } else {
+            var media = {
+                'name': 'No information available'
+            }
+            var emission = {
+                'name': 'No information available'
+            }
+            aplayer.vars.playlist[aplayer.states.current].media = media;
+            aplayer.vars.playlist[aplayer.states.current].emission = emission;
+            aplayer.ui.screen_display(aplayer.states.current);
+
+            console.log('nothing on air');
         }
-    })
 
-    // aplayer.vars.playlist[aplayer.states.current].media
+
+
+    })
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 aplayer.base.controls = function (args) {
 
-    // console.log(args);
-
-    // alert(args.force_seek);
-
-    aplayer.base.debug('aplayer.base.controls');
+    console.log('aplayer.base.controls:', args);
 
     var action = args.action || false;
     var index = args.index || false;
@@ -717,9 +775,9 @@ aplayer.base.controls = function (args) {
     var position = args.position || false;
 
 
-    aplayer.base.debug('action: ' + action);
-    aplayer.base.debug('index: ' + index);
-    aplayer.base.debug('uuid: ' + uuid);
+    //aplayer.base.debug('action: ' + action);
+    //aplayer.base.debug('index: ' + index);
+    //aplayer.base.debug('uuid: ' + uuid);
 
     var fast_polling = false;
     var update_ui = false;
@@ -755,12 +813,15 @@ aplayer.base.controls = function (args) {
 
     if (action == 'play' && index !== false) {
 
-        // cancel pending subscriptions
+
+        var stream;
+
+        // cancel pending subscriptions (used by alibrary stream playing)
         aplayer.base.unsubscribe_channel_data();
 
-        // switch to handle live streams
+        // in case library content is played
         if (aplayer.vars.source && aplayer.vars.source == 'alibrary') {
-            var stream = aplayer.vars.playlist[index].stream;
+            stream = aplayer.vars.playlist[index].stream;
             console.log('stream:', stream);
 
             // TODO: Hakish here - try to complete meta data
@@ -769,52 +830,26 @@ aplayer.base.controls = function (args) {
             console.log('ELEMENT:', aplayer.vars.playlist[index])
 
 
-            setTimeout(function () {
-                aplayer.ui.screen_display(index);
-            }, 2000)
-
-
         }
+        // in case abcast stream is played
         if (aplayer.vars.source && aplayer.vars.source == 'abcast') {
 
+            var channel = aplayer.vars.playlist[index]
+            stream = channel.stream;
+            console.log('channel:', channel);
+            console.log('stream:', stream);
 
-            console.log(aplayer.vars)
-            console.log(aplayer.vars.result)
-
-            // get channel data - non-async
-            var stream;
-            $.ajax({
-                url: aplayer.vars.uri,
-                type: "GET",
-                async: false,
-                success: function (data) {
-                    console.log(data);
-
-                    var channel = data;
-
-                    console.log('channel:', channel);
-                    aplayer.vars.playlist = [];
-                    aplayer.vars.playlist[0] = channel;
-
-
-                    aplayer.base.subscribe_channel_data(channel);
-
-                    stream = channel.stream;
-
-                }
-            });
-
+            aplayer.base.subscribe_channel_data(channel);
 
         }
 
-
-        if (aplayer.vars.debug) {
-            console.log("STREAM:", stream);
-        }
-
-        console.log('play via: ' + aplayer.vars.stream_mode);
+        // TODO: ?
+        setTimeout(function () {
+            aplayer.ui.screen_display(index);
+        }, 2000)
 
 
+        // mode switch and player initialisation
         if (aplayer.vars.stream_mode == 'rtmp') {
 
             // stream.rtmp_host = 'rtmp://localhost:1935/';
@@ -845,15 +880,7 @@ aplayer.base.controls = function (args) {
             aplayer.base.debug('uri: ' + stream.uri);
         }
 
-        if (aplayer.vars.debug) {
-            console.log(pl);
-        }
-
-
         jwprun = jwp.stop().load(pl).play();
-
-        console.log('jwp run:', jwprun);
-
 
         if (args.force_seek) {
             jwp.seek(args.force_seek);

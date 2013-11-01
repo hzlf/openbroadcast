@@ -1,17 +1,34 @@
 {% load sekizai_tags i18n %}
 
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.li-scroller.1.0.js"></script>{% endaddtoblock %}
+
+<!-- current version -->
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}aplayer/js/base.js"></script>{% endaddtoblock %}
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}aplayer/js/ui.js"></script>{% endaddtoblock %}
 
+
+<!-- refactored version -->
+{% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}aplayer/js/base_0.2.js"></script>{% endaddtoblock %}
+
+
+<!-- inline version (apears in top navigation)  -->
 {% addtoblock "js-post" %}<script type="text/javascript" src="{{ STATIC_URL }}aplayer/js/inline.js"></script>{% endaddtoblock %}
+
+
 
 {% addtoblock "js-post" %}
     <script>
         var aplayer = aplayer || {};
+        var player_app = player_app || {};
         $(function () {
+
             aplayer.inline = new InlinePlayer();
             aplayer.inline.init();
+
+            // new version
+            // player_app = new AplayerApp('main');
+            // player_app.init();
+
         });
     </script>
 
@@ -58,8 +75,17 @@
 
         <!-- Icon/Actions-->
         <div class="right shortcuts">
+
+<a href="#" class="streamable popup" data-resource_uri="/api/v1/abcast/channel/1/"><img
+                    src="/static/img/prototype/webstream.png" alt="Webstream"/></a>
+
+
+            <!--
             <a href="/api/cast/listen.json#0#replace" title="Liten to the livestream" class="playable popup"><img
                     src="/static/img/prototype/webstream.png" alt="Webstream"/></a>
+            -->
+
+
         </div>
         <div class="clear"></div>
     </div>

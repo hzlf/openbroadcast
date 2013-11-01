@@ -621,15 +621,16 @@ var EmissionApp = function() {
 				},
 				// effect: false
 			},
-			hide : false, // We'll hide it maunally so disable hide events
-			style : 'qtip-dark qtip-dialogue qtip-shadow qtip-rounded popup-emission', // Add a few styles
+			hide : false,
+            style: {
+              classes: 'qtip-dark qtip-dialogue qtip-shadow qtip-rounded popup-emission',
+              // width: '1000px'
+            },
+			// style : 'qtip-dark qtip-dialogue qtip-shadow qtip-rounded popup-emission',
 			events : {
-				// Hide the tooltip when any buttons in the dialogue are clicked
 				render : function(event, api) {
 					$('a.btn', api.elements.content).click(api.hide);
 				}
-				// Destroy the tooltip once it's hidden as we no longer need it!
-				// hide: function(event, api) { api.destroy(); }
 			}
 		});
 	}

@@ -1,7 +1,12 @@
 /*********************************************************************************
- * APLAYER USER-INTERFACE
- * Copyright 2012, Jonas Ohrstrom  - ohrstrom@gmail.com
+ * APLAYER UI
+ * Copyright 2009, Jonas Ohrstrom  - ohrstrom@gmail.com
  * See LICENSE.txt
+ *
+ * WARNING!!!
+ * this code is extremly bad. it is taken from an old (also bad) project and
+ * extended again and again.
+ * refactoring is neccessary - but at the moment no time and no budget
  *********************************************************************************/
 
 
@@ -445,20 +450,16 @@ aplayer.ui.update = function(aplayer) {
 	if (aplayer.vars.source && aplayer.vars.source == 'abcast') {
 		//console.log('we\'re in abcast mode..');
 		var channel = aplayer.vars.playlist[aplayer.states.current];
-		
-		//console.log('channel:', channel);
-		
+
 		if (!channel.media) {
-			console.log('NEED TO GET MEDIA!!');
+			console.log('no channel media available.');
 		} else {
 			media = channel.media;
 		}
 	}
 	
 	if (media) {
-		
 
-		
 		// var media = aplayer.vars.playlist[aplayer.states.current];
 		
 		//console.log('media:', media);
@@ -591,19 +592,47 @@ aplayer.ui.update = function(aplayer) {
  * (renders the tpl_screen.html template)
  *********************************************************************************/
 aplayer.ui.screen_display = function(index) {
-	
-	var item = aplayer.vars.playlist[index];
-	
-	
-	
+
+    // hack - get media in case of abcast (media is mapped to channel data)
+    if (aplayer.vars.playlist[index].media) {
+        var item = aplayer.vars.playlist[index].media;
+        item.source = 'abcast';
+    } else {
+        var item = aplayer.vars.playlist[index];
+        item.source = 'alibrary';
+    }
+
 	try {
 		item.images = []
 		item.images.push(item.release.main_image);
 	} catch(err) {};
-	
+
+    // refactored to nj
+    /*
 	var html = ich.tpl_screen({object: item});
 	$( "#aplayer_screen" ).html(html);
+    */
+
+    // moving to nj
+    var html = nj.render('aplayer/nj/popup_screen.html', {
+        object: item
+    });
+    $( "#aplayer_screen" ).html(html);
+
+
 };
+
+
+aplayer.ui.update_emission = function(data) {
+
+
+    console.log('update_emission - data:', data)
+
+    var html = nj.render('aplayer/nj/popup_emission.html', {
+        object: data
+    });
+    $( "#aplayer_emission" ).html(html);
+}
 
 
 

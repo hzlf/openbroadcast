@@ -3,6 +3,7 @@ from django.db.models import Count
 from django.conf.urls.defaults import *
 from django.http import HttpResponse
 from django.contrib.sites.models import Site
+from django.core.cache import cache
 
 import datetime
 
@@ -133,7 +134,7 @@ class ChannelResource(ModelResource):
         self.throttle_check(request)
 
         c = Channel.objects.get(**self.remove_api_resource_names(kwargs))
-        
+
         bundle = self.build_bundle(obj=c, request=request)
         bundle = self.full_dehydrate(bundle)
         
@@ -147,7 +148,13 @@ class ChannelResource(ModelResource):
         print
         print 'get_now_playing:'
         print es
-        
+
+
+        # check if in cache
+        cached_item = cache.get('abcast_on_air_%s' % c.pk)
+        print 'ITEM FROM CACHE:'
+        print cached_item
+
         now_playing = []
         start_next = False
         items = []
@@ -172,9 +179,16 @@ class ChannelResource(ModelResource):
                 if item.time_start < now and item.time_end > now:
                     item.is_playing = True
                     # map item for quick access
+
+                    # ugly
+                    if cached_item:
+                        item_url = cached_item.get_api_url()
+                    else:
+                        item_url = item.content_object.get_api_url()
+
                     now_playing = {
                                    'emission': e.get_api_url(),
-                                   'item': item.content_object.get_api_url(),
+                                   'item': item_url,
                                    'time_start': item.time_start,
                                    'time_end': item.time_end,
                                    }

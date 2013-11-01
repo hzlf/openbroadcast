@@ -7,6 +7,7 @@ from django import http
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect
 
 from django.core.exceptions import PermissionDenied
+from django.views.decorators.cache import never_cache
 
 from django.utils import simplejson as json
 from django.template import RequestContext
@@ -378,7 +379,7 @@ class MediaEditView(UpdateView):
     
     
 
-
+@never_cache
 def media_download(request, slug, format, version):
     
     media = get_object_or_404(Media, slug=slug)
@@ -407,7 +408,7 @@ def media_download(request, slug, format, version):
     
     return sendfile(request, cache_file, attachment=True, attachment_filename=filename)
 
-
+@never_cache
 def stream_html5(request, uuid):
     
     media = get_object_or_404(Media, uuid=uuid)
@@ -442,7 +443,7 @@ def __encode(path, bitrate, format):
         # do something with chuck of data
         # e.g. sendDataToClient(data)
         yield data
-
+@never_cache
 def encode(request, uuid, bitrate=128, format='mp3'):
 
     media = get_object_or_404(Media, uuid=uuid)
@@ -473,7 +474,7 @@ def encode(request, uuid, bitrate=128, format='mp3'):
 
     #return sendfile(request, media.get_cache_file('mp3', 'base'))
 
-
+@never_cache
 def waveform(request, uuid):
     
     media = get_object_or_404(Media, uuid=uuid)

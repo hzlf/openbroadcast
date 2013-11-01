@@ -123,7 +123,8 @@ def masterpath_by_uuid(instance, filename):
 
 
 class Media(CachingMixin, MigrationMixin):
-    
+#class Media(MigrationMixin):
+
     # core fields
     uuid = RUUIDField(primary_key=False)
     name = models.CharField(max_length=200, db_index=True)

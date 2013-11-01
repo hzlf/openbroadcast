@@ -1,6 +1,6 @@
 {% extends "aplayer/base.html" %}
 
-{% load sekizai_tags compress include_raw i18n straight_include %}
+{% load sekizai_tags compress include_raw i18n straight_include comments %}
 
 {% block extras %}
 
@@ -17,17 +17,17 @@
 	{% include_raw "aplayer/tpl_media.html" %}
 </script>
 <div id="wrap">
-<div class="navbar navbar-inverse navbar-fixed-top">
+<div class="navbar navbar-inverse navbar-fixed-top" style="height: 34px">
 	<div class="navbar-inner">
 
 		<a class="brand" href="#">&nbsp;<img src="{{ STATIC_URL }}img/icons/favicon.gif" /></a>
 
 		<div class="nav-collapse collapse">
 			<ul class="nav">
-				<li class="active">
+				<li class="" data-source="alibrary">
 					<a href="#">{% trans "Media Library" %}</a>
 				</li>
-				<li class="">
+				<li class="" data-source="abcast">
 					<a href="#">{% trans "Livestream" %}</a>
 				</li>
 			</ul>
@@ -47,12 +47,52 @@
 
         <!-- loading message -->
         <div style="text-align: center;">
-            <h2>{% trans "Loading Player" %}</h2>
+            <h2>{% trans "Loading Player" %} (Library)</h2>
             <p style="padding-right: 0;"><i class="icon icon-large icon-spinner icon-spin"></i></p>
             <p style="padding-right: 0;">{% trans "Loading the player for the first time can take some seconds." %}</p>
         </div>
 
 	</section>
+
+	<section class="screen emission" id="aplayer_emission">
+		<!-- CONTENT INSERTED FROM TPL_MEDIA -->
+
+        <!-- loading message -->
+        <div style="text-align: center;">
+            <h2>{% trans "Loading Player" %} (Stream)</h2>
+            <p style="padding-right: 0;"><i class="icon icon-large icon-spinner icon-spin"></i></p>
+            <p style="padding-right: 0;">{% trans "Loading the player for the first time can take some seconds." %}</p>
+        </div>
+
+	</section>
+
+
+    <section class="screen comments on-site" id="aplayer_comments">
+
+        <!---->
+        <div class="header">
+            <h3>{% trans "Comments" %}</h3>
+        </div>
+
+        <div class="form">
+            {% if user.is_authenticated %}
+                {% render_comment_form for object %}
+            {% else %}
+                <p>{% trans "Please login to join the conversation" %}</p>
+            {% endif %}
+        </div>
+
+        {% with router=object.get_api_url %}
+            {% include "element/chat/_message_list.html" %}
+        {% endwith %}
+
+        {% render_comment_list for object %}
+
+
+    </section>
+
+
+
 
 </div>
 

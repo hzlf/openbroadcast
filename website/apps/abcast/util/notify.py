@@ -1,7 +1,7 @@
 import datetime
-
+from django.core.cache import cache
 from lib.icecast.api import IcecastAPI
-
+from pushy.util import pushy_custom
 # logging
 import logging
 logger = logging.getLogger(__name__)
@@ -12,7 +12,18 @@ def start_play(item, channel=None, user=None):
     log.debug('item: %s' % item)
     log.debug('channel: %s' % channel)
     log.debug('user: %s' % user)
-    
+
+    """
+    Set current values to cache
+    """
+    cache.set('abcast_on_air_%s' % channel.pk, item, 30)
+
+
+    """
+    Broadcast to pushy clients
+    """
+    pushy_custom('%son-air/' % channel.get_api_url())
+
     """
     Update stream metadata
     """

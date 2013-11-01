@@ -83,7 +83,11 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.cache.UpdateCacheMiddleware',
+
+    'johnny.middleware.LocalStoreClearMiddleware',
+    'johnny.middleware.QueryCacheMiddleware',
+
+    #'django.middleware.cache.UpdateCacheMiddleware',
 
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -124,10 +128,22 @@ MIDDLEWARE_CLASSES = (
     'arating.middleware.AratingIpMiddleware',
     #'lib.middleware.social_auth_extra.SocialAuthExceptionExtraMiddleware',
 
-    'django.middleware.cache.FetchFromCacheMiddleware',
+    #'django.middleware.cache.FetchFromCacheMiddleware',
 
 )
 
+
+# some johnny settings
+CACHES = {
+    'default' : dict(
+        BACKEND = 'johnny.backends.memcached.MemcachedCache',
+        LOCATION = ['127.0.0.1:11211'],
+        JOHNNY_CACHE = True,
+    )
+}
+JOHNNY_MIDDLEWARE_KEY_PREFIX='jc_obp'
+
+"""
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
@@ -135,6 +151,7 @@ CACHES = {
     }
 }
 CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
+"""
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
