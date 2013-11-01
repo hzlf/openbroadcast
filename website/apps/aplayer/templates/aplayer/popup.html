@@ -8,100 +8,111 @@
 {% endblock %}
 
 {% block inner %}
-<!-- include unparsed template for js rendering -->
-<!-- TODO: maybe refactor to nunjucks -->
-<script id="tpl_screen" type="text/html">
+    <!-- include unparsed template for js rendering -->
+    <!-- TODO: maybe refactor to nunjucks -->
+    <script id="tpl_screen" type="text/html">
 	{% include_raw "aplayer/tpl_screen.html" %}
 </script>
-<script id="tpl_media" type="text/html">
+    <script id="tpl_media" type="text/html">
 	{% include_raw "aplayer/tpl_media.html" %}
 </script>
-<div id="wrap">
-<div class="navbar navbar-inverse navbar-fixed-top" style="height: 34px">
-	<div class="navbar-inner">
+    <div id="wrap">
+        <div class="navbar navbar-inverse navbar-fixed-top" style="height: 34px">
+            <div class="navbar-inner">
 
-		<a class="brand" href="#">&nbsp;<img src="{{ STATIC_URL }}img/icons/favicon.gif" /></a>
+                <a class="brand" href="#">&nbsp;<img src="{{ STATIC_URL }}img/icons/favicon.gif"/></a>
 
-		<div class="nav-collapse collapse">
-			<ul class="nav">
-				<li class="" data-source="alibrary">
-					<a href="#">{% trans "Media Library" %}</a>
-				</li>
-				<li class="" data-source="abcast">
-					<a href="#">{% trans "Livestream" %}</a>
-				</li>
-			</ul>
-		</div>
+                <div class="nav-collapse collapse">
+                    <ul class="nav">
+                        <li class="" data-source="alibrary">
+                            <a href="#">{% trans "Media Library" %}</a>
+                        </li>
+                        <li class="" data-source="abcast">
+                            <a href="#">{% trans "Livestream" %}</a>
+                        </li>
 
-	</div>
-</div>
+                    </ul>
+                    <ul class="nav pull-right countdown">
+                        <li class="">
+                            <span class="pull-right time"></span>
+                            <span class="pull-right">Next: </span>
+                        </li>
+                    </ul>
 
-<div class="container">
 
-	<section class="screen controls" id="aplayer_screen">
-		<!-- CONTENT INSERTED FROM TPL_SCREEN -->
-	</section>
+                </div>
 
-	<section class="screen playlist" id="aplayer_playlist">
-		<!-- CONTENT INSERTED FROM TPL_MEDIA -->
-
-        <!-- loading message -->
-        <div style="text-align: center;">
-            <h2>{% trans "Loading Player" %} (Library)</h2>
-            <p style="padding-right: 0;"><i class="icon icon-large icon-spinner icon-spin"></i></p>
-            <p style="padding-right: 0;">{% trans "Loading the player for the first time can take some seconds." %}</p>
+            </div>
         </div>
 
-	</section>
+        <div class="container">
 
-	<section class="screen emission" id="aplayer_emission">
-		<!-- CONTENT INSERTED FROM TPL_MEDIA -->
+            <section class="screen controls" id="aplayer_screen">
+                <!-- CONTENT INSERTED FROM TPL_SCREEN -->
+            </section>
 
-        <!-- loading message -->
-        <div style="text-align: center;">
-            <h2>{% trans "Loading Player" %} (Stream)</h2>
-            <p style="padding-right: 0;"><i class="icon icon-large icon-spinner icon-spin"></i></p>
-            <p style="padding-right: 0;">{% trans "Loading the player for the first time can take some seconds." %}</p>
+            <section class="screen playlist" id="aplayer_playlist">
+                <!-- CONTENT INSERTED FROM TPL_MEDIA -->
+
+                <!-- loading message -->
+                <div style="text-align: center;">
+                    <h2>{% trans "Loading Player" %} (Library)</h2>
+
+                    <p style="padding-right: 0;"><i class="icon icon-large icon-spinner icon-spin"></i></p>
+
+                    <p style="padding-right: 0;">{% trans "Loading the player for the first time can take some seconds." %}</p>
+                </div>
+
+            </section>
+
+            <section class="screen emission" id="aplayer_emission">
+                <!-- CONTENT INSERTED FROM TPL_MEDIA -->
+
+                <!-- loading message -->
+                <div style="text-align: center;">
+                    <h2>{% trans "Loading Player" %} (Stream)</h2>
+
+                    <p style="padding-right: 0;"><i class="icon icon-large icon-spinner icon-spin"></i></p>
+
+                    <p style="padding-right: 0;">{% trans "Loading the player for the first time can take some seconds." %}</p>
+                </div>
+
+            </section>
+
+
+            <section class="screen comments on-site" id="aplayer_comments">
+
+                <!---->
+                <div class="header">
+                    <h3>{% trans "Comments" %}</h3>
+                </div>
+
+                <div class="form">
+                    {% if user.is_authenticated %}
+                        {% render_comment_form for object %}
+                    {% else %}
+                        <p>{% trans "Please login to join the conversation" %}</p>
+                    {% endif %}
+                </div>
+
+                {% with router=object.get_api_url %}
+                    {% include "element/chat/_message_list.html" %}
+                {% endwith %}
+
+                {% render_comment_list for object %}
+
+
+            </section>
+
+
         </div>
 
-	</section>
+    </div>
 
+    <footer class="footer">
+        <div class="__container">
 
-    <section class="screen comments on-site" id="aplayer_comments">
-
-        <!---->
-        <div class="header">
-            <h3>{% trans "Comments" %}</h3>
-        </div>
-
-        <div class="form">
-            {% if user.is_authenticated %}
-                {% render_comment_form for object %}
-            {% else %}
-                <p>{% trans "Please login to join the conversation" %}</p>
-            {% endif %}
-        </div>
-
-        {% with router=object.get_api_url %}
-            {% include "element/chat/_message_list.html" %}
-        {% endwith %}
-
-        {% render_comment_list for object %}
-
-
-    </section>
-
-
-
-
-</div>
-
-</div>
-
-<footer class="footer">
-	<div class="__container">
-
-        <!--
+            <!--
 		<form class="form-horizontal">
 		  <div class="control-group" id="playlists_inline_selector">
 		    <label class="control-label" for="inputEmail">{% trans "Active Basket" %}</label>
@@ -120,21 +131,27 @@
 
         <span class="status pull-right">
             <ul class="horizontal unstyled">
-                <li><span>Mode</span><small id="aplayer_mode"> * loading * </small></li>
-                <li><span>Version</span><small id="aplayer_version"> * loading * </small></li>
+                <li><span>Mode</span>
+                    <small id="aplayer_mode"> * loading *</small>
+                </li>
+                <li><span>Version</span>
+                    <small id="aplayer_version"> * loading *</small>
+                </li>
             </ul>
 
         </span>
 
-	</div>
-</footer>
+        </div>
+    </footer>
 
-<!-- here sits the flash part of the player... -->
-<div class="controls" id="aplayer_controls" style="height: 1px; width: 1px; overflow: hidden; position: fixed; right: 0;" >
-	<div id="aplayer_container" style="height: 1px; width: 1px"></div>
-</div>
+    <!-- here sits the flash part of the player... -->
+    <div class="controls"
+         id="aplayer_controls"
+         style="height: 1px; width: 1px; overflow: hidden; position: fixed; right: 0;">
+        <div id="aplayer_container" style="height: 1px; width: 1px"></div>
+    </div>
 
-<!--
+    <!--
 <div class="ovaerlay aplayer" id="overlay_container">
 <div class="wrapper">
 <h1>{% trans "Please wait" %}</h1>

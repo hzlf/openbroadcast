@@ -30,7 +30,7 @@ aplayer.states_last = aplayer.states_last || false;
 aplayer.vars.states = { current: 0, next: false, prev: false};
 
 // polling interval
-aplayer.vars.len_interval = 2000;
+aplayer.vars.len_interval = 300;
 
 aplayer.vars.debug = true;
 aplayer.vars.version = '0.2.17b';
@@ -694,10 +694,10 @@ aplayer.base.update_channel_data = function (channel) {
 
                 aplayer.ui.screen_display(aplayer.states.current);
 
-                /*
+                /**/
                 if (data.start_next) {
                     // alert(data.start_next)
-                    var cnt_holder = $('.countdown > span');
+                    var cnt_holder = $('.countdown span.time');
                     cnt_holder.countdown({
                         until: data.start_next,
                         format: 'HMS',
@@ -706,7 +706,7 @@ aplayer.base.update_channel_data = function (channel) {
                     });
 
                 }
-                */
+
 
             })
 

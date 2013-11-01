@@ -35,6 +35,14 @@ html, body
   .navbar.navbar-fixed-top
     background-image: none !important
 
+    // countdown hack
+    ul.countdown
+      li
+        span
+          color: white
+          padding: 7px 5px 0 0
+        span.time
+
 
 // main wrapper
 body.popup
@@ -357,7 +365,8 @@ body
 
 
 body.alibrary
-
+  .countdown
+    display: none
   .container
     section.playlist
       display: block

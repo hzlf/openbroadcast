@@ -13291,52 +13291,57 @@ html #push .container select, html footer .container select, body #push .contain
 html .navbar.navbar-fixed-top, body .navbar.navbar-fixed-top {
   background-image: none !important;
 }
+/* line 41, ../sass/aplayer/_style.sass */
+html .navbar.navbar-fixed-top ul.countdown li span, body .navbar.navbar-fixed-top ul.countdown li span {
+  color: white;
+  padding: 7px 5px 0 0;
+}
 
-/* line 42, ../sass/aplayer/_style.sass */
+/* line 50, ../sass/aplayer/_style.sass */
 body.popup .container {
   width: 100% !important;
 }
-/* line 49, ../sass/aplayer/_style.sass */
+/* line 57, ../sass/aplayer/_style.sass */
 body.popup .navbar .nav > li > a {
   padding: 1px 5px 0px;
   margin: 6px 5px 6px;
 }
-/* line 52, ../sass/aplayer/_style.sass */
+/* line 60, ../sass/aplayer/_style.sass */
 body.popup .navbar .navbar-inner {
   background-color: #333333;
 }
-/* line 54, ../sass/aplayer/_style.sass */
+/* line 62, ../sass/aplayer/_style.sass */
 body.popup .navbar .active > a {
   background-color: #333333;
   border: 1px solid #a5a5a5;
 }
-/* line 63, ../sass/aplayer/_style.sass */
+/* line 71, ../sass/aplayer/_style.sass */
 body.popup.buffering div.ajax-indicator {
   display: block;
 }
-/* line 67, ../sass/aplayer/_style.sass */
+/* line 75, ../sass/aplayer/_style.sass */
 body.popup.paused .hidden-while-paused {
   display: none;
 }
-/* line 70, ../sass/aplayer/_style.sass */
+/* line 78, ../sass/aplayer/_style.sass */
 body.popup.paused .item.listing.active {
   background-color: #fff00f !important;
   text-decoration: blink;
 }
-/* line 74, ../sass/aplayer/_style.sass */
+/* line 82, ../sass/aplayer/_style.sass */
 body.popup.playing .hidden-while-playing {
   display: none;
 }
-/* line 77, ../sass/aplayer/_style.sass */
+/* line 85, ../sass/aplayer/_style.sass */
 body.popup.playing .item.listing.active {
   background-color: #fff00f !important;
   text-decoration: blink;
 }
-/* line 82, ../sass/aplayer/_style.sass */
+/* line 90, ../sass/aplayer/_style.sass */
 body.popup.buffering .hidden-while-buffering {
   display: none;
 }
-/* line 87, ../sass/aplayer/_style.sass */
+/* line 95, ../sass/aplayer/_style.sass */
 body.popup div.ajax-indicator {
   display: none;
   position: fixed;
@@ -13349,16 +13354,16 @@ body.popup div.ajax-indicator {
   background-image: url(/static/img/base/ajax-loader.l.invers.gif);
 }
 
-/* line 103, ../sass/aplayer/_style.sass */
+/* line 111, ../sass/aplayer/_style.sass */
 body.popup section.container {
   width: 100%;
   background: #efefef;
 }
-/* line 109, ../sass/aplayer/_style.sass */
+/* line 117, ../sass/aplayer/_style.sass */
 body.popup .screen .padded-x, body.popup .screen .padded-y {
   padding: 10px;
 }
-/* line 112, ../sass/aplayer/_style.sass */
+/* line 120, ../sass/aplayer/_style.sass */
 body.popup .screen.controls {
   width: 100%;
   position: fixed;
@@ -13366,56 +13371,56 @@ body.popup .screen.controls {
   background: whitesmoke;
   border-bottom: 1px solid #dddddd;
 }
-/* line 123, ../sass/aplayer/_style.sass */
+/* line 131, ../sass/aplayer/_style.sass */
 body.popup .screen.controls .information h1 {
   font-size: 14px;
   line-height: 20px;
   margin-bottom: 0px !important;
 }
-/* line 127, ../sass/aplayer/_style.sass */
+/* line 135, ../sass/aplayer/_style.sass */
 body.popup .screen.controls .information h2, body.popup .screen.controls .information h3 {
   font-size: 12px;
   line-height: 18px;
   margin-bottom: 0px !important;
 }
-/* line 131, ../sass/aplayer/_style.sass */
+/* line 139, ../sass/aplayer/_style.sass */
 body.popup .screen.controls .information h2 small, body.popup .screen.controls .information h3 small {
   font-size: 10px;
   padding-left: 14px;
   color: #333333;
 }
-/* line 137, ../sass/aplayer/_style.sass */
+/* line 145, ../sass/aplayer/_style.sass */
 body.popup .screen.controls .image > img {
   height: 120px;
   width: 120px;
 }
-/* line 141, ../sass/aplayer/_style.sass */
+/* line 149, ../sass/aplayer/_style.sass */
 body.popup .screen.controls .aplayer-information {
   height: 80px;
 }
-/* line 149, ../sass/aplayer/_style.sass */
+/* line 157, ../sass/aplayer/_style.sass */
 body.popup .screen.controls .aplayer-controls {
   padding: 2px 0 2px 10px;
   border-top: 1px solid #dddddd;
   height: 18px;
   overflow: hidden;
 }
-/* line 156, ../sass/aplayer/_style.sass */
+/* line 164, ../sass/aplayer/_style.sass */
 body.popup .screen.controls .aplayer-controls a {
   font-size: 14px;
   color: #a5a5a5;
 }
-/* line 159, ../sass/aplayer/_style.sass */
+/* line 167, ../sass/aplayer/_style.sass */
 body.popup .screen.controls .aplayer-controls a:hover {
   color: #00bb00;
   text-decoration: none;
 }
-/* line 167, ../sass/aplayer/_style.sass */
+/* line 175, ../sass/aplayer/_style.sass */
 body.popup .screen.controls .image > img {
   height: 120px;
   width: 120px;
 }
-/* line 171, ../sass/aplayer/_style.sass */
+/* line 179, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist, body.popup .screen.emission {
   overflow-y: scroll;
   overflow-x: hidden;
@@ -13425,98 +13430,98 @@ body.popup .screen.playlist, body.popup .screen.emission {
   position: fixed;
   padding-top: 24px;
 }
-/* line 183, ../sass/aplayer/_style.sass */
+/* line 191, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist .item {
   border-bottom: 1px solid #efefef;
 }
-/* line 185, ../sass/aplayer/_style.sass */
+/* line 193, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist .item:first-child {
   border-top: 1px solid #efefef;
 }
-/* line 187, ../sass/aplayer/_style.sass */
+/* line 195, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist .item .wrapper {
   padding: 2px 10px;
 }
-/* line 190, ../sass/aplayer/_style.sass */
+/* line 198, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist .item .wrapper .icon {
   padding-top: 12px;
 }
-/* line 192, ../sass/aplayer/_style.sass */
+/* line 200, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist .item .wrapper .icon i {
   margin-left: 6px;
   color: #a5a5a5;
 }
-/* line 197, ../sass/aplayer/_style.sass */
+/* line 205, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist .item .wrapper .information h1 {
   font-size: 12px;
   line-height: 16px;
   margin-bottom: 0px !important;
 }
-/* line 201, ../sass/aplayer/_style.sass */
+/* line 209, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist .item .wrapper .information h2, body.popup .screen.playlist .item .wrapper .information h3 {
   font-size: 12px;
   line-height: 16px;
   margin-bottom: 0px !important;
 }
-/* line 205, ../sass/aplayer/_style.sass */
+/* line 213, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist .item .wrapper .information h2 small, body.popup .screen.playlist .item .wrapper .information h3 small {
   font-size: 10px;
 }
-/* line 208, ../sass/aplayer/_style.sass */
+/* line 216, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist .item .wrapper .duration {
   color: #5a5a5a;
   font-size: 10px;
   padding-top: 0px;
   text-align: right;
 }
-/* line 216, ../sass/aplayer/_style.sass */
+/* line 224, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist .item.hover, body.popup .screen.playlist .item.playing {
   cursor: pointer;
   border-bottom: none;
   background: #ddffd9;
 }
-/* line 220, ../sass/aplayer/_style.sass */
+/* line 228, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist .item.hover .icon > i, body.popup .screen.playlist .item.playing .icon > i {
   color: #00bb00;
 }
-/* line 222, ../sass/aplayer/_style.sass */
+/* line 230, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist .item.hover .indicator, body.popup .screen.playlist .item.playing .indicator {
   display: block;
 }
-/* line 227, ../sass/aplayer/_style.sass */
+/* line 235, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist .item .indicator {
   display: none;
   height: 1px;
   overflow: hidden;
   width: 100%;
 }
-/* line 233, ../sass/aplayer/_style.sass */
+/* line 241, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist .item .indicator .wrapper {
   background: #efefef;
   padding: 0 !important;
 }
-/* line 236, ../sass/aplayer/_style.sass */
+/* line 244, ../sass/aplayer/_style.sass */
 body.popup .screen.playlist .item .indicator .wrapper .inner {
   width: 0%;
   background: #00bb00;
 }
-/* line 241, ../sass/aplayer/_style.sass */
+/* line 249, ../sass/aplayer/_style.sass */
 body.popup .screen.emission {
   padding-left: 10px;
   padding-right: 10px;
 }
-/* line 246, ../sass/aplayer/_style.sass */
+/* line 254, ../sass/aplayer/_style.sass */
 body.popup .screen.emission section.description p {
   color: #5a5a5a;
 }
-/* line 249, ../sass/aplayer/_style.sass */
+/* line 257, ../sass/aplayer/_style.sass */
 body.popup .screen.emission section.description .description {
   border-top: 1px #a5a5a5;
   border-bottom: 1px solid #a5a5a5;
   max-height: 260px;
   overflow: hidden;
 }
-/* line 257, ../sass/aplayer/_style.sass */
+/* line 265, ../sass/aplayer/_style.sass */
 body.popup .screen.emission section.description .markdown-remove * {
   color: #5a5a5a;
   font-size: 12px;
@@ -13524,16 +13529,16 @@ body.popup .screen.emission section.description .markdown-remove * {
   margin: 2px 0 !important;
   padding: 2px 0;
 }
-/* line 264, ../sass/aplayer/_style.sass */
+/* line 272, ../sass/aplayer/_style.sass */
 body.popup .screen.emission section.description .markdown-remove h1, body.popup .screen.emission section.description .markdown-remove h2 {
   font-size: 14px;
   line-height: 16px;
 }
-/* line 268, ../sass/aplayer/_style.sass */
+/* line 276, ../sass/aplayer/_style.sass */
 body.popup .screen.emission section.description .object-links {
   padding-top: 4px;
 }
-/* line 275, ../sass/aplayer/_style.sass */
+/* line 283, ../sass/aplayer/_style.sass */
 body.popup .screen.comments {
   display: none;
   overflow-y: hidden;
@@ -13543,55 +13548,55 @@ body.popup .screen.comments {
   position: relative;
   padding-top: 24px;
 }
-/* line 289, ../sass/aplayer/_style.sass */
+/* line 297, ../sass/aplayer/_style.sass */
 body.popup #progress_bar {
   margin: 20px 0;
   height: 32px;
 }
-/* line 296, ../sass/aplayer/_style.sass */
+/* line 304, ../sass/aplayer/_style.sass */
 body.popup #progress_bar div.playhead .background {
   background: #00bb00;
 }
-/* line 299, ../sass/aplayer/_style.sass */
+/* line 307, ../sass/aplayer/_style.sass */
 body.popup #progress_bar div.playhead .indicator {
   background-image: url(/static/aplayer/img/playhead.indicator.png);
   background-repeat: repeat-y;
   background-position: 30px 0;
 }
-/* line 305, ../sass/aplayer/_style.sass */
+/* line 313, ../sass/aplayer/_style.sass */
 body.popup #progress_bar div.playhead .handler {
   background-image: none;
 }
-/* line 308, ../sass/aplayer/_style.sass */
+/* line 316, ../sass/aplayer/_style.sass */
 body.popup #progress_bar div.playhead .waveform {
   height: 30px;
 }
-/* line 312, ../sass/aplayer/_style.sass */
+/* line 320, ../sass/aplayer/_style.sass */
 body.popup #progress_bar div.playhead.hover .handler {
   background-image: url(/static/aplayer/img/playhead.handler.png);
   background-repeat: no-repeat;
 }
-/* line 320, ../sass/aplayer/_style.sass */
+/* line 328, ../sass/aplayer/_style.sass */
 body.popup #progress_bar > div.time-current {
   padding: 0 0 0 10px;
 }
-/* line 323, ../sass/aplayer/_style.sass */
+/* line 331, ../sass/aplayer/_style.sass */
 body.popup #progress_bar > div.indicator {
   width: 100%;
   margin: 0 0px;
 }
-/* line 327, ../sass/aplayer/_style.sass */
+/* line 335, ../sass/aplayer/_style.sass */
 body.popup #progress_bar > div.indicator.has-waveform {
   background-size: 100% 100%;
   background-color: #00bb00;
 }
-/* line 332, ../sass/aplayer/_style.sass */
+/* line 340, ../sass/aplayer/_style.sass */
 body.popup #progress_bar > div.indicator .wrapper {
   height: 36px;
   border: 1px solid #efefef;
   overflow: hidden;
 }
-/* line 338, ../sass/aplayer/_style.sass */
+/* line 346, ../sass/aplayer/_style.sass */
 body.popup #progress_bar > div.indicator .wrapper .inner {
   height: 36px;
   width: 0%;
@@ -13600,97 +13605,101 @@ body.popup #progress_bar > div.indicator .wrapper .inner {
   border-right: 1px solid #00bb00;
 }
 
-/* line 355, ../sass/aplayer/_style.sass */
+/* line 363, ../sass/aplayer/_style.sass */
 body .container section.playlist, body .container section.emission {
   display: none;
 }
 
-/* line 362, ../sass/aplayer/_style.sass */
+/* line 368, ../sass/aplayer/_style.sass */
+body.alibrary .countdown {
+  display: none;
+}
+/* line 371, ../sass/aplayer/_style.sass */
 body.alibrary .container section.playlist {
   display: block;
 }
 
-/* line 368, ../sass/aplayer/_style.sass */
+/* line 377, ../sass/aplayer/_style.sass */
 body.abcast .container section.emission {
   display: block;
 }
-/* line 371, ../sass/aplayer/_style.sass */
+/* line 380, ../sass/aplayer/_style.sass */
 body.abcast .indicator.playhead {
   opacity: 0;
 }
-/* line 374, ../sass/aplayer/_style.sass */
+/* line 383, ../sass/aplayer/_style.sass */
 body.abcast .aplayer-controls .next, body.abcast .aplayer-controls .prev {
   display: none;
 }
 
-/* line 392, ../sass/aplayer/_style.sass */
+/* line 401, ../sass/aplayer/_style.sass */
 body.popup footer .status ul {
   padding-right: 8px;
 }
-/* line 394, ../sass/aplayer/_style.sass */
+/* line 403, ../sass/aplayer/_style.sass */
 body.popup footer .status ul li {
   padding-right: 8px;
 }
-/* line 396, ../sass/aplayer/_style.sass */
+/* line 405, ../sass/aplayer/_style.sass */
 body.popup footer .status ul li span {
   font-size: 11px;
   color: #a5a5a5;
   padding-right: 4px;
 }
-/* line 400, ../sass/aplayer/_style.sass */
+/* line 409, ../sass/aplayer/_style.sass */
 body.popup footer .status ul li small {
   font-size: 11px;
   color: #666666;
   text-transform: uppercase;
 }
 
-/* line 409, ../sass/aplayer/_style.sass */
+/* line 418, ../sass/aplayer/_style.sass */
 body.popup section.comments.on-site div.header {
   display: none;
   padding: 10px;
 }
-/* line 412, ../sass/aplayer/_style.sass */
+/* line 421, ../sass/aplayer/_style.sass */
 body.popup section.comments.on-site div.header h3 {
   font-size: 14px;
 }
-/* line 415, ../sass/aplayer/_style.sass */
+/* line 424, ../sass/aplayer/_style.sass */
 body.popup section.comments.on-site div.form {
   padding: 10px 10px 0;
   border-top: 1px solid #dddddd;
 }
-/* line 419, ../sass/aplayer/_style.sass */
+/* line 428, ../sass/aplayer/_style.sass */
 body.popup section.comments.on-site div.listing.comment {
   overflow-y: scroll;
   height: 200px;
 }
-/* line 422, ../sass/aplayer/_style.sass */
+/* line 431, ../sass/aplayer/_style.sass */
 body.popup section.comments.on-site div.listing.comment .item {
   border: none !important;
   padding: 6px 0 2px 0 !important;
 }
-/* line 426, ../sass/aplayer/_style.sass */
+/* line 435, ../sass/aplayer/_style.sass */
 body.popup section.comments.on-site div.listing.comment .item:nth-child(odd) {
   background: #fafafa;
 }
-/* line 429, ../sass/aplayer/_style.sass */
+/* line 438, ../sass/aplayer/_style.sass */
 body.popup section.comments.on-site div.listing.comment .item .col-left {
   max-width: 400px;
 }
-/* line 431, ../sass/aplayer/_style.sass */
+/* line 440, ../sass/aplayer/_style.sass */
 body.popup section.comments.on-site div.listing.comment .item .col-left .comment-text > p {
   padding-left: 10px;
 }
-/* line 434, ../sass/aplayer/_style.sass */
+/* line 443, ../sass/aplayer/_style.sass */
 body.popup section.comments.on-site div.listing.comment .item .col-right {
   clear: both;
   float: none;
 }
-/* line 437, ../sass/aplayer/_style.sass */
+/* line 446, ../sass/aplayer/_style.sass */
 body.popup section.comments.on-site div.listing.comment .item .col-right ul {
   margin: 0 0 0 0;
   padding: 4px 0 2px 10px;
 }
-/* line 440, ../sass/aplayer/_style.sass */
+/* line 449, ../sass/aplayer/_style.sass */
 body.popup section.comments.on-site div.listing.comment .item .col-right ul li {
   float: left;
   padding-right: 10px;
