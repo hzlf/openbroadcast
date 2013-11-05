@@ -23,7 +23,10 @@
                 </li>
             </ul>
             {% if not readonly %}
+                <!--
                 <span>{{ object.item.content_object.duration|ms2time }}</span>
+                -->
+                <span>{{ (object.item.content_object.duration - object.cue_in - object.cue_out)|ms2time }}</span>
             {% endif %}
         </div>
 

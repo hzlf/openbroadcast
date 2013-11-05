@@ -39,16 +39,22 @@ def get_schedule_for_pypo(range_start, range_end):
             i_start = e_start + datetime.timedelta(milliseconds=offset)
             i_end = e_start + datetime.timedelta(milliseconds=offset + co.get_duration())
 
+
+            # i_end needs cue / cross calculations
+            # TODO: verify calculations!!!!
+            # i_end = i_end - datetime.timedelta(milliseconds=( item.cue_in + item.cue_out + item.fade_cross ))
+            i_end = i_end - datetime.timedelta(milliseconds=( item.cue_in + item.cue_out ))
+
+
             # map to airtime format
             i_start_str = i_start.strftime('%Y-%m-%d-%H-%M-%S')
             i_end_str = i_end.strftime('%Y-%m-%d-%H-%M-%S')
 
-            print
-            print item.content_object
-
-
             print 'cue_in  -  cue_out  -  fade_in  -  fade_out  -  fade_cross'
             print '%06d     %06d      %06d      %06d       %06d' % (item.cue_in, item.cue_out, item.fade_in, item.fade_out, item.fade_cross)
+
+            print 'offset:     %s' % offset
+
             print 'start:      %s' % i_start
             #print 'start str:  %s' % i_start_str
             print 'end:        %s' % i_end
@@ -63,6 +69,11 @@ def get_schedule_for_pypo(range_start, range_end):
                 print "ALREADY PLAYED!!!! > SKIP!"
 
             else:
+
+                # calculate timings
+
+
+
                 data = {
                         #'id': co.pk,
                         'id': co.uuid,
@@ -86,7 +97,8 @@ def get_schedule_for_pypo(range_start, range_end):
 
                 media['%s' % i_start_str] = data
 
-            offset += ( co.get_duration() - (item.cue_in + item.cue_out) )
+            #offset += ( co.get_duration() - (item.cue_in + item.cue_out) )
+            offset += ( co.get_duration() - (item.cue_in + item.cue_out + item.fade_cross ) )
 
 
     #print media

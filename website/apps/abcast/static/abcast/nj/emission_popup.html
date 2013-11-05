@@ -24,6 +24,10 @@
 <section class="description">
 
 
+    {% if object.content_object.main_image %}
+    <img src="{{ object.content_object.main_image }}" style="width: 50%;">
+    {% endif %}
+
     <!--
 	<p>{{ object.content_object.description_html|shorten(200)|linebreaksbr}}</p>
     -->
