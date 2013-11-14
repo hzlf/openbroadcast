@@ -23,7 +23,7 @@ class Pusher(object):
         if self.action == 'update_schedule':
 
             range_start = datetime.datetime.now()
-            range_end = datetime.datetime.now() + datetime.timedelta(seconds=60*60)
+            range_end = datetime.datetime.now() + datetime.timedelta(seconds=60*60*6)
             data = pypo.get_schedule_for_pypo(range_start, range_end)
 
             pg = PypoGateway()

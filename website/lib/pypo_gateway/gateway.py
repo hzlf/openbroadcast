@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 from django.conf import settings
 
-USE_CELERYD = True
+USE_CELERYD = False
 
 """
 Same config as used for celery setup

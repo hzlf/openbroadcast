@@ -318,6 +318,10 @@ class Process(object):
         log.info('Lookup acoustid for: %s' % (file.path))
 
         data = acoustid.match(AC_API_KEY, file.path)
+
+        print 'AID data:'
+        print data
+        print '---'
         
         res = []
         i = 0

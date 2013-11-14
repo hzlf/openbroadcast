@@ -377,7 +377,10 @@ class ImportFile(BaseModel):
 
         """
         """
+        print 'pre results_acoustid'
         obj.results_acoustid = processor.get_aid(obj.file)
+        print obj.results_acoustid
+        print 'post results_acoustid'
         obj.results_acoustid_status = True
         obj.save()
 

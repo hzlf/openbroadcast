@@ -154,7 +154,7 @@ aplayer.base.load = function (play) {
     console.log('aplayer.base.load - callback from remote window. object to play:', play);
 
     // set mode
-    if(play.source == 'abcast') {
+    if (play.source == 'abcast') {
         $('body').removeClass('alibrary');
         $('body').addClass('abcast');
 
@@ -233,15 +233,13 @@ aplayer.base.load_playlist = function (uri) {
                 } else if (uri.indexOf("track") != -1) {
 
 
-
-                    if(result.objects) {
+                    if (result.objects) {
                         // got collection of tracks (playing media_set eg)
                         aplayer.base.set_playlist(result.objects);
                     } else {
                         // single media
                         aplayer.base.set_playlist([result]);
                     }
-
 
 
                 } else if (uri.indexOf("playlist") != -1) {
@@ -648,15 +646,19 @@ aplayer.base.subscribe_channel_data = function (channel) {
 
     console.log('aplayer.base.subscribe_channel_data: ', channel)
 
-    aplayer.vars.playlist[aplayer.states.current].media = {
-        name: 'loading'
+    try {
+        aplayer.vars.playlist[aplayer.states.current].media = {
+            name: 'loading'
+        }
+    } catch (e) {
+
     }
 
 
     // call update
     aplayer.base.update_channel_data(channel);
     // and subscribe for changes
-    pushy.subscribe(channel.resource_uri + 'on-air/', function(){
+    pushy.subscribe(channel.resource_uri + 'on-air/', function () {
         aplayer.base.update_channel_data(channel);
     });
 
@@ -681,15 +683,12 @@ aplayer.base.update_channel_data = function (channel) {
         var emission;
 
 
-
-
         if (data.playing && data.playing.item) {
 
 
-            $.get(data.playing.item, function(media){
+            $.get(data.playing.item, function (media) {
                 console.log('media on air:', media)
                 aplayer.vars.playlist[aplayer.states.current].media = media;
-
 
 
                 aplayer.ui.screen_display(aplayer.states.current);
@@ -711,8 +710,8 @@ aplayer.base.update_channel_data = function (channel) {
             })
 
             // make sure api has data updated
-            setTimeout(function(){
-                $.get(data.playing.emission, function(data){
+            setTimeout(function () {
+                $.get(data.playing.emission, function (data) {
                     console.log('emission on air:', data)
                     aplayer.vars.playlist[aplayer.states.current].emission = emission;
                     aplayer.ui.screen_display(aplayer.states.current);
@@ -737,25 +736,9 @@ aplayer.base.update_channel_data = function (channel) {
         }
 
 
-
     })
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 aplayer.base.controls = function (args) {
@@ -923,42 +906,42 @@ aplayer.base.controls = function (args) {
 
             var vc = aplayer.player.getVolume();
             var vc = 80;
-            for (var v = vc; v > 0; v-=3) {
+            for (var v = vc; v > 0; v -= 3) {
                 aplayer.player.setVolume(v)
             }
             jwp.seek(p);
-            for (var v = 0; v < vc; v+=3) {
+            for (var v = 0; v < vc; v += 3) {
                 aplayer.player.setVolume(v)
             }
 
 
             /*
-            var vc = aplayer.player.getVolume();
-            var cn = 10;
-            for (var v = vc; v > 0; v--) {
-                console.log('v:' + v)
-                console.log('cn:' + cn)
-                aplayer.player.setVolume(v)
-                setTimeout(function () {
-                    aplayer.player.setVolume(v)
-                }, cn);
-                cn += 100;
-            }
-            setTimeout(function () {
-                jwp.seek(p);
-            }, cn);
-            cn += 100;
+             var vc = aplayer.player.getVolume();
+             var cn = 10;
+             for (var v = vc; v > 0; v--) {
+             console.log('v:' + v)
+             console.log('cn:' + cn)
+             aplayer.player.setVolume(v)
+             setTimeout(function () {
+             aplayer.player.setVolume(v)
+             }, cn);
+             cn += 100;
+             }
+             setTimeout(function () {
+             jwp.seek(p);
+             }, cn);
+             cn += 100;
 
-            for (var v = 0; v < vc; v++) {
-                console.log('v:' + v)
-                console.log('cn:' + cn)
-                aplayer.player.setVolume(v)
-                setTimeout(function () {
-                    aplayer.player.setVolume(v)
-                }, cn);
-                cn += 100;
-            }
-            */
+             for (var v = 0; v < vc; v++) {
+             console.log('v:' + v)
+             console.log('cn:' + cn)
+             aplayer.player.setVolume(v)
+             setTimeout(function () {
+             aplayer.player.setVolume(v)
+             }, cn);
+             cn += 100;
+             }
+             */
 
 
             fast_polling = true;

@@ -2,10 +2,12 @@ import datetime
 from django.contrib.sites.models import Site
 from abcast.models import Emission
 
-def get_schedule_for_pypo(range_start, range_end):
+def get_schedule_for_pypo(range_start, range_end, exclude=None):
 
 
     es = Emission.objects.filter(time_end__gte=range_start, time_start__lte=range_end)
+    if exclude:
+        es = es.exclude(pk__in=exclude)
 
     base_url = Site.objects.get_current().domain
 
