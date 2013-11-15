@@ -15,6 +15,7 @@ SchedulerApp = function() {
 	this.api_url = false;
 	this.channel_id;
 	this.ac;
+    this.last_update = false;
 	
 	this.station_time;
 	this.time_offset;
@@ -197,9 +198,17 @@ SchedulerApp = function() {
 		} else {
 			debug.debug('SchedulerApp - load: using remote data');
 			var url = self.api_url + '?channel_id=' + self.channel_id  + '&limit=500' + self.range_filter;
+
+            if(self.last_update) {
+                url += "updated__gte=" + self.last_update;
+            }
+
 			$.get(url, function(data) {
+
+                self.last_update = data.meta.time;
 				self.local_data = data;
 				self.display(data);
+
 			})
 		}
 	};
@@ -235,12 +244,13 @@ SchedulerApp = function() {
 
 		});
 
+
+        /* TODO: find a way to handle vanished items
 		$('.container.scheduler .emission.delete-flag').fadeOut(500);
 		setTimeout(function() {
 			$('.container.scheduler .emission.delete-flag').remove();
 		}, 500)
-
-		// self.bindings();
+        */
 
 	};
 
@@ -556,6 +566,10 @@ var EmissionApp = function() {
 					data : data,
 					complete : function(data) {
 						dialogue.destroy();
+
+                        // delete local element
+                        self.dom_element.fadeOut(500);
+
 						self.scheduler_app.load();
 					}
 				});

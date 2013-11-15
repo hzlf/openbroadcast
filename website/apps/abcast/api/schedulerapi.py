@@ -81,27 +81,37 @@ class EmissionResource(ModelResource):
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get', 'post', 'delete',]
         resource_name = 'abcast/emission'
-        excludes = ['updated', 'locked', ]
+        excludes = ['locked', ]
         include_absolute_url = True
         authentication =  Authentication()
         authorization = Authorization()
         filtering = {
             #'channel': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
+            'channel': ['exact',],
             'time_start': ['gte', 'lte'],
             'time_end': ['gte', 'lte'],
+            'updated': ['gte', 'lte'],
         }
         max_limit = 100000
         #cache = SimpleCache(timeout=120)
 
-    def obj_get_list(self, request=None, **kwargs):
 
-        channel_id =  request.GET['channel_id']
-        objects = Emission.objects.order_by('name').filter(channel__pk=int(channel_id))
+    def alter_list_data_to_serialize(self, request, data):
+        # add current time to meta, to enable to just call api for changes
+        data['meta']['time'] = datetime.datetime.now()
+        return data
 
 
-        #fetch objects based on param
-        return objects
+    def apply_filters(self, request, applicable_filters):
+        base_object_list = super(EmissionResource, self).apply_filters(request, applicable_filters)
+
+        channel_id = request.GET.get('channel_id', None)
+        if channel_id:
+            base_object_list = base_object_list.filter(channel_id=int(channel_id)).distinct()
+
+        return base_object_list
+
 
 
     def dehydrate(self, bundle):

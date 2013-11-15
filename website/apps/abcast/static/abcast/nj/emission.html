@@ -1,5 +1,5 @@
 <div 
-	class="chip fix {{ object.source }} emission theme-{{ object.color }}" 
+	class="hoverable chip fix {{ object.source }} emission theme-{{ object.color }}"
 	data-resource-uri={{ object.resource_uri }}
 	id="{{ object.uuid }}" 
 	data-tip="<div class='tooltip-emission'><strong><i class='icon-tasks'></i> {{ object.type }}</strong><br>{{ object.start }} - {{ object.end }}<br>scheduled by: {{ object.user.username }}<div class='description markdown-remove'>{{ object.content_object.description_html}}</div>{% if object.content_object.main_image %}<img src='{{ object.content_object.main_image }}' style='width: 50%;'>{% endif %}</div>"
