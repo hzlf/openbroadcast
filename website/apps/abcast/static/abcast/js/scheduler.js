@@ -59,7 +59,6 @@ SchedulerApp = function() {
 
         self.bindings();
 
-
 		pushy.subscribe(self.api_url, function() {
 			self.load();
 		});
@@ -111,7 +110,7 @@ SchedulerApp = function() {
 		// copy-paster
 		$('.day-actions').on('click', 'a', function(e){
 			e.preventDefault();
-			debug.debug('copy-paste action');
+			debug.debug('day action');
 			var action = $(this).data('action');
 			var date = $(this).data('date');
 			debug.debug(action);
@@ -119,10 +118,6 @@ SchedulerApp = function() {
 			if (action == 'copy') {
 				self.copy_paste_source = date;
 				$.cookie('scheduler_copy_paste_source', date);
-			}
-
-			if (action == 'delete') {
-				alert('delete: ' + date);
 			}
 			if (action == 'paste') {
 				if( ! self.copy_paste_source) {
@@ -155,6 +150,35 @@ SchedulerApp = function() {
 						}
 					});
 				}
+			}
+
+			if (action == 'delete') {
+                var url = '/program/scheduler/delete-day/';
+                var data = {
+                    date: date,
+                    channel_id: self.channel_id
+                }
+
+                $.ajax({
+                    type : "POST",
+                    url : url,
+                    dataType : "json",
+                    contentType : 'application/json',
+                    processData : true,
+                    data : data,
+                    success : function(data) {
+                        if(data.status) {
+                            // force complete update
+                            self.last_update = false;
+                            self.load();
+                        } else {
+                            base.ui.ui_message(data.message, 4000);
+                        }
+                    },
+                    error: function(xhr, status, e) {
+                        base.ui.ui_message(e, 4000);
+                    }
+                });
 			}
 			
 			
@@ -492,9 +516,17 @@ var EmissionApp = function() {
 		self.offset = self.scheduler_app.offset;
 		// self.bindings();
 		self.load(use_local_data);
-		pushy.subscribe(self.api_url, function() {
+		pushy.subscribe(self.api_url, function(data) {
 			debug.debug('pushy callback');
-			self.load()
+
+            if(data.type == 'update') {
+                self.load()
+            }
+
+            if(data.type == 'delete') {
+                self.dom_element.fadeOut(500);
+            }
+
 		});
 	};
 

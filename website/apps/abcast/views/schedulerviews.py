@@ -362,7 +362,7 @@ def copy_paste_day(request):
     
     log.debug('copy from: %s to %s' % (source, target))
     
-    if source and target:
+    if channel and source and target:
         source = datetime.datetime.strptime(source, '%Y-%m-%d')
         target = datetime.datetime.strptime(target, '%Y-%m-%d')
         
@@ -408,6 +408,51 @@ def copy_paste_day(request):
             'status': True,
             }
     
+    return data
+
+
+"""
+delete all emissions in given day
+"""
+@json_view
+def delete_day(request):
+
+    log = logging.getLogger('abcast.schedulerviews.delete_day')
+
+    date = request.POST.get('date', None)
+    channel_id = request.POST.get('channel_id', SCHEDULER_DEFAULT_CHANNEL_ID)
+    channel = Channel.objects.get(pk=channel_id)
+
+    log.debug('delete day %s on %s' % (date, channel.name))
+
+    if channel and date:
+        date = datetime.datetime.strptime(date, '%Y-%m-%d')
+        now = datetime.datetime.now()
+
+        time_start = date + datetime.timedelta(hours=SCHEDULER_OFFSET)
+
+        if time_start < now:
+            time_start = now
+
+        time_end = time_start + datetime.timedelta(hours=24)
+
+        log.debug('range: %s to %s' % (time_start, time_end))
+
+
+        # get emissions
+        es = Emission.objects.filter(time_start__gte=time_start, time_end__lte=time_end, channel=channel)
+        emission_count = es.count()
+        for e in es:
+            print 'delete:'
+            print e
+            # call delete on every object to have signals emitted
+            e.delete()
+
+    data = {
+            'status': True,
+            'deleted': emission_count
+            }
+
     return data
 
  

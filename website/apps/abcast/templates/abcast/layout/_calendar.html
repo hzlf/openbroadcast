@@ -42,8 +42,10 @@
 							{% endif %}
 							<ul class="unstyled horizontal day-actions">
 								{% if date > today %}
-								<li><a href="#" data-action="delete" data-date="{{ date|date:"Y-m-d" }}" title="{% trans "Delete day" %}"><i class="icon-trash"></i></a></li>
 								<li><a href="#" data-action="paste" data-date="{{ date|date:"Y-m-d" }}" title="{% trans "Paste day" %}"><i class="icon-paste"></i></a></li>
+								{% endif %}
+								{% if date >= today %}
+								<li><a href="#" data-action="delete" data-date="{{ date|date:"Y-m-d" }}" title="{% trans "Delete day" %}"><i class="icon-trash"></i></a></li>
 								{% endif %}
 								<li><a href="#" data-action="copy" data-date="{{ date|date:"Y-m-d" }}" title="{% trans "Copy day" %}"><i class="icon-copy"></i></a></li>
 							</ul>

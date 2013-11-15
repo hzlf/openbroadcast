@@ -182,6 +182,13 @@ class Emission(BaseModel, CachingMixin):
         }) + ''
 
 
+    def get_api_list_url(self):
+        return reverse('api_dispatch_list', kwargs={
+            'api_name': 'v1',
+            'resource_name': 'abcast/emission',
+        })
+
+
 
     @property
     def has_lock(self):
@@ -246,7 +253,7 @@ def post_save_emission(sender, **kwargs):
     """
     check if emission is in a critical range (eg it should start soon)
     """
-    SCHEDULE_AHEAD = 60 * 60 * 6 # seconds
+    SCHEDULE_AHEAD = 60 * 60 * 3 # seconds
     range_start = datetime.datetime.now()
     range_end = datetime.datetime.now() + datetime.timedelta(seconds=SCHEDULE_AHEAD)
 
@@ -278,7 +285,7 @@ def pre_delete_emission(sender, **kwargs):
     """
     check if emission is in a critical range (eg it should start soon)
     """
-    SCHEDULE_AHEAD = 60 * 60 * 6 # seconds
+    SCHEDULE_AHEAD = 60 * 60 * 3 # seconds
     range_start = datetime.datetime.now()
     range_end = datetime.datetime.now() + datetime.timedelta(seconds=SCHEDULE_AHEAD)
 

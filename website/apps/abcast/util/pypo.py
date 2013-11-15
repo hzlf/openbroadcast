@@ -74,6 +74,11 @@ def get_schedule_for_pypo(range_start, range_end, exclude=None):
 
                 # calculate timings
 
+                try:
+                    uri = "http://%s%s" % (base_url, co.get_stream_url())
+                except Exception, ex:
+                    print ex
+                    uri = None
 
 
                 data = {
@@ -91,7 +96,7 @@ def get_schedule_for_pypo(range_start, range_end, exclude=None):
                         'start': "%s" % i_start_str,
                         'end': "%s" % i_end_str,
                         'show_name': "%s" % e.name,
-                        'uri': "http://%s%s" % (base_url, co.get_stream_url()),
+                        'uri': uri,
                         'row_id': co.uuid,
                         'type': "file",
 

@@ -11,6 +11,7 @@ import time
 import re
 
 from abcast.models import *
+from abcast.util.calc import round_dt
 from alibrary.models import Playlist
 import datetime
 
@@ -29,6 +30,7 @@ SCHEDULER_DEFAULT_USERNAME = 'root'
 SCHEDULER_DEFAULT_THEME = 3
 
 class Autopilot(object):
+
     def __init__(self, * args, **kwargs):
 
         translation.activate('en')
@@ -40,13 +42,17 @@ class Autopilot(object):
         self.username = kwargs.get('username', SCHEDULER_DEFAULT_USERNAME)
         self.user = User.objects.get(username=self.username)
         self.verbosity = int(kwargs.get('verbosity', 1))
+
+        from pushy.models import setup_signals
+        setup_signals()
+
         
         
     def add_emission(self, slot_start):
         
         log = logging.getLogger('abcast.autopilot.add_emission')
         log.debug('auto-adding emission, slot start: %s' % slot_start)
-            
+
         # check if overlapping emission exists
         ces = Emission.objects.filter(time_start__lt=slot_start, time_end__gt=slot_start, channel=self.channel)
         print 'coliding emissions'
@@ -57,6 +63,8 @@ class Autopilot(object):
             next_start = slot_start
             
         print 'next_start: %s' % next_start
+        next_start = round_dt(next_start, 300) # round to 5 minutes
+        print 'next_start rounded: %s' % next_start
             
         # check how much time is available until next emission
         fes = Emission.objects.filter(time_start__gte=next_start, channel=self.channel).order_by('time_start')
@@ -93,6 +101,7 @@ class Autopilot(object):
         if p:
             e = Emission(content_object=p, time_start=next_start, channel=self.channel, user=self.user, color=SCHEDULER_DEFAULT_THEME)
             e.save()
+            # e, c = Emission.objects.get_or_create(content_object=p, time_start=next_start, channel=self.channel, user=self.user, color=SCHEDULER_DEFAULT_THEME)
             
             print 'Created emission, will run until: %s' % e.time_end
             
@@ -150,7 +159,7 @@ class Autopilot(object):
 
 
             """"""
-            while self.free_time_in_range(range_start, range_end) > 10:
+            while self.free_time_in_range(range_start, range_end) > 120:
                 slot_start = self.add_emission(slot_start)
 
 

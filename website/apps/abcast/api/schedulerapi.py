@@ -171,20 +171,13 @@ class EmissionResource(ModelResource):
 
         locked = request.POST.get('locked', 0)
         color = request.POST.get('color', 0)
-        
-        print "*****************************************************"
-        print locked
-        
-        
+
         if int(locked) == 1:
             e.locked = True
         else:
             e.locked = False
             
         e.color = int(color)
-        
-        
-        
         data = {}
         
         e.save()
@@ -223,8 +216,7 @@ class EmissionResource(ModelResource):
         log.debug('minutes (offset): %s' % offset_min)
         log.debug('days (offset): %s' % offset_d)
 
-        
-        
+
         # add offsets
         time_start = datetime.datetime.combine(e.time_start.date(), datetime.time(0))
         time_start = time_start + datetime.timedelta(minutes=offset_min, days=offset_d)
@@ -264,6 +256,9 @@ class EmissionResource(ModelResource):
         
         
         return self.json_response(request, data)
+
+
+
 
     def json_response(self, request, data):
         
