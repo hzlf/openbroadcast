@@ -1207,13 +1207,11 @@ base.ui.tagcloud = function () {
     total_count = 0;
     $('#tagcloud_inline .toggle-level').each(function (i, e) {
 
-
+        /*
         var level = $(this).data('taglevel');
         var count = $('a.level' + level, '#tagcloud_inline').length;
 
-
         total_count = total_count + count;
-
         console.log('count:', count, 'level:', level);
 
         if (count > 0) {
@@ -1221,6 +1219,7 @@ base.ui.tagcloud = function () {
         } else {
             // $(this).html('.');
         }
+        */
 
 
     });

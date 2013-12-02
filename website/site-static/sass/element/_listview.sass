@@ -648,10 +648,29 @@
         // width: 214px
       .c3
         width: 178px
-      .c4
-        width: 320px
-        .inner_row.bottom
-          width: 316px
+      .c4 // tags
+        //background-color: orangered
+        // cloud (inline)
+        position: relative
+        ul.tags
+          position: absolute
+          bottom: 0px
+          right: 0
+          opacity: 0.88
+          padding-bottom: 2px
+          li
+            margin: 2px 2px 0 0
+            padding: 0 4px
+            line-height: 14px
+            background: white
+            color: #333
+            border: 1px solid #dfdfdf
+            float: right
+            text-transform: uppercase
+            &.active
+              background: #00bb00
+              border-color: #00bb00
+              color: white
   
     &.m
       font-size: 90%

@@ -263,8 +263,8 @@ def post_save_emission(sender, **kwargs):
         # notify pypy
         print 'emission in critical range: notify pypo'
         from lib.pypo_gateway import send as pypo_send
-        from abcast.util import pypo
-        data = pypo.get_schedule_for_pypo(range_start=range_start, range_end=range_end)
+        from abcast.util import scheduler
+        data = scheduler.get_schedule_for_pypo(range_start=range_start, range_end=range_end)
 
         message = {
             'event_type': 'update_schedule',
@@ -295,8 +295,8 @@ def pre_delete_emission(sender, **kwargs):
         # notify pypy
         print 'emission in critical range: notify pypo'
         from lib.pypo_gateway import send as pypo_send
-        from abcast.util import pypo
-        data = pypo.get_schedule_for_pypo(range_start=range_start, range_end=range_end, exclude=[obj.pk])
+        from abcast.util import scheduler
+        data = scheduler.get_schedule_for_pypo(range_start=range_start, range_end=range_end, exclude=[obj.pk])
 
         message = {
             'event_type': 'update_schedule',

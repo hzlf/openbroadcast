@@ -7,6 +7,7 @@ InlinePlayer = function () {
     this.player;
 
     this.state = false;
+    this.source = false;
     this.current_uuid = false;
     this.current_media = false;
 
@@ -128,7 +129,7 @@ InlinePlayer = function () {
         container.show();
 
 
-        if (self.player) {
+        if (self.player && self.source == 'alibrary') {
             var playlist = self.player.vars.playlist;
 
             $.each(playlist, function (i, item) {
@@ -140,6 +141,17 @@ InlinePlayer = function () {
                 container_listing.append(html);
 
             });
+        }
+
+
+        if (self.player && self.source == 'abcast') {
+
+            var html = nj.render('aplayer/nj/inline_player_item.html', {
+                object: self.current_media
+            });
+
+            container_listing.append(html);
+
 
         }
 
@@ -157,31 +169,71 @@ InlinePlayer = function () {
         var container = self.dom_element;
         var states = aplayer.states;
 
+
+        //console.log('aplayer:', aplayer)
+        //console.log('media:', media)
+
         if (self.state !== states.state) {
             console.log('state changed');
             self.state = states.state;
             self.current_media = media;
             self.update_state();
+            //self.display_listing();
         }
 
         if (self.current_uuid !== media.uuid) {
             console.log('media changed');
             self.current_uuid = media.uuid;
             self.update_media();
+            //self.display_listing();
         }
 
-        // TODO: maybe rewrite the display section to nj templates
-        $('li.current', container).html(util.format_time(states.position));
-        $('li.total', container).html(util.format_time(states.duration));
+        // update source
+        if (aplayer.vars.source) {
+            // alibrary or abcast
+            self.source = aplayer.vars.source
+        }
 
-        $('ul.timing', container).fadeIn(500);
-        $('.media_name a', container).html(media.name);
-        $('.media_name a', container).attr('href', media.absolute_url);
-        $('.artist_name a', container).html(media.artist.name);
-        $('.artist_name a', container).attr('href', media.artist.absolute_url);
-        $('.release_name a', container).html(media.release.name);
-        $('.release_name a', container).attr('href', media.release.absolute_url);
-        $('.listing .inner .indicator', container).css('width', states.position_rel + '%');
+
+        // kind of hackish... switch between alibrary and abcast
+        if (aplayer.vars.source && aplayer.vars.source == 'alibrary') {
+            // TODO: maybe rewrite the display section to nj templates
+
+            container.addClass('alibrary');
+            container.removeClass('abcast');
+
+            $('li.current', container).html(util.format_time(states.position));
+            $('li.total', container).html(util.format_time(states.duration));
+
+            $('ul.timing', container).fadeIn(500);
+            $('.media_name a', container).html(media.name);
+            $('.media_name a', container).attr('href', media.absolute_url);
+
+            /*
+             $('.artist_name a', container).html(media.artist.name);
+             $('.artist_name a', container).attr('href', media.artist.absolute_url);
+             $('.release_name a', container).html(media.release.name);
+             $('.release_name a', container).attr('href', media.release.absolute_url);
+             */
+            $('.listing .inner .indicator', container).css('width', states.position_rel + '%');
+
+
+        }
+
+        if (aplayer.vars.source && aplayer.vars.source == 'abcast') {
+            // TODO: maybe rewrite the display section to nj templates
+
+            container.addClass('abcast');
+            container.removeClass('alibrary');
+
+            $('li.current', container).html('');
+            $('li.total', container).html('');
+            $('ul.timing', container).hide();
+            $('.media_name a', container).html(media.name);
+            $('.media_name a', container).attr('href', media.absolute_url);
+            $('.listing .inner .indicator', container).css('width', '0%');
+
+        }
 
 
     };

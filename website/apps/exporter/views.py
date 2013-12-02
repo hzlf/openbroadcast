@@ -99,7 +99,7 @@ class __nomod__ExportCreateView(ProcessFormView, FormMixin, TemplateResponseMixi
     
     model = Export
     
-    template_name = 'exporter/import_create.html'
+    template_name = 'exporter/export_create.html'
     form_class = ExportCreateForm
     #success_url = lazy(reverse, str)("feedback-feedback-list")
     

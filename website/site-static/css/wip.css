@@ -870,9 +870,26 @@ form.form-playlist div.dayparts div.controls ul {
 .listview.container.profile.m .c3 {
   width: 178px; }
 .listview.container.profile.m .c4 {
-  width: 320px; }
-  .listview.container.profile.m .c4 .inner_row.bottom {
-    width: 316px; }
+  position: relative; }
+  .listview.container.profile.m .c4 ul.tags {
+    position: absolute;
+    bottom: 0px;
+    right: 0;
+    opacity: 0.88;
+    padding-bottom: 2px; }
+    .listview.container.profile.m .c4 ul.tags li {
+      margin: 2px 2px 0 0;
+      padding: 0 4px;
+      line-height: 14px;
+      background: white;
+      color: #333333;
+      border: 1px solid #dfdfdf;
+      float: right;
+      text-transform: uppercase; }
+      .listview.container.profile.m .c4 ul.tags li.active {
+        background: #00bb00;
+        border-color: #00bb00;
+        color: white; }
 .listview.container.m {
   font-size: 90%; }
   .listview.container.m .list_body_item, .listview.container.m .list_header_item {

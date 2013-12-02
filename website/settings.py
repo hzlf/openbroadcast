@@ -965,6 +965,7 @@ PUSHY_SETTINGS = {
         'importer.import',
         'importer.importfile',
         'abcast.emission',
+        'abcast.channel',
         'exporter.Export',
     ),
     'SOCKET_SERVER': 'http://localhost:8888/',

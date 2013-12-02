@@ -18,7 +18,7 @@ from tastypie.utils import trailing_slash
 from tastypie.exceptions import ImmediateHttpResponse
 
 from abcast.models import Station, Channel, Emission
-from abcast.util import notify, pypo
+from abcast.util import notify, scheduler
 from lib.pypo_gateway import send as pypo_send
 
 from easy_thumbnails.files import get_thumbnailer
@@ -68,7 +68,7 @@ class ChannelResource(ModelResource):
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         resource_name = 'abcast/channel'
-        excludes = ['updated',]
+        excludes = ['on_air_id',]
         #include_absolute_url = True
         authentication =  Authentication()
         authorization = Authorization()
@@ -101,16 +101,27 @@ class ChannelResource(ModelResource):
 
 
         """
-        Generate stream settings
+        generate on-air
         """
-        stream = {
-                  'file': 'lala',
-                  'rtmp_app': 'lala',
-                  'rtmp_host': 'lala',
-                  #'uri': 'http://pypo:8000/obp-dev-256.mp3',
-                  'uri': bundle.obj.get_stream_url(),
-                  'uuid': bundle.obj.uuid,
-                  }
+        on_air = bundle.obj.get_on_air()
+
+        bundle.data['on_air'] = on_air
+
+        """
+        generate stream settings
+        """
+        if bundle.obj.rtmp_app and bundle.obj.rtmp_path:
+            stream = {
+                      'file': '%s.stream' % bundle.obj.rtmp_path,
+                     'rtmp_app': '%s' % bundle.obj.rtmp_app,
+                     'rtmp_host': 'rtmp://%s:%s/' % (settings.RTMP_HOST, settings.RTMP_PORT),
+                      #'uri': 'http://pypo:8000/obp-dev-256.mp3',
+                      'uri': bundle.obj.get_stream_url(),
+                      'uuid': bundle.obj.uuid,
+                      }
+        else:
+            stream = {}
+
         bundle.data['stream'] = stream
         bundle.data['stream_url'] = bundle.obj.get_stream_url()
         bundle.data['images'] = []
@@ -404,15 +415,15 @@ class BaseResource(Resource):
         data = {'status': True}
         return self.json_response(request, data)
 
+
+
+
     def notify_start_play(self, request, **kwargs):
         
         print '** notify_start_play **'
         media_uuid = request.GET.get('media_id', None)
         channel_uuid = request.GET.get('channel_id', None)
-        
-        print 'request user!!'
-        print request.user
-        
+
         if media_uuid and channel_uuid:
             print 'media_uuid  : %s' % media_uuid
             print 'channel_uuid: %s' % channel_uuid
@@ -424,10 +435,11 @@ class BaseResource(Resource):
                 channel = Channel.objects.get(uuid=channel_uuid)
             except:
                 channel = None
-                
-            # call notification
-            notify.start_play(item, channel, request.user)
-            
+
+            if channel:
+                channel.on_air = item
+                channel.save()
+
             
             print 'item: %s' % item.name
             print 'channel: %s' % channel.name
@@ -461,7 +473,7 @@ class BaseResource(Resource):
         range_start = datetime.datetime.now()
         range_end = datetime.datetime.now() + datetime.timedelta(seconds=SCHEDULE_AHEAD)
 
-        media = pypo.get_schedule_for_pypo(range_start, range_end)
+        media = scheduler.get_schedule_for_pypo(range_start, range_end)
         # map
         data = {'media': media}
 

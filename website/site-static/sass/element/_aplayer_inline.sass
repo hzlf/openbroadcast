@@ -48,7 +48,7 @@
         font-size: 83%
         padding-top: 2px
 	
-    background-color: #DDFFD9
+
 
     border: none
     //
@@ -94,6 +94,7 @@
         &:hover
           color: #00bb00
 
+    // alibrary only
     div.playhead
       margin: 8px 0
       .background
@@ -116,6 +117,9 @@
           background-image: url(/static/aplayer/img/playhead.handler.png)
           background-repeat: no-repeat
 
+    // abcast only
+    div.channel
+      padding: 5px 0 5px 5px
 
     &.listing .inner
 
@@ -182,3 +186,34 @@
               background: #00bb00
 
 
+// source switches
+#aplayer_inline
+
+  .display
+    background-color: #efefef
+
+  .indicator, .channel
+    display: none
+
+  &.alibrary
+
+    .display
+      background-color: #DDFFD9
+
+
+    .indicator
+      display: block
+
+  &.abcast
+
+    .display
+      background-color: #EEE6FF
+    .channel
+      display: block
+
+    .listing .actions
+      .prev, .next
+        display: none
+
+    .indicator
+      display: none !important

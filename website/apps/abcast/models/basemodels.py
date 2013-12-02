@@ -15,6 +15,9 @@ from cms.models import CMSPlugin
 from django_extensions.db.fields import *
 from django_extensions.db.fields.json import JSONField
 
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
+
 from django.core.urlresolvers import reverse
 
 # filer
@@ -25,6 +28,8 @@ import arating
 
 from phonenumber_field.modelfields import PhoneNumberField
 from l10n.models import Country
+
+from abcast.util import notify
 
 # 
 from lib.fields import extra
@@ -130,7 +135,28 @@ class StationMembers(models.Model):
 
 
     
-    
+"""
+Holds what is on air right now
+"""
+class OnAirItem(BaseModel):
+
+    #channel = models.ForeignKey('Channel')
+
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    content_object = generic.GenericForeignKey('content_type', 'object_id')
+
+    class Meta:
+        app_label = 'abcast'
+        verbose_name = _('On Air')
+        verbose_name_plural = _('On Air')
+        unique_together = ('content_type', 'object_id',)
+        #ordering = ('name', )
+
+    def __unicode__(self):
+        return "%s : %s" % (self.channel.pk, self.channel.pk)
+
+
 """
 A bit verbose, as already channel in bcmon - but different type of app f.t.m.
 """
@@ -150,20 +176,34 @@ class Channel(BaseModel):
     description = extra.MarkdownTextField(blank=True, null=True)
     
     station = models.ForeignKey('Station', null=True, blank=True, on_delete=models.SET_NULL)
-    
+
+
+    """
+    RTMP settings
+    """
+    rtmp_app = models.CharField(max_length=256, null=True, blank=True)
+    rtmp_path = models.CharField(max_length=256, null=True, blank=True)
+
     """
     settings for 'owned' channels
     """
     has_scheduler = models.BooleanField(default=False)
     stream_server = models.ForeignKey('StreamServer', null=True, blank=True, on_delete=models.SET_NULL)
     mount = models.CharField(max_length=64, null=True, blank=True)
-    
+
+    # on_air = JSONField(null=True, blank=True)
+    # on_air = generic.GenericRelation(OnAirItem, object_id_field="object_id")
+    on_air_type = models.ForeignKey(ContentType, null=True, blank=True)
+    on_air_id = models.PositiveIntegerField(null=True, blank=True)
+    on_air = generic.GenericForeignKey('on_air_type', 'on_air_id')
+
     
     class Meta:
         app_label = 'abcast'
         verbose_name = _('Channel')
         verbose_name_plural = _('Channels')
         ordering = ('name', )
+        unique_together = ('on_air_type', 'on_air_id')
 
     def __unicode__(self):
         return "%s" % self.name
@@ -206,6 +246,60 @@ class Channel(BaseModel):
                 dayparts.append(dp)
         
         return dayparts
+
+
+    def get_on_air(self):
+        """
+        merge currently playing item (told by pypo) with estimated scheduler entry for the emission
+        """
+        now = datetime.datetime.now()
+        emissions = self.scheduler_emissions.filter(channel__pk=self.pk, time_start__lte=now, time_end__gte=now)
+        if emissions.count() > 0:
+
+            emission = emissions[0]
+            emission_url = emissions[0].get_api_url()
+
+            emission_items = []
+            """
+            for e in emission.get_timestamped_media():
+                item = e.content_object
+                emission_items.append({
+                    'pk': item.pk,
+                    'time_start': e.timestamp,
+                    'resource_uri': item.get_api_url()
+                })
+            """
+
+        else:
+            emission_url = None
+            emission_items = []
+
+        try:
+            item_url = self.on_air.get_api_url()
+        except:
+            item_url = None
+
+        on_air = {
+            'item': item_url,
+            'emission': emission_url,
+            'emission_items': emission_items
+        }
+
+
+        return on_air
+
+
+def post_save_channel(sender, **kwargs):
+    print 'post_save_channel - kwargs'
+    obj = kwargs['instance']
+
+    # call notification
+    notify.start_play(obj.on_air, obj)
+
+post_save.connect(post_save_channel, sender=Channel)
+
+
+
 
 
 class StreamServer(BaseModel):

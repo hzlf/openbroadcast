@@ -274,6 +274,7 @@ def schedule_object(request):
     range_end = request.POST.get('range_end', None)
     channel_id = request.POST.get('channel_id', SCHEDULER_DEFAULT_CHANNEL_ID)
     channel = Channel.objects.get(pk=channel_id)
+    color = request.POST.get('color', 0)
     
     num_days = request.POST.get('num_days', SCHEDULER_NUM_DAYS)
     
@@ -332,7 +333,7 @@ def schedule_object(request):
     
     
     # if no errors so far -> create emission and attach object
-    e = Emission(content_object=obj, time_start=time_start, user=request.user, channel=channel)
+    e = Emission(content_object=obj, time_start=time_start, user=request.user, channel=channel, color=color)
     e.save()
     
     

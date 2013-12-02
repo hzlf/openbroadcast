@@ -28,9 +28,11 @@ class IcecastAPI:
         for format in server.formats.all():
             mount = '/%s-%s.%s' % (channel.mount, format.bitrate, format.type)
             print 'mount: %s' % mount
-            
-            self.update_server(server, mount, text)
-            
+
+            try:
+                self.update_server(server, mount, text)
+            except Exception, e:
+                print e
             
     def update_server(self, server, mount, text):
         
@@ -45,13 +47,12 @@ class IcecastAPI:
         
         url = '%sadmin/metadata' % server.host
         print '*******************'
-        print url
         
         auth=('admin', server.admin_pass)
         
-        params = {'mount': mount, 'mode': 'updinfo', 'song': u'%s' % text.encode('utf-8')}
+        params = {'mount': mount, 'mode': 'updinfo', 'song': u'%s' % text}
         
-        r = requests.get(url, auth=auth, params=params)
+        r = requests.get(url, auth=auth, params=params, timeout=2.0)
         
         print '######################################################'
         print r.url

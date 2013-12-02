@@ -724,6 +724,31 @@ class PlaylistItemPlaylist(models.Model):
     fade_cross = models.PositiveIntegerField(max_length=12, default=0)
     class Meta:
         app_label = 'alibrary'
+
+    def save(self, *args, **kwargs):
+
+        # catch invalid cases
+
+        if int(self.fade_cross) > int(self.fade_out):
+            self.fade_cross = int(self.fade_out) - 1
+
+        if int(self.fade_cross) < 0:
+            self.fade_cross = 0
+
+        if int(self.cue_in) < 0:
+            self.cue_in = 0
+
+        if int(self.cue_out) < 0:
+            self.cue_out = 0
+
+        if int(self.fade_in) < 0:
+            self.fade_in = 0
+
+        if int(self.fade_out) < 0:
+            self.fade_out = 0
+
+
+        super(PlaylistItemPlaylist, self).save(*args, **kwargs)
         
         
  

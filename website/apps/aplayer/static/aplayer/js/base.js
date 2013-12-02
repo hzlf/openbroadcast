@@ -658,7 +658,13 @@ aplayer.base.subscribe_channel_data = function (channel) {
     // call update
     aplayer.base.update_channel_data(channel);
     // and subscribe for changes
+    /*
     pushy.subscribe(channel.resource_uri + 'on-air/', function () {
+        aplayer.base.update_channel_data(channel);
+    });
+    */
+    pushy.subscribe(channel.resource_uri, function (data) {
+        console.log('pushy callbackk with data:', data);
         aplayer.base.update_channel_data(channel);
     });
 
@@ -675,6 +681,41 @@ aplayer.base.update_channel_data = function (channel) {
 
     console.log('aplayer.base.update_channel_data: ', channel)
 
+
+    $.get(channel.resource_uri, function (data) {
+        console.log('ON-AIR', data.on_air)
+
+        var on_air = data.on_air;
+        var media;
+        var emission;
+
+        if(on_air.item) {
+            $.get(on_air.item, function (media) {
+                console.log('media on air:', media)
+                aplayer.vars.playlist[aplayer.states.current].media = media;
+
+                aplayer.ui.screen_display(aplayer.states.current);
+
+            })
+        }
+        if(on_air.emission) {
+            setTimeout(function () {
+                $.get(on_air.emission, function (data) {
+                    console.log('emission on air:', data)
+                    aplayer.vars.playlist[aplayer.states.current].emission = emission;
+                    aplayer.ui.screen_display(aplayer.states.current);
+
+                    aplayer.ui.update_emission(data);
+
+                })
+            }, 500);
+        }
+
+
+
+    });
+
+    /*
     $.get(channel.resource_uri + 'on-air/', function (data) {
 
         console.log('on air:', data);
@@ -690,12 +731,9 @@ aplayer.base.update_channel_data = function (channel) {
                 console.log('media on air:', media)
                 aplayer.vars.playlist[aplayer.states.current].media = media;
 
-
                 aplayer.ui.screen_display(aplayer.states.current);
 
-                /**/
                 if (data.start_next) {
-                    // alert(data.start_next)
                     var cnt_holder = $('.countdown span.time');
                     cnt_holder.countdown({
                         until: data.start_next,
@@ -703,10 +741,7 @@ aplayer.base.update_channel_data = function (channel) {
                         compact: true,
                         significant: 4
                     });
-
                 }
-
-
             })
 
             // make sure api has data updated
@@ -735,8 +770,11 @@ aplayer.base.update_channel_data = function (channel) {
             console.log('nothing on air');
         }
 
-
     })
+    */
+
+
+
 
 }
 

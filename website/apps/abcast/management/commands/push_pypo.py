@@ -6,7 +6,7 @@ from django.utils import translation
 
 from lib.pypo_gateway import PypoGateway
 from lib.pypo_gateway import send as pypo_send
-from abcast.util import pypo
+from abcast.util import scheduler
 
 
 
@@ -24,7 +24,7 @@ class Pusher(object):
 
             range_start = datetime.datetime.now()
             range_end = datetime.datetime.now() + datetime.timedelta(seconds=60*60*6)
-            data = pypo.get_schedule_for_pypo(range_start, range_end)
+            data = scheduler.get_schedule_for_pypo(range_start, range_end)
 
             pg = PypoGateway()
             message = {

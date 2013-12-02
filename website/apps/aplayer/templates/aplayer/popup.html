@@ -20,7 +20,12 @@
         <div class="navbar navbar-inverse navbar-fixed-top" style="height: 34px">
             <div class="navbar-inner">
 
-                <a class="brand" href="#">&nbsp;<img src="{{ STATIC_URL }}img/icons/favicon.gif"/></a>
+                <a class="brand" href="#">
+                    <img class="hidden-while-playing hidden-while-buffering" src="{{ STATIC_URL }}aplayer/img/icon.base.gif"/>
+                    <img class="hidden-while-buffering" src="{{ STATIC_URL }}aplayer/img/icon.playing.gif"/>
+                    <img class="hidden-while-playing" src="{{ STATIC_URL }}aplayer/img/icon.buffering.gif"/>
+                    <img class="hidden-while-playing" src="{{ STATIC_URL }}aplayer/img/icon.paused.gif"/>
+                </a>
 
                 <div class="nav-collapse collapse">
                     <ul class="nav">
@@ -32,13 +37,14 @@
                         </li>
 
                     </ul>
+                    <!--
                     <ul class="nav pull-right countdown">
                         <li class="">
                             <span class="pull-right time"></span>
                             <span class="pull-right">Next: </span>
                         </li>
                     </ul>
-
+                    -->
 
                 </div>
 
