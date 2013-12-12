@@ -1,15 +1,15 @@
 #-*- coding: utf-8 -*-
-from django.template.loader import render_to_string
 import inspect
+
+from django.template.loader import render_to_string
 from django import forms
-from django.conf import settings
 from django.contrib.admin.widgets import ForeignKeyRawIdWidget
 from django.contrib.admin.sites import site
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.safestring import mark_safe
 from django.utils.text import truncate_words
-from django.utils.translation import ugettext as _
+
 from filer.models import Folder
 from filer.settings import FILER_STATICMEDIA_PREFIX
 

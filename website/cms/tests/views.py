@@ -1,13 +1,15 @@
 from __future__ import with_statement
+import sys
+
+from django.conf import settings
+from django.core.urlresolvers import clear_url_caches
+from django.http import Http404, HttpResponse
+
 from cms.api import create_page
 from cms.apphook_pool import apphook_pool
 from cms.test_utils.testcases import SettingsOverrideTestCase
 from cms.test_utils.util.context_managers import SettingsOverride
 from cms.views import _handle_no_page, details
-from django.conf import settings
-from django.core.urlresolvers import clear_url_caches
-from django.http import Http404, HttpResponse
-import sys
 
 
 APP_NAME = 'SampleApp'

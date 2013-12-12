@@ -1,17 +1,10 @@
-from django.contrib.auth.models import User
-from django.db.models import Count
-
 from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
-from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
-
-from tastypie.cache import SimpleCache
-
-from alibrary.models import Media, Release, Artist, Label, Playlist, PlaylistMedia
-
+from tastypie.resources import ModelResource
 from easy_thumbnails.files import get_thumbnailer
 
+from alibrary.models import Media, Release, Artist, Label, Playlist, PlaylistMedia
 from ep.API import fp
 
 

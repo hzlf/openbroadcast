@@ -1,5 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
+import os
+import datetime
+
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.exceptions import ImproperlyConfigured
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
+from django.forms.widgets import Media
+from django.test.testcases import TestCase
+
 from cms.api import create_page, publish_page, add_plugin
 from cms.conf.patch import post_patch_check
 from cms.exceptions import PluginAlreadyRegistered, PluginNotRegistered
@@ -12,26 +23,17 @@ from cms.plugins.inherit.models import InheritPagePlaceholder
 from cms.plugins.link.forms import LinkForm
 from cms.plugins.link.models import Link
 from cms.plugins.text.models import Text
-from cms.plugins.text.utils import (plugin_tags_to_id_list, 
+from cms.plugins.text.utils import (plugin_tags_to_id_list,
     plugin_tags_to_admin_html)
 from cms.plugins.twitter.models import TwitterRecentEntries
 from cms.test_utils.project.pluginapp.models import Article, Section
 from cms.test_utils.project.pluginapp.plugins.manytomany_rel.models import (
     ArticlePluginModel)
-from cms.test_utils.testcases import (CMSTestCase, URL_CMS_PAGE, 
+from cms.test_utils.testcases import (CMSTestCase, URL_CMS_PAGE,
     URL_CMS_PAGE_ADD, URL_CMS_PLUGIN_ADD, URL_CMS_PLUGIN_EDIT, URL_CMS_PAGE_CHANGE, URL_CMS_PLUGIN_REMOVE)
 from cms.sitemaps.cms_sitemap import CMSSitemap
 from cms.test_utils.util.context_managers import SettingsOverride
 from cms.utils.copy_plugins import copy_plugins_to
-from django.conf import settings
-from django.contrib.auth.models import User
-from django.core.exceptions import ImproperlyConfigured
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.management import call_command
-from django.forms.widgets import Media
-from django.test.testcases import TestCase
-import os
-import datetime
 
 
 class DumbFixturePlugin(CMSPluginBase):

@@ -1,8 +1,11 @@
+from os.path import basename
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
 from cms.models import CMSPlugin
 from cms.plugins.video import settings
-from os.path import basename
+
 
 class Video(CMSPlugin):
     # player settings

@@ -1,7 +1,8 @@
-from django.db import models
 import random
 
+from django.db import models
 from django.conf import settings
+
 try:
     storage = settings.MULTI_IMAGES_FOLDER+'/'
 except AttributeError:

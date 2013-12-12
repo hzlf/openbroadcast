@@ -1,4 +1,3 @@
-from django.db.models.base import ModelBase
 from django.core.exceptions import ImproperlyConfigured
 
 from actstream.settings import get_models

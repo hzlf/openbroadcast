@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
+import warnings
+
+from django.contrib.sites.models import Site
+from django.shortcuts import get_object_or_404
+from django.template import (NodeList, VariableNode,
+    TemplateSyntaxError)
+from django.template.loader import get_template
+from django.template.loader_tags import (ConstantIncludeNode, ExtendsNode,
+    BlockNode)
+from sekizai.helpers import is_variable_extend_node
+
 from cms.exceptions import DuplicatePlaceholderWarning
 from cms.models import Page
 from cms.templatetags.cms_tags import Placeholder
 from cms.utils.placeholder import validate_placeholder_name
-from django.contrib.sites.models import Site
-from django.shortcuts import get_object_or_404
-from django.template import (NodeList, TextNode, VariableNode, 
-    TemplateSyntaxError)
-from django.template.loader import get_template
-from django.template.loader_tags import (ConstantIncludeNode, ExtendsNode, 
-    BlockNode)
-import warnings
-from sekizai.helpers import is_variable_extend_node
+
 
 def get_page_from_plugin_or_404(cms_plugin):
     return get_object_or_404(Page, placeholders=cms_plugin.placeholder)

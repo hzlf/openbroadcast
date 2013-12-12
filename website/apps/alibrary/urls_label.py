@@ -1,7 +1,6 @@
 from django.conf.urls.defaults import *
 
 # app imports
-from alibrary.models import Label
 from alibrary.views import LabelDetailView, LabelListView, LabelEditView, label_autocomplete
 
 urlpatterns = patterns('',

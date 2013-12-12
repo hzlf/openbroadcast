@@ -1,16 +1,13 @@
 import mimetypes
 import os
-import posixpath
-import re
-import urllib
 
-from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponseNotModified
+from django.http import HttpResponse, Http404, HttpResponseNotModified
 from django.core.exceptions import PermissionDenied
 from django.db.models import get_model
 from django.shortcuts import get_object_or_404
 from django.contrib.admin.util import unquote
 from django.views.static import was_modified_since
-from django.utils.http import http_date, parse_http_date
+from django.utils.http import http_date
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 

@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-from cms.utils.i18n import get_default_language
+import re
+import urllib
+import urlparse
+
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.middleware.locale import LocaleMiddleware
 from django.utils import translation
-import re
-import urllib
-import urlparse
+
+from cms.utils.i18n import get_default_language
+
 
 SUPPORTED = dict(settings.CMS_LANGUAGES)
 

@@ -1,11 +1,13 @@
-from cms.plugin_base import CMSPluginBase
-from cms.plugin_pool import plugin_pool
 from django.conf import settings
 from django import template
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.template.context import Context
+
+from cms.plugin_base import CMSPluginBase
+from cms.plugin_pool import plugin_pool
 from models import SnippetPtr
+
 
 class SnippetPlugin(CMSPluginBase):
     model = SnippetPtr

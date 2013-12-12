@@ -1,21 +1,14 @@
-from django.conf import settings
 from django.conf.urls.defaults import *
-from django.contrib.auth.models import User
-from django.db.models import Count
-import json
 from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
-from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
-from tastypie.cache import SimpleCache
+from tastypie.resources import ModelResource, ALL_WITH_RELATIONS
 from tastypie.utils import trailing_slash
 from tastypie.exceptions import ImmediateHttpResponse
 from django.http import HttpResponse
 
 
 from importer.models import Import, ImportFile
-
-from alibrary.api import MediaResource
 
 
 # file = request.FILES[u'files[]']
@@ -41,6 +34,7 @@ class ImportFileResource(ModelResource):
         filtering = {
             'import_session': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
+            'import_session__uuid_key': ['exact',],
         }
         
 
@@ -72,7 +66,8 @@ class ImportFileResource(ModelResource):
 
             #import_id = request.GET['import_session']
             import_id = request.GET.get('import_session', None)
-            uuid_key = request.GET.get('uuid_key', None)
+            #uuid_key = request.GET.get('uuid_key', None)
+            uuid_key = request.GET.get('import_session__uuid_key', None)
 
 
             print "####################################"
@@ -119,6 +114,7 @@ class ImportResource(ModelResource):
         filtering = {
             #'channel': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
+            'uuid_key': ['exact',],
         }
         
     def save_related(self, obj):

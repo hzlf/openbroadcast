@@ -1,5 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
+
+from django.conf import settings
+from django.contrib import admin
+from django.contrib.auth.models import User, Permission
+from django.contrib.messages.storage import default_storage
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseForbidden, HttpResponse
+from django.template import TemplateSyntaxError, Template
+from django.template.context import Context, RequestContext
+from django.test import TestCase
+
 from cms.api import add_plugin, create_page
 from cms.conf.global_settings import CMS_TEMPLATE_INHERITANCE_MAGIC
 from cms.exceptions import DuplicatePlaceholderWarning
@@ -11,23 +22,14 @@ from cms.plugins.text.cms_plugins import TextPlugin
 from cms.plugins.text.models import Text
 from cms.test_utils.fixtures.fakemlng import FakemlngFixtures
 from cms.test_utils.project.fakemlng.models import Translations
-from cms.test_utils.project.placeholderapp.models import (Example1, Example2, 
+from cms.test_utils.project.placeholderapp.models import (Example1, Example2,
     Example3, Example4, Example5)
 from cms.test_utils.testcases import CMSTestCase
-from cms.test_utils.util.context_managers import (SettingsOverride, 
+from cms.test_utils.util.context_managers import (SettingsOverride,
     UserLoginContext)
 from cms.test_utils.util.mock import AttributeObject
 from cms.utils.placeholder import PlaceholderNoAction, MLNGPlaceholderActions
 from cms.utils.plugins import get_placeholders
-from django.conf import settings
-from django.contrib import admin
-from django.contrib.auth.models import User, Permission
-from django.contrib.messages.storage import default_storage
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseForbidden, HttpResponse
-from django.template import TemplateSyntaxError, Template
-from django.template.context import Context, RequestContext
-from django.test import TestCase
 
 
 class PlaceholderTestCase(CMSTestCase):

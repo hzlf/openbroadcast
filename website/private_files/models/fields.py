@@ -1,6 +1,6 @@
 import os
 
-from django.db.models.fields.files import FileField, ImageField, ImageFieldFile, FieldFile
+from django.db.models.fields.files import FileField, FieldFile
 from django.core.urlresolvers import reverse
 
 PROTECTION_METHODS = ['basic', 'nginx', 'lighttpd', 'apache']

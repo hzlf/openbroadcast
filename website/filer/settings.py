@@ -1,10 +1,13 @@
 #-*- coding: utf-8 -*-
-from django.conf import settings
-from django.core.files.storage import get_storage_class
-from filer.utils.loader import load_object
-from filer.utils.recursive_dictionary import RecursiveDictionaryWithExcludes
 import os
 import urlparse
+
+from django.conf import settings
+from django.core.files.storage import get_storage_class
+
+from filer.utils.loader import load_object
+from filer.utils.recursive_dictionary import RecursiveDictionaryWithExcludes
+
 
 FILER_DEBUG = getattr(settings, 'FILER_DEBUG', False) # When True makes
 

@@ -1,4 +1,3 @@
-import re
 from django import template
 
 from wikisyntax.helpers import wikify_string, wikisafe_markdown

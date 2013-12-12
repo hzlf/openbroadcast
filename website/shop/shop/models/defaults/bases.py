@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 from decimal import Decimal
 from distutils.version import LooseVersion
+
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models.aggregates import Sum
 from django.utils.translation import ugettext_lazy as _
 from polymorphic.polymorphic_model import PolymorphicModel
+import django
+from django_extensions.db.fields import AutoSlugField
+
 from shop.cart.modifiers_pool import cart_modifiers_pool
 from shop.util.fields import CurrencyField
 from shop.util.loader import get_model_string
-import django
 
-from django_extensions.db.fields import AutoSlugField
 
 
 #==============================================================================

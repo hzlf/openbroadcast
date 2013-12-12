@@ -1,10 +1,11 @@
-from django.db import models
-from django.utils.translation import ugettext as _
-import dateutil.parser
 import time
 from time import mktime
 from datetime import datetime
+
+from django.db import models
+from django.utils.translation import ugettext as _
 from django_extensions.db.fields.json import JSONField
+
 # Create your models here.
 
 

@@ -1,12 +1,15 @@
 #-*- coding: utf-8 -*-
+import os
+
 from django.core.files import File as DjangoFile
 from django.test.testcases import TestCase
+
 from filer.models import tools
 from filer.models.clipboardmodels import Clipboard
 from filer.models.foldermodels import Folder
 from filer.models.imagemodels import Image
 from filer.tests.helpers import create_superuser, create_image
-import os
+
 
 class ToolsTestCase(TestCase):
     def setUp(self):

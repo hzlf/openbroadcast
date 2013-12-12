@@ -7,10 +7,13 @@ The set of authentication methods which are used is then specified by setting th
 :attr:`authentication` attribute on the :class:`View` class, and listing a set of :class:`authentication` classes.
 """
 
+import base64
+
 from django.contrib.auth import authenticate
 from django.middleware.csrf import CsrfViewMiddleware
+
 from djangorestframework.utils import as_tuple
-import base64
+
 
 __all__ = (
     'BaseAuthentication',

@@ -4,10 +4,13 @@ for checking if a request passes a certain set of constraints. You can assign a 
 class to your view by setting your View's :attr:`permissions` class attribute.
 """
 
+import time
+
 from django.core.cache import cache
+
 from djangorestframework import status
 from djangorestframework.response import ErrorResponse
-import time
+
 
 __all__ = (
     'BasePermission',

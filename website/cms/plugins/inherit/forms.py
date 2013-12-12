@@ -1,9 +1,11 @@
-from cms.models import Page
-from cms.plugins.inherit.models import InheritPagePlaceholder
 from django import forms
 from django.forms.models import ModelForm
 from django.forms.util import ErrorList
 from django.utils.translation import ugettext_lazy as _
+
+from cms.models import Page
+from cms.plugins.inherit.models import InheritPagePlaceholder
+
 
 class InheritForm(ModelForm):
     from_page = forms.ModelChoiceField(label=_("page"), queryset=Page.objects.drafts(), required=False)

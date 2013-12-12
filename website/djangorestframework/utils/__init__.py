@@ -1,12 +1,12 @@
+import re
+import xml.etree.ElementTree as ET
+
 from django.utils.encoding import smart_unicode
 from django.utils.xmlutils import SimplerXMLGenerator
 from django.core.urlresolvers import resolve
-from django.conf import settings
 
 from djangorestframework.compat import StringIO
 
-import re
-import xml.etree.ElementTree as ET
 
 
 #def admin_media_prefix(request):

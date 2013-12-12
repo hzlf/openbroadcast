@@ -1,6 +1,4 @@
-import django
 from django.conf import settings
-from django.db.models import get_model, get_app
 
 DEBUG = getattr(settings, 'PUSHY_ASSET_DEBUG', True)
 

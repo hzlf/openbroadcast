@@ -1,16 +1,9 @@
-import datetime
-from django.utils.timezone import utc
 from django.db import models
-from django.db.models import Q
 #from django.contrib.gis.db import models
-from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 
 from cms.models import CMSPlugin, Page
 from django_extensions.db.fields import *
-from django.core.urlresolvers import reverse
-from django.db.models.signals import post_save
-
 
 from lib.fields import extra
 

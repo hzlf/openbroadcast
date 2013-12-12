@@ -1,32 +1,20 @@
 #-*- coding: utf-8 -*-
-from django.core.files import File as DjangoFile
-from django.core.management.base import BaseCommand, NoArgsCommand
 from optparse import make_option
 import os
-import sys
+from datetime import datetime
 
-import time
-
-import re
-
+from django.core.files import File as DjangoFile
+from django.core.management.base import BaseCommand, NoArgsCommand
 from tagging.models import Tag
+from django.template.defaultfilters import slugify
+import audiotools
 
 from alibrary.models import Artist, Release, Media, Label, Relation, License
-
 from filer.models.filemodels import File
 from filer.models.audiomodels import Audio
 from filer.models.imagemodels import Image
-
 from obp_legacy.models import *
-
-from django.template.defaultfilters import slugify
-
-from datetime import datetime
-
 from lib.util import filer_extra
-
-from audiotools import AudioFile, MP3Audio, M4AAudio, FlacAudio, WaveAudio, MetaData
-import audiotools
 
 
 def id_to_location(id):

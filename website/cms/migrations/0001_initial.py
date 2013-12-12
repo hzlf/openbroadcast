@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
+import datetime
+
 from south.db import db
 from django.db import models
+
 from cms.models import *
-import datetime
+
+
 class Migration:
     
     def forwards(self, orm):

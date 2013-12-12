@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
-from django.contrib import messages
-from django.shortcuts import redirect
-
 
 from social_auth.middleware import SocialAuthExceptionMiddleware
 

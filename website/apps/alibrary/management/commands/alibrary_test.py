@@ -1,10 +1,5 @@
 #-*- coding: utf-8 -*-
-import os
-from django.core.files import File as DjangoFile
-from django.core.management.base import BaseCommand, NoArgsCommand
-
-from optparse import make_option
-from datetime import *
+from django.core.management.base import NoArgsCommand
 
 
 class LibDebug(object):
@@ -13,7 +8,7 @@ class LibDebug(object):
 
     def test_relations(self):
         
-        from alibrary.models import Relation, Release
+        from alibrary.models import Release
         print "test_relations"
         
         r = Release.objects.get(pk=48)

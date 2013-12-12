@@ -1,5 +1,4 @@
 from south.db import db
-from django.db import models
 from cms.plugins.video.models import *
 
 class Migration:

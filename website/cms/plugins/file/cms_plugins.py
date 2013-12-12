@@ -1,8 +1,10 @@
+from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
+
 from cms.plugin_pool import plugin_pool
 from cms.plugin_base import CMSPluginBase
-from django.utils.translation import ugettext_lazy as _
 from models import File
-from django.conf import settings
+
 
 class FilePlugin(CMSPluginBase):
     model = File

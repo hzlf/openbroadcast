@@ -4,8 +4,10 @@ A central mechanism for settings which have defaults.
 Repurposed from Sphene Community Tools: http://sct.sphene.net
 """
 
-from django.conf import settings
 import logging
+
+from django.conf import settings
+
 log = logging.getLogger('l10n.l10n_settings')
 
 l10n_settings_defaults = {

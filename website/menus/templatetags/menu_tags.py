@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import urllib
+
 from classytags.arguments import IntegerArgument, Argument, StringArgument
 from classytags.core import Options
 from classytags.helpers import InclusionTag
@@ -8,8 +10,9 @@ from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.utils.translation import activate, get_language, ugettext
+
 from menus.menu_pool import menu_pool
-import urllib
+
 
 register = template.Library()
 

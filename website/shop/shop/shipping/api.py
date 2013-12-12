@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from django.shortcuts import redirect
+
 from shop.shop_api import ShopAPI
 from shop.order_signals import payment_selection
 from shop.models.ordermodel import ExtraOrderPriceField
-from django.shortcuts import redirect
 
 
 class ShippingAPI(ShopAPI):

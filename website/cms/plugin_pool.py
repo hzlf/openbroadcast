@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+
 from cms.exceptions import PluginAlreadyRegistered, PluginNotRegistered
 from cms.plugin_base import CMSPluginBase
 from cms.utils.django_load import load
 from cms.utils.helpers import reversion_register
 from cms.utils.placeholder import get_placeholder_conf
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
-import warnings
+
 
 class PluginPool(object):
     def __init__(self):

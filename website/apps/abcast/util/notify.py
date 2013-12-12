@@ -1,4 +1,3 @@
-import datetime
 from django.core.cache import cache
 from lib.icecast.api import IcecastAPI
 from pushy.util import pushy_custom

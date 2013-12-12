@@ -1,8 +1,10 @@
-import requests
-import oauth2
 import json
 import urlparse
 import os
+
+import requests
+import oauth2
+
 
 class Fetcher(object):
     """

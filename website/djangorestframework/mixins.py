@@ -3,8 +3,9 @@ The :mod:`mixins` module provides a set of reusable `mixin`
 classes that can be added to a `View`.
 """
 
+from StringIO import StringIO
+
 from django.contrib.auth.models import AnonymousUser
-from django.db.models.query import QuerySet
 from django.db.models.fields.related import ForeignKey
 from django.http import HttpResponse
 
@@ -15,10 +16,6 @@ from djangorestframework.resources import Resource, FormResource, ModelResource
 from djangorestframework.response import Response, ErrorResponse
 from djangorestframework.utils import as_tuple, MSIE_USER_AGENT_REGEX
 from djangorestframework.utils.mediatypes import is_form_media_type, order_by_precedence
-
-from decimal import Decimal
-import re
-from StringIO import StringIO
 
 
 __all__ = (

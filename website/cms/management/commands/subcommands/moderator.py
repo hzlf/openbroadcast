@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from cms.management.commands.subcommands.base import SubcommandsCommand
-from cms.models.pagemodel import Page
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
+
+from cms.management.commands.subcommands.base import SubcommandsCommand
+from cms.models.pagemodel import Page
 
 
 class ModeratorOnCommand(NoArgsCommand):

@@ -1,13 +1,9 @@
 #-*- coding: utf-8 -*-
-from django.core.files import File as DjangoFile
-from django.core.management.base import BaseCommand, NoArgsCommand
 from optparse import make_option
-import os
-import sys
 
-import re
+from django.core.management.base import BaseCommand, NoArgsCommand
 
-from alibrary.models import Artist, Release, Media, Label, Format
+from alibrary.models import Release, Media, Format
 from ashop.models import Downloadrelease, Downloadmedia
 
 

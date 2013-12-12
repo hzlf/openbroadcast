@@ -1,4 +1,6 @@
 import datetime
+from hashlib import sha1
+
 from django.conf import settings
 from django.core.cache import cache
 from django.db import models
@@ -6,8 +8,6 @@ from django.db.models import signals
 from django.db.models.query import QuerySet
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
-
-from hashlib import sha1
 
 
 def make_digest(key):

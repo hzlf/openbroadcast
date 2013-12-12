@@ -1,24 +1,25 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
-from cms.api import create_page
-from cms.menu import CMSMenu, get_visible_pages
-from cms.models import Page
-from cms.models.permissionmodels import GlobalPagePermission, PagePermission
-from cms.test_utils.fixtures.menus import (MenusFixture, SubMenusFixture, 
-    SoftrootFixture)
-from cms.test_utils.testcases import SettingsOverrideTestCase
-from cms.test_utils.util.context_managers import (SettingsOverride, 
-    LanguageOverride)
-from cms.test_utils.util.mock import AttributeObject
+
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser, User, Permission, Group
 from django.contrib.sites.models import Site
 from django.template import Template, TemplateSyntaxError
+
+from cms.api import create_page
+from cms.menu import CMSMenu, get_visible_pages
+from cms.models import Page
+from cms.models.permissionmodels import GlobalPagePermission, PagePermission
+from cms.test_utils.fixtures.menus import (MenusFixture, SubMenusFixture,
+    SoftrootFixture)
+from cms.test_utils.testcases import SettingsOverrideTestCase
+from cms.test_utils.util.context_managers import (SettingsOverride,
+    LanguageOverride)
+from cms.test_utils.util.mock import AttributeObject
 from menus.base import NavigationNode
 from menus.menu_pool import menu_pool, _build_nodes_inner_for_one_menu
 from menus.models import CacheKey
 from menus.utils import mark_descendants, find_selected, cut_levels
-
 
 
 class BaseMenuTest(SettingsOverrideTestCase):

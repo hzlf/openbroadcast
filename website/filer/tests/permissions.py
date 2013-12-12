@@ -1,14 +1,17 @@
 #-*- coding: utf-8 -*-
+import os
+
 from django.contrib.auth.models import User, Group
 from django.core.files import File as DjangoFile
 from django.test.testcases import TestCase
+
 from filer import settings as filer_settings
 from filer.models.clipboardmodels import Clipboard
 from filer.models.foldermodels import Folder, FolderPermission
 from filer.models.imagemodels import Image
 from filer.tests.utils import Mock
 from filer.tests.helpers import create_image, create_superuser
-import os
+
 
 class FolderPermissionsTestCase(TestCase):
 

@@ -1,8 +1,9 @@
+from django.http import HttpResponse
+
 from cms.test_utils.testcases import CMSTestCase
 from cms.test_utils.util.mock import AttributeObject
-from django.http import HttpResponse
 from menus.templatetags.menu_tags import PageLanguageUrl
-from menus.utils import (simple_language_changer, find_selected, 
+from menus.utils import (simple_language_changer, find_selected,
     language_changer_decorator)
 
 

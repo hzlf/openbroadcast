@@ -5,10 +5,10 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
+import mptt
+
 from filer.models import mixins
 from filer import settings as filer_settings
-
-import mptt
 
 
 class FolderManager(models.Manager):

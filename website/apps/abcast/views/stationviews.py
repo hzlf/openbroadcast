@@ -1,31 +1,13 @@
 from django.views.generic import DetailView, ListView
-from django.shortcuts import get_object_or_404, render_to_response
 from django.conf import settings
-
-from django.template import RequestContext
+from tagging.models import Tag
+from django.db.models import Q
 
 from pure_pagination.mixins import PaginationMixin
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
-
 from abcast.models import Station
-
-from sendfile import sendfile
-
-from ashop.util.base import get_download_permissions
-
-
 from abcast.filters import StationFilter
-
-from tagging.models import Tag, TaggedItem
-from tagging.utils import calculate_cloud
-
-
-
-from easy_thumbnails.files import get_thumbnailer
-
-from django.db.models import Q
 from lib.util import tagging_extra
-
 
 
 PAGINATE_BY = getattr(settings, 'PAGINATE_BY', (12,24,36,120))

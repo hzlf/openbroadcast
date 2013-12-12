@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
+from distutils.version import LooseVersion
+
 from classytags.arguments import Argument
 from classytags.core import Options, Tag
 from classytags.helpers import InclusionTag
-from cms.models import MASK_PAGE, MASK_CHILDREN, MASK_DESCENDANTS
-from cms.utils.admin import get_admin_menu_item_context
-from cms.utils.permissions import get_any_page_view_permissions
-from distutils.version import LooseVersion
 from django import template
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext, ugettext_lazy as _
 import django
+
+from cms.models import MASK_PAGE, MASK_CHILDREN, MASK_DESCENDANTS
+from cms.utils.admin import get_admin_menu_item_context
+from cms.utils.permissions import get_any_page_view_permissions
+
 
 register = template.Library()
 

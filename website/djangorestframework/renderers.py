@@ -5,12 +5,14 @@ Django REST framework also provides HTML and PlainText renderers that help self-
 by serializing the output along with documentation regarding the View, output status and headers,
 and providing forms and links depending on the allowed methods, renderers and parsers on the View. 
 """
+import string
+from urllib import quote_plus
+
 from django import forms
 from django.conf import settings
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.template import RequestContext, loader
 from django.utils import simplejson as json
-
 
 from djangorestframework.compat import apply_markdown, yaml
 from djangorestframework.utils import dict2xml, url_resolves
@@ -19,8 +21,6 @@ from djangorestframework.utils.description import get_name, get_description
 from djangorestframework.utils.mediatypes import get_media_type_params, add_media_type_param, media_type_matches
 from djangorestframework import VERSION
 
-import string
-from urllib import quote_plus
 
 __all__ = (
     'BaseRenderer',

@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
-from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseRedirect
 from urlparse import urlsplit
 
-from django.db.models import Q
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+
 from shop.models.cartmodel import CartItem
 from shop.models.productmodel import Product
 from shop.util.cart import get_or_create_cart
 from shop.views.cart import CartDetails
-
-from django.shortcuts import render_to_response
-from django.template import RequestContext
 
 
 class AjaxCartDetails(CartDetails):

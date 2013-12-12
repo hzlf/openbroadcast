@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
 import unittest
-import tagging
-
-from pdb import set_trace
-from StringIO import StringIO
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_unicode
 
 from tagging.fields import TagField
 from tagging.models import Tag, TaggedItem, Synonym

@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from selectable.base import LookupBase, ModelLookup
+from selectable.base import LookupBase
 from selectable.compat import force_text
 from selectable.exceptions import (LookupAlreadyRegistered, LookupNotRegistered,
                                     LookupInvalid)

@@ -5,7 +5,7 @@ from django.conf import settings
 from django.test import TestCase
 
 import django_filters
-from django_filters.tests.models import User, Comment, Book, Restaurant, Article, STATUS_CHOICES
+from django_filters.tests.models import User, Book, Restaurant, Article, STATUS_CHOICES
 
 
 class GenericViewTests(TestCase):

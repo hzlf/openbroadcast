@@ -1,37 +1,23 @@
 import os
 
-from django.views.generic import DetailView, ListView, FormView, UpdateView
-from django.views.generic.detail import SingleObjectTemplateResponseMixin
-from django.shortcuts import get_object_or_404, render_to_response
-from django import http
+from django.views.generic import DetailView, ListView, UpdateView
+from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect
-
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.cache import never_cache
-
-from django.utils import simplejson as json
-from django.template import RequestContext
 from django.db.models import Q
 from django.conf import settings
-
 from django.contrib.contenttypes.models import ContentType
-
-from tagging.models import Tag, TaggedItem
-from tagging.utils import calculate_cloud
-from easy_thumbnails.files import get_thumbnailer
+from tagging.models import Tag
+import reversion
+from sendfile import sendfile
 
 from pure_pagination.mixins import PaginationMixin
-
 from alibrary.models import Media, Playlist, PlaylistItem, Artist, Release
 from alibrary.forms import MediaForm, MediaActionForm, MediaRelationFormSet, ExtraartistFormSet
 from alibrary.filters import MediaFilter
-
 from lib.util import tagging_extra
 from lib.util import change_message
-
-import reversion
-
-from sendfile import sendfile
 import audiotranscode
 
 

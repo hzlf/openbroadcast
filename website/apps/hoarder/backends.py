@@ -1,6 +1,5 @@
 import time
 import logging
-from datetime import datetime
 
 from django.conf import settings
 from django.utils.importlib import import_module

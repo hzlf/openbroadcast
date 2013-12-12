@@ -1,8 +1,6 @@
-from django import template
-from django.conf import settings
-from django.template import Library, Node, Template, resolve_variable
-
 import time
+
+from django import template
 
 register = template.Library()
 

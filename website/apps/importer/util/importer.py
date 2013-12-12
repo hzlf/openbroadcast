@@ -1,40 +1,23 @@
 import os
-import string
-import unicodedata
 import pprint
 import re
 import time
+import shutil
+import logging
 
-import locale
-import acoustid
 import requests
-
-from mutagen import File as MutagenFile
-from mutagen.easyid3 import EasyID3
-from mutagen.id3 import ID3
-
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-
 from tagging.models import Tag
-from alibrary.models import Relation, Release, Artist, Media, Label, MediaExtraartists, Profession, ArtistMembership
-
-
-from lib.util import filer_extra
-
-from alibrary.util import lookup
-
-from settings import MEDIA_ROOT
-
-import musicbrainzngs
-import discogs_client as discogs
-
-import shutil
-
-
-from base import discogs_image_by_url, discogs_id_by_url
 from celery.task import task
-import logging
+
+from alibrary.models import Relation, Release, Artist, Media, MediaExtraartists, Profession, ArtistMembership
+from lib.util import filer_extra
+from alibrary.util import lookup
+from settings import MEDIA_ROOT
+import musicbrainzngs
+from base import discogs_image_by_url, discogs_id_by_url
+
 log = logging.getLogger(__name__)
 
 
@@ -301,8 +284,9 @@ class Importer(object):
         # attach item to current import
         if r:
             log.info('release here, add it to importitems: %s' % r)
-            ii = obj.import_session.add_importitem(r)
-            log.info('importitem created: %s' % ii)
+            if obj.import_session:
+                ii = obj.import_session.add_importitem(r)
+                log.info('importitem created: %s' % ii)
             
             # assign
             m.release = r
@@ -372,8 +356,9 @@ class Importer(object):
         # attach item to current import
         if a:
             log.info('artist here, add it to importitems: %s' % a)
-            ii = obj.import_session.add_importitem(a)
-            log.info('importitem created: %s' % ii)
+            if obj.import_session:
+                ii = obj.import_session.add_importitem(a)
+                log.info('importitem created: %s' % ii)
             
             # assign
             m.artist = a
@@ -410,8 +395,9 @@ class Importer(object):
 
         # save assignments
         m.save()
-        
-        obj.import_session.add_importitem(m)
+
+        if obj.import_session:
+            obj.import_session.add_importitem(m)
         
         # add file
         folder = "private/%s/" % (m.uuid.replace('-', '/'))

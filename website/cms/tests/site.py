@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
+
+from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
+
 from cms.api import create_page
 from cms.models import Page
 from cms.test_utils.testcases import CMSTestCase
 from cms.test_utils.util.context_managers import SettingsOverride
-from django.contrib.auth.models import User
-from django.contrib.sites.models import Site
+
 
 class SiteTestCase(CMSTestCase):
     """Site framework specific test cases.

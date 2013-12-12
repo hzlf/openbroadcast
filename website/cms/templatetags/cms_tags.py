@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
+from itertools import chain
+import re
+
 from classytags.arguments import Argument, MultiValueArgument
 from classytags.core import Options, Tag
 from classytags.helpers import InclusionTag, AsTag
 from classytags.parser import Parser
-from cms.models import Page, Placeholder as PlaceholderModel
-from cms.plugin_rendering import render_plugins, render_placeholder
-from cms.plugins.utils import get_plugins, assign_plugins
-from cms.utils import get_language_from_request
-from cms.utils.moderator import get_cmsplugin_queryset, get_page_queryset
-from cms.utils.placeholder import validate_placeholder_name
 from django import template
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -16,8 +13,13 @@ from django.core.cache import cache
 from django.core.mail import mail_managers
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _, get_language
-from itertools import chain
-import re
+
+from cms.models import Page, Placeholder as PlaceholderModel
+from cms.plugin_rendering import render_plugins, render_placeholder
+from cms.plugins.utils import get_plugins, assign_plugins
+from cms.utils import get_language_from_request
+from cms.utils.moderator import get_cmsplugin_queryset, get_page_queryset
+from cms.utils.placeholder import validate_placeholder_name
 
 
 register = template.Library()

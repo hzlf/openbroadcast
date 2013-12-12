@@ -1,13 +1,16 @@
 from __future__ import with_statement
-from cms.test_utils.util.context_managers import TemporaryDirectory
-from django.core.management.base import CommandError
-from django.core.management.commands.compilemessages import (compile_messages, 
-    has_bom)
-from django.test.testcases import TestCase
 import os
 import shutil
 import subprocess
 import sys
+
+from django.core.management.base import CommandError
+from django.core.management.commands.compilemessages import (compile_messages,
+    has_bom)
+from django.test.testcases import TestCase
+
+from cms.test_utils.util.context_managers import TemporaryDirectory
+
 
 THIS_DIR = os.path.dirname(__file__)
 SOURCE_DIR = os.path.abspath(os.path.join(THIS_DIR, '..', 'locale'))

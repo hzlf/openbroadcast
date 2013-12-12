@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
-from django.db.models.base import ModelBase
-from cms.publisher.manager import PublisherManager
 from mptt.models import MPTTModelBase
+
+from cms.publisher.manager import PublisherManager
 from cms.publisher.options import PublisherOptions
 
 

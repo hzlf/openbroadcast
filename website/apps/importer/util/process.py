@@ -1,28 +1,20 @@
-from mutagen import File as MutagenFile
-from mutagen.easyid3 import EasyID3
-from mutagen.id3 import ID3
-
-from django.conf import settings
-
 import os
 import re
 import locale
+import pprint
+import logging
+
+from mutagen import File as MutagenFile
+from mutagen.easyid3 import EasyID3
+from django.conf import settings
 import acoustid
 import requests
-import pprint
-
-from xml.etree import ElementTree as ET
-import simplejson
 
 import musicbrainzngs
-import discogs_client as discogs
-
 from lib.util import pesterfish
 from lib.util.sha1 import sha1_by_file
+from base import discogs_image_by_url
 
-from base import discogs_image_by_url 
-
-import logging
 log = logging.getLogger(__name__)
 
 

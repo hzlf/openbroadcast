@@ -5,21 +5,17 @@ fields.
 This file contains the implementation for QSRF Django.
 """
 
-import datetime
 from copy import deepcopy
 
 from django.core.exceptions import FieldError
-from django.db import connection
 from django.db.models.fields import FieldDoesNotExist
-from django.db.models.query import QuerySet, Q
+from django.db.models.query import QuerySet
 from django.db.models.sql.query import Query
 from django.db import connections, DEFAULT_DB_ALIAS
 from django.db.models.sql.datastructures import (
-    EmptyResultSet,
-    Empty,
     MultiJoin)
 from django.db.models.sql.constants import *
-from django.db.models.sql.where import WhereNode, EverythingNode, AND, OR
+from django.db.models.sql.where import WhereNode, AND, OR
 
 try:
     # handle internal API changes in Django rev. 9700

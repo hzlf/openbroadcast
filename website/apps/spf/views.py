@@ -1,7 +1,7 @@
 import unicodecsv as csv
 from django.http import HttpResponse
 
-from spf.models import Match, Request
+from spf.models import Request
 
 def matches_csv(request):
     # Create the HttpResponse object with the appropriate CSV header.

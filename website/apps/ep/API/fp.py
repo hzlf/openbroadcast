@@ -8,12 +8,19 @@ Copyright (c) 2010 The Echo Nest Corporation. All rights reserved.
 """
 from __future__ import with_statement
 import logging
-import solr
 import pickle
 from collections import defaultdict
-import zlib, base64, re, time, random, string, math
-import pytyrant
+import zlib
+import base64
+import re
+import time
+import random
+import string
 import datetime
+
+import solr
+import pytyrant
+
 
 now = datetime.datetime.utcnow()
 IMPORTDATE = now.strftime("%Y-%m-%dT%H:%M:%SZ")

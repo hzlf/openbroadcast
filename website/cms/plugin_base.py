@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from cms.exceptions import SubClassNeededError, Deprecated
-from cms.models import CMSPlugin
 from django import forms
 from django.conf import settings
 from django.contrib import admin
@@ -9,6 +7,10 @@ from django.db.models.options import get_verbose_name
 from django.forms.models import ModelForm
 from django.utils.encoding import smart_str
 from django.utils.translation import ugettext_lazy as _
+
+from cms.exceptions import SubClassNeededError, Deprecated
+from cms.models import CMSPlugin
+
 
 class CMSPluginBaseMetaclass(forms.MediaDefiningClass):
     """

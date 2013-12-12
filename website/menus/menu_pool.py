@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-from cms.utils.django_load import load
+import copy
+
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.utils.translation import get_language
+
+from cms.utils.django_load import load
 from menus.exceptions import NamespaceAllreadyRegistered
 from menus.models import CacheKey
-import copy
+
 
 def _build_nodes_inner_for_one_menu(nodes, menu_class_name):
     '''

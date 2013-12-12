@@ -1,7 +1,6 @@
 from django.db import models
 
 from multilingual.query import MultilingualModelQuerySet
-from multilingual.languages import *
 
 
 class MultilingualManager(models.Manager):

@@ -1,16 +1,18 @@
 #-*- coding: utf-8 -*-
+import hashlib
+import os
+
 from django.contrib.auth import models as auth_models
 from django.core import urlresolvers
 from django.core.files.base import ContentFile
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from polymorphic import PolymorphicModel, PolymorphicManager
+
 from filer.fields.multistorage_file import MultiStorageFileField
 from filer.models import mixins
 from filer import settings as filer_settings
 from filer.models.foldermodels import Folder
-from polymorphic import PolymorphicModel, PolymorphicManager
-import hashlib
-import os
 
 
 class FileManager(PolymorphicManager):

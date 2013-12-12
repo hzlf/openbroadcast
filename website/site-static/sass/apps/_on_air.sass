@@ -1,33 +1,116 @@
+$on-air-fg: #333
+$on-air-bg: #f5f5f5
+
 .on-air-container
   padding: 5px 0
-  background: #fafafa
+  background: white
+
+  > .actions
+    a
+      text-transform: uppercase
+      &.btn
+        background-color: #0b0
+        border: none
+
+
   .channel
     padding: 0 5px
+
+
   .emission
-    padding: 0 5px
-    // background: orange
-    .name
-      text-transform: uppercase
-    small
-      font-size: 80%
-      color: #a5a5a5
-  .items
-    > div
-    
-      padding: 0
-      height: 54px
-      overflow: hidden
-      margin-bottom: 4px
-      span.playing
-        display: none
-    
-    > div.playing
+    background: $on-air-bg
+    color: $on-air-fg
+    margin-bottom: 2px
+    padding: 0 5px 2px
+    a
+      color: $on-air-fg
+
+    h3, p
+      color: $on-air-fg !important
+
+    &:hover
       background: #ddffd9
-      span.playing
-        display: inline
-      
-    > div.past
-    
+
+
+    section.description
+      display: none
+      padding-bottom: 3px
+
+      img
+        width: 100% !important
+
+    .__legacy__
+      background: $on-air-bg
+      color: white
+      margin-bottom: 2px
+      a
+        color: white
+
+      ul
+        margin: 0
+        padding: 0
+
+      padding: 0 5px
+      // background: orange
+      .name
+        text-transform: uppercase
+      small
+        font-size: 80%
+        color: #a5a5a5
+
+  .items
+
+    .item
+      +clearfix()
+      background: $on-air-bg
+      margin-bottom: 2px
+      color: $on-air-fg
+      a
+        color: $on-air-fg
+      .image
+        width: 64px
+        padding: 5px
+        float: left
+        img
+          width: 64px
+          width: 100%
+      .information
+        padding: 5px
+        float: left
+
+      &.playing
+        background: $on-air-bg
+        .image
+          padding: 1%
+          width: 100%
+          img
+            width: 98%
+        .information
+          color: $on-air-fg
+          float: none
+          clear: both
+          a
+            color: $on-air-fg
+
+      &:hover
+        background: #ddffd9
+
+
+    //
+      > div
+
+        padding: 0
+        height: 54px
+        overflow: hidden
+        margin-bottom: 4px
+        span.playing
+          display: none
+
+      > div.playing
+        background: #ddffd9
+        span.playing
+          display: inline
+
   .count
     padding: 0 5px
     

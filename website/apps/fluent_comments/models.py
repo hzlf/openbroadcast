@@ -9,16 +9,6 @@ from django.shortcuts import render
 from fluent_comments import appsettings
 
 # redis queue
-import redis
-import json
-import string
-import random
-import time
-
-import markdown
-import re
-
-from easy_thumbnails.files import get_thumbnailer
 
 
 

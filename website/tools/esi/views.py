@@ -1,9 +1,8 @@
 # Create your views here.
 from django.conf import settings
-from django.core.exceptions import PermissionDenied
 from django.core.xheaders import populate_xheaders
-from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render_to_response
+from django.http import Http404, HttpResponse
+from django.shortcuts import get_object_or_404
 from django.template import RequestContext, loader
 from django.db.models import Model, get_model
 from django.utils.cache import patch_cache_control

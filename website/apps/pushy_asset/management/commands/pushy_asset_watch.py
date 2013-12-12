@@ -1,19 +1,15 @@
 import os
-import sys
-from collections import OrderedDict
 from optparse import make_option
 
 import time
 from watchdog.observers import Observer
-from watchdog.events import LoggingEventHandler, FileSystemEventHandler
+from watchdog.events import FileSystemEventHandler
 
 
 
 from django.core.files.storage import FileSystemStorage
-from django.core.management.base import CommandError, NoArgsCommand
-from django.contrib.staticfiles import finders, storage
-from django.template.loader import render_to_string
-
+from django.core.management.base import NoArgsCommand
+from django.contrib.staticfiles import storage
 
 from pushy_asset.compiler import PushyAssetCompiler
 

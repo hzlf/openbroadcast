@@ -1,7 +1,9 @@
-from cms.models.fields import PlaceholderField
 from django.core.urlresolvers import reverse
 from django.db import models
 import mptt
+
+from cms.models.fields import PlaceholderField
+
 
 class Category(models.Model):
     parent = models.ForeignKey('self', blank=True, null=True)

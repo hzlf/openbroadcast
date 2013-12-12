@@ -1,7 +1,6 @@
 from django.conf.urls.defaults import *
 
 # app imports
-from alibrary.models import Playlist
 from alibrary.views import *
 urlpatterns = patterns('',
 

@@ -1,42 +1,26 @@
+import logging
+
 from django import forms
-from django.conf import settings
-
 from django.forms import ModelForm, Form
-
 from django.forms.models import BaseInlineFormSet, inlineformset_factory
 from django.contrib.contenttypes.generic import BaseGenericInlineFormSet, generic_inlineformset_factory
-
-
 from django.utils.translation import ugettext as _
-
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import *
 from crispy_forms.bootstrap import FormActions
 
 from filer.models.imagemodels import Image
-
-from django.contrib.admin import widgets as admin_widgets
-
-import logging
 logger = logging.getLogger(__name__)
 
 
-from alibrary.models import Release, Media, Relation
+from alibrary.models import Relation
 
 from pagedown.widgets import PagedownWidget
 
 import selectable.forms as selectable
 from alibrary.lookups import *
 
-
-import floppyforms as forms
-from django_date_extensions.fields import ApproximateDateFormField
-
-from ajax_select.fields import AutoCompleteSelectField
-from ajax_select import make_ajax_field
-
-    
-from django.forms.widgets import FileInput, HiddenInput
+from django.forms.widgets import FileInput
 
 #from floppyforms.widgets import DateInput
 from tagging.forms import TagField

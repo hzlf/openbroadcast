@@ -1,7 +1,7 @@
 import unittest
 from dgs2.discogs_client.models import Artist, Release
 from dgs2.discogs_client.tests import DiscogsClientTestCase
-from dgs2.discogs_client.exceptions import ConfigurationError, HTTPError
+from dgs2.discogs_client.exceptions import HTTPError
 
 class ModelsTestCase(DiscogsClientTestCase):
     def test_artist(self):

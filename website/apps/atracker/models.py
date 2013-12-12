@@ -1,6 +1,4 @@
 """Models for the ``object_events`` app."""
-from django.conf import settings
-from django.contrib.auth.models import SiteProfileNotAvailable
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -9,10 +7,6 @@ from django.template.defaultfilters import date
 from django.utils.timesince import timesince
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-
-from django.contrib.contenttypes.models import ContentType
-
-
 
 
 class EventType(models.Model):

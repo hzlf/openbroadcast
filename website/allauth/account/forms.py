@@ -9,8 +9,6 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.utils.encoding import smart_unicode
-from django.utils.hashcompat import sha_constructor
 from django.utils.http import int_to_base36
 
 from django.contrib import messages
@@ -22,7 +20,7 @@ from django.contrib.sites.models import Site
 from emailconfirmation.models import EmailAddress
 
 # from models import PasswordReset
-from utils import user_display, perform_login, send_email_confirmation
+from utils import perform_login, send_email_confirmation
 from allauth.utils import email_address_exists
         
 from app_settings import *

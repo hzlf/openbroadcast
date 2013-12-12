@@ -1,28 +1,16 @@
-from django.contrib.auth.models import User
-from django.db.models import Count
-
 from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
-from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
-
-
-
-from tastypie.cache import SimpleCache
-
-from django.contrib import comments
-
+from tastypie.resources import ModelResource
 from django.contrib.comments.models import Comment
+from django.contrib.sites.models import Site
 
 from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
-
 from alibrary.models import Release
 from alibrary.api import ReleaseResource
-
 from abcast.models import Channel
 from abcast.api import ChannelResource
 
-from django.contrib.sites.models import Site 
 
 """
 class ReleaseResource(ModelResource):

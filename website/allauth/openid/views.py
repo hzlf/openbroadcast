@@ -2,8 +2,6 @@ from django.utils.http import urlencode
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
-from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 

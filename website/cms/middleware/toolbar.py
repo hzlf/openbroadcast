@@ -2,9 +2,10 @@
 """
 Edit Toolbar middleware
 """
-from cms.cms_toolbar import CMSToolbar
 from django.http import HttpResponse
 from django.template.loader import render_to_string
+
+from cms.cms_toolbar import CMSToolbar
 
 
 def toolbar_plugin_processor(instance, placeholder, rendered_content, original_context):

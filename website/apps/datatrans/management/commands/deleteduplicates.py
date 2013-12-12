@@ -1,8 +1,10 @@
 from collections import defaultdict
-from datatrans.models import KeyValue
+
 from django.db import connection, transaction
 from django.core.management.base import BaseCommand
 from south.db import db
+
+from datatrans.models import KeyValue
 
 
 class Command(BaseCommand):

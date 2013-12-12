@@ -1,7 +1,6 @@
 import re
 
 from django.conf import settings
-from django.db.models.loading import get_model
 from django.core.cache import cache
 from django.utils.safestring import mark_safe
 

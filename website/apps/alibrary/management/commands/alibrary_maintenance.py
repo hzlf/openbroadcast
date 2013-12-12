@@ -1,24 +1,14 @@
 #-*- coding: utf-8 -*-
 import os
-import sys
-import time
-import re
 import hashlib
 import pprint
-
-import requests
-
-from django.core.files import File as DjangoFile
-from django.core.management.base import BaseCommand, NoArgsCommand
 from optparse import make_option
-
-
-
 import logging
 
-log = logging.getLogger(__name__)
+from django.core.management.base import BaseCommand, NoArgsCommand
 
-from datetime import datetime
+
+log = logging.getLogger(__name__)
 
 ECHONEST_API_KEY = 'DC7YKF3VYN7R0LG1M'
 
@@ -134,7 +124,6 @@ class MaintenanceWorker(object):
 
         if self.action == 'self_check_playlists':
 
-            from alibrary.models import Playlist
             from alibrary.models.mediamodels import self_check_playlists
 
             # reset

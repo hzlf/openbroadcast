@@ -1,8 +1,9 @@
+import logging
+
 from django.db import transaction
 from django.db.models import get_models, Model
 from django.contrib.contenttypes.generic import GenericForeignKey
 
-import logging
 logger = logging.getLogger(__name__)
 
 @transaction.commit_on_success

@@ -13,8 +13,6 @@ from crispy_forms_filters import *
 
 TEMPLATE_PACK = getattr(settings, 'CRISPY_TEMPLATE_PACK', 'bootstrap')
 
-from time import gmtime, strftime
-
 
 class ForLoopSimulator(object):
     """

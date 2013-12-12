@@ -1,7 +1,22 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
+from types import MethodType
+from unittest import TestCase
+
+from django.conf import settings
+from django.contrib import admin
+from django.contrib.admin.sites import site
+from django.contrib.auth.models import User, Permission, AnonymousUser
+from django.contrib.sites.models import Site
+from django.core.exceptions import PermissionDenied
+from django.core.urlresolvers import reverse
+from django.http import (Http404, HttpResponseBadRequest, HttpResponseForbidden,
+    HttpResponse)
+from django.test.client import Client, RequestFactory
+from django.utils.encoding import smart_str
+
 from cms.admin.change_list import CMSChangeList
-from cms.admin.dialog.forms import (ModeratorForm, PermissionForm, 
+from cms.admin.dialog.forms import (ModeratorForm, PermissionForm,
     PermissionAndModeratorForm)
 from cms.admin.dialog.views import _form_class_selector
 from cms.admin.forms import PageForm
@@ -15,24 +30,11 @@ from cms.models.placeholdermodel import Placeholder
 from cms.models.titlemodels import Title
 from cms.plugins.text.models import Text
 from cms.test_utils import testcases as base
-from cms.test_utils.testcases import (CMSTestCase, URL_CMS_PAGE_DELETE, 
+from cms.test_utils.testcases import (CMSTestCase, URL_CMS_PAGE_DELETE,
     URL_CMS_PAGE, URL_CMS_TRANSLATION_DELETE)
 from cms.test_utils.util.context_managers import SettingsOverride
 from cms.test_utils.util.mock import AttributeObject
-from django.conf import settings
-from django.contrib import admin
-from django.contrib.admin.sites import site
-from django.contrib.auth.models import User, Permission, AnonymousUser
-from django.contrib.sites.models import Site
-from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
-from django.http import (Http404, HttpResponseBadRequest, HttpResponseForbidden, 
-    HttpResponse)
-from django.test.client import Client, RequestFactory
-from django.utils.encoding import smart_str
 from menus.menu_pool import menu_pool
-from types import MethodType
-from unittest import TestCase
 
 
 class AdminTestsBase(CMSTestCase):

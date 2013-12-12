@@ -1,13 +1,11 @@
 #!/usr/bin/env python
-import echoprint
-import requests
 import subprocess
-import sys
-import struct
 import json
 
+import requests
 
 from settings import ENMFP_CODEGEN_BIN, ECHONEST_API_KEY
+
 
 class Analyze:
     

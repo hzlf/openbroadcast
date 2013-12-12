@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from cms.api import create_page, create_title, publish_page, add_plugin
-from cms.middleware.multilingual import patch_response
-from cms.test_utils.testcases import CMSTestCase
+import urllib
+
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test.client import Client
-import urllib
+
+from cms.api import create_page, create_title, publish_page, add_plugin
+from cms.middleware.multilingual import patch_response
+from cms.test_utils.testcases import CMSTestCase
 
 
 class MultilingualTestCase(CMSTestCase):

@@ -1,13 +1,10 @@
-from django.template import RequestContext
-from django.views.generic import DetailView, ListView, FormView, UpdateView, CreateView, DeleteView
+from django.views.generic import ListView, UpdateView, CreateView, DeleteView
 
-from django.views.generic.detail import SingleObjectTemplateResponseMixin, TemplateResponseMixin
+from django.views.generic.detail import TemplateResponseMixin
 from  django.views.generic.edit import FormMixin, ProcessFormView
-from django.shortcuts import get_object_or_404, render_to_response
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden
 from django.core.files.uploadedfile import UploadedFile
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.utils.functional import lazy

@@ -10,7 +10,7 @@ import sys
 os.environ['DJANGO_SETTINGS_MODULE'] = 'djangorestframework.runtests.settings'
 
 from coverage import coverage
-from itertools import chain
+
 
 def main():
     """Run the tests for djangorestframework and generate a coverage report."""

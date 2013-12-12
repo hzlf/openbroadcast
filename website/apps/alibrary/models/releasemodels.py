@@ -1,29 +1,19 @@
 # python
 import datetime
 from datetime import *
-import time
-import uuid
-import shutil
-import sys
-import tempfile
 import glob
-import sets
-import requests
 from zipfile import ZipFile
+
+import requests
+
 
 # django
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import post_save
-from django.template.defaultfilters import slugify
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
-from django.core.files import File as DjangoFile
 from django.core.urlresolvers import reverse
-
-from django.contrib.contenttypes.generic import GenericRelation
-
-from django.http import HttpResponse # needed for absolute url
 
 from settings import *
 
@@ -50,7 +40,6 @@ from django_date_extensions.fields import ApproximateDateField
 # modules
 #from taggit.managers import TaggableManager
 from django_countries import CountryField
-from easy_thumbnails.files import get_thumbnailer
 
 import tagging
 import reversion 
@@ -71,9 +60,8 @@ import arating
 
 from alibrary.models.basemodels import *
 from alibrary.models.artistmodels import *
-from alibrary.models.mediamodels import *
-from alibrary.models.playlistmodels import *
-from alibrary.models.labelmodels import *
+from alibrary.models.labelmodels import Label
+from alibrary.models.mediamodels import Media
 
 
 

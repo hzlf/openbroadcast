@@ -3,30 +3,22 @@
 
 import os
 import time
-import datetime
-import re
+import logging
 
 from django.db import models
 from django.db.models.signals import post_save
-
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
-
-from django.db.models.signals import post_delete, post_save
+from django.db.models.signals import post_delete
 from django.core.urlresolvers import reverse
-
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
-
 from django_extensions.db.fields.json import JSONField
+import magic
+from celery.task import task
 
 from alibrary.models import Media
 
-
-
-import magic
-from celery.task import task
-import logging
 log = logging.getLogger(__name__)
 
 USE_CELERYD = True
@@ -186,10 +178,16 @@ class Import(BaseModel):
 
     # importitem handling
     def add_importitem(self, item):
+
         ctype = ContentType.objects.get_for_model(item)
-        
-        item, created = ImportItem.objects.get_or_create(object_id=item.pk, content_type=ctype, import_session=self)
-    
+
+        try:
+            item, created = ImportItem.objects.get_or_create(object_id=item.pk, content_type=ctype, import_session=self)
+        except Exception, e:
+            item = ImportItem.objects.filter(object_id=item.pk, content_type=ctype, import_session=self)[0]
+            created = False
+
+
         if created:
             self.add_to_playlist(item)
             self.add_to_collection(item)
@@ -343,7 +341,8 @@ class ImportFile(BaseModel):
                 if media:
                     obj.status = 5
                     obj.media = media
-                    obj.import_session.add_importitem(obj)
+                    if obj.import_session:
+                        obj.import_session.add_importitem(obj)
                     obj.save()
 
                     return
@@ -402,7 +401,8 @@ class ImportFile(BaseModel):
         if media:
             obj.status = 5
             # add to session
-            obj.import_session.add_importitem(obj)
+            if obj.import_session:
+                obj.import_session.add_importitem(obj)
         
         obj.results_tag_status = True
         obj.save()
@@ -510,7 +510,6 @@ def post_save_importfile(sender, **kwargs):
 post_save.connect(post_save_importfile, sender=ImportFile)      
   
 def post_delete_importfile(sender, **kwargs):
-    import shutil
     obj = kwargs['instance']
     try:
         os.remove(obj.file.path)

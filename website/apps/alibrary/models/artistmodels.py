@@ -1,25 +1,13 @@
 # python
-import datetime
-import uuid
-import shutil
-import sys
 
 # django
 from django.db import models
 from django.db.models.signals import post_save
 from django.db.models import Q
-from django.template.defaultfilters import slugify
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
-from django.core.files import File as DjangoFile
 from django.core.urlresolvers import reverse
 
-
-from django.contrib.contenttypes.generic import GenericRelation
-
-from django.http import HttpResponse # needed for absolute url
-
-from settings import *
 
 # django-extensions (http://packages.python.org/django-extensions/)
 from django_extensions.db.fields import UUIDField, AutoSlugField
@@ -42,8 +30,6 @@ from django_date_extensions.fields import ApproximateDateField
 
 # modules
 #from taggit.managers import TaggableManager
-from django_countries import CountryField
-from easy_thumbnails.files import get_thumbnailer
 
 import tagging
 import reversion 
@@ -60,8 +46,6 @@ import arating
 ################
 from alibrary.models.basemodels import *
 from alibrary.models.releasemodels import *
-from alibrary.models.mediamodels import *
-from alibrary.models.playlistmodels import *
 
 from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify

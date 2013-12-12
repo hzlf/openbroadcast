@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
 # TODO: this is just stuff from utils.py - should be splitted / moved
-from cms.utils.i18n import get_default_language
 from distutils.version import LooseVersion
+import os
+
 from django.conf import settings
 from django.core.files.storage import get_storage_class
-from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response
-from django.template import RequestContext
 from django.utils.functional import LazyObject
 import django
-import os
-import urllib
+
+from cms.utils.i18n import get_default_language
 
 
 def get_template_from_request(request, obj=None, no_current_page=False):

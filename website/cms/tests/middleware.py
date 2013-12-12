@@ -1,13 +1,15 @@
 #-*- coding: utf-8 -*-
 from __future__ import with_statement
+
+from django.http import HttpResponse, HttpResponseRedirect
+from django.conf import settings
+
 from cms.middleware.multilingual import MultilingualURLMiddleware, HAS_LANG_PREFIX_RE
 from cms.test_utils.testcases import CMSTestCase
 from cms.test_utils.util.context_managers import SettingsOverride
 from cms.test_utils.util.mock import AttributeObject
-from django.http import HttpResponse, HttpResponseRedirect
-from django.conf import settings
-import django
 from cms.templatetags.cms_admin import admin_static_url
+
 
 class MiddlewareTestCase(CMSTestCase):
     def test_multilingual_middleware_get_lang_from_request(self):

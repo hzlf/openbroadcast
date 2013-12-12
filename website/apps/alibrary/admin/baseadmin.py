@@ -7,15 +7,13 @@ from alibrary.models import ArtistProfessions, MediaExtraartists, ReleaseExtraar
 """
 from alibrary.models import *
 
-from django.contrib.contenttypes.generic import *
-
 from guardian.admin import GuardedModelAdmin
 
 from ashop.models import *
 
 from django.utils.safestring import mark_safe
 from django.shortcuts import render_to_response
-from django.template import RequestContext, loader
+from django.template import RequestContext
 
 from multilingual.admin import MultilingualModelAdmin
 

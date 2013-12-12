@@ -1,6 +1,3 @@
-from django.conf.urls.defaults import *
-
-
 from tastypie.api import Api
 #from tastytools.api import Api
 

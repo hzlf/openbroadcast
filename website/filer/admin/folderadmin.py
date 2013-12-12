@@ -1,11 +1,13 @@
 #-*- coding: utf-8 -*-
+import os
+import itertools
+import inspect
+
 from django import forms
 from django import template
-from django.contrib import admin
 from django.contrib.admin import helpers
 from django.contrib.admin.util import quote, unquote, capfirst
 from django.template.defaultfilters import urlencode
-from filer.admin.patched.admin_utils import get_deleted_objects
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.core.urlresolvers import reverse
@@ -19,6 +21,9 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.utils.translation import ungettext, ugettext_lazy
+from django.conf import settings as django_settings
+
+from filer.admin.patched.admin_utils import get_deleted_objects
 from filer import settings
 from filer.admin.forms import (CopyFilesAndFoldersForm, ResizeImagesForm,
                                RenameFilesForm)
@@ -35,11 +40,6 @@ from filer.models import (Folder, FolderRoot, UnfiledImages, File, tools,
 from filer.settings import FILER_STATICMEDIA_PREFIX, FILER_PAGINATE_BY
 from filer.utils.filer_easy_thumbnails import FilerActionThumbnailer
 from filer.thumbnail_processors import normalize_subject_location
-from django.conf import settings as django_settings
-import urllib
-import os
-import itertools
-import inspect
 
 
 class AddFolderPopupForm(forms.ModelForm):
@@ -1047,7 +1047,6 @@ class FolderAdmin(PrimitivePermissionAwareModelAdmin):
             'upscale': form_data['upscale'],
             'subject_location': image.subject_location,
         })
-        from django.db.models.fields.files import ImageFieldFile
         image.file.file = new_image.file
         image.generate_sha1()
         image.save()  # Also gets new width and height

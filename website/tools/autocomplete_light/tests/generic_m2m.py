@@ -1,13 +1,9 @@
-from autocomplete.case import *
-from autocomplete.generic import AutocompleteGenericMock, AutocompleteGenericTestCase
-
 from django import http
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import User, Group, Permission
-
 from autocomplete_light.contrib.generic_m2m import GenericModelForm, \
     GenericModelMultipleChoiceField
 
+from autocomplete.case import *
+from autocomplete.generic import AutocompleteGenericMock
 from generic_m2m_autocomplete.models import ModelGroup
 
 

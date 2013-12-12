@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
-from cms.exceptions import NoHomeFound
-from cms.models.pagemodel import Page
+import urllib
+import re
 
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.db.models.query_utils import Q
-import urllib
-import re
+
+from cms.exceptions import NoHomeFound
+from cms.models.pagemodel import Page
+
 
 ADMIN_PAGE_RE_PATTERN = ur'cms/page/(\d+)'
 ADMIN_PAGE_RE = re.compile(ADMIN_PAGE_RE_PATTERN)

@@ -1,6 +1,8 @@
 #-*- coding: utf-8 -*-
-from django.template import Library
 import math
+
+from django.template import Library
+
 
 register = Library()
 

@@ -4,44 +4,25 @@
 import os
 import time
 import datetime
-import re
 import shutil
-import urllib
+import logging
 
 from django.db import models
 from django.db.models.signals import post_save
 from django.core.files import File as DjangoFile
-
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
-
-from django.db.models.signals import post_delete, post_save
-
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
-
 from django.core.urlresolvers import reverse
-
 from django.template.loader import render_to_string
-
-from django_extensions.db.fields.json import JSONField
-
-from zipfile import ZipFile
-
 from django.utils.hashcompat import sha_constructor
-
-from alibrary.models import Release, Media, Artist, Relation
+from celery.task import task
 
 from util.process import Process
-from util.dbox import Synchronizer
-
 from lib.util.filename import safe_name
-
 from pushy.util import pushy_custom
 
-import magic
-from celery.task import task
-import logging
 
 log = logging.getLogger(__name__)
 

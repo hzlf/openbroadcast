@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-from menus.base import Menu
 from django.core.exceptions import ValidationError
+
+from menus.base import Menu
+
 
 class CMSAttachMenu(Menu):
     cms_enabled = True

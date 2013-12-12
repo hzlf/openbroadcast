@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
+from django.conf import settings
+from django.contrib.sites.models import Site
+from django.db import models
+from django.db.models import Q
+
 from cms.cache.permissions import get_permission_cache, set_permission_cache
 from cms.exceptions import NoPermissionsException
 from cms.models.query import PageQuerySet
 from cms.publisher import PublisherManager
 from cms.utils.i18n import get_fallback_languages
-from django.conf import settings
-from django.contrib.sites.models import Site
-from django.db import models
-from django.db.models import Q
 
 
 class PageManager(PublisherManager):

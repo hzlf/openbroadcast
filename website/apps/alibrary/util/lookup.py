@@ -1,13 +1,9 @@
+import logging
+
 from django.contrib.contenttypes.models import ContentType
 
 from alibrary.models.basemodels import *
 from alibrary.models.artistmodels import *
-from alibrary.models.mediamodels import *
-from alibrary.models.releasemodels import *
-from alibrary.models.playlistmodels import *
-
-
-import logging
 log = logging.getLogger(__name__)
 
 

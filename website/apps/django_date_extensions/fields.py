@@ -1,10 +1,15 @@
-import time, re, datetime
+import time
+import re
+import datetime
 from datetime import date
-from widgets import PrettyDateInput
+
 from django.db import models
 from django import forms
 from django.forms import ValidationError
 from django.utils import dateformat
+
+from widgets import PrettyDateInput
+
 
 class ApproximateDate(object):
     """A date object that accepts 0 for month or day to mean we don't

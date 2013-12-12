@@ -1,8 +1,6 @@
 from django.contrib import admin
-from django import forms
 
 # generic relations
-from genericrelations.models import RelatedContentInline
 from genericrelations.admin import GenericAdminModelAdmin
 
 from abcast.models import Broadcast, Emission, Daypart, DaypartSet, Weekday

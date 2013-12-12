@@ -1,8 +1,13 @@
-from datetime import datetime
+import os
+import tempfile
+import shutil
+import sys
+
 from django.conf import settings
+
 from utils.audioprocessing.processing import AudioProcessingException
 import utils.audioprocessing.processing as audioprocessing
-import os, tempfile, gearman, shutil, sys
+import gearman
 
 
 def process(sound):

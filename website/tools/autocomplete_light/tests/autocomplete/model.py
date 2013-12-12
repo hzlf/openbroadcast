@@ -1,6 +1,6 @@
-from .case import *
-
 from django.contrib.auth.models import User
+
+from .case import *
 
 
 class AutocompleteModelMock(autocomplete_light.AutocompleteModelBase):

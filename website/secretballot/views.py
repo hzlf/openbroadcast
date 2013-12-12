@@ -2,7 +2,6 @@ from django.template import loader, RequestContext
 from django.core.exceptions import ImproperlyConfigured
 from django.http import (HttpResponse, HttpResponseRedirect, Http404, 
                          HttpResponseForbidden)
-from django.db.models import get_model
 from django.db.models.base import ModelBase
 from django.contrib.contenttypes.models import ContentType
 from secretballot.models import Vote

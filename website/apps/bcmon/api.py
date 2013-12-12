@@ -1,10 +1,7 @@
-from django.contrib.auth.models import User
-from django.db.models import Count
-
 from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
-from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
+from tastypie.resources import ModelResource, Resource, ALL_WITH_RELATIONS
 
 from bcmon.models import *
 from alibrary.api import MediaResource

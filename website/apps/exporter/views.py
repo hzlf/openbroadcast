@@ -1,30 +1,19 @@
-from django.template import RequestContext
-from django.views.generic import DetailView, ListView, FormView, UpdateView, CreateView, DeleteView
+import logging
 
-from django.views.generic.detail import SingleObjectTemplateResponseMixin, TemplateResponseMixin
+from django.views.generic import ListView, UpdateView, CreateView, DeleteView
+from django.views.generic.detail import TemplateResponseMixin
 from  django.views.generic.edit import FormMixin, ProcessFormView
-from django.shortcuts import get_object_or_404, render_to_response
-from django.conf import settings
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden
-from django.core.files.uploadedfile import UploadedFile
-from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.utils.functional import lazy
-from django.views.decorators.csrf import csrf_exempt
-from django.utils import simplejson
-
 from django import http
 from django.utils import simplejson as json
-
 from sendfile import sendfile
-import urllib
-from django_crypto import DecodeAES
 
 from exporter.models import *
 from exporter.forms import *
-
-import logging
 log = logging.getLogger(__name__)
 
 

@@ -1,14 +1,15 @@
 """Tests for the status module"""
 from django.test import TestCase
+from django.contrib.auth.models import Group, User
+
 from djangorestframework import status
 from djangorestframework.compat import RequestFactory
-from django.contrib.auth.models import Group, User
 from djangorestframework.mixins import CreateModelMixin
 from djangorestframework.resources import ModelResource
 from djangorestframework.tests.models import CustomUser
 
 
-class TestModelCreation(TestCase): 
+class TestModelCreation(TestCase):
     """Tests on CreateModelMixin"""
 
     def setUp(self):

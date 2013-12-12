@@ -6,7 +6,6 @@ from django.conf import settings
 from django.core.xheaders import populate_xheaders
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
-import multilingual
 
 DEFAULT_TEMPLATE = 'flatpages/default.html'
 

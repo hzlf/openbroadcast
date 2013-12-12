@@ -1,18 +1,12 @@
 #-*- coding: utf-8 -*-
 #from django.core.files import File as DjangoFile
+import os
+from optparse import make_option
+
 from django.core.management.base import BaseCommand, NoArgsCommand
 
 from cms.models import CMSPlugin
-
 from alibrary.models import *
-
-import os
-
-
-
-from optparse import make_option
-import os
-from datetime import *
 
 
 class CacheReset(object):

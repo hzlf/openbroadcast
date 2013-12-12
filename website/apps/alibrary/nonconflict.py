@@ -2,7 +2,8 @@
 # module and import it above your form definitions.
 # From http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/204197
 
-import inspect, types, __builtin__
+import inspect
+import types
 
 ############## preliminary: two utility functions #####################
 

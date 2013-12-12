@@ -1,16 +1,16 @@
+from django.template.defaultfilters import title
+from django.utils.translation import ugettext_lazy as _
+
 from cmsplugin_top_products.models import TopProducts
 from cms.models.pluginmodel import CMSPlugin
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
-from django.template.defaultfilters import title
-from django.utils.translation import ugettext_lazy as _
-
 from shop.models.productmodel import Product
 from shop.util.cart import get_or_create_cart
 from shop.models.productmodel import Product
 from shop.models.ordermodel import OrderItem
-
 from ashop.models.productmodels import SingleProduct
+
 
 # from shop.models.defaults.product.Product import Product
 

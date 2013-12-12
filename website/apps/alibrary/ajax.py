@@ -1,16 +1,13 @@
-from django.core import serializers
-from dajax.core import Dajax
+import json
+
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
-
 from dajaxice.decorators import dajaxice_register
+import requests
 
 from alibrary.models import APILookup, Release, Relation, Label, Artist, Media
 from lib.util.merge import merge_model_objects
 
-import requests
-import json
 
 # logging
 import logging

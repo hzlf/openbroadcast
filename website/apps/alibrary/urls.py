@@ -4,8 +4,7 @@ from django.views.generic import ListView
 from django.views.generic.simple import direct_to_template
 
 # app imports
-from alibrary.models import Artist, Release, Media, Label
-from alibrary.views import *
+from alibrary.models import Artist
 
 # rest
 from djangorestframework.views import ListOrCreateModelView, InstanceModelView, ListModelView, InstanceModelViewRO

@@ -8,11 +8,8 @@ except ImportError:
         import Image as PILImage
     except ImportError:
         raise ImportError("The Python Imaging Library was not found.")
-from datetime import datetime
-from django.core import urlresolvers
 from django.db import models
 from django.db.models.signals import post_save
-from django.core.files.base import ContentFile
 from django.utils.translation import ugettext_lazy as _
 from filer import settings as filer_settings
 from filer.models.filemodels import File

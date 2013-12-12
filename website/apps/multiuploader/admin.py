@@ -1,5 +1,7 @@
-from models import MultiuploaderImage
 from django.contrib import admin
+
+from models import MultiuploaderImage
+
 
 class MultiuploaderImageAdmin(admin.ModelAdmin):
     search_fields = ["filename", "key_data"]

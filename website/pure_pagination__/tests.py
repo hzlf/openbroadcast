@@ -1,11 +1,9 @@
 from datetime import datetime
-from operator import attrgetter
+
+from django.test import TestCase
+from django.db import models
 
 from pure_pagination import Paginator, InvalidPage, EmptyPage
-from django.test import TestCase
-from django.test.client import Client
-
-from django.db import models
 
 class Article(models.Model):
     headline = models.CharField(max_length=100, default='Default headline')

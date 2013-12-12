@@ -1,4 +1,4 @@
-from django.core.management.base import NoArgsCommand, CommandError
+from django.core.management.base import NoArgsCommand
 
 from djangoratings.models import SimilarUser
 

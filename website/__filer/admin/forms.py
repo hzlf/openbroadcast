@@ -1,10 +1,11 @@
 from django import forms
 from django.db import models
 from django.contrib.admin import widgets
-from filer.utils.files import get_valid_filename
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ValidationError
 from django.conf import settings
+
+from filer.utils.files import get_valid_filename
 
 
 if 'cmsplugin_filer_image' in settings.INSTALLED_APPS:

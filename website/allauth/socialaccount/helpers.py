@@ -1,12 +1,10 @@
-from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from django.contrib.auth import login, logout as auth_logout
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from django.utils.http import urlencode
 from django.template.defaultfilters import slugify
 

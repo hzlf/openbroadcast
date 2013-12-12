@@ -1,12 +1,7 @@
-from django.views.generic import DetailView, ListView, FormView, UpdateView
-from django.views.generic.detail import SingleObjectTemplateResponseMixin
+from django.views.generic import DetailView, ListView, UpdateView
 from django.shortcuts import get_object_or_404, render_to_response
 
-from django.db.models import Avg
-
-from django import http
-from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect
-from django.utils import simplejson as json
+from django.http import HttpResponseRedirect
 from django.conf import settings
 
 from django.template import RequestContext
@@ -14,23 +9,16 @@ from django.template import RequestContext
 from pure_pagination.mixins import PaginationMixin
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 
-from alibrary.models import Label, Release, Profession, Media, License, Playlist
-
-from sendfile import sendfile
-
-from ashop.util.base import get_download_permissions
+from alibrary.models import Label, Release
 
 #from alibrary.forms import ReleaseForm
 from alibrary.forms import LabelForm, LabelActionForm, LabelRelationFormSet
 
 from alibrary.filters import LabelFilter
 
-from tagging.models import Tag, TaggedItem
-from tagging.utils import calculate_cloud
+from tagging.models import Tag
 
 from django.db.models import Q
-
-from easy_thumbnails.files import get_thumbnailer
 
 import reversion
 

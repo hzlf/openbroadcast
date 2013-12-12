@@ -15,8 +15,6 @@ from django.conf import settings
 from django.template.defaultfilters import slugify, striptags
 from django.utils.translation import ugettext_lazy as _
 
-from django.template import Context
-
 from decorators import logtime, once_per_instance
 
 # cms

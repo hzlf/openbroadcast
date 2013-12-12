@@ -2,24 +2,23 @@
 
 Peter Cicman, Divio GmbH, 2008
 """
+import re
+
 from django.utils.text import capfirst, get_text_list
-from django.contrib.admin.util import flatten_fieldsets
 from django.http import HttpResponseRedirect
 from django.utils.encoding import force_unicode
-
-import re
-from copy import deepcopy
 from django.conf import settings
 from django import forms
 from django.contrib import admin
 from django.db.models import Model
 from django.forms.util import ErrorList, ValidationError
-from django.forms.models import BaseInlineFormSet, ModelFormMetaclass
+from django.forms.models import BaseInlineFormSet
 from django.utils.translation import ugettext as _
 from django.template.loader import find_template
 from django.template import TemplateDoesNotExist
 from multilingual.languages import get_default_language
 from multilingual.utils import GLL
+
 
 MULTILINGUAL_PREFIX = '_ml__trans_'
 MULTILINGUAL_INLINE_PREFIX = '_ml__inline_trans_'

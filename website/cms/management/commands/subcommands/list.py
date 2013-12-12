@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from django.core.management.base import NoArgsCommand
+
 from cms.management.commands.subcommands.base import SubcommandsCommand
 from cms.models.pluginmodel import CMSPlugin
 from cms.models.titlemodels import Title
-from django.core.management.base import NoArgsCommand
 
 
 class ListApphooksCommand(NoArgsCommand):

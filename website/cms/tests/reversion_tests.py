@@ -1,21 +1,24 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
-from cms.models import Page
-from cms.models.pluginmodel import CMSPlugin
-from cms.plugins.text.models import Text
-from cms.test_utils.project.fileapp.models import FileModel
-from cms.test_utils.testcases import (CMSTestCase, URL_CMS_PAGE, 
-    URL_CMS_PAGE_CHANGE, URL_CMS_PAGE_ADD, URL_CMS_PLUGIN_ADD, URL_CMS_PLUGIN_EDIT)
+from os.path import join
+import shutil
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import SimpleUploadedFile
-from os.path import join
-from cms.test_utils.project.fileapp.models import FileModel
-from reversion import (revision as revision_manager, 
+from reversion import (revision as revision_manager,
     revision_context_manager as revision_context)
 from reversion.models import Revision, Version, VERSION_CHANGE
-import shutil
+
+from cms.models import Page
+from cms.models.pluginmodel import CMSPlugin
+from cms.plugins.text.models import Text
+from cms.test_utils.project.fileapp.models import FileModel
+from cms.test_utils.testcases import (CMSTestCase, URL_CMS_PAGE,
+    URL_CMS_PAGE_CHANGE, URL_CMS_PAGE_ADD, URL_CMS_PLUGIN_ADD, URL_CMS_PLUGIN_EDIT)
+from cms.test_utils.project.fileapp.models import FileModel
+
 
 class ReversionTestCase(CMSTestCase):
     def setUp(self):

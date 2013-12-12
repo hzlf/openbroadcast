@@ -1,20 +1,14 @@
 #-*- coding: utf-8 -*-
-from django.core.files import File as DjangoFile
-from django.core.management.base import BaseCommand, NoArgsCommand
 from optparse import make_option
-import os
-import sys
-
-import re
 import time
-import redis
 import json
-import requests
 import random
 
-from django.template.defaultfilters import slugify
-from alibrary.models import Artist, Release, Media, Label
+from django.core.management.base import BaseCommand, NoArgsCommand
+import redis
+import requests
 
+from alibrary.models import Media
 
 
 class Pusher(object):

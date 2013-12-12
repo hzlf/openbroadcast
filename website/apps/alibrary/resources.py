@@ -1,20 +1,17 @@
-from djangorestframework.resources import ModelResource
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
-
-from cms.admin.placeholderadmin import PlaceholderAdmin
-
 from easy_thumbnails.files import get_thumbnailer
 
+from djangorestframework.resources import ModelResource
+from cms.admin.placeholderadmin import PlaceholderAdmin
 from settings import *
-from alibrary.models import Release, Media, Artist, Label
-
+from alibrary.models import Release, Media, Artist
 from lib.templatetags.truncate import *
-
 from filer.models.filemodels import *
 from filer.models.foldermodels import *
 from filer.models.audiomodels import *
 from filer.models.imagemodels import *
+
 
 class APIBaseMixin():
     

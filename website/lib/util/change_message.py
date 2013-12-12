@@ -1,4 +1,4 @@
-from django.utils.text import capfirst, get_text_list
+from django.utils.text import get_text_list
 from django.utils.encoding import force_unicode
 
 def construct(request, form, formsets):

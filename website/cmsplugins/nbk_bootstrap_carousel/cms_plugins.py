@@ -1,10 +1,10 @@
-from django.db import models
+from django.contrib import admin
+from django.utils.translation import ugettext as _
+
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
 from cms.models.pluginmodel import CMSPlugin
-from django.contrib import admin
 
-from django.utils.translation import ugettext as _
 
 # app specific imports
 from nbk_bootstrap_carousel.models import CarouselPlugin as CarouselPluginModel

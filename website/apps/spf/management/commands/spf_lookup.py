@@ -1,20 +1,14 @@
 #-*- coding: utf-8 -*-
-import os
-import sys
-import time
-import re
 
-from django.core.files import File as DjangoFile
-from django.core.management.base import BaseCommand, NoArgsCommand
 from optparse import make_option
+
+from django.core.management.base import BaseCommand, NoArgsCommand
 
 from obp_legacy.models import *
 from spf.models import Request, Match
-
 from spf.util.lookup import MediaLookup, LegacyLookup
 from spf.util.match import MediaMatch
 
-from datetime import datetime
 
 DEFAULT_LIMIT = 500
 DEFAULT_OFFSET = 0

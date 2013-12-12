@@ -1,6 +1,5 @@
 import unittest
 
-from django.test import TransactionTestCase
 from django.contrib.contenttypes.models import ContentType
 
 from cities_light.models import Country, City

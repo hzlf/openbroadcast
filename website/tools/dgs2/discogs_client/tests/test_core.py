@@ -1,8 +1,10 @@
 import unittest
+from datetime import datetime
+
 from dgs2.discogs_client import Client
 from dgs2.discogs_client.tests import DiscogsClientTestCase
 from dgs2.discogs_client.exceptions import ConfigurationError, HTTPError
-from datetime import datetime
+
 
 class CoreTestCase(DiscogsClientTestCase):
     def test_user_agent(self):

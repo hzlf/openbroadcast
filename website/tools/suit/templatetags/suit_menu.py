@@ -1,9 +1,11 @@
+import warnings
+
 from django import template
 from django.contrib import admin
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.urlresolvers import reverse
-import warnings
 from suit.config import get_config
+
 
 register = template.Library()
 

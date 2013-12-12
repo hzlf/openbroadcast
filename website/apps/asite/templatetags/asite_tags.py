@@ -2,10 +2,6 @@
 from django import template
 from django.contrib.sites.models import Site
 
-from classytags.helpers import InclusionTag
-from classytags.core import Options
-from classytags.arguments import Argument
-
 from allauth.facebook.models import FacebookApp
 
 register = template.Library()

@@ -1,5 +1,6 @@
-from django_mobile import get_flavour, _set_request_header
 from django.utils.cache import patch_vary_headers
+
+from django_mobile import get_flavour, _set_request_header
 
 
 class CacheFlavourMiddleware(object):

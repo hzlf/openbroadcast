@@ -132,7 +132,6 @@
 #        self.assertEqual(files['file1'].read(), 'blablabla')
 
 from StringIO import StringIO
-from cgi import parse_qs
 from django import forms
 from django.test import TestCase
 from djangorestframework.parsers import FormParser

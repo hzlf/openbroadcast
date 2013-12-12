@@ -1,8 +1,9 @@
 #-*- coding: utf-8 -*-
-from easy_thumbnails.files import Thumbnailer
 import os
 import re
-from filer import settings as filer_settings
+
+from easy_thumbnails.files import Thumbnailer
+
 
 # match the source filename using `__` as the seperator. ``opts_and_ext`` is non
 # greedy so it should match the last occurence of `__`.

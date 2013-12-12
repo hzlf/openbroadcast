@@ -1,8 +1,7 @@
-from .case import *
-
 from django.template import Template, Context
-
 from django.contrib.auth.models import User
+
+from .case import *
 
 
 class AutocompleteMock(autocomplete_light.AutocompleteModelTemplate):

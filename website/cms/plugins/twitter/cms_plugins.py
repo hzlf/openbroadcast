@@ -2,8 +2,7 @@ from django.utils.translation import ugettext_lazy as _
 from cms.plugin_base import CMSPluginBase
 from cms.plugins.twitter.models import TwitterRecentEntries, TwitterSearch
 from cms.plugin_pool import plugin_pool
-from django.conf import settings
-from django.forms.widgets import Media
+
 
 class TwitterRecentEntriesPlugin(CMSPluginBase):
     model = TwitterRecentEntries

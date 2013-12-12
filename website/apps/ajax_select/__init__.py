@@ -10,7 +10,7 @@ from django.db.models.fields.related import ForeignKey, ManyToManyField
 from django.contrib.contenttypes.models import ContentType
 from django.forms.models import ModelForm
 from django.utils.text import capfirst
-from django.utils.translation import ugettext_lazy as _, ugettext
+from django.utils.translation import ugettext_lazy as _
 
 
 class LookupChannel(object):

@@ -1,4 +1,18 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
+from os.path import join
+import copy
+
+from django.conf import settings
+from django.contrib.sites.models import Site
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse
+from django.db import models
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from django.utils.translation import get_language, ugettext_lazy as _
+from mptt.models import MPTTModel
+
 from cms.exceptions import NoHomeFound
 from cms.models.managers import PageManager, PagePermissionsPermissionManager
 from cms.models.metaclasses import PageMetaClass
@@ -8,19 +22,7 @@ from cms.publisher.errors import MpttPublisherCantPublish
 from cms.utils import i18n, urlutils, page as page_utils
 from cms.utils.copy_plugins import copy_plugins_to
 from cms.utils.helpers import reversion_register
-from datetime import datetime
-from django.conf import settings
-from django.contrib.sites.models import Site
-from django.core.exceptions import ObjectDoesNotExist
-from django.core.urlresolvers import reverse
-from django.db import models
-from django.db.models import Q
-from django.shortcuts import get_object_or_404
-from django.utils.translation import get_language, ugettext_lazy as _
 from menus.menu_pool import menu_pool
-from mptt.models import MPTTModel
-from os.path import join
-import copy
 
 
 class Page(MPTTModel):

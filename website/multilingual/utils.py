@@ -1,4 +1,3 @@
-from multilingual.languages import get_default_language
 try:
     from django.utils.decorators import auto_adapt_to_methods as method_decorator
 except ImportError:

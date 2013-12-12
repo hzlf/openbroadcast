@@ -23,7 +23,6 @@ except ImportError:
 from django.db import transaction
 from django.utils.translation import ugettext, ugettext_lazy as _
 
-from postman.fields import CommaSeparatedUserField
 from postman.models import Message
 from postman.utils import WRAP_WIDTH
 

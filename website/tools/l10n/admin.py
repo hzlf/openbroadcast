@@ -1,7 +1,7 @@
-from l10n.models import Country, AdminArea, Address
 from django.contrib import admin
-from django.utils.translation import get_language, ugettext_lazy as _
-from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
+
+from l10n.models import Country, AdminArea
 
 
 class AdminArea_Inline(admin.TabularInline):
@@ -48,7 +48,6 @@ class CountryAreaAdmin(admin.ModelAdmin):
     area_field_required = "true"
 
     def get_urls(self):
-        from django.conf.urls.defaults import patterns, include, url
         urls = super(CountryAreaAdmin, self).get_urls()
         from l10n.urls import urlpatterns
         return urlpatterns + urls

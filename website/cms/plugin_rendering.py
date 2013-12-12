@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
-from cms.models.placeholdermodel import Placeholder
-from cms.plugin_processors import (plugin_meta_context_processor, 
-    mark_safe_plugin_processor)
-from cms.utils import get_language_from_request
-from cms.utils.django_load import iterload_objects
-from cms.utils.placeholder import get_placeholder_conf
 from django.conf import settings
 from django.template import Template, Context
 from django.template.defaultfilters import title
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext_lazy as _
+
+from cms.models.placeholdermodel import Placeholder
+from cms.plugin_processors import (plugin_meta_context_processor,
+    mark_safe_plugin_processor)
+from cms.utils import get_language_from_request
+from cms.utils.django_load import iterload_objects
+from cms.utils.placeholder import get_placeholder_conf
+
 
 # these are always called before all other plugin context processors
 DEFAULT_PLUGIN_CONTEXT_PROCESSORS = (

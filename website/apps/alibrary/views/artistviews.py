@@ -1,12 +1,7 @@
-from django.views.generic import DetailView, ListView, FormView, UpdateView
-from django.views.generic.detail import SingleObjectTemplateResponseMixin
+from django.views.generic import DetailView, ListView, UpdateView
 from django.shortcuts import get_object_or_404, render_to_response
 
-from django.db.models import Avg
-
-from django import http
-from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect
-from django.utils import simplejson as json
+from django.http import HttpResponseRedirect
 from django.conf import settings
 
 from django.template import RequestContext
@@ -14,23 +9,14 @@ from django.template import RequestContext
 from pure_pagination.mixins import PaginationMixin
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 
-from alibrary.models import Artist, Label, Release, Profession, Media, License, Playlist, NameVariation
-
-from sendfile import sendfile
-
-from ashop.util.base import get_download_permissions
+from alibrary.models import Artist, Label, Release, Media, NameVariation
 
 #from alibrary.forms import ReleaseForm
 from alibrary.forms import ArtistForm, ArtistActionForm, ArtistRelationFormSet, MemberFormSet, AliasFormSet
 
 from alibrary.filters import ArtistFilter
 
-from tagging.models import Tag, TaggedItem
-from tagging.utils import calculate_cloud
-
-
-
-from easy_thumbnails.files import get_thumbnailer
+from tagging.models import Tag
 
 import reversion
 
@@ -289,7 +275,7 @@ class ArtistDetailView(DetailView):
         testing top-flop
         """
         m_top = []
-        media_top = Media.objects.filter(artist=obj, votes__vote__gt=0).order_by('-votes__vote')
+        media_top = Media.objects.filter(artist=obj, votes__vote__gt=0).order_by('-votes__vote').distinct()
         if media_top.count() > 0:
             media_top = media_top[0:10]
             for media in media_top:
@@ -298,7 +284,7 @@ class ArtistDetailView(DetailView):
         self.extra_context['m_top'] = m_top
         
         m_flop = []
-        media_flop = Media.objects.filter(artist=obj, votes__vote__lt=0).order_by('votes__vote')
+        media_flop = Media.objects.filter(artist=obj, votes__vote__lt=0).order_by('votes__vote').distinct()
         if media_flop.count() > 0:
             media_flop = media_flop[0:10]
             for media in media_flop:

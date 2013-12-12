@@ -1,8 +1,4 @@
 import re
-from datetime import datetime
-import uuid
-
-from django.conf import settings
 
 from hoarder.models import RelVisitor
 from hoarder import register_request_event, _get_visitor_id

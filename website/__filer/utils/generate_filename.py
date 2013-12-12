@@ -1,7 +1,9 @@
-from filer.utils.files import get_valid_filename
-from django.utils.encoding import force_unicode, smart_str
 import datetime
 import os
+
+from django.utils.encoding import force_unicode, smart_str
+
+from filer.utils.files import get_valid_filename
 
 
 def by_date(instance, filename):

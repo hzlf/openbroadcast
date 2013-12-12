@@ -1,9 +1,7 @@
 # python
-import datetime
 
 # django
 from django.db import models
-from settings import *
 from django.utils.translation import ugettext as _
 
 # logging
@@ -12,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 ################
-from alibrary.models import *
 
 
 class Format(models.Model):

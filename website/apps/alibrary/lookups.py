@@ -1,9 +1,10 @@
 from django.utils.html import mark_safe
+from easy_thumbnails.files import get_thumbnailer
+
 from selectable.base import ModelLookup
 from selectable.registry import registry
-from django.utils.safestring import mark_safe
-from easy_thumbnails.files import get_thumbnailer
 from alibrary.models import *
+
 THUMBNAIL_OPT = dict(size=(70, 70), crop=True, bw=False, quality=80)
 
 

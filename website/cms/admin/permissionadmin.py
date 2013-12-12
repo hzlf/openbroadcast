@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
-from cms.admin.forms import (GlobalPagePermissionAdminForm, 
+from copy import deepcopy
+from distutils.version import LooseVersion
+
+from django.conf import settings
+from django.contrib import admin
+from django.utils.translation import ugettext as _
+import django
+
+from cms.admin.forms import (GlobalPagePermissionAdminForm,
     PagePermissionInlineAdminForm, ViewRestrictionInlineAdminForm)
 from cms.exceptions import NoPermissionsException
 from cms.models import Page, PagePermission, GlobalPagePermission, PageUser
 from cms.utils.permissions import get_user_permission_level
-from copy import deepcopy
-from distutils.version import LooseVersion
-from django.conf import settings
-from django.contrib import admin
-from django.template.defaultfilters import title
-from django.utils.translation import ugettext as _
-import django
-
 
 
 DJANGO_1_3 = LooseVersion(django.get_version()) < LooseVersion('1.4')

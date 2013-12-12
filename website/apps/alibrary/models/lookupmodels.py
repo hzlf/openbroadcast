@@ -1,40 +1,20 @@
 # python
-import datetime
-import uuid
-import shutil
-import sys
-import json
 
 # django
-from django.db import models
-from django import forms
-from django.db.models.signals import post_save
-from django.template.defaultfilters import slugify
-from django.contrib.auth.models import User
-from django.utils.translation import ugettext as _
-from django.core.files import File as DjangoFile
-from django.core.urlresolvers import reverse
+from urlparse import urlparse
 
+from django.db import models
+from django.utils.translation import ugettext as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
-
-from django.http import HttpResponse # needed for absolute url
-
-from settings import *
-
-from l10n.models import Country
-
-import eav
-from eav.models import Attribute
-
-from jsonfield import JSONField
-
-from urlparse import urlparse
 import requests
-
 from django.conf import settings
 
+from settings import *
+from l10n.models import Country
+from jsonfield import JSONField
 from alibrary.util.relations import get_service_by_url
+
 
 # logging
 import logging

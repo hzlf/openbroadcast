@@ -1,44 +1,46 @@
 # -*- coding: utf-8 -*-
-from cms.admin.change_list import CMSChangeList
-from cms.admin.dialog.views import get_copy_dialog
-from cms.admin.forms import PageForm, PageAddForm
-from cms.admin.permissionadmin import (PAGE_ADMIN_INLINES, 
-    PagePermissionInlineAdmin, ViewRestrictionInlineAdmin)
-from cms.admin.views import revert_plugins
-from cms.apphook_pool import apphook_pool
-from cms.exceptions import NoPermissionsException
-from cms.forms.widgets import PluginEditor
-from cms.models import (Page, Title, CMSPlugin, PagePermission, 
-    PageModeratorState, EmptyTitle, GlobalPagePermission)
-from cms.models.managers import PagePermissionsPermissionManager
-from cms.models.placeholdermodel import Placeholder
-from cms.plugin_pool import plugin_pool
-from cms.templatetags.cms_admin import admin_static_url
-from cms.utils import (copy_plugins, helpers, moderator, permissions, plugins, 
-    get_template_from_request, get_language_from_request, 
-    placeholder as placeholder_utils, admin as admin_utils, cms_static_url)
 from copy import deepcopy
 from distutils.version import LooseVersion
+from urllib2 import unquote
+
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin.options import IncorrectLookupParameters
 from django.contrib.admin.util import get_deleted_objects
-from urllib2 import unquote
 from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import router, transaction, models
 from django.forms import CharField
-from django.http import (HttpResponseRedirect, HttpResponse, Http404, 
+from django.http import (HttpResponseRedirect, HttpResponse, Http404,
     HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotAllowed)
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
-from django.template.defaultfilters import (title, escape, force_escape, 
+from django.template.defaultfilters import (title, escape, force_escape,
     escapejs)
 from django.utils.encoding import force_unicode
 from django.utils.translation import ugettext, ugettext_lazy as _
-from menus.menu_pool import menu_pool
 import django
+
+from cms.admin.change_list import CMSChangeList
+from cms.admin.dialog.views import get_copy_dialog
+from cms.admin.forms import PageForm, PageAddForm
+from cms.admin.permissionadmin import (PAGE_ADMIN_INLINES,
+    PagePermissionInlineAdmin, ViewRestrictionInlineAdmin)
+from cms.admin.views import revert_plugins
+from cms.apphook_pool import apphook_pool
+from cms.exceptions import NoPermissionsException
+from cms.forms.widgets import PluginEditor
+from cms.models import (Page, Title, CMSPlugin, PagePermission,
+    PageModeratorState, EmptyTitle, GlobalPagePermission)
+from cms.models.managers import PagePermissionsPermissionManager
+from cms.models.placeholdermodel import Placeholder
+from cms.plugin_pool import plugin_pool
+from cms.templatetags.cms_admin import admin_static_url
+from cms.utils import (copy_plugins, helpers, moderator, permissions, plugins,
+    get_template_from_request, get_language_from_request,
+    placeholder as placeholder_utils, admin as admin_utils, cms_static_url)
+from menus.menu_pool import menu_pool
 
 
 DJANGO_1_3 = LooseVersion(django.get_version()) < LooseVersion('1.4')

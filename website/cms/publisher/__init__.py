@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from django.conf import settings
 from manager import PublisherManager
 
 __all__ = ('PublisherManager', 'VERSION')

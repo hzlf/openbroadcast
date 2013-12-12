@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-from django import template
-
-from classytags.helpers import InclusionTag
-from classytags.core import Options
-from classytags.arguments import Argument
-from django.utils.safestring import mark_safe
 import re
+
+from django import template
+from django.utils.safestring import mark_safe
 
 from alibrary.models import Daypart, Playlist
 

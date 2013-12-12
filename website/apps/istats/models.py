@@ -1,9 +1,7 @@
-import logging
-import time
 from celery.task.control import inspect
 
 from exporter.models import Export
-from importer.models import Import, ImportFile
+from importer.models import ImportFile
 
 class Stats(object):
 

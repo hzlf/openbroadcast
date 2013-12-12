@@ -1,10 +1,11 @@
+import logging
+
 from celery.task import task
 from social_auth.models import UserSocialAuth
 from dropbox import client, session
 
 import settings
 
-import logging
 log = logging.getLogger(__name__)
 
 USE_CELERYD = True

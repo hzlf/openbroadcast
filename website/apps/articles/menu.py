@@ -1,6 +1,8 @@
+from django.utils.translation import ugettext_lazy as _
+
 from menus.base import Modifier, Menu, NavigationNode
 from menus.menu_pool import menu_pool
-from django.utils.translation import ugettext_lazy as _
+
 
 class ArticleMenu(Menu):
 

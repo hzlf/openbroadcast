@@ -1,11 +1,6 @@
 # Create your views here.
-from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.template import RequestContext
-from django.contrib.auth import login, authenticate, logout as auth_logout
-from django.contrib.auth.models import User
-from django.shortcuts import render_to_response
 from django.views.decorators.csrf import csrf_exempt
 
 from allauth.utils import get_login_redirect_url

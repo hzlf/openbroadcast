@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
+from decimal import Decimal
+
 from django.test import TestCase
+
 from l10n.validators import aupostcode, capostcode, uspostcode
 from l10n import l10n_settings
 from l10n.utils import moneyfmt
-from decimal import Decimal
+
 
 class AUPostCodeTest(TestCase):
     def test_valid(self):

@@ -1,6 +1,5 @@
 from django import template
 
-import datetime
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from .. import views as esi_views

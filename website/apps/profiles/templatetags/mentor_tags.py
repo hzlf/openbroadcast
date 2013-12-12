@@ -1,18 +1,9 @@
 # -*- coding: utf-8 -*-
 from django import template
 
-from classytags.helpers import InclusionTag
-from classytags.core import Options
-from classytags.arguments import Argument
-from django.utils.safestring import mark_safe
-import re
-
 from django.core.urlresolvers import reverse
 
 from django.utils.translation import ugettext_lazy as _
-
-from ..models import Profile
-from django.contrib.auth.models import User, Group
 
 register = template.Library()
 

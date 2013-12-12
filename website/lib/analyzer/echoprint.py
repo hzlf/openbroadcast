@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-import echoprint
-import requests
 import subprocess
-import sys
-import struct
 import json
+
+import requests
+
 
 try:
     from settings import ECHOPRINT_CODEGEN_BIN

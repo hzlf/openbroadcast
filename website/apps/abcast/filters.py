@@ -1,8 +1,5 @@
-from django.utils.translation import ugettext as _
 import django_filters
 from abcast.models import Station
-
-from django.utils.datastructures import SortedDict
 
 ORDER_BY_FIELD = 'o'
 

@@ -1,10 +1,7 @@
 #-*- coding: utf-8 -*-
-from django.core.files import File as DjangoFile
-from django.core.management.base import BaseCommand, NoArgsCommand
-
 from optparse import make_option
-import os
-from datetime import *
+
+from django.core.management.base import BaseCommand, NoArgsCommand
 
 
 # echoprint

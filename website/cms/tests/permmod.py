@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
-from cms.api import (create_page, publish_page, approve_page, add_plugin, 
-    create_page_user, assign_user_to_page)
-from cms.models import Page, CMSPlugin
-from cms.models.moderatormodels import (ACCESS_DESCENDANTS, 
-    ACCESS_PAGE_AND_DESCENDANTS)
-from cms.models.permissionmodels import PagePermission, GlobalPagePermission
-from cms.test_utils.testcases import (URL_CMS_PAGE_ADD, URL_CMS_PLUGIN_REMOVE, 
-    SettingsOverrideTestCase, URL_CMS_PLUGIN_ADD, CMSTestCase)
-from cms.test_utils.util.context_managers import SettingsOverride
-from cms.utils.page_resolver import get_page_from_path
-from cms.utils.permissions import has_generic_permission
 
 from django.contrib.auth.models import User, Permission, AnonymousUser, Group
 from django.contrib.sites.models import Site
 from django.core.management import call_command
 from django.db.models import Q
+
+from cms.api import (create_page, publish_page, approve_page, add_plugin,
+    create_page_user, assign_user_to_page)
+from cms.models import Page, CMSPlugin
+from cms.models.moderatormodels import (ACCESS_DESCENDANTS,
+    ACCESS_PAGE_AND_DESCENDANTS)
+from cms.models.permissionmodels import PagePermission, GlobalPagePermission
+from cms.test_utils.testcases import (URL_CMS_PAGE_ADD, URL_CMS_PLUGIN_REMOVE,
+    SettingsOverrideTestCase, URL_CMS_PLUGIN_ADD, CMSTestCase)
+from cms.test_utils.util.context_managers import SettingsOverride
+from cms.utils.page_resolver import get_page_from_path
+from cms.utils.permissions import has_generic_permission
+
 
 class PermissionModeratorTests(SettingsOverrideTestCase):
     """Permissions and moderator together

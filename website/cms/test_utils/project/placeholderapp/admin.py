@@ -1,7 +1,8 @@
-from cms.admin.placeholderadmin import PlaceholderAdmin
-from cms.test_utils.project.placeholderapp.models import (Example1, Example2, 
-    Example3, Example4, Example5)
 from django.contrib import admin
+
+from cms.admin.placeholderadmin import PlaceholderAdmin
+from cms.test_utils.project.placeholderapp.models import (Example1, Example2,
+    Example3, Example4, Example5)
 
 
 class MixinAdmin(admin.ModelAdmin):

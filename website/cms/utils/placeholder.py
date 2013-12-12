@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
-from django.core.exceptions import MultipleObjectsReturned, ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured
 from django.db.models.query_utils import Q
 
 def get_placeholder_conf(setting, placeholder, template=None, default=None):

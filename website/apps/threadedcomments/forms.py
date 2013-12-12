@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.comments.forms import CommentForm
 from django.conf import settings
-from django.utils.hashcompat import sha_constructor
 from django.utils.translation import ugettext_lazy as _
 
 from threadedcomments.models import ThreadedComment

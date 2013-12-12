@@ -1,6 +1,3 @@
-
-from south.db import db
-from django.db import models
 from cms.plugins.text.models import *
 
 class Migration:

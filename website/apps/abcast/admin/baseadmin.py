@@ -1,8 +1,6 @@
 from django.contrib import admin
 
 from abcast.models import *
-from django.contrib.auth.models import User
-from genericadmin.admin import GenericAdminModelAdmin, GenericTabularInline
 
 
 class MembersInline(admin.TabularInline):

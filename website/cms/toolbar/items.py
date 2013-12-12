@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-from cms.toolbar.base import BaseItem, Serializable
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.middleware.csrf import get_token
 from django.template.context import RequestContext, Context
 from django.template.loader import render_to_string
 from django.utils.html import strip_spaces_between_tags
+
+from cms.toolbar.base import BaseItem, Serializable
 
 
 class Switcher(BaseItem):

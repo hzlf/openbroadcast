@@ -1,24 +1,16 @@
 # python
-import datetime
-import uuid
 import shutil
-import sys
 import time
 import subprocess
-import sys
-import struct
 import json
 
 # django
 from django.db import models
 from django.db.models.signals import post_save, pre_delete
-from django.template.defaultfilters import slugify
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 from django.core.files import File as DjangoFile
 from django.core.urlresolvers import reverse
-
-from django.http import HttpResponse # needed for absolute url
 
 # TODO: only import needed settings
 from settings import *
@@ -50,11 +42,10 @@ from private_files import PrivateFileField
 
 # modules
 #from taggit.managers import TaggableManager
-from django_countries import CountryField
 from easy_thumbnails.files import get_thumbnailer
 
 # audiotools (for conversion)
-from audiotools import AudioFile, MP3Audio, M4AAudio, FlacAudio, WaveAudio, MetaData
+from audiotools import MetaData
 import audiotools
 import tempfile
 
@@ -64,8 +55,6 @@ from celery.task import task
 
 # shop
 from shop.models import Product
-from alibrary.nonconflict import classmaker
-from mptt.models import MPTTModel, TreeForeignKey, TreeManyToManyField 
 
 # audio processing / waveform
 from lib.audioprocessing.processing import create_wave_images, AudioProcessingException
@@ -84,10 +73,8 @@ log = logging.getLogger(__name__)
 ################
 from alibrary.models.basemodels import *
 from alibrary.models.artistmodels import *
-from alibrary.models.releasemodels import *
-from alibrary.models.playlistmodels import *
+from alibrary.models.playlistmodels import PlaylistItem
 
-from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
 
 from alibrary.util.echonest import EchonestWorker

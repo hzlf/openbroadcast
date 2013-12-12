@@ -1,8 +1,7 @@
-from django.conf import settings
-
 from math import ceil
 import functools
 
+from django.conf import settings
 from django.template.loader import render_to_string
 
 PAGINATION_SETTINGS = getattr(settings, "PAGINATION_SETTINGS", {})

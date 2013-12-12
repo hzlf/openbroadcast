@@ -1,10 +1,10 @@
-from filer.models import * 
-from django.core.files import File as DjangoFile
-
+import os
 from os.path import basename
 from urlparse import urlsplit
-
 import urllib2
+
+from django.core.files import File as DjangoFile
+from filer.models import Image
 
 def url2name(url):
     return basename(urlsplit(url)[2])

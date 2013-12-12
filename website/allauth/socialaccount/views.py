@@ -1,4 +1,4 @@
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -6,13 +6,10 @@ from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
-from django.utils.translation import ugettext, ugettext_lazy as _
-from django.contrib.sites.models import Site
 
 from allauth.utils import get_login_redirect_url
 from allauth.account.views import signup as account_signup
 
-from models import SocialAccount
 from forms import DisconnectForm, SignupForm
 
 import helpers

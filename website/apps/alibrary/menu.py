@@ -6,9 +6,6 @@ from menus.menu_pool import menu_pool
 from cms.menu_bases import CMSAttachMenu
 
 
-from alibrary.models import Profession, Release, Artist, Playlist
-
-
 class LibraryMenu(CMSAttachMenu):
     
     name = _("Library Menu")

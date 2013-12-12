@@ -1,7 +1,6 @@
 from django.utils.html import escape, conditional_escape
-from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
-from django.forms.widgets import ClearableFileInput, CheckboxInput, HiddenInput, Widget
+from django.forms.widgets import ClearableFileInput, CheckboxInput, Widget
 
 
 from filer.models import File, Image

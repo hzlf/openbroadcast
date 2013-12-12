@@ -1,11 +1,10 @@
 #!/usr/bin/env python
-import echoprint
-import requests
 import subprocess
 import sys
-import struct
-
 import json
+
+import requests
+
 
 if len(sys.argv) < 1:
     print "Usage: identify.py filename"

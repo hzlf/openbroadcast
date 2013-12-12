@@ -1,4 +1,4 @@
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from django import forms
 
 from emailconfirmation.models import EmailAddress

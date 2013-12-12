@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-from PIL import Image, ImageChops, ImageDraw
+from PIL import Image, ImageDraw
 
 from django.contrib.auth.models import User
 from filer.models.foldermodels import Folder

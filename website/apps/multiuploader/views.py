@@ -1,8 +1,10 @@
 from django.shortcuts import get_object_or_404, render_to_response
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseBadRequest
-from models import MultiuploaderImage
 from django.core.files.uploadedfile import UploadedFile
+
+from models import MultiuploaderImage
+
 
 #importing json parser to generate jQuery plugin friendly json response
 from django.utils import simplejson
@@ -10,8 +12,6 @@ from django.utils import simplejson
 #for generating thumbnails
 #sorl-thumbnails must be installed and properly configured
 #from sorl.thumbnail import get_thumbnail
-
-from easy_thumbnails.files import get_thumbnailer
 
 
 from django.views.decorators.csrf import csrf_exempt

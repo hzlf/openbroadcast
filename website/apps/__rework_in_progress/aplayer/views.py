@@ -1,16 +1,10 @@
-import datetime
-from alibrary.models import Release
-from django.views.generic import DetailView
-from django.shortcuts import get_object_or_404
+import urllib
+import cStringIO
+import random
 
 from django.http import HttpResponse
 from PIL import Image
-import urllib
-import cStringIO
 
-import random
-
-import numpy as np
 
 INK = "red", "blue", "green", "yellow"
 

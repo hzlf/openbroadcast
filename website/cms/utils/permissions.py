@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-from cms.exceptions import NoPermissionsException
-from cms.models import Page, PagePermission, GlobalPagePermission
-from cms.plugin_pool import plugin_pool
-from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.contrib.sites.models import Site
 from django.db.models import Q
-from django.utils.translation import ugettext_lazy as _
 
+from cms.exceptions import NoPermissionsException
+from cms.models import Page, PagePermission, GlobalPagePermission
+from cms.plugin_pool import plugin_pool
 
 
 try:

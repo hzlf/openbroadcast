@@ -1,10 +1,10 @@
 import md5
-from django.conf import settings
-from django.contrib.auth.models import User, check_password
+import logging
+
+from django.contrib.auth.models import User
 
 from obp_legacy.models_legacy import ElggUsers as LegacyUser
 
-import logging
 log = logging.getLogger(__name__)
 
 

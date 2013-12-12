@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-from cms.admin.dialog.forms import PermissionAndModeratorForm, PermissionForm, ModeratorForm
-from cms.models import Page
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
+
+from cms.admin.dialog.forms import PermissionAndModeratorForm, PermissionForm, ModeratorForm
+from cms.models import Page
+
 
 def _form_class_selector():
     '''

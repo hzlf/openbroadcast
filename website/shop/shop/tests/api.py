@@ -1,9 +1,11 @@
-from shop.models.ordermodel import OrderExtraInfo, Order
+from decimal import Decimal
+
 from django.test.testcases import TestCase
 from django.contrib.auth.models import User
+
+from shop.models.ordermodel import OrderExtraInfo, Order
 from shop.tests.util import Mock
 from shop.shop_api import ShopAPI
-from decimal import Decimal
 
 
 class ShopApiTestCase(TestCase):

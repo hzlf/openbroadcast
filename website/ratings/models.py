@@ -1,6 +1,6 @@
 import string
 
-from django.db import models, transaction, IntegrityError
+from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.utils.datastructures import SortedDict

@@ -2,32 +2,24 @@
 # -*- coding: utf-8 -*-
 
 import os
-import datetime
 import shutil
-import re
 
 from mutagen import File as MutagenFile
 from mutagen.easyid3 import EasyID3
-from mutagen.id3 import ID3
-
 from django.db import models
 from django.db.models.signals import post_save
-
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
+from django_extensions.db.fields import *
 
 from cms.models import CMSPlugin
-from django_extensions.db.fields import *
-from django_extensions.db.fields.json import JSONField
 
-from django.core.urlresolvers import reverse
 
 # filer
 from filer.fields.image import FilerImageField
 from filer.fields.file import FilerFileField
 
 # audiotools (for conversion)
-from audiotools import AudioFile, MP3Audio, M4AAudio, FlacAudio, WaveAudio, MetaData
 import audiotools
 import tempfile
 

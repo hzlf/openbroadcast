@@ -1,19 +1,10 @@
 from django import forms
 from django.core.urlresolvers import reverse, get_urlconf, get_resolver, NoReverseMatch
 from django.db import models
-from django.db.models.query import QuerySet
-from django.db.models.fields.related import RelatedField
-from django.utils.encoding import smart_unicode
 
 from djangorestframework.response import ErrorResponse
 from djangorestframework.serializer import Serializer, _SkipField
 from djangorestframework.utils import as_tuple
-
-import decimal
-import inspect
-import re
-
-
 
 
 class BaseResource(Serializer):

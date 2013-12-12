@@ -2,8 +2,6 @@ from django.utils.translation import ugettext as _
 import django_filters
 from alibrary.models import Release, Playlist, Artist, Media, Label
 
-from django.utils.datastructures import SortedDict
-
 ORDER_BY_FIELD = 'o'
 
 from django.db import models

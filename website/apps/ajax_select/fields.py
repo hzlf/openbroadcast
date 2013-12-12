@@ -1,17 +1,16 @@
+import os
 
-from ajax_select import get_lookup
 from django import forms
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.forms.util import flatatt
-from django.template.defaultfilters import escapejs
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
-from django.conf import settings
 from django.utils import simplejson
-import os
+
+from ajax_select import get_lookup
 
 
 as_default_help = u'Enter text to search.'

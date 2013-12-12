@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
+import datetime
+import os.path
+
+from django.conf import settings
+from django.contrib.sites.models import Site
+from django.core.urlresolvers import reverse
+from django.http import HttpRequest, HttpResponse, HttpResponseNotFound
+
 from cms.admin.forms import PageForm
 from cms.api import create_page, add_plugin
 from cms.models import Page, Title
@@ -15,12 +23,6 @@ from cms.test_utils.testcases import (CMSTestCase, URL_CMS_PAGE,
 from cms.test_utils.util.context_managers import (LanguageOverride,
                                                   SettingsOverride)
 from cms.utils.page_resolver import get_page_from_request
-from django.conf import settings
-from django.contrib.sites.models import Site
-from django.core.urlresolvers import reverse
-from django.http import HttpRequest, HttpResponse, HttpResponseNotFound
-import datetime
-import os.path
 from cms.utils.page import is_valid_page_slug
 
 

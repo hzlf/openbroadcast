@@ -1,4 +1,3 @@
-import datetime
 import hmac
 import time
 from django.conf import settings

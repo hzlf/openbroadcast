@@ -1,14 +1,14 @@
 #-*- coding: utf-8 -*-
+import os
+
 from PIL import Image as PILImage
-from datetime import datetime
-from django.core import urlresolvers
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from filer import settings as filer_settings
+
 from filer.models.filemodels import File
 from filer.utils.filer_easy_thumbnails import FilerThumbnailer
 from filer.utils.pil_exif import get_exif_for_file
-import os
+
 
 # cross imports
 # from alibrary.models import Artist, License

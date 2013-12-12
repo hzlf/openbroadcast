@@ -1,4 +1,14 @@
 from __future__ import with_statement
+from unittest import TestCase
+
+from django.conf import settings
+from django.contrib.sites.models import Site
+from django.core import mail
+from django.core.exceptions import ImproperlyConfigured
+from django.http import HttpRequest
+from django.template import RequestContext
+from django.template.base import Template
+
 from cms.api import create_page, create_title
 from cms.models.pagemodel import Page, Placeholder
 from cms.templatetags.cms_tags import (get_site_id, _get_page_by_untyped_arg,
@@ -7,14 +17,6 @@ from cms.test_utils.fixtures.templatetags import TwoPagesFixture
 from cms.test_utils.testcases import SettingsOverrideTestCase
 from cms.test_utils.util.context_managers import SettingsOverride
 from cms.utils.plugins import get_placeholders
-from django.conf import settings
-from django.contrib.sites.models import Site
-from django.core import mail
-from django.core.exceptions import ImproperlyConfigured
-from django.http import HttpRequest
-from django.template import RequestContext
-from unittest import TestCase
-from django.template.base import Template
 
 
 class TemplatetagTests(TestCase):

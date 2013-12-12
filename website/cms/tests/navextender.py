@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
+
+from django.conf import settings
+from django.template import Template
+
 from cms.models import Page
 from cms.test_utils.fixtures.navextenders import NavextendersFixture
 from cms.test_utils.testcases import SettingsOverrideTestCase
 from cms.test_utils.util.menu_extender import TestMenu
-from django.conf import settings
-from django.template import Template
 from menus.menu_pool import menu_pool
+
 
 class NavExtenderTestCase(NavextendersFixture, SettingsOverrideTestCase):
     settings_overrides = {'CMS_MODERATOR': False}

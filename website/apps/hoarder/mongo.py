@@ -1,7 +1,9 @@
-from pymongo import Connection
 from datetime import datetime
 
 from django.conf import settings
+
+from pymongo import Connection
+
 
 connection = Connection(getattr(settings, 'HOARDER_MONGO_HOST', 'localhost'), 
                         getattr(settings, 'HOARDER_MONGO_PORT', 27017))

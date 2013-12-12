@@ -1,12 +1,14 @@
 #-*- coding: utf-8 -*-
+from optparse import make_option
+import os
+
 from django.core.files import File as DjangoFile
 from django.core.management.base import BaseCommand, NoArgsCommand
+
 from filer.models.filemodels import File
 from filer.models.foldermodels import Folder
 from filer.models.imagemodels import Image
 from filer.settings import FILER_IS_PUBLIC_DEFAULT
-from optparse import make_option
-import os
 
 
 class FileImporter(object):

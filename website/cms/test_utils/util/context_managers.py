@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
+from shutil import rmtree as _rmtree
+from tempfile import template, mkdtemp, _exists
+import StringIO
+import sys
+
 from django.conf import settings
 from django.core.signals import request_started
 from django.db import reset_queries
 from django.template import context
 from django.utils.translation import get_language, activate
-from shutil import rmtree as _rmtree
-from tempfile import template, mkdtemp, _exists
-import StringIO
-import sys
+
 
 class NULL:
     pass

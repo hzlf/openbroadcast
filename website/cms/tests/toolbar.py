@@ -1,15 +1,18 @@
 from __future__ import with_statement
-from cms.api import create_page
-from cms.cms_toolbar import CMSToolbar
-from cms.test_utils.testcases import SettingsOverrideTestCase
-from cms.test_utils.util.context_managers import SettingsOverride
-from cms.toolbar.items import (Anchor, TemplateHTML, Switcher, List, ListItem, 
-    GetButton)
+
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
+
+from cms.api import create_page
+from cms.cms_toolbar import CMSToolbar
+from cms.test_utils.testcases import SettingsOverrideTestCase
+from cms.test_utils.util.context_managers import SettingsOverride
+from cms.toolbar.items import (Anchor, TemplateHTML, Switcher, List, ListItem,
+    GetButton)
+
 
 class ToolbarUserMixin(object):
     def get_anon(self):

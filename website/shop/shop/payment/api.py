@@ -5,9 +5,11 @@ This file defines the interafces one should implement when either creating a
 new payment module or willing to use modules with another shop system.
 """
 from decimal import Decimal
+
+from django.core.urlresolvers import reverse
+
 from shop.models.ordermodel import OrderPayment
 from shop.shop_api import ShopAPI
-from django.core.urlresolvers import reverse
 
 
 class PaymentAPI(ShopAPI):

@@ -1,6 +1,3 @@
-import operator
-
-
 class Authorization(object):
     """
     A base class that provides no permissions checking.

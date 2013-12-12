@@ -1,11 +1,12 @@
 from decimal import Decimal
+import logging
+import re
 
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
+
 from l10n.l10n_settings import get_l10n_setting
-import logging
-import re
 
 # Create a regex to strip out the decimal places with currency formatting
 # Example string = u"$%(val)0.2f" so this regex should let us get the 0.2f portion

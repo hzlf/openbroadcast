@@ -1,6 +1,5 @@
 from django.conf.urls.defaults import patterns, url
 from django.test import TestCase
-from django.test import Client
 
 
 urlpatterns = patterns('djangorestframework.utils.staticviews',

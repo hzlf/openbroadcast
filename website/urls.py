@@ -1,7 +1,5 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
-from django.views.generic.simple import direct_to_template
-from django.conf.urls import handler403, handler404, handler500
 
 
 # pinax

@@ -1,10 +1,11 @@
+from random import randint
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.core.urlresolvers import reverse
 from django.db.models.loading import load_app
 from django.test import TestCase
-from random import randint
 
 
 class UserTestCaseMixin(TestCase):

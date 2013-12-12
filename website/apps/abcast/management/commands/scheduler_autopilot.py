@@ -1,21 +1,16 @@
 #-*- coding: utf-8 -*-
-from django.core.files import File as DjangoFile
+from optparse import make_option
+import datetime
+
 from django.core.management.base import BaseCommand, NoArgsCommand
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils import translation
-from optparse import make_option
-import os
-import sys
-import time
-import re
 
 from abcast.models import *
 from abcast.util.calc import round_dt
 from alibrary.models import Playlist
-import datetime
 
-from random import choice
 
 # logging
 import logging

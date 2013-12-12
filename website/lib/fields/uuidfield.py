@@ -1,7 +1,6 @@
-from django.db.models import CharField
-
-
 import uuid
+
+from django.db.models import CharField
 
 UUID_BASE_ID = 'fff0'
 UUID_BASE_VERSION = 1

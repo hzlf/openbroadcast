@@ -1,8 +1,9 @@
+import operator
+import time
+
 from django.conf import settings
 from django.test.simple import DjangoTestSuiteRunner
 from django.utils.unittest.suite import TestSuite
-import operator
-import time
 
 
 TIMINGS = {}

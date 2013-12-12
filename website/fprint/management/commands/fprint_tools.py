@@ -1,20 +1,13 @@
 #-*- coding: utf-8 -*-
-import os
 import sys
-import time
-import re
-
-import requests
 import struct
-import slumber
 import subprocess
-import time
-import echoprint
-
-from django.core.files import File as DjangoFile
-from django.core.management.base import BaseCommand, NoArgsCommand
 from optparse import make_option
 
+import requests
+from django.core.management.base import BaseCommand, NoArgsCommand
+
+import echoprint
 from ep.API import fp
 
 REC_DURATION = 30

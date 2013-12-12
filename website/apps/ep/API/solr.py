@@ -293,11 +293,10 @@ import datetime
 import time
 from StringIO import StringIO
 from xml.sax import make_parser
-from xml.sax import _exceptions
 from xml.sax.handler import ContentHandler
 from xml.sax.saxutils import escape, quoteattr
 from xml.dom.minidom import parseString
-from types import BooleanType, FloatType, IntType, ListType, LongType, StringType, UnicodeType
+from types import StringType, UnicodeType
 from contextlib import contextmanager
 import Queue
 

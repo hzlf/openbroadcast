@@ -1,5 +1,6 @@
+from StringIO import StringIO
+
 from django.conf.urls.defaults import patterns, url
-from django import http
 from django.test import TestCase
 
 from djangorestframework import status
@@ -10,7 +11,6 @@ from djangorestframework.mixins import ResponseMixin
 from djangorestframework.response import Response
 from djangorestframework.utils.mediatypes import add_media_type_param
 
-from StringIO import StringIO
 
 DUMMYSTATUS = status.HTTP_200_OK
 DUMMYCONTENT = 'dummycontent'

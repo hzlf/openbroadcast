@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
+import sys
+
+from django.contrib.auth.models import User
+from django.core.urlresolvers import clear_url_caches, reverse
+
 from cms.api import create_page, create_title
 from cms.apphook_pool import apphook_pool
-from cms.appresolver import (applications_page_check, clear_app_resolvers, 
+from cms.appresolver import (applications_page_check, clear_app_resolvers,
     get_app_patterns)
 from cms.test_utils.testcases import CMSTestCase
 from cms.test_utils.util.context_managers import SettingsOverride
-from django.contrib.auth.models import User
-from django.core.urlresolvers import clear_url_caches, reverse
-import sys
-
 
 
 APP_NAME = 'SampleApp'

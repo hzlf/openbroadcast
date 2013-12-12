@@ -1,5 +1,11 @@
+import os
+import shutil
+import subprocess
+import signal
+import sys
+
 from settings import ESSENTIA_EXECUTABLE
-import os, shutil, subprocess, signal, sys
+
 
 def analyze(sound):
     FFMPEG_TIMEOUT = 3 * 60

@@ -1,8 +1,6 @@
 from django.utils import simplejson
-from django.core import serializers
 
 from dajaxice.decorators import dajaxice_register
-from dajax.core import Dajax
 
 from importer.models import *
 

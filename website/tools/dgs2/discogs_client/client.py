@@ -1,6 +1,4 @@
-import requests
 import json
-import oauth2
 import urllib
 
 from dgs2.discogs_client import models

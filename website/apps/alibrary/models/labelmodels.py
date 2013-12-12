@@ -1,25 +1,14 @@
 # python
 import datetime
-import uuid
-import shutil
-import sys
 
 # django
 from django.db import models
-from django import forms
 from django.db.models.signals import post_save
-from django.template.defaultfilters import slugify
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
-from django.core.files import File as DjangoFile
 from django.core.urlresolvers import reverse
 
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
-
-from django.http import HttpResponse # needed for absolute url
-
-from settings import *
 
 
 # cms
@@ -38,17 +27,15 @@ from django_date_extensions.fields import ApproximateDateField
 
 # modules
 #from taggit.managers import TaggableManager
-from django_countries import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
-from easy_thumbnails.files import get_thumbnailer
 
-from l10n.models import AdminArea, Country
+from l10n.models import Country
 
 import tagging
 import reversion 
 
 # model extensions
-from mptt.models import MPTTModel, TreeForeignKey, TreeManyToManyField 
+from mptt.models import MPTTModel, TreeForeignKey
 
 # django-extensions (http://packages.python.org/django-extensions/)
 from django_extensions.db.fields import UUIDField, AutoSlugField

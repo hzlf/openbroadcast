@@ -1,8 +1,10 @@
+import re
+
+from django.utils.translation import ugettext as _
+
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
 from cmsplugin_soundcloud.models import Soundcloud as SoundcloudModel
-from django.utils.translation import ugettext as _
-import re
 
 
 class SoundcloudPlugin(CMSPluginBase):

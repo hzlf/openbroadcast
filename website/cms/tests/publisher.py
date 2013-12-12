@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
+
+from django.contrib.auth.models import User
+from django.core.management.base import CommandError
+
 from cms.api import create_page
 from cms.management.commands import publisher_publish
 from cms.models.pagemodel import Page
 from cms.test_utils.testcases import CMSTestCase
-from cms.test_utils.util.context_managers import (SettingsOverride, 
+from cms.test_utils.util.context_managers import (SettingsOverride,
     StdoutOverride)
-from django.contrib.auth.models import User
-from django.core.management.base import CommandError
+
 
 class PublisherTestCase(CMSTestCase):
     '''

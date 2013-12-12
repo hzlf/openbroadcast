@@ -1,22 +1,14 @@
-from django.contrib.auth.models import User
-from django.db.models import Count
+import json
 
 from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
-from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
+from tastypie.resources import ModelResource, ALL_WITH_RELATIONS
+from django.template import defaultfilters as dj_filters
 
 from exporter.models import Export, ExportItem
-
 from alibrary.api import ReleaseResource, ArtistResource, PlaylistResource, MediaResource
 from alibrary.models import Release, Artist, Playlist, Media
-
-from django.template import defaultfilters as dj_filters
-from django.utils import formats
-
-
-import json
-
 from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
 
 

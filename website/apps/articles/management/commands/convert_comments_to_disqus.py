@@ -1,15 +1,18 @@
-from django.conf import settings
-from django.contrib.comments.models import Comment
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.sites.models import Site
-from django.core.management.base import NoArgsCommand
-from articles.models import Article
-import simplejson as json
 import re
 import string
 import sys
 import urllib
 import urllib2
+
+from django.conf import settings
+from django.contrib.comments.models import Comment
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
+from django.core.management.base import NoArgsCommand
+import simplejson as json
+
+from articles.models import Article
+
 
 NONPRINTABLE_RE = re.compile('[^%s]' % string.printable)
 

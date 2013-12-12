@@ -1,12 +1,10 @@
-from django.db import models
-from cms.plugin_base import CMSPluginBase
-from cms.plugin_pool import plugin_pool
-
-
 from django.utils.translation import ugettext as _
 
+from cms.plugin_base import CMSPluginBase
+from cms.plugin_pool import plugin_pool
 from bcmon.models import Playout
 from bcmon.models import ChannelPlugin as ChannelPluginModel
+
 
 @plugin_pool.register_plugin
 class ChannelPlugin(CMSPluginBase):

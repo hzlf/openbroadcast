@@ -1,6 +1,4 @@
 from django import template
-import pprint
-import cgi
 
 from django.contrib.humanize.templatetags.humanize import intcomma
 

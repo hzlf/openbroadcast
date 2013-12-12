@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+import re
+
 from django.conf import settings
 from django.db.models import Q
-import re
+
 
 APPEND_TO_SLUG = "-copy"
 COPY_SLUG_REGEX = re.compile(r'^.*-copy(?:-(\d)*)?$')

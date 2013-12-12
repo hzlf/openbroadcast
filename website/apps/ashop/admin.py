@@ -7,7 +7,6 @@ class BaseAdmin(admin.ModelAdmin):
     save_on_top = True
 
 from ashop.models import *
-from alibrary.models import Format
 
 
 class HardwarereleaseAdmin(BaseAdmin):

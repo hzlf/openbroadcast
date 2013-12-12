@@ -1,20 +1,18 @@
 from django.conf.urls.defaults import *
-from django.conf import settings
 
 from django.db.models import Q
 
 from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
-from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
-from tastypie.cache import SimpleCache
+from tastypie.resources import ModelResource
 from tastypie.utils import trailing_slash
 
 from easy_thumbnails.files import get_thumbnailer
 
 from alibrary.models import Release
 
-THUMBNAIL_OPT = dict(size=(70, 70), crop=True, bw=False, quality=80)
+THUMBNAIL_OPT = dict(size=(240, 240), crop=True, bw=False, quality=80)
 
 class ReleaseResource(ModelResource):
     

@@ -1,7 +1,8 @@
 #-*- coding: utf-8 -*-
 import inspect
+import logging
+
 from django import forms
-from django.conf import settings as globalsettings
 from django.contrib.admin.widgets import ForeignKeyRawIdWidget
 from django.contrib.admin.sites import site
 from django.core.exceptions import ImproperlyConfigured
@@ -10,10 +11,10 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.utils.text import truncate_words
+
 from filer.models import File
 from filer.settings import FILER_STATICMEDIA_PREFIX
 
-import logging
 logger = logging.getLogger(__name__)
 
 class AdminFileWidget(ForeignKeyRawIdWidget):

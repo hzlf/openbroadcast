@@ -1,22 +1,8 @@
-from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
-from django.db import models
-from django.db.models import Q
 from django.contrib.sites.models import Site
-from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
-from django.shortcuts import render_to_response, get_object_or_404
+from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.utils.http import base36_to_int
-from django.utils.translation import ugettext, ugettext_lazy as _
-
-from django.contrib import messages
-from django.contrib.auth import authenticate
-from django.contrib.auth import login as auth_login
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.contrib.auth.tokens import default_token_generator
-from emailconfirmation.models import EmailAddress, EmailConfirmation
 
 from allauth.utils import passthrough_login_redirect_url
 

@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 from distutils.version import LooseVersion
+
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.utils.translation import ugettext_lazy as _
+import django
+
 from shop.models.productmodel import Product
 from shop.util.fields import CurrencyField
 from shop.util.loader import load_class
-import django
+
 
 
 #==============================================================================

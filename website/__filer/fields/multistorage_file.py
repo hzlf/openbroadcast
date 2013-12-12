@@ -1,6 +1,5 @@
 #-*- coding: utf-8 -*-
 from django.core.files.base import File
-from django.core.files.storage import Storage
 from easy_thumbnails import fields as easy_thumbnails_fields, \
     files as easy_thumbnails_files
 from filer import settings as filer_settings

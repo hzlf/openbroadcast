@@ -1,6 +1,5 @@
 from django import template
 from django.template.loader import render_to_string
-from django.template.defaultfilters import slugify
 
 from basic.tools.templatetags.utils import parse_ttag
 

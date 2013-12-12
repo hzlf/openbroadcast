@@ -11,7 +11,6 @@ import string
 
 from django.utils.safestring import SafeData, mark_safe
 from django.utils.encoding import force_unicode
-from django.utils.http import urlquote
 from django.utils.html import escape
 from django import template
 

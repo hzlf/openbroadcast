@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
-from cms.exceptions import NoHomeFound
-from cms.models import Title, Page, PageModerator
-from cms.models.moderatormodels import MASK_PAGE, MASK_CHILDREN, \
-    MASK_DESCENDANTS, PageModeratorState
-from cms.utils.permissions import get_user_sites_queryset
 from django.conf import settings
 from django.contrib.admin.views.main import ChangeList, ALL_VAR, IS_POPUP_VAR, \
     ORDER_TYPE_VAR, ORDER_VAR, SEARCH_VAR
 from django.contrib.sites.models import Site
 import django
+
+from cms.exceptions import NoHomeFound
+from cms.models import Title, Page, PageModerator
+from cms.models.moderatormodels import MASK_PAGE, MASK_CHILDREN, \
+    MASK_DESCENDANTS, PageModeratorState
+from cms.utils.permissions import get_user_sites_queryset
+
 
 COPY_VAR = "copy"
 

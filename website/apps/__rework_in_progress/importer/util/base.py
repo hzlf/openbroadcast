@@ -1,7 +1,7 @@
-import discogs_client as discogs
-
 import logging
 import time
+
+import discogs_client as discogs
 
 log = logging.getLogger(__name__)
 

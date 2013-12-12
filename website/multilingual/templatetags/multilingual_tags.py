@@ -1,13 +1,5 @@
-import math
-import StringIO
-import tokenize
-
 from django import template
-from django import forms
-from django.template import Node, NodeList, Template, Context, resolve_variable
-from django.template.loader import get_template, render_to_string
-from django.conf import settings
-from django.utils.html import escape
+from django.template import resolve_variable
 from multilingual.languages import (
     get_default_language,
     get_language_code_list,

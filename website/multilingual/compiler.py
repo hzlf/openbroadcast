@@ -10,9 +10,7 @@ from django.db.models.sql.compiler import SQLCompiler
 
 from multilingual.languages import (
     get_translation_table_alias,
-    get_language_code_list,
-    get_default_language,
-    get_translated_field_alias)
+    get_language_code_list )
 
 __ALL__ = ['MultilingualSQLCompiler']
 

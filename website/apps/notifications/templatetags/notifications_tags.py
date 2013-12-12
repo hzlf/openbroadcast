@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 from django.template import Library
-from django.template.base import TemplateSyntaxError
-from django.template import Node
 
 register = Library()
 

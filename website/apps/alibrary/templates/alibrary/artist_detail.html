@@ -64,7 +64,17 @@
 				-->
         <section class="top">
 
-            <h2>{% trans "Top Tracks" %}</h2>
+
+            <h2>
+                {% url alibrary-media-list as media_list %}
+                {% trans "Top Tracks" %}
+                            <span class="pull-right">
+                                <a href="{% spurl path=media_list query="artist={{ object.slug }}" %}">
+                                    <i class="icon-chevron-sign-right"></i>
+                                    {% trans "Show all" %} {{ object.media_artist.count }} {% trans "tracks by" %} {{ object.name }}
+                                </a>
+                            </span>
+            </h2>
 
             <div class="listview container medias s">
 

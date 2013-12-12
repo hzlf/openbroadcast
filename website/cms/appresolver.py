@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-from cms.apphook_pool import apphook_pool
-from cms.utils.moderator import get_page_queryset
-
 from django.conf import settings
 from django.conf.urls.defaults import patterns
 from django.contrib.sites.models import Site
@@ -10,6 +7,10 @@ from django.core.urlresolvers import RegexURLResolver, Resolver404, reverse, \
     RegexURLPattern
 from django.db.models import Q
 from django.utils.importlib import import_module
+
+from cms.apphook_pool import apphook_pool
+from cms.utils.moderator import get_page_queryset
+
 
 APP_RESOLVERS = []
 

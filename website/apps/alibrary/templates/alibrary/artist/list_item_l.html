@@ -55,6 +55,8 @@
 
             <div class="list_body_item">
                 <ul class="unstyled">
+
+
                     {% if item.get_releases.count > 0 %}
                         <li>
                             {% url alibrary-release-list as release_list %}
@@ -65,13 +67,19 @@
                                 class="filter icon"></span></a>
                         </li>
                     {% endif %}
+
+
                     {% if item.media_artist.count > 0 %}
                         <li>
-                            {% trans "Tracks" %}:&nbsp;<a href="#"
-                                                          style="vertical-align: top;">{{ item.media_artist.count }}<span
+                            {% url alibrary-media-list as media_list %}
+                            {% trans "Tracks" %}:&nbsp;<a
+                                href="{% spurl path=media_list query="artist={{ item.slug }}" %}"
+                                title="{% trans "Only show tracks by" %} {{ item.name }}"
+                                style="vertical-align: top;">{{ item.media_artist.count }}<span
                                 class="filter icon"></span></a>
                         </li>
                     {% endif %}
+
                 </ul>
             </div>
 

@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db.models import Manager
 from django.db.models.query import QuerySet, EmptyQuerySet
 from django.utils.encoding import smart_unicode

@@ -1,6 +1,8 @@
 from django.conf.urls.defaults import *
+from django.contrib.auth.decorators import login_required
+
 from exporter.views import *
-from django.contrib.auth.decorators import login_required, permission_required
+
 
 urlpatterns = patterns('exporter.views',
                                                

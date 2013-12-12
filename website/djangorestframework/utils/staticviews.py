@@ -1,7 +1,9 @@
+import base64
+
 from django.contrib.auth.views import *
 from django.conf import settings
 from django.http import HttpResponse
-import base64
+
 
 def deny_robots(request):
     return HttpResponse('User-agent: *\nDisallow: /', mimetype='text/plain')

@@ -1,26 +1,15 @@
-from datetime import datetime, timedelta
-
-from django.conf import settings
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
-from django.template import RequestContext
 from django.utils.cache import patch_response_headers
-from django.contrib.auth import login, authenticate, logout as auth_logout
-from django.contrib.auth.models import User
-from django.shortcuts import render_to_response, render
-from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
+from facebook import GraphAPI, GraphAPIError
 
 from allauth.utils import get_login_redirect_url
 from allauth.socialaccount.helpers import complete_social_login
 from allauth.socialaccount.helpers import render_authentication_error
 from allauth.socialaccount.oauth import OAuthClient
-
-from facebook import GraphAPI, GraphAPIError
-
-from models import FacebookApp, FacebookAccount
+from models import FacebookAccount
 from forms import FacebookConnectForm
-
 from allauth.utils import valid_email_or_none
+
 
 def login(request):
     ret = None

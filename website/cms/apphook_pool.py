@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-from cms.exceptions import AppAlreadyRegistered
-from cms.utils.django_load import load, iterload_objects
+import warnings
+
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-import warnings
+
+from cms.exceptions import AppAlreadyRegistered
+from cms.utils.django_load import load, iterload_objects
+
 
 class ApphookPool(object):
     def __init__(self):

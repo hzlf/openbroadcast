@@ -1,4 +1,3 @@
-import re
 from operator import add
 from time import time
 from django.db import connection

@@ -1,34 +1,15 @@
-from mutagen import File as MutagenFile
-from mutagen.easyid3 import EasyID3
-from mutagen.id3 import ID3
+import os
+import shutil
+import logging
 
 from django.conf import settings
 
-import os
-import string
-import unicodedata
-
-import locale
-import acoustid
-import requests
-
-from alibrary.models import Relation, Release, Artist, Media, Label
-
+from alibrary.models import Relation, Release, Artist, Media
 from lib.util import filer_extra
-
 from alibrary.util import lookup
-
 from settings import MEDIA_ROOT
-
 import musicbrainzngs
-import discogs_client as discogs
-
-import shutil
-
-
-from base import discogs_image_by_url 
-
-import logging
+from base import discogs_image_by_url
 log = logging.getLogger(__name__)
 
 

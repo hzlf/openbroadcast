@@ -1,18 +1,11 @@
 from django.conf import settings
-
-from django.contrib.auth.models import User
-from django.db.models import Count
-
 from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
-from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
-
-from tastypie.cache import SimpleCache
+from tastypie.resources import ModelResource
+from easy_thumbnails.files import get_thumbnailer
 
 from abcast.models import Jingle, JingleSet
-
-from easy_thumbnails.files import get_thumbnailer
 
 class JingleResource(ModelResource):
     

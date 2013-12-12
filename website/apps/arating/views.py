@@ -1,15 +1,14 @@
+import json
+
 from django.template import loader, RequestContext
-from django.core.exceptions import ImproperlyConfigured
-from django.http import (HttpResponse, HttpResponseRedirect, Http404, 
+from django.http import (HttpResponse, HttpResponseRedirect, Http404,
                          HttpResponseForbidden)
-from django.db.models import get_model
 from django.db.models.base import ModelBase
 from django.contrib.contenttypes.models import ContentType
-from arating.models import Vote
 
+from arating.models import Vote
 from arating.models import VOTE_CHOICES
 
-import json
 
 def vote(request, content_type, object_id, vote=0, can_vote_test=None,
               redirect_url=None, template_name=None, template_loader=loader,

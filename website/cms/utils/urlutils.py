@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-from django.conf import settings
 from urlparse import urlparse
 import re
+
+from django.conf import settings
+
 
 # checks validity of absolute / relative url
 any_path_re = re.compile('^/?[a-zA-Z0-9_.-]+(/[a-zA-Z0-9_.-]+)*/?$') 

@@ -1,6 +1,8 @@
-from django.template import Library
 from urlparse import urlparse, urlunparse
 from urllib import quote
+
+from django.template import Library
+
 register = Library()
 
 def add_query_param(url, param):

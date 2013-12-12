@@ -1,6 +1,5 @@
 #-*- coding: utf-8 -*-
-from django.core.files import File as DjangoFile
-from django.core.management.base import BaseCommand, NoArgsCommand
+from django.core.management.base import NoArgsCommand
 from filer.models.filemodels import File
 from filer.models.foldermodels import Folder
 from filer.models.imagemodels import Image
@@ -8,10 +7,6 @@ from filer.settings import FILER_IS_PUBLIC_DEFAULT
 
 # from bcast.settings import *
 from alibrary.models import Media
-
-from optparse import make_option
-import os
-from datetime import *
 
 
 class MediaFix(object):

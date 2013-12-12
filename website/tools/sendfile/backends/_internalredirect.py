@@ -1,5 +1,7 @@
-from django.conf import settings
 import os.path
+
+from django.conf import settings
+
 
 def _convert_file_to_url(filename):
     relpath = os.path.relpath(filename, settings.SENDFILE_ROOT)

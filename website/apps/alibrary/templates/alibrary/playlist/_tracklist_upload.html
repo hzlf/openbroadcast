@@ -82,7 +82,7 @@
     <div class="uploader">
 
         <form id="fileupload"
-              action="{% url api_dispatch_list api_name="v1" resource_name="importfile" %}?uuid_key={{ object.uuid }}"
+              action="{% url api_dispatch_list api_name="v1" resource_name="importfile" %}?import_session__uuid_key={{ object.uuid }}"
               method="POST"
               enctype="multipart/form-data">
 

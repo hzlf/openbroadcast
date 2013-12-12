@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from shop.models.cartmodel import Cart
-from django.contrib.auth.models import AnonymousUser
 
 
 def get_or_create_cart(request):

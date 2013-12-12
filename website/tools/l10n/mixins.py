@@ -2,11 +2,14 @@
 """Provides mixin objects to ease programming for translations."""
 __docformat__="restructuredtext"
 
+import logging
+
 from django.contrib.sites.models import Site
 from django.utils.translation import get_language
-import keyedcache
-import logging
 from django.conf import settings
+
+import keyedcache
+
 
 log = logging.getLogger('l10n.mixins')
 

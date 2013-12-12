@@ -1,27 +1,16 @@
 #-*- coding: utf-8 -*-
-import os
-import sys
-import time
 import re
 import hashlib
 import pprint
+from optparse import make_option
+import logging
 
-import requests
-import json
-
-from django.core.files import File as DjangoFile
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, NoArgsCommand
-from optparse import make_option
 
-
-
-import logging
 
 log = logging.getLogger(__name__)
-
-from datetime import datetime
 
 ECHONEST_API_KEY = 'DC7YKF3VYN7R0LG1M'
 MUSICBRAINZ_HOST = getattr(settings, 'MUSICBRAINZ_HOST', None)

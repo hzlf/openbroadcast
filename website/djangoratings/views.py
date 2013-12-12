@@ -3,8 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, Http404
 
 from exceptions import *
-from django.conf import settings
-from default_settings import RATINGS_VOTES_PER_IP
+
 
 class AddRatingView(object):
     def __call__(self, request, content_type_id, object_id, field_name, score):

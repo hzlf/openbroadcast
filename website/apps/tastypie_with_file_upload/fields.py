@@ -1,7 +1,8 @@
 import datetime
-from dateutil.parser import parse
 from decimal import Decimal
 import re
+
+from dateutil.parser import parse
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.utils import datetime_safe, importlib
 from tastypie.bundle import Bundle

@@ -1,11 +1,7 @@
 # encoding: utf-8
-import datetime
-from south.db import db
-from south.v2 import DataMigration
-from django.db import models
-
-from datatrans.models import KeyValue
 from collections import defaultdict
+
+from south.v2 import DataMigration
 
 class Migration(DataMigration):
 

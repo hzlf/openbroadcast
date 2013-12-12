@@ -1,12 +1,9 @@
-from django.conf import settings
 from django.conf.urls.defaults import *
 from django.db.models import Q
 
-from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
-from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
-from tastypie.cache import SimpleCache
+from tastypie.resources import ModelResource
 from tastypie.utils import trailing_slash
 
 from easy_thumbnails.files import get_thumbnailer

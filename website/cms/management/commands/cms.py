@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+from optparse import make_option
+
+from django.core.management.base import BaseCommand
+
 from cms.management.commands.subcommands.base import SubcommandsCommand
 from cms.management.commands.subcommands.list import ListCommand
 from cms.management.commands.subcommands.moderator import ModeratorCommand
 from cms.management.commands.subcommands.uninstall import UninstallCommand
-from django.core.management.base import BaseCommand
-from optparse import make_option
-    
-    
+
+
 class Command(SubcommandsCommand):
     
     option_list = BaseCommand.option_list + (

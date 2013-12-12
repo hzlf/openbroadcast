@@ -9,8 +9,6 @@ Inspired by:
     http://github.com/leah/python-oauth/blob/master/oauth/example/client.py
     http://github.com/facebook/tornado/blob/master/tornado/auth.py
 """
-import time
-import base64
 import urllib
 import urllib2
 
@@ -24,12 +22,7 @@ except ImportError:
 import oauth2 as oauth
 
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
 from django.utils.translation import gettext as _
-
-from django.conf import settings
-
-from django.contrib.sites.models import Site
 
 
 def get_token_prefix(url):

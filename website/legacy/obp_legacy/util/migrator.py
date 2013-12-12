@@ -1,36 +1,20 @@
 import os
-import string
-import unicodedata
-import pprint
 import re
-import time
 import shutil
-
 import json
-
 import datetime
 
-import locale
-
-from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 from django.core.validators import email_re
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
-
-from django.utils.html import strip_tags, strip_entities
 from html2text import html2text
+from tagging.models import Tag
 
 from filer.models.filemodels import File
 from filer.models.audiomodels import Audio
 from filer.models.imagemodels import Image
-
-from audiotools import AudioFile, MP3Audio, M4AAudio, FlacAudio, WaveAudio, MetaData
-import audiotools
-
 from settings import MEDIA_ROOT
 
-from tagging.models import Tag
 #from alibrary.models import Relation, Release, Artist, Media, Label, MediaExtraartists, Profession, ArtistMembership
 from obp_legacy.models import *
 
@@ -38,7 +22,6 @@ from lib.util import filer_extra
 
 from l10n.models import Country
 
-from settings import MEDIA_ROOT
 from settings import LEGACY_STORAGE_ROOT
 
 import logging
@@ -748,7 +731,6 @@ class UserMigrator(Migrator):
     def run(self, legacy_obj):
 
         from profiles.models import Profile
-        from django.contrib.auth.models import User, Group
         #from obp_legacy.models_legacy import *
 
         status = 1
@@ -771,7 +753,6 @@ class LegacyUserMigrator(Migrator):
 
     def run(self, legacy_obj):
 
-        from profiles.models import Profile
         from django.contrib.auth.models import User, Group
         from obp_legacy.models_legacy import *
 
@@ -958,8 +939,7 @@ class CommunityMigrator(Migrator):
 
     def run(self, legacy_obj):
 
-        from profiles.models import Profile, Community
-        from django.contrib.auth.models import User, Group
+        from profiles.models import Community
         from obp_legacy.models_legacy import *
 
         status = 1
@@ -1074,7 +1054,7 @@ class PlaylistMigrator(Migrator):
 
     def run(self, legacy_obj):
 
-        from alibrary.models import Playlist, PlaylistItem, PlaylistItemPlaylist
+        from alibrary.models import Playlist, PlaylistItemPlaylist
         from obp_legacy.models_legacy import *
 
         status = 1

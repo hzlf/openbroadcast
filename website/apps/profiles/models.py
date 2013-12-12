@@ -1,27 +1,23 @@
-import re, datetime, os
-from dateutil import relativedelta
+import re
+import datetime
+import os
 
+from dateutil import relativedelta
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import permalink
 from django.contrib.auth.models import User, Group
-from django.db.models.signals import post_save, pre_save
-
-from django_countries import CountryField
-
+from django.db.models.signals import post_save
 import tagging
-import arating
-from postman.api import pm_write
-
-from lib.fields import extra
-
 from django_extensions.db.fields import AutoSlugField, UUIDField
-
 from phonenumber_field.modelfields import PhoneNumberField
 
+import arating
+from postman.api import pm_write
+from lib.fields import extra
 from invitation.signals import invitation_accepted
-
 from l10n.models import Country
+
 
 DEFAULT_GROUP = 'Listener'
 APPROVED_GROUPS = ('Member', 'Mentor',)

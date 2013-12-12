@@ -8,9 +8,6 @@ Django-multilingual: language-related settings and functions.
 #retrieve language settings from settings.py
 from multilingual import settings
 
-from django.utils.translation import ugettext_lazy as _
-from multilingual.exceptions import LanguageDoesNotExist
-
 try:
     from threading import local
 except ImportError:

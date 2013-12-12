@@ -3,7 +3,6 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 
 from groups.decorators import *
-from groups.models import *
 from groups.forms import *
 from tools.shortcuts import render, redirect
 

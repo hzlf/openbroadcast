@@ -4,7 +4,6 @@ Template tags for Django
 # TODO: add in Jinja tags if Coffin is available
 
 from django import template
-from django.contrib.contenttypes.models import ContentType
 from django.db.models import ObjectDoesNotExist
 
 from djangoratings.models import Vote

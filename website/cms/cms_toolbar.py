@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
-from cms.toolbar.base import Toolbar
-from cms.toolbar.constants import LEFT, RIGHT
-from cms.toolbar.items import (Anchor, Switcher, TemplateHTML, ListItem, List, 
-    GetButton)
-from cms.utils import cms_static_url
-from cms.utils.moderator import page_moderator_state, I_APPROVE
+import urllib
+
 from django import forms
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
-import urllib
-from utils.permissions import has_page_change_permission, has_any_page_change_permissions
-from django.conf import settings
+
+from cms.toolbar.base import Toolbar
+from cms.toolbar.constants import LEFT, RIGHT
+from cms.toolbar.items import (Anchor, Switcher, TemplateHTML, ListItem, List,
+    GetButton)
+from cms.utils import cms_static_url
+from cms.utils.moderator import page_moderator_state, I_APPROVE
+from utils.permissions import has_page_change_permission
 
 
 def _get_page_admin_url(context, toolbar, **kwargs):

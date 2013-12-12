@@ -1,6 +1,6 @@
-from atracker.models import Event, EventType
-
 import logging
+
+from atracker.models import Event, EventType
 log = logging.getLogger(__name__)
 
 def summary_for_object(content_object, event_content_object=None, event_type=''):

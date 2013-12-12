@@ -1,8 +1,11 @@
+import os
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from cms.models import CMSPlugin
-import os
 from django.conf import settings
+
+from cms.models import CMSPlugin
+
 
 class File(CMSPlugin):
     """

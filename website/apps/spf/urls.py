@@ -1,6 +1,8 @@
 from django.conf.urls.defaults import *
+from django.contrib.auth.decorators import login_required
+
 from spf.views import matches_csv
-from django.contrib.auth.decorators import login_required, permission_required
+
 
 urlpatterns = patterns('importer.views',
 

@@ -1,26 +1,17 @@
 from django.db import models
-from shop.models import Product
 from django.utils.translation import ugettext as _
-from django.http import HttpRequest
-from django.contrib.auth.models import AnonymousUser
+from guardian.shortcuts import assign
 
+from shop.models import Product
 from filer.fields.image import FilerImageField
 from filer.fields.file import FilerFileField
-
 from filer.models.filemodels import *
 from filer.models.foldermodels import *
-
 from cms.models import CMSPlugin
-
 from shop.models.productmodel import Product
 from shop.models.ordermodel import Order
 from shop.order_signals import *
-
-from guardian.models import UserObjectPermission
-from guardian.shortcuts import assign
-
 from alibrary.models import Release, Media
-
 
 
 class Releaseproduct(Product):

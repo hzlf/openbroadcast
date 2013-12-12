@@ -1,28 +1,20 @@
-from django.contrib.auth.models import User
-from django.db.models import Count
+import datetime
+import json
+
 from django.conf.urls.defaults import *
 from django.http import HttpResponse
 from django.contrib.sites.models import Site
 from django.core.cache import cache
-
-import datetime
-
-import json
-
 from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
-from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
-from tastypie.cache import SimpleCache
+from tastypie.resources import ModelResource, Resource, ALL_WITH_RELATIONS
 from tastypie.utils import trailing_slash
-from tastypie.exceptions import ImmediateHttpResponse
-
-from abcast.models import Station, Channel, Emission
-from abcast.util import notify, scheduler
-from lib.pypo_gateway import send as pypo_send
-
 from easy_thumbnails.files import get_thumbnailer
 
+from abcast.models import Station, Channel, Emission
+from abcast.util import scheduler
+from lib.pypo_gateway import send as pypo_send
 
 
 SCHEDULE_AHEAD = 60 * 60 * 6 # seconds

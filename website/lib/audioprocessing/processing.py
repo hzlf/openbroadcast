@@ -20,13 +20,15 @@
 # Authors:
 #   Bram de Jong <bram.dejong at domain.com where domain in gmail>
 
-from PIL import Image, ImageDraw, ImageColor #@UnresolvedImport
 from functools import partial
 import math
-import numpy
 import os
 import re
 import signal
+
+from PIL import Image, ImageDraw, ImageColor #@UnresolvedImport
+import numpy
+
 #from . import get_sound_type
 
 ALPHA_BASE = 0

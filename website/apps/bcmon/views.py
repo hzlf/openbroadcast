@@ -1,11 +1,9 @@
-from django.views.generic import DetailView, ListView, FormView, UpdateView
-from django.views.generic.detail import SingleObjectTemplateResponseMixin
-from django.shortcuts import get_object_or_404, render_to_response
+from django.views.generic import DetailView, ListView
+from django.shortcuts import render_to_response
 
-from django.http import HttpResponse, HttpResponseForbidden, Http404
+from django.http import HttpResponse
 from django.template import RequestContext
 
-import json
 from django.core import serializers
 
 from wdd.models import Entry, Room

@@ -1,11 +1,10 @@
-from django.db import models
+import json
+
 from django.db.models.signals import post_save
 import redis
-import json
 
 from pusher import settings as pusher_settings
 
-from alibrary.models import Playlist
 
 def pusher_post_save(sender, **kwargs):
     rs = redis.StrictRedis()

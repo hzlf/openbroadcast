@@ -1,11 +1,10 @@
-from cms.plugin_base import CMSPluginBase
-from cms.plugin_pool import plugin_pool
+import re
 
 from django.utils.translation import ugettext as _
 
+from cms.plugin_base import CMSPluginBase
+from cms.plugin_pool import plugin_pool
 from cmsplugin_youtube.models import YouTube as YouTubeModel
-import re
-
 
 
 class YouTubePlugin(CMSPluginBase):

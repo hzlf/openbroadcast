@@ -1,8 +1,10 @@
+from os.path import basename
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
 from cms.models import CMSPlugin, Page
-from os.path import basename
+
 
 class Picture(CMSPlugin):
     """

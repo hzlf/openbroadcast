@@ -1,8 +1,10 @@
+import os.path
+
 from django.conf import settings
 from django.test import TestCase
 from django.http import HttpResponse, Http404, HttpRequest
-import os.path
 from sendfile import sendfile as real_sendfile, _get_sendfile
+
 
 def sendfile(request, filename, **kwargs):
     # just a simple response with the filename

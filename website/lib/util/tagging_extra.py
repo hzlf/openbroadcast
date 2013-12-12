@@ -1,10 +1,6 @@
 import math
-import types
 
-from django.utils.encoding import force_unicode
 from django.utils.translation import ugettext as _
-
-from array import array
 
 
 # Font size distribution algorithms

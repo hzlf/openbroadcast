@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-from django.contrib.sitemaps import Sitemap
 import itertools
+
+from django.contrib.sitemaps import Sitemap
+
 
 class CMSSitemap(Sitemap):
     changefreq = "monthly"

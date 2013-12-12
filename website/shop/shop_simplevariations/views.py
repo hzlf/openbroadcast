@@ -1,5 +1,4 @@
 from .models import Option, CartItemOption
-from django.db.models import Q
 from shop.models.cartmodel import CartItem
 from shop.models.productmodel import Product
 from shop.util.cart import get_or_create_cart

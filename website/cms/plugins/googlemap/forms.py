@@ -1,9 +1,12 @@
 # coding: utf-8
 
 import re
+
 from django.forms.models import ModelForm
-from .models import GoogleMap
 from django.utils.translation import ugettext_lazy as _
+
+from .models import GoogleMap
+
 
 CSS_WIDTH_RE = re.compile(r'^\d+(?:px|%)$')
 CSS_HEIGHT_RE = re.compile(r'^\d+px$')

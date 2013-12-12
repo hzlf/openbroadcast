@@ -1,13 +1,9 @@
-from cms.plugin_base import CMSPluginBase
-from cms.plugin_pool import plugin_pool
-
 from django.utils.translation import ugettext as _
 
-
-import re
-import os
-
+from cms.plugin_base import CMSPluginBase
+from cms.plugin_pool import plugin_pool
 from settings import CMS_GIT_FILE
+
 
 class GitStatusPlugin(CMSPluginBase):
 

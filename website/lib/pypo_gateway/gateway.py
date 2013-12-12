@@ -6,10 +6,12 @@
     :author: (c) 2013 by Jonas Ohrstrom.
     :license: GPLv3, see LICENSE for more details.
 """
-from kombu import Connection
 import json
 import logging
+
+from kombu import Connection
 from celery.task import task
+
 log = logging.getLogger(__name__)
 
 from django.conf import settings

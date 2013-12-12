@@ -1,11 +1,8 @@
 import unittest
 
 from django import http
-from django import forms
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import User, Group, Permission
-
-import autocomplete_light
+from django.contrib.auth.models import User, Group
 
 
 def make_get_request(query=''):

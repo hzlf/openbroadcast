@@ -1,7 +1,8 @@
 from django.forms.models import ModelForm
 from django.utils.translation import ugettext_lazy as _
-from cms.plugins.link.models import Link
 from django import forms
+
+from cms.plugins.link.models import Link
 from cms.models import Page
 
 

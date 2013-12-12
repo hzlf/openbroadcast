@@ -1,14 +1,14 @@
+import itertools
+
 from django.db.models import Manager
 from django.db.models.query import QuerySet
-
 from django.contrib.contenttypes.models import ContentType
-import itertools
+
 
 class VoteQuerySet(QuerySet):
     def delete(self, *args, **kwargs):
         """Handles updating the related `votes` and `score` fields attached to the model."""
         # XXX: circular import
-        from fields import RatingField
 
         qs = self.distinct().values_list('content_type', 'object_id').order_by('content_type')
     

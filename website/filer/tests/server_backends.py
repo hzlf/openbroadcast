@@ -1,6 +1,5 @@
 #-*- coding: utf-8 -*-
 import time
-import shutil
 import os
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpResponseNotModified, Http404

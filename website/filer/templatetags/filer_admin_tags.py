@@ -1,7 +1,9 @@
+from distutils.version import LooseVersion
+
 import django
 from django.conf import settings
 from django.template import Library
-from distutils.version import LooseVersion
+
 
 register = Library()
 

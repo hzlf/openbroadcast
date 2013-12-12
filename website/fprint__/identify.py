@@ -1,8 +1,9 @@
 import sys
-import os
 import subprocess
-from API import fp
 import json
+
+from API import fp
+
 
 def identify(file):
 

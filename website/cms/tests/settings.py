@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
+
+from django.core.exceptions import ImproperlyConfigured
+from django.template.loader import render_to_string
+
 from cms.conf.global_settings import CMS_TEMPLATE_INHERITANCE_MAGIC
 from cms.conf.patch import post_patch, post_patch_check
 from cms.test_utils.testcases import CMSTestCase
 from cms.test_utils.util.context_managers import SettingsOverride
-from django.core.exceptions import ImproperlyConfigured
-from django.template.loader import render_to_string
+
 
 class SettingsTests(CMSTestCase):
     def test_cms_templates_length(self):

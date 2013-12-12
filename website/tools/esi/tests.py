@@ -14,8 +14,8 @@ try:
     from django.test import RequestFactory
 except:
     RequestFactory = None
-from django.template import Template, Context, RequestContext, TemplateSyntaxError
-from esi.views import esi, get_object
+from django.template import Template, Context, TemplateSyntaxError
+from esi.views import get_object
 
 
 class EsiTest(TestCase):

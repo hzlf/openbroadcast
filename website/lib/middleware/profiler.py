@@ -5,11 +5,13 @@
 import sys
 import os
 import re
-import hotshot, hotshot.stats
+import hotshot
+import hotshot.stats
 import tempfile
 import StringIO
 
 from django.conf import settings
+
 
 words_re = re.compile( r'\s+' )
 

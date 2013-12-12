@@ -1,5 +1,7 @@
-import settings
 from django.core.urlresolvers import reverse
+
+import settings
+
 
 PRETTIFY = False
 try:
@@ -27,7 +29,6 @@ import sys
 import tempfile
 import hotshot
 import hotshot.stats
-from django.conf import settings
 from cStringIO import StringIO
 
 class ProfileMiddleware(object):

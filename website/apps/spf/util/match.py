@@ -1,19 +1,9 @@
-import os
-import time
-import re
 import pprint
-import json
-import datetime
-from django.conf import settings
+import logging
 
 import musicbrainzngs
-
 from obp_legacy.models import *
-
-from spf.models import Match, Request
-
-
-import logging
+from spf.models import Match
 log = logging.getLogger(__name__)
 
 

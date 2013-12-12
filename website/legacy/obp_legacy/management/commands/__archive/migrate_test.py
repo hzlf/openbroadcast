@@ -1,27 +1,10 @@
 #-*- coding: utf-8 -*-
-from django.core.files import File as DjangoFile
-from django.core.management.base import BaseCommand, NoArgsCommand
 from optparse import make_option
-import os
-import sys
 
-import time
-
-import re
-
-from tagging.models import Tag
-
-from alibrary.models import Artist, Release, Media, Label, Relation, License
+from django.core.management.base import BaseCommand, NoArgsCommand
 
 from obp_legacy.models import *
-
-from django.template.defaultfilters import slugify
-
-from datetime import datetime
-
 from lib.util import filer_extra
-
-from filer.models import *
 
 
 def id_to_location(id):

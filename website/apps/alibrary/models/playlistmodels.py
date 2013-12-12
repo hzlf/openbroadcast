@@ -1,21 +1,13 @@
 # python
-import datetime
-import uuid
-import shutil
-import sys
 
 # django
 from django.db import models
 from django.db.models.signals import post_save
-from django.template.defaultfilters import slugify
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
-from django.core.files import File as DjangoFile
 from django.core.urlresolvers import reverse
 
 from django.contrib.contenttypes.models import ContentType
-
-from django.http import HttpResponse # needed for absolute url
 
 from settings import *
 
@@ -28,8 +20,6 @@ from cms.models.fields import PlaceholderField
 from cms.utils.placeholder import get_page_from_placeholder_if_exists
 
 # model_utils
-from model_utils.models import StatusModel, TimeFramedModel
-from model_utils import Choices
 
 # filer
 from filer.models.filemodels import *
@@ -40,10 +30,10 @@ from filer.fields.image import FilerImageField
 from filer.fields.audio import FilerAudioField
 from filer.fields.file import FilerFileField
 
+from celery.task import task
+
 # modules
 #from taggit.managers import TaggableManager
-from django_countries import CountryField
-from easy_thumbnails.files import get_thumbnailer
 
 import tagging
 #import reversion 
@@ -57,10 +47,6 @@ from lib.fields import extra
 ################
 from alibrary.models.basemodels import *
 from alibrary.models.artistmodels import *
-from alibrary.models.releasemodels import *
-from alibrary.models.mediamodels import *
-
-
 
 from caching.base import CachingMixin, CachingManager
 

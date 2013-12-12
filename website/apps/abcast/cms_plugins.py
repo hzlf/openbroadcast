@@ -1,10 +1,8 @@
-from django.db import models
+from django.utils.translation import ugettext as _
+
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
 from cms.models.pluginmodel import CMSPlugin
-
-from django.utils.translation import ugettext as _
-
 from abcast.models import OnAirPlugin as OnAirPluginModel
 
 
@@ -12,7 +10,9 @@ from abcast.models import OnAirPlugin as OnAirPluginModel
 class OnAirPlugin(CMSPluginBase):
     model = OnAirPluginModel
     name = _("On-Air Plugin")
-    render_template = "abcast/cmsplugin/on_air.html"
+
+    #render_template = "abcast/cmsplugin/on_air.html"
+    render_template = "abcast/cmsplugin/on_air_ng.html"
 
     # meta
     class Meta:
@@ -22,7 +22,7 @@ class OnAirPlugin(CMSPluginBase):
 
         context.update({
             'instance': instance,
-            'object': instance.channel,
+            'channel': instance.channel,
             'placeholder': placeholder,
         })
         return context

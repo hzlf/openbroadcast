@@ -1,14 +1,13 @@
-from alibrary.models import Release
+import urllib
+import cStringIO
+import random
+
 from django.http import HttpResponse
 from django.template import RequestContext
 from django.shortcuts import render_to_response
-
 from PIL import Image
-import urllib
-import cStringIO
 
-import random
-
+from alibrary.models import Release
 
 
 INK = "red", "blue", "green", "yellow"

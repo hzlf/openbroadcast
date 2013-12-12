@@ -1,4 +1,4 @@
-from filer.models import * 
+
 
 filename = 'test.jpg'
 file = ''

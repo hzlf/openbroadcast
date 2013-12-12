@@ -4,7 +4,6 @@ from email.parser import FeedParser
 from email.utils import parseaddr, parsedate
 from optparse import make_option
 import socket
-import sys
 import time
 
 from django.conf import settings

@@ -1,20 +1,10 @@
-from django.contrib.auth.models import User
-from django.db.models import Count
 from django.conf.urls.defaults import *
-from django.http import HttpResponse
 from django.contrib.sites.models import Site
 
-import datetime
-
-import json
-
-from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
-from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
-from tastypie.cache import SimpleCache
+from tastypie.resources import Resource
 from tastypie.utils import trailing_slash
-from tastypie.exceptions import ImmediateHttpResponse
 
 from .models import Stats
 

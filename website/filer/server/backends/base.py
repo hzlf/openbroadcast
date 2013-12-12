@@ -1,7 +1,8 @@
 #-*- coding: utf-8 -*-
-from django.utils.encoding import smart_str
 import mimetypes
 import os
+
+from django.utils.encoding import smart_str
 
 
 class ServerBase(object):

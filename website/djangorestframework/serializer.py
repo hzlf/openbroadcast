@@ -1,14 +1,13 @@
 """
 Customizable serialization.
 """
-from django.db import models
-from django.db.models.query import QuerySet
-from django.db.models.fields.related import RelatedField
-from django.utils.encoding import smart_unicode, is_protected_type, smart_str
-
-import decimal
 import inspect
 import types
+
+from django.db import models
+from django.db.models.query import QuerySet
+from django.utils.encoding import smart_unicode, is_protected_type, smart_str
+
 
 
 # We register serializer classes, so that we can refer to them by their

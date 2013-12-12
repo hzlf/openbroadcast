@@ -1,7 +1,5 @@
 import base64
 
-from django.http import HttpResponseRedirect
-
 from openid.store.interface import OpenIDStore as OIDStore
 from openid.association import Association as OIDAssociation
 

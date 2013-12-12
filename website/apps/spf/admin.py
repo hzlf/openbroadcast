@@ -1,8 +1,6 @@
 """Admin classes for the ``object_events`` app."""
 from django.contrib import admin
 
-from csvimport.admin import CSVImportAdmin
-
 from .models import Request, Match
 # from lib.admin.actions import export_as_csv_action
 

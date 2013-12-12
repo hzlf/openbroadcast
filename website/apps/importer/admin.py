@@ -10,6 +10,15 @@ status_set_ready.short_description = 'Set status to "ready"'
 
 def status_set_queued(modeladmin, request, queryset):
     queryset.update(status=6)
+
+
+def requeue(modeladmin, request, queryset):
+
+    for item in queryset:
+        item.status = 6
+        item.save()
+
+
 status_set_queued.short_description = 'Set status to "queued"'
 
 
@@ -26,7 +35,7 @@ class ImportItemnline(admin.TabularInline):
 
 class ImportAdmin(admin.ModelAdmin):    
     
-    list_display = ('created', 'user', 'status', 'type',)
+    list_display = ('created', 'user', 'status', 'type', 'uuid_key',)
     list_filter = ('status', 'user',)    
     readonly_fields = ('created', 'updated',)
     date_hierarchy = 'created'
@@ -39,7 +48,7 @@ class ImportFileAdmin(admin.ModelAdmin):
     list_filter = ('status', 'import_session',)
     readonly_fields = ('created', 'updated', 'mimetype', 'import_session', 'results_tag', 'import_tag', 'results_musicbrainz', 'results_discogs',)
     date_hierarchy = 'created'
-    actions = [status_set_ready, status_set_queued]
+    actions = [status_set_ready, status_set_queued, requeue]
 
 admin.site.register(Import, ImportAdmin)
 admin.site.register(ImportFile, ImportFileAdmin)

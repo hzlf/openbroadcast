@@ -1,17 +1,11 @@
-from django.views.generic import DetailView, ListView, FormView, UpdateView
-from django.views.generic.detail import SingleObjectTemplateResponseMixin
-from django.shortcuts import get_object_or_404, render_to_response
+from django.views.generic import DetailView, ListView
+from django.shortcuts import render_to_response
 
-from django.db.models import Avg
-
-from django import http
-from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect
+from django.http import HttpResponse, Http404
 from django.utils import simplejson as json
 from django.conf import settings
 from django.shortcuts import redirect
-from django.core import serializers
 from django.utils.translation import ugettext as _
-import json
 
 from django.template import RequestContext
 
@@ -20,16 +14,9 @@ from alibrary.models import Playlist
 
 #from abcast.filters import EmissionFilter
 
-from tagging.models import Tag, TaggedItem
-from tagging.utils import calculate_cloud
-
 import datetime
 
 from jsonview.decorators import json_view
-import jsonview
-
-
-from easy_thumbnails.files import get_thumbnailer
 
 from django.db.models import Q
 from lib.util import tagging_extra

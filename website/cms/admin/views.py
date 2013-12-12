@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-from cms.models import Page, Title, CMSPlugin, Placeholder
-from cms.utils import get_language_from_request
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+
+from cms.models import Page, Title, CMSPlugin, Placeholder
+from cms.utils import get_language_from_request
+
 
 def save_all_plugins(request, page, placeholder, excludes=None):
 

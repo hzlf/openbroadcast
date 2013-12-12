@@ -1,9 +1,8 @@
 # encoding: utf-8
-from django.db import models
-from south.db import db
-from south.v2 import DataMigration
-import datetime
 import traceback
+
+from south.v2 import DataMigration
+
 
 class Migration(DataMigration):
 

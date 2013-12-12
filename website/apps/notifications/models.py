@@ -1,15 +1,16 @@
 import datetime
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.db import models
 from django.utils.timezone import utc
-from .utils import id2slug
+from model_utils import managers, Choices
 
+from .utils import id2slug
 from notifications.signals import notify
 
-from model_utils import managers, Choices
 
 try:
     from django.utils import timezone

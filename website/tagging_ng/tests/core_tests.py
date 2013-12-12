@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-from pdb import set_trace
 from unittest import TestCase
 from django import forms
 from django.db.models import Q

@@ -1,4 +1,3 @@
-from cms.utils import cms_static_url
 from django.conf import settings
 from django.forms.widgets import flatatt
 from django.template.defaultfilters import escape
@@ -7,9 +6,12 @@ from django.utils import simplejson
 from django.utils.encoding import smart_unicode
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
+
+from cms.utils import cms_static_url
 from tinymce.widgets import TinyMCE, get_language_config
 import cms.plugins.text.settings
 import tinymce.settings
+
 
 class TinyMCEEditor(TinyMCE):
     

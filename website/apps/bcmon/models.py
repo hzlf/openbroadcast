@@ -7,17 +7,14 @@ import re
 
 from django.db import models
 from django.db.models.signals import post_save
-
-from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
-
-from cms.models import CMSPlugin
 from django_extensions.db.fields import *
 from django_extensions.db.fields.json import JSONField
 
+from cms.models import CMSPlugin
 from alibrary.models import Media
-
 from ep.API import fp
+
 
 def filename_by_uuid(instance, filename):
     filename, extension = os.path.splitext(filename)

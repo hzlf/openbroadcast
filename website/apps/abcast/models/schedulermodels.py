@@ -1,25 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import os
 import datetime
-import re
 
 from django.db import models
-from django.db.models.signals import post_save, pre_delete, post_delete
+from django.db.models.signals import post_save, pre_delete
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 from django.core.urlresolvers import reverse
-
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
-
+from django_extensions.db.fields import *
 
 from cms.models import CMSPlugin
-from django_extensions.db.fields import *
-from django_extensions.db.fields.json import JSONField
-
-from django.core.urlresolvers import reverse
 
 # filer
 from filer.fields.image import FilerImageField
@@ -29,9 +22,9 @@ from filer.fields.file import FilerFileField
 # 
 from lib.fields import extra
 
-from alibrary.models import Artist, Playlist
+from alibrary.models import Playlist
 
-from abcast.models import BaseModel, Station, Channel
+from abcast.models import BaseModel, Channel
 
 
 from caching.base import CachingMixin, CachingManager

@@ -1,11 +1,13 @@
 import os
 import stat
 import re
-from email.Utils import parsedate_tz, mktime_tz
 
 from django.core.files.base import File
 from django.http import HttpResponse, HttpResponseNotModified
 from django.utils.http import http_date
+
+from email.Utils import parsedate_tz, mktime_tz
+
 
 def sendfile(request, filename, **kwargs):
     # Respect the If-Modified-Since header.

@@ -2,8 +2,6 @@
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 
-from urlparse import urlsplit
-
 from shop.forms import get_cart_item_formset
 from shop.models.productmodel import Product
 from shop.util.cart import get_or_create_cart

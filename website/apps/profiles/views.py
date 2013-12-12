@@ -2,37 +2,22 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.http import Http404, HttpResponseRedirect
 from django.views.generic import list_detail
-
-from django.http import HttpResponseRedirect, HttpResponse
-
-from django.views.generic import DetailView, ListView, FormView, UpdateView
-from django.views.generic.detail import SingleObjectTemplateResponseMixin
-
+from django.http import HttpResponse
+from django.views.generic import DetailView, ListView
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from actstream.models import *
+from tagging.models import Tag
+from django.db.models import Q
 
 from pure_pagination.mixins import PaginationMixin
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
-
 from profiles.models import *
 from profiles.forms import *
-
-from actstream.models import *
-
 from alibrary.models import Playlist
-
-
-
-
 from profiles.filters import ProfileFilter
-
-from tagging.models import Tag, TaggedItem
-from tagging.utils import calculate_cloud
-
-from django.db.models import Q
 from lib.util import tagging_extra
-
 
 
 PAGINATE_BY = getattr(settings, 'PROFILES_PAGINATE_BY', (12,24,36))

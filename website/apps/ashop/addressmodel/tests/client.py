@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.contrib.auth.models import User
-from shop.addressmodel.models import Country, Address
 from django.test.testcases import TestCase
+
+from shop.addressmodel.models import Country, Address
 
 
 class ClientTestCase(TestCase):

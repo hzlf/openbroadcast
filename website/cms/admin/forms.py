@@ -1,14 +1,4 @@
 # -*- coding: utf-8 -*-
-from cms.apphook_pool import apphook_pool
-from cms.forms.widgets import UserSelectAdminWidget
-from cms.models import (Page, PagePermission, PageUser, ACCESS_PAGE, 
-    PageUserGroup)
-from cms.utils.mail import mail_page_user_change
-from cms.utils.page import is_valid_page_slug
-from cms.utils.page_resolver import get_page_from_path
-from cms.utils.permissions import (get_current_user, get_subordinate_users, 
-    get_subordinate_groups)
-from cms.utils.urlutils import any_path_re
 from django import forms
 from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm
@@ -21,9 +11,18 @@ from django.forms.util import ErrorList
 from django.forms.widgets import HiddenInput
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _, get_language
+
+from cms.apphook_pool import apphook_pool
+from cms.forms.widgets import UserSelectAdminWidget
+from cms.models import (Page, PagePermission, PageUser, ACCESS_PAGE,
+    PageUserGroup)
+from cms.utils.mail import mail_page_user_change
+from cms.utils.page import is_valid_page_slug
+from cms.utils.page_resolver import get_page_from_path
+from cms.utils.permissions import (get_current_user, get_subordinate_users,
+    get_subordinate_groups)
+from cms.utils.urlutils import any_path_re
 from menus.menu_pool import menu_pool
-
-
 
 
 def get_permission_acessor(obj):

@@ -1,7 +1,8 @@
-from django.db import models
 from tagging.fields import TagField
-from tagging_autocomplete_tagit.widgets import TagAutocompleteTagIt
 from django.contrib.admin.widgets import AdminTextInputWidget
+
+from tagging_autocomplete_tagit.widgets import TagAutocompleteTagIt
+
 
 # The following code is based on models.py file from django-tinymce by Joost Cassee
 

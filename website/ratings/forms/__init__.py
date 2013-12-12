@@ -3,7 +3,6 @@ import time
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.utils.crypto import salted_hmac, constant_time_compare
-from django.utils.encoding import force_unicode
 
 from ratings import cookies, exceptions
 

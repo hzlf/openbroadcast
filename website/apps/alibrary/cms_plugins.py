@@ -1,10 +1,8 @@
-from django.db import models
+from django.utils.translation import ugettext as _
+
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
 from cms.models.pluginmodel import CMSPlugin
-
-from django.utils.translation import ugettext as _
-
 from alibrary.models import MediaPlugin as MediaPluginModel
 from alibrary.models import ReleasePlugin as ReleasePluginModel
 from alibrary.models import ArtistPlugin as ArtistPluginModel

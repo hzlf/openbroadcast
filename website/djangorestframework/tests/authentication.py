@@ -1,15 +1,13 @@
+import base64
+
 from django.conf.urls.defaults import patterns
 from django.contrib.auth.models import User
-from django.contrib.auth import login
 from django.test import Client, TestCase
-
 from django.utils import simplejson as json
 
 from djangorestframework.compat import RequestFactory
 from djangorestframework.views import View
 from djangorestframework import permissions
-
-import base64
 
 
 class MockView(View):

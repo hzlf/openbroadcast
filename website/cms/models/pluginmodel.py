@@ -9,13 +9,12 @@ from django.db import models
 from django.db.models.base import (model_unpickle, simple_class_factory)
 from django.db.models.query_utils import DeferredAttribute
 from django.utils.translation import ugettext_lazy as _
+from mptt.models import MPTTModel, MPTTModelBase
 
 from cms.exceptions import DontUsePageAttributeWarning
 from cms.models.placeholdermodel import Placeholder
 from cms.plugin_rendering import PluginContext, render_plugin
 from cms.utils.helpers import reversion_register
-
-from mptt.models import MPTTModel, MPTTModelBase
 
 
 class BoundRenderMeta(object):

@@ -1,28 +1,17 @@
-from django.conf import settings
+import json
+import datetime
 
-from django.contrib.auth.models import User
-from django.db.models import Count
+from django.conf import settings
 from django.conf.urls.defaults import *
 from django.http import HttpResponse
-
-import json
-
-from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
-from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
-from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
-from tastypie.cache import SimpleCache
+from tastypie.resources import ModelResource
 from tastypie.utils import trailing_slash
-from tastypie.exceptions import ImmediateHttpResponse
 
+from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
 from alibrary.models import Playlist
 from abcast.models import Emission, Channel
-
-from easy_thumbnails.files import get_thumbnailer
-
-
-import datetime
 
 # logging
 import logging

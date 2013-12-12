@@ -14,7 +14,6 @@ logger = logging.getLogger('tagging.models')
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import connection, models, IntegrityError
-from django.db.models.query import QuerySet
 from django.utils.translation import ugettext_lazy as _
 
 from tagging import settings
@@ -591,7 +590,6 @@ if settings.MULTILINGUAL_TAGS:
     """Monkey-patching for translation getter,
        to fallback to another translation."""
 
-    from multilingual.translation import getter_generator
     _orig_name_getter = Tag.get_name
     def _my_get_name(self, language_id = None, fallback = False):
         value = _orig_name_getter(self, language_id, fallback)

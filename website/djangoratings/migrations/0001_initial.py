@@ -1,6 +1,5 @@
 
 from south.db import db
-from django.db import models
 from djangoratings.models import *
 
 class Migration:

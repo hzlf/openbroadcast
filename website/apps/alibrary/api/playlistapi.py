@@ -1,25 +1,20 @@
-from django.conf import settings
 from django.conf.urls.defaults import *
 from django.db.models import Q
-
 from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
-from tastypie.resources import ModelResource, Resource, ALL, ALL_WITH_RELATIONS
-from tastypie.cache import SimpleCache
+from tastypie.resources import ModelResource
 from tastypie.utils import trailing_slash
-
-from alibrary.api import ReleaseResource, MediaResource, SimpleMediaResource
-from alibrary.models import Release, Artist
-from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
-
-from lib.api.authentication import OAuth20Authentication
-
 from easy_thumbnails.files import get_thumbnailer
 
+from alibrary.api import ReleaseResource, MediaResource, SimpleMediaResource
+from alibrary.models import Release
+from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
+from lib.api.authentication import OAuth20Authentication
 from alibrary.models import Playlist, PlaylistMedia, Media, PlaylistItemPlaylist, PlaylistItem, Daypart
 from abcast.models import Jingle
 from abcast.api import JingleResource
+
 
 THUMBNAIL_OPT = dict(size=(70, 70), crop=True, bw=False, quality=80)
 

@@ -4,7 +4,6 @@ Support for models' internal Translation class.
 
 ##TODO: this is messy and needs to be cleaned up
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models import signals
 from django.db.models.base import ModelBase

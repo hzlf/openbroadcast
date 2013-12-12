@@ -1,13 +1,12 @@
 import logging
-from django.db import models
-from django.db.models.signals import post_save, post_delete
-import redis
 import json
 import time
-
 from pushy import settings as pushy_settings
-
 from multiprocessing import Pool
+
+from django.db.models.signals import post_save, post_delete
+import redis
+
 
 logger = logging.getLogger(__name__)
 

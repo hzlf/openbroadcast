@@ -1,12 +1,9 @@
+from inspect import isclass
+
 from django.core.management.base import AppCommand
 from django.db import models
-from django.utils.importlib import import_module
 from django.conf import settings
-from django.db import connection
-from django.core.management import call_command
 from multilingual.utils import is_multilingual_model
-from multilingual.languages import get_language_choices
-from inspect import isclass
 from south.db import db
 
 

@@ -1,15 +1,12 @@
 # Author: Jonathan Slenders
 
 from cgi import escape
+import sys
 
 from django import template
 from django.conf import settings
-from django.template import Library, Node, Template, resolve_variable
-from django.template import NodeList, Variable, Context
-from django.template import TemplateSyntaxError, VariableDoesNotExist
-
-import sys
-import traceback
+from django.template import Node, Template, resolve_variable
+from django.template import Context
 
 # Tools for debugging django templates
 

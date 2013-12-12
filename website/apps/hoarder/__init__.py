@@ -1,4 +1,3 @@
-from datetime import datetime
 import uuid
 
 from hoarder.models import RelVisitor

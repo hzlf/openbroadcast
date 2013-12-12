@@ -2,18 +2,18 @@ import sys
 import time
 import logging
 import traceback
-
 import cPickle as pickle
 
 from django.conf import settings
 from django.core.mail import mail_admins
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
-
 from notification.lockfile import FileLock, AlreadyLocked, LockTimeout
 from notification.models import NoticeQueueBatch
-from notification.signals import emitted_notices
 from notification import models as notification
+
+from notification.signals import emitted_notices
+
 
 # lock timeout value. how long to wait for the lock to become available.
 # default behavior is to never wait for the lock to be available.

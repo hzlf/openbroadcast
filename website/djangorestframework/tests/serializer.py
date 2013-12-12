@@ -1,11 +1,12 @@
 """Tests for the resource module"""
-from django.test import TestCase
-from djangorestframework.serializer import Serializer
-
-from django.db import models
-
 import datetime
 import decimal
+
+from django.test import TestCase
+from django.db import models
+
+from djangorestframework.serializer import Serializer
+
 
 class TestObjectToData(TestCase): 
     """

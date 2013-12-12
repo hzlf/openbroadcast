@@ -1,7 +1,6 @@
 from django.conf.urls.defaults import *
 
 # app imports
-from alibrary.models import Artist
 from alibrary.views import ArtistDetailView, ArtistListView, ArtistEditView, artist_autocomplete
 
 urlpatterns = patterns('',

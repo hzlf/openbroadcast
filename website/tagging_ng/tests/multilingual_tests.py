@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase
-from pdb import set_trace
 
 from django.utils.translation import get_language
-from tagging.models import Tag, TaggedItem
-from tagging.tests.models import Article, Link, Perch, Parrot, FormTest
+from tagging.models import Tag
 from tagging import settings
 
 if settings.MULTILINGUAL_TAGS:

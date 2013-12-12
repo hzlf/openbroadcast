@@ -1,7 +1,6 @@
 from django.conf.urls.defaults import *
 
 # app imports
-from alibrary.models import License
 from alibrary.views import *
 
 urlpatterns = patterns('',

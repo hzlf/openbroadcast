@@ -1,13 +1,6 @@
 # -*- coding: utf-8 -*-
 from django import template
-
-from classytags.helpers import InclusionTag
-from classytags.core import Options
-from classytags.arguments import Argument
-from django.utils.safestring import mark_safe
-import re
-
-from alibrary.models import Daypart
+from abcast.models import Channel
 
 register = template.Library()
 
@@ -16,7 +9,13 @@ def jingles_inline(context):
     #context.update({'foo': '...'})
     return context
 
-@register.inclusion_tag('abcast/templatetags/on_air_inline.html', takes_context=True)
-def on_air_inline(context):
-    #context.update({'foo': '...'})
+@register.inclusion_tag('abcast/templatetags/on_air_inline_ng.html', takes_context=True)
+def on_air_inline(context, channel_id=None):
+
+    if not channel_id:
+        channel_id = 1
+
+    channel = Channel.objects.get(pk=channel_id)
+
+    context.update({'channel': channel})
     return context

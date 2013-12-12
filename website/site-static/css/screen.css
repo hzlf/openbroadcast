@@ -12179,48 +12179,141 @@ div.shortcutter div.item.hover .col-left i {
   color: #00bb00;
 }
 
-/* line 1, ../sass/apps/_on_air.sass */
+/* line 4, ../sass/apps/_on_air.sass */
 .on-air-container {
   padding: 5px 0;
-  background: #fafafa;
-}
-/* line 4, ../sass/apps/_on_air.sass */
-.on-air-container .channel {
-  padding: 0 5px;
-}
-/* line 6, ../sass/apps/_on_air.sass */
-.on-air-container .emission {
-  padding: 0 5px;
+  background: white;
 }
 /* line 9, ../sass/apps/_on_air.sass */
-.on-air-container .emission .name {
+.on-air-container > .actions a {
   text-transform: uppercase;
 }
 /* line 11, ../sass/apps/_on_air.sass */
-.on-air-container .emission small {
+.on-air-container > .actions a.btn {
+  background-color: #00bb00;
+  border: none;
+}
+/* line 16, ../sass/apps/_on_air.sass */
+.on-air-container .channel {
+  padding: 0 5px;
+}
+/* line 20, ../sass/apps/_on_air.sass */
+.on-air-container .emission {
+  background: whitesmoke;
+  color: #333333;
+  margin-bottom: 2px;
+  padding: 0 5px 2px;
+}
+/* line 25, ../sass/apps/_on_air.sass */
+.on-air-container .emission a {
+  color: #333333;
+}
+/* line 28, ../sass/apps/_on_air.sass */
+.on-air-container .emission h3, .on-air-container .emission p {
+  color: #333333 !important;
+}
+/* line 31, ../sass/apps/_on_air.sass */
+.on-air-container .emission:hover {
+  background: #ddffd9;
+}
+/* line 35, ../sass/apps/_on_air.sass */
+.on-air-container .emission section.description {
+  display: none;
+  padding-bottom: 3px;
+}
+/* line 39, ../sass/apps/_on_air.sass */
+.on-air-container .emission section.description img {
+  width: 100% !important;
+}
+/* line 42, ../sass/apps/_on_air.sass */
+.on-air-container .emission .__legacy__ {
+  background: whitesmoke;
+  color: white;
+  margin-bottom: 2px;
+  padding: 0 5px;
+}
+/* line 46, ../sass/apps/_on_air.sass */
+.on-air-container .emission .__legacy__ a {
+  color: white;
+}
+/* line 49, ../sass/apps/_on_air.sass */
+.on-air-container .emission .__legacy__ ul {
+  margin: 0;
+  padding: 0;
+}
+/* line 55, ../sass/apps/_on_air.sass */
+.on-air-container .emission .__legacy__ .name {
+  text-transform: uppercase;
+}
+/* line 57, ../sass/apps/_on_air.sass */
+.on-air-container .emission .__legacy__ small {
   font-size: 80%;
   color: #a5a5a5;
 }
-/* line 15, ../sass/apps/_on_air.sass */
-.on-air-container .items > div {
-  padding: 0;
-  height: 54px;
-  overflow: hidden;
-  margin-bottom: 4px;
+/* line 63, ../sass/apps/_on_air.sass */
+.on-air-container .items .item {
+  *zoom: 1;
+  background: whitesmoke;
+  margin-bottom: 2px;
+  color: #333333;
 }
-/* line 21, ../sass/apps/_on_air.sass */
-.on-air-container .items > div span.playing {
-  display: none;
+/* line 17, ../sass/bourbon/addons/_clearfix.scss */
+.on-air-container .items .item:before, .on-air-container .items .item:after {
+  content: " ";
+  display: table;
 }
-/* line 24, ../sass/apps/_on_air.sass */
-.on-air-container .items > div.playing {
+/* line 23, ../sass/bourbon/addons/_clearfix.scss */
+.on-air-container .items .item:after {
+  clear: both;
+}
+/* line 68, ../sass/apps/_on_air.sass */
+.on-air-container .items .item a {
+  color: #333333;
+}
+/* line 70, ../sass/apps/_on_air.sass */
+.on-air-container .items .item .image {
+  width: 64px;
+  padding: 5px;
+  float: left;
+}
+/* line 74, ../sass/apps/_on_air.sass */
+.on-air-container .items .item .image img {
+  width: 64px;
+  width: 100%;
+}
+/* line 77, ../sass/apps/_on_air.sass */
+.on-air-container .items .item .information {
+  padding: 5px;
+  float: left;
+}
+/* line 81, ../sass/apps/_on_air.sass */
+.on-air-container .items .item.playing {
+  background: whitesmoke;
+}
+/* line 83, ../sass/apps/_on_air.sass */
+.on-air-container .items .item.playing .image {
+  padding: 1%;
+  width: 100%;
+}
+/* line 86, ../sass/apps/_on_air.sass */
+.on-air-container .items .item.playing .image img {
+  width: 98%;
+}
+/* line 88, ../sass/apps/_on_air.sass */
+.on-air-container .items .item.playing .information {
+  color: #333333;
+  float: none;
+  clear: both;
+}
+/* line 92, ../sass/apps/_on_air.sass */
+.on-air-container .items .item.playing .information a {
+  color: #333333;
+}
+/* line 95, ../sass/apps/_on_air.sass */
+.on-air-container .items .item:hover {
   background: #ddffd9;
 }
-/* line 26, ../sass/apps/_on_air.sass */
-.on-air-container .items > div.playing span.playing {
-  display: inline;
-}
-/* line 31, ../sass/apps/_on_air.sass */
+/* line 114, ../sass/apps/_on_air.sass */
 .on-air-container .count {
   padding: 0 5px;
 }

@@ -1,12 +1,10 @@
 import logging
 
-from django.http import HttpResponse
-from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth.models import AnonymousUser
 from django.utils import timezone
 
 from tastypie.authentication import Authentication
 
-import provider.oauth2
 from provider.oauth2.models import AccessToken
 
 """

@@ -1,7 +1,6 @@
-from django import forms
-
 import operator
 
+from django import forms
 from weekday_field import utils, widgets
 
 class WeekdayFormField(forms.TypedMultipleChoiceField):

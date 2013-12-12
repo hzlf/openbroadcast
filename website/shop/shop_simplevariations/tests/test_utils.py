@@ -1,7 +1,7 @@
 """Commonly used methods for shop_simplevariation tests."""
 from shop.models.productmodel import Product
 
-from ..models import CartItemOption, Option, OptionGroup
+from ..models import Option, OptionGroup
 
 
 def create_fixtures(options=False):
