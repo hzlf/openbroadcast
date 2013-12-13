@@ -1,443 +1,100 @@
-@charset "UTF-8";
-/* master.sass */
-/* Master stylesheet */
-/* vars.sass */
-/* line 1, ../sass/util/_control.sass */
-.left {
-  float: left;
-}
+/*
+Syntax error: Undefined variable: "$image_path".
+        on line 138 of /Users/ohrstrom/Documents/Code/openbroadcast.ch/website/site-static/sass/_pplayer.style.sass
+        from line 10 of /Users/ohrstrom/Documents/Code/openbroadcast.ch/website/site-static/sass/pplayer.master.sass
 
-/* line 4, ../sass/util/_control.sass */
-.right {
-  float: right;
-}
-
-/* line 7, ../sass/util/_control.sass */
-.clear {
-  clear: both;
-}
-
-/* line 11, ../sass/util/_control.sass */
-ul.horizontal li {
-  float: left;
-}
-
-/* vars.sass */
-/* CSS Document */
-/* line 9, ../sass/_pplayer.style.sass */
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 12px;
-  line-height: 17px;
-  margin: 0;
-  border: 0;
-  padding: 0;
-  background: white;
-  overflow: hidden;
-}
-
-/* for internet explorer */
-/* line 21, ../sass/_pplayer.style.sass */
-* html body {
-  padding: 40px 0 0 0;
-}
-
-/* AJAX loader */
-/* line 26, ../sass/_pplayer.style.sass */
-body.file.ajax_loading {
-  background-color: #dfdfdf;
-}
-/* line 28, ../sass/_pplayer.style.sass */
-body.file.ajax_loading .loading {
-  display: block !important;
-  z-index: 1000;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-}
-/* line 34, ../sass/_pplayer.style.sass */
-body.file.ajax_loading .loading.dim {
-  background-color: black;
-  opacity: 0.2;
-}
-/* line 37, ../sass/_pplayer.style.sass */
-body.file.ajax_loading .loading.throbber {
-  z-index: 101;
-  background-image: url(/static/img/base/throbber.large.green.gif);
-  background-position: center center;
-  background-repeat: no-repeat;
-}
-
-/* line 44, ../sass/_pplayer.style.sass */
-body.stream.ajax_loading .loading {
-  display: block !important;
-  z-index: 1000;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-}
-/* line 50, ../sass/_pplayer.style.sass */
-body.stream.ajax_loading .loading.throbber {
-  z-index: 101;
-  /*background-image: url(/static/img/base/throbber.large.green.gif) */
-  background-position: center center;
-  background-repeat: no-repeat;
-}
-
-/* line 57, ../sass/_pplayer.style.sass */
-a {
-  color: #6633cc;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-/* line 62, ../sass/_pplayer.style.sass */
-img {
-  border: 0px solid;
-}
-
-/* line 66, ../sass/_pplayer.style.sass */
-#content {
-  left: 0;
-  width: 100%;
-  border-top: 1px solid #bbbbbb;
-  height: 390px;
-}
-
-/* line 72, ../sass/_pplayer.style.sass */
-body.file #content {
-  overflow: auto;
-}
-
-/* line 76, ../sass/_pplayer.style.sass */
-body.stream #content {
-  overflow: hidden;
-  background-color: #dddddd;
-}
-/* line 81, ../sass/_pplayer.style.sass */
-body.stream #content .info .images img {
-  width: 101% !important;
-}
-/* line 85, ../sass/_pplayer.style.sass */
-body.stream #sounddisplay .d-position, body.stream #sounddisplay .d-duration {
-  display: none !important;
-}
-
-/* topnav */
-/* line 94, ../sass/_pplayer.style.sass */
-#tabbar {
-  background: #777777;
-  height: 22px;
-}
-/* line 97, ../sass/_pplayer.style.sass */
-#tabbar ul {
-  margin: 0px;
-  padding: 0px;
-  list-style: none;
-}
-/* line 101, ../sass/_pplayer.style.sass */
-#tabbar li {
-  float: left;
-  margin: 0px;
-  padding: 2px 10px 1px 22px;
-  background-color: #777777;
-  border: 0px solid #999999;
-  border-right: 1px solid #666666;
-  border-bottom: 1px solid #888888;
-  border-top: 1px solid #777777;
-}
-/* line 110, ../sass/_pplayer.style.sass */
-#tabbar li a {
-  border-bottom: 0px solid !important;
-  color: #333333;
-  text-decoration: none;
-}
-/* line 114, ../sass/_pplayer.style.sass */
-#tabbar li.active {
-  background-color: #d9d9d9;
-  border-bottom: 1px solid #999999;
-  border-top: 1px solid #dddddd;
-}
-/* line 118, ../sass/_pplayer.style.sass */
-#tabbar li.active a {
-  color: black;
-}
-
-/* line 126, ../sass/_pplayer.style.sass */
-.tracktitle {
-  font-size: 12px;
-  font-weight: bold;
-  padding: 10px 0px 2px 1px;
-  color: #333333;
-}
-
-/* line 132, ../sass/_pplayer.style.sass */
-.list {
-  background: white;
-}
-
-/* line 135, ../sass/_pplayer.style.sass */
-.listitem {
-  padding: 7px 12px 5px 38px;
-  border-bottom: 1px solid #cccccc;
-  background: white url(/static/img/prototype/list_but.png) no-repeat 10px 6px;
-  cursor: pointer;
-  color: #333333;
-  font-size: 12px;
-  line-height: 12px;
-}
-/* line 143, ../sass/_pplayer.style.sass */
-.listitem a {
-  color: #999999;
-}
-/* line 145, ../sass/_pplayer.style.sass */
-.listitem a:hover {
-  color: #333333;
-  text-decoration: underline;
-}
-
-/* line 149, ../sass/_pplayer.style.sass */
-.trackinfo {
-  position: relative;
-  top: 13px;
-  font-size: 10px;
-  line-height: 11px;
-  color: #666666;
-  margin: 2px 0px 2px 0px;
-  height: 12px;
-  overflow: hidden;
-}
-
-/* line 159, ../sass/_pplayer.style.sass */
-.on {
-  background: #dafed4;
-}
-
-/* line 162, ../sass/_pplayer.style.sass */
-.action {
-  background: #fffedc;
-}
-
-/* line 166, ../sass/_pplayer.style.sass */
-#player .header {
-  border-top: 1px solid #eeeeee;
-  /*border-bottom: 1px solid #bbb */
-  padding: 10px;
-  background: #dddddd;
-}
-
-/* line 173, ../sass/_pplayer.style.sass */
-.listitem {
-  position: relative;
-  padding-left: 38px;
-  background: white url(/static/img/prototype/list_play_button2_s.png) no-repeat 10px 6px;
-  padding-bottom: 12px;
-}
-/* line 174, ../sass/_pplayer.style.sass */
-.listitem:hover {
-  background: #eee6ff url(/static/img/prototype/list_but.png) no-repeat 10px 6px;
-  color: black;
-}
-/* line 177, ../sass/_pplayer.style.sass */
-.listitem.action:hover {
-  background: #fffedc;
-  color: black;
-}
-/* line 180, ../sass/_pplayer.style.sass */
-.listitem .list-title {
-  position: absolute;
-  /*margin-right:80px; this is now handled with textTruncate */
-  overflow: hidden;
-  height: 17px;
-  font-weight: bold;
-}
-/* line 186, ../sass/_pplayer.style.sass */
-.listitem .list-right {
-  float: right;
-  padding-left: 20px;
-}
-/* line 189, ../sass/_pplayer.style.sass */
-.listitem span {
-  color: #777777;
-  padding-left: 5px;
-}
-/* line 196, ../sass/_pplayer.style.sass */
-.listitem:hover {
-  background: #eee6ff url(/static/img/prototype/list_play_button2_s.png) no-repeat 10px 6px;
-}
-/* line 198, ../sass/_pplayer.style.sass */
-.listitem:hover .list-right {
-  color: black;
-}
-/* line 200, ../sass/_pplayer.style.sass */
-.listitem.play {
-  background: #dcffdc url(/static/img/prototype/list_play_on.png) no-repeat 10px 6px;
-  color: black;
-}
-/* line 203, ../sass/_pplayer.style.sass */
-.listitem.play:hover {
-  background: #dcffdc url(/static/img/prototype/list_play_on.png) no-repeat 10px 6px;
-  color: black;
-}
-
-/* line 211, ../sass/_pplayer.style.sass */
-#sounddisplay {
-  border: 1px solid #888888;
-  border-bottom: 1px solid white;
-  border-right: 1px solid white;
-  background: #e4ffe4;
-  padding: 5px 7px 7px 7px;
-  margin-bottom: 8px;
-  line-height: 14px;
-}
-/* line 219, ../sass/_pplayer.style.sass */
-#sounddisplay .d-position {
-  float: left;
-  font-weight: bold;
-  padding-top: 10px;
-  font-size: 11px;
-}
-/* line 224, ../sass/_pplayer.style.sass */
-#sounddisplay .d-duration {
-  float: right;
-  font-weight: bold;
-  padding-top: 10px;
-  font-size: 11px;
-}
-/* line 229, ../sass/_pplayer.style.sass */
-#sounddisplay .progress-holder {
-  height: 7px;
-  padding: 5px 0px 5px 0px;
-  margin: 7px 37px 0px 37px;
-}
-/* line 233, ../sass/_pplayer.style.sass */
-#sounddisplay .progress {
-  position: relative;
-  height: 7px;
-  border: 1px solid #666666;
-  cursor: pointer;
-}
-/* line 238, ../sass/_pplayer.style.sass */
-#sounddisplay .loader {
-  position: absolute;
-  height: 7px;
-  background: #c3ebc3;
-}
-/* line 242, ../sass/_pplayer.style.sass */
-#sounddisplay .position {
-  position: absolute;
-  height: 7px;
-  width: 1px;
-  background: url(/static/img/prototype/bar_bg.png);
-}
-/* line 247, ../sass/_pplayer.style.sass */
-#sounddisplay .position .time {
-  display: none;
-}
-/* line 250, ../sass/_pplayer.style.sass */
-#sounddisplay .handler {
-  position: absolute;
-}
-/* line 252, ../sass/_pplayer.style.sass */
-#sounddisplay .media-name-cont {
-  height: 15px;
-  overflow: hidden;
-}
-/* line 255, ../sass/_pplayer.style.sass */
-#sounddisplay .media-name {
-  font-weight: bold;
-  padding-bottom: 1px;
-}
-/* line 258, ../sass/_pplayer.style.sass */
-#sounddisplay .media-release, #sounddisplay .media-artist {
-  color: #798f71;
-  height: 15px;
-  overflow: hidden;
-}
-/* line 262, ../sass/_pplayer.style.sass */
-#sounddisplay .cue_in, #sounddisplay .cue_out {
-  position: absolute;
-  height: 7px;
-  width: 1px;
-  background: #63735e;
-}
-
-/* line 269, ../sass/_pplayer.style.sass */
-body.paused #sounddisplay {
-  background: #efefef;
-}
-/* line 271, ../sass/_pplayer.style.sass */
-body.paused #sounddisplay .time, body.paused #sounddisplay .d-position, body.paused #sounddisplay .d-duration {
-  text-decoration: blink;
-}
-
-/* buttons */
-/* line 276, ../sass/_pplayer.style.sass */
-div.control .button {
-  cursor: pointer;
-  background-repeat: no-repeat;
-}
-/* line 279, ../sass/_pplayer.style.sass */
-div.control .button.play {
-  background-image: url(/static/img/prototype/f_paused_on.png);
-  width: 50px;
-  height: 45px;
-}
-/* line 283, ../sass/_pplayer.style.sass */
-div.control .button.play.paused {
-  background-image: url(/static/img/prototype/f_play_on.png);
-}
-/* line 286, ../sass/_pplayer.style.sass */
-div.control .button.next {
-  background-image: url(/static/img/prototype/f_next.png);
-  width: 40px;
-  height: 45px;
-}
-/* line 290, ../sass/_pplayer.style.sass */
-div.control .button.next.active {
-  background-image: url(/static/img/prototype/f_next_on.png);
-}
-/* line 293, ../sass/_pplayer.style.sass */
-div.control .button.prev {
-  background-image: url(/static/img/prototype/f_prev.png);
-  width: 40px;
-  height: 45px;
-}
-/* line 297, ../sass/_pplayer.style.sass */
-div.control .button.prev.active {
-  background-image: url(/static/img/prototype/f_prev_on.png);
-}
-
-/* Overrides if waveform available */
-/* line 306, ../sass/_pplayer.style.sass */
-body.waveform #content, body.waveform #playlist {
-  top: 163px;
-}
-/* line 310, ../sass/_pplayer.style.sass */
-body.waveform #sounddisplay .d-position, body.waveform #sounddisplay .d-duration {
-  display: none;
-}
-/* line 313, ../sass/_pplayer.style.sass */
-body.waveform #sounddisplay .progress-holder {
-  height: 20px;
-  margin: 7px 0px 0;
-}
-/* line 316, ../sass/_pplayer.style.sass */
-body.waveform #sounddisplay .progress {
-  width: 326px;
-  height: 20px;
-  border: none;
-}
-/* line 321, ../sass/_pplayer.style.sass */
-body.waveform #sounddisplay .position {
-  position: absolute;
-  top: 0px;
-  height: 20px;
-  width: 1px;
-  border-right: 1px solid #dd0000;
-  background-image: none;
-}
-/* line 328, ../sass/_pplayer.style.sass */
-body.waveform #sounddisplay .position .time {
-  display: inline;
-}
+Backtrace:
+/Users/ohrstrom/Documents/Code/openbroadcast.ch/website/site-static/sass/_pplayer.style.sass:138
+/Users/ohrstrom/Documents/Code/openbroadcast.ch/website/site-static/sass/pplayer.master.sass:10
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/script/variable.rb:49:in `_perform'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/script/node.rb:50:in `perform'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/script/string_interpolation.rb:82:in `_perform'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/script/node.rb:50:in `perform'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/script/list.rb:70:in `_perform'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/script/list.rb:70:in `map'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/script/list.rb:70:in `_perform'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/script/node.rb:50:in `perform'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:301:in `visit_prop'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:37:in `send'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:37:in `visit'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:100:in `visit'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:53:in `visit_children'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:53:in `map'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:53:in `visit_children'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:109:in `visit_children'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:121:in `with_environment'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:108:in `visit_children'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:37:in `visit'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:325:in `visit_rule'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:37:in `send'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:37:in `visit'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:100:in `visit'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:230:in `visit_import'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:230:in `map'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:230:in `visit_import'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:37:in `send'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:37:in `visit'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:100:in `visit'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:53:in `visit_children'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:53:in `map'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:53:in `visit_children'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:109:in `visit_children'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:121:in `with_environment'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:108:in `visit_children'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:37:in `visit'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:128:in `visit_root'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:37:in `send'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/base.rb:37:in `visit'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:100:in `visit'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:7:in `send'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/visitors/perform.rb:7:in `visit'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/root_node.rb:36:in `css_tree'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/tree/root_node.rb:20:in `render'
+/opt/local/lib/ruby/gems/1.8/gems/sass-3.3.0.alpha.149/lib/sass/engine.rb:265:in `render'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/compiler.rb:140:in `compile'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/compiler.rb:126:in `timed'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/compiler.rb:139:in `compile'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/logger.rb:45:in `red'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/compiler.rb:138:in `compile'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/compiler.rb:118:in `compile_if_required'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/compiler.rb:103:in `run'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/compiler.rb:101:in `each'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/compiler.rb:101:in `run'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/compiler.rb:126:in `timed'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/compiler.rb:100:in `run'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/commands/watch_project.rb:147:in `recompile'
+/opt/local/lib/ruby/site_ruby/1.8/rubygems/core_ext/kernel_require.rb:45:in `to_proc'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/path.rb:73:in `call'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/path.rb:73:in `run_callback'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/path.rb:55:in `callback_action'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/path.rb:35:in `update'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/state/directory.rb:39:in `modified'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/state/directory.rb:37:in `each'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/state/directory.rb:37:in `modified'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/state/directory.rb:18:in `refresh'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/backends/rbfsevent.rb:30:in `temporary_multipath_handler'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/backends/rbfsevent.rb:27:in `each'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/backends/rbfsevent.rb:27:in `temporary_multipath_handler'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/backends/rbfsevent.rb:17:in `run'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/backends/rbfsevent.rb:16:in `each'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/backends/rbfsevent.rb:16:in `run'
+/opt/local/lib/ruby/gems/1.8/gems/rb-fsevent-0.9.3/lib/rb-fsevent/fsevent.rb:43:in `call'
+/opt/local/lib/ruby/gems/1.8/gems/rb-fsevent-0.9.3/lib/rb-fsevent/fsevent.rb:43:in `run'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/backends/rbfsevent.rb:20:in `run'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm/monitor.rb:26:in `run'
+/opt/local/lib/ruby/gems/1.8/gems/fssm-0.2.9/lib/fssm.rb:70:in `monitor'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/commands/watch_project.rb:87:in `perform'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/commands/base.rb:18:in `execute'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/commands/project_base.rb:19:in `execute'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/exec/sub_command_ui.rb:43:in `perform!'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/lib/compass/exec/sub_command_ui.rb:15:in `run!'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/bin/compass:30
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/bin/compass:44:in `call'
+/opt/local/lib/ruby/gems/1.8/gems/compass-0.12.2/bin/compass:44
+/opt/local/bin/compass:23:in `load'
+/opt/local/bin/compass:23
+*/
+body:before {
+  white-space: pre;
+  font-family: monospace;
+  content: "Syntax error: Undefined variable: \"$image_path\".\A         on line 138 of /Users/ohrstrom/Documents/Code/openbroadcast.ch/website/site-static/sass/_pplayer.style.sass\A         from line 10 of /Users/ohrstrom/Documents/Code/openbroadcast.ch/website/site-static/sass/pplayer.master.sass"; }

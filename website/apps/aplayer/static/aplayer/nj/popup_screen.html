@@ -2,17 +2,25 @@
     <div class="span8 information">
         <div class="padded-x padded-y">
 
-            <h2>
-                <a class="parent_link" href="{{ object.release.absolute_url }}">{{ object.release.name|truncate_chars_inner(30) }}</a>
 
-                {% if object.release.releasedate %}
-                <small> {{ object.release.releasedate }}</small>
-                {% endif %}
-
-            </h2>
             <h1><a class="parent_link" href="{{ object.absolute_url }}">{{ object.name|truncate_chars_inner(30) }}</a></h1>
 
-            <h2><a class="parent_link" href="{{ object.artist.absolute_url }}">{{ object.artist.name|truncate_chars_inner(30) }}</a></h2>
+            <span><a class="parent_link" href="{{ object.artist.absolute_url }}">
+                {{ object.artist.name|truncate_chars_inner(30) }}</a></span>
+
+            <br>
+
+            <span>
+                <a class="parent_link" href="{{ object.release.absolute_url }}">
+                    {{ object.release.name|truncate_chars_inner(30) }}</a>
+
+                {% if object.release.releasedate %}
+                    <small> {{ object.release.releasedate }}</small>
+                {% endif %}
+
+            </span>
+
+
         </div>
     </div>
 
@@ -81,7 +89,6 @@
 
             </ul>
         </div>
-
 
 
     </div>

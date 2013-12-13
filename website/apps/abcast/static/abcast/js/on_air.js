@@ -39,7 +39,13 @@ OnAirApp = function () {
     };
 
     this.bindings = function () {
-
+        // artist image fade
+        self.dom_element.on('mouseover', '.information a[data-target="artist"]', function(){
+            $('.image img.artist', self.dom_element).addClass('visible');
+        });
+        self.dom_element.on('mouseout', '.information a[data-target="artist"]', function(){
+            $('.image img.artist', self.dom_element).removeClass('visible');
+        });
     };
 
     this.iface = function () {
@@ -92,27 +98,39 @@ OnAirApp = function () {
         self.current_emission = data;
 
         var container = $('.emission', self.dom_element);
-
-		var d = {
-			object : data
-		}
-
-		var html = nj.render('abcast/nj/on_air_emission.html', d);
+		var html = nj.render('abcast/nj/on_air_emission.html', {object : data});
         container.html(html);
 
     };
+
     this.display_item = function (data) {
         debug.debug('OnAirApp: display_item',  data);
         self.current_item = data;
 
         var container = $('.items', self.dom_element);
-
-		var d = {
-			object : data
-		}
         $('div', container).removeClass('playing');
-		var html = nj.render('abcast/nj/on_air_item.html', d);
+		var html = nj.render('abcast/nj/on_air_item.html', {object : data});
         container.prepend($(html).addClass('playing').fadeIn(500));
+
+        // subscribe for item changes
+        // data.resource_uri = data.resource_uri.replace('/track/', '/media/')
+        pushy.subscribe(data.resource_uri, function (data) {
+            console.log('pushy callbackk with data:', data);
+            self.refresh_item(data)
+        });
+
+    };
+
+    this.refresh_item = function(data) {
+        debug.debug('OnAirApp: refresh_item - ', data);
+        $.get(data.route, function (data) {
+            var container = $('.item[data-uuid="'+ data.uuid  + '"]');
+
+            var html = nj.render('abcast/nj/on_air_item.html', {object : data});
+            container.replaceWith($(html).addClass(container.attr('class')));
+
+        });
+
 
     };
 

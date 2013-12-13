@@ -962,6 +962,7 @@ using django pushy!!
 PUSHY_SETTINGS = {
     'MODELS': (
         'alibrary.playlist',
+        'alibrary.media',
         'importer.import',
         'importer.importfile',
         'abcast.emission',

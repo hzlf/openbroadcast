@@ -1,0 +1,195 @@
+@import "vars"
+
+
+// comments
+
+section.comments.disqus
+  margin-top: 36px
+
+  #footer
+    display: none !important
+    height: 0px
+    width: 0px
+
+.item_detail section
+  &:first-child
+    background-color: #F5F5F5
+
+.iteminfo
+  padding: 0
+  
+  font-size: 90%
+  line-height: 11px
+  text-align: left
+  
+  
+
+    
+  .image
+    img
+      width: 135px
+      height: 135px
+  
+
+  h2
+    //margin-bottom: 16px
+    //font-size: 180%
+
+  .container_content
+    // padding: 15px 15px 0
+    
+    dl
+      padding: 0
+      margin: 0 
+      list-style-type: none
+      width: 100%
+      margin: 0 0 7px
+      &.contact
+        div p
+          line-height: 140%
+          padding: 0 0 11px !important
+      &.tags 
+        width: 420px
+        float: left
+
+
+      &.license
+        p
+          padding: 4px 0 0 0 !important
+        img
+          height: 10px
+		  
+		
+      &.links.external
+
+        dd
+          @include link_external
+          float: none
+		  
+
+
+		  
+		  
+		  
+    li
+      padding: 0
+      margin: 0  
+     
+      
+    p
+      color: #666666
+      &.label
+        width: 70px
+        color: #000000
+		
+      
+  .container_image
+    padding: 14px
+    a
+      display: block
+      border: 1px solid #F5F5F5
+      &:hover
+        border: 1px solid #00BB00
+
+  .item_menu 
+    //margin-bottom: 20px
+    h3
+      margin: 0
+      padding: 0
+      text-transform: uppercase
+      font-size: 140%
+    ul
+      margin: 0px
+
+.item_menu
+  padding: 0px
+  margin: 0px
+  // UNBORDERING
+  //border-bottom: 1px solid #bbb
+  //border-bottom: 1px solid #fff
+  background-color: #F5F5F5
+  height: auto
+  float: left
+  width: 100%
+  font-size: 90%
+  ul
+    line-height: 1em
+    list-style: none outside none
+    margin: 0
+    padding: 0
+    position: relative
+    width: 100%
+    float: left
+    bottom: -1px
+    margin-left: 0px
+  li
+    float: left
+    margin: 0
+    padding: 0
+    // UNBORDERING
+    border: 1px solid #bbb
+    border: none
+    padding: 0px
+    margin: 0 0 0 5px
+    &.spacer
+      border: none
+      border-top: 1px solid #F5F5F5
+      border-bottom: 1px solid #bbb
+      padding: 5px
+    &.on, &.active
+      border-bottom: 1px solid #fff
+      a
+        //border-bottom: #fff
+        background-color: #fff
+        color: $main-a
+        
+    a
+      background: none repeat scroll 0 0 #e1e1e1
+      color: #666666
+      display: block
+      margin: 0
+      text-decoration: none
+      // UNBORDERING
+      padding: 5px 10px
+      padding: 2px 10px
+      &.on, &.active
+        border-bottom: #fff
+        background-color: #fff
+        color: $main-a
+      &.disabled
+        color: #c1c1c1
+        cursor: wait
+      &:hover
+        border-bottom: none
+        background-color: #fff
+        color: $main-a
+      &.disabled:hover
+        border-bottom: none
+        background-color: #e1e1e1
+        color: #c1c1c1
+
+
+
+
+
+
+div.item_inner
+  div.container
+    &.lyrics
+      font-size: 115%
+      line-height: 190%
+      font-style: italic
+
+      p
+        margin-bottom: 14px
+
+
+div.item_detail
+  section.description
+    background-color: transparent
+    margin-top: 20px
+    .markdown
+      // +markdown()
+
+  
+  

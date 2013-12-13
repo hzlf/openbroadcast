@@ -1,0 +1,70 @@
+/* alibrary styleing. further app specific styles should be placed here */
+
+
+.popup-merge
+  width: 703px !important
+  max-width: 703px !important
+
+  padding: 10px 0 0 0
+
+  .info
+    border-bottom: 1px solid #5a5a5a
+    margin-bottom: 10px
+
+    strong
+      color: $white
+
+    p
+      color: #999
+      margin-bottom: 4px
+
+
+
+  .item.object
+    margin: 0 0 10px 0
+    width: 98%
+    img
+      width: 72px
+      padding: 4px 0 4px 4px
+
+    .span10
+      width: 80.982%
+
+    cursor: pointer
+    &.hover, &.selected
+      background: #ddffd9
+      *
+        color: #5a5a5a
+
+    &.slave
+      opacity: 0.7
+      //transition: opacity 0.1s
+      //-webkit-transition: opacity 0.1s
+
+  // content
+  > div
+    section.title
+      h3
+        color: #fff
+        small:
+          text-transform: none !important
+          font-size: 60%
+
+    section.description
+      p
+        color: #efefef
+      a
+        background: #6633cc
+        color: white
+
+    section.form
+      label
+        color: #efefef
+
+  .action
+    input
+      color: white
+      width: 550px
+      border: none
+      background: #5a5a5a
+      padding: 4px 2px 4px 6px

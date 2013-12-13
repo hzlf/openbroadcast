@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
 
 from django.utils.translation import ugettext as _
 
@@ -33,3 +34,22 @@ class Vote(Timestamped):
     def __unicode__(self):
         return '%s from %s on %s' % (self.get_vote_display(), self.user,
                                      self.content_object)
+
+
+def post_save_vote(sender, **kwargs):
+    obj = kwargs['instance']
+
+    print 'post_save_vote - kwargs'
+
+    try:
+        from pushy.util import pushy_custom
+        pushy_custom(obj.content_object.get_api_url(), type='update')
+    except Exception, e:
+        print e
+
+    print obj.content_object.get_api_url()
+
+
+
+
+post_save.connect(post_save_vote, sender=Vote)

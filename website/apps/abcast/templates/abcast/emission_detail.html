@@ -1,6 +1,6 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags wiki_tags sekizai_tags %}
+{% load truncate i18n thumbnail arating_tags wiki_tags sekizai_tags abcast_tags %}
 
 {% block heading %} <!-- heading / icon (large one) -->
     <div id="heading">
@@ -91,4 +91,17 @@
 
 {% block sidebar %}
     {# include "alibrary/artist/sidebar/_detail.html" #}
+
+    	<!-- inline "On Air" -->
+	{% on_air_inline %}
+
+    <!-- hackish, remove tune-in button -->
+    {% addtoblock "css" %}
+        <style>
+            #on_air_app > .actions {
+                display: none;
+            }
+        </style>
+    {% endaddtoblock %}
+
 {% endblock %}

@@ -136,6 +136,7 @@ body.popup
         font-size: 12px
         line-height: 18px
         margin-bottom: 0px !important
+      h2, span
         small
           font-size: 10px
           padding-left: 14px
@@ -160,13 +161,17 @@ body.popup
       border-top: 1px solid #dddddd
       height: 18px
       overflow: hidden
-      
-      a
-        font-size: 14px
-        color: #a5a5a5
-        &:hover
-          color: #00bb00
-          text-decoration: none
+
+      ul > li
+
+        padding: 0 7px 0 0
+
+        a
+          font-size: 14px
+          color: #a5a5a5
+          &:hover
+            color: #00bb00
+            text-decoration: none
       
     
     
@@ -368,6 +373,11 @@ body.alibrary
   .countdown
     display: none
   .container
+
+    .controls .image
+      img
+        max-width: 80px
+
     section.playlist
       display: block
 
@@ -377,9 +387,14 @@ body.abcast
     section.emission
       display: block
 
+    .controls .image
+      img
+        max-width: 110px
+
   .indicator.playhead
-    opacity: 0
+    display: none
   .aplayer-controls
+    margin-top: 30px
     .next, .prev
       display: none
 

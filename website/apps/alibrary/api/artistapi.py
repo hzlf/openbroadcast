@@ -10,7 +10,7 @@ from easy_thumbnails.files import get_thumbnailer
 
 from alibrary.models import Artist
 
-THUMBNAIL_OPT = dict(size=(70, 70), crop=True, bw=False, quality=80)
+THUMBNAIL_OPT = dict(size=(240, 240), crop=True, bw=False, quality=80)
 
 class ArtistResource(ModelResource):
 

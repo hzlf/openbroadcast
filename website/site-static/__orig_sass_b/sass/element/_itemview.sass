@@ -1,0 +1,443 @@
+@import "vars"
+
+
+// comments
+
+section.comments.disqus
+  margin-top: 36px
+
+  #footer
+    display: none !important
+    height: 0px
+    width: 0px
+
+.item_detail section
+  &.shaded
+    background-color: #F5F5F5
+
+
+
+
+  // inline player
+  #aplayer_detail
+    height: 128px
+    position: relative
+    // loading notice
+    p.notice
+      padding: 50px 0
+      text-align: center
+
+    // playhead container
+    .playhead
+
+      .overlay
+        position: absolute
+        width: 32px
+        z-index: 10
+        // alignment
+        &.primary
+
+        &.secondary
+          right: 10px
+          width: 16px
+
+
+        // inner elements
+        ul.action
+          margin: 0
+          padding-left: 0px
+
+          li
+            float: left
+
+          li > a
+            padding: 1px 1px 1px 3px
+            width: 12px
+            display: block
+
+            &:hover
+              text-decoration: none
+              color: white !important
+
+        // color overrides
+        &.primary
+          ul.action li > a
+            color: #00BB00
+            &:hover
+              background: #00BB00
+        &.secondary
+          ul.action li > a
+            &:hover
+              background: #6633cc
+
+
+
+
+
+    
+// inner listing & sections
+.item_detail .item_inner section
+
+  
+
+  h2
+    font-size: 16px
+    color: #a5a5a5
+    
+  .s .list_body_row.item
+    &:first-child
+      .list_body_item
+        border-top: 1px solid #dddddd
+
+  &.top, &.flop, &.contribution
+    margin-top: 15px
+    
+  &.description
+    margin-top: 15px
+
+  &.tracklist
+    margin-top: 15px
+    .markdown
+      // +markdown()
+    
+  &.profile
+    margin-top: 15px
+    .markdown
+      // +markdown()
+    
+  &.history
+    margin-top: 15px
+    div.item
+      border-bottom: 1px solid #dddddd
+      ul
+        //color: red
+      p
+        color: #5a5a5a
+        font-size: 90%
+        
+  &.appearance
+    margin-top: 15px
+
+  &.video
+    margin-top: 15px
+
+  &.statistics
+    margin-top: 15px
+
+        
+  &.media
+    margin-top: 15px
+
+
+
+
+
+
+
+
+.iteminfo
+  padding: 0
+  
+  font-size: 90%
+  line-height: 11px
+  text-align: left
+  
+  
+
+    
+  .image
+    img
+      width: 135px
+      height: 135px
+
+  .rating
+    margin-top: 4px
+
+  h2
+    //margin-bottom: 16px
+    //font-size: 180%
+
+  .container_content
+    // padding: 15px 15px 0
+    
+    dl
+      padding: 0
+      margin: 0 
+      list-style-type: none
+      width: 100%
+      margin: 0 0 7px
+      &.contact
+        div p
+          line-height: 140%
+          padding: 0 0 11px !important
+
+
+      span.tag
+        margin: 2px 2px 0 0
+        padding: 0 4px
+        background: #333
+        color: white
+        border: 1px solid #333
+        text-transform: uppercase
+
+
+
+      &.license
+        p
+          padding: 4px 0 0 0 !important
+        img
+          height: 10px
+
+      dd.relations
+
+        li
+          padding: 0 3px 0 0
+          margin: 0 3px 0 0
+          float: left
+          span.service
+            display: none
+          a
+            color: #5a5a5a
+            text-decoration: none
+            &:hover
+              color: #6633cc
+            i
+              font-size: 180%
+              line-height: 17px
+		  
+		
+      &.links.external
+
+        dd
+          float: none
+		  
+
+
+		  
+		  
+		  
+    li
+      padding: 0
+      margin: 0  
+     
+      
+    p
+      color: #666666
+      &.label
+        width: 70px
+        color: #000000
+		
+      
+  .container_image
+    padding: 14px
+    a
+      display: block
+      border: 1px solid #F5F5F5
+      &:hover
+        border: 1px solid #00BB00
+
+  .item_menu 
+    //margin-bottom: 20px
+    h3
+      margin: 0
+      padding: 0
+      text-transform: uppercase
+      font-size: 140%
+    ul
+      margin: 0px
+
+
+
+
+// analyse display
+.item_detail
+  section.analyse
+    // background: #ff0000
+    table
+      thead tr
+        padding-bottom: 1px
+        th
+          // font-weight: normal
+          text-align: left
+      tbody
+        td.value
+          // width: 100px
+        td.bar
+          width: 120px
+          .holder
+            margin: 4px 10px 0 0
+            background: #efefef
+            border: 1px solid #cdcdcd
+            .indicator
+              height: 10px
+              background-color: #cdcdcd
+              position: relative
+              span
+                font-weight: bold
+                position: absolute
+                top: 2px
+                left: 3px
+                font-size: 9px
+                line-height: 9px
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.item_menu
+  padding: 0px
+  margin: 0px
+  // UNBORDERING
+  //border-bottom: 1px solid #bbb
+  //border-bottom: 1px solid #fff
+  background-color: #F5F5F5
+  height: auto
+  float: left
+  width: 100%
+  font-size: 90%
+  ul
+    line-height: 1em
+    list-style: none outside none
+    margin: 0
+    padding: 0
+    position: relative
+    width: 100%
+    float: left
+    bottom: -1px
+    margin-left: 0px
+  li
+    float: left
+    margin: 0
+    padding: 0
+    // UNBORDERING
+    border: 1px solid #bbb
+    border: none
+    padding: 0px
+    margin: 0 0 0 5px
+    &.spacer
+      border: none
+      border-top: 1px solid #F5F5F5
+      border-bottom: 1px solid #bbb
+      padding: 5px
+    &.on, &.active
+      border-bottom: 1px solid #fff
+      a
+        //border-bottom: #fff
+        background-color: #fff
+        color: $main-a
+        
+    a
+      background: none repeat scroll 0 0 #e1e1e1
+      color: #666666
+      display: block
+      margin: 0
+      text-decoration: none
+      // UNBORDERING
+      padding: 5px 10px
+      padding: 2px 10px
+      &.on, &.active
+        border-bottom: #fff
+        background-color: #fff
+        color: $main-a
+      &.disabled
+        color: #c1c1c1
+        cursor: wait
+      &:hover
+        border-bottom: none
+        background-color: #fff
+        color: $main-a
+      &.disabled:hover
+        border-bottom: none
+        background-color: #e1e1e1
+        color: #c1c1c1
+
+
+
+
+
+
+div.item_inner
+  div.container
+    &.lyrics
+      font-size: 115%
+      line-height: 190%
+      font-style: italic
+
+      p
+        margin-bottom: 14px
+
+
+
+
+/* specific items, maybe move to other files some time.. */
+section.item_inner .tab-pane
+  section.profile
+    &.information
+      // background: red
+      h4
+        text-transform: none
+        color: #a5a5a5
+      dl
+        margin: 4px 0 8px
+  
+  
+
+
+// relations in sidebar
+.sidebar
+
+
+  .listing
+    &.relations
+
+      .social
+        height: 24px
+        margin: 2px 0 8px
+
+
+
+      .relations > ul
+        li
+          cursor: pointer
+          padding: 4px 0 6px 0
+          border-bottom: 1px solid #efefef
+          clear: both
+          a
+            color: #5a5a5a
+            &:hover
+              text-decoration: none
+
+          i
+            font-size: 160%
+            width: 40px
+            display: block
+            float: left
+          span.service
+            top: 3px
+            position: relative
+            display: block
+            width: 100%
+
+          &:hover a
+            color: #6633cc
+
