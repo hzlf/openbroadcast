@@ -84,7 +84,7 @@
 <!--
 <body id="body" class="base">
 -->
-<body id="body" class="base {% block body_class %}{% endblock %}" data-spy="scroll" data-target=".subnav"
+<body id="body" class="base {% block body_class %}{% endblock %}{% if user.is_authenticated %} authenticated{% endif %}" data-spy="scroll" data-target=".subnav"
       data-offset="50">
 {% cms_toolbar %}
 <div id="dim_content" style="display: none;"></div>

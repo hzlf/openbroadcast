@@ -11,6 +11,8 @@ OnAirApp = function () {
     this.dom_id = 'on_air_app';
     this.dom_element;
 
+    this.authenticated = false;
+
     this.current_data = false;
 
     this.current_emission_url = false;
@@ -31,7 +33,6 @@ OnAirApp = function () {
         self.load();
 
         pushy.subscribe(self.api_url, function (data) {
-            console.log('pushy callbackk with data:', data);
             self.load()
         });
 
@@ -98,7 +99,7 @@ OnAirApp = function () {
         self.current_emission = data;
 
         var container = $('.emission', self.dom_element);
-		var html = nj.render('abcast/nj/on_air_emission.html', {object : data});
+		var html = nj.render('abcast/nj/on_air_emission.html', {object : data, api_url: self.api_url});
         container.html(html);
 
     };
@@ -109,7 +110,7 @@ OnAirApp = function () {
 
         var container = $('.items', self.dom_element);
         $('div', container).removeClass('playing');
-		var html = nj.render('abcast/nj/on_air_item.html', {object : data});
+		var html = nj.render('abcast/nj/on_air_item.html', {object : data, authenticated : self.authenticated });
         container.prepend($(html).addClass('playing').fadeIn(500));
 
         // subscribe for item changes
@@ -126,7 +127,7 @@ OnAirApp = function () {
         $.get(data.route, function (data) {
             var container = $('.item[data-uuid="'+ data.uuid  + '"]');
 
-            var html = nj.render('abcast/nj/on_air_item.html', {object : data});
+            var html = nj.render('abcast/nj/on_air_item.html', {object : data, authenticated : self.authenticated });
             container.replaceWith($(html).addClass(container.attr('class')));
 
         });

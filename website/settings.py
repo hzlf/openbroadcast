@@ -31,6 +31,7 @@ sys.path.insert(0, os.path.join(PROJECT_DIR, 'legacy'))
 
 DEBUG = True
 
+
 TEMPLATE_DEBUG = DEBUG
 #TEMPLATE_STRING_IF_INVALID ='* MISSING *'
 

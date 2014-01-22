@@ -1295,7 +1295,7 @@ aplayer.base.log = function (action, index, uuid) {
  * logging / event tracking
  *********************************************************************************/
 aplayer.base.debug = function (text) {
-
+    /*
     var d = new Date();
     var hour = d.getHours();
     var min = d.getMinutes();
@@ -1308,6 +1308,7 @@ aplayer.base.debug = function (text) {
 
     }
     ;
+    */
 
     // $('.footer > .wrapper').prepend('<p>' + '<span>' + time + '</span> | ' + text + '</p>');
 };

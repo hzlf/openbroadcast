@@ -47,9 +47,4 @@ def post_save_vote(sender, **kwargs):
     except Exception, e:
         print e
 
-    print obj.content_object.get_api_url()
-
-
-
-
 post_save.connect(post_save_vote, sender=Vote)

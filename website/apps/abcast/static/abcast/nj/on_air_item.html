@@ -18,23 +18,40 @@
         <div class="rating-inline pull-right">
 
             <ul class="horizontal unstyled arating">
-                <li>
-                    <a data-vote="{% if object.votes.user == -1 %}0{% else %}-1{% endif %}"
-                       class="vote-1{% if object.votes.user == -1 %} active{% endif %}"
-                       href="/en/vote/alibrary.media/{{ object.id }}/0/">
-                        <i class="icon-thumbs-down"></i>
-                        <span class="count">{{ object.votes.down }}</span>
-                    </a>
-                </li>
 
-                <li>
-                    <a data-vote="{% if object.votes.user == 1 %}0{% else %}1{% endif %}"
-                       class="vote1{% if object.votes.user == 1 %} active{% endif %}"
-                       href="/en/vote/alibrary.media/{{ object.id }}/0/">
-                        <i class="icon-thumbs-up"></i>
-                        <span class="count">{{ object.votes.up }}</span>
-                    </a>
-                </li>
+                {% if authenticated %}
+                    <li>
+                        <a data-vote="{% if object.votes.user == -1 %}0{% else %}-1{% endif %}"
+                           class="vote-1{% if object.votes.user == -1 %} active{% endif %}"
+                           href="/en/vote/alibrary.media/{{ object.id }}/0/">
+                            <i class="icon-thumbs-down"></i>
+                            <span class="count">{{ object.votes.down }}</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a data-vote="{% if object.votes.user == 1 %}0{% else %}1{% endif %}"
+                           class="vote1{% if object.votes.user == 1 %} active{% endif %}"
+                           href="/en/vote/alibrary.media/{{ object.id }}/0/">
+                            <i class="icon-thumbs-up"></i>
+                            <span class="count">{{ object.votes.up }}</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li>
+                            <i class="icon-thumbs-down"></i>
+                            <span class="count">{{ object.votes.down }}</span>
+
+                    </li>
+
+                    <li>
+
+                            <i class="icon-thumbs-up"></i>
+                            <span class="count">{{ object.votes.up }}</span>
+                    </li>
+                {% endif %}
+
+
             </ul>
 
 
@@ -42,13 +59,18 @@
 
         <ul class="unstyled">
             <li>
-                <h4 class="name"><a href="{{ object.absolute_url }}">{{ object.name|truncate_chars_inner(24) }}</a> </h4>
+                <h4 class="name"><a href="{{ object.absolute_url }}">{{ object.name|truncate_chars_inner(24) }}</a></h4>
             </li>
             <li>
-                <a data-target="artist" href="{{ object.artist.absolute_url }}">{{ object.artist.name|truncate_chars_inner(32) }}</a>
+                <a data-target="artist" href="{{ object.artist.absolute_url }}">
+                    {{ object.artist.name|truncate_chars_inner(32) }}</a>
             </li>
             <li>
                 <a href="{{ object.release.absolute_url }}">{{ object.release.name|truncate_chars_inner(32) }}</a>
+            </li>
+
+            <li>
+                <a href="{{ object.release.label.absolute_url }}">{{ object.release.label.name|truncate_chars_inner(32) }}</a>
             </li>
         </ul>
     </div>

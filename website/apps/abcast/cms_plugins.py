@@ -12,7 +12,7 @@ class OnAirPlugin(CMSPluginBase):
     name = _("On-Air Plugin")
 
     #render_template = "abcast/cmsplugin/on_air.html"
-    render_template = "abcast/cmsplugin/on_air_ng.html"
+    render_template = "abcast/cmsplugin/on_air.html"
 
     # meta
     class Meta:

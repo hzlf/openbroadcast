@@ -19,12 +19,24 @@
 		<li>
 			{% if choice.active %}
 				<a data-vote="0" class="active vote{{ choice.key }}" href="{% url vote content_type=ct object_id=object.id vote=0 %}">
-					<i class="icon-thumbs-up"></i>
+
+                    {% if choice.key > 0%}
+                        <i class="icon-thumbs-up"></i>
+                    {% else %}
+                        <i class="icon-thumbs-down"></i>
+                    {% endif %}
+
                     <span class="count">{{ choice.count }}</span>
 				</a>
 			{% else %}
 				<a data-vote="{{ choice.key }}" class="vote{{ choice.key }}" href="{% url vote content_type=ct object_id=object.id vote=0 %}">
-					<i class="icon-thumbs-down"></i>
+
+                    {% if choice.key > 0%}
+                        <i class="icon-thumbs-up"></i>
+                    {% else %}
+                        <i class="icon-thumbs-down"></i>
+                    {% endif %}
+
                     <span class="count">{{ choice.count }}</span>
 				</a>
 			{% endif %}

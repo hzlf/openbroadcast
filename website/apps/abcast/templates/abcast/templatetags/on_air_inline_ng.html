@@ -10,6 +10,7 @@
 		var abcast = abcast || {};
 		abcast.on_air = new OnAirApp();
 		abcast.on_air.api_url = "{{ channel.get_api_url }}";
+		abcast.on_air.authenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
 
 
         setTimeout(function() {
