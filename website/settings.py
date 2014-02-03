@@ -318,17 +318,8 @@ FLUENT_COMMENTS_EXCLUDE_FIELDS = ['title', 'email', 'name', 'url', ]
 
 INSTALLED_APPS = (
 
-    #'admin_tools.theming',
-    #'admin_tools.menu',
-    #'admin_tools.dashboard',
-
-    #'admintools_bootstrap',
     'admin_style',
-
-    #'suit',
-
     'admin_tools',
-
     'admin_shortcuts',
     'django_su',
 
@@ -342,7 +333,6 @@ INSTALLED_APPS = (
     'django.contrib.webdesign',
     'django.contrib.admin',
 
-
     'threadedcomments',
     'fluent_comments',
 
@@ -351,15 +341,12 @@ INSTALLED_APPS = (
     'django.contrib.markup',
     'django.contrib.sitemaps',
 
-    #'staticfiles',
-
     # server
     'gunicorn',
     'django_date_extensions',
     'esi',
 
     #'turbolinks',
-
     'haystack',
 
     # messaging & registration
@@ -378,6 +365,7 @@ INSTALLED_APPS = (
 
     #'notification',
     'notifications',
+
     'debug_toolbar',
     'mailer',
     'djcelery',
@@ -394,33 +382,18 @@ INSTALLED_APPS = (
     'private_files',
 
     'profiles',
-    #'django_hgroups',
-
-
     'sendfile',
-
     'reversion',
-
     #'clear_cache',
-
-    'actstream',
-
     'django_badbrowser',
     'datatrans',
-
     'genericadmin',
 
-
-    # temp
-    #'eav',
 
     # dajax
     'dajaxice',
     'dajax',
-
     'ajax_select',
-
-
     'email_obfuscator',
 
 
@@ -434,15 +407,14 @@ INSTALLED_APPS = (
     'cmsplugin_vimeo',
     #'cmsplugin_soundcloud',
     'cmsplugin_pagedown',
-
     'cmsplugin_git',
 
-    'shortcutter',
 
+
+    'shortcutter',
     'multilingual',
     'disqus',
     'selectable',
-
     'autocomplete_light',
 
     # asset and media handling
@@ -453,25 +425,12 @@ INSTALLED_APPS = (
     # translation
     'modeltranslation',
 
-
-    # rest & API
-    #'djangorestframework', # refactored to tastypie
-
     # stats
     'atracker',
-
 
     # users/auth
     'avatar',
     'emailconfirmation',
-    #'allauth',
-    #'allauth.account',
-    #'allauth.socialaccount',
-    ##'allauth.ajax',
-    ##'allauth.twitter',
-    #'allauth.openid',
-    #'allauth.facebook',
-
 
     # alternative registration
     'registration',
@@ -481,18 +440,13 @@ INSTALLED_APPS = (
 
     # api
     'tastypie',
-    #'tastytools',
-    #'tastydocs',
-    #'chocolate',
     # oauth
     'provider',
     'provider.oauth2',
 
     'crispy_forms',
     'floppyforms',
-    #'djangoratings',
     'django_mobile',
-
 
     'pushy',
     'nunjucks',
@@ -512,7 +466,6 @@ INSTALLED_APPS = (
     'asearch',
     #'django_db_signals',
 
-
     # blog
     'zinnia',
     'cmsplugin_zinnia', # somehow not working.. ivestigate!!
@@ -522,40 +475,31 @@ INSTALLED_APPS = (
     'ashop',
     'ashop.addressmodel',
     #'acalendar',
-    #'articles',
     'spurl',
     'lib',
-    #'teaser',
 
     # shop apps
     'shop',
     'shop_ajax',
     'paypal.standard.ipn',
     'shop_paypal',
-    #'discount',
 
+    #
     'wikisyntax',
-    #'taggit',
     'tagging',
     'ac_tagging',
     'pure_pagination',
-    #'taggit_templatetags',
-
     'obp_legacy',
 
     # helpers
     'dev',
 
-
     # spf
     'csvimport',
     'spf',
-
-    # fprint
     'fprint',
 
-    # monitoring
-    #'kitsune',
+    'actstream',
 )
 
 ZINNIA_ENTRY_BASE_MODEL = 'cmsplugin_zinnia.placeholder.EntryPlaceholder'
@@ -1056,7 +1000,6 @@ ACTSTREAM_SETTINGS = {
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
-#logging.getLogger('django.db.backends').setLevel(logging.ERROR)
 
 # try to override from local_config.py
 DEBUG_APPS = None
