@@ -1,22 +1,24 @@
 """Test cases for Zinnia's Entry"""
+from __future__ import with_statement
+import warnings
 from datetime import timedelta
 
 from django.test import TestCase
 from django.utils import timezone
 from django.contrib import comments
+from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.utils.translation import activate
 from django.utils.translation import deactivate
-from django.test.utils import override_settings
 from django.contrib.comments.models import CommentFlag
-from django.contrib.auth.tests.utils import skipIfCustomUser
 
-from zinnia.managers import PUBLISHED
-from zinnia.models_bases import entry
+from zinnia.models import entry
 from zinnia.models.entry import Entry
-from zinnia.models.author import Author
+from zinnia.managers import PUBLISHED
 from zinnia.flags import PINGBACK, TRACKBACK
+from zinnia.models.entry import get_base_model
+from zinnia.models.entry import EntryAbstractClass
 from zinnia.tests.utils import datetime
 from zinnia import url_shortener as shortener_settings
 
@@ -29,7 +31,6 @@ class EntryTestCase(TestCase):
                   'slug': 'my-entry'}
         self.entry = Entry.objects.create(**params)
 
-    @skipIfCustomUser
     def test_discussions(self):
         site = Site.objects.get_current()
         self.assertEquals(self.entry.discussions.count(), 0)
@@ -37,33 +38,28 @@ class EntryTestCase(TestCase):
         self.assertEquals(self.entry.pingbacks.count(), 0)
         self.assertEquals(self.entry.trackbacks.count(), 0)
 
-        comments.get_model().objects.create(
-            comment='My Comment 1',
-            content_object=self.entry,
-            submit_date=timezone.now(),
-            site=site)
+        comments.get_model().objects.create(comment='My Comment 1',
+                                            content_object=self.entry,
+                                            site=site)
         self.assertEquals(self.entry.discussions.count(), 1)
         self.assertEquals(self.entry.comments.count(), 1)
         self.assertEquals(self.entry.pingbacks.count(), 0)
         self.assertEquals(self.entry.trackbacks.count(), 0)
 
-        comments.get_model().objects.create(
-            comment='My Comment 2',
-            content_object=self.entry,
-            submit_date=timezone.now(),
-            site=site, is_public=False)
+        comments.get_model().objects.create(comment='My Comment 2',
+                                            content_object=self.entry,
+                                            site=site, is_public=False)
         self.assertEquals(self.entry.discussions.count(), 1)
         self.assertEquals(self.entry.comments.count(), 1)
         self.assertEquals(self.entry.pingbacks.count(), 0)
         self.assertEquals(self.entry.trackbacks.count(), 0)
 
-        author = Author.objects.create_user(username='webmaster',
-                                            email='webmaster@example.com')
+        author = User.objects.create_user(username='webmaster',
+                                          email='webmaster@example.com')
 
         comment = comments.get_model().objects.create(
             comment='My Comment 3',
             content_object=self.entry,
-            submit_date=timezone.now(),
             site=Site.objects.create(domain='http://toto.com',
                                      name='Toto.com'))
         comment.flags.create(user=author, flag=CommentFlag.MODERATOR_APPROVAL)
@@ -73,10 +69,7 @@ class EntryTestCase(TestCase):
         self.assertEquals(self.entry.trackbacks.count(), 0)
 
         comment = comments.get_model().objects.create(
-            comment='My Pingback 1',
-            content_object=self.entry,
-            submit_date=timezone.now(),
-            site=site)
+            comment='My Pingback 1', content_object=self.entry, site=site)
         comment.flags.create(user=author, flag=PINGBACK)
         self.assertEquals(self.entry.discussions.count(), 3)
         self.assertEquals(self.entry.comments.count(), 2)
@@ -84,10 +77,7 @@ class EntryTestCase(TestCase):
         self.assertEquals(self.entry.trackbacks.count(), 0)
 
         comment = comments.get_model().objects.create(
-            comment='My Trackback 1',
-            content_object=self.entry,
-            submit_date=timezone.now(),
-            site=site)
+            comment='My Trackback 1', content_object=self.entry, site=site)
         comment.flags.create(user=author, flag=TRACKBACK)
         self.assertEquals(self.entry.discussions.count(), 4)
         self.assertEquals(self.entry.comments.count(), 2)
@@ -175,18 +165,7 @@ class EntryTestCase(TestCase):
 
     def test_previous_entry(self):
         site = Site.objects.get_current()
-        with self.assertNumQueries(0):
-            # entry.previous_entry does not works until entry
-            # is published, so no query should be performed
-            self.assertFalse(self.entry.previous_entry)
-        self.entry.status = PUBLISHED
-        self.entry.save()
-        self.entry.sites.add(site)
-        del self.entry.previous_next  # Invalidate the cached property
-        with self.assertNumQueries(1):
-            self.assertFalse(self.entry.previous_entry)
-            # Reload to check the cache
-            self.assertFalse(self.entry.previous_entry)
+        self.assertFalse(self.entry.previous_entry)
         params = {'title': 'My second entry',
                   'content': 'My second content',
                   'slug': 'my-second-entry',
@@ -194,11 +173,8 @@ class EntryTestCase(TestCase):
                   'status': PUBLISHED}
         self.second_entry = Entry.objects.create(**params)
         self.second_entry.sites.add(site)
-        del self.entry.previous_next  # Invalidate the cached property
-        with self.assertNumQueries(1):
-            self.assertEquals(self.entry.previous_entry, self.second_entry)
-            # Reload to check the cache
-            self.assertEquals(self.entry.previous_entry, self.second_entry)
+        del self.entry.previous_entry  # Invalidate the cached_property
+        self.assertEquals(self.entry.previous_entry, self.second_entry)
         params = {'title': 'My third entry',
                   'content': 'My third content',
                   'slug': 'my-third-entry',
@@ -206,25 +182,13 @@ class EntryTestCase(TestCase):
                   'status': PUBLISHED}
         self.third_entry = Entry.objects.create(**params)
         self.third_entry.sites.add(site)
-        del self.entry.previous_next  # Invalidate the cached property
+        del self.entry.previous_entry
         self.assertEquals(self.entry.previous_entry, self.third_entry)
         self.assertEquals(self.third_entry.previous_entry, self.second_entry)
-        self.assertFalse(self.second_entry.previous_entry)
 
     def test_next_entry(self):
         site = Site.objects.get_current()
-        with self.assertNumQueries(0):
-            # entry.next_entry does not works until entry
-            # is published, so no query should be performed
-            self.assertFalse(self.entry.previous_entry)
-        self.entry.status = PUBLISHED
-        self.entry.save()
-        self.entry.sites.add(site)
-        del self.entry.previous_next  # Invalidate the cached property
-        with self.assertNumQueries(1):
-            self.assertFalse(self.entry.next_entry)
-            # Reload to check the cache
-            self.assertFalse(self.entry.next_entry)
+        self.assertFalse(self.entry.next_entry)
         params = {'title': 'My second entry',
                   'content': 'My second content',
                   'slug': 'my-second-entry',
@@ -232,11 +196,8 @@ class EntryTestCase(TestCase):
                   'status': PUBLISHED}
         self.second_entry = Entry.objects.create(**params)
         self.second_entry.sites.add(site)
-        del self.entry.previous_next  # Invalidate the cached property
-        with self.assertNumQueries(1):
-            self.assertEquals(self.entry.next_entry, self.second_entry)
-            # Reload to check the cache
-            self.assertEquals(self.entry.next_entry, self.second_entry)
+        del self.entry.next_entry  # Invalidate the cached_property
+        self.assertEquals(self.entry.next_entry, self.second_entry)
         params = {'title': 'My third entry',
                   'content': 'My third content',
                   'slug': 'my-third-entry',
@@ -244,43 +205,9 @@ class EntryTestCase(TestCase):
                   'status': PUBLISHED}
         self.third_entry = Entry.objects.create(**params)
         self.third_entry.sites.add(site)
-        del self.entry.previous_next  # Invalidate the cached property
+        del self.entry.next_entry
         self.assertEquals(self.entry.next_entry, self.third_entry)
         self.assertEquals(self.third_entry.next_entry, self.second_entry)
-        self.assertFalse(self.second_entry.next_entry)
-
-    def test_previous_next_entry_in_one_query(self):
-        site = Site.objects.get_current()
-        self.entry.status = PUBLISHED
-        self.entry.save()
-        self.entry.sites.add(site)
-        with self.assertNumQueries(1):
-            self.assertFalse(self.entry.previous_entry)
-            self.assertFalse(self.entry.next_entry)
-            # Reload to check the cache
-            self.assertFalse(self.entry.previous_entry)
-            self.assertFalse(self.entry.next_entry)
-        params = {'title': 'My second entry',
-                  'content': 'My second content',
-                  'slug': 'my-second-entry',
-                  'creation_date': datetime(2001, 1, 1),
-                  'status': PUBLISHED}
-        self.second_entry = Entry.objects.create(**params)
-        self.second_entry.sites.add(site)
-        params = {'title': 'My third entry',
-                  'content': 'My third content',
-                  'slug': 'my-third-entry',
-                  'creation_date': datetime(2050, 1, 1),
-                  'status': PUBLISHED}
-        self.third_entry = Entry.objects.create(**params)
-        self.third_entry.sites.add(site)
-        del self.entry.previous_next  # Invalidate the cached property
-        with self.assertNumQueries(1):
-            self.assertEquals(self.entry.previous_entry, self.second_entry)
-            self.assertEquals(self.entry.next_entry, self.third_entry)
-            # Reload to check the cache
-            self.assertEquals(self.entry.previous_entry, self.second_entry)
-            self.assertEquals(self.entry.next_entry, self.third_entry)
 
     def test_related_published(self):
         site = Site.objects.get_current()
@@ -376,24 +303,26 @@ class EntryHtmlContentTestCase(TestCase):
             self.assertEquals(html_content, self.entry.content)
 
 
-class EntryAbsoluteUrlTestCase(TestCase):
+class EntryGetBaseModelTestCase(TestCase):
 
-    def check_get_absolute_url(self, creation_date, url_expected):
-        params = {'title': 'My entry',
-                  'content': 'My content',
-                  'slug': 'my-entry',
-                  'creation_date': creation_date}
-        entry = Entry.objects.create(**params)
-        self.assertEquals(entry.get_absolute_url(), url_expected)
+    def setUp(self):
+        self.original_entry_base_model = entry.ENTRY_BASE_MODEL
 
-    @override_settings(USE_TZ=False)
-    def test_get_absolute_url_no_timezone(self):
-        self.check_get_absolute_url(datetime(2013, 1, 1, 12, 0),
-                                    '/2013/01/01/my-entry/')
+    def tearDown(self):
+        entry.ENTRY_BASE_MODEL = self.original_entry_base_model
 
-    @override_settings(USE_TZ=True, TIME_ZONE='Europe/Paris')
-    def test_get_absolute_url_with_timezone(self):
-        self.check_get_absolute_url(datetime(2013, 1, 1, 12, 0),
-                                    '/2013/01/01/my-entry/')
-        self.check_get_absolute_url(datetime(2013, 1, 1, 23, 0),
-                                    '/2013/01/02/my-entry/')
+    def test_get_base_model(self):
+        entry.ENTRY_BASE_MODEL = ''
+        self.assertEquals(get_base_model(), EntryAbstractClass)
+
+        entry.ENTRY_BASE_MODEL = 'mymodule.myclass'
+        try:
+            with warnings.catch_warnings(record=True) as w:
+                self.assertEquals(get_base_model(), EntryAbstractClass)
+                self.assertTrue(issubclass(w[-1].category, RuntimeWarning))
+        except AttributeError:
+            # Fail under Python2.5, because of'warnings.catch_warnings'
+            pass
+
+        entry.ENTRY_BASE_MODEL = 'zinnia.models.entry.EntryAbstractClass'
+        self.assertEquals(get_base_model(), EntryAbstractClass)

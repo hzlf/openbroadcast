@@ -1,14 +1,12 @@
 """Test cases for Zinnia's admin"""
 from django.test import TestCase
-from django.contrib.auth.tests.utils import skipIfCustomUser
+from django.contrib.auth.models import User
 
 from zinnia import settings
 from zinnia.models.entry import Entry
-from zinnia.models.author import Author
 from zinnia.models.category import Category
 
 
-@skipIfCustomUser
 class EntryAdminTestCase(TestCase):
     """Test case for Entry Admin"""
     urls = 'zinnia.tests.urls'
@@ -16,8 +14,7 @@ class EntryAdminTestCase(TestCase):
     def setUp(self):
         self.original_wysiwyg = settings.WYSIWYG
         settings.WYSIWYG = None
-        Author.objects.create_superuser(
-            'admin', 'admin@example.com', 'password')
+        User.objects.create_superuser('admin', 'admin@example.com', 'password')
         category_1 = Category.objects.create(title='Category 1', slug='cat-1')
         Category.objects.create(title='Category 2', slug='cat-2',
                                 parent=category_1)
@@ -55,14 +52,12 @@ class EntryAdminTestCase(TestCase):
         self.assertEquals(Entry.objects.count(), 1)
 
 
-@skipIfCustomUser
 class CategoryAdminTestCase(TestCase):
     """Test cases for Category Admin"""
     urls = 'zinnia.tests.urls'
 
     def setUp(self):
-        Author.objects.create_superuser(
-            'admin', 'admin@example.com', 'password')
+        User.objects.create_superuser('admin', 'admin@example.com', 'password')
         self.client.login(username='admin', password='password')
 
     def test_category_add_and_change(self):

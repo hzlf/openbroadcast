@@ -1,5 +1,6 @@
 {% extends "zinnia/entry_list.html" %}
 {% load i18n %}
+{% load url from future %}
 
 {% block meta-description %}{% trans "Archives" %} {{ day|date:"DATE_FORMAT" }}{% endblock %}
 
@@ -43,5 +44,5 @@
     <a href="{% url 'zinnia_entry_archive_month' next_month|date:"Y" next_month|date:"m" %}" rel="archives">{{ next_month|date:"YEAR_MONTH_FORMAT" }}</a>
   </li>
   {% endif %}
-</ul>
+<ul>
 {% endblock %}

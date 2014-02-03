@@ -515,7 +515,7 @@ INSTALLED_APPS = (
 
     # blog
     'zinnia',
-    'cmsplugin_zinnia',
+    'cmsplugin_zinnia', # somehow not working.. ivestigate!!
 
     'bcmon',
     #'secretballot',

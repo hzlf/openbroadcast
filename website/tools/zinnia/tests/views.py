@@ -1,4 +1,5 @@
 """Test cases for Zinnia's views"""
+from __future__ import with_statement
 from datetime import date
 
 from django.test import TestCase
@@ -11,7 +12,6 @@ from django.test.utils import setup_test_template_loader
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.signals import user_logged_in
 from django.contrib.auth.models import update_last_login
-from django.contrib.auth.tests.utils import skipIfCustomUser
 
 from zinnia.models.entry import Entry
 from zinnia.models.author import Author
@@ -24,11 +24,6 @@ from zinnia.signals import connect_discussion_signals
 from zinnia.signals import disconnect_discussion_signals
 
 
-@skipIfCustomUser
-@override_settings(
-    TEMPLATE_CONTEXT_PROCESSORS=(
-        'django.core.context_processors.request',
-    ))
 class ViewsBaseCase(TestCase):
     """
     Setup and utility function base case.
@@ -105,6 +100,11 @@ class ViewsBaseCase(TestCase):
         self.assertEquals(response['Content-Type'], mimetype)
         self.assertTrue('protocol' in response.context)
 
+ViewsBaseCase = override_settings(
+    TEMPLATE_CONTEXT_PROCESSORS=(
+        'django.core.context_processors.request',
+    ))(ViewsBaseCase)
+
 
 class ZinniaViewsTestCase(ViewsBaseCase):
     """
@@ -123,22 +123,9 @@ class ZinniaViewsTestCase(ViewsBaseCase):
         except AttributeError:
             pass
 
-    @override_settings(USE_TZ=False)
-    def test_zinnia_entry_archive_index_no_timezone(self):
+    def test_zinnia_entry_archive_index(self):
         template_name_today = 'zinnia/archives/%s/entry_archive.html' % \
                               date.today().strftime('%Y/%m/%d')
-        setup_test_template_loader(
-            {template_name_today: ''})
-        response = self.check_publishing_context(
-            '/', 2, 3, 'entry_list', 2)
-        self.assertTemplateUsed(response, template_name_today)
-        restore_template_loaders()
-
-    @override_settings(USE_TZ=True, TIME_ZONE='Europe/Paris')
-    def test_zinnia_entry_archive_index_with_timezone(self):
-        template_name_today = 'zinnia/archives/%s/entry_archive.html' % \
-                              timezone.localtime(timezone.now()
-                                                 ).strftime('%Y/%m/%d')
         setup_test_template_loader(
             {template_name_today: ''})
         response = self.check_publishing_context(
@@ -150,7 +137,7 @@ class ZinniaViewsTestCase(ViewsBaseCase):
         setup_test_template_loader(
             {'zinnia/archives/2010/entry_archive_year.html': ''})
         response = self.check_publishing_context(
-            '/2010/', 2, 3, 'entry_list', 4)
+            '/2010/', 2, 3, 'entry_list', 2)
         self.assertTemplateUsed(
             response, 'zinnia/archives/2010/entry_archive_year.html')
         restore_template_loaders()
@@ -205,29 +192,14 @@ class ZinniaViewsTestCase(ViewsBaseCase):
         self.assertEquals(response.context['next_day'], None)
         restore_template_loaders()
 
-    @override_settings(USE_TZ=False)
-    def test_zinnia_entry_archive_today_no_timezone(self):
+    def test_zinnia_entry_archive_today(self):
         setup_test_template_loader(
             {'zinnia/entry_archive_today.html': ''})
         with self.assertNumQueries(5):
             response = self.client.get('/today/')
-        self.assertTemplateUsed(response, 'zinnia/entry_archive_today.html')
-        self.assertEquals(response.context['day'].date(), date.today())
-        self.assertEquals(response.context['previous_month'], date(2010, 6, 1))
-        self.assertEquals(response.context['next_month'], None)
-        self.assertEquals(response.context['previous_day'], date(2010, 6, 1))
-        self.assertEquals(response.context['next_day'], None)
-        restore_template_loaders()
-
-    @override_settings(USE_TZ=True, TIME_ZONE='Europe/Paris')
-    def test_zinnia_entry_archive_today_with_timezone(self):
-        setup_test_template_loader(
-            {'zinnia/entry_archive_today.html': ''})
-        with self.assertNumQueries(5):
-            response = self.client.get('/today/')
-        self.assertTemplateUsed(response, 'zinnia/entry_archive_today.html')
-        self.assertEquals(response.context['day'].date(), timezone.localtime(
+        self.assertEquals(response.context['day'], timezone.localtime(
             timezone.now()).date())
+        self.assertTemplateUsed(response, 'zinnia/entry_archive_today.html')
         self.assertEquals(response.context['previous_month'], date(2010, 6, 1))
         self.assertEquals(response.context['next_month'], None)
         self.assertEquals(response.context['previous_day'], date(2010, 6, 1))
@@ -584,7 +556,6 @@ class ZinniaViewsTestCase(ViewsBaseCase):
         self.assertEquals(response.context['comment'], None)
 
         comment = comments.get_model().objects.create(
-            submit_date=timezone.now(),
             comment='My Comment 1', content_object=self.category,
             site=self.site, is_public=False)
         with self.assertNumQueries(1):

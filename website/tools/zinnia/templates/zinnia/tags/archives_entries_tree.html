@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load url from future %}
 {% regroup archives by year as year_list %}
 <ul>
   {% for year in year_list %}

@@ -1,13 +1,13 @@
 """Views for Zinnia capabilities"""
 from django.contrib.sites.models import Site
-from django.views.generic.base import TemplateView
 
 from zinnia.settings import PROTOCOL
 from zinnia.settings import COPYRIGHT
 from zinnia.settings import FEEDS_FORMAT
+from zinnia.views.mixins.mimetypes import TemplateMimeTypeView
 
 
-class CapabilityView(TemplateView):
+class CapabilityView(TemplateMimeTypeView):
     """Base view for the weblog capabilities"""
 
     def get_context_data(self, **kwargs):
@@ -25,7 +25,7 @@ class HumansTxt(CapabilityView):
     """
     http://humanstxt.org/
     """
-    content_type = 'text/plain'
+    mimetype = 'text/plain'
     template_name = 'zinnia/humans.txt'
 
 
@@ -33,7 +33,7 @@ class RsdXml(CapabilityView):
     """
     http://en.wikipedia.org/wiki/Really_Simple_Discovery
     """
-    content_type = 'application/rsd+xml'
+    mimetype = 'application/rsd+xml'
     template_name = 'zinnia/rsd.xml'
 
 
@@ -41,7 +41,7 @@ class WLWManifestXml(CapabilityView):
     """
     http://msdn.microsoft.com/en-us/library/bb463260.aspx
     """
-    content_type = 'application/wlwmanifest+xml'
+    mimetype = 'application/wlwmanifest+xml'
     template_name = 'zinnia/wlwmanifest.xml'
 
 
@@ -49,5 +49,5 @@ class OpenSearchXml(CapabilityView):
     """
     http://www.opensearch.org/
     """
-    content_type = 'application/opensearchdescription+xml'
     template_name = 'zinnia/opensearch.xml'
+    mimetype = 'application/opensearchdescription+xml'

@@ -4,7 +4,6 @@ from functools import wraps
 from datetime import datetime
 
 from django.utils.dateformat import format
-from django.utils.timezone import is_aware
 from django.utils.timezone import localtime
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
@@ -42,17 +41,6 @@ def day_crumb(creation_date):
                               args=[year, month, day]))
 
 
-def entry_breadcrumbs(entry):
-    """Breadcrumbs for an Entry"""
-    creation_date = entry.creation_date
-    if is_aware(creation_date):
-        creation_date = localtime(creation_date)
-    return [year_crumb(creation_date),
-            month_crumb(creation_date),
-            day_crumb(creation_date),
-            Crumb(entry.title)]
-
-
 ZINNIA_ROOT_URL = lambda: reverse('zinnia_entry_archive_index')
 
 MODEL_BREADCRUMBS = {'Tag': lambda x: [Crumb(_('Tags'),
@@ -60,12 +48,16 @@ MODEL_BREADCRUMBS = {'Tag': lambda x: [Crumb(_('Tags'),
                                        Crumb(x.name)],
                      'Author': lambda x: [Crumb(_('Authors'),
                                                 reverse('zinnia_author_list')),
-                                          Crumb(x.__unicode__())],
+                                          Crumb(x.username)],
                      'Category': lambda x: [Crumb(
                          _('Categories'), reverse('zinnia_category_list'))] +
-                     [Crumb(anc.__unicode__(), anc.get_absolute_url())
+                     [Crumb(anc.title, anc.get_absolute_url())
                       for anc in x.get_ancestors()] + [Crumb(x.title)],
-                     'Entry': entry_breadcrumbs}
+                     'Entry': lambda x: [
+                         year_crumb(localtime(x.creation_date)),
+                         month_crumb(localtime(x.creation_date)),
+                         day_crumb(localtime(x.creation_date)),
+                         Crumb(x.title)]}
 
 ARCHIVE_REGEXP = re.compile(
     r'.*(?P<year>\d{4})/(?P<month>\d{2})?/(?P<day>\d{2})?.*')

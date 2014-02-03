@@ -1,16 +1,17 @@
 """Test cases for Zinnia's mixins"""
+from __future__ import with_statement
 from datetime import date
 
 from django.test import TestCase
 from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
-from django.contrib.auth.tests.utils import skipIfCustomUser
 
 from zinnia.models.entry import Entry
 from zinnia.models.author import Author
 from zinnia.models.category import Category
 from zinnia.managers import PUBLISHED
 from zinnia.tests.utils import datetime
+from zinnia.views.mixins.mimetypes import MimeTypeMixin
 from zinnia.views.mixins.archives import PreviousNextPublishedMixin
 from zinnia.views.mixins.callable_queryset import CallableQuerysetMixin
 from zinnia.views.mixins.prefetch_related import PrefetchRelatedMixin
@@ -35,6 +36,15 @@ class MixinTestCase(TestCase):
         instance.queryset = qs
         self.assertEquals(instance.get_queryset(),
                           [])
+
+    def test_mimetype_mixin(self):
+        instance = MimeTypeMixin()
+        self.assertRaises(ImproperlyConfigured,
+                          instance.get_mimetype)
+
+        instance.mimetype = 'mimetype'
+        self.assertEquals(instance.get_mimetype(),
+                          'mimetype')
 
     def test_entry_queryset_template_response_mixin(self):
         instance = EntryQuerysetTemplateResponseMixin()
@@ -230,7 +240,7 @@ class MixinTestCase(TestCase):
 
         params = {'title': 'Entry 3', 'content': 'Entry 3',
                   'slug': 'entry-3', 'status': PUBLISHED,
-                  'creation_date': datetime(2013, 6, 2, 12)}
+                  'creation_date': datetime(2012, 6, 2, 12)}
         entry_3 = Entry.objects.create(**params)
         entry_3.sites.add(site)
 
@@ -240,42 +250,32 @@ class MixinTestCase(TestCase):
         epnp = EntryPreviousNextPublished()
 
         test_date = datetime(2009, 12, 1)
-        self.assertEquals(epnp.get_previous_year(test_date), None)
         self.assertEquals(epnp.get_previous_month(test_date), None)
         self.assertEquals(epnp.get_previous_day(test_date), None)
-        self.assertEquals(epnp.get_next_year(test_date), date(2012, 1, 1))
         self.assertEquals(epnp.get_next_month(test_date), date(2012, 1, 1))
         self.assertEquals(epnp.get_next_day(test_date), date(2012, 1, 1))
 
         test_date = datetime(2012, 1, 1)
-        self.assertEquals(epnp.get_previous_year(test_date), None)
         self.assertEquals(epnp.get_previous_month(test_date), None)
         self.assertEquals(epnp.get_previous_day(test_date), None)
-        self.assertEquals(epnp.get_next_year(test_date), date(2013, 1, 1))
         self.assertEquals(epnp.get_next_month(test_date), date(2012, 3, 1))
         self.assertEquals(epnp.get_next_day(test_date), date(2012, 3, 15))
 
         test_date = datetime(2012, 3, 15)
-        self.assertEquals(epnp.get_previous_year(test_date), None)
         self.assertEquals(epnp.get_previous_month(test_date), date(2012, 1, 1))
         self.assertEquals(epnp.get_previous_day(test_date), date(2012, 1, 1))
-        self.assertEquals(epnp.get_next_year(test_date), date(2013, 1, 1))
-        self.assertEquals(epnp.get_next_month(test_date), date(2013, 6, 1))
-        self.assertEquals(epnp.get_next_day(test_date), date(2013, 6, 2))
+        self.assertEquals(epnp.get_next_month(test_date), date(2012, 6, 1))
+        self.assertEquals(epnp.get_next_day(test_date), date(2012, 6, 2))
 
-        test_date = datetime(2013, 6, 2)
-        self.assertEquals(epnp.get_previous_year(test_date), date(2012, 1, 1))
+        test_date = datetime(2012, 6, 2)
         self.assertEquals(epnp.get_previous_month(test_date), date(2012, 3, 1))
         self.assertEquals(epnp.get_previous_day(test_date), date(2012, 3, 15))
-        self.assertEquals(epnp.get_next_year(test_date), None)
         self.assertEquals(epnp.get_next_month(test_date), None)
         self.assertEquals(epnp.get_next_day(test_date), None)
 
-        test_date = datetime(2014, 5, 1)
-        self.assertEquals(epnp.get_previous_year(test_date), date(2013, 1, 1))
-        self.assertEquals(epnp.get_previous_month(test_date), date(2013, 6, 1))
-        self.assertEquals(epnp.get_previous_day(test_date), date(2013, 6, 2))
-        self.assertEquals(epnp.get_next_year(test_date), None)
+        test_date = datetime(2013, 5, 1)
+        self.assertEquals(epnp.get_previous_month(test_date), date(2012, 6, 1))
+        self.assertEquals(epnp.get_previous_day(test_date), date(2012, 6, 2))
         self.assertEquals(epnp.get_next_month(test_date), None)
         self.assertEquals(epnp.get_next_day(test_date), None)
 
@@ -287,7 +287,6 @@ class MixinTestCase(TestCase):
         self.assertRaises(ImproperlyConfigured,
                           instance.get_queryset)
 
-    @skipIfCustomUser
     def test_prefetch_categories_authors_mixin(self):
         author = Author.objects.create_user(username='author',
                                             email='author@example.com')

@@ -5,8 +5,7 @@ from django.conf import settings
 
 from zinnia.tests.entry import EntryTestCase
 from zinnia.tests.entry import EntryHtmlContentTestCase
-from zinnia.tests.entry import EntryAbsoluteUrlTestCase
-from zinnia.tests.models_bases import LoadModelClassTestCase
+from zinnia.tests.entry import EntryGetBaseModelTestCase
 from zinnia.tests.signals import SignalsTestCase
 from zinnia.tests.category import CategoryTestCase
 from zinnia.tests.admin import EntryAdminTestCase
@@ -32,7 +31,6 @@ from zinnia.tests.author import AuthorTestCase
 from zinnia.tests.admin_filters import AuthorListFilterTestCase
 from zinnia.tests.admin_filters import CategoryListFilterTestCase
 from zinnia.tests.flags import FlagsTestCase
-from zinnia.tests.translated_urls import TranslatedURLsTestCase
 from zinnia.signals import disconnect_entry_signals
 from zinnia.signals import disconnect_discussion_signals
 
@@ -43,7 +41,7 @@ def suite():
     loader = TestLoader()
 
     test_cases = (ManagersTestCase, EntryTestCase,
-                  LoadModelClassTestCase, SignalsTestCase,
+                  EntryGetBaseModelTestCase, SignalsTestCase,
                   EntryHtmlContentTestCase, CategoryTestCase,
                   ZinniaViewsTestCase, ZinniaFeedsTestCase,
                   ZinniaSitemapsTestCase, ComparisonTestCase,
@@ -54,8 +52,7 @@ def suite():
                   EntryAdminTestCase, CategoryAdminTestCase,
                   MixinTestCase, LongEnoughTestCase,
                   AuthorTestCase, FlagsTestCase,
-                  AuthorListFilterTestCase, CategoryListFilterTestCase,
-                  TranslatedURLsTestCase, EntryAbsoluteUrlTestCase)
+                  AuthorListFilterTestCase, CategoryListFilterTestCase)
 
     if 'django_xmlrpc' in settings.INSTALLED_APPS:
         test_cases += (PingBackTestCase, MetaWeblogTestCase)

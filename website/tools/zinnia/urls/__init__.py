@@ -8,15 +8,14 @@ from django.utils.translation import ugettext_lazy
 from zinnia.settings import TRANSLATED_URLS
 
 
-def i18n_url(url, translate=TRANSLATED_URLS):
+def _(url_to_translate):
     """
-    Translate or not an URL part.
+    Translate or not the default Zinnia's URLs.
     """
-    if translate:
-        return ugettext_lazy(url)
-    return url
+    if TRANSLATED_URLS:
+        return ugettext_lazy(url_to_translate)
+    return url_to_translate
 
-_ = i18n_url
 
 urlpatterns = patterns(
     '',

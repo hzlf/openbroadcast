@@ -1,5 +1,5 @@
 """Comment flags for Zinnia"""
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.utils.functional import memoize
 
 from zinnia.settings import COMMENT_FLAG_USER_ID
@@ -11,7 +11,6 @@ user_flagger_ = {}
 
 
 def _get_user_flagger():
-    User = get_user_model()
     try:
         user = User.objects.get(pk=COMMENT_FLAG_USER_ID)
     except User.DoesNotExist:

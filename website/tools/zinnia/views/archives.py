@@ -18,6 +18,9 @@ from zinnia.views.mixins.templates import \
     EntryQuerysetArchiveTemplateResponseMixin
 from zinnia.views.mixins.templates import \
     EntryQuerysetArchiveTodayTemplateResponseMixin
+from zinnia.views.mixins.tz_fixes import EntryDayTZFix
+from zinnia.views.mixins.tz_fixes import EntryWeekTZFix
+from zinnia.views.mixins.tz_fixes import EntryMonthTZFix
 
 
 class EntryArchiveMixin(ArchiveMixin,
@@ -55,14 +58,14 @@ class EntryYear(EntryArchiveMixin, BaseYearArchiveView):
     template_name_suffix = '_archive_year'
 
 
-class EntryMonth(EntryArchiveMixin, BaseMonthArchiveView):
+class EntryMonth(EntryMonthTZFix, EntryArchiveMixin, BaseMonthArchiveView):
     """
     View returning the archives for a month.
     """
     template_name_suffix = '_archive_month'
 
 
-class EntryWeek(EntryArchiveMixin, BaseWeekArchiveView):
+class EntryWeek(EntryWeekTZFix, EntryArchiveMixin, BaseWeekArchiveView):
     """
     View returning the archive for a week.
     """
@@ -80,14 +83,14 @@ class EntryWeek(EntryArchiveMixin, BaseWeekArchiveView):
         return self.date_list, self.object_list, extra_context
 
 
-class EntryDay(EntryArchiveMixin, BaseDayArchiveView):
+class EntryDay(EntryDayTZFix, EntryArchiveMixin, BaseDayArchiveView):
     """
     View returning the archive for a day.
     """
     template_name_suffix = '_archive_day'
 
 
-class EntryToday(EntryArchiveMixin, BaseTodayArchiveView):
+class EntryToday(EntryDayTZFix, EntryArchiveMixin, BaseTodayArchiveView):
     """
     View returning the archive for the current day.
     """
@@ -99,8 +102,6 @@ class EntryToday(EntryArchiveMixin, BaseTodayArchiveView):
         And defines self.year/month/day for
         EntryQuerysetArchiveTemplateResponseMixin.
         """
-        today = timezone.now()
-        if timezone.is_aware(today):
-            today = timezone.localtime(today)
-        self.year, self.month, self.day = today.date().isoformat().split('-')
+        today = timezone.localtime(timezone.now()).date()
+        self.year, self.month, self.day = today.isoformat().split('-')
         return self._get_dated_items(today)

@@ -1,9 +1,7 @@
 """Views for Zinnia trackback"""
-from django.utils import timezone
 from django.contrib import comments
 from django.contrib.sites.models import Site
 from django.shortcuts import get_object_or_404
-from django.views.generic.base import TemplateView
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.http import HttpResponsePermanentRedirect
@@ -13,11 +11,12 @@ from zinnia.models.entry import Entry
 from zinnia.flags import TRACKBACK
 from zinnia.flags import get_user_flagger
 from zinnia.signals import trackback_was_posted
+from zinnia.views.mixins.mimetypes import TemplateMimeTypeView
 
 
-class EntryTrackback(TemplateView):
+class EntryTrackback(TemplateMimeTypeView):
     """View for handling trackbacks on the entries"""
-    content_type = 'text/xml'
+    mimetype = 'text/xml'
     template_name = 'zinnia/entry_trackback.xml'
 
     @method_decorator(csrf_exempt)
@@ -57,8 +56,7 @@ class EntryTrackback(TemplateView):
         trackback, created = comments.get_model().objects.get_or_create(
             content_type=ContentType.objects.get_for_model(Entry),
             object_pk=entry.pk, site=site, user_url=url,
-            user_name=blog_name, defaults={'comment': excerpt,
-                                           'submit_date': timezone.now()})
+            user_name=blog_name, defaults={'comment': excerpt})
         if created:
             trackback.flags.create(user=get_user_flagger(), flag=TRACKBACK)
             trackback_was_posted.send(trackback.__class__,
