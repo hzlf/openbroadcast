@@ -30,7 +30,8 @@ Definition instances
 """
 def openbroadcast_ch():
     env.site_id = 'openbroadcast.ch'
-    env.hosts = ['node05.daj.anorg.net']
+    env.hosts = ['node05.scd.hazelfire.com']
+    #env.hosts = ['node05.daj.anorg.net']
     #env.git_url = 'git://github.com/hzlf/openbroadcast.git'
     env.git_url = 'git@lab.hazelfire.com:hazelfire/obp/openbroadcast-ch.git'
     env.git_branch = 'development'
@@ -60,6 +61,14 @@ def deploy():
     """
     """
     with cd(env.path):  
+        
+        """
+        create project directory
+        """
+        try:
+            run('mkdir %s' % env.path)
+        except Exception, e:
+            pass
         
         """
         create directory to save the local_config
@@ -109,15 +118,17 @@ def deploy():
         virtualenv and requirements
         """
         try:
-            pass
+            run('virtualenv /srv/%s' % env.site_id)
             # run('virtualenv --no-site-packages /srv/%s' % env.site_id)
+
         except Exception, e:
             pass
 
             
             
         if not env.skip_requirements:
-            run('pip -E /srv/%s install -r %s' % (env.site_id, 'src/website/requirements/requirements.txt'))
+            #run('pip -E /srv/%s install -r %s' % (env.site_id, 'src/website/requirements/requirements.txt'))
+            run('/srv/%s/bin/pip install -r  %s --allow-all-external' % (env.site_id, 'src/website/requirements/requirements.txt'))
         
             
         """

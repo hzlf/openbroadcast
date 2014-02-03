@@ -117,8 +117,8 @@ django-countries==1.2
 
 # blog
 -e git+git://github.com/newvem/pytz.git#egg=pytz
-cmsplugin_zinnia
--e git+git://github.com/hzlf/django-blog-zinnia.git@v0.12.3#egg=django-zinnia
+# cmsplugin_zinnia
+# -e git+git://github.com/hzlf/django-blog-zinnia.git@v0.12.3#egg=django-zinnia
 
 
 # add-ons
@@ -129,9 +129,8 @@ django-notification
 django-sendfile>=0.3.0
 # django-multilingual-ng>=0.1.21
 
--e git://github.com/ojii/django-multilingual-ng.git#egg=django-multilingual-ng
-
--e git+git://github.com/enginous/mutagen.git#egg=Mutagen
+#-e git://github.com/ojii/django-multilingual-ng.git#egg=django-multilingual-ng
+#-e git+git://github.com/enginous/mutagen.git#egg=Mutagen
 
 # CMS related & plugins
 markdown
