@@ -7,6 +7,11 @@ SETTINGS = getattr(settings, 'PUSHER_SETTINGS', {})
 def get_models():
 
     models = {}
-    for model in SETTINGS.get('MODELS', None):
-        models[model.lower()] = get_model(*model.split('.'))
+
+    try:
+        for model in SETTINGS.get('MODELS', None):
+            models[model.lower()] = get_model(*model.split('.'))
+    except Exception, e:
+        print e
+
     return models

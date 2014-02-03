@@ -401,7 +401,7 @@ INSTALLED_APPS = (
 
     'reversion',
 
-    'clear_cache',
+    #'clear_cache',
 
     'actstream',
 
