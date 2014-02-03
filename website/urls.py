@@ -48,11 +48,7 @@ urlpatterns = patterns('',
     url(r'uploader/', include('multiuploader.urls')),
     
     (r'^dev/', include('dev.urls')), # shop main urls
-    
-    #url(r'^private_files/', include('private_files.urls')),
-    #url(r'^activity/', include('actstream.urls')),
-    url(r"^ratings/", include("agon_ratings.urls")),
-    
+
     url(r"^vote/", include('arating.urls')),
     url(r'^ac_tagging/', include('ac_tagging.urls')),
     #url(r'^ac_lookup/lookups/', include('ajax_select.urls')),

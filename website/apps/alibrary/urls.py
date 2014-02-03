@@ -6,9 +6,7 @@ from django.views.generic.simple import direct_to_template
 # app imports
 from alibrary.models import Artist
 
-# rest
-from djangorestframework.views import ListOrCreateModelView, InstanceModelView, ListModelView, InstanceModelViewRO
-from alibrary.resources import *
+# restfrom alibrary.resources import *
 
 urlpatterns = patterns('',
                        
@@ -43,16 +41,8 @@ urlpatterns = patterns('',
 
     
     # REST-API urls
-    url(r'^api/$', direct_to_template, {'template': 'alibrary/api/index.html'}),
+    # url(r'^api/$', direct_to_template, {'template': 'alibrary/api/index.html'}),
 
-    url(r'^api/releases/$',          ListModelView.as_view(resource=ReleaseResource), name='release-resource-root'),
-    url(r'^api/releases/(?P<uuid>[-\w]+)/$', InstanceModelViewRO.as_view(resource=ReleaseResource), name='release-resource-detail'),
-
-    url(r'^api/tracks/$',          ListModelView.as_view(resource=MediaResource), name='media-resource-root'),
-    url(r'^api/tracks/(?P<uuid>[-\w]+)/$', InstanceModelViewRO.as_view(resource=MediaResource), name='media-resource-detail'),
-    
-    url(r'^api/artists/$',          ListModelView.as_view(resource=ArtistResource), name='artist-resource-root'),
-    url(r'^api/artists/(?P<uuid>[-\w]+)/$', InstanceModelViewRO.as_view(resource=ArtistResource), name='artist-resource-detail'),
     
     
 )

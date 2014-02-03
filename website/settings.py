@@ -456,7 +456,7 @@ INSTALLED_APPS = (
 
 
     # rest & API
-    'djangorestframework',
+    #'djangorestframework', # refactored to tastypie
 
     # stats
     'atracker',
@@ -492,7 +492,6 @@ INSTALLED_APPS = (
     'crispy_forms',
     'floppyforms',
     #'djangoratings',
-    #'agon_ratings',
     'django_mobile',
 
 
@@ -1050,7 +1049,6 @@ WYM_CLASSES = ",\n".join([
 ACTSTREAM_SETTINGS = {
     'MODELS': ('auth.user', 'auth.group', 'alibrary.release', 'alibrary.playlist', 'alibrary.artist', 'alibrary.media', 'alibrary.label',
                'zinnia.entry', 'abcast.emission', 'abcast.station'),
-    #'MANAGER': 'myapp.streams.MyActionManager',
     'FETCH_RELATIONS': True,
     'USE_PREFETCH': True,
     'USE_JSONFIELD': True,
