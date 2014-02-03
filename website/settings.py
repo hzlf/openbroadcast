@@ -412,8 +412,7 @@ INSTALLED_APPS = (
 
 
     # temp
-
-    'eav',
+    #'eav',
 
     # dajax
     'dajaxice',

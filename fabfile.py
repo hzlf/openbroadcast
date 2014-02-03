@@ -34,7 +34,8 @@ def openbroadcast_ch():
     #env.hosts = ['node05.daj.anorg.net']
     #env.git_url = 'git://github.com/hzlf/openbroadcast.git'
     env.git_url = 'git@lab.hazelfire.com:hazelfire/obp/openbroadcast-ch.git'
-    env.git_branch = 'development'
+    #env.git_branch = 'development'
+    env.git_branch = 'cleanup'
     env.path = '/var/www/openbroadcast.ch'
     env.storage = '/storage/www_data/openbroadcast.ch'
     env.user = 'root'
