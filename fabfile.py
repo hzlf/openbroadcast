@@ -120,13 +120,28 @@ def deploy():
         """
         try:
             run('virtualenv /srv/%s' % env.site_id)
-            # run('virtualenv --no-site-packages /srv/%s' % env.site_id)
+        except Exception, e:
+            pass
 
+        """
+        hacks
+        """
+        try:
+            # pip - version < 1.5 needed to allow external modules
+            run('/srv/%s/bin/pip install pip==1.4.1' % (env.site_id))
+        except Exception, e:
+            pass
+
+        try:
+            # pre-install numpy, does not work through requirements
+            run('/srv/%s/bin/pip install numpy' % (env.site_id))
         except Exception, e:
             pass
 
             
-            
+        """
+        install project requirements
+        """
         if not env.skip_requirements:
             #run('pip -E /srv/%s install -r %s' % (env.site_id, 'src/website/requirements/requirements.txt'))
             run('/srv/%s/bin/pip install -r  %s --allow-all-external' % (env.site_id, 'src/website/requirements/requirements.txt'))
@@ -212,14 +227,14 @@ def deploy():
             # restart gunicorn webserver
             run('supervisorctl restart %s' % env.site_id)
             # restart gunicorn celeryd-worker
-            run('supervisorctl restart worker.celery.%s' % env.site_id)
-            run('supervisorctl restart worker.import.%s' % env.site_id)
-            run('supervisorctl restart worker.convert.%s' % env.site_id)
+            #run('supervisorctl restart worker.celery.%s' % env.site_id)
+            #run('supervisorctl restart worker.import.%s' % env.site_id)
+            #run('supervisorctl restart worker.convert.%s' % env.site_id)
             # restart other supervisor services
-            run('supervisorctl restart echoprint.%s' % env.site_id)
-            run('supervisorctl restart ttserver.%s' % env.site_id)
-            run('supervisorctl restart pushy.%s' % env.site_id)
-            
+            #run('supervisorctl restart echoprint.%s' % env.site_id)
+            #run('supervisorctl restart ttserver.%s' % env.site_id)
+            #run('supervisorctl restart pushy.%s' % env.site_id)
+            # present current status
             run('supervisorctl status | grep %s' % env.site_id)
         except Exception, e:
             pass

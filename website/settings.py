@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.join(PROJECT_DIR, 'tools'))
 # subdirectory for plugins
 sys.path.insert(0, os.path.join(PROJECT_DIR, 'cmsplugins'))
 # subdirectory for shop
-sys.path.insert(0, os.path.join(PROJECT_DIR, 'shop'))
+sys.path.insert(0, os.path.join(PROJECT_DIR, 'ecommerce'))
 # subdirectory for legacy tools
 sys.path.insert(0, os.path.join(PROJECT_DIR, 'legacy'))
 
@@ -518,7 +518,6 @@ INSTALLED_APPS = (
     'cmsplugin_zinnia', # somehow not working.. ivestigate!!
 
     'bcmon',
-    #'secretballot',
     'genericrelations',
     'ashop',
     'ashop.addressmodel',
