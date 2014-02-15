@@ -6,7 +6,7 @@ import os
 
 # glogal env
 env.warn_only = True
-env.supervisor = '/etc/supervisord'
+env.supervisor = '/etc/supervisor/conf.d'
 env.nginx = '/etc/nginx/sites-enabled'
 
 env.skip_requirements = False

@@ -1,5 +1,5 @@
 {% extends "layout_base.html" %}
-{% load spurl cache i18n truncate dajaxice_templatetags sekizai_tags %}
+{% load spurl adv_cache i18n truncate dajaxice_templatetags sekizai_tags webdesign %}
 
 {% block heading %}
     <!-- view specific scripts -->
@@ -85,9 +85,9 @@
 {% endblock %}
 
 {% block tagcloud %}
-
+    {% cache 0 "tagcloud" request.get_full_path %}
     {% include "alibrary/element/_tagcloud.html" %}
-
+    {% endcache %}
 {% endblock %}
 
 
@@ -176,7 +176,11 @@
 
                 {# switching list styles #}
                 {% if list_style == "s" %}
+
+                    {% cache 0 "release_list_item_s" item.pk item.updated %}
                     {% include "alibrary/release/list_item_s.html" %}
+                    {% endcache %}
+
                 {% endif %}
 
                 {% if list_style == "m" %}
@@ -184,7 +188,9 @@
                 {% endif %}
 
                 {% if list_style == "l" %}
+                    {% cache 0 "release_list_item_l" item.pk item.updated %}
                     {% include "alibrary/release/list_item_l.html" %}
+                    {% endcache %}
                 {% endif %}
 
             {% endfor %}

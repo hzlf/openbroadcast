@@ -389,6 +389,8 @@ INSTALLED_APPS = (
     'datatrans',
     'genericadmin',
 
+    'adv_cache_tag',
+
 
     # dajax
     'dajaxice',
