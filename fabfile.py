@@ -40,6 +40,30 @@ def openbroadcast_ch():
     env.storage = '/storage/www_data/openbroadcast.ch'
     env.user = 'root'
 
+def stage_openbroadcast_ch():
+    env.site_id = 'openbroadcast.ch'
+    env.hosts = ['172.20.10.204']
+    #env.hosts = ['node05.daj.anorg.net']
+    #env.git_url = 'git://github.com/hzlf/openbroadcast.git'
+    env.git_url = 'git@lab.hazelfire.com:hazelfire/obp/openbroadcast-ch.git'
+    #env.git_branch = 'development'
+    env.git_branch = 'cleanup'
+    env.path = '/var/www/openbroadcast.ch'
+    env.storage = '/nas/storage/stage.openbroadcast.ch'
+    env.user = 'root'
+
+def prod_openbroadcast_ch():
+    env.site_id = 'openbroadcast.ch'
+    env.hosts = ['172.20.10.205']
+    #env.hosts = ['node05.daj.anorg.net']
+    #env.git_url = 'git://github.com/hzlf/openbroadcast.git'
+    env.git_url = 'git@lab.hazelfire.com:hazelfire/obp/openbroadcast-ch.git'
+    #env.git_branch = 'development'
+    env.git_branch = 'cleanup'
+    env.path = '/var/www/openbroadcast.ch'
+    env.storage = '/nas/storage/prod.openbroadcast.ch'
+    env.user = 'root'
+
     
     
 def build_ci():
@@ -67,7 +91,7 @@ def deploy():
         create project directory
         """
         try:
-            run('mkdir %s' % env.path)
+            run('mkdir -p %s' % env.path)
         except Exception, e:
             pass
         
@@ -153,6 +177,7 @@ def deploy():
         try:
             run('ln -s %s/media %s/src/website/media' % (env.storage, env.path))
             run('ln -s %s/smedia %s/src/website/smedia' % (env.storage, env.path))
+            run('ln -s %s/static %s/src/website/static' % (env.storage, env.path))
         except Exception, e:
             pass
             

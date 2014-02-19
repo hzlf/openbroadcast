@@ -38,13 +38,35 @@ And finally THE APP!
 
     su pypo
     cd ~/src/
-    git clone git@lab.hazelfire.com:hazelfire/obp/pypo.git
+    # git clone git@lab.hazelfire.com:hazelfire/obp/pypo.git # in case you have repo-access
     git clone https://github.com/hzlf/pypo.git
     cd pypo/pypo/
 
     virtualenv env
     source env/bin/activate
     pip install -r requirements.txt
+
+
+Again, as root
+
+.. code-block:: bash
+
+    mkdir -p /var/log/pypo/ls/
+    chown -R pypo:pypo /var/log/pypo
+
+    # run the scripts [testing]
+
+    cd /home/pypo/src/pypo/pypo/liquidsoap_scripts
+    sudo -u pypo /usr/local/bin/liquidsoap --verbose -f ls_script.liq
+
+    cd /home/pypo/src/pypo/pypo
+    sudo -u pypo env/bin/python pypo.py
+
+
+    # add to supervisor (symlink, or copy if you feel safer...)
+    ln -s /home/pypo/src/pypo/conf/* /etc/supervisor/conf.d/
+    supervisorctl reread
+    supervisorctl update
 
 
 

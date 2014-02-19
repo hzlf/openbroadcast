@@ -15,6 +15,7 @@ Contents:
     web/index
     services/index
 
+    setup/server
 
 
 

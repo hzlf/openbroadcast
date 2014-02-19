@@ -13,13 +13,13 @@ logger = logging.getLogger(__name__)
 pool = Pool(processes=10)
 
 def pushy_publish(channel, key, message):
-    rs = redis.StrictRedis()
+    rs = redis.StrictRedis(host=pushy_settings.get_redis_host())
     time.sleep(0.005)
     rs.publish('%s%s' % (channel, key), json.dumps(message))
     
 
 def pushy_post_save(sender, **kwargs):
-    rs = redis.StrictRedis()
+    rs = redis.StrictRedis(host=pushy_settings.get_redis_host())
     obj = kwargs['instance']
     created = kwargs['created']
 
@@ -48,7 +48,7 @@ def pushy_post_save(sender, **kwargs):
 
 
 def pushy_post_delete(sender, **kwargs):
-    rs = redis.StrictRedis()
+    rs = redis.StrictRedis(host=pushy_settings.get_redis_host())
     obj = kwargs['instance']
 
     message = {

@@ -6,6 +6,9 @@ SETTINGS = getattr(settings, 'PUSHY_SETTINGS', {})
 def get_channel():
     return '%s' % SETTINGS.get('CHANNEL_PREFIX', 'pushy_')
 
+def get_redis_host():
+    return '%s' % SETTINGS.get('REDIS_HOST', '127.0.0.1')
+
 def get_models():
     
     models = {}

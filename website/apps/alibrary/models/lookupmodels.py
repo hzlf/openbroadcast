@@ -1,4 +1,5 @@
 # python
+import re
 
 # django
 from urlparse import urlparse
@@ -209,6 +210,23 @@ class APILookup(models.Model):
             if k == 'namevariations':
                 res['namevariations'] = ', '.join(d_artist.data[k])
 
+
+            if k == 'name':
+
+                value = d_artist.data[k]
+                # remove numbers from eg: My Artist (3)
+                p = ' \([0-9]+\)'
+                value = re.sub(p, '', value)
+
+                # try to remap ", The"
+                if value[-5:] == ', The':
+                    value = 'The %s' % value[:-5]
+                if value[-4:] == ',The':
+                    value = 'The %s' % value[:-4]
+
+                res[k] = value
+
+
             # image
             if k == 'images':
                 image = None
@@ -233,7 +251,8 @@ class APILookup(models.Model):
                         pass
 
                 try:
-                    res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', 'dgs.anorg.net')
+                    #res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', 'dgs.anorg.net')
+                    res['remote_image'] = res['main_image'] = image
                 except:
                     res['remote_image'] = res['main_image'] = None
                 #res['remote_image'] = 'http://dgs.anorg.net/image/R-5081-1147456810.jpeg'
@@ -385,7 +404,8 @@ class APILookup(models.Model):
                         pass
 
                 try:
-                    res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', 'dgs.anorg.net')
+                    #res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', 'dgs.anorg.net')
+                    res['remote_image'] = res['main_image'] = image
                 except:
                     res['remote_image'] = res['main_image'] = None
                 #res['remote_image'] = 'http://dgs.anorg.net/image/R-5081-1147456810.jpeg'
@@ -483,7 +503,8 @@ class APILookup(models.Model):
                         pass
 
                 try:
-                    res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', 'dgs.anorg.net')
+                    #res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', 'dgs.anorg.net')
+                    res['remote_image'] = res['main_image'] = image
                 except:
                     res['remote_image'] = res['main_image'] = None
 

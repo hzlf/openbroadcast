@@ -177,7 +177,7 @@
                 {# switching list styles #}
                 {% if list_style == "s" %}
 
-                    {% cache 0 "release_list_item_s" item.pk item.updated %}
+                    {% cache 0 "release_list_item_s" item.pk item.updated user.is_authenticated %}
                     {% include "alibrary/release/list_item_s.html" %}
                     {% endcache %}
 
@@ -188,7 +188,7 @@
                 {% endif %}
 
                 {% if list_style == "l" %}
-                    {% cache 0 "release_list_item_l" item.pk item.updated %}
+                    {% cache 0 "release_list_item_l" item.pk item.updated user.is_authenticated %}
                     {% include "alibrary/release/list_item_l.html" %}
                     {% endcache %}
                 {% endif %}
