@@ -1,0 +1,79 @@
+Messaging Server(s)
+===================
+
+
+Main Messaging Server
+-----------------------
+
+ - node03
+
+Software in use:
+
+ - redis
+ - rabbit-mq
+ - EP database
+
+
+Echoprint server installation
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+    aptitude install default-jre tokyotyrant
+
+    cd
+    cd src
+    git clone https://github.com/echonest/echoprint-server.git
+    cd echoprint-server
+
+
+    mkdir -p /srv/openbroadcast.ch/service
+    cp -Rp solr/solr /srv/openbroadcast.ch/service/
+    cd /srv/openbroadcast.ch/service/solr
+
+    # solr
+    java -Dsolr.solr.home=/srv/openbroadcast.ch/service/solr/solr/ -Djava.awt.headless=true -jar start.jar
+
+    # tokyo-tyrant
+    mkdir /var/ttserver/
+    /usr/sbin/ttserver -port 1978 -thnum 4 -pid /var/run/ttserver.pid /var/ttserver/prod_casket.tch#bnum=1000000
+
+
+
+
+/etc/supervisor/conf.d/tt.prod.openbroadcast.ch.conf
+:::::::::::::::::::::::::::::::
+
+.. code-block:: bash
+
+    [program:tt.prod.openbroadcast.ch.conf]
+    directory=/root/
+    command=/usr/sbin/ttserver -port 1978 -thnum 4 -pid /var/run/ttserver.pid /var/ttserver/prod_casket.tch#bnum=1000000
+    user=root
+    autostart=true
+    autorestart=true
+    redirect_stderr=True
+    environment=HOME='/root/'
+    stdout_logfile_maxbytes=10MB
+    stdout_logfile_backups=5
+    stdout_logfile=/var/log/supervisor/tt.prod.openbroadcast.ch
+
+
+
+/etc/supervisor/conf.d/solr.prod.openbroadcast.ch.conf
+:::::::::::::::::::::::::::::::
+
+.. code-block:: bash
+
+    [program:solr.prod.openbroadcast.ch.conf]
+    directory=/srv/openbroadcast.ch/service/solr
+    command=/usr/bin/java -Dsolr.solr.home=/srv/openbroadcast.ch/service/solr/solr/ -Djava.awt.headless=true -jar start.jar
+    user=root
+    autostart=true
+    autorestart=true
+    redirect_stderr=True
+    environment=HOME='/root/'
+    stdout_logfile_maxbytes=10MB
+    stdout_logfile_backups=5
+    stdout_logfile=/var/log/supervisor/solr.prod.openbroadcast.ch
+

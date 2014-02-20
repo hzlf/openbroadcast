@@ -21,6 +21,11 @@ import datetime
 import solr
 import pytyrant
 
+from django.conf import settings
+
+SOLR_SERVER = getattr(settings, 'SOLR_SERVER', {'host': 'localhost', 'port': 8502})
+TT_SERVER = getattr(settings, 'TT_SERVER', {'host': 'localhost', 'port': 1978})
+
 
 now = datetime.datetime.utcnow()
 IMPORTDATE = now.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -30,10 +35,14 @@ try:
 except ImportError:
     import simplejson as json
 
-_fp_solr = solr.SolrConnectionPool("http://localhost:8502/solr/fp")
 _hexpoch = int(time.time() * 1000)
 logger = logging.getLogger(__name__)
-_tyrant_address = ['localhost', 1978]
+
+#_fp_solr = solr.SolrConnectionPool("http://localhost:8502/solr/fp")
+#_tyrant_address = ['localhost', 1978]
+
+_fp_solr = solr.SolrConnectionPool('http://%s:%s/solr/fp' % (SOLR_SERVER['host'], SOLR_SERVER['port']))
+_tyrant_address = [TT_SERVER['host'], TT_SERVER['port']]
 _tyrant = None
 
 class Response(object):

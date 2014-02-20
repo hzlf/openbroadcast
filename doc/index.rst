@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to obp's documentation!
+Open Broadcast documentation
 ===============================
 
 Contents:
@@ -15,7 +15,10 @@ Contents:
     web/index
     services/index
 
-    setup/server
+    setup/server/index
+    setup/server/overview
+
+    setup/website/installation
 
 
 

@@ -1,5 +1,6 @@
-from actstream.models import Follow
-from actstream.models import user_stream as ac_user_stream
+# TODO: these two lines kill everything?
+#from actstream.models import Follow
+#from actstream.models import user_stream as ac_user_stream
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.template import Variable, Library, Node, TemplateSyntaxError
