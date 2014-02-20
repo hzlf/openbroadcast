@@ -1,6 +1,6 @@
 from django.core.cache import cache
 from lib.icecast.api import IcecastAPI
-from pushy.util import pushy_custom
+
 # logging
 import logging
 logger = logging.getLogger(__name__)
@@ -21,6 +21,7 @@ def start_play(item, channel=None, user=None):
     """
     Broadcast to pushy clients
     """
+    from pushy.util import pushy_custom
     pushy_custom('%son-air/' % channel.get_api_url())
 
     """

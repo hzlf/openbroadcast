@@ -12,6 +12,7 @@ register = Library()
 
 
 def _is_following_helper(context, actor):
+    from actstream.models import Follow
     return Follow.objects.is_following(context.get('user'), actor)
 
 
@@ -23,6 +24,7 @@ class DisplayActivityFollowUrl(Node):
     def render(self, context):
         actor_instance = self.actor.resolve(context)
         content_type = ContentType.objects.get_for_model(actor_instance).pk
+        from actstream.models import Follow
         if Follow.objects.is_following(context.get('user'), actor_instance):
             return reverse('actstream_unfollow', kwargs={
                 'content_type_id': content_type, 'object_id': actor_instance.pk})
@@ -133,6 +135,7 @@ def is_following(user, actor):
             You are already following {{ another_user }}
         {% endif %}
     """
+    from actstream.models import Follow
     return Follow.objects.is_following(user, actor)
 
 
@@ -218,11 +221,13 @@ def backwards_compatibility_check(template_name):
 
 @register.inclusion_tag('actstream/templatetags/user_stream.html', takes_context=True)
 def user_stream(context, user):
+    from actstream.models import user_stream as ac_user_stream
     stream = ac_user_stream(user)[0:15]
     context.update({'stream': stream})
     return context
 
 @register.filter
 def user_stream_count(user):
-   return ac_user_stream(user).count()
+    from actstream.models import user_stream as ac_user_stream
+    return ac_user_stream(user).count()
 

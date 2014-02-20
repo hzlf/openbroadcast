@@ -1,9 +1,9 @@
 App Server(s)
-===================
+#############
 
 
 Main Application Server
------------------------
+*********************
 
  - node04: stage.openbroadcast.ch
  - node05: prod.openbroadcast.ch
@@ -13,7 +13,7 @@ both share the same setup
 
 
 Chromaprint / AcoustID
-~~~~~~~~~~~~~~~~~~~~~~
+==========
 
 .. code-block:: bash
 
@@ -21,7 +21,7 @@ Chromaprint / AcoustID
 
 
 Echoprint installation
-~~~~~~~~~~~~~~~~~~~~~~
+==========
 
 .. code-block:: bash
 
@@ -39,7 +39,7 @@ Echoprint installation
 
 
 Echoprint server installation
-~~~~~~~~~~~~~~~~~~~~~~
+==========
 
 Only used on stage server. Echoprint server for production is located on node03.
 
@@ -66,3 +66,20 @@ Only used on stage server. Echoprint server for production is located on node03.
 
 
 
+Audiotools installation
+==========
+
+repository: https://github.com/hzlf/python-audio-tools
+
+
+===============  ===============  ===============
+Format           Encoder          Decoder
+===============  ===============  ===============
+AIFF             Python           Python
+MP3              mpg123           twolame
+FLAC             Python           Python
+Ogg FLAC         Python           flac
+Ogg Vorbis       oggdec           oggdec
+===============  ===============  ===============
+
+aptitude install mpg123 twolame lame flac vorbis-tools

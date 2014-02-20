@@ -101,7 +101,7 @@ MIDDLEWARE_CLASSES = (
 
     'django.contrib.messages.middleware.MessageMiddleware',
     #'pagination.middleware.PaginationMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
     # cms
     'cms.middleware.multilingual.MultilingualURLMiddleware',
     'cms.middleware.page.CurrentPageMiddleware',
@@ -366,7 +366,7 @@ INSTALLED_APPS = (
     #'notification',
     'notifications',
 
-    'debug_toolbar',
+    #'debug_toolbar',
     'mailer',
     'djcelery',
 
@@ -390,7 +390,7 @@ INSTALLED_APPS = (
     'genericadmin',
 
     'adv_cache_tag',
-    'debug_toolbar_memcache',
+    #'debug_toolbar_memcache',
 
 
     # dajax

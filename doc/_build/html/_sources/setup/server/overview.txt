@@ -80,47 +80,15 @@ messaging & cache server
  - internal: 172.20.10.203
  - external: 95.211.179.44
 
+See :doc:`messaging`
 
-cache
-*****************
+:guilabel:`&Cancel`
 
-aptitude install memcached
+:kbd:`Control-x Control-f`
 
+:mailheader:`Content-Type`
 
-redis
-*************************
-
-.. code-block:: bash
-
-    wget http://download.redis.io/releases/redis-2.8.5.tar.gz
-    tar xzf redis-2.8.5.tar.gz
-    cd redis-2.8.5
-    make
-    make install
-
-    nano /etc/redis/redis.conf # see etc/
-    nano /etc/supervisor/conf.d/redis.conf # see etc/
-
-    supervisorctl reread
-    supervisorctl update
-    supervisorctl status
-
-
-rabbit-mq
-*************************
-
-see: https://www.rabbitmq.com/install-debian.html
-
-.. code-block:: bash
-
-    rabbitmq-plugins enable rabbitmq_management
-
-    rabbitmqctl add_user root <password>
-    rabbitmqctl set_user_tags root administrator
-
-
-http://172.20.10.203:15672/ # needs vpn connection
-
+:menuselection:`Start --> Programs`
 
 
 
@@ -134,6 +102,8 @@ development app-server
  - internal: 172.20.10.204
  - external: 95.211.179.45
 
+See :doc:`appserver`
+
 
 node05
 ::::::
@@ -142,6 +112,8 @@ app-server
 
  - internal: 172.20.10.205
  - external: 95.211.179.46
+
+See :doc:`appserver`
 
 
 node06

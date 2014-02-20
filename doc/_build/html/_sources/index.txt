@@ -16,7 +16,7 @@ Contents:
     services/index
 
     setup/server/index
-    setup/server/overview
+
 
     setup/website/installation
 

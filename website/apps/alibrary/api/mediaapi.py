@@ -69,6 +69,7 @@ class MediaResource(ModelResource):
                 waveform_image = bundle.obj.get_waveform_url()
 
         except:
+            waveform_image = None
             pass
 
         if not waveform_image:

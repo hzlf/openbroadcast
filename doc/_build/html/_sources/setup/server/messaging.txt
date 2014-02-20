@@ -1,9 +1,9 @@
 Messaging Server(s)
-===================
+###################
 
 
 Main Messaging Server
------------------------
+*********************
 
  - node03
 
@@ -14,12 +14,75 @@ Software in use:
  - EP database
 
 
-Echoprint server installation
-~~~~~~~~~~~~~~~~~~~~~~
+cache
+==========
+
+aptitude install memcached
 
 .. code-block:: bash
 
-    aptitude install default-jre tokyotyrant
+    nano /etc/memcached.conf # -l 172.20.10.203
+
+
+redis
+==========
+
+.. code-block:: bash
+
+    wget http://download.redis.io/releases/redis-2.8.5.tar.gz
+    tar xzf redis-2.8.5.tar.gz
+    cd redis-2.8.5
+    make
+    make install
+
+    nano /etc/redis/redis.conf # see etc/
+    nano /etc/supervisor/conf.d/redis.conf # see etc/
+
+    supervisorctl reread
+    supervisorctl update
+    supervisorctl status
+
+/etc/supervisor/conf.d/redis.conf
+---------------------------------
+
+.. code-block:: bash
+
+    [program:redis]
+    directory=/root/
+    command=/usr/local/bin/redis-server /etc/redis/redis.conf
+    user=root
+    autostart=true
+    autorestart=true
+    redirect_stderr=True
+    environment=HOME='/root/'
+    stdout_logfile_maxbytes=10MB
+    stdout_logfile_backups=5
+    stdout_logfile=/var/log/supervisor/redis.log
+
+
+rabbit-mq
+==========
+
+see: https://www.rabbitmq.com/install-debian.html
+
+.. code-block:: bash
+
+    rabbitmq-plugins enable rabbitmq_management
+
+    rabbitmqctl add_user root <password>
+    rabbitmqctl set_user_tags root administrator
+
+
+http://172.20.10.203:15672/ # needs vpn connection
+
+
+
+Echoprint server installation
+==========
+
+.. code-block:: bash
+
+    aptitude install default-jre tokyotyrant multitail
 
     cd
     cd src
@@ -42,7 +105,7 @@ Echoprint server installation
 
 
 /etc/supervisor/conf.d/tt.prod.openbroadcast.ch.conf
-:::::::::::::::::::::::::::::::
+---------------------------------
 
 .. code-block:: bash
 
@@ -61,7 +124,7 @@ Echoprint server installation
 
 
 /etc/supervisor/conf.d/solr.prod.openbroadcast.ch.conf
-:::::::::::::::::::::::::::::::
+---------------------------------
 
 .. code-block:: bash
 
@@ -77,3 +140,13 @@ Echoprint server installation
     stdout_logfile_backups=5
     stdout_logfile=/var/log/supervisor/solr.prod.openbroadcast.ch
 
+
+
+start it!
+---------------------------------
+
+.. code-block:: bash
+
+    supervisorctl reread
+    supervisorctl update
+    supervisorctl status
