@@ -10,4 +10,6 @@ Contents:
     overview
     appserver
     messaging
+    streaming
+    playout
 

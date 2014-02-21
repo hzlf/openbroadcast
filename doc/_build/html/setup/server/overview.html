@@ -53,14 +53,16 @@
 <li><a class="reference internal" href="#">2.1. Overview</a><ul>
 <li><a class="reference internal" href="#vz-node-post-install">2.1.1. vz node post-install</a></li>
 <li><a class="reference internal" href="#vz-nodes-post-clone">2.1.2. vz nodes post-clone</a></li>
-<li><a class="reference internal" href="#vz-nodes">2.1.3. vz nodes</a><ul>
-<li><a class="reference internal" href="#node01">2.1.3.1. node01</a></li>
-<li><a class="reference internal" href="#node02">2.1.3.2. node02</a></li>
-<li><a class="reference internal" href="#node03">2.1.3.3. node03</a></li>
-<li><a class="reference internal" href="#node04">2.1.3.4. node04</a></li>
-<li><a class="reference internal" href="#node05">2.1.3.5. node05</a></li>
-<li><a class="reference internal" href="#node06">2.1.3.6. node06</a></li>
-<li><a class="reference internal" href="#node07">2.1.3.7. node07</a></li>
+<li><a class="reference internal" href="#etc-hosts">2.1.3. /etc/hosts/</a></li>
+<li><a class="reference internal" href="#vz-host">2.1.4. vz host</a></li>
+<li><a class="reference internal" href="#vz-nodes">2.1.5. vz nodes</a><ul>
+<li><a class="reference internal" href="#node01-webhead">2.1.5.1. node01 - WebHead</a></li>
+<li><a class="reference internal" href="#node02-database">2.1.5.2. node02 - Database</a></li>
+<li><a class="reference internal" href="#node03-messaging">2.1.5.3. node03 - Messaging</a></li>
+<li><a class="reference internal" href="#node04-app-server-development">2.1.5.4. node04 - APP-Server Development</a></li>
+<li><a class="reference internal" href="#node05-app-server-production">2.1.5.5. node05 - APP-Server Production</a></li>
+<li><a class="reference internal" href="#node06-streaming-stream-generation">2.1.5.6. node06 - Streaming &amp; Stream-generation</a></li>
+<li><a class="reference internal" href="#node07-mirror-s">2.1.5.7. node07 - Mirror(s)</a></li>
 </ul>
 </li>
 </ul>
@@ -124,11 +126,39 @@ postmap /etc/postfix/transport
 </pre></div>
 </div>
 </div>
+<div class="section" id="etc-hosts">
+<h2>2.1.3. /etc/hosts/<a class="headerlink" href="#etc-hosts" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash"><div class="highlight"><pre><span class="c"># obp dev</span>
+95.211.179.43   stage.openbroadcast.ch
+172.20.10.27    vz.obp
+172.20.10.201   node01.obp
+172.20.10.202   node02.obp
+172.20.10.203   node03.obp
+172.20.10.204   node04.obp
+172.20.10.205   node05.obp
+172.20.10.206   node06.obp
+172.20.10.207   node07.obp
+172.20.10.208   node08.obp
+172.20.10.209   node09.obp
+172.20.10.210   node10.obp
+</pre></div>
+</div>
+</div>
+<div class="section" id="vz-host">
+<h2>2.1.4. vz host<a class="headerlink" href="#vz-host" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>internal: 172.20.10.27</li>
+<li>external: 95.211.179.27</li>
+<li>kvm: 95.211.179.28 / 172.20.10.28</li>
+</ul>
+</div></blockquote>
+<p><a class="reference external" href="https://172.20.10.27:8006/">https://172.20.10.27:8006/</a></p>
+</div>
 <div class="section" id="vz-nodes">
-<h2>2.1.3. vz nodes<a class="headerlink" href="#vz-nodes" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="node01">
-<h3>2.1.3.1. node01<a class="headerlink" href="#node01" title="Permalink to this headline">¶</a></h3>
-<p>webhead</p>
+<h2>2.1.5. vz nodes<a class="headerlink" href="#vz-nodes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="node01-webhead">
+<h3>2.1.5.1. node01 - WebHead<a class="headerlink" href="#node01-webhead" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>internal: 172.20.10.201</li>
@@ -139,9 +169,8 @@ postmap /etc/postfix/transport
 </pre></div>
 </div>
 </div>
-<div class="section" id="node02">
-<h3>2.1.3.2. node02<a class="headerlink" href="#node02" title="Permalink to this headline">¶</a></h3>
-<p>database-server</p>
+<div class="section" id="node02-database">
+<h3>2.1.5.2. node02 - Database<a class="headerlink" href="#node02-database" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>internal: 172.20.10.202</li>
@@ -157,8 +186,8 @@ apt-get install mariadb-server
 </pre></div>
 </div>
 </div>
-<div class="section" id="node03">
-<h3>2.1.3.3. node03<a class="headerlink" href="#node03" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="node03-messaging">
+<h3>2.1.5.3. node03 - Messaging<a class="headerlink" href="#node03-messaging" title="Permalink to this headline">¶</a></h3>
 <p>messaging &amp; cache server</p>
 <blockquote>
 <div><ul class="simple">
@@ -167,13 +196,9 @@ apt-get install mariadb-server
 </ul>
 </div></blockquote>
 <p>See <a class="reference internal" href="messaging.html"><em>Messaging Server(s)</em></a></p>
-<p><em class="guilabel"><span class="accelerator">C</span>ancel</em></p>
-<p><tt class="kbd docutils literal"><span class="pre">Control-x</span> <span class="pre">Control-f</span></tt></p>
-<p><em class="mailheader">Content-Type</em></p>
-<p><em class="menuselection">Start ‣ Programs</em></p>
 </div>
-<div class="section" id="node04">
-<h3>2.1.3.4. node04<a class="headerlink" href="#node04" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="node04-app-server-development">
+<h3>2.1.5.4. node04 - APP-Server Development<a class="headerlink" href="#node04-app-server-development" title="Permalink to this headline">¶</a></h3>
 <p>development app-server</p>
 <blockquote>
 <div><ul class="simple">
@@ -183,8 +208,8 @@ apt-get install mariadb-server
 </div></blockquote>
 <p>See <a class="reference internal" href="appserver.html"><em>App Server(s)</em></a></p>
 </div>
-<div class="section" id="node05">
-<h3>2.1.3.5. node05<a class="headerlink" href="#node05" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="node05-app-server-production">
+<h3>2.1.5.5. node05 - APP-Server Production<a class="headerlink" href="#node05-app-server-production" title="Permalink to this headline">¶</a></h3>
 <p>app-server</p>
 <blockquote>
 <div><ul class="simple">
@@ -194,8 +219,8 @@ apt-get install mariadb-server
 </div></blockquote>
 <p>See <a class="reference internal" href="appserver.html"><em>App Server(s)</em></a></p>
 </div>
-<div class="section" id="node06">
-<h3>2.1.3.6. node06<a class="headerlink" href="#node06" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="node06-streaming-stream-generation">
+<h3>2.1.5.6. node06 - Streaming &amp; Stream-generation<a class="headerlink" href="#node06-streaming-stream-generation" title="Permalink to this headline">¶</a></h3>
 <p>streaming-server</p>
 <blockquote>
 <div><ul class="simple">
@@ -203,9 +228,11 @@ apt-get install mariadb-server
 <li>external: 95.211.179.47</li>
 </ul>
 </div></blockquote>
+<p>See <a class="reference internal" href="streaming.html"><em>Streaming Server(s)</em></a> &amp;
+See <a class="reference internal" href="playout.html"><em>Playout Server</em></a></p>
 </div>
-<div class="section" id="node07">
-<h3>2.1.3.7. node07<a class="headerlink" href="#node07" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="node07-mirror-s">
+<h3>2.1.5.7. node07 - Mirror(s)<a class="headerlink" href="#node07-mirror-s" title="Permalink to this headline">¶</a></h3>
 <p>musicbrainz mirror</p>
 <blockquote>
 <div><ul class="simple">

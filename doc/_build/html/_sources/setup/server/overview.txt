@@ -35,14 +35,43 @@ on vz-host:
     nano /etc/vz/conf/<id>.conf # adapt ip and hostname
 
 
+/etc/hosts/
+~~~~~~~~~~~
+
+.. code-block:: bash
+
+    # obp dev
+    95.211.179.43   stage.openbroadcast.ch
+    172.20.10.27    vz.obp
+    172.20.10.201   node01.obp
+    172.20.10.202   node02.obp
+    172.20.10.203   node03.obp
+    172.20.10.204   node04.obp
+    172.20.10.205   node05.obp
+    172.20.10.206   node06.obp
+    172.20.10.207   node07.obp
+    172.20.10.208   node08.obp
+    172.20.10.209   node09.obp
+    172.20.10.210   node10.obp
+
+
+vz host
+~~~~~~~
+
+ - internal: 172.20.10.27
+ - external: 95.211.179.27
+ - kvm: 95.211.179.28 / 172.20.10.28
+
+https://172.20.10.27:8006/
+
+
 
 vz nodes
 ~~~~~~~~
 
-node01
+node01 - WebHead
 ::::::
 
-webhead
 
  - internal: 172.20.10.201
  - external: 95.211.179.43
@@ -53,10 +82,9 @@ webhead
     aptitude install nginx
 
 
-node02
+node02 - Database
 ::::::
 
-database-server
 
  - internal: 172.20.10.202
 
@@ -72,7 +100,7 @@ database-server
     apt-get install mariadb-server
 
 
-node03
+node03 - Messaging
 ::::::
 
 messaging & cache server
@@ -82,19 +110,9 @@ messaging & cache server
 
 See :doc:`messaging`
 
-:guilabel:`&Cancel`
-
-:kbd:`Control-x Control-f`
-
-:mailheader:`Content-Type`
-
-:menuselection:`Start --> Programs`
 
 
-
-
-
-node04
+node04 - APP-Server Development
 ::::::
 
 development app-server
@@ -105,7 +123,7 @@ development app-server
 See :doc:`appserver`
 
 
-node05
+node05 - APP-Server Production
 ::::::
 
 app-server
@@ -116,7 +134,7 @@ app-server
 See :doc:`appserver`
 
 
-node06
+node06 - Streaming & Stream-generation
 ::::::
 
 streaming-server
@@ -124,8 +142,10 @@ streaming-server
  - internal: 172.20.10.206
  - external: 95.211.179.47
 
+See :doc:`streaming` &
+See :doc:`playout`
 
-node07
+node07 - Mirror(s)
 ::::::
 
 musicbrainz mirror

@@ -357,9 +357,12 @@ PlaylistUi = function () {
 
                 try {
                     //console.log('trying to subscribe to pusher with: ' + item.resource_uri);
-                    pusher.subscribe(item.resource_uri, self.update_playlists);
+                    //pusher.subscribe(item.resource_uri, self.update_playlists);
+                    pushy.subscribe(item.resource_uri, self.update_playlists);
+
+
                 } catch (e) {
-                    //console.log('error subscribe to pusher:', e);
+                    //console.log('error subscribe to pushy:', e);
                 }
 
 
@@ -418,10 +421,10 @@ PlaylistUi = function () {
                     self.current_items[item.id] = item;
 
                     try {
-                        console.log('trying to subscribe to pusher with: ' + item.resource_uri);
-                        pusher.subscribe(item.resource_uri, self.update_playlists);
+                        console.log('trying to subscribe to pushy with: ' + item.resource_uri);
+                        pushy.subscribe(item.resource_uri, self.update_playlists);
                     } catch (e) {
-                        console.log('error subscribe to pusher:', e);
+                        console.log('error subscribe to pushy:', e);
                     }
 
 

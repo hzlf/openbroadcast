@@ -457,7 +457,7 @@ INSTALLED_APPS = (
     'istats',
 
     # custom apps/*
-    'pusher',
+    #'pusher',
     'asite',
     'alibrary',
     'aplayer',

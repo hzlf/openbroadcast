@@ -506,7 +506,7 @@ class Export(BaseModel):
         self.filename = generate_export_filename(self.export_items)
 
         if not self.token:
-            self.token = sha_constructor('asd' + self.uuid).hexdigest()
+            self.token = sha_constructor('TX%s' % self.uuid).hexdigest()
 
         super(Export, self).save(*args, **kwargs)
 
