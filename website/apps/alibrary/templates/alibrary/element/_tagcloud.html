@@ -1,5 +1,6 @@
-{% load spurl %}
+{% load spurl adv_cache %}
 
+{% cache 0 "tagcloud" request.get_full_path %}
 
 	<div style=" display: none;" id="tagcloud_inline" data-uistate="init" class="tagcloud inline ui-persistent">
 			
@@ -35,3 +36,5 @@
 	<div class="clear"></div>
 	
 	</div>
+
+{% endcache %}

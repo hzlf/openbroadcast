@@ -85,9 +85,9 @@
 {% endblock %}
 
 {% block tagcloud %}
-    {% cache 0 "tagcloud" request.get_full_path %}
+
     {% include "alibrary/element/_tagcloud.html" %}
-    {% endcache %}
+
 {% endblock %}
 
 
