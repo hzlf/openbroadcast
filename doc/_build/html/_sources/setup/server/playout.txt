@@ -132,6 +132,13 @@ Again, as root
 
 .. code-block:: bash
 
+    mkdir /etc/airtime
+    nano /etc/airtime/liquidsoap.cfg # in case you want to pre-populate the configs
+
+
+
+.. code-block:: bash
+
     mkdir -p /var/log/pypo/ls/
     chown -R pypo:pypo /var/log/pypo
 
@@ -145,6 +152,6 @@ Again, as root
 
 
     # add to supervisor (symlink, or copy if you feel safer...)
-    ln -s /home/pypo/src/pypo/conf/* /etc/supervisor/conf.d/
+    ln -s /home/pypo/src/pypo/conf/pypo.supervised.conf /etc/supervisor/conf.d/
     supervisorctl reread
     supervisorctl update

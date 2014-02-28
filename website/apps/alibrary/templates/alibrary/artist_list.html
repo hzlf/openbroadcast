@@ -1,5 +1,5 @@
 {% extends "layout_base.html" %}
-{% load spurl cache i18n truncate dajaxice_templatetags sekizai_tags %}
+{% load spurl adv_cache i18n truncate dajaxice_templatetags sekizai_tags %}
 
 {% block heading %}
 <!-- view specific scripts -->
@@ -108,7 +108,11 @@
 		
 		{# switching list styles #}
 		{% if list_style == "s" %}
-		{% include "alibrary/artist/list_item_s.html" %}
+
+            {% cache 0 "artist_list_item_s" item.pk item.updated user.is_authenticated %}
+            {% include "alibrary/artist/list_item_s.html" %}
+            {% endcache %}
+
 		{% endif %}
 		
 		{% if list_style == "m" %}
@@ -116,7 +120,11 @@
 		{% endif %}
 		
 		{% if list_style == "l" %}
-		{% include "alibrary/artist/list_item_l.html" %}
+
+            {% cache 0 "artist_list_item_l" item.pk item.updated user.is_authenticated %}
+            {% include "alibrary/artist/list_item_l.html" %}
+            {% endcache %}
+
 		{% endif %}
 		
 		{% endfor %}

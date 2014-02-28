@@ -17,6 +17,8 @@ Contents:
 
     setup/server/index
 
+    setup/migration/index
+
 
     setup/website/installation
 

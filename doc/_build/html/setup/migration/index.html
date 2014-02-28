@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>4. WebAPP installation &mdash; obp 0.0.1 documentation</title>
+    <title>3. Data Migration &mdash; obp 0.0.1 documentation</title>
     
     <link rel="stylesheet" href="../../_static/solar.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -23,7 +23,8 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
-    <link rel="prev" title="1. Platform - Legacy-data Migration" href="../migration/overview.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+    <link rel="next" title="1. Platform - Legacy-data Migration" href="overview.html" />
+    <link rel="prev" title="2.5. Playout Server" href="../server/playout.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
 <link href="../../_static/solarized-dark.css" rel="stylesheet">
 <link href="../../_static/extra.css" rel="stylesheet">
   </head>
@@ -35,7 +36,10 @@
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../migration/overview.html" title="1. Platform - Legacy-data Migration"
+          <a href="overview.html" title="1. Platform - Legacy-data Migration"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../server/playout.html" title="2.5. Playout Server"
              accesskey="P">previous</a> |</li>
         <li><a href="../../index.html">obp 0.0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -43,11 +47,14 @@
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../migration/overview.html"
-                        title="previous chapter">1. Platform - Legacy-data Migration</a></p>
+  <p class="topless"><a href="../server/playout.html"
+                        title="previous chapter">2.5. Playout Server</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="overview.html"
+                        title="next chapter">1. Platform - Legacy-data Migration</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="../../_sources/setup/website/installation.txt"
+    <li><a href="../../_sources/setup/migration/index.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">
@@ -71,23 +78,18 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="webapp-installation">
-<h1>4. WebAPP installation<a class="headerlink" href="#webapp-installation" title="Permalink to this headline">¶</a></h1>
-<p>packages [debian base install,  base-packages, additionally]:</p>
-<div class="highlight-bash"><div class="highlight"><pre>aptitude install supervisor sudo libmysqlclient-dev libjpeg-dev python-dev libxml2 libxml2-dev libxslt-dev
-aptitude install libsndfile libsndfile-dev libboost-dev libtag1-dev ffmpeg libmagic1
-
-easy_install PIP
-pip install virtualenv
-pip install setuptools --no-use-wheel --upgrade
-</pre></div>
+  <div class="section" id="data-migration">
+<h1>3. Data Migration<a class="headerlink" href="#data-migration" title="Permalink to this headline">¶</a></h1>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">1. Platform - Legacy-data Migration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#preparation">1.1. Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#migration-tools">1.2. Migration tools</a></li>
+</ul>
+</li>
+</ul>
 </div>
-<p># downgrade pip
-pip install pip==1.4.1</p>
-<p># manual installation (don&#8217;t ask why...)
-pip install numpy
-pip install django-phonenumber-field==0.2a3</p>
-<p>pip install -r requirements/requirements.txt</p>
 </div>
 
 

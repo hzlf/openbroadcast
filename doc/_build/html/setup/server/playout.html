@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="top" title="obp 0.0.1 documentation" href="../../index.html" />
     <link rel="up" title="2. Server setup" href="index.html" />
-    <link rel="next" title="3. WebAPP installation" href="../website/installation.html" />
+    <link rel="next" title="3. Data Migration" href="../migration/index.html" />
     <link rel="prev" title="2.4. Streaming Server(s)" href="streaming.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
 <link href="../../_static/solarized-dark.css" rel="stylesheet">
 <link href="../../_static/extra.css" rel="stylesheet">
@@ -37,7 +37,7 @@
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../website/installation.html" title="3. WebAPP installation"
+          <a href="../migration/index.html" title="3. Data Migration"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="streaming.html" title="2.4. Streaming Server(s)"
@@ -71,8 +71,8 @@
   <p class="topless"><a href="streaming.html"
                         title="previous chapter">2.4. Streaming Server(s)</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="../website/installation.html"
-                        title="next chapter">3. WebAPP installation</a></p>
+  <p class="topless"><a href="../migration/index.html"
+                        title="next chapter">3. Data Migration</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../../_sources/setup/server/playout.txt"
@@ -208,6 +208,10 @@ pip install -r requirements.txt
 </pre></div>
 </div>
 <p>Again, as root</p>
+<div class="highlight-bash"><div class="highlight"><pre>mkdir /etc/airtime
+nano /etc/airtime/liquidsoap.cfg <span class="c"># in case you want to pre-populate the configs</span>
+</pre></div>
+</div>
 <div class="highlight-bash"><div class="highlight"><pre>mkdir -p /var/log/pypo/ls/
 chown -R pypo:pypo /var/log/pypo
 
@@ -221,7 +225,7 @@ sudo -u pypo env/bin/python pypo.py
 
 
 <span class="c"># add to supervisor (symlink, or copy if you feel safer...)</span>
-ln -s /home/pypo/src/pypo/conf/* /etc/supervisor/conf.d/
+ln -s /home/pypo/src/pypo/conf/pypo.supervised.conf /etc/supervisor/conf.d/
 supervisorctl reread
 supervisorctl update
 </pre></div>

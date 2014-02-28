@@ -1,0 +1,73 @@
+Platform - Legacy-data Migration
+################################
+
+
+Preparation
+*********************
+
+
+
+Configure the needed database connections:
+==========================================
+
+local_settings.py
+
+.. code-block:: bash
+
+    DATABASES = {
+
+        'default': {
+            ***
+        },
+        'legacy': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'legacy_openbroadcast_medialibrary',
+            'USER': 'openbroadcast',
+            'PASSWORD': '********************',
+            'HOST': '172.20.10.202',
+        },
+        'legacy_legacy': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'legacy_openbroadcast',
+            'USER': 'openbroadcast',
+            'PASSWORD': '********************',
+            'HOST': '172.20.10.202',
+        },
+    }
+
+
+
+Database
+========
+
+.. note::
+
+    Tables on ":abbr:`legacy-legacy (a.k.a. ELGG)`" have to be altered!
+
+
+.. code-block:: sql
+
+    ALTER TABLE `elgg_cm_master` ADD `migrated` DATETIME  NULL  AFTER `locked_userident`;
+
+
+File storage/access
+===================
+
+Files from the legacy-installation must be mounted on the application-server. Configuration:
+
+.. code-block:: bash
+
+    LEGACY_STORAGE_ROOT = '/nas/prod/ml/'
+
+
+.. note::
+
+    `LEGACY_STORAGE_ROOT` is the directory that contains the main `media` folder!!
+
+
+
+
+Migration tools
+*********************
+
+

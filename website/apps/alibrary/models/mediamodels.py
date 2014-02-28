@@ -414,7 +414,10 @@ class Media(CachingMixin, MigrationMixin):
         if subfolder:
             folder = "%s/%s%s/" % (MEDIA_ROOT, self.folder, subfolder)
             if not os.path.isdir(folder):
-                os.mkdir(folder, 0755)
+                try:
+                    os.mkdir(folder, 0755)
+                except Exception, e:
+                    pass
                 
             return folder
                     

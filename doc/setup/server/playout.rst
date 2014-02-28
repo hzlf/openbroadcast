@@ -152,6 +152,6 @@ Again, as root
 
 
     # add to supervisor (symlink, or copy if you feel safer...)
-    ln -s /home/pypo/src/pypo/conf/* /etc/supervisor/conf.d/
+    ln -s /home/pypo/src/pypo/conf/pypo.supervised.conf /etc/supervisor/conf.d/
     supervisorctl reread
     supervisorctl update
