@@ -188,9 +188,9 @@
                 {% endif %}
 
                 {% if list_style == "l" %}
-                    {% cache 0 "release_list_item_l" item.pk item.updated user.is_authenticated %}
+                    {% cache 0 "release_list_item_l" item.pk item.updated user.is_authenticated %}{% endcache %}
                     {% include "alibrary/release/list_item_l.html" %}
-                    {% endcache %}
+
                 {% endif %}
 
             {% endfor %}

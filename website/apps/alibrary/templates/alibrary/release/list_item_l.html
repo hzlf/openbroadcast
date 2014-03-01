@@ -1,4 +1,4 @@
-{% load thumbnail i18n truncate display_tags arating_tags spurl spacify_tags %}
+{% load adv_cache thumbnail i18n truncate display_tags arating_tags spurl spacify_tags %}
 
 <div class="list_body_row selectable item release {{ item.uuid }} {% if item.publish_date %} published{% else %} unpublished{% endif %}{% if item.creator == user %} owner{% endif %}"
      id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}"
@@ -6,6 +6,9 @@
      data-id="{{ item.id }}"
      data-uuid="{{ item.uuid }}"
      data-ct="release">
+
+
+
 
     <div class="wrapper_icon">
 
@@ -17,6 +20,8 @@
 
     <div class="spacer tag-cloud">
 
+        <!-- TODO: this block consumes too much rendering time. -->
+
         <ul class="tags unstyled horizontal">
             {% for tag in item.tags|slice:":8" %}
                 <li class="{% if tag.pk in active_tags %}active{% endif %}">{{ tag.name|truncate_chars_inner:10 }}</li>
@@ -25,18 +30,28 @@
 
     </div>
 
+
+
     <div class="wrapper_info">
 
         <div class="wrapper_inner">
+
+
 
             <div class="list_body_item">
                 <ul class="title">
                     <li class="bold">
                         <a href="{{ item.get_absolute_url }}"
                            title="{{ item.name }}"> {{ item.name|truncate_chars_inner:18 }}
-                            {% topflop_for_object item %} </a>
+                            {% cache 0 "topflop_release" item.pk item.updated %}
+                            {% topflop_for_object item %}
+                            {% endcache %}
+
+                        </a>
                     </li>
                     <li>
+
+                        {% comment %}{% endcomment %}
 
                         {% for artist in item.get_artists %}
 
@@ -76,9 +91,13 @@
                 </ul>
             </div>
 
+
+
             <div class="list_body_item">
                 <ul class="unstyled indicator horizontal">
 
+
+                    {% comment %}
                     <li>
                         {% if item.get_license %}
                             <a href="{{ item.get_license.get_absolute_url }}" title="{% trans "License details" %}"
@@ -87,11 +106,18 @@
                             &nbsp;
                         {% endif %}
                     </li>
+                    {% endcomment %}
+
+                    {% comment %}
 
                     {% include "alibrary/element/_track_indicator.html" %}
 
+                    {% endcomment %}
+
                 </ul>
             </div>
+
+
 
             {% if item.label %}
                 <div class="list_body_item">
@@ -118,6 +144,7 @@
                     </ul>
                 </div>
             {% endif %}
+
 
 
         </div>
@@ -165,6 +192,8 @@
         </ul>
 
     </div>
+
+
 
 </div>
 

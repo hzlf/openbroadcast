@@ -63,7 +63,7 @@
 	{% if user.is_authenticated and user|user_stream_count > 0 %}
 
 	<div class="notification-holder">
-		{% user_stream user %}
+		{# user_stream user #}
 	</div>
 	
 	{% endif %}

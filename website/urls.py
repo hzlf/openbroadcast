@@ -30,7 +30,7 @@ dajaxice_autodiscover()
 
 
 from urls_api import api
-
+import debug_toolbar
 
 urlpatterns = patterns('',
 
@@ -131,6 +131,8 @@ urlpatterns = patterns('',
     # spf
     url(r"^spf/", include("spf.urls")),
 
+
+    url(r'^__debug__/', include(debug_toolbar.urls)),
     
     # cms base
     url(r'^', include('cms.urls')),
@@ -144,7 +146,9 @@ if settings.SERVE_MEDIA:
 )
     
 if settings.DEBUG:
+
     urlpatterns += patterns('',
+
         url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
             'document_root': settings.MEDIA_ROOT,
         }),

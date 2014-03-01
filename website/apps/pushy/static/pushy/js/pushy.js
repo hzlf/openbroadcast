@@ -51,7 +51,7 @@ PushyApp = function() {
 			});
 
 		} catch(err) {
-			alert('Unable to connect to socket-server');
+			//alert('Unable to connect to socket-server');
 			console.log(err.message);
 		}
 	};
