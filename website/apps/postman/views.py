@@ -127,8 +127,9 @@ def write(request, recipients=None, form_classes=(WriteForm, AnonymousWriteForm)
 
     """
 
-    print 'WRITE:'
+    print '-- postmam write, to: -------'
     print recipients
+    print '-----------------------------'
 
 
     user = request.user
@@ -139,22 +140,31 @@ def write(request, recipients=None, form_classes=(WriteForm, AnonymousWriteForm)
         channel = autocomplete_channels
     next_url = _get_referer(request)
     if request.method == 'POST':
+
+        print ' * request is post'
+
         form = form_class(request.POST, sender=user, channel=channel,
             user_filter=user_filter,
             exchange_filter=exchange_filter,
             max=max)
-        if form.is_valid():
-            is_successful = form.save(auto_moderators=auto_moderators)
 
-            print '******'
-            print is_successful
-            print '*******'
+        if form.is_valid():
+            print ' * form is valid trying to save'
+            is_successful = form.save(auto_moderators=auto_moderators, hacked_recipient=recipients)
+            print ' * form is post save'
 
             if is_successful:
+                print ' * successfully saved message'
                 messages.success(request, _("Message successfully sent."), fail_silently=False)
             else:
+                print ' * message rejected'
                 messages.warning(request, _("Message rejected for at least one recipient."), fail_silently=False)
             return redirect(request.GET.get('next', success_url or next_url or 'postman_inbox'))
+
+        else:
+            print ' * form is _not_ valid'
+
+
     else:
         initial = dict(request.GET.items())  # allow optional initializations by query string
         if recipients:

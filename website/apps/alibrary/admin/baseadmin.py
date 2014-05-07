@@ -123,7 +123,7 @@ class LabelInline(admin.TabularInline):
 
 class MediaInline(admin.TabularInline):
     model = Media
-    exclude = ['description','slug','processed','echoprint_status','conversion_status', 'd_tags', 'echonest_id', 'danceability', 'energy', 'liveness', 'loudness', 'speechiness', 'start_of_fade_out', 'echonest_duration', 'tempo', 'key', 'sections','master_sha1', 'base_format', 'base_filesize', 'base_duration', 'base_samplerate', 'base_bitrate', 'filename', 'publish_date', 'status', 'owner', 'creator', 'publisher', 'mediamumber', 'master', 'mediatype' ]
+    exclude = ['description','slug','processed','echoprint_status','conversion_status', 'd_tags', 'echonest_id', 'danceability', 'energy', 'liveness', 'loudness', 'speechiness', 'start_of_fade_out', 'echonest_duration', 'tempo', 'key', 'sections','master_sha1', 'base_format', 'base_filesize', 'base_duration', 'base_samplerate', 'base_bitrate', 'filename', 'publish_date', 'status', 'owner', 'creator', 'publisher', 'medianumber', 'master', 'mediatype' ]
     readonly_fields = ['artist', ]
     extra = 1
     
@@ -251,6 +251,7 @@ class ArtistAdmin(PlaceholderAdmin, BaseAdmin):
     fieldsets = [
         (None,               {'fields': ['name', 'slug', 'main_image', 'real_name', 'country', ('listed', 'disable_link',), 'enable_comments', 'biography', 'excerpt', 'folder', ]}),
         ('Users', {'fields' : ['owner', 'creator', 'publisher']}),
+        ('Various', {'fields' : ['booking_contact', 'email',]}),
         #('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
     ]
     
@@ -301,7 +302,7 @@ class MediaReleaseInline(admin.TabularInline):
     
 class MediaAdmin(BaseAdmin):
     
-    list_display   = ('name', 'created', 'release_link', 'artist', 'mediatype', 'tracknumber', 'mediamumber', 'duration', 'processed', 'echoprint_status', 'conversion_status')
+    list_display   = ('name', 'created', 'release_link', 'artist', 'mediatype', 'tracknumber', 'medianumber', 'duration', 'processed', 'echoprint_status', 'conversion_status',)
     search_fields = ['artist__name', 'release__name', 'name']
     list_filter = ('mediatype', 'license__name', 'processed', 'echoprint_status', 'conversion_status')
     
@@ -315,16 +316,17 @@ class MediaAdmin(BaseAdmin):
     """"""
     fieldsets = [
         (None,  {'fields': 
-                 ['name', 'slug', 'isrc', 'filename', 'uuid', ('tracknumber', 'mediamumber'), 'mediatype', ('release', 'release_link'), 'artist', 'license', 'd_tags']
+                 ['name', 'slug', 'isrc', 'filename', 'uuid', ('tracknumber', 'medianumber', 'opus_number'), 'mediatype', 'version', ('release', 'release_link'), 'artist', 'license', 'd_tags', 'echonest_id',]
                  }),
                  
         ('Users', {'fields' : ['owner', 'creator', 'publisher']}),
+        ('Text', {'fields' : ['description', 'lyrics',]}),
                  
         ('Storage related',  {
                 'fields': ['master', 'master_sha1', 'folder', ('base_format', 'base_filesize', 'base_duration',), ('base_samplerate', 'base_bitrate')]
                  }),
 
-        ('Mixed content', {'fields': ['description'], 'classes': ['']}),
+        #('Mixed content', {'fields': ['description'], 'classes': ['']}),
         ('Advanced options [Know what you are doing!!!!!!!!]', {
             'classes': ('uncollapse',),
             'fields': ('processed','echoprint_status','conversion_status',)

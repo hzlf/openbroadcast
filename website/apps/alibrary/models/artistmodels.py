@@ -84,7 +84,13 @@ class Artist(MigrationMixin):
     name = models.CharField(max_length=200, db_index=True)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
 
-    type = models.CharField(verbose_name="Artist type", max_length=120, blank=True, null=True)
+
+    TYPE_CHOICES = (
+        ('person', _('Person')),
+        ('group', _('Group')),
+        ('other', _('Other')),
+    )
+    type = models.CharField(verbose_name="Artist type", max_length=120, blank=True, null=True, choices=TYPE_CHOICES)
     main_image = FilerImageField(null=True, blank=True, related_name="artist_main_image", rel='')
     real_name = models.CharField(max_length=200, blank=True, null=True)
     disambiguation = models.CharField(max_length=256, blank=True, null=True)
@@ -93,6 +99,7 @@ class Artist(MigrationMixin):
     country = models.ForeignKey(Country, blank=True, null=True)
 
     booking_contact = models.CharField(verbose_name=_('Booking'), max_length=256, blank=True, null=True)
+    email = models.EmailField(verbose_name=_('E-Mail'), max_length=256, blank=True, null=True)
 
     date_start = ApproximateDateField(verbose_name=_("Begin"), blank=True, null=True, help_text=_("date of formation / date of birth"))
     date_end = ApproximateDateField(verbose_name=_("End"), blank=True, null=True, help_text=_("date of breakup / date of death"))

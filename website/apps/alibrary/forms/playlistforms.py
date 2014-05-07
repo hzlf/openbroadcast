@@ -112,11 +112,9 @@ class PlaylistForm(ModelForm):
         super(PlaylistForm, self).__init__(*args, **kwargs)
 
         self.helper = FormHelper()
-        self.helper.form_id = "id_playlist_form_%s" % 'asd'
-        self.helper.form_class = 'form-horizontal'
-        self.helper.form_method = 'post'
-        self.helper.form_action = ''
         self.helper.form_tag = False
+
+        self.fields['name'].label = _('Title')
 
         if self.instance.type == 'broadcast':
             self.fields['d_tags'].required = True

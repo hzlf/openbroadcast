@@ -130,11 +130,11 @@
 
 
 
-	<!--
+	<!---->
 	<dl class="dl-horizontal">
 
 		<dt>
-			{% trans "Relations" %}:
+			{% trans "Links" %}:
 		</dt>
 		<dd class="horizontal">
 			<ul class="unstyled">
@@ -147,19 +147,19 @@
 		</dd>
 
 	</dl>
-	-->
+
 
 	<dl class="dl-horizontal sub">
 
 
 
 		<dt>
-			{% trans "History" %}:
+			{% trans "Edit History" %}:
 		</dt>
 		<dd>
 			
 			{% if object.owner %}
-			<span class="key">{% trans "Created by" %}:</span> <span class="value"><a href="{{ object.owner.get_absolute_url }}">{{ object.owner }}</a></span> |
+			<span class="key">{% trans "Added by" %}:</span> <span class="value"><a href="{{ object.owner.get_absolute_url }}">{{ object.owner }}</a></span> |
 			{% endif %}
 			
 			{% if object.publisher %}

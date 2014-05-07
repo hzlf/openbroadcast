@@ -59,7 +59,7 @@ class MediaForm(ModelForm):
 
     class Meta:
         model = Media
-        fields = ('name', 'description', 'artist', 'tracknumber', 'mediatype', 'license', 'release', 'd_tags', 'isrc', )
+        fields = ('name', 'description', 'lyrics', 'artist', 'tracknumber', 'medianumber', 'opus_number', 'mediatype', 'version', 'license', 'release', 'd_tags', 'isrc', )
 
 
     def __init__(self, *args, **kwargs):
@@ -68,7 +68,6 @@ class MediaForm(ModelForm):
         self.instance = kwargs['instance']
         
         print self.instance
-        
         print self.user.has_perm("alibrary.edit_release")
         print self.user.has_perm("alibrary.admin_release", self.instance)
 
@@ -81,18 +80,21 @@ class MediaForm(ModelForm):
         """
         Prototype function, set some fields to readonly depending on permissions
         """
-        """
-        if not self.user.has_perm("alibrary.admin_release", self.instance):
-            self.fields['catalognumber'].widget.attrs['readonly'] = 'readonly'
-        """
+        print '## permission check'
+        print
+
+        if not self.user.has_perm("alibrary.admin_release", self.instance) and self.instance.release and self.instance.release.publish_date:
+            #pass
+            self.fields['license'].widget.attrs['readonly'] = 'readonly'
+
 
         self.helper = FormHelper()
-        self.helper.form_id = "id_feedback_form_%s" % 'asd'
-        self.helper.form_class = 'form-horizontal'
-        self.helper.form_method = 'post'
-        self.helper.form_action = ''
         self.helper.form_tag = False
-        
+
+        # rewrite labels
+        self.fields['medianumber'].label = _('Disc number')
+        self.fields['opus_number'].label = _('Opus N.')
+
         
         base_layout = Fieldset(
                                
@@ -100,8 +102,11 @@ class MediaForm(ModelForm):
                 LookupField('name', css_class='input-xlarge'),
                 LookupField('release', css_class='input-xlarge'),
                 LookupField('artist', css_class='input-xlarge'),
-                LookupField('tracknumber', css_class='input-xlarge'),
                 LookupField('mediatype', css_class='input-xlarge'),
+                LookupField('tracknumber', css_class='input-xlarge'),
+                Field('medianumber', css_class='input-xlarge'),
+                Field('opus_number', css_class='input-xlarge'),
+                Field('version', css_class='input-xlarge'),
         )
         
         license_layout = Fieldset(
@@ -123,6 +128,12 @@ class MediaForm(ModelForm):
                 'Meta',
                 LookupField('description', css_class='input-xxlarge'),
         )
+
+
+        lyrics_layout = Fieldset(
+                'Lyrics',
+                LookupField('lyrics', css_class='input-xxlarge'),
+        )
         
         tagging_layout = Fieldset(
                 'Tags',
@@ -138,6 +149,7 @@ class MediaForm(ModelForm):
                         base_layout,
                         # artist_layout,
                         meta_layout,
+                        lyrics_layout,
                         license_layout,
                         tagging_layout,
                         identifiers_layout,
@@ -158,12 +170,8 @@ class MediaForm(ModelForm):
     extra_artists = forms.ModelChoiceField(Artist.objects.all(),
         widget=autocomplete_light.ChoiceWidget('ArtistAutocomplete'), required=False)
     """
-    
-    artist = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False)    
-    
-    
-    
-    
+    name = forms.CharField(required=True, label='Title')
+    artist = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False)
     description = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")   
 
     
@@ -275,13 +283,20 @@ class BaseExtraartistForm(ModelForm):
         model = MediaExtraartists
         parent_model = Media
         fields = ('artist','profession',)
+        # labels in django 1.6 only... leave them here for the future...
+        labels = {
+            'profession': _('Credited as'),
+        }
 
     def __init__(self, *args, **kwargs):
         super(BaseExtraartistForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
 
-    artist = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False)
+        self.fields['profession'].label = _('Credited as')
 
+
+    artist = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False, label=_('Credited Artist'))
+    #profession = forms.ChoiceField()
 
 
 

@@ -166,20 +166,20 @@ class MediaListView(PaginationMixin, ListView):
             ids = import_session.importitem_set.filter(content_type=ctype.pk).values_list('object_id',)
             qs = qs.filter(pk__in=ids).distinct()
 
-
+        # filter by user
+        creator_filter = self.request.GET.get('creator', None)
+        if creator_filter:
+            from django.contrib.auth.models import User
+            creator = get_object_or_404(User, username='%s' % creator_filter)
+            qs = qs.filter(creator=creator).distinct()
+            f = {'item_type': 'release' , 'item': creator, 'label': _('Added by')}
+            self.relation_filter.append(f)
 
 
         # "extra-filters" (to provide some arbitary searches)
         extra_filter = self.request.GET.get('extra_filter', None)
-
-        print 'EXTRA FILTER!!!!!!!!!!!!!!!!!!!'
-        print extra_filter
-        print '-------'
-
         if extra_filter:
-
             if extra_filter == 'unassigned':
-
                 qs = qs.filter(release=None).distinct()
                 # add relation filter
                 #fa = Release.objects.filter(slug=release_filter)[0]

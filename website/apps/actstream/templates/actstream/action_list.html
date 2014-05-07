@@ -77,14 +77,22 @@
 			{% for action in action_list %}
 			<tr>
 				
-				<td>{% if action.target %}{{ action.target.classname }}{% else %}&nbsp;{% endif %}</td>
-				
+				<td>
+                {% if action.target %}
+                    {% if action.target.classname == 'Media' %}
+                        Track
+                    {% else %}
+                        {{ action.target.classname }}
+                    {% endif %}
+                {% else %}
+                    &nbsp;
+                {% endif %}
 				<td>
 					
 					
 				{% if action.actor %}
 				
-					{% if action.actor == user %}
+					{% if action.actor == user and 1 == 2 %}
 					{% trans "You" %}
 					{% else %}
 					<a href="{{ action.actor.get_profile.get_absolute_url }}">{% firstof action.actor.get_full_name action.actor %}</a>
@@ -94,14 +102,9 @@
 					
 				{{ action.verb }}
 					
-				{% if action.target %}<a href="{{ action.target.get_absolute_url }}">{{ action.target }}{% else %}&nbsp;{% endif %}</a>
-
-
-
-				
-				
-
-
+                        {% if action.target %}
+                            <a href="{{ action.target.get_absolute_url }}">"{{ action.target.name|truncate_chars_inner:60 }}"</a>
+                        {% endif %}
 				</td>
 
 				<td><span class="pull-right">{{ action.timestamp|timesince }} {% trans "ago" %}</span></td>
@@ -144,7 +147,9 @@
 {% endblock %}
 
 {% block sidebar %}
+{% comment %}
 <ul class="unstyled">
+
 	<p>
 		Your last actions:
 	</p>
@@ -154,7 +159,7 @@
 		{# display_timestamped_action action #}
 		
 		
-		<!--
+		<!---->
 		{% trans "You" %}
 		{{ action.verb }}
 		{% if action.action_object %}
@@ -162,11 +167,20 @@
 		{% else %}
 		<a href="{{ action.target.get_absolute_url }}">{{ action.target }}</a>
 		{% endif %}
-		-->
+
 		
 	</li>
 	{% endfor%}
 </ul>
+{% endcomment %}
 {# include "actstream/action/sidebar/_list.html" #}
+
+<div class="filter_context">
+	{% for item in filter.filterlist %}
+	{% include "actstream/element/_filterbox.html" %}
+	{% endfor %}
+	<div class="boxend"></div>
+</div>
+
 {% endblock %}
 

@@ -258,12 +258,14 @@ EditUi = function () {
 
 
         // mode switch (editor)
+        /*
         $('#editor_mode_switch li > a').live('click', function (e) {
             e.preventDefault();
             var mode = $(this).data('mode');
             $(this).parents('.ui-persistent').data('uistate', mode);
 
         });
+        */
 
         // apply classes based on state
         // $("#release_media_form *[class*='mode-']").parents('.control-group').hide(5000);

@@ -2,7 +2,7 @@
 <div class="span7 padded-h container_content">
 
 	<div class="page-header">
-		<h2>{{ object.name|truncate_chars_inner:40 }}{% if object.country %} ({{ object.country.iso2_code }}){% endif %} <small>{{ object.type }}</small></h2>
+		<h2>{{ object.name|truncate_chars_inner:40 }}{% if object.country %} ({{ object.country.iso2_code }}){% endif %} <small>{{ object.get_type_display }}</small></h2>
 	</div>
 
 	<dl class="dl-horizontal main">
@@ -186,7 +186,7 @@
 
 
 		<dt>
-			{% trans "History" %}:
+			{% trans "Edit History" %}:
 		</dt>
 		<dd>
 			
@@ -195,7 +195,7 @@
 			{% endif %}
 
 			{% if object.creator %}
-			<span class="key">{% trans "Created by" %}:</span> <span class="value"><a href="{{ object.creator.get_absolute_url }}">{{ object.creator }}</a></span> |
+			<span class="key">{% trans "Added by" %}:</span> <span class="value"><a href="{{ object.creator.get_absolute_url }}">{{ object.creator }}</a></span> |
 			{% endif %}
 			
 			{% if object.publisher %}
@@ -220,28 +220,16 @@
 		-->
 		
 
-    {% if object.tags %}
-        <dt>
-            {% trans "Tags" %}:
-        </dt>
-        <dd>
-            {% for tag in object.tags %}
-                {{ tag.name }}{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        </dd>
-    {% endif %}
-    <!--
-    {% if object.tags %}
-        <dt>
-            {% trans "Tags" %}:
-        </dt>
-        <dd>
-            {% for tag in object.tags %}
-                <span class="tag">{{ tag.name|spacify }}</span>
-            {% endfor %}
-        </dd>
-    {% endif %}
--->
+        {% if object.tags %}
+            <dt>
+                {% trans "Tags" %}:
+            </dt>
+            <dd>
+                {% for tag in object.tags %}
+                    <span class="tag">{{ tag.name|spacify }}</span>
+                {% endfor %}
+            </dd>
+        {% endif %}
 
 	</dl>
 

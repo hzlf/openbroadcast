@@ -30,7 +30,7 @@
 {% if change %}{% if not is_popup %}
   <div class="object-tools">
     {% block object-tools-items %}
-    <a href="history/" class="btn btn-small historylink">{% trans "History" %}</span></a>
+    <a href="history/" class="btn btn-small historylink">{% trans "Edit History" %}</span></a>
     {% if has_absolute_url %}<a href="../../../r/{{ content_type_id }}/{{ object_id }}/" class="viewsitelink"><span class="label">{% trans "View on site" %}</span></a>{% endif%}
     {% endblock %}
   </div>

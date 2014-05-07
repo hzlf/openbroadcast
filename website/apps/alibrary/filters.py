@@ -42,11 +42,11 @@ class ReleaseFilter(django_filters.FilterSet):
     releasetype = CharListFilter(label="Release type")
     release_country = CharListFilter(label="Country")
     media_release__license__name = CharListFilter(label="License")
-    main_format__name = CharListFilter(label="Release Format")
+    #main_format__name = CharListFilter(label="Release Format")
     #releasedate = DekadeFilter(label="Release date")
     class Meta:
         model = Release
-        fields = ['releasetype', 'release_country', 'main_format__name', 'media_release__license__name', 'label__type', ]
+        fields = ['releasetype', 'release_country', 'media_release__license__name', 'label__type', ]
 
     @property
     def filterlist(self):
@@ -74,7 +74,7 @@ class ReleaseFilter(django_filters.FilterSet):
 class ArtistFilter(django_filters.FilterSet):
     type = CharListFilter(label=_("Artist type"))
     country__printable_name = CharListFilter(label=_("Country"))
-    professions = CharListFilter(label=_("Professions"))
+    professions__name = CharListFilter(label=_("Professions"))
 
     class Meta:
         model = Artist

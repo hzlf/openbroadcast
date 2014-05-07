@@ -1,4 +1,4 @@
-{% load truncate i18n thumbnail arating_tags alibrary_tags calc %}
+{% load truncate i18n thumbnail arating_tags alibrary_tags calc spacify_tags %}
 <div class="span7 padded-h container_content">
 
 	<div class="page-header">
@@ -6,6 +6,17 @@
 	</div>
 
 	<dl class="dl-horizontal main">
+
+
+        {% if object.series %}
+		<dt>
+			{% trans "Series" %}:
+		</dt>
+		<dd>
+			{{ object.series }}{% if object.series_number %} #{{ object.series_number }}{% endif %}
+		</dd>
+        {% endif %}
+
 
 		<dt>
 			{% trans "Author" %}:
@@ -65,12 +76,12 @@
 		
 		<!--
 		<dt>
-		{% trans "History" %}:
+		{% trans "Edit History" %}:
 		</dt>
 		<dd>
 
 		{% if object.owner %}
-		<span class="key">{% trans "Created by" %}:</span> <span class="value"><a href="{{ object.owner.get_absolute_url }}">{{ object.owner }}</a></span> |
+		<span class="key">{% trans "Added by" %}:</span> <span class="value"><a href="{{ object.owner.get_absolute_url }}">{{ object.owner }}</a></span> |
 		{% endif %}
 
 		{% if object.publisher %}
@@ -91,14 +102,16 @@
 			<span class="value">{{ object.get_emissions.count }}</span> <span class="key">{% trans "Airplays" %}</span> | <span class="value">{{ object.get_emissions.count }}</span> <span class="key">{% trans "Plays" %}</span> | <span class="value">28</span> <span class="key">{% trans "Downloads" %}</span>
 		</dd>
 
-		{% if object.tags %}
-		<dt>{% trans "Tags" %}:</dt>
-		<dd>
-			{% for tag in object.tags %}
-			{{ tag.name }}{% if not forloop.last %},{% endif %}
-			{% endfor %}
-		</dd>
-		{% endif %}
+    {% if object.tags %}
+        <dt>
+            {% trans "Tags" %}:
+        </dt>
+        <dd>
+            {% for tag in object.tags %}
+                <span class="tag">{{ tag.name|spacify }}</span>
+            {% endfor %}
+        </dd>
+    {% endif %}
 
 	</dl>
 

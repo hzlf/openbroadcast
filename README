@@ -84,3 +84,7 @@ Download latest Sass from the console: gem install sass --pre (you might need su
 Just adding sass_options = {:sourcemap => true} to config.rb in Compass won’t work (just yet) and you can even get Compass conflicts with the aforementioned Sass alpha version. In my case, Compass 0.12.2 (Alnilam) does not get on very well with Sass 3.3.0.alpha.103 (Bleeding Edge), though it might be some other gem conflict.
 For that reason, we will have to watch changes using Sass directly, using sourcemap option: sass --watch --sourcemap sources/compass:public/css which generates a .map file for each source. This is the information Devtools will use to let you trace/edit original Sass files directly in the browser.
 """
+
+# run sass compiler with sourcemap
+cd /website/site-static/sass/
+sass --watch --sourcemap _wip.sass:../css/wip.css

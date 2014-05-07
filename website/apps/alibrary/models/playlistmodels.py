@@ -173,7 +173,7 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
     TYPE_CHOICES = (
         ('basket', _('Private Playlist')),
         ('playlist', _('Public Playlist')),
-        ('broadcast', _('Broadcast Playlist')),
+        ('broadcast', _('Broadcasts')),
         ('other', _('Other')),
     )
     type = models.CharField(max_length=12, default='basket', null=True, choices=TYPE_CHOICES)

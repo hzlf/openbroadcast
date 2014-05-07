@@ -179,6 +179,15 @@ class ReleaseListView(PaginationMixin, ListView):
             ids = import_session.importitem_set.filter(content_type=ctype.pk).values_list('object_id',)
             qs = qs.filter(pk__in=ids).distinct()
 
+        # filter by user
+        creator_filter = self.request.GET.get('creator', None)
+        if creator_filter:
+            from django.contrib.auth.models import User
+            creator = get_object_or_404(User, username='%s' % creator_filter)
+            qs = qs.filter(creator=creator).distinct()
+            f = {'item_type': 'release' , 'item': creator, 'label': _('Added by')}
+            self.relation_filter.append(f)
+
 
 
 

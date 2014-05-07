@@ -15,7 +15,7 @@ from pure_pagination.mixins import PaginationMixin
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 from profiles.models import *
 from profiles.forms import *
-from alibrary.models import Playlist
+from alibrary.models import Playlist, Release, Media
 from profiles.filters import ProfileFilter
 from lib.util import tagging_extra
 
@@ -167,32 +167,6 @@ class ProfileListView(PaginationMixin, ListView):
         self.tagcloud = tagging_extra.calculate_cloud(tagcloud)
 
         return qs
-    
-    def __get_queryset(self, **kwargs):
-
-        kwargs = {}
-        return Profile.objects.filter(**kwargs)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -213,10 +187,15 @@ class ProfileDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = kwargs
         context_object_name = self.get_context_object_name(self.object)
+        # get contributions
         context['broadcasts'] = Playlist.objects.filter(user=self.object.user).order_by('-updated')
+        context['uploaded_releases'] = Release.objects.filter(creator=self.object.user).order_by('-created')
+        context['uploaded_media'] = Media.objects.filter(creator=self.object.user).order_by('-created')
+
+        context['user_stream'] = actor_stream(self.object.user)[0:20]
         if context_object_name:
             context[context_object_name] = self.object
-            context['user_stream'] = actor_stream(self.object.user)
+
         return context
 
 

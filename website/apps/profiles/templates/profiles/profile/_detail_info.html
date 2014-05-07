@@ -1,4 +1,4 @@
-{% load truncate i18n thumbnail arating_tags %}
+{% load truncate i18n thumbnail arating_tags spacify_tags %}
 <div class="span7 padded-h container_content">
 
 	<div class="page-header">
@@ -87,7 +87,7 @@
 	<dl class="dl-horizontal sub">
 
 		<dt>
-			{% trans "History" %}:
+			{% trans "Edit History" %}:
 		</dt>
 		<dd>
 			
@@ -109,16 +109,16 @@
 			<span class="value">28</span> <span class="key">{% trans "Downloads" %}</span>
 		</dd>
 
-		{% if object.tags %}
-		<dt>
-			{% trans "Tags" %}:
-		</dt>
-		<dd>
-			{% for tag in object.tags %}
-			{{ tag.name }}{% if not forloop.last %},{% endif %}
-			{% endfor %}
-		</dd>
-		{% endif %}
+    {% if object.tags %}
+        <dt>
+            {% trans "Tags" %}:
+        </dt>
+        <dd>
+            {% for tag in object.tags %}
+                <span class="tag">{{ tag.name|spacify }}</span>
+            {% endfor %}
+        </dd>
+    {% endif %}
 
 	</dl>
 

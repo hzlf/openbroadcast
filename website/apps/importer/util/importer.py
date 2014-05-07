@@ -636,7 +636,7 @@ def mb_complete_media_task(obj, mb_id, mb_release_id, excludes=()):
                         pass
 
                     try:
-                        obj.mediamumber = int(disc_index)
+                        obj.medianumber = int(disc_index)
                     except:
                         pass
 

@@ -98,7 +98,7 @@ class BaseWriteForm(forms.ModelForm):
         return recipients
 
     @transaction.commit_on_success
-    def save(self, recipient=None, parent=None, auto_moderators=[]):
+    def save(self, recipient=None, parent=None, auto_moderators=[], hacked_recipient=None):
         """
         Save as many messages as there are recipients.
 
@@ -111,10 +111,11 @@ class BaseWriteForm(forms.ModelForm):
 
         """
 
-        print '***** SAVE POSTMAN!!'
-        print self.cleaned_data
-
         recipients = self.cleaned_data.get('recipients', [])
+        if hacked_recipient:
+            from django.contrib.auth.models import User
+            recipients = [User.objects.get(username=hacked_recipient)]
+
         if parent and not parent.thread_id:  # at the very first reply, make it a conversation
             parent.thread = parent
             parent.save()
@@ -130,8 +131,6 @@ class BaseWriteForm(forms.ModelForm):
                 recipients.remove(recipient)
             recipients.insert(0, recipient)
         is_successful = True
-
-        print recipients
 
         for r in recipients:
 

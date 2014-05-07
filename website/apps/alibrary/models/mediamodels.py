@@ -73,7 +73,7 @@ log = logging.getLogger(__name__)
 ################
 from alibrary.models.basemodels import *
 from alibrary.models.artistmodels import *
-from alibrary.models.playlistmodels import PlaylistItem
+from alibrary.models.playlistmodels import PlaylistItem, Playlist
 
 from alibrary.util.slug import unique_slugify
 
@@ -160,7 +160,7 @@ class Media(CachingMixin, MigrationMixin):
     lock = models.PositiveIntegerField(max_length=1, default=0, editable=False)
     
     tracknumber = models.PositiveIntegerField(max_length=12, default=0)
-
+    opus_number = models.CharField(max_length=200, blank=True, null=True)
 
     MEDIANUMBER_CHOICES = (
         (0, '0'),
@@ -174,18 +174,48 @@ class Media(CachingMixin, MigrationMixin):
         (8, '8'),
     )
     # a.k.a. "Disc number"
-    mediamumber = models.PositiveIntegerField(verbose_name=_('a.k.a. "Disc number'), max_length=12, default=0, choices=MEDIANUMBER_CHOICES)
+    medianumber = models.PositiveIntegerField(verbose_name=_('a.k.a. "Disc number'), blank=True, null=True, max_length=12, choices=MEDIANUMBER_CHOICES)
     
+
+
     MEDIATYPE_CHOICES = (
-        ('track', _('Track')),
+        (_('Single content recording'), (
+                ('song', _('Song')),
+                ('acappella', _('A cappella')),
+                ('soundeffects', _('Sound effects')),
+                ('soundtrack', _('Soundtrack')),
+                ('spokenword', _('Spokenword')),
+                ('interview', _('Interview')),
+            )
+        ),
+        (_('Multiple content recording'), (
+                ('djmix', _('DJ-Mix')),
+                ('concert', _('Concert')),
+                ('liveact', _('Live Act (PA)')),
+            )
+        ),
+        ('other', _('Other')),
+        (None, _('Unknown')),
+    )
+
+    mediatype = models.CharField(verbose_name=_('Type'), max_length=12, default='song', choices=MEDIATYPE_CHOICES)
+
+    VERSION_CHOICES = (
+        ('original', _('Original')),
         ('remix', _('Remix')),
-        ('mix', _('DJ-Mix')),
+        ('cover', _('Cover')),
+        ('live', _('Live Version')),
+        ('studio', _('Studio Version')),
+        ('radio', _('Radio Version')),
+        ('demo', _('Demo Version')),
         ('other', _('Other')),
     )
-    mediatype = models.CharField(verbose_name=_('Type'), max_length=12, default='track', choices=MEDIATYPE_CHOICES)
-    
+    version = models.CharField(max_length=12, blank=True, null=True, default='track', choices=VERSION_CHOICES)
+
+
     description = models.TextField(verbose_name="Extra Description / Tracklist", blank=True, null=True)
-    
+    lyrics = models.TextField(blank=True, null=True)
+
     duration = models.PositiveIntegerField(verbose_name="Duration (in ms)", max_length=12, blank=True, null=True, editable=False)
     
     # relations
@@ -272,7 +302,7 @@ class Media(CachingMixin, MigrationMixin):
         app_label = 'alibrary'
         verbose_name = _('Track')
         verbose_name_plural = _('Tracks')
-        ordering = ('mediamumber', 'tracknumber', )
+        ordering = ('medianumber', 'tracknumber', )
 
         permissions = (
             ('play_media', 'Play Track'),
@@ -513,7 +543,8 @@ class Media(CachingMixin, MigrationMixin):
         try:
             pis = PlaylistItem.objects.filter(object_id=self.pk, content_type=ContentType.objects.get_for_model(self))
             ps = Playlist.objects.exclude(type='other').filter(items__in=pis).order_by('-type', '-created',).distinct()
-        except:
+        except Exception, e:
+            print '### get_appearances error: %s' % e
             pass
         
         return ps

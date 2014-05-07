@@ -155,8 +155,8 @@ class Release(MigrationMixin):
     placeholder_1 = PlaceholderField('placeholder_1')
     
     RELEASETYPE_CHOICES = (
-        ('ep', _('EP')),
         ('album', _('Album')),
+        ('ep', _('EP')),
         ('compilation', _('Compilation')),
         ('remix', _('Remix')),
         ('live', _('Live')),
@@ -166,22 +166,30 @@ class Release(MigrationMixin):
     
     RELEASETYPE_CHOICES = (
         (_('General'), (
-                ('ep', _('EP')),
                 ('album', _('Album')),
-                ('compilation', _('Compilation')),
                 ('single', _('Single')),
-            )
-        ),
-        (_('Recording'), (
-                ('remix', _('Remix')),
+                ('ep', _('EP')),
+                ('compilation', _('Compilation')),
+                ('soundtrack', _('Soundtrack')),
+                ('audiobook', _('Audiobook')),
+                ('spokenword', _('Spokenword')),
+                ('interview', _('Interview')),
                 ('live', _('Live')),
+                ('remix', _('Remix')),
+                ('broadcast', _('Broadcast')),
+                ('djmix', _('DJ-Mix')),
+                ('mixtape', _('Mixtape')),
             )
         ),
+        #(_('Recording'), (
+        #        ('remix', _('Remix')),
+        #        ('live', _('Live')),
+        #    )
+        #),
         ('other', _('Other')),
-        ('unknown', _('Unknown')),
     )
     
-    releasetype = models.CharField(verbose_name="Release type", max_length=24, default='other', choices=RELEASETYPE_CHOICES)
+    releasetype = models.CharField(verbose_name="Release type", max_length=24, blank=True, null=True, choices=RELEASETYPE_CHOICES)
 
     
     # relations

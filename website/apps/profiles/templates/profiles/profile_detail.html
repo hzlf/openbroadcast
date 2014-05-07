@@ -40,9 +40,25 @@
             <li>
                 <a href="#activities" data-toggle="tab">{% trans "Activities" %}</a>
             </li>
+
+            {% if broadcasts.count %}
             <li>
-                <a href="#broadcasts" data-toggle="tab">{% trans "Broadcasts" %}</a>
+                <a href="#broadcasts" data-toggle="tab">
+                    {% trans "Playlists" %}
+                    ({{ broadcasts.count }})
+                </a>
             </li>
+            {% endif %}
+
+            {% if uploaded_media.count > 0 or uploaded_releases.count > 0 %}
+            <li>
+                <a href="#uploads" data-toggle="tab">
+                    {% trans "Uploads" %}
+                    ({{ uploaded_media.count|add:uploaded_releases.count }})
+                </a>
+            </li>
+            {% endif %}
+
         </ul>
     </div>
 
@@ -133,7 +149,9 @@
 
                             {% if object.birth_date %}
                                 <dt>{% trans "Date of birth" %}</dt>
-                                <dd>{{ object.birth_date }} <small> ({% trans "Age" %}: {{ object.age }} )</small></dd>
+                                <dd>{{ object.birth_date }}
+                                    <small> ({% trans "Age" %}: {{ object.age }} )</small>
+                                </dd>
                             {% endif %}
 
                             {% if object.gender %}
@@ -244,38 +262,61 @@
 
     <div class="tab-pane" id="activities">
 
+        <section class="activities">
+
+            <h2>{% trans "Activities" %}
+            <span class="pull-right">
+                <a href="{% url actstream-action-list %}?username={{ object.user.username }}">
+                    <i class="icon-chevron-sign-right"></i>
+                    {% trans "Show all activities" %}
+                </a>
+            </span>
+            </h2>
 
 
-        {# stats_for_user object.user #}
+            <table class="table table-condensed striped action">
+                <tbody>
+
+                {% for action in user_stream %}
+                    <tr>
+                        <td>
+                            {% if action.target %}
+                                {% if action.target.classname == 'Media' %}
+                                    Track
+                                {% else %}
+                                    {{ action.target.classname }}
+                                {% endif %}
+                            {% else %}
+                                &nbsp;
+                            {% endif %}
+                        </td>
 
 
-        <table class="table table-condensed striped action">
-            <tbody>
+                        <td>
+                            {% if action.actor %}
+                                <a href="{{ action.actor.get_profile.get_absolute_url }}">
+                                    {% firstof action.actor.get_full_name action.actor %}</a>
+                            {% endif %}
 
-            {% for action in user_stream|slice:":50" %}
-                <tr>
-                    <td>#</td>
+                            {{ action.verb }}
 
-                    <td>{% display_action action %}</td>
+                            {% if action.target %}
+                                <a href="{{ action.target.get_absolute_url }}">"{{ action.target.name|truncate_chars_inner:60 }}"</a>
+                            {% endif %}
 
-                    <!--
-							<td> {% if action.action_object %}
-							{{ action.action_object.classname }} <a href="{{ action.action_object.get_absolute_url }}">
-                        {{ action.action_object }}</a> {% trans "was" %}
-							{% endif %}
-							{{ action.verb }}
 
-							{% if action.actor %}
-							{% trans "by" %} <a href="{{ action.actor.get_profile.get_absolute_url }}">
-                        {% firstof action.actor.get_full_name action.actor %}</a> {% endif %} </td>
-							-->
-                    <td><span class="pull-right">{{ action.timestamp|timesince }} {% trans "ago" %}</span></td>
-                </tr>
+                        </td>
 
-            {% endfor %}
+                        <td><span class="pull-right">{{ action.timestamp|timesince }} {% trans "ago" %}</span></td>
+                    </tr>
 
-            </tbody>
-        </table>
+                {% endfor %}
+
+                </tbody>
+            </table>
+
+        </section>
+
 
     </div>
 
@@ -307,12 +348,64 @@
 
         </section>
 
-    </div>
-    </div>
-
-    </section>
 
     </div>
+
+    <div class="tab-pane" id="uploads">
+
+        <section class="uploads">
+
+            {% if uploaded_releases.count > 0 %}
+            <h2>
+                {% trans "Recently added Releases" %}
+                <span class="pull-right">
+                    {% url alibrary-release-list as release_list %}
+                    <a href="{% spurl path=release_list query="creator={{ object.user.username }}" %}">
+                        <i class="icon-chevron-sign-right"></i>
+                        {% trans "Show all added Releases" %} ({{ uploaded_releases.count }})
+                    </a>
+                </span>
+            </h2>
+
+            <div class="listview container release l">
+                <div class="list_body">
+                    {% for item in uploaded_releases|slice:":8" %}
+                        {% include "alibrary/release/list_item_l.html" %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+
+            {% if uploaded_media.count > 0 %}
+            <h2 style="margin-top: 24px;">
+                {% trans "Recently added Tracks" %}
+                <span class="pull-right">
+                    {% url alibrary-media-list as media_list %}
+                    <a href="{% spurl path=media_list query="creator={{ object.user.username }}" %}">
+                        <i class="icon-chevron-sign-right"></i>
+                        {% trans "Show all added Tracks" %} ({{ uploaded_media.count }})
+                    </a>
+                </span>
+            </h2>
+
+            <div class="listview container media s">
+                <div class="list_body">
+                    {% for item in uploaded_media|slice:":12" %}
+                        {% include "alibrary/media/_list_item_foreign_xs.html" %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+        </section>
+
+
+    </div>
+
+
+
+</div></div>
 
 {% endblock %}
 

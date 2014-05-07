@@ -335,17 +335,17 @@ class BaseReleaseMediaFormSet(BaseInlineFormSet):
                 Column(
                        Field('tracknumber', css_class='input-small'),
                        Field('mediatype', css_class='input-small'),
-                       Field('license', css_class='input-small mode-m mode-l'),
+                       Field('license', css_class='input-small'),
 
-                       Field('DELETE', css_class='input-mini'),
+                       #Field('DELETE', css_class='input-mini'),
 
                        css_class='span3'
                        ),
                 Column(
                         LookupField('name', css_class='input-large'),
                         LookupField('artist', css_class='input-large'),
-                        Field('isrc', css_class='input-large mode-m mode-l'),
-                        Field('filename', css_class='input-large mode-m mode-l'),
+                        Field('isrc', css_class='input-large'),
+                        #Field('filename', css_class='input-large'),
                        css_class='span9'
                        ),
                 css_class='releasemedia-row row-fluid',
@@ -378,11 +378,12 @@ class BaseReleaseMediaForm(ModelForm):
         #formset = BaseReleaseMediaFormSet
         #fields = ('name','tracknumber','base_filesize',)
 
+
     def __init__(self, *args, **kwargs):
         self.instance = kwargs['instance']
         super(BaseReleaseMediaForm, self).__init__(*args, **kwargs)
 
-        self.fields['filename'].widget.attrs['readonly'] = True
+        # self.fields['filename'].widget.attrs['readonly'] = True
 
         if self.instance and self.instance.release and self.instance.release.publish_date:
             self.fields['license'].widget.attrs['readonly'] = True
@@ -391,7 +392,7 @@ class BaseReleaseMediaForm(ModelForm):
 
     artist = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False)
     tracknumber =  forms.CharField(label=_('No.'))
-    filename =  forms.CharField(widget=ReadOnlyField(), label=_('Original File'), required=False)
+    #filename =  forms.CharField(widget=ReadOnlyField(), label=_('Original File'), required=False)
 
     def clean_license(self):
         instance = getattr(self, 'instance', None)
@@ -564,9 +565,9 @@ ReleaseMediaFormSet = inlineformset_factory(Release,
                                             Media,
                                             form=BaseReleaseMediaForm,
                                             formset=BaseReleaseMediaFormSet,
-                                            can_delete=True,
+                                            can_delete=False,
                                             extra=0,
-                                            fields=('name', 'tracknumber', 'isrc', 'artist', 'license', 'mediatype','filename'),
+                                            fields=('name', 'tracknumber', 'isrc', 'artist', 'license', 'mediatype',),
                                             can_order=False)
 
 AlbumartistFormSet = inlineformset_factory(Release,

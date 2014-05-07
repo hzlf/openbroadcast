@@ -1,5 +1,5 @@
 <div class="object history">
-	{% for r in history.all|slice:":50" %}
+	{% for r in history.all|slice:":20" %}
 	<div class="item">
 		<ul class="unstyled horizontal">
 			<li class="created">{{ r.revision.date_created }}</li>

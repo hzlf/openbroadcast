@@ -13,6 +13,8 @@ from actstream.models import *
 from pure_pagination.mixins import PaginationMixin
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 
+from actstream.filters import ActionFilter
+
 
 PAGINATE_BY = getattr(settings, 'ACTSTREAM_PAGINATE_BY', (30,60,120))
 PAGINATE_BY_DEFAULT = getattr(settings, 'ACTSTREAM_PAGINATE_BY_DEFAULT', 30)
@@ -47,14 +49,23 @@ class ActionListView(PaginationMixin, ListView):
             user = get_object_or_404(User, username=user_filter)
             qs = qs.filter(actor_object_id=user.pk).distinct()
 
-        
+
+        # apply filters
+        self.filter = ActionFilter(self.request.GET, queryset=qs)
+
+        qs = self.filter.qs
+
+
         
         return qs
     
 
     def get_context_data(self, **kwargs):
         context = super(ActionListView, self).get_context_data(**kwargs)
-        context['user_stream'] = actor_stream(self.request.user)
+
+        context.update({'filter': self.filter})
+        context['filter'] = self.filter
+        # context['user_stream'] = actor_stream(self.request.user)
         return context
 
 

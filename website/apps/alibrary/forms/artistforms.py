@@ -74,6 +74,7 @@ class ArtistForm(ModelForm):
                   'type',
                   'country',
                   'booking_contact',
+                  'email',
                   'biography',
                   'main_image',
                   'date_start',
@@ -122,6 +123,7 @@ class ArtistForm(ModelForm):
                 LookupField('real_name', css_class='input-xlarge'),
                 LookupField('type', css_class='input-xlarge'),
                 LookupField('country', css_class='input-xlarge'),
+                LookupField('email', css_class='input-xlarge'),
                 LookupField('booking_contact', css_class='input-xlarge'),
         )
 
