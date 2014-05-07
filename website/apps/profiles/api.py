@@ -24,7 +24,7 @@ class ProfileResource(ModelResource):
         detail_allowed_methods = ['get',]
         resource_name = 'profile'
         # TODO: double-check for sensitive information
-        excludes = ['birth_date', 'phone', 'iban', 'id', 'fax', 'mobile', 'paypal', 'address1', 'address2',]
+        excludes = ['birth_date', 'phone', 'iban', 'id', 'fax', 'mobile', 'paypal', 'address1', 'address2', 'legacy_id', 'legacy_legacy_id', 'migrated', ]
         authentication = Authentication()
         authorization = Authorization()
         always_return_data = True
@@ -88,10 +88,10 @@ class ProfileResource(ModelResource):
         object_list = []
         qs = None
         if q and len(q) > 1:
+
             qs = Profile.objects.filter(Q(user__username__istartswith=q)\
                 | Q(user__first_name__istartswith=q)\
                 | Q(user__last_name__istartswith=q))
-
 
         if qs:
            object_list = qs.distinct()[0:20]

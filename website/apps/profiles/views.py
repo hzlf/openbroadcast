@@ -23,7 +23,28 @@ from lib.util import tagging_extra
 PAGINATE_BY = getattr(settings, 'PROFILES_PAGINATE_BY', (12,24,36))
 PAGINATE_BY_DEFAULT = getattr(settings, 'PROFILES_PAGINATE_BY_DEFAULT', 12)
 
-
+ORDER_BY = [
+    {
+        'key': 'user__first_name',
+        'name': _('Name')
+    },
+    {
+        'key': 'user__last_name',
+        'name': _('Surname')
+    },
+    {
+        'key': 'user__username',
+        'name': _('Username')
+    },
+    {
+        'key': 'created',
+        'name': _('Date joined')
+    },
+    {
+        'key': 'updated',
+        'name': _('Last modified')
+    },
+]
 
 
 
@@ -66,6 +87,8 @@ class ProfileListView(PaginationMixin, ListView):
         self.extra_context['tagcloud'] = self.tagcloud
         self.extra_context['list_style'] = self.request.GET.get('list_style', 'm')
         self.extra_context['get'] = self.request.GET
+
+        self.extra_context['order_by'] = ORDER_BY
         
         context.update(self.extra_context)
         return context
