@@ -1129,6 +1129,11 @@ base.ui.searchbar = function () {
     this.autocomplete.ct = ct;
     this.autocomplete.template = 'alibrary/nj/' + ct + '/autocomplete.html';
 
+    // hackish, map for non-library items
+    if (ct == 'profile') {
+        this.autocomplete.template = 'profiles/nj/' + ct + '/autocomplete.html';
+    }
+
     // hackish api mapping :(
     if(ct == 'media') {
         ct = 'track';

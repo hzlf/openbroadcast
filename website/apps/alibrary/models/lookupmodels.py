@@ -404,8 +404,9 @@ class APILookup(models.Model):
                         pass
 
                 try:
+                    res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', 'localhost:8000')
                     #res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', 'dgs.anorg.net')
-                    res['remote_image'] = res['main_image'] = image
+                    #res['remote_image'] = res['main_image'] = image
                 except:
                     res['remote_image'] = res['main_image'] = None
                 #res['remote_image'] = 'http://dgs.anorg.net/image/R-5081-1147456810.jpeg'

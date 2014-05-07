@@ -76,6 +76,14 @@ see: https://www.rabbitmq.com/install-debian.html
 http://172.20.10.203:15672/ # needs vpn connection
 
 
+askjdhkajsd ajshd kajhsdk ajs 
+============================================
+
+askjdha ksjhdha jshdl kajhsdl kads
+asd ads lagskjdagkjsdhgkajsdg 
+- skdjhajshd
+- asldjka kjsdh 
+
 
 Echoprint server installation
 ==========

@@ -1,5 +1,5 @@
 {% extends "layout_base.html" %}
-{% load spurl cache i18n truncate cache dajaxice_templatetags sekizai_tags %}
+{% load spurl adv_cache i18n truncate cache dajaxice_templatetags sekizai_tags %}
 
 {% block heading %}
     <!-- view specific scripts -->
@@ -125,7 +125,11 @@
 
                 {# switching list styles #}
                 {% if list_style == "s" %}
+
+                    {% cache 0 "media_list_item_s" item.pk item.updated user.is_authenticated %}
                     {% include "alibrary/media/list_item_s.html" %}
+                    {% endcache %}
+
                 {% endif %}
 
                 {% if list_style == "m" %}

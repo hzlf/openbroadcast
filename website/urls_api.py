@@ -10,6 +10,7 @@ from importer.api import ImportResource, ImportFileResource
 from exporter.api import ExportResource, ExportItemResource
 from abcast.api import StationResource, ChannelResource, JingleResource, JingleSetResource, EmissionResource
 from abcast.api import BaseResource as AbcastBaseResource
+from profiles.api import ProfileResource
 
 from istats.api import StatsResource
 
@@ -48,8 +49,11 @@ api.register(ChannelResource())
 api.register(JingleResource())
 api.register(JingleSetResource())
 
-### scheduler
+# scheduler
 api.register(EmissionResource())
+
+# profiles
+api.register(ProfileResource())
 
 # comment
 api.register(CommentResource())
