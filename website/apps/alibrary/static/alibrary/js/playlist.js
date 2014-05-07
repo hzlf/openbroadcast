@@ -627,7 +627,7 @@ CollectorApp = (function () {
         el.on('click', '.item.playlist', function (e) {
 
             // don't do if link clicked
-            if(!$(event.target).is("a")) {
+            if(!$(e.target).is("a")) {
 
                 var item = {
                     el: $(this),
