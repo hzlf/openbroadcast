@@ -22,7 +22,7 @@ UiStates = function () {
 
     var self = this;
     this.css_selector = '.ui-persistent';
-    this.cookie_name = 'ui_states';
+    this.cookie_name = 'ui_states_shared';
     this.values = new HashTable();
 
     // load states from cookie to hash-table
