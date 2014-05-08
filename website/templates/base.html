@@ -39,8 +39,8 @@
     {% render_block "css" postprocessor "compressor.contrib.sekizai.compress" %}
 
     <!-- js head -->
-    {% render_block "js-head" %}
-    {# render_block "js-head" postprocessor "compressor.contrib.sekizai.compress" #}
+    {# render_block "js-head" #}
+    {% render_block "js-head" postprocessor "compressor.contrib.sekizai.compress" %}
 
     <!-- webfonts -->
     {# include "lib/monotype.html" #}
@@ -225,8 +225,15 @@
 {% render_block "js-ext" %}
 
 <!-- js-post -->
-{% render_block "js-post" %}
-{# render_block "js-post" postprocessor "compressor.contrib.sekizai.compress" #}
+{# render_block "js-post" #}
+
+
+{% render_block "js-post" postprocessor "compressor.contrib.sekizai.compress" %}
+
+<!-- debugging compressed & reformatted js -->
+{% comment %}<script src="{{ STATIC_URL }}js/cp-debug.js"></script>{% endcomment %}
+
+{% render_block "js-uncompressed" %}
 
 
 {% include 'autocomplete_light/static.html' %}

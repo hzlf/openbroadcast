@@ -2,7 +2,7 @@
  * Some useful util functions
  * (as jQuery plugins)
  */
-
+;
 (function (jQuery) {
 
     var union = function (array1, array2) {
@@ -57,14 +57,14 @@ if (typeof String.prototype.endsWith !== 'function') {
     String.prototype.endsWith = function(suffix) {
         return this.indexOf(suffix, this.length - suffix.length) !== -1;
     };
-}
+};
 
 
 function arrRemove(arr, from, to) {
   var rest = arr.slice((to || from) + 1 || arr.length);
   this.length = from < 0 ? arr.length + from : from;
   return arr.push.apply(arr, rest);
-}
+};
 function isInt(value) {
     return !isNaN(parseInt(value,10)) && (parseFloat(value,10) == parseInt(value,10));
-}
+};

@@ -98,11 +98,11 @@ UiStates = function () {
         this.save = function () {
 
             $.log('save');
-            $.cookie(this.cookie_name, JSON.stringify(self.values.items));
+            $.cookie(this.cookie_name, JSON.stringify(self.values.items), { expires: 7, path: '/' });
             $.log('post-save');
 
         }
-}
+};
 
 BaseUi = function () {
 
@@ -213,7 +213,7 @@ base.ui.states_custom_update = function (id, state) {
 
     return false;
 
-}
+};
 
 
 function HashTable(obj) {
@@ -290,7 +290,7 @@ function HashTable(obj) {
         this.items = {}
         this.length = 0;
     }
-}
+};
 
 
 /* AJAX Indicator */
@@ -302,7 +302,7 @@ base.ui.loading = function () {
             $('.navbar .container').removeClass('active');
             $('body').removeClass('ajax_loading');
         });
-}
+};
 
 /*
  * Periodical UI refresh frequency degrades continuosely
@@ -2238,4 +2238,4 @@ base.ui.state___ = {
         return (this.data = data);
     }
 
-}
+};

@@ -81,7 +81,7 @@ class MultilingualURLMiddleware(object):
             request.path = "/" + "/".join(request.path.split("/")[2:])
             request.path_info = "/" + "/".join(request.path_info.split("/")[2:])
             t = prefix
-            if t in SUPPORTED:
+            if t in SUPPORTED and 1 == 2:
                 lang = t
                 if (hasattr(request, "session") and
                     request.session.get("django_language", None) != lang):

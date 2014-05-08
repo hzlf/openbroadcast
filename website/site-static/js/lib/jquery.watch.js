@@ -14,7 +14,7 @@ $.fn.watch = function(props, callback, timeout){
                         func: 	callback,
                         vals: 	[] };
         $.each(data.props, function(i) {
-        	data.vals[i] = el.data(data.props[i]); 
+        	data.vals[i] = el.data(data.props[i]);
         });
         el.data(data);
 

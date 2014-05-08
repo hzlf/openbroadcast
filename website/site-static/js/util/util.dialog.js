@@ -5,7 +5,7 @@
 
 (function(window, undefined) {
 
-	util = util || {};
+	var util = util || {};
 
 	var UtilDialog = (function() {
 
