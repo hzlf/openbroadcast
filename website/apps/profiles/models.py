@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.db.models import permalink
 from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_save
+from django.core.urlresolvers import reverse
 import tagging
 from django_extensions.db.fields import AutoSlugField, UUIDField
 from phonenumber_field.modelfields import PhoneNumberField
@@ -151,6 +152,13 @@ class Profile(MigrationMixin):
     def get_admin_url(self):
         from lib.util.get_admin_url import change_url
         return change_url(self)
+
+    def get_api_url(self):
+        return reverse('api_dispatch_detail', kwargs={
+            'api_name': 'v1',
+            'resource_name': 'profile',
+            'pk': self.pk
+        }) + ''
 
 
 

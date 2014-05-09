@@ -73,6 +73,8 @@ class ProfileResource(ModelResource):
 
         return [
               url(r"^(?P<resource_name>%s)/autocomplete%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('autocomplete'), name="profiles-profile_api-autocomplete"),
+              url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/stats%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('stats'), name="profiles-profile_api-stats"),
+
         ]
 
 
@@ -146,4 +148,26 @@ class ProfileResource(ModelResource):
             pass
 
         return bundle
+
+
+
+    def stats(self, request, **kwargs):
+
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        profile = Profile.objects.get(**self.remove_api_resource_names(kwargs))
+
+        from statistics.util import ObjectStatistics
+
+        ostats = ObjectStatistics(user=profile.user)
+
+        stats = ostats.generate(actions=['stream', 'download',])
+
+
+
+
+        self.log_throttled_access(request)
+        return self.create_response(request, stats)
         

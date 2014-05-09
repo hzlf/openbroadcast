@@ -4,11 +4,17 @@
 
 {% block heading %} <!-- heading / icon (large one) -->
 
-    {% addtoblock "js-post" %}<script src="{{ STATIC_URL }}alibrary/js/lib/raphael-min.js"></script>{% endaddtoblock %}
-    {% addtoblock "js-post" %}<script src="{{ STATIC_URL }}aplayer/js/detail.js"></script>{% endaddtoblock %}
+    {% addtoblock "js-post" %}
+        <script src="{{ STATIC_URL }}alibrary/js/lib/raphael-min.js"></script>{% endaddtoblock %}
+    {% addtoblock "js-post" %}
+        <script src="{{ STATIC_URL }}aplayer/js/detail.js"></script>{% endaddtoblock %}
 
     <!-- statistic tools -->
     {% addtoblock "js-post" %}<script src="{{ STATIC_URL }}alibrary/js/statistics.js"></script>{% endaddtoblock %}
+
+    <!-- jqplot - TODO: maybe move to include -->
+    {% addtoblock "js-uncompressed" %}<script src="{{ STATIC_URL }}js/lib/flot-0.8.3/jquery.flot.js"></script>{% endaddtoblock %}
+    {% addtoblock "js-uncompressed" %}<script src="{{ STATIC_URL }}js/lib/flot-0.8.3/jquery.flot.time.js"></script>{% endaddtoblock %}
 
 
 
@@ -29,12 +35,20 @@
                 detail_player.init();
                 window.detail_player = detail_player;
 
-
-
+                // initialize stats app
                 var stats = new StatisticApp;
-                stats.ct = 'media';
-                stats.id = object.pk;
+                stats.resource_uri = '{{ object.get_api_url }}';
+                // stats.dom_id = 'statistics_container'; // this is the default anyway
+
                 stats.init();
+
+                // trigger to actually _load_ the stats
+                $('a[data-toggle="tab"]').on('shown', function (e) {
+                    if($(e.target).attr('href') == '#statistics') {
+                        stats.show();
+                    }
+                })
+
 
             });
         </script>
@@ -108,13 +122,13 @@
 
     <section class="tabbed item_inner">
 
-        <div class="tab-content">
+    <div class="tab-content">
 
-            <div class="tab-pane active" id="overview_">
+    <div class="tab-pane active" id="overview_">
 
-                <section class="media">
+        <section class="media">
 
-                    <!--
+            <!--
                         <h2>{% trans "Track" %}</h2>
 
 
@@ -123,231 +137,242 @@
                         </div>
                         -->
 
-                    <!--
+            <!--
                         <div id="waveform" style="background: #a5a5a5; width: 100%; height: 50px;">
                             <img src="{{ object.get_waveform_url }}" style="height: 50px; width: 100%;"></img>
                         </div>
                         -->
 
-                </section>
+        </section>
 
-                {% if object.description %}
-                    <section class="description">
-                        <h2>{% trans "Track description" %}</h2>
+        {% if object.description %}
+            <section class="description">
+                <h2>{% trans "Track description" %}</h2>
 
-                        <div class="description markdown padded-h">
-                            {% wikify object.description %}
-                        </div>
-                    </section>
-                {% endif %}
+                <div class="description markdown padded-h">
+                    {% wikify object.description %}
+                </div>
+            </section>
+        {% endif %}
 
 
-                {%  if object.echonest_id %}
-                <section class="analyse">
-                    <h2>{% trans "Track analysis" %}</h2>
+        {% if object.echonest_id %}
+            <section class="analyse">
+                <h2>{% trans "Track analysis" %}</h2>
 
-                    <table class=" table-condensed" style="width: 100%;">
-                        <thead>
-                        <tr>
-                            <th>{% trans "Tempo" %} [BPM]</th>
-                            <th>{% trans "Loudness" %}</th>
-                            <th>{% trans "Key" %}</th>
+                <table class=" table-condensed" style="width: 100%;">
+                    <thead>
+                    <tr>
+                        <th>{% trans "Tempo" %} [BPM]</th>
+                        <th>{% trans "Loudness" %}</th>
+                        <th>{% trans "Key" %}</th>
 
-                            <th>{% trans "Danceability" %}</th>
-                            <th>{% trans "Energy" %}</th>
-                            <th>{% trans "Liveness" %}</th>
-                            <th>{% trans "Speechiness" %}</th>
+                        <th>{% trans "Danceability" %}</th>
+                        <th>{% trans "Energy" %}</th>
+                        <th>{% trans "Liveness" %}</th>
+                        <th>{% trans "Speechiness" %}</th>
 
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td class="value">{{ object.tempo }}</td>
-                            <td class="value">{{ object.loudness }}</td>
-                            <td class="value">{{ object.key }}</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="value">{{ object.tempo }}</td>
+                        <td class="value">{{ object.loudness }}</td>
+                        <td class="value">{{ object.key }}</td>
 
-                            <td class="bar">
-                                {% if object.danceability %}
+                        <td class="bar">
+                            {% if object.danceability %}
                                 <div class="holder">
                                     <div class="indicator" style="width: {{ object.danceability|multiply:100 }}%">
                                         <span>{{ object.danceability|multiply:100|roundint }}%</span>
                                     </div>
                                 </div>
-                                {% else %}
+                            {% else %}
                                 <span class="na">-</span>
-                                {% endif %}
-                            </td>
+                            {% endif %}
+                        </td>
 
-                            <td class="bar">
-                                {% if object.energy %}
+                        <td class="bar">
+                            {% if object.energy %}
                                 <div class="holder">
                                     <div class="indicator" style="width: {{ object.energy|multiply:100 }}%">
                                         <span>{{ object.energy|multiply:100|roundint }}%</span>
                                     </div>
                                 </div>
-                                {% else %}
+                            {% else %}
                                 <span class="na">-</span>
-                                {% endif %}
-                            </td>
+                            {% endif %}
+                        </td>
 
-                            <td class="bar">
-                                {% if object.liveness %}
+                        <td class="bar">
+                            {% if object.liveness %}
                                 <div class="holder">
                                     <div class="indicator" style="width: {{ object.liveness|multiply:100 }}%">
                                         <span>{{ object.liveness|multiply:100|roundint }}%</span>
                                     </div>
                                 </div>
-                                {% else %}
+                            {% else %}
                                 <span class="na">-</span>
-                                {% endif %}
-                            </td>
+                            {% endif %}
+                        </td>
 
-                            <td class="bar">
-                                {% if object.speechiness %}
+                        <td class="bar">
+                            {% if object.speechiness %}
                                 <div class="holder">
                                     <div class="indicator" style="width: {{ object.speechiness|multiply:100 }}%">
                                         <span>{{ object.speechiness|multiply:100|roundint }}%</span>
                                     </div>
                                 </div>
-                                {% else %}
+                            {% else %}
                                 <span class="na">-</span>
-                                {% endif %}
-                            </td>
+                            {% endif %}
+                        </td>
 
-                        </tr>
-                        </tbody>
-                    </table>
-
-
-                </section>
-                {% endif %}
+                    </tr>
+                    </tbody>
+                </table>
 
 
-
-                <section class="file-properties">
-                    <h2>{% trans "Audio Properties" %}</h2>
-
-
-                    <table class=" table-condensed" style="width: 100%;">
-                        <thead>
-                        <tr>
-                            <th>{% trans "Format" %}</th>
-                            <th>{% trans "Filesize" %}</th>
-                            <th>{% trans "Samplerate" %}</th>
-                            <th>{% trans "Bitrate" %}</th>
-                            <th>{% trans "Filename" %}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td class="value">{{ object.base_format|upper }}</td>
-                            <td class="value">{{ object.base_filesize|filesizeformat }}</td>
-                            <td class="value">{{ object.base_samplerate }}</td>
-                            <td class="value">{{ object.base_bitrate }}</td>
-                            <td class="value">{% if obj.filename %}{{ object.filename }}{% endif %}</td>
-                        </tr>
-                        </tbody>
-                    </table>
-
-
-                </section>
-
-
-            </div>
-
-            <div class="tab-pane" id="appearance">
-
-                <section class="appearance">
-
-                    <h2>{% trans "Playlists using this track" %}</h2>
-
-                    <div class="listview container playlist s">
-
-                        <div class="list_body">
-
-                            {% with highlight=object extended=1 %}
-                                {% for item in object.appearances %}
-                                    {% include "alibrary/playlist/list_item_s.html" %}
-                                {% endfor %}
-                            {% endwith %}
-                        </div>
-                    </div>
-
-                    <h2 style="margin-top: 20px;">{% trans "Credits & Credited Artists" %}</h2>
-
-
-                    <ul class="__horizontal unstyled small">
-                    {% for ea in object.extraartist_media.all %}
-                        <li>
-                            <a href="{{ ea.artist.get_absolute_url }}">{{ ea.artist.name }}</a>
-                            <small>[{{ ea.profession.name }}]</small>
-                        </li>
-                    {% endfor %}
-                    </ul>
+            </section>
+        {% endif %}
 
 
 
-                </section>
-
-            </div>
-
+        <section class="file-properties">
+            <h2>{% trans "Audio Properties" %}</h2>
 
 
+            <table class=" table-condensed" style="width: 100%;">
+                <thead>
+                <tr>
+                    <th>{% trans "Format" %}</th>
+                    <th>{% trans "Filesize" %}</th>
+                    <th>{% trans "Samplerate" %}</th>
+                    <th>{% trans "Bitrate" %}</th>
+                    <th>{% trans "Filename" %}</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td class="value">{{ object.base_format|upper }}</td>
+                    <td class="value">{{ object.base_filesize|filesizeformat }}</td>
+                    <td class="value">{{ object.base_samplerate }}</td>
+                    <td class="value">{{ object.base_bitrate }}</td>
+                    <td class="value">{% if obj.filename %}{{ object.filename }}{% endif %}</td>
+                </tr>
+                </tbody>
+            </table>
 
 
-            {% if object.has_video %}
-                <div class="tab-pane" id="video">
+        </section>
 
-                    <section class="video">
 
-                        <h2>{% trans "Video Clip" %}</h2>
+    </div>
 
-                    </section>
+    <div class="tab-pane" id="appearance">
 
+        <section class="appearance">
+
+            <h2>{% trans "Playlists using this track" %}</h2>
+
+            <div class="listview container playlist s">
+
+                <div class="list_body">
+
+                    {% with highlight=object extended=1 %}
+                        {% for item in object.appearances %}
+                            {% include "alibrary/playlist/list_item_s.html" %}
+                        {% endfor %}
+                    {% endwith %}
                 </div>
-            {% endif %}
-
-
-            {% if object.lyrics %}
-                <div class="tab-pane" id="lyrics">
-
-                    <section class="lyrics">
-
-                        <h2>{% trans "Lyrics" %}</h2>
-
-                        {{ object.lyrics|linebreaks }}
-
-                    </section>
-
-                </div>
-            {% endif %}
-
-
-            <div class="tab-pane" id="history">
-
-                <section class="history">
-
-                    <h2>{% trans "Edit history" %}</h2>
-
-                    {% include "alibrary/element/_object_history.html" %}
-                </section>
-
             </div>
 
-            <div class="tab-pane" id="statistics">
-
-                <section class="statistics">
-
-                    <h2>{% trans "Statistics" %}</h2>
-
-                    {% events_for_object object %}
-
-                </section>
+            <h2 style="margin-top: 20px;">{% trans "Credits & Credited Artists" %}</h2>
 
 
-            </div>
+            <ul class="__horizontal unstyled small">
+                {% for ea in object.extraartist_media.all %}
+                    <li>
+                        <a href="{{ ea.artist.get_absolute_url }}">{{ ea.artist.name }}</a>
+                        <small>[{{ ea.profession.name }}]</small>
+                    </li>
+                {% endfor %}
+            </ul>
+
+
+        </section>
+
+    </div>
+
+
+
+
+
+    {% if object.has_video %}
+        <div class="tab-pane" id="video">
+
+            <section class="video">
+
+                <h2>{% trans "Video Clip" %}</h2>
+
+            </section>
 
         </div>
+    {% endif %}
+
+
+    {% if object.lyrics %}
+        <div class="tab-pane" id="lyrics">
+
+            <section class="lyrics">
+
+                <h2>{% trans "Lyrics" %}</h2>
+
+                {{ object.lyrics|linebreaks }}
+
+            </section>
+
+        </div>
+    {% endif %}
+
+
+    <div class="tab-pane" id="history">
+
+        <section class="history">
+
+            <h2>{% trans "Edit history" %}</h2>
+
+            {% include "alibrary/element/_object_history.html" %}
+        </section>
+
+    </div>
+
+    <div class="tab-pane" id="statistics">
+
+        <section class="statistics">
+
+            <h2>{% trans "Statistics" %}</h2>
+
+
+            <div id="statistics_container" style="min-height: 240px;">
+                <div class="message">{% trans "Loading statistics" %}</div>
+                <!-- dynamic content -->
+            </div>
+
+
+            <h2 style="margin-top: 24px;">{% trans "Airplays" %}</h2>
+
+            {% events_for_object_by_verb object "playout" %}
+
+
+            {% comment %}{% events_for_object object %}{% endcomment %}
+
+        </section>
+
+
+    </div>
+
+    </div>
 
     </section>
 

@@ -12603,6 +12603,286 @@ ul.ui-autocomplete > li img {
   border-color: #6633cc;
 }
 
+/*rules for the plot target div.  These will be cascaded down to all plot elements according to css rules */
+/* line 3, ../sass/apps/_statistics.sass */
+.jqplot-target {
+  position: relative;
+  color: #666666;
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  font-size: 1em;
+  /*    height: 300px;
+   *  width: 400px; */
+}
+
+/*rules applied to all axes */
+/* line 13, ../sass/apps/_statistics.sass */
+.jqplot-axis {
+  font-size: 0.75em;
+}
+
+/* line 16, ../sass/apps/_statistics.sass */
+.jqplot-xaxis {
+  margin-top: 10px;
+}
+
+/* line 19, ../sass/apps/_statistics.sass */
+.jqplot-x2axis {
+  margin-bottom: 10px;
+}
+
+/* line 22, ../sass/apps/_statistics.sass */
+.jqplot-yaxis {
+  margin-right: 10px;
+}
+
+/* line 25, ../sass/apps/_statistics.sass */
+.jqplot-y2axis, .jqplot-y3axis, .jqplot-y4axis, .jqplot-y5axis, .jqplot-y6axis, .jqplot-y7axis, .jqplot-y8axis, .jqplot-y9axis, .jqplot-yMidAxis {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+/*rules applied to all axis tick divs */
+/* line 31, ../sass/apps/_statistics.sass */
+.jqplot-axis-tick, .jqplot-xaxis-tick, .jqplot-yaxis-tick, .jqplot-x2axis-tick, .jqplot-y2axis-tick, .jqplot-y3axis-tick, .jqplot-y4axis-tick, .jqplot-y5axis-tick, .jqplot-y6axis-tick, .jqplot-y7axis-tick, .jqplot-y8axis-tick, .jqplot-y9axis-tick, .jqplot-yMidAxis-tick {
+  position: absolute;
+  white-space: pre;
+}
+
+/* line 35, ../sass/apps/_statistics.sass */
+.jqplot-xaxis-tick {
+  top: 0px;
+  /* initial position untill tick is drawn in proper place */
+  left: 15px;
+  /*    padding-top: 10px; */
+  vertical-align: top;
+}
+
+/* line 42, ../sass/apps/_statistics.sass */
+.jqplot-x2axis-tick {
+  bottom: 0px;
+  /* initial position untill tick is drawn in proper place */
+  left: 15px;
+  /*    padding-bottom: 10px; */
+  vertical-align: bottom;
+}
+
+/* line 49, ../sass/apps/_statistics.sass */
+.jqplot-yaxis-tick {
+  right: 0px;
+  /* initial position untill tick is drawn in proper place */
+  top: 15px;
+  /*    padding-right: 10px; */
+  text-align: right;
+}
+/* line 55, ../sass/apps/_statistics.sass */
+.jqplot-yaxis-tick.jqplot-breakTick {
+  right: -20px;
+  margin-right: 0px;
+  padding: 1px 5px 1px 5px;
+  /*background-color: white; */
+  z-index: 2;
+  font-size: 1.5em;
+}
+
+/* line 63, ../sass/apps/_statistics.sass */
+.jqplot-y2axis-tick, .jqplot-y3axis-tick, .jqplot-y4axis-tick, .jqplot-y5axis-tick, .jqplot-y6axis-tick, .jqplot-y7axis-tick, .jqplot-y8axis-tick, .jqplot-y9axis-tick {
+  left: 0px;
+  /* initial position untill tick is drawn in proper place */
+  top: 15px;
+  /*    padding-left: 10px; */
+  /*    padding-right: 15px; */
+  text-align: left;
+}
+
+/* line 71, ../sass/apps/_statistics.sass */
+.jqplot-yMidAxis-tick {
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* line 75, ../sass/apps/_statistics.sass */
+.jqplot-xaxis-label {
+  margin-top: 10px;
+  font-size: 11pt;
+  position: absolute;
+}
+
+/* line 80, ../sass/apps/_statistics.sass */
+.jqplot-x2axis-label {
+  margin-bottom: 10px;
+  font-size: 11pt;
+  position: absolute;
+}
+
+/* line 85, ../sass/apps/_statistics.sass */
+.jqplot-yaxis-label {
+  margin-right: 10px;
+  /*    text-align: center; */
+  font-size: 11pt;
+  position: absolute;
+}
+
+/* line 91, ../sass/apps/_statistics.sass */
+.jqplot-yMidAxis-label {
+  font-size: 11pt;
+  position: absolute;
+}
+
+/* line 95, ../sass/apps/_statistics.sass */
+.jqplot-y2axis-label, .jqplot-y3axis-label, .jqplot-y4axis-label, .jqplot-y5axis-label, .jqplot-y6axis-label, .jqplot-y7axis-label, .jqplot-y8axis-label, .jqplot-y9axis-label {
+  /*    text-align: center; */
+  font-size: 11pt;
+  margin-left: 10px;
+  position: absolute;
+}
+
+/* line 101, ../sass/apps/_statistics.sass */
+.jqplot-meterGauge-tick {
+  font-size: 0.75em;
+  color: #999999;
+}
+
+/* line 105, ../sass/apps/_statistics.sass */
+.jqplot-meterGauge-label {
+  font-size: 1em;
+  color: #999999;
+}
+
+/* line 110, ../sass/apps/_statistics.sass */
+table.jqplot-table-legend {
+  margin-top: 12px;
+  margin-bottom: 12px;
+  margin-left: 12px;
+  margin-right: 12px;
+  background-color: rgba(255, 255, 255, 0.6);
+  border: 1px solid #cccccc;
+  position: absolute;
+  font-size: 0.75em;
+}
+/* line 119, ../sass/apps/_statistics.sass */
+table.jqplot-cursor-legend {
+  background-color: rgba(255, 255, 255, 0.6);
+  border: 1px solid #cccccc;
+  position: absolute;
+  font-size: 0.75em;
+}
+
+/* line 126, ../sass/apps/_statistics.sass */
+td.jqplot-table-legend {
+  vertical-align: middle;
+}
+/* line 129, ../sass/apps/_statistics.sass */
+td.jqplot-seriesToggle:hover, td.jqplot-seriesToggle:active {
+  cursor: pointer;
+}
+
+/*These rules could be used instead of assigning
+ *element styles and relying on js object properties. */
+/*td.jqplot-table-legend-swatch {
+ *    padding-top: 0.5em;
+ *    text-align: center;
+ *}
+ *
+ *tr.jqplot-table-legend:first td.jqplot-table-legend-swatch {
+ *    padding-top: 0px;
+ *} */
+/* line 146, ../sass/apps/_statistics.sass */
+.jqplot-table-legend .jqplot-series-hidden {
+  text-decoration: line-through;
+}
+
+/* line 150, ../sass/apps/_statistics.sass */
+div.jqplot-table-legend-swatch-outline {
+  border: 1px solid #cccccc;
+  padding: 1px;
+}
+/* line 153, ../sass/apps/_statistics.sass */
+div.jqplot-table-legend-swatch {
+  width: 0px;
+  height: 0px;
+  border-top-width: 5px;
+  border-bottom-width: 5px;
+  border-left-width: 6px;
+  border-right-width: 6px;
+  border-top-style: solid;
+  border-bottom-style: solid;
+  border-left-style: solid;
+  border-right-style: solid;
+}
+
+/* line 165, ../sass/apps/_statistics.sass */
+.jqplot-title {
+  top: 0px;
+  left: 0px;
+  padding-bottom: 0.5em;
+  font-size: 1.2em;
+}
+
+/* line 171, ../sass/apps/_statistics.sass */
+table.jqplot-cursor-tooltip {
+  border: 1px solid #cccccc;
+  font-size: 0.75em;
+}
+
+/* line 175, ../sass/apps/_statistics.sass */
+.jqplot-cursor-tooltip, .jqplot-highlighter-tooltip, .jqplot-canvasOverlay-tooltip {
+  border: 1px solid #cccccc;
+  font-size: 0.75em;
+  white-space: nowrap;
+  background: rgba(208, 208, 208, 0.5);
+  padding: 1px;
+}
+
+/* line 182, ../sass/apps/_statistics.sass */
+.jqplot-point-label {
+  font-size: 0.75em;
+  z-index: 2;
+}
+
+/* line 186, ../sass/apps/_statistics.sass */
+td.jqplot-cursor-legend-swatch {
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* line 190, ../sass/apps/_statistics.sass */
+div.jqplot-cursor-legend-swatch {
+  width: 1.2em;
+  height: 0.7em;
+}
+
+/* line 194, ../sass/apps/_statistics.sass */
+.jqplot-error {
+  /*   Styles added to the plot target container when there is an error go here. */
+  text-align: center;
+}
+
+/* line 198, ../sass/apps/_statistics.sass */
+.jqplot-error-message {
+  /*    Styling of the custom error message div goes here. */
+  position: relative;
+  top: 46%;
+  display: inline-block;
+}
+
+/* line 205, ../sass/apps/_statistics.sass */
+div.jqplot-bubble-label {
+  font-size: 0.8em;
+  /*    background: rgba(90%, 90%, 90%, 0.15); */
+  padding-left: 2px;
+  padding-right: 2px;
+  color: #333333;
+}
+/* line 211, ../sass/apps/_statistics.sass */
+div.jqplot-bubble-label.jqplot-bubble-label-highlight {
+  background: rgba(229, 229, 229, 0.7);
+}
+/* line 213, ../sass/apps/_statistics.sass */
+div.jqplot-noData-container {
+  text-align: center;
+  background-color: rgba(244, 244, 244, 0.3);
+}
+
 /*!
  * qTip2 - Pretty powerful tooltips - v2.0.1-4-g
  * http://qtip2.com

@@ -9,9 +9,22 @@ register = template.Library()
 @register.inclusion_tag('atracker/templatetags/events_for_object.html', takes_context=True)
 def events_for_object(context, obj):
 
-    # events = Event.objects.filter(object_id=obj.pk)
     events = Event.objects.by_obj(obj=obj)
     
+    if events:
+        return {
+            'request': context['request'],
+            'events': events
+        }
+
+    return {}
+
+
+@register.inclusion_tag('atracker/templatetags/events_for_object_by_verb.html', takes_context=True)
+def events_for_object_by_verb(context, obj, verb):
+
+    events = Event.objects.by_obj(obj=obj).filter(event_type__title='%s' % verb)[0:20]
+
     if events:
         return {
             'request': context['request'],

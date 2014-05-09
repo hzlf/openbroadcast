@@ -10,6 +10,37 @@
     {% addtoblock "js-post" %}
         <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.history.js"></script>{% endaddtoblock %}
 
+    <!-- statistic tools -->
+    {% addtoblock "js-post" %}<script src="{{ STATIC_URL }}alibrary/js/statistics.js"></script>{% endaddtoblock %}
+
+    <!-- jqplot - TODO: maybe move to include -->
+    {% addtoblock "js-uncompressed" %}<script src="{{ STATIC_URL }}js/lib/flot-0.8.3/jquery.flot.js"></script>{% endaddtoblock %}
+    {% addtoblock "js-uncompressed" %}<script src="{{ STATIC_URL }}js/lib/flot-0.8.3/jquery.flot.time.js"></script>{% endaddtoblock %}
+
+
+    {% addtoblock "js-post" %}
+        <script>
+            $(function () {
+
+                // initialize stats app
+                var stats = new StatisticApp;
+                stats.resource_uri = '{{ object.get_api_url }}';
+                // stats.dom_id = 'statistics_container'; // this is the default anyway
+
+                stats.init();
+
+                // trigger to actually _load_ the stats
+                $('a[data-toggle="tab"]').on('shown', function (e) {
+                    if($(e.target).attr('href') == '#statistics') {
+                        stats.show();
+                    }
+                })
+
+
+            });
+        </script>
+    {% endaddtoblock %}
+
     <div id="heading">
         {% include "skeleton/heading.html" %}
     </div>
@@ -25,6 +56,9 @@
 
 {% block inner %}
     <div class="item_detail" style="">
+
+
+    <h1>+{{ object.get_api_url }}+</h1>
 
     <section class="shaded">
         <div class="row iteminfo release">
@@ -58,6 +92,11 @@
                 </a>
             </li>
             {% endif %}
+
+            <li>
+                <a href="#statistics" data-toggle="tab">{% trans "Statistics" %}</a>
+            </li>
+
 
         </ul>
     </div>
@@ -397,6 +436,24 @@
                 </div>
             </div>
             {% endif %}
+
+        </section>
+
+
+    </div>
+
+    <div class="tab-pane" id="statistics">
+
+        <section class="statistics">
+
+            <h2>{% trans "Statistics" %}</h2>
+
+
+            <div id="statistics_container" style="min-height: 240px;">
+                <div class="message">{% trans "Loading statistics" %}</div>
+                <!-- dynamic content -->
+            </div>
+
 
         </section>
 
