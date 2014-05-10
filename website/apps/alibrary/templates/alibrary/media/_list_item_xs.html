@@ -1,4 +1,4 @@
-{% load calc i18n arating_tags truncate spurl atracker_tags %}
+{% load calc i18n arating_tags truncate spurl adv_cache atracker_tags %}
 
 <div class="list_body_row selectable item media {{ item.uuid }} {% if item.release.publish_date %} published{% else %} unpublished{% endif %}{% if item.creator == user %} owner{% endif %}"
      id="list_item_{{ item.id }}"
@@ -98,7 +98,9 @@
 
             <li>
                 <ul class="unstyled horizontal">
+                    {% cache 0 "media__list_item_xs" item.pk item.updated %}
                     {% stats_for_object item %}
+                    {% endcache %}
                 </ul>
             </li>
 

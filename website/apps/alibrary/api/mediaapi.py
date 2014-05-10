@@ -260,13 +260,8 @@ class MediaResource(ModelResource):
         obj = Media.objects.get(**self.remove_api_resource_names(kwargs))
 
         from statistics.util import ObjectStatistics
-
         ostats = ObjectStatistics(obj=obj)
-
         stats = ostats.generate()
-
-
-
 
         self.log_throttled_access(request)
         return self.create_response(request, stats)

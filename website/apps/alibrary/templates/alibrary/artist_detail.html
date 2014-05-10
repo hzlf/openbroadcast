@@ -1,12 +1,43 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags wiki_tags atracker_tags spurl alibrary_tags url_tags %}
+{% load truncate i18n thumbnail arating_tags wiki_tags atracker_tags spurl alibrary_tags url_tags sekizai_tags %}
 
-{% block heading %} <!-- heading / icon (large one) -->
+{% block heading %}
+
+    <!-- statistic tools -->
+    {% addtoblock "js-post" %}<script src="{{ STATIC_URL }}alibrary/js/statistics.js"></script>{% endaddtoblock %}
+
+    <!-- jqplot - TODO: maybe move to include -->
+    {% addtoblock "js-uncompressed" %}<script src="{{ STATIC_URL }}js/lib/flot-0.8.3/jquery.flot.js"></script>{% endaddtoblock %}
+    {% addtoblock "js-uncompressed" %}<script src="{{ STATIC_URL }}js/lib/flot-0.8.3/jquery.flot.time.js"></script>{% endaddtoblock %}
+
+
+
+
+    {% addtoblock "js-post" %}
+        <script>
+            $(function () {
+
+                // initialize stats app
+                var stats = new StatisticApp;
+                stats.resource_uri = '{{ object.get_api_url }}';
+                stats.init();
+
+                // trigger to actually _load_ the stats
+                $('a[data-toggle="tab"]').on('shown', function (e) {
+                    if($(e.target).attr('href') == '#statistics') {
+                        stats.show();
+                    }
+                })
+
+
+            });
+        </script>
+    {% endaddtoblock %}
+
     <div id="heading">
         {% include "skeleton/heading.html" %}
     </div>
-    <!-- heading / icon (large one) -->
 {% endblock %}
 
 {% block modnav %} <!-- start: intra-module navigation -->
@@ -281,14 +312,14 @@
         <section class="statistics">
 
             <h2>{% trans "Statistics" %}</h2>
-            {% for item in object.get_media %}
-                <div class="clear clearfix">
-                    <strong><a href="{{ item.get_absolute_url }}">{{ item.name }}</a></strong></div>
-                <ul class="horizontal unstyled" style="padding-bottom: 17px">
-                    {% stats_for_object item %}
-                    <li class="clear"></li>
-                </ul>
-            {% endfor %}
+
+            <div id="statistics_container" style="min-height: 240px;">
+                <div class="message">{% trans "Loading statistics" %}</div>
+                <!-- dynamic content -->
+            </div>
+            <div class="choices-container">
+                <ul class="unstyled pull-right" id="plot_choices"></ul>
+            </div>
 
         </section>
 

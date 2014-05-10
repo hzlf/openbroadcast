@@ -53,6 +53,7 @@ class ArtistResource(ModelResource):
               url(r"^(?P<resource_name>%s)/autocomplete%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('autocomplete'), name="alibrary-artist_api-autocomplete"),
               # for compatibility, remove later on
               url(r"^(?P<resource_name>%s)/autocomplete-name%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('autocomplete'), name="alibrary-artist_api-autocomplete"),
+              url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/stats%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('stats'), name="alibrary-artist_api-stats"),
         ]
         
     def autocomplete(self, request, **kwargs):
@@ -121,3 +122,19 @@ class ArtistResource(ModelResource):
         
 
         return bundle
+
+
+    def stats(self, request, **kwargs):
+
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        artist = Artist.objects.get(**self.remove_api_resource_names(kwargs))
+
+        from statistics.util import ObjectStatistics
+        ostats = ObjectStatistics(artist=artist)
+        stats = ostats.generate()
+
+        self.log_throttled_access(request)
+        return self.create_response(request, stats)

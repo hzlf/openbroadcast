@@ -118,7 +118,7 @@ MIDDLEWARE_CLASSES = (
     'lib.middleware.profiler.ProfileMiddleware',
 
     # admin
-    'lib.middleware.admin_redirects.AdminRedirectMiddleware',
+    #'lib.middleware.admin_redirects.AdminRedirectMiddleware',
     # custom
     #'lib.middleware.ProfileMiddleware',
     #'lib.middleware.PrettifyMiddlewareBS',

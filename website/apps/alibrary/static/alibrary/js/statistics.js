@@ -33,7 +33,50 @@ StatisticApp = function () {
         $.get(url, function (data) {
             console.log('response data:', data);
 
-            $.plot('#' + self.dom_id, data, {
+            // hard-code color indices to prevent them from shifting
+            var i = 0;
+            $.each(data, function (key, val) {
+                val.color = i;
+                ++i;
+            });
+
+            // insert checkboxes & bind click event
+            var choice_container = $('#plot_choices');
+            $.each(data, function (key, val) {
+                choice_container.append("<li><input type='checkbox' name='" + key +
+                    "' checked='checked' id='id" + key + "'></input>" +
+                    "<label for='id" + key + "'>"
+                    + val.label + "</label></li>");
+            });
+            $('input', choice_container).on('click', function (e) {
+                self.plot(data);
+            });
+
+
+            self.plot(data);
+
+
+            $('.message', $('#' + self.dom_id)).hide();
+
+
+        });
+
+    };
+
+    this.plot = function (data) {
+
+
+        var datasets = [];
+
+        $('#plot_choices').find("input:checked").each(function () {
+            var key = $(this).attr("name");
+            if (key && data[key]) {
+                datasets.push(data[key]);
+            }
+        });
+
+        if (datasets.length > 0) {
+            $.plot('#' + self.dom_id, datasets, {
                 xaxis: {
                     mode: "time",
                     minTickSize: [1, "month"]
@@ -62,66 +105,10 @@ StatisticApp = function () {
                 crosshair: {
                     mode: "x"
                 }
-            })
+            });
+        }
+        ;
 
-
-            /*
-             var line1 = [
-             ['2013/12/01', 1566],
-             ['2014/01/01', 278],
-             ['2014/02/01', 978],
-             ['2014/03/01', 278],
-             ['2014/04/01', 578],
-             ['2014/05/01', 566],
-             ['2014/06/01', 1566],
-             ['2014/07/01', 1566],
-             ['2014/08/01', 1566],
-             ['2014/09/01', 1566],
-             ['2014/10/01', 1566],
-             ['2014/11/01', 1566]
-             ];
-
-
-             var plot1 = $.jqplot(self.dom_id, [line1], {
-             title: 'Data Point Highlighting',
-             axes: {
-             xaxis: {
-             renderer: $.jqplot.DateAxisRenderer,
-             numberTicks: 2,
-             syncTicks: true,
-             autoscale: false,
-             tickOptions: {
-             formatString: '%Y %b'
-             }
-             },
-             yaxis: {
-             tickOptions: {
-             formatString: '%i'
-             }
-             }
-             },
-             //highlighter: {
-             //    show: true,
-             //    sizeAdjust: 7.5
-             //},
-             cursor: {
-             show: false
-             }
-             });
-             */
-
-
-            $('.message', $('#' + self.dom_id)).hide();
-
-
-        });
-
-        /*
-         setTimeout(function () {
-         $('#' + self.dom_id).html('<h1>stats</h1>');
-         self.loaded = true;
-         }, 2000);
-         */
 
     };
 

@@ -12,9 +12,10 @@ DEFAULT_ACTIONS = ['playout', 'stream', 'download',]
 
 class ObjectStatistics(object):
 
-    def __init__(self, obj=None, user=None):
+    def __init__(self, obj=None, user=None, artist=None):
         self.obj = obj
         self.user = user
+        self.artist = artist
 
     def generate(self, actions=DEFAULT_ACTIONS):
 
@@ -77,6 +78,10 @@ class ObjectStatistics(object):
             events = Event.objects.by_obj(obj=self.obj).filter(event_type__title='%s' % action, created__gte=range_start, created__lte=range_end).extra(select={'month': 'extract( month from created )'}).values('month').annotate(dcount=Count('created'))
         elif self.user:
             events = Event.objects.filter(user=self.user, event_type__title='%s' % action, created__gte=range_start, created__lte=range_end).extra(select={'month': 'extract( month from created )'}).values('month').annotate(dcount=Count('created'))
+        elif self.artist:
+            from django.contrib.contenttypes.models import ContentType
+            ctype = ContentType.objects.get(app_label="alibrary", model="media")
+            events = Event.objects.filter(object_id__in=self.artist.media_artist.values_list('pk', flat=True).distinct(), content_type=ctype, event_type__title='%s' % action, created__gte=range_start, created__lte=range_end).extra(select={'month': 'extract( month from created )'}).values('month').annotate(dcount=Count('created'))
         else:
             events = Event.objects.filter(event_type__title='%s' % action, created__gte=range_start, created__lte=range_end).extra(select={'month': 'extract( month from created )'}).values('month').annotate(dcount=Count('created'))
 
