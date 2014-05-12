@@ -23,16 +23,20 @@ class DisplayActivityFollowUrl(Node):
 
     def render(self, context):
         actor_instance = self.actor.resolve(context)
-        content_type = ContentType.objects.get_for_model(actor_instance).pk
-        from actstream.models import Follow
-        if Follow.objects.is_following(context.get('user'), actor_instance):
-            return reverse('actstream_unfollow', kwargs={
+
+        try:
+            content_type = ContentType.objects.get_for_model(actor_instance).pk
+            from actstream.models import Follow
+            if Follow.objects.is_following(context.get('user'), actor_instance):
+                return reverse('actstream_unfollow', kwargs={
+                    'content_type_id': content_type, 'object_id': actor_instance.pk})
+            if self.actor_only:
+                return reverse('actstream_follow', kwargs={
+                    'content_type_id': content_type, 'object_id': actor_instance.pk})
+            return reverse('actstream_follow_all', kwargs={
                 'content_type_id': content_type, 'object_id': actor_instance.pk})
-        if self.actor_only:
-            return reverse('actstream_follow', kwargs={
-                'content_type_id': content_type, 'object_id': actor_instance.pk})
-        return reverse('actstream_follow_all', kwargs={
-            'content_type_id': content_type, 'object_id': actor_instance.pk})
+        except:
+            pass
 
 
 class DisplayActivityActorUrl(Node):
@@ -136,7 +140,10 @@ def is_following(user, actor):
         {% endif %}
     """
     from actstream.models import Follow
-    return Follow.objects.is_following(user, actor)
+    try:
+        return Follow.objects.is_following(user, actor)
+    except:
+        pass
 
 
 def follow_url(parser, token):

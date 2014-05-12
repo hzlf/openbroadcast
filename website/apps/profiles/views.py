@@ -193,6 +193,10 @@ class ProfileDetailView(DetailView):
         context['uploaded_media'] = Media.objects.filter(creator=self.object.user).order_by('-created')
 
         context['user_stream'] = actor_stream(self.object.user)[0:20]
+
+        context['following'] = Follow.objects.following(self.object.user)
+        context['followers'] = Follow.objects.followers(self.object.user)
+
         if context_object_name:
             context[context_object_name] = self.object
 

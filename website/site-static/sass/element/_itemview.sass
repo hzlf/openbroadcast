@@ -120,7 +120,58 @@ section.comments.disqus
   &.emissions
     margin-top: 15px
 
+  &.following
+    margin-top: 15px
+    // TODO: maybe move to other place later on
+    table.follows
+      width: 100%
+      .ctype
+        width: 100px
+      .item
+      .actions
+        text-align: right
+        width: 120px
 
+
+      tr.hover > td
+        background-color: #DDFFD9
+
+    table.follows .actions
+      a
+        width: 110px
+        display: block
+        //background: greenyellow
+        text-align: left
+        padding: 2px 4px 0px 4px
+
+        &:hover
+          span > i
+            padding-right: 6px
+
+        text-decoration: none
+
+        // show/hide dependig on current state
+        .start-following
+          display: inline
+        .stop-following
+          display: none
+
+        &.following
+          .start-following
+            display: none
+          .stop-following
+            display: inline
+
+        // text
+        > span.start-following
+          color: $linkColor
+          &:hover
+            color: $linkColorHover
+
+        > span.stop-following
+          color: $gray
+          &:hover
+            color: $grayDark
 
 
 

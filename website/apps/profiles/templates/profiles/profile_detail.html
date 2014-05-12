@@ -34,6 +34,20 @@
                     if($(e.target).attr('href') == '#statistics') {
                         stats.show();
                     }
+                });
+
+
+                // quick'n'dirty follow/unfollow AJAX implementation
+                $('table.follows').on('click', '[data-action="trigger_follow"]', function(e){
+                    e.preventDefault();
+                    var el = $(this);
+                    var url = el.attr('href').split("?")[0];
+                    $.get(url, function(data){
+                        el.toggleClass('following');
+                    });
+
+
+
                 })
 
 
@@ -71,8 +85,9 @@
             <li class="active">
                 <a href="#profile" data-toggle="tab">{% trans "Profile" %}</a>
             </li>
+
             <li>
-                <a href="#activities" data-toggle="tab">{% trans "Activities" %}</a>
+                <a href="#following" data-toggle="tab">{% trans "Following" %}</a>
             </li>
 
             {% if broadcasts.count %}
@@ -92,6 +107,9 @@
                 </a>
             </li>
             {% endif %}
+            <li>
+                <a href="#activities" data-toggle="tab">{% trans "Activities" %}</a>
+            </li>
 
             <li>
                 <a href="#statistics" data-toggle="tab">{% trans "Statistics" %}</a>
@@ -298,6 +316,55 @@
 
     </div>
 
+    <div class="tab-pane" id="following">
+
+        <section class="following">
+            {% load ctype %}
+
+            <h2>{% trans "Following" %}</h2>
+
+            <table class="follows table-striped table-condensed">
+                {% for item in following %}
+                <tr class="hoverable">
+                    <td class="ctype">{{ item|ct_name_by_object|capfirst }}</td>
+                    <td class="item"><a href="{{ item.get_absolute_url }}">{{ item }}</a></td>
+                    <td class="actions">
+                    {% if user.is_authenticated %}
+                        <a data-action="trigger_follow" class="hoverable{% if request.user|is_following:item %} following{% endif %}" href="{% follow_all_url item %}?next={{ request.get_full_path }}" title="{% trans "Follow/unfollow" %}">
+                            <span class="stop-following"><i class="icon icon-unlink"></i> {% trans "Stop following" %}</span>
+                            <span class="start-following"><i class="icon icon-link"></i> {% trans "Follow" %}</span>
+                        </a>
+                    {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <h2 style="margin-top: 24px;">{% trans "Followers" %}</h2>
+
+            <table class="follows table-striped table-condensed">
+                {% for item in followers %}
+                <tr class="hoverable">
+                    <td class="ctype">{{ item|ct_name_by_object|capfirst }}</td>
+                    <td class="item"><a href="{{ item.get_absolute_url }}">{{ item }}</a></td>
+                    <td class="actions">
+                    {% if user.is_authenticated and item != request.user %}
+                        <a data-action="trigger_follow" class="hoverable{% if request.user|is_following:item %} following{% endif %}" href="{% follow_all_url item %}?next={{ request.get_full_path }}" title="{% trans "Follow/unfollow" %}">
+                            <span class="stop-following"><i class="icon icon-unlink"></i> {% trans "Stop following" %}</span>
+                            <span class="start-following"><i class="icon icon-link"></i> {% trans "Follow" %}</span>
+                        </a>
+                    {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+
+
+        </section>
+
+
+    </div>
+
 
     <div class="tab-pane" id="activities">
 
@@ -436,24 +503,6 @@
                 </div>
             </div>
             {% endif %}
-
-        </section>
-
-
-    </div>
-
-    <div class="tab-pane" id="statistics">
-
-        <section class="statistics">
-
-            <h2>{% trans "Statistics" %}</h2>
-
-
-            <div id="statistics_container" style="min-height: 240px;">
-                <div class="message">{% trans "Loading statistics" %}</div>
-                <!-- dynamic content -->
-            </div>
-
 
         </section>
 
