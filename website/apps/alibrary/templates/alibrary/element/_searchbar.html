@@ -52,9 +52,9 @@
                             <a href="{% spurl base=request.get_full_path remove_query_param="page" remove_query_param=item.name %}"
                                class="lfilter">
                                 {% firstof item.label item.name %}:
-                                {% if item.range_start %}{{ item.range_start }}{% endif %}
+                                {% if item.range_start %}{{ item.range_start|date:"Y" }}{% endif %}
                                 {% if item.range_start and item.range_end %} - {% endif %}
-                                {% if item.range_end %}{{ item.range_end }}{% endif %}
+                                {% if item.range_end %}{{ item.range_end|date:"Y" }}{% endif %}
                                 <!-- unfortunately no fitting icon... so hacking -->
                                 <i class="_icon icon-delete">&nbsp;</i>
 
