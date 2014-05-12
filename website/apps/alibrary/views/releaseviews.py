@@ -89,6 +89,7 @@ class ReleaseListView(PaginationMixin, ListView):
         context = super(ReleaseListView, self).get_context_data(**kwargs)
         
         self.extra_context['filter'] = self.filter
+        self.extra_context['special_filters'] = ['releasedate',]
         self.extra_context['relation_filter'] = self.relation_filter
         self.extra_context['tagcloud'] = self.tagcloud
         # for the ordering-box

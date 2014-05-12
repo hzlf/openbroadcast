@@ -42,23 +42,46 @@
 
     <!-- object based filters-->
     <ul class="filter-bar unstyled horizontal">
-        {% for item in filter.filterlist %}{% for filter_entry in item.entries %}
+        {% for item in filter.filterlist %}
 
-            {% spurl base=request.get_full_path active_mquery="{{ item.name }}={{ filter_entry.0 }}" as is_active %}
+            {% if item.name == "releasedate" %}
+                {% comment %}hackish... no other way at the moment. sorry.{% endcomment %}
 
-            {% if is_active %}
-                <li>
-                    <a href="{% spurl base=request.get_full_path remove_query_param="page" trigger_mquery="{{ item.name }}={{ filter_entry.0 }}" %}"
-                       class="lfilter">
-                        {% firstof item.label item.name %}: {{ filter_entry.0 }}
-                        <!-- unfortunately no fitting icon... so hacking -->
-                        <i class="_icon icon-delete">&nbsp;</i>
+                    {% if "releasedate=" in request.get_full_path %}
+                        <li>
+                            <a href="{% spurl base=request.get_full_path remove_query_param="page" remove_query_param=item.name %}"
+                               class="lfilter">
+                                {% firstof item.label item.name %}:
+                                {% if item.range_start %}{{ item.range_start }}{% endif %}
+                                {% if item.range_start and item.range_end %} - {% endif %}
+                                {% if item.range_end %}{{ item.range_end }}{% endif %}
+                                <!-- unfortunately no fitting icon... so hacking -->
+                                <i class="_icon icon-delete">&nbsp;</i>
 
-                    </a>
-                </li>
+                            </a>
+                        </li>
+                    {% endif %}
+
+            {% else %}
+                {% for filter_entry in item.entries %}
+                    {% spurl base=request.get_full_path active_mquery="{{ item.name }}={{ filter_entry.0 }}" as is_active %}
+                    {% if is_active %}
+                        <li>
+                            <a href="{% spurl base=request.get_full_path remove_query_param="page" trigger_mquery="{{ item.name }}={{ filter_entry.0 }}" %}"
+                               class="lfilter">
+                                {% firstof item.label item.name %}: {{ filter_entry.0 }}
+                                <!-- unfortunately no fitting icon... so hacking -->
+                                <i class="_icon icon-delete">&nbsp;</i>
+
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
             {% endif %}
 
-        {% endfor %}{% endfor %}
+
+
+        {% endfor %}
     </ul>
 
     <div class="clear"></div>

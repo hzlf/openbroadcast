@@ -60,6 +60,7 @@ class Filter(object):
             else:
                 self._field = self.field_class(required=self.required,
                     label=self.label, widget=self.widget, **self.extra)
+
         return self._field
 
     def filter(self, qs, value):

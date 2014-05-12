@@ -5,6 +5,8 @@
 
 var util = util || {};
 
+alert(123);
+
 util.uri_param_insert = function(sourceUrl, parameterName, parameterValue, replaceDuplicates) {
 
 	if((sourceUrl == null) || (sourceUrl.length == 0))

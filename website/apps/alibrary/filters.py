@@ -1,4 +1,5 @@
 from django.utils.translation import ugettext as _
+import datetime
 import django_filters
 from alibrary.models import Release, Playlist, Artist, Media, Label
 
@@ -37,16 +38,63 @@ class DekadeFilter(django_filters.ChoiceFilter):
     pass
 
 
+
+class DateRangeFilter(django_filters.Filter):
+
+    range_start = None
+    range_end = None
+
+    def __init__(self, *args, **kwargs):
+        super(DateRangeFilter, self).__init__(*args, **kwargs)
+
+    @property
+    def field(self):
+        if not hasattr(self, '_field'):
+            self._field = self.field_class(required=self.required,
+                label=self.label, widget=self.widget, **self.extra)
+
+        return self._field
+
+    def filter(self, qs, value):
+
+        range = value.split(':')
+        range = range if len(range) == 2 else None
+
+        if range:
+            # try to extract the dates
+            try:
+                range_start = datetime.datetime.strptime(range[0], '%Y-%m-%d').date()
+            except:
+                range_start = None
+            try:
+                range_end = datetime.datetime.strptime(range[1], '%Y-%m-%d').date()
+            except:
+                range_end = None
+
+            self.range_start = range_start
+            self.range_end = range_end
+
+            if range_start and range_end:
+                return qs.filter(**{'%s__range' % self.name: (range_start, range_end)})
+
+            if range_start and not range_end:
+                return qs.filter(**{'%s__gte' % self.name: (range_start)})
+
+            if not range_start and range_end:
+                return qs.filter(**{'%s__lte' % self.name: (range_end)})
+
+        return qs
+
+
 class ReleaseFilter(django_filters.FilterSet):
-    # releasedate = django_filters.DateFilter()
     releasetype = CharListFilter(label="Release type")
     release_country = CharListFilter(label="Country")
     media_release__license__name = CharListFilter(label="License")
     #main_format__name = CharListFilter(label="Release Format")
-    #releasedate = DekadeFilter(label="Release date")
+    releasedate = DateRangeFilter(label="Release date")
     class Meta:
         model = Release
-        fields = ['releasetype', 'release_country', 'media_release__license__name', 'label__type', ]
+        fields = ['releasedate', 'releasetype', 'release_country', 'media_release__license__name', 'label__type', ]
 
     @property
     def filterlist(self):

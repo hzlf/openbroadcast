@@ -2509,6 +2509,270 @@ section.item_inner .tab-pane section.profile.information dl {
   color: #6633cc;
 }
 
+/* ---------- box classes ---------- */
+/* line 4, ../sass/element/_filterbox.sass */
+.box {
+  border-left: 1px solid white;
+  border-right: 1px solid white;
+  border-top: 1px solid #cccccc;
+}
+
+/* line 10, ../sass/element/_filterbox.sass */
+.boxtitle {
+  color: #333333;
+  padding: 3px 0px 2px 19px;
+  background-image: url(/static/img/prototype/box_handler.png);
+  background-repeat: no-repeat;
+}
+/* line 15, ../sass/element/_filterbox.sass */
+.boxtitle:hover {
+  cursor: pointer;
+}
+
+/* line 18, ../sass/element/_filterbox.sass */
+.boxcontent {
+  padding: 0px 0px 4px 0px;
+  /*padding:0px 0px 4px 19px; */
+  /*|s| - padding_left auf boxitem verschoben */
+  display: none;
+}
+/* line 23, ../sass/element/_filterbox.sass */
+.boxcontent .boxitem input {
+  background-color: white;
+  border: 1px solid #bbbbbb;
+  color: #5a5a5a;
+}
+
+/* line 28, ../sass/element/_filterbox.sass */
+.boxitem {
+  /*|s| */
+  padding-left: 19px;
+}
+/* line 32, ../sass/element/_filterbox.sass */
+.boxitem.selected a {
+  /*|s| */
+  color: #333333;
+}
+/* line 35, ../sass/element/_filterbox.sass */
+.boxitem.selected.plus {
+  /*|s| */
+  background-repeat: no-repeat;
+}
+/* line 39, ../sass/element/_filterbox.sass */
+.boxitem.plus {
+  /*|s| */
+  background-repeat: no-repeat;
+}
+/* line 43, ../sass/element/_filterbox.sass */
+.boxitem.minus {
+  /*|s| */
+  background-repeat: no-repeat;
+}
+/* line 47, ../sass/element/_filterbox.sass */
+.boxitem.folder {
+  /*|s| */
+  background-repeat: no-repeat;
+}
+
+/* line 52, ../sass/element/_filterbox.sass */
+.box.boxon {
+  background-color: whitesmoke;
+  border-left: 1px solid #dddddd;
+  border-right: 1px solid #dddddd;
+}
+
+/* line 61, ../sass/element/_filterbox.sass */
+.box.has_active {
+  background-color: #ddffd9;
+}
+
+/* line 66, ../sass/element/_filterbox.sass */
+.boxtitle.boxon {
+  color: black;
+  background-image: url(/static/img/prototype/box_handler_on.png);
+}
+
+/* line 71, ../sass/element/_filterbox.sass */
+.boxend {
+  border-top: 1px solid #dddddd;
+}
+
+/* ---------- content box classes ---------- */
+/*|s| */
+/* line 78, ../sass/element/_filterbox.sass */
+.content_box {
+  margin-bottom: 8px;
+  border-left: 1px solid white;
+  border-right: 1px solid white;
+  border-top: 1px solid #cccccc;
+  border-bottom: 1px solid #cccccc;
+}
+
+/* line 85, ../sass/element/_filterbox.sass */
+.content_boxtitle {
+  float: left;
+  color: #333333;
+  margin-right: 30px !important;
+  padding: 3px 0px 2px 19px;
+  background-image: url(/static/img/prototype/box_handler.png);
+  background-repeat: no-repeat;
+}
+/* line 92, ../sass/element/_filterbox.sass */
+.content_boxtitle:hover {
+  cursor: pointer;
+}
+
+/* line 95, ../sass/element/_filterbox.sass */
+.content_boxcontent {
+  padding: 0px 0px 0px 0px;
+  display: none;
+}
+
+/* line 100, ../sass/element/_filterbox.sass */
+.content_box.boxon {
+  background-color: whitesmoke;
+  border-top: 1px solid #dddddd;
+  border-left: 1px solid #dddddd;
+  border-right: 1px solid #dddddd;
+  /*|s| */
+  border-bottom: 1px solid #dddddd;
+  /*|s| */
+}
+
+/* line 112, ../sass/element/_filterbox.sass */
+.content_boxtitle.boxon {
+  color: black;
+  background-image: url(/static/img/prototype/box_handler_on.png);
+}
+
+/* line 117, ../sass/element/_filterbox.sass */
+.content_boxmore {
+  float: right;
+  margin-top: 2px;
+  width: 20px;
+}
+
+/* line 122, ../sass/element/_filterbox.sass */
+.content_boxend {
+  border-top: 1px solid #dddddd;
+}
+
+/* line 125, ../sass/element/_filterbox.sass */
+.content_boxextra {
+  padding: 2px 0px 2px 7px;
+}
+
+/* ---------- basket ---------- */
+/* line 133, ../sass/element/_filterbox.sass */
+.boxtitle .count {
+  color: #999999;
+}
+
+/* line 136, ../sass/element/_filterbox.sass */
+.boxsub {
+  margin: 1px 2px 0px 2px;
+  background: #eeeeee;
+}
+
+/* line 140, ../sass/element/_filterbox.sass */
+.boxsub-title {
+  border: 1px solid #bbbbbb;
+  padding: 1px 2px 0px 16px;
+  background: #dddddd url(/static/img/prototype/box_handler.png) no-repeat -2px -2px;
+  cursor: pointer;
+}
+/* line 146, ../sass/element/_filterbox.sass */
+.boxsub-title.open {
+  background-image: url(/static/img/prototype/box_handler_on.png) !important;
+}
+
+/* line 149, ../sass/element/_filterbox.sass */
+.boxsub-content {
+  display: none;
+  color: #6633cc;
+}
+
+/* line 154, ../sass/element/_filterbox.sass */
+.boxsub .b-closer {
+  float: right;
+  background: url(/static/img/prototype/basket_remove.png) no-repeat;
+  width: 17px;
+  height: 18px;
+}
+/* line 159, ../sass/element/_filterbox.sass */
+.boxsub .i-closer {
+  float: right;
+  background: url(/static/img/prototype/boxsub_item_remove.png) no-repeat;
+  width: 17px;
+  height: 18px;
+}
+/* line 164, ../sass/element/_filterbox.sass */
+.boxsub .i-add {
+  float: right;
+  background: url(/static/img/prototype/boxsub_item_add.png) no-repeat;
+  width: 17px;
+  height: 18px;
+}
+
+/* line 170, ../sass/element/_filterbox.sass */
+.b-closer:hover, .i-closer:hover {
+  background: url(/static/img/prototype/boxsub_remove_on.png) no-repeat !important;
+}
+
+/* line 174, ../sass/element/_filterbox.sass */
+.boxsub .b-pl {
+  float: right;
+  background: url(/static/img/prototype/basket_to_pl.png) no-repeat;
+  width: 17px;
+  height: 18px;
+}
+/* line 179, ../sass/element/_filterbox.sass */
+.boxsub .b-play {
+  float: right;
+  background: url(/static/img/prototype/list_play_button2_s.png) no-repeat;
+  width: 17px;
+  height: 18px;
+}
+
+/* line 185, ../sass/element/_filterbox.sass */
+.boxsub-item {
+  padding: 2px 2px 1px 16px;
+  cursor: pointer;
+  border: 1px solid #bbbbbb;
+  border-top: 1px solid #cccccc;
+  margin-top: -1px;
+}
+/* line 191, ../sass/element/_filterbox.sass */
+.boxsub-item:hover {
+  background-color: #e4e4e4 !important;
+}
+
+/* line 194, ../sass/element/_filterbox.sass */
+.boxsub.drop-over .boxsub-title {
+  background-color: #c8efc8 !important;
+}
+
+/* line 203, ../sass/element/_filterbox.sass */
+.box.special.releasedate .range-select {
+  clear: both;
+}
+/* line 205, ../sass/element/_filterbox.sass */
+.box.special.releasedate .range-select select {
+  width: 80px;
+  height: 20px;
+  margin-bottom: 0;
+  padding: 0 4px !important;
+}
+/* line 211, ../sass/element/_filterbox.sass */
+.box.special.releasedate #predefined_selector {
+  padding: 8px 10px 2px 20px;
+}
+/* line 214, ../sass/element/_filterbox.sass */
+.box.special.releasedate #predefined_selector ul > li {
+  padding-right: 8px;
+  float: left;
+}
+
 /* line 4, ../sass/apps/_atracker.sass */
 .atracker.event-list h3 {
   margin: 20px 0 0px !important;

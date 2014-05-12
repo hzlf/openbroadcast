@@ -273,7 +273,8 @@ class BaseFilterSet(object):
                     raw_value = self.form[name].value()
                     try:
                         value = self.form.fields[name].clean(raw_value)
-                    except forms.ValidationError:
+                    except forms.ValidationError, e:
+                        print e
                         # for invalid values either:
                         # strictly "apply" filter yielding no results and get outta here
                         if self.strict:

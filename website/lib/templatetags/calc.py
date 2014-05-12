@@ -4,18 +4,18 @@ from django import template
 
 register = template.Library()
 
-@register.filter 
+@register.filter
 def multiply(value, arg):
     return float(value) * float(arg)
 
-@register.filter 
+@register.filter
 def divide(value, arg):
     try:
         return int(float(value) / float(arg))
     except:
         return None
 
-@register.filter 
+@register.filter
 def subtract(value, arg):
     return int(float(value) - float(arg))
 
@@ -23,19 +23,19 @@ def subtract(value, arg):
 def roundint(value):
     return int(value)
 
-@register.filter 
+@register.filter
 def squaretuple(value):
-    return '%sx%s' % (value, value) 
+    return '%sx%s' % (value, value)
 
-@register.filter 
+@register.filter
 def halftuple(value):
-    return '%sx%s' % (value, int(value) / 2) 
+    return '%sx%s' % (value, int(value) / 2)
 
-@register.filter 
+@register.filter
 def widetuple(value):
-    return '%sx%s' % (value, int(value) / 16 * 9) 
+    return '%sx%s' % (value, int(value) / 16 * 9)
 
-@register.filter 
+@register.filter
 def sec_to_time(value):
     if value >= 3600:
         return time.strftime('%H:%M:%S', time.gmtime(value))
