@@ -469,6 +469,7 @@ INSTALLED_APPS = (
     'multiuploader',
     'arating',
     'asearch',
+    'backfeed',
     #'django_db_signals',
 
     # blog

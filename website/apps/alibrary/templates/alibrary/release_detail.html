@@ -47,6 +47,15 @@
     <!-- end: intra-module navigation -->
 {% endblock %}
 
+
+{% comment %}{% block searchbar %}
+
+    {% with object=item ct="release" %}
+        {% include "alibrary/element/_searchbar.html" %}
+    {% endwith %}
+
+{% endblock %}{% endcomment %}
+
 {% block inner %}
 
 

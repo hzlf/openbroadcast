@@ -5164,15 +5164,17 @@ dd {
 
 /* line 122, ../sass/site/_type.sass */
 dt {
-  font-weight: bold;
+  font-weight: normal;
+  opacity: 0.6;
+  text-align: left;
 }
 
-/* line 125, ../sass/site/_type.sass */
+/* line 127, ../sass/site/_type.sass */
 dd {
   margin-left: 9px;
 }
 
-/* line 132, ../sass/site/_type.sass */
+/* line 134, ../sass/site/_type.sass */
 hr {
   margin: 18px 0;
   border: 0;
@@ -5180,22 +5182,22 @@ hr {
   border-bottom: 1px solid white;
 }
 
-/* line 139, ../sass/site/_type.sass */
+/* line 141, ../sass/site/_type.sass */
 strong {
   font-weight: bold;
 }
 
-/* line 142, ../sass/site/_type.sass */
+/* line 144, ../sass/site/_type.sass */
 em {
   font-style: italic;
 }
 
-/* line 145, ../sass/site/_type.sass */
+/* line 147, ../sass/site/_type.sass */
 .muted {
   color: #cccccc;
 }
 
-/* line 149, ../sass/site/_type.sass */
+/* line 151, ../sass/site/_type.sass */
 abbr {
   font-size: 90%;
   text-transform: uppercase;
@@ -5203,30 +5205,30 @@ abbr {
   cursor: help;
 }
 
-/* line 156, ../sass/site/_type.sass */
+/* line 158, ../sass/site/_type.sass */
 blockquote {
   padding: 0 0 0 15px;
   margin: 0 0 18px;
   border-left: 5px solid #eeeeee;
 }
-/* line 160, ../sass/site/_type.sass */
+/* line 162, ../sass/site/_type.sass */
 blockquote p {
   margin-bottom: 0;
   font-size: 16px;
   font-weight: 300;
   line-height: 22.5px;
 }
-/* line 163, ../sass/site/_type.sass */
+/* line 165, ../sass/site/_type.sass */
 blockquote small {
   display: block;
   line-height: 18px;
   color: #cccccc;
 }
-/* line 167, ../sass/site/_type.sass */
+/* line 169, ../sass/site/_type.sass */
 blockquote small:before {
   content: "\2014 \00A0";
 }
-/* line 170, ../sass/site/_type.sass */
+/* line 172, ../sass/site/_type.sass */
 blockquote.pull-right {
   float: right;
   padding-left: 0;
@@ -5234,13 +5236,13 @@ blockquote.pull-right {
   border-left: 0;
   border-right: 5px solid #eeeeee;
 }
-/* line 176, ../sass/site/_type.sass */
+/* line 178, ../sass/site/_type.sass */
 blockquote.pull-right p,
 blockquote.pull-right small {
   text-align: right;
 }
 
-/* line 182, ../sass/site/_type.sass */
+/* line 184, ../sass/site/_type.sass */
 q:before,
 q:after,
 blockquote:before,
@@ -5248,7 +5250,7 @@ blockquote:after {
   content: "";
 }
 
-/* line 189, ../sass/site/_type.sass */
+/* line 191, ../sass/site/_type.sass */
 address {
   display: block;
   margin-bottom: 18px;
@@ -5256,12 +5258,12 @@ address {
   font-style: normal;
 }
 
-/* line 196, ../sass/site/_type.sass */
+/* line 198, ../sass/site/_type.sass */
 small {
   font-size: 100%;
 }
 
-/* line 199, ../sass/site/_type.sass */
+/* line 201, ../sass/site/_type.sass */
 cite {
   font-style: normal;
 }
@@ -12592,6 +12594,51 @@ div.jqplot-bubble-label.jqplot-bubble-label-highlight {
 div.jqplot-noData-container {
   text-align: center;
   background-color: rgba(244, 244, 244, 0.3);
+}
+
+/* line 1, ../sass/apps/_backfeed.sass */
+div.backfeed {
+  position: fixed;
+  left: 0;
+  top: 25%;
+}
+/* line 11, ../sass/apps/_backfeed.sass */
+div.backfeed .toggle a {
+  display: block;
+  padding: 10px;
+  background: #00bb00;
+  color: #333333;
+}
+/* line 16, ../sass/apps/_backfeed.sass */
+div.backfeed .toggle a span {
+  display: none;
+}
+/* line 19, ../sass/apps/_backfeed.sass */
+div.backfeed.hover .toggle a span.title {
+  display: inline;
+}
+/* line 22, ../sass/apps/_backfeed.sass */
+div.backfeed .content-holder {
+  display: none;
+}
+/* line 27, ../sass/apps/_backfeed.sass */
+div.backfeed.expanded {
+  min-width: 320px;
+}
+/* line 31, ../sass/apps/_backfeed.sass */
+div.backfeed.expanded .toggle a span {
+  display: inline;
+}
+/* line 34, ../sass/apps/_backfeed.sass */
+div.backfeed.expanded .content-holder {
+  display: block;
+}
+/* line 40, ../sass/apps/_backfeed.sass */
+div.backfeed .content-holder {
+  padding-top: 20px;
+  padding-left: 20px;
+  min-height: 200px;
+  background: #fafafa;
 }
 
 /*!

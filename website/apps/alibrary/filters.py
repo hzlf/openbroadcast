@@ -126,7 +126,7 @@ class ArtistFilter(django_filters.FilterSet):
 
     class Meta:
         model = Artist
-        fields = ['type', 'country__printable_name', 'country__continent', 'professions__name']
+        fields = ['type', 'country__continent', 'country__printable_name', 'professions__name']
 
     @property
     def filterlist(self):

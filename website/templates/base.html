@@ -1,4 +1,4 @@
-{% load compress cms_tags sekizai_tags value_from_settings esi %}
+{% load compress cms_tags sekizai_tags value_from_settings esi backfeed_tags %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
 
@@ -202,6 +202,9 @@
 </div>
 
 
+{% if user.is_authenticated %}
+{% backfeed_inline %}
+{% endif %}
 
 
 
