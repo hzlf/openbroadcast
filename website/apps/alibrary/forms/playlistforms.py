@@ -188,8 +188,8 @@ class PlaylistForm(ModelForm):
         layout = Layout(
                         #ACTION_LAYOUT,
                         base_layout,
-                        series_layout,
                         tagging_layout,
+                        series_layout,
                         rotation_layout,
                         daypart_layout,
                         #ACTION_LAYOUT,
