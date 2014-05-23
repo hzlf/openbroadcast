@@ -71,9 +71,13 @@ ImporterUi = function() {
             $.each(self.importfiles, function(i, item){
 
                 if(item.local_data && item.local_data.status == 'ready') {
-                    // override status for fast display update
-                    item.local_data.status = 'queued';
-                    item.display(item.local_data)
+
+                    setTimeout(function(){
+                        // override status for fast display update
+                        item.local_data.status = 'queued';
+                        item.display(item.local_data)
+                    },500)
+
                 }
             })
 

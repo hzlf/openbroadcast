@@ -151,6 +151,8 @@ class Importer(object):
             force_label = it['force_label']
             
 
+        if not name:
+            name = clean_filename(filename)
             
         
         print
@@ -201,7 +203,7 @@ class Importer(object):
         m = None
         m_created = False
         # log.info('media, force creation: %s' % name)
-        log.info('creati media: %s' % name)
+        log.info('creating media: %s' % name)
         m = Media(name=name)
         m.filename = filename
         if tracknumber:
@@ -893,21 +895,25 @@ def mb_complete_release_task(obj, mb_id):
         if discogs_id:
             url = 'http://api.discogs.com/releases/%s' % discogs_id
             r = requests.get(url)
-            dgs_result = r.json()
 
-            styles = dgs_result.get('styles', [])
-            for style in styles:
-                log.debug('got style: %s' % (style))
-                Tag.objects.add_tag(obj, '"%s"' % style)
+            try:
+                dgs_result = r.json()
 
-            genres = dgs_result.get('genres', [])
-            for genre in genres:
-                log.debug('got genre: %s' % (genre))
-                Tag.objects.add_tag(obj, '"%s"' % genre)
+                styles = dgs_result.get('styles', [])
+                for style in styles:
+                    log.debug('got style: %s' % (style))
+                    Tag.objects.add_tag(obj, '"%s"' % style)
 
-            notes = dgs_result.get('notes', None)
-            if notes:
-                obj.description = notes
+                genres = dgs_result.get('genres', [])
+                for genre in genres:
+                    log.debug('got genre: %s' % (genre))
+                    Tag.objects.add_tag(obj, '"%s"' % genre)
+
+                notes = dgs_result.get('notes', None)
+                if notes:
+                    obj.description = notes
+            except:
+                pass
 
     if discogs_master_url:
         discogs_id = None
@@ -920,21 +926,25 @@ def mb_complete_release_task(obj, mb_id):
         if discogs_id:
             url = 'http://api.discogs.com/masters/%s' % discogs_id
             r = requests.get(url)
-            dgs_result = r.json()
+            try:
+                dgs_result = r.json()
 
-            styles = dgs_result.get('styles', [])
-            for style in styles:
-                log.debug('got style: %s' % (style))
-                Tag.objects.add_tag(obj, '"%s"' % style)
+                styles = dgs_result.get('styles', [])
+                for style in styles:
+                    log.debug('got style: %s' % (style))
+                    Tag.objects.add_tag(obj, '"%s"' % style)
 
-            genres = dgs_result.get('genres', [])
-            for genre in genres:
-                log.debug('got genre: %s' % (genre))
-                Tag.objects.add_tag(obj, '"%s"' % genre)
+                genres = dgs_result.get('genres', [])
+                for genre in genres:
+                    log.debug('got genre: %s' % (genre))
+                    Tag.objects.add_tag(obj, '"%s"' % genre)
 
-            notes = dgs_result.get('notes', None)
-            if notes:
-                obj.description = notes
+                notes = dgs_result.get('notes', None)
+                if notes:
+                    obj.description = notes
+
+            except:
+                pass
 
 
 
@@ -1082,93 +1092,99 @@ def mb_complete_artist_task(obj, mb_id):
         if discogs_id:
             url = 'http://api.discogs.com/artists/%s' % discogs_id
             r = requests.get(url)
-            dgs_result = r.json()
 
 
-            """
-            styles = dgs_result.get('styles', ())
-            for style in styles:
-                log.debug('got style: %s' % (style))
-                Tag.objects.add_tag(obj, '"%s"' % style)
-            """
-            profile = dgs_result.get('profile', None)
-            if profile:
-                obj.biography = profile
+            try:
+                dgs_result = r.json()
 
-            realname = dgs_result.get('realname', None)
-            if realname:
-                obj.real_name = realname
 
-            """
-            verry hackish part here, just as proof-of-concept
-            """
-            aliases = dgs_result.get('aliases', ())
-            for alias in aliases:
-                try:
-                    log.debug('got alias: %s' % alias['name'])
-                    # TODO: improve! handle duplicates!
-                    time.sleep(1.1)
-                    r = requests.get(alias['resource_url'])
-                    aa_result = r.json()
-                    aa_discogs_url = aa_result.get('uri', None)
-                    aa_name = aa_result.get('name', None)
-                    aa_profile = aa_result.get('profile', None)
-                    if aa_discogs_url and aa_name:
+                """
+                styles = dgs_result.get('styles', ())
+                for style in styles:
+                    log.debug('got style: %s' % (style))
+                    Tag.objects.add_tag(obj, '"%s"' % style)
+                """
+                profile = dgs_result.get('profile', None)
+                if profile:
+                    obj.biography = profile
 
-                        l_as = lookup.artist_by_relation_url(aa_discogs_url)
-                        l_a = None
+                realname = dgs_result.get('realname', None)
+                if realname:
+                    obj.real_name = realname
 
-                        if len(l_as) < 1:
-                            l_a = Artist(name=aa_name, biography=aa_profile)
-                            l_a.save()
+                """
+                verry hackish part here, just as proof-of-concept
+                """
+                aliases = dgs_result.get('aliases', ())
+                for alias in aliases:
+                    try:
+                        log.debug('got alias: %s' % alias['name'])
+                        # TODO: improve! handle duplicates!
+                        time.sleep(1.1)
+                        r = requests.get(alias['resource_url'])
+                        aa_result = r.json()
+                        aa_discogs_url = aa_result.get('uri', None)
+                        aa_name = aa_result.get('name', None)
+                        aa_profile = aa_result.get('profile', None)
+                        if aa_discogs_url and aa_name:
 
-                            rel = Relation(content_object=l_a, url=aa_discogs_url)
-                            rel.save()
+                            l_as = lookup.artist_by_relation_url(aa_discogs_url)
+                            l_a = None
 
-                        if len(l_as) == 1:
-                            l_a = l_as[0]
-                            print l_as[0]
+                            if len(l_as) < 1:
+                                l_a = Artist(name=aa_name, biography=aa_profile)
+                                l_a.save()
 
-                        if l_a:
-                            obj.aliases.add(l_a)
-                except:
-                    pass
+                                rel = Relation(content_object=l_a, url=aa_discogs_url)
+                                rel.save()
 
-            """
-            verry hackish part here, just as proof-of-concept
-            """
-            members = dgs_result.get('members', ())
-            for member in members:
-                try:
-                    log.debug('got member: %s' % member['name'])
-                    # TODO: improve! handle duplicates!
-                    time.sleep(1.1)
-                    r = requests.get(member['resource_url'])
-                    ma_result = r.json()
-                    ma_discogs_url = ma_result.get('uri', None)
-                    ma_name = ma_result.get('name', None)
-                    ma_profile = ma_result.get('profile', None)
-                    if ma_discogs_url and ma_name:
+                            if len(l_as) == 1:
+                                l_a = l_as[0]
+                                print l_as[0]
 
-                        l_as = lookup.artist_by_relation_url(ma_discogs_url)
-                        l_a = None
+                            if l_a:
+                                obj.aliases.add(l_a)
+                    except:
+                        pass
 
-                        if len(l_as) < 1:
-                            l_a = Artist(name=ma_name, biography=ma_profile)
-                            l_a.save()
+                """
+                verry hackish part here, just as proof-of-concept
+                """
+                members = dgs_result.get('members', ())
+                for member in members:
+                    try:
+                        log.debug('got member: %s' % member['name'])
+                        # TODO: improve! handle duplicates!
+                        time.sleep(1.1)
+                        r = requests.get(member['resource_url'])
+                        ma_result = r.json()
+                        ma_discogs_url = ma_result.get('uri', None)
+                        ma_name = ma_result.get('name', None)
+                        ma_profile = ma_result.get('profile', None)
+                        if ma_discogs_url and ma_name:
 
-                            rel = Relation(content_object=l_a, url=ma_discogs_url)
-                            rel.save()
+                            l_as = lookup.artist_by_relation_url(ma_discogs_url)
+                            l_a = None
 
-                        if len(l_as) == 1:
-                            l_a = l_as[0]
-                            print l_as[0]
+                            if len(l_as) < 1:
+                                l_a = Artist(name=ma_name, biography=ma_profile)
+                                l_a.save()
 
-                        if l_a:
-                            ma = ArtistMembership.objects.get_or_create(parent=obj, child=l_a)
+                                rel = Relation(content_object=l_a, url=ma_discogs_url)
+                                rel.save()
 
-                except:
-                    pass
+                            if len(l_as) == 1:
+                                l_a = l_as[0]
+                                print l_as[0]
+
+                            if l_a:
+                                ma = ArtistMembership.objects.get_or_create(parent=obj, child=l_a)
+
+                    except:
+                        pass
+
+            except:
+                pass
 
 
 
