@@ -36,7 +36,7 @@
 						<th scope="col">
 						<div class="wk-dayname">
 							{% if days|length < 8 %}
-							<span class="wk-daylink">{{ date|date:"DATE_FORMAT" }}</span>
+							<span class="wk-daylink">{{ date|date:"m / d" }}</span>
 							{% else %}
 							<span class="wk-daylink">{{ date|date:"m / d" }}</span>
 							{% endif %}

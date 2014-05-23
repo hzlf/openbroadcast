@@ -65,6 +65,43 @@ Only used on stage server. Echoprint server for production is located on node03.
 
 
 
+Echoprint services (on stage server)
+::::::::::::::::::::::::::::::::::::
+
+.. code-block:: bash
+
+    nano /etc/supervisor/conf.d/echoprint.conf
+
+.. code-block:: bash
+
+    [program:tokyo]
+    directory=/root/
+    command=/usr/sbin/ttserver -port 1978 -thnum 4 -pid /var/run/ttserver.pid /var/ttserver/prod_casket.tch#bnum=1000000
+    user=root
+    autostart=true
+    autorestart=true
+    redirect_stderr=True
+    environment=HOME='/root/'
+    stdout_logfile_maxbytes=10MB
+    stdout_logfile_backups=5
+    stdout_logfile=/var/log/supervisor/tokyo.log
+
+    [program:solr]
+    directory=/srv/openbroadcast.ch/service/solr
+    command=/usr/bin/java -Dsolr.solr.home=/srv/openbroadcast.ch/service/solr/solr/ -Djava.awt.headless=true -jar start.jar
+    user=root
+    autostart=true
+    autorestart=true
+    redirect_stderr=True
+    environment=HOME='/root/'
+    stdout_logfile_maxbytes=10MB
+    stdout_logfile_backups=5
+    stdout_logfile=/var/log/supervisor/solr.log
+
+
+
+
+
 
 Audiotools installation
 ==========

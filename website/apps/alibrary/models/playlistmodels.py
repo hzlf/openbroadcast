@@ -145,8 +145,9 @@ class Series(models.Model):
     
 
 
-class Playlist(MigrationMixin, CachingMixin, models.Model):
-    
+#class Playlist(MigrationMixin, CachingMixin, models.Model):
+class Playlist(MigrationMixin, models.Model):
+
     name = models.CharField(max_length=200)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     uuid = UUIDField()
@@ -234,7 +235,7 @@ class Playlist(MigrationMixin, CachingMixin, models.Model):
     
     # manager
     # objects = models.Manager()
-    objects = CachingManager()
+    # objects = CachingManager()
     
     # auto-update
     created = models.DateTimeField(auto_now_add=True, editable=False)

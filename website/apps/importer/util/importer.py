@@ -749,7 +749,7 @@ def mb_complete_release_task(obj, mb_id):
 
             if relation['type'] == 'discogs':
                 log.debug('got discogs url for release: %s' % relation['url'])
-                discogs_url = relation['url']
+                discogs_url = relation['url']['resource']
 
                 # obj.save()
 
@@ -757,9 +757,9 @@ def mb_complete_release_task(obj, mb_id):
                 log.debug('got purchase url for release: %s' % relation['url'])
 
                 try:
-                    rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
+                    rel = Relation.objects.get(object_id=obj.pk, url=relation['url']['resource'])
                 except:
-                    rel = Relation(content_object=obj, url=relation['url'])
+                    rel = Relation(content_object=obj, url=relation['url']['resource'])
                     rel.save()
 
 
@@ -782,16 +782,16 @@ def mb_complete_release_task(obj, mb_id):
 
                 if relation['type'] == 'discogs':
                     log.debug('got discogs master-url for release: %s' % relation['url'])
-                    discogs_master_url = relation['url']
+                    discogs_master_url = relation['url']['resource']
 
 
                 if relation['type'] == 'wikipedia':
                     log.debug('got wikipedia url for release: %s' % relation['url'])
 
                     try:
-                        rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
+                        rel = Relation.objects.get(object_id=obj.pk, url=relation['url']['resource'])
                     except:
-                        rel = Relation(content_object=obj, url=relation['url'])
+                        rel = Relation(content_object=obj, url=relation['url']['resource'])
                         rel.save()
 
 
@@ -799,9 +799,9 @@ def mb_complete_release_task(obj, mb_id):
                     log.debug('got lyrics url for release: %s' % relation['url'])
 
                     try:
-                        rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
+                        rel = Relation.objects.get(object_id=obj.pk, url=relation['url']['resource'])
                     except:
-                        rel = Relation(content_object=obj, url=relation['url'])
+                        rel = Relation(content_object=obj, url=relation['url']['resource'])
                         rel.save()
 
 
@@ -809,9 +809,9 @@ def mb_complete_release_task(obj, mb_id):
                     log.debug('got allmusic url for release: %s' % relation['url'])
 
                     try:
-                        rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
+                        rel = Relation.objects.get(object_id=obj.pk, url=relation['url']['resource'])
                     except:
-                        rel = Relation(content_object=obj, url=relation['url'])
+                        rel = Relation(content_object=obj, url=relation['url']['resource'])
                         rel.save()
 
 
@@ -819,9 +819,9 @@ def mb_complete_release_task(obj, mb_id):
                     log.debug('got review url for release: %s' % relation['url'])
 
                     try:
-                        rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
+                        rel = Relation.objects.get(object_id=obj.pk, url=relation['url']['resource'])
                     except:
-                        rel = Relation(content_object=obj, url=relation['url'])
+                        rel = Relation(content_object=obj, url=relation['url']['resource'])
                         rel.save()
 
 
@@ -1024,16 +1024,16 @@ def mb_complete_artist_task(obj, mb_id):
 
         if relation['type'] == 'discogs':
             log.debug('got discogs url for artist: %s' % relation['url'])
-            discogs_url = relation['url']
+            discogs_url = relation['url']['resource']
 
         if relation['type'] in valid_relations:
             log.debug('got %s url for artist: %s' % (relation['type'], relation['url']))
 
 
             try:
-                rel = Relation.objects.get(object_id=obj.pk, url=relation['url'])
+                rel = Relation.objects.get(object_id=obj.pk, url=relation['url']['resource'])
             except:
-                rel = Relation(content_object=obj, url=relation['url'])
+                rel = Relation(content_object=obj, url=relation['url']['resource'])
 
                 if relation['type'] == 'official homepage':
                     rel.service = 'official'
