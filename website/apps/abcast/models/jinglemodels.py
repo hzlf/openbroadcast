@@ -47,7 +47,7 @@ def clean_filename(filename):
 
 def masterpath_by_uuid(instance, filename):
     filename, extension = os.path.splitext(filename)
-    folder = "private/%s/" % (instance.uuid.replace('-', '/'))
+    folder = "private/%s/" % (instance.uuid.replace('-', '/')[6:])
     filename = u'master'
     return os.path.join(folder, "%s%s" % (clean_filename(filename).lower(), extension.lower()))
 
