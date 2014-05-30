@@ -285,7 +285,7 @@ class Releases(models.Model):
     releasecountry = models.CharField(max_length=150, blank=True)
     releasestatus = models.CharField(max_length=60, blank=True)
     releasetype = models.CharField(max_length=60, blank=True)
-    recording_date = models.DateTimeField(blank=True)
+    recording_date = models.DateTimeField(blank=True, null=True)
     event_location = models.CharField(max_length=750, blank=True)
     event_location_town = models.CharField(max_length=750, blank=True)
     event_location_url = models.CharField(max_length=750, blank=True)

@@ -23,9 +23,6 @@ def pushy_post_save(sender, **kwargs):
     obj = kwargs['instance']
     created = kwargs['created']
 
-
-    print '************ pushy_post_save ********************'
-
     if created:
         action = 'create'
         try:

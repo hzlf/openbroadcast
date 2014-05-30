@@ -879,7 +879,8 @@ def mb_complete_release_task(obj, mb_id):
             img = filer_extra.url_to_file(ca_url, obj.folder)
             obj.main_image = img
             obj.save()
-        except:
+        except Exception, e:
+            print 'unable to get image on coverartarchive: %s' % e
             pass
 
 

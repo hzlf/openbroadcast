@@ -6,6 +6,9 @@ import urllib2
 from django.core.files import File as DjangoFile
 from filer.models import Image
 
+import logging
+log = logging.getLogger(__name__)
+
 def url2name(url):
     return basename(urlsplit(url)[2])
 
@@ -37,20 +40,35 @@ def download(url, dir):
     
 def url_to_file(url, folder):
     
-    # url = 'http://www.astrosurf.com/astrospace/images/ss/Satellite%2008.jpg'
+    log.debug('saving %s to %s' % (url, folder))
     
     local_name, local_path = download(url, 'tmp')
     
     dj_file = DjangoFile(open(local_path), name=local_name)
-    
 
     obj, created = Image.objects.get_or_create(
                                     original_filename=local_name,
                                     file=dj_file,
                                     folder=folder,
                                     is_public=True)
-    
-    
+
     os.remove(local_path)
     
+    return obj
+
+
+def path_to_file(path, folder):
+
+    log.debug('saving %s to %s' % (path, folder))
+
+    dj_file = DjangoFile(open(path), name=os.path.basename(path))
+
+    obj, created = Image.objects.get_or_create(
+                                    original_filename=os.path.basename(path),
+                                    file=dj_file,
+                                    folder=folder,
+                                    is_public=True)
+
+
+
     return obj

@@ -594,8 +594,8 @@ class APILookup(models.Model):
                         #print rel['url']
                         #print get_service_by_url(rel['url'], None)
                         mapped.append({
-                            'url': rel['url'],
-                            'service': get_service_by_url(rel['url'], None),
+                            'url': rel['url']['resource'],
+                            'service': get_service_by_url(rel['url']['resource'], None),
                             })
 
                 data[k] = mapped
@@ -640,6 +640,20 @@ class APILookup(models.Model):
                 #res['release_country'] = c.pk
             except:
                 pass
+
+
+
+        # try to get cover-art
+        try:
+            url = 'http://coverartarchive.org/release/%s' % id
+            r = requests.get(url)
+            if r.ok:
+                res['main_image'] = r.json()['images'][0]['image']
+                res['remote_image'] = r.json()['images'][0]['image']
+        except:
+            pass
+
+
 
         print 'DTAGS:'
         print d_tags
@@ -708,7 +722,7 @@ class APILookup(models.Model):
                         #print get_service_by_url(rel['url'], None)
                         mapped.append({
                             'url': rel['url'],
-                            'service': get_service_by_url(rel['url'], None),
+                            'service': get_service_by_url(rel['url']['resource'], None),
                             })
 
                 data[k] = mapped
@@ -797,7 +811,7 @@ class APILookup(models.Model):
                         #print get_service_by_url(rel['url'], None)
                         mapped.append({
                             'url': rel['url'],
-                            'service': get_service_by_url(rel['url'], None),
+                            'service': get_service_by_url(rel['url']['resource'], None),
                             })
 
                 data[k] = mapped
@@ -891,7 +905,7 @@ class APILookup(models.Model):
                     if 'url' in rel:
                         mapped.append({
                             'url': rel['url'],
-                            'service': get_service_by_url(rel['url'], None),
+                            'service': get_service_by_url(rel['url']['resource'], None),
                             })
 
                 data[k] = mapped

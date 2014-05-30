@@ -1259,7 +1259,8 @@ class TCON(TextFrame):
     use the 'genres' property rather than the 'text' attribute.
     """
 
-    from mutagen._constants import GENRES
+    #from mutagen._constants import GENRES
+    GENRES = []
 
     def __get_genres(self):
         genres = []

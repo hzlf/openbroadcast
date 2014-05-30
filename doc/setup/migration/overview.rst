@@ -64,6 +64,16 @@ Database
     ALTER TABLE `elgg_cm_master` ADD `migrated` DATETIME  NULL  AFTER `locked_userident`;
 
 
+.. note::
+
+    Tables on ":abbr:`legacy (a.k.a. Music Library)`" have to be altered!
+
+.. code-block:: sql
+
+    ALTER TABLE `releases` CHANGE `recording_date` `recording_date` DATETIME  NULL  DEFAULT '0000-00-00 00:00:00';
+
+
+
 File storage/access
 ===================
 

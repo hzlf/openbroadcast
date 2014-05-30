@@ -804,7 +804,7 @@ EditUi = function () {
         var target = $('#' + self.field_prefix + key);
 
 
-        console.log('apply value:', val, ' key: ', key);
+        console.log('apply value:', val, ' key: ', key, 'prefix:', self.lookup_prefix);
 
         // hack for autocomlete fields (there is a hidden value)
         if (key.endsWith('_0')) {
@@ -817,6 +817,11 @@ EditUi = function () {
         if (key == 'main_image') {
             var val_b = $('#' + self.lookup_prefix + 'remote_image').html();
             var target_b = $('#' + self.field_prefix + 'remote_image');
+
+            // reflect change in info-panel
+            $('.iteminfo .image a').attr('href','#');
+            $('.iteminfo .image img').attr('src',val_b);
+
             target_b.val(val_b);
         }
         ;

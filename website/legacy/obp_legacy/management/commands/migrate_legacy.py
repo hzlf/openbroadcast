@@ -52,13 +52,20 @@ class LegacyImporter(object):
 
 
         if self.id or self.legacy_id:
-            print 'run migration on specific object'
-            if(self.object_type == 'media'):
 
+            if(self.object_type == 'media'):
 
                 if self.legacy_id:
                     legacy_obj = Medias.objects.using('legacy').get(id=int(self.legacy_id))
                     obj, status = get_media_by_legacy_object(legacy_obj, force=True)
+                    legacy_obj.migrated = datetime.now()
+                    legacy_obj.save()
+
+            if(self.object_type == 'release'):
+
+                if self.legacy_id:
+                    legacy_obj = Releases.objects.using('legacy').get(id=int(self.legacy_id))
+                    obj, status = get_release_by_legacy_object(legacy_obj, force=True)
                     legacy_obj.migrated = datetime.now()
                     legacy_obj.save()
 

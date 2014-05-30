@@ -156,9 +156,17 @@ def provider_search(request, *args, **kwargs):
         if item_type == 'media':
             _type = 'recording'
 
+        import re
+        query = re.sub('[^A-Za-z0-9 ]+', '', query)
+
         url = 'http://%s/ws/2/%s?query=%s&fmt=json' % (MUSICBRAINZ_HOST, _type, query)
         log.debug('query url: %s' % (url))
         r = requests.get(url)
+
+        print '/////////////////////////////////////////////////////'
+        print r.text
+        print '/////////////////////////////////////////////////////'
+
         if item_type == 'release':
             results = json.loads(r.text)['releases']
             for result in results:

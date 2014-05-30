@@ -341,6 +341,10 @@ class Media(CachingMixin, MigrationMixin):
         if latest_revision:
             return latest_revision.user
         else:
+            try:
+                return User.objects.get(username='root')
+            except:
+                pass
             return None
 
 
@@ -720,8 +724,14 @@ class Media(CachingMixin, MigrationMixin):
             print 'src_path: %s' % src_path
             print 'tmp_path: %s' % tmp_path
             print 'dst_path: %s' % dst_path
+
+            p = subprocess.Popen([
+                '/usr/bin/sox', src_path, tmp_path
+            ], stdout=subprocess.PIPE)
+            stdout = p.communicate()
+            print stdout
             
-            audiotools.open(src_path).convert(tmp_path, audiotools.WaveAudio)
+            #audiotools.open(src_path).convert(tmp_path, audiotools.WaveAudio)
             
             args = (tmp_path, dst_path, None, 1800, 301, 2048)
             create_wave_images(*args)
@@ -994,18 +1004,27 @@ class Media(CachingMixin, MigrationMixin):
         path = obj.get_master_path()
 
         if not path:
+            log.warning('master_path not available: %s' % path)
             obj.echoprint_status = 2
             obj.save()
             return None
-        
-        print 'path: %s' % path
-        
+
+        log.debug('echoprint binary at: %s' % ecb)
+        log.debug('update echoprint: %s' % path)
+
         p = subprocess.Popen([
             ecb, path,
         ], stdout=subprocess.PIPE)
-        stdout = p.communicate()        
-        d = json.loads(stdout[0])
-        
+        stdout = p.communicate()
+
+        try:
+            d = json.loads(stdout[0])
+        except ValueError, e:
+            log.error('unable to load JSON: %s' % e)
+            log.error('stdout: %s' % stdout)
+
+            return False
+
         # print d
         
         try:
@@ -1142,6 +1161,7 @@ class Media(CachingMixin, MigrationMixin):
                     self.echoprint_status = 0
 
             except Exception, e:
+                print e
                 pass
             
         
@@ -1152,7 +1172,9 @@ class Media(CachingMixin, MigrationMixin):
             log.info('Media id: %s - cache folder does not exist' % (self.pk))
             cache_folder = None
 
-            
+
+
+
         if self.master and self.processed != 1:
             log.info('Media id: %s - set master path to: %s' % (self.pk, self.master.path))
             iext = None
@@ -1182,7 +1204,7 @@ class Media(CachingMixin, MigrationMixin):
             self.base_filesize = base_filesize
             self.base_duration = base_duration
             
-        
+
         
         if self.master:
             self.master_sha1 = self.generate_sha1()
@@ -1191,7 +1213,7 @@ class Media(CachingMixin, MigrationMixin):
                 
                 
         unique_slugify(self, self.name)
-        
+
         # update d_tags
         t_tags = ''
         for tag in self.tags:
@@ -1218,10 +1240,13 @@ arating.enable_voting_on(Media)
 """"""
 from actstream import action
 def action_handler(sender, instance, created, **kwargs):
-    try:
-        action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
-    except Exception, e:
-        print e
+
+    if instance.get_last_editor():
+        log.debug('last editor seems to be: %s' % instance.get_last_editor())
+        try:
+            action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
+        except Exception, e:
+            print 'error attaching action_handler: %s' % e
 
 post_save.connect(action_handler, sender=Media)
         

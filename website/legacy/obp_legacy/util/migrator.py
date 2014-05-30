@@ -36,11 +36,12 @@ class Migrator(object):
 
 
 class ReleaseMigrator(Migrator):
+
     def __init__(self):
         log = logging.getLogger('util.migrator.__init__')
 
 
-    def run(self, legacy_obj):
+    def run(self, legacy_obj, force=False):
 
         from alibrary.models import Release, Relation
 
@@ -56,7 +57,7 @@ class ReleaseMigrator(Migrator):
         else:
             log.info('object found by legacy_id: %s' % obj.pk)
 
-        if created:
+        if created or force:
             """
             Mapping data
             1-to-1 fields
@@ -64,6 +65,8 @@ class ReleaseMigrator(Migrator):
             obj.name = legacy_obj.name[:190]
             obj.created = legacy_obj.created
             obj.updated = legacy_obj.updated
+
+            print '*****************************'
 
             if legacy_obj.catalognumber:
                 log.debug('catalognumber: %s' % legacy_obj.catalognumber)
@@ -199,23 +202,24 @@ class ReleaseMigrator(Migrator):
             Get image
             """
             try:
-                img_url = 'http://openbroadcast.ch/static/images/release/%s/original.jpg' % id_to_location(
-                    obj.legacy_id)
-                log.debug('download image: %s' % img_url)
-                img = filer_extra.url_to_file(img_url, obj.folder)
-                obj.main_image = img
-            except:
-                pass
+                img_path = os.path.join(LEGACY_STORAGE_ROOT, 'static', 'images', 'release', id_to_location(obj.legacy_id), 'original.jpg')
+                log.debug('image path: %s' % img_path)
+                if os.path.isfile(img_path):
+                    img = filer_extra.path_to_file(img_path, obj.folder)
+                    obj.main_image = img
+                else:
+                    log.debug('image does not exist at: %s' % img_path)
 
-            """
-            Finishing up
-            """
+            except Exception, e:
+                log.warning('unable to get image: %s - %s' % (img_path, e))
+
             obj.save()
 
         return obj, status
 
 
 class MediaMigrator(Migrator):
+
     def __init__(self):
         log = logging.getLogger('util.migrator.__init__')
 
@@ -323,64 +327,54 @@ class MediaMigrator(Migrator):
             """
             try:
 
+                # TODO: refactor to os.path.join()
                 base_path = '%s%s' % (LEGACY_STORAGE_ROOT, 'media/')
-
                 media_dir = '%s%s/' % (base_path, id_to_location(obj.legacy_id))
 
                 if legacy_obj.has_flac_default == 1:
-                    print 'FLAC'
                     media_path = '%sdefault.flac' % (media_dir)
                 else:
-                    print 'MP3'
                     media_path = '%sdefault.mp3' % (media_dir)
 
-                print '******************************************************'
-                print media_dir
-                print media_path
-
                 if os.path.isfile(media_path):
-                    print 'file exists!'
 
-                    """"""
-                    folder = "private/%s/" % (obj.uuid.replace('-', '/'))
-
+                    folder = "private/%s/" % (obj.uuid.replace('-', '/')[6:])
                     filename, extension = os.path.splitext(media_path)
                     dst = os.path.join(folder, "master%s" % extension.lower())
 
-                    print dst
-
                     try:
-
-                        os.makedirs("%s/%s" % (MEDIA_ROOT, folder))
+                        try:
+                            os.makedirs("%s/%s" % (MEDIA_ROOT, folder))
+                        except:
+                            pass
                         shutil.copy(media_path, "%s/%s" % (MEDIA_ROOT, dst))
                         obj.master = dst
                         obj.save()
 
                     except Exception, e:
+                        log.error('unable to link %s - %s' % (media_path, e))
                         print e
 
-
                 else:
-                    print 'unable to get file'
+                    log.error('file does not exist: %s' % media_path)
 
 
             except:
                 pass
 
-            """
-            Finishing up
-            """
+
             obj.save()
 
         return obj, status
 
 
 class ArtistMigrator(Migrator):
+
     def __init__(self):
         log = logging.getLogger('util.migrator.__init__')
 
 
-    def run(self, legacy_obj):
+    def run(self, legacy_obj, force=False):
 
         from alibrary.models import Artist, Relation
 
@@ -396,7 +390,7 @@ class ArtistMigrator(Migrator):
         else:
             log.info('object found by legacy_id: %s' % obj.pk)
 
-        if created:
+        if created or force:
             """
             Mapping data
             1-to-1 fields
@@ -533,27 +527,29 @@ class ArtistMigrator(Migrator):
             Get image
             """
             try:
-                img_url = 'http://openbroadcast.ch/static/images/artist/%s/original.jpg' % id_to_location(obj.legacy_id)
-                log.debug('download image: %s' % img_url)
-                img = filer_extra.url_to_file(img_url, obj.folder)
-                obj.main_image = img
-            except:
-                pass
+                img_path = os.path.join(LEGACY_STORAGE_ROOT, 'static', 'images', 'artist', id_to_location(obj.legacy_id), 'original.jpg')
+                log.debug('image path: %s' % img_path)
+                if os.path.isfile(img_path):
+                    img = filer_extra.path_to_file(img_path, obj.folder)
+                    obj.main_image = img
+                else:
+                    log.debug('image does not exist at: %s' % img_path)
 
-            """
-            Finishing up
-            """
+            except Exception, e:
+                log.warning('unable to get image: %s - %s' % (img_path, e))
+
             obj.save()
 
         return obj, status
 
 
 class LabelMigrator(Migrator):
+
     def __init__(self):
         log = logging.getLogger('util.migrator.__init__')
 
 
-    def run(self, legacy_obj):
+    def run(self, legacy_obj, force=False):
 
         from alibrary.models import Label, Relation, Distributor, DistributorLabel
 
@@ -569,7 +565,7 @@ class LabelMigrator(Migrator):
         else:
             log.info('object found by legacy_id: %s' % obj.pk)
 
-        if created:
+        if created or force:
             """
             Mapping data
             1-to-1 fields
@@ -708,16 +704,17 @@ class LabelMigrator(Migrator):
             Get image
             """
             try:
-                img_url = 'http://openbroadcast.ch/static/images/label/%s/original.jpg' % id_to_location(obj.legacy_id)
-                log.debug('download image: %s' % img_url)
-                img = filer_extra.url_to_file(img_url, obj.folder)
-                obj.main_image = img
-            except:
-                pass
+                img_path = os.path.join(LEGACY_STORAGE_ROOT, 'static', 'images', 'label', id_to_location(obj.legacy_id), 'original.jpg')
+                log.debug('image path: %s' % img_path)
+                if os.path.isfile(img_path):
+                    img = filer_extra.path_to_file(img_path, obj.folder)
+                    obj.main_image = img
+                else:
+                    log.debug('image does not exist at: %s' % img_path)
 
-            """
-            Finishing up
-            """
+            except Exception, e:
+                log.warning('unable to get image: %s - %s' % (img_path, e))
+
             obj.save()
 
         return obj, status
@@ -1215,9 +1212,9 @@ class PlaylistMigrator(Migrator):
         return obj, status
 
 
-def get_release_by_legacy_object(legacy_obj):
+def get_release_by_legacy_object(legacy_obj, force=False):
     migrator = ReleaseMigrator()
-    obj, status = migrator.run(legacy_obj)
+    obj, status = migrator.run(legacy_obj, force)
 
     return obj, status
 
@@ -1229,16 +1226,16 @@ def get_media_by_legacy_object(legacy_obj, force=False):
     return obj, status
 
 
-def get_artist_by_legacy_object(legacy_obj):
+def get_artist_by_legacy_object(legacy_obj, force=False):
     migrator = ArtistMigrator()
-    obj, status = migrator.run(legacy_obj)
+    obj, status = migrator.run(legacy_obj, force)
 
     return obj, status
 
 
-def get_label_by_legacy_object(legacy_obj):
+def get_label_by_legacy_object(legacy_obj, force=False):
     migrator = LabelMigrator()
-    obj, status = migrator.run(legacy_obj)
+    obj, status = migrator.run(legacy_obj, force)
 
     return obj, status
 
