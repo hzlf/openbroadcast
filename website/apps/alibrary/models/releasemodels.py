@@ -282,7 +282,7 @@ class Release(MigrationMixin):
 
     @property
     def is_new(self):
-        if self.releasedate and self.releasedate <= (datetime.now()+timedelta(days=7)).date():
+        if self.releasedate and self.releasedate > (datetime.now()-timedelta(days=7)).date():
             return True
 
         return False
