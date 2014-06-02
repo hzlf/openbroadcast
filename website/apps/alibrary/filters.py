@@ -143,6 +143,23 @@ class ReleaseFilter(django_filters.FilterSet):
                 if ds not in flist:
                     flist.append(filter_)
 
+
+
+
+            """
+            add some custom queries
+            """
+            cf = {
+                'label': 'Extra filters',
+                'name': 'extra_filter',
+                'entries': [
+                    ['no_cover', '', 'No cover'],
+                    ['has_cover', '', 'With cover'],
+                ]
+            }
+            flist.append(cf)
+
+
             self._filterlist = flist
 
         return self._filterlist

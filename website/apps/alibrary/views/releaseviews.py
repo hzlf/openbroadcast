@@ -198,6 +198,23 @@ class ReleaseListView(PaginationMixin, ListView):
             self.relation_filter.append(f)
 
 
+        # "extra-filters" (to provide some arbitary searches)
+        extra_filter = self.request.GET.get('extra_filter', None)
+        if extra_filter:
+            if extra_filter == 'no_cover':
+                qs = qs.filter(main_image=None).distinct()
+                # add relation filter
+                #fa = Release.objects.filter(slug=release_filter)[0]
+                #f = {'item_type': 'release' , 'item': fa, 'label': _('Release')}
+                #self.relation_filter.append(f)
+            if extra_filter == 'has_cover':
+                qs = qs.exclude(main_image=None).distinct()
+                # add relation filter
+                #fa = Release.objects.filter(slug=release_filter)[0]
+                #f = {'item_type': 'release' , 'item': fa, 'label': _('Release')}
+                #self.relation_filter.append(f)
+
+
 
 
         # base queryset        
