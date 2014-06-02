@@ -92,14 +92,19 @@ class PlaylistListView(PaginationMixin, ListView):
         
         self.tagcloud = None
         q = self.request.GET.get('q', None)
+
+        #qs = Playlist.objects.all()
+        qs = Playlist.objects.filter(~Q(type='basket') | Q(user__pk=self.request.user.pk))
+
+
         
         if q:
-            qs = Playlist.objects.filter(Q(name__istartswith=q)\
+            qs = qs.filter(Q(name__istartswith=q)\
             | Q(description__icontains=q)\
             | Q(user__username__istartswith=q))\
             .distinct()
-        else:
-            qs = Playlist.objects.all()
+
+
             
 
             
