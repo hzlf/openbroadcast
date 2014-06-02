@@ -13,15 +13,15 @@ class WikiRelease(object):
     
     def attempt(self, token, **kwargs):
         if Release.objects.filter(self.get_query(token)).count() > 0:
+            self.obj = Release.objects.filter(self.get_query(token))[0]
             return True
         return False
 
     def render(self, token, trail=None, **kwargs):
-        obj = Release.objects.get(self.get_query(token))
-        if obj.catalognumber:
-            return "<a href='%s'>[%s]&nbsp;%s</a>" % (obj.get_absolute_url(), obj.catalognumber, obj.name)
+        if self.obj:
+            return "<a href='%s'>%s</a>" % (self.obj.get_absolute_url(), self.obj.name)
         else:
-            return "<a href='%s'>%s</a>" % (obj.get_absolute_url(), obj.name)
+            return 'linker error'
 
 class WikiArtist(object):
     

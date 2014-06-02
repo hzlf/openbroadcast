@@ -9,11 +9,14 @@ from django.forms.widgets import FileInput
 from tagging.forms import TagField
 
 from filer.models.imagemodels import Image
-from alibrary.models import Playlist, TARGET_DURATION_CHOICES
+from alibrary.models import Playlist
 import selectable.forms as selectable
 from alibrary.lookups import *
 from ac_tagging.widgets import TagAutocompleteTagIt
 from lib.widgets.widgets import ReadOnlyIconField
+
+
+from alibrary import settings as alibrary_settings
 
 
 
@@ -208,7 +211,7 @@ class PlaylistForm(ModelForm):
 
     series = selectable.AutoCompleteSelectField(PlaylistSeriesLookup, allow_new=True, required=False)
 
-    target_duration = forms.ChoiceField(widget=forms.RadioSelect, choices=TARGET_DURATION_CHOICES, required=False)
+    target_duration = forms.ChoiceField(widget=forms.RadioSelect, choices=alibrary_settings.PLAYLIST_TARGET_DURATION_CHOICES, required=False)
     dayparts = forms.ModelMultipleChoiceField(label='...%s' % _('Dayparts'), widget=DaypartWidget(), queryset=Daypart.objects.active(), required=False)
 
     seasons = forms.ModelMultipleChoiceField(label='...%s' % _('Seasons'), queryset=Season.objects.all(), required=False, widget=forms.CheckboxSelectMultiple)

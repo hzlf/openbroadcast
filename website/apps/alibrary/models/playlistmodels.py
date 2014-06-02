@@ -30,6 +30,7 @@ from filer.fields.image import FilerImageField
 from filer.fields.audio import FilerAudioField
 from filer.fields.file import FilerFileField
 
+
 from celery.task import task
 
 # modules
@@ -48,47 +49,13 @@ from lib.fields import extra
 from alibrary.models.basemodels import *
 from alibrary.models.artistmodels import *
 
+from alibrary import settings as alibrary_settings
+
 from caching.base import CachingMixin, CachingManager
 
 
-DURATION_MAX_DIFF = 2000 # one second...
+DURATION_MAX_DIFF = 2000 # two seconds...
 
-
-TARGET_DURATION_CHOICES = (
-    (900, '15'),
-    (1800, '30'),
-    (2700, '45'),
-    (3600, '60'),
-    (4500, '75'),
-    (5400, '90'),
-    (6300, '105'),
-    (7200, '120'),
-
-    (8100, '135'),
-    (9000, '150'),
-    (9900, '165'),
-    (10800, '180'),
-    (11700, '195'),
-    (12600, '210'),
-    (13500, '225'),
-    (14400, '240'),
-
-
-)
-"""
-SEASOUN_CHOICES = (
-    (0, _('Spring')),
-    (1, _('Summer')),
-    (2, _('Autumn')),
-    (3, _('Winter')),
-)
-
-WEATHER_CHOICES = (
-    (0, _('Sunny')),
-    (1, _('Rainy')),
-    (2, _('Foggy ')),
-)
-"""
 
 def filename_by_uuid(instance, filename):
     filename, extension = os.path.splitext(filename)
@@ -151,44 +118,11 @@ class Playlist(MigrationMixin, models.Model):
     name = models.CharField(max_length=200)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     uuid = UUIDField()
-    
-    STATUS_CHOICES = (
-        (0, _('Init')),
-        (1, _('Ready')),
-        (2, _('In progress')),
-        (3, _('Scheduled')),
-        (4, _('Descheduled')),
-        (99, _('Error')),
-        (11, _('Other')),
-    )
-    status = models.PositiveIntegerField(default=0, choices=STATUS_CHOICES)
 
-    """
-    TYPE_CHOICES = (
-        ('basket', _('Basket')),
-        ('playlist', _('Playlist')),
-        ('broadcast', _('Broadcast')),
-        ('other', _('Other')),
-    )
-    """
-    TYPE_CHOICES = (
-        ('basket', _('Private Playlist')),
-        ('playlist', _('Public Playlist')),
-        ('broadcast', _('Broadcasts')),
-        ('other', _('Other')),
-    )
-    type = models.CharField(max_length=12, default='basket', null=True, choices=TYPE_CHOICES)
-
-
-    BROADCAST_STATUS_CHOICES = (
-        (0, _('Undefined')),
-        (1, _('OK')),
-        (2, _('Warning')),
-        (99, _('Error')),
-    )
-    broadcast_status = models.PositiveIntegerField(default=0, choices=BROADCAST_STATUS_CHOICES)
+    status = models.PositiveIntegerField(default=0, choices=alibrary_settings.PLAYLIST_STATUS_CHOICES)
+    type = models.CharField(max_length=12, default='basket', null=True, choices=alibrary_settings.PLAYLIST_TYPE_CHOICES)
+    broadcast_status = models.PositiveIntegerField(default=0, choices=alibrary_settings.PLAYLIST_BROADCAST_STATUS_CHOICES)
     broadcast_status_messages = JSONField(blank=True, null=True, default=None)
-
 
     EDIT_MODE_CHOICES = (
         (0, _('Compact')),
@@ -218,7 +152,7 @@ class Playlist(MigrationMixin, models.Model):
     duration = models.IntegerField(max_length=12, null=True, default=0)
     
 
-    target_duration = models.PositiveIntegerField(default=0, null=True, choices=TARGET_DURATION_CHOICES)
+    target_duration = models.PositiveIntegerField(default=0, null=True, choices=alibrary_settings.PLAYLIST_TARGET_DURATION_CHOICES)
     
     dayparts = models.ManyToManyField(Daypart, null=True, blank=True, related_name='daypart_plalists')
     seasons = models.ManyToManyField('Season', null=True, blank=True, related_name='season_plalists')

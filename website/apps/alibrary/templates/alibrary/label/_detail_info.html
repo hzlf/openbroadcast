@@ -1,4 +1,4 @@
-{% load truncate i18n thumbnail arating_tags email_obfuscator spurl %}
+{% load truncate i18n thumbnail arating_tags email_obfuscator spurl spacify_tags %}
 <div class="span6 padded-h container_content">
 
 	<div class="page-header">
@@ -183,16 +183,16 @@
 		</dd>
 		-->
 		
-		{% if object.tags %}
-		<dt>
-			{% trans "Tags" %}:
-		</dt>
-		<dd>
-			{% for tag in object.tags %}
-			{{ tag.name }}{% if not forloop.last %},{% endif %}
-			{% endfor %}
-		</dd>
-		{% endif %}
+    {% if object.tags %}
+        <dt>
+            {% trans "Tags" %}:
+        </dt>
+        <dd>
+            {% for tag in object.tags %}
+                <span class="tag">{{ tag.name|spacify }}</span>
+            {% endfor %}
+        </dd>
+    {% endif %}
 
 	</dl>
 

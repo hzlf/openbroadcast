@@ -377,22 +377,64 @@ class PlaylistFilter(django_filters.FilterSet):
                 ds = self.queryset.values_list(name, flat=False).annotate(
                     n=models.Count("pk", distinct=True)).distinct()
 
-                """
-                if name == 'dayparts':
-                    print '************* DPF ****'
-                    tlist = []
+
+                # TODO: extreme hackish...
+                if name == 'type':
+                    nd = []
                     for d in ds:
-                        print d
-                        # tlist.append([d[0], d[1], DAY_CHOICES[d[0]]])
-                        tlist.append([d[0], d[1], DAY_CHOICES[0] ])
+                        if d[0] == 'NULL':
+                            nd.append([d[0], d[1], _('Unknown')])
+                        else:
+                            nd.append([d[0], d[1], u'%s' % d[0].replace('_', ' ').title()])
 
-                    ds = tlist
-                """
+                    filter_.entries = nd
 
-                filter_.entries = ds
+                elif name == 'status':
+                    nd = []
+                    for d in ds:
+                        if d[0] == 'NULL':
+                            pass
+                        else:
+                            if d[0] != None:
+                                for x in alibrary_settings.PLAYLIST_STATUS_CHOICES:
+                                    if x[0] == d[0]:
+                                        nd.append([d[0], d[1], '%s' % x[1]])
+
+                    filter_.entries = nd
+
+                elif name == 'target_duration':
+                    nd = []
+                    for d in ds:
+                        if d[0] == 'NULL':
+                            pass
+                        else:
+                            if d[0] != None:
+                                for x in alibrary_settings.PLAYLIST_TARGET_DURATION_CHOICES:
+                                    if x[0] == d[0]:
+                                        nd.append([d[0], d[1], _('%s minutes') % x[1]])
+
+                    filter_.entries = nd
+
+                elif name == 'dayparts':
+                    from alibrary.models import Daypart
+                    nd = []
+                    for d in ds:
+                        print 'daypart filter'
+                        try:
+                            dp = Daypart.objects.get(pk=int(d[0]))
+                            print dp
+                            nd.append([d[0], d[1], dp])
+
+                        except:
+                            pass
+
+                    nd.sort()
+                    filter_.entries = nd
+
+                else:
+                    filter_.entries = ds
 
                 if ds not in flist:
-                    #pass
                     flist.append(filter_)
 
             self._filterlist = flist
