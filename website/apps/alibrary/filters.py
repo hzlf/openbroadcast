@@ -413,6 +413,7 @@ class PlaylistFilter(django_filters.FilterSet):
                                     if x[0] == d[0]:
                                         nd.append([d[0], d[1], _('%s minutes') % x[1]])
 
+                    nd.sort()
                     filter_.entries = nd
 
                 elif name == 'dayparts':
