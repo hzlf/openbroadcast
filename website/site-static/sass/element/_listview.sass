@@ -43,6 +43,7 @@
         background-image: url('/static/img/base/listview.style.l.png')
 
 
+
 .listview
   &.container
   
@@ -84,31 +85,17 @@
             background-image: url('/static/img/prototype/table_order_desc.png')
         a
           color: #666666
+
+
+
+
+.listview
+  &.container
+
     .list_body
       display: table-row-group
       .list_body_row
         display: table-row
-        
-        span.badge
-          height: 10px
-          margin-top: 3px
-          background: orange
-          display: block
-          padding: 0 3px
-          color: white
-          font-size: 9px
-          line-height: 10px
-          font-weight: normal
-          text-transform: uppercase
-          margin-right: 4px
-          &:first-child
-            margin-right: 12px
-          &.top
-            background: #46b5fd
-            color: #fff
-          &.flop
-            background: red
-
 
         // inline smalls (eg country)
         a > small
@@ -171,10 +158,42 @@
                 color: #00bb00
             
 
+
+// top-flop badges
+.listview
+  &.container
+    span.badge
+      height: 10px
+      margin-top: 3px
+      background: orange
+      display: block
+      padding: 0 3px
+      color: white
+      font-size: 9px
+      line-height: 10px
+      font-weight: normal
+      text-transform: uppercase
+      margin-right: 4px
+      &:first-child
+        margin-right: 12px
+      &.top
+        background: #00bb00
+        color: #fff
+      &.flop
+        background: red
+
+    span.trackcount
+      //
+      //background: lawngreen
+
+.listview
+  &.container.l
+    span.badge
+      &:first-child
+        margin-right: 0px
+
 	  
-	  
-	  
-	  
+.listview
   &.footer
     border-top: none
     margin: 0
@@ -440,6 +459,10 @@
       .c6
         width: 30px
         padding-right: 0px
+    &.labels.m
+      .c1
+        width: 61px
+        background-position: 5px 5px
 		
     /* medias */
     &.medias.s
@@ -823,12 +846,12 @@
     div.list_body_row 
       display: block
       float: left
-      // width: 172px
       width: 197px
-      //height: 200px
+      // height with animation
       height: 235px
-      //height: 255px
-      /*background-color: #ff0000 */
+      // height always open
+      height: 275px
+
       background-repeat: no-repeat
       overflow: hidden
       border-bottom: 1px solid #DDDDDD
@@ -842,6 +865,8 @@
       &.hover
         background-color: #ffffff
         .wrapper_info
+          background-color: #F5F5F5
+        .wrapper_action
           background-color: #F5F5F5
       &.selection.hover
         background-color: #ffffff
@@ -936,11 +961,9 @@
 
 
       // animate on item hover
-      &.hover .spacer
-        height: 82px
-        -webkit-transition-property: height
-        -webkit-transition-duration: .0s
 
+      //
+      &.hover
         ul.tags
           position: absolute
           opacity: 1
@@ -951,7 +974,6 @@
             border: 1px solid #626262
 
 
-
 		
       /* Adjustable infoo panel */
       .wrapper_info
@@ -959,13 +981,14 @@
         ul li
           /*padding: 2px 2px 2px 5px
         .wrapper_inner
-          height: 98px
+          //height: 98px
+          height: 59px
           overflow: hidden
 
 
 
       .wrapper_action
-        background: #f5f5f5
+        background: #ffffff
         li
           float: right
 

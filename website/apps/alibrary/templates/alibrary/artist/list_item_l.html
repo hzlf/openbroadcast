@@ -1,7 +1,8 @@
 {% load thumbnail i18n truncate display_tags arating_tags spurl %}
 
-<div class="list_body_row selectable item artist view edit stream collect download" id="list_item_{{ item.pk }}"
+<div class="list_body_row selectable clickable item artist view edit stream collect download" id="list_item_{{ item.pk }}"
      data-resource_uri="{{ item.get_api_url }}"
+     data-absolute_url="{{ item.get_absolute_url }}"
      {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 200x200 crop bw upscale subject_location=item.main_image.subject_location %});"{% endif %}>
 
     <div class="wrapper_icon">
@@ -51,10 +52,8 @@
                         -->
                     </li>
                 </ul>
-            </div>
 
-            <div class="list_body_item">
-                <ul class="unstyled">
+                <ul class="unstyled horizontal">
 
 
                     {% if item.get_releases.count > 0 %}
@@ -70,7 +69,7 @@
 
 
                     {% if item.media_artist.count > 0 %}
-                        <li>
+                        <li style="padding-left: 30px">
                             {% url alibrary-media-list as media_list %}
                             {% trans "Tracks" %}:&nbsp;<a
                                 href="{% spurl path=media_list query="artist={{ item.slug }}" %}"

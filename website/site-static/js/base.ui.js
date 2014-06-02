@@ -1523,6 +1523,19 @@ base.ui.listview = function () {
      * Listview - row functions
      */
 
+    // detail-click on image element
+    $('div.item.clickable').on('click', '.spacer', function (e) {
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        var url = $(this).parents('.item').data('absolute_url');
+        window.location.href = url;
+
+    });
+
+
+
     // hover / -out
     $('div.listview.container div.list_body_row').hover(function (event) {
         $(this).addClass("hover");

@@ -2,7 +2,7 @@
 from optparse import make_option
 
 from django.core.management.base import BaseCommand, NoArgsCommand
-
+from django.conf import settings
 
 #from alibrary.models import Artist, Release, Media, Label, Relation, License
 
@@ -41,6 +41,7 @@ ALTER TABLE `elgg_cm_master` ADD `migrated` DATETIME  NULL  AFTER `locked_userid
 """
 
 class LegacyImporter(object):
+
     def __init__(self, * args, **kwargs):
         self.object_type = kwargs.get('object_type')
         self.id = kwargs.get('id')
@@ -48,7 +49,14 @@ class LegacyImporter(object):
         self.limit = kwargs.get('limit')
         self.verbosity = int(kwargs.get('verbosity', 1))
         
-    def walker(self):
+    def run(self):
+
+        if not self.check():
+            import sys
+            print '-------------------------------------------------'
+            print 'Self-check failed.'
+            print
+            sys.exit(2)
 
 
         if self.id or self.legacy_id:
@@ -149,7 +157,30 @@ class LegacyImporter(object):
                 obj, status = get_playlist_by_legacy_object(legacy_obj)                
                 legacy_obj.migrated = datetime.now()
                 legacy_obj.save()
-                
+
+
+    def check(self):
+
+        status = True
+
+        """
+        check if directories exist & permissions match
+        """
+        media_root = getattr(settings, 'MEDIA_ROOT', None)
+        legacy_storage = getattr(settings, 'LEGACY_STORAGE_ROOT', None)
+
+        print 'media root:     %s' % media_root
+        print 'legacy storage: %s' % legacy_storage
+
+
+        """
+        check if legacy-databases are ready
+        """
+
+
+
+        return status
+
                 
         
 
@@ -188,4 +219,4 @@ class Command(NoArgsCommand):
 
     def handle_noargs(self, **options):
         legacy_importer = LegacyImporter(**options)
-        legacy_importer.walker()
+        legacy_importer.run()

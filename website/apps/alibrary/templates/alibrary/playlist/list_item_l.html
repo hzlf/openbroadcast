@@ -1,7 +1,8 @@
 {% load thumbnail i18n truncate display_tags arating_tags spurl calc %}
 
-<div class="list_body_row selectable item playlist published {% if item.user == request.user %}owner{% endif %} view edit stream collect download"
+<div class="list_body_row selectable clickable item playlist published {% if item.user == request.user %}owner{% endif %} view edit stream collect download"
      id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}"
+     data-absolute_url="{{ item.get_absolute_url }}"
      {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 200x200 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}>
 
     <div class="wrapper_icon">
@@ -50,26 +51,35 @@
                            style="vertical-align: top;"><span class="filter icon"></span></a>
 
 
+                        <span class="pull-right">
+                            <span class="small">{{ item.get_type_display }}</span>
+                        </span>
+
+
                     </li>
 
-                    <li class="small">
-                        {{ item.get_type_display }} | {{ item.get_status_display }}
-                    </li>
 
                 </ul>
-            </div>
 
-            <div class="list_body_item">
                 <ul class="unstyled">
                     <li>
                         {{ item.duration|divide:1000|sec_to_time }}
                         {% if item.target_duration %}
                             <span class="small">{% trans "of" %} {{ item.target_duration|sec_to_time }}</span>
                         {% endif %}
+
+                        {% comment %}
+                        <span class="small">{{ item.items.count }} {% trans "Tracks" %}</span>
+                        {% endcomment %}
+
+                        <span class="pull-right">
+                            <span class="small">{{ item.get_status_display }}</span>
+                        </span>
+
                     </li>
-                    <li class="small">
-                        {{ item.items.count }} {% trans "Tracks" %}
-                    </li>
+
+
+
                 </ul>
 
 

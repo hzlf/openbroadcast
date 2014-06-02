@@ -1,9 +1,10 @@
 {% load adv_cache thumbnail i18n truncate display_tags arating_tags spurl spacify_tags %}
 
-<div class="list_body_row selectable item release {{ item.uuid }} {% if item.publish_date %} published{% else %} unpublished{% endif %}{% if item.creator == user %} owner{% endif %}"
+<div class="list_body_row selectable clickable item release {{ item.uuid }} {% if item.publish_date %} published{% else %} unpublished{% endif %}{% if item.creator == user %} owner{% endif %}"
      id="list_item_{{ item.pk }}" data-resource_uri="{{ item.get_api_url }}"
      {% if item.main_image %}style="background-image: url({% thumbnail item.main_image 200x200 crop upscale subject_location=item.main_image.subject_location %});"{% endif %}
      data-id="{{ item.id }}"
+     data-absolute_url="{{ item.get_absolute_url }}"
      data-uuid="{{ item.uuid }}"
      data-ct="release">
 
@@ -39,6 +40,8 @@
 
 
             <div class="list_body_item">
+
+
                 <ul class="title">
                     <li class="bold">
                         <a href="{{ item.get_absolute_url }}"
@@ -86,64 +89,53 @@
 
                         {% endfor %}
 
+                        <span class="pull-right">
+                            <span>{{ item.get_media.count }}</span>{% if item.totaltracks %}<span class="small"> of {{ item.totaltracks }}</span>{% endif %}
+                        </span>
+
 
                     </li>
                 </ul>
-            </div>
 
+                {% if item.label %}
+                <ul class="horizontal clearfix unstyled">
+                    <li style="white-space:nowrap;">
+                        {% if item.label %}
 
+                            <a href="{{ item.label.get_absolute_url }}"
+                               title="{{ item.label.name }}">{{ item.label.name|truncate_chars_inner:18 }}</a>
+                            &nbsp;
+                            <a href="{% spurl base=request.get_full_path remove_query_param="page" set_query="label={{ item.label.slug }}" %}"
+                               title="{% trans "Only show releases on" %} {{ item.label.name }}"
+                               style="vertical-align: top;"><span class="filter icon"></span></a>
 
-            <div class="list_body_item">
-                <ul class="unstyled indicator horizontal">
-
-
-                    {% comment %}
-                    <li>
-                        {% if item.get_license %}
-                            <a href="{{ item.get_license.get_absolute_url }}" title="{% trans "License details" %}"
-                               class="iconset iconset-license">{{ item.get_license.iconset_display }}</a>
                         {% else %}
                             &nbsp;
                         {% endif %}
+
+
+
                     </li>
-                    {% endcomment %}
-
-                    {% comment %}{% endcomment %}
-
-                    {% include "alibrary/element/_track_indicator.html" %}
-
-
-
+                    <li class="small" style="float: right;">
+                        {% if  item.catalognumber %}
+                            {{ item.catalognumber }}
+                        {% endif %}
+                    </li>
                 </ul>
+                {% endif %}
+
+
             </div>
 
 
+            {% comment %}
+            <div class="list_body_item">
+                <ul class="unstyled indicator horizontal">
+                    {% include "alibrary/element/_track_indicator.html" %}
+                </ul>
+            </div>
+            {% endcomment %}
 
-            {% if item.label %}
-                <div class="list_body_item">
-                    <ul class="horizontal clearfix unstyled">
-                        <li style="white-space:nowrap;">
-                            {% if item.label %}
-
-                                <a href="{{ item.label.get_absolute_url }}"
-                                   title="{{ item.label.name }}">{{ item.label.name|truncate_chars_inner:18 }}</a>
-                                &nbsp;
-                                <a href="{% spurl base=request.get_full_path remove_query_param="page" set_query="label={{ item.label.slug }}" %}"
-                                   title="{% trans "Only show releases on" %} {{ item.label.name }}"
-                                   style="vertical-align: top;"><span class="filter icon"></span></a>
-
-                            {% else %}
-                                &nbsp;
-                            {% endif %}
-                        </li>
-                        <li class="small">&nbsp;
-                            {% if  item.catalognumber %}
-                                {{ item.catalognumber }}
-                            {% endif %}
-                        </li>
-                    </ul>
-                </div>
-            {% endif %}
 
 
 

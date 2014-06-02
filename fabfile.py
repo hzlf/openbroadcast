@@ -230,9 +230,9 @@ def deploy(branch=None):
             pass
         """
 
-
         # reload app-server
         reload_gunicorn()
+        restart_services()
 
         # cleanup
         with cd(env.path):
@@ -243,7 +243,6 @@ def deploy(branch=None):
 
 
 def reload_gunicorn():
-
 
     try:
         r = run('supervisorctl status %s' % env.site_id)
@@ -259,6 +258,13 @@ def reload_gunicorn():
         print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 
 
+def restart_services():
+    try:
+        run('supervisorctl restart services.%s:*' % env.site_id)
+    except Exception, e:
+        print '!!!!!! SERVICES WARNING !!!!!!!'
+        print e
+        print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 
 
 

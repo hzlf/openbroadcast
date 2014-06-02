@@ -134,6 +134,7 @@ class ReleaseForm(ModelForm):
         fields = ('name',
                   'label',
                   'releasetype',
+                  'totaltracks',
                   'release_country',
                   'catalognumber',
                   'description',
@@ -181,6 +182,7 @@ class ReleaseForm(ModelForm):
                 #Div(HTML('<h4>%s</h4><p>%s</p>' % (_('Bulk Edit'), _('Choose Artist name and/or license to apply on every track.'))), css_class='form-help'),
                 LookupField('name', css_class='input-xlarge'),
                 LookupField('releasetype', css_class='input-xlarge'),
+                LookupField('totaltracks', css_class='input-xlarge'),
         )
 
         artist_layout = Fieldset(
