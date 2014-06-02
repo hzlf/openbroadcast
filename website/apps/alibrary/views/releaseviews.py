@@ -200,7 +200,6 @@ class ReleaseListView(PaginationMixin, ListView):
 
         # "extra-filters" (to provide some arbitary searches)
         extra_filter = self.request.GET.get('extra_filter', None)
-        """
         if extra_filter:
             if extra_filter == 'no_cover':
                 qs = qs.filter(main_image=None).distinct()
@@ -214,7 +213,7 @@ class ReleaseListView(PaginationMixin, ListView):
                 #fa = Release.objects.filter(slug=release_filter)[0]
                 #f = {'item_type': 'release' , 'item': fa, 'label': _('Release')}
                 #self.relation_filter.append(f)
-        """
+
 
 
 

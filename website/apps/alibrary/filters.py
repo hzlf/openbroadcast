@@ -123,7 +123,7 @@ class ReleaseFilter(django_filters.FilterSet):
 
                     filter_.entries = nd
 
-                elif name == 'label__type':
+                elif name == 'label__type_':
                     nd = []
                     for d in ds:
                         if d[0] == 'NULL':
