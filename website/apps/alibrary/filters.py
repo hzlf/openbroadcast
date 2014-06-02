@@ -113,7 +113,7 @@ class ReleaseFilter(django_filters.FilterSet):
 
 
                 # TODO: extreme hackish...
-                if name == 'releasetype':
+                if name == 'releasetype_':
                     nd = []
                     for d in ds:
                         if d[0] == 'NULL':
