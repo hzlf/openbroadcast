@@ -237,8 +237,10 @@ arating.enable_voting_on(Label)
 
 from actstream import action
 def action_handler(sender, instance, created, **kwargs):
-
-    action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
+    try:
+        action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
+    except:
+        pass
 
 
 post_save.connect(action_handler, sender=Label)

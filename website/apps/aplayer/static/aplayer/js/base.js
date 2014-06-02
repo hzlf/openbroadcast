@@ -659,10 +659,10 @@ aplayer.base.subscribe_channel_data = function (channel) {
     aplayer.base.update_channel_data(channel);
     // and subscribe for changes
     /*
-    pushy.subscribe(channel.resource_uri + 'on-air/', function () {
-        aplayer.base.update_channel_data(channel);
-    });
-    */
+     pushy.subscribe(channel.resource_uri + 'on-air/', function () {
+     aplayer.base.update_channel_data(channel);
+     });
+     */
     pushy.subscribe(channel.resource_uri, function (data) {
         console.log('pushy callbackk with data:', data);
         aplayer.base.update_channel_data(channel);
@@ -689,7 +689,7 @@ aplayer.base.update_channel_data = function (channel) {
         var media;
         var emission;
 
-        if(on_air.item) {
+        if (on_air.item) {
             $.get(on_air.item, function (media) {
                 console.log('media on air:', media)
                 aplayer.vars.playlist[aplayer.states.current].media = media;
@@ -698,7 +698,7 @@ aplayer.base.update_channel_data = function (channel) {
 
             })
         }
-        if(on_air.emission) {
+        if (on_air.emission) {
             setTimeout(function () {
                 $.get(on_air.emission, function (data) {
                     console.log('emission on air:', data)
@@ -712,68 +712,65 @@ aplayer.base.update_channel_data = function (channel) {
         }
 
 
-
     });
 
     /*
-    $.get(channel.resource_uri + 'on-air/', function (data) {
+     $.get(channel.resource_uri + 'on-air/', function (data) {
 
-        console.log('on air:', data);
+     console.log('on air:', data);
 
-        var media;
-        var emission;
-
-
-        if (data.playing && data.playing.item) {
+     var media;
+     var emission;
 
 
-            $.get(data.playing.item, function (media) {
-                console.log('media on air:', media)
-                aplayer.vars.playlist[aplayer.states.current].media = media;
-
-                aplayer.ui.screen_display(aplayer.states.current);
-
-                if (data.start_next) {
-                    var cnt_holder = $('.countdown span.time');
-                    cnt_holder.countdown({
-                        until: data.start_next,
-                        format: 'HMS',
-                        compact: true,
-                        significant: 4
-                    });
-                }
-            })
-
-            // make sure api has data updated
-            setTimeout(function () {
-                $.get(data.playing.emission, function (data) {
-                    console.log('emission on air:', data)
-                    aplayer.vars.playlist[aplayer.states.current].emission = emission;
-                    aplayer.ui.screen_display(aplayer.states.current);
-
-                    aplayer.ui.update_emission(data);
-
-                })
-            }, 2000);
-
-        } else {
-            var media = {
-                'name': 'No information available'
-            }
-            var emission = {
-                'name': 'No information available'
-            }
-            aplayer.vars.playlist[aplayer.states.current].media = media;
-            aplayer.vars.playlist[aplayer.states.current].emission = emission;
-            aplayer.ui.screen_display(aplayer.states.current);
-
-            console.log('nothing on air');
-        }
-
-    })
-    */
+     if (data.playing && data.playing.item) {
 
 
+     $.get(data.playing.item, function (media) {
+     console.log('media on air:', media)
+     aplayer.vars.playlist[aplayer.states.current].media = media;
+
+     aplayer.ui.screen_display(aplayer.states.current);
+
+     if (data.start_next) {
+     var cnt_holder = $('.countdown span.time');
+     cnt_holder.countdown({
+     until: data.start_next,
+     format: 'HMS',
+     compact: true,
+     significant: 4
+     });
+     }
+     })
+
+     // make sure api has data updated
+     setTimeout(function () {
+     $.get(data.playing.emission, function (data) {
+     console.log('emission on air:', data)
+     aplayer.vars.playlist[aplayer.states.current].emission = emission;
+     aplayer.ui.screen_display(aplayer.states.current);
+
+     aplayer.ui.update_emission(data);
+
+     })
+     }, 2000);
+
+     } else {
+     var media = {
+     'name': 'No information available'
+     }
+     var emission = {
+     'name': 'No information available'
+     }
+     aplayer.vars.playlist[aplayer.states.current].media = media;
+     aplayer.vars.playlist[aplayer.states.current].emission = emission;
+     aplayer.ui.screen_display(aplayer.states.current);
+
+     console.log('nothing on air');
+     }
+
+     })
+     */
 
 
 }
@@ -842,14 +839,21 @@ aplayer.base.controls = function (args) {
 
         // in case library content is played
         if (aplayer.vars.source && aplayer.vars.source == 'alibrary') {
-            stream = aplayer.vars.playlist[index].stream;
-            console.log('stream:', stream);
 
-            // TODO: Hakish here - try to complete meta data
-            var el = aplayer.vars.playlist[index]
-            var idx = index;
-            console.log('ELEMENT:', aplayer.vars.playlist[index])
 
+            console.log('*** TRYING TO EXTRACT STREAM INFO ***')
+            console.log(aplayer.vars.playlist)
+
+            try {
+                stream = aplayer.vars.playlist[index].stream;
+                console.log('stream:', stream);
+                // TODO: Hakish here - try to complete meta data
+                var el = aplayer.vars.playlist[index]
+                var idx = index;
+                console.log('ELEMENT:', aplayer.vars.playlist[index])
+            } catch (e) {
+                console.log('error', e);
+            }
 
         }
         // in case abcast stream is played
@@ -1296,19 +1300,19 @@ aplayer.base.log = function (action, index, uuid) {
  *********************************************************************************/
 aplayer.base.debug = function (text) {
     /*
-    var d = new Date();
-    var hour = d.getHours();
-    var min = d.getMinutes();
-    var sec = d.getSeconds();
+     var d = new Date();
+     var hour = d.getHours();
+     var min = d.getMinutes();
+     var sec = d.getSeconds();
 
-    var time = hour + ':' + min + ':' + sec;
-    try {
-        console.log(text);
-    } catch (err) {
+     var time = hour + ':' + min + ':' + sec;
+     try {
+     console.log(text);
+     } catch (err) {
 
-    }
-    ;
-    */
+     }
+     ;
+     */
 
     // $('.footer > .wrapper').prepend('<p>' + '<span>' + time + '</span> | ' + text + '</p>');
 };

@@ -13,9 +13,11 @@
 
     <div class="wrapper_icon">
 
-        {% with object=item ct="release" %}
-            {% include "alibrary/element/_item_actions_primary.html" %}
-        {% endwith %}
+        {% if item.get_media.count > 0 %}
+            {% with object=item ct="release" %}
+                {% include "alibrary/element/_item_actions_primary.html" %}
+            {% endwith %}
+        {% endif %}
 
     </div>
 
