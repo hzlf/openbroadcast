@@ -17,6 +17,8 @@ from django.core.urlresolvers import reverse
 
 from settings import *
 
+from alibrary import settings as alibrary_settings
+
 # django-extensions (http://packages.python.org/django-extensions/)
 from django_extensions.db.fields import UUIDField
 
@@ -34,6 +36,8 @@ from filer.fields.image import FilerImageField
 from filer.fields.audio import FilerAudioField
 from filer.fields.file import FilerFileField
 
+
+from l10n.models import Country
 
 from django_date_extensions.fields import ApproximateDateField
 
@@ -102,7 +106,8 @@ class Release(MigrationMixin):
     license = models.ForeignKey(License, blank=True, null=True, related_name='release_license')
 
     # TODO: Refactor to l10n !!
-    release_country = CountryField(blank=True, null=True)
+    #release_country = CountryField(blank=True, null=True)
+    release_country = models.ForeignKey(Country, blank=True, null=True)
     
     uuid = UUIDField()
     
@@ -153,43 +158,8 @@ class Release(MigrationMixin):
     
     # cms field
     placeholder_1 = PlaceholderField('placeholder_1')
-    
-    RELEASETYPE_CHOICES = (
-        ('album', _('Album')),
-        ('ep', _('EP')),
-        ('compilation', _('Compilation')),
-        ('remix', _('Remix')),
-        ('live', _('Live')),
-        ('single', _('Single')),
-        ('other', _('Other')),
-    )
-    
-    RELEASETYPE_CHOICES = (
-        (_('General'), (
-                ('album', _('Album')),
-                ('single', _('Single')),
-                ('ep', _('EP')),
-                ('compilation', _('Compilation')),
-                ('soundtrack', _('Soundtrack')),
-                ('audiobook', _('Audiobook')),
-                ('spokenword', _('Spokenword')),
-                ('interview', _('Interview')),
-                ('live', _('Live')),
-                ('remix', _('Remix')),
-                ('broadcast', _('Broadcast')),
-                ('djmix', _('DJ-Mix')),
-                ('mixtape', _('Mixtape')),
-            )
-        ),
-        #(_('Recording'), (
-        #        ('remix', _('Remix')),
-        #        ('live', _('Live')),
-        #    )
-        #),
-        ('other', _('Other')),
-    )
-    
-    releasetype = models.CharField(verbose_name="Release type", max_length=24, blank=True, null=True, choices=RELEASETYPE_CHOICES)
+
+    releasetype = models.CharField(verbose_name="Release type", max_length=24, blank=True, null=True, choices=alibrary_settings.RELEASETYPE_CHOICES)
 
     
     # relations
@@ -301,6 +271,23 @@ class Release(MigrationMixin):
             pass
 
         return False
+
+    @property
+    def is_promotional(self):
+        if self.releasedate and self.publish_date:
+            if self.releasedate > self.publish_date.date() and self.releasedate > datetime.now().date():
+                return True
+
+        return False
+
+    @property
+    def is_new(self):
+        if self.releasedate and self.releasedate <= (datetime.now()+timedelta(days=7)).date():
+            return True
+
+        return False
+
+
     
     def get_lookup_providers(self):
         

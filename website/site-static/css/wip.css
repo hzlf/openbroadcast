@@ -1216,130 +1216,142 @@ form.form-playlist div.dayparts div.controls ul li.title {
   text-align: center;
 }
 /* line 486, ../sass/element/_listview.sass */
-.listview.container.medias.s .c5 .iconset-license {
-  position: relative;
-  top: 10px;
-  font-size: 14px;
+.listview.container.medias.s .c5 ul > li {
+  width: 24px;
+  padding-top: 10px;
 }
-/* line 490, ../sass/element/_listview.sass */
+/* line 489, ../sass/element/_listview.sass */
+.listview.container.medias.s .c5 ul > li a {
+  color: #333333;
+}
+/* line 491, ../sass/element/_listview.sass */
+.listview.container.medias.s .c5 ul > li a:hover {
+  text-decoration: none;
+  color: #6633cc;
+}
+/* line 494, ../sass/element/_listview.sass */
+.listview.container.medias.s .c5 ul > li i {
+  font-size: 145%;
+}
+/* line 501, ../sass/element/_listview.sass */
 .listview.container.medias.s .c6 {
   width: 40px;
   padding-right: 0px;
 }
-/* line 493, ../sass/element/_listview.sass */
+/* line 504, ../sass/element/_listview.sass */
 .listview.container.medias.s .c7 {
   width: 30px;
 }
-/* line 497, ../sass/element/_listview.sass */
+/* line 508, ../sass/element/_listview.sass */
 .listview.container.medias.inner.s {
   margin-top: 20px;
 }
-/* line 501, ../sass/element/_listview.sass */
+/* line 512, ../sass/element/_listview.sass */
 .listview.container.medias.inner.s .c1 {
   width: 60px;
 }
-/* line 503, ../sass/element/_listview.sass */
+/* line 514, ../sass/element/_listview.sass */
 .listview.container.medias.inner.s .c1 .tracknumber {
   text-align: right;
   font-weight: bold;
   padding: 2px 9px 0 0;
 }
-/* line 508, ../sass/element/_listview.sass */
+/* line 519, ../sass/element/_listview.sass */
 .listview.container.medias.inner.s .c3 {
   width: 200px;
 }
-/* line 514, ../sass/element/_listview.sass */
+/* line 525, ../sass/element/_listview.sass */
 .listview.container.medias.inner.s .list_body_row:first-child .list_body_item {
   border-top: 1px solid #dddddd;
 }
-/* line 517, ../sass/element/_listview.sass */
+/* line 528, ../sass/element/_listview.sass */
 .listview.container.medias.inner.s .list_body_row .list_body_item {
   padding: 4px 2px 0px 2px;
   vertical-align: middle;
 }
-/* line 522, ../sass/element/_listview.sass */
+/* line 533, ../sass/element/_listview.sass */
 .listview.container .item.timestamp .c1 {
   width: 90px !important;
 }
-/* line 524, ../sass/element/_listview.sass */
+/* line 535, ../sass/element/_listview.sass */
 .listview.container .item.timestamp .c1 .timestamp {
   width: 36px;
   float: left;
   font-weight: bold;
   padding: 2px 0 0 4px;
 }
-/* line 530, ../sass/element/_listview.sass */
+/* line 541, ../sass/element/_listview.sass */
 .listview.container .item.hidden-future {
   display: table-row;
   background: #efefef;
 }
-/* line 534, ../sass/element/_listview.sass */
+/* line 545, ../sass/element/_listview.sass */
 .listview.container .item.hidden-future .inner {
   display: table-cell;
   border-bottom: 1px solid #dddddd;
   height: 36px;
 }
-/* line 539, ../sass/element/_listview.sass */
+/* line 550, ../sass/element/_listview.sass */
 .listview.container .item.hidden-future .inner.icon i {
   padding-left: 15px;
   font-size: 200%;
   line-height: 33px;
   color: #aaaaaa;
 }
-/* line 555, ../sass/element/_listview.sass */
+/* line 566, ../sass/element/_listview.sass */
 .listview.container.transmissions.s .c2 {
   width: auto;
 }
-/* line 557, ../sass/element/_listview.sass */
+/* line 568, ../sass/element/_listview.sass */
 .listview.container.transmissions.s .c3 {
   width: 80px;
 }
-/* line 559, ../sass/element/_listview.sass */
+/* line 570, ../sass/element/_listview.sass */
 .listview.container.transmissions.s .c4 {
   width: 180px;
 }
-/* line 561, ../sass/element/_listview.sass */
+/* line 572, ../sass/element/_listview.sass */
 .listview.container.transmissions.s .c5 {
   width: 80px;
 }
-/* line 563, ../sass/element/_listview.sass */
+/* line 574, ../sass/element/_listview.sass */
 .listview.container.transmissions.s .list_body_item.c3 {
   text-align: right;
   padding-right: 24px;
 }
-/* line 569, ../sass/element/_listview.sass */
+/* line 580, ../sass/element/_listview.sass */
 .listview.container.downloads.s .list_body_row {
   height: 22px;
 }
-/* line 571, ../sass/element/_listview.sass */
+/* line 582, ../sass/element/_listview.sass */
 .listview.container.downloads.s .c2 {
   width: auto;
 }
-/* line 573, ../sass/element/_listview.sass */
+/* line 584, ../sass/element/_listview.sass */
 .listview.container.downloads.s .c3 {
   width: 80px;
   text-align: right;
   padding-right: 8px;
 }
-/* line 577, ../sass/element/_listview.sass */
+/* line 588, ../sass/element/_listview.sass */
 .listview.container.downloads.s .c4 {
   width: auto;
   text-align: right;
   padding-right: 8px;
 }
-/* line 581, ../sass/element/_listview.sass */
+/* line 592, ../sass/element/_listview.sass */
 .listview.container.downloads.s .c5 {
   width: 80px;
   text-align: right;
   padding-right: 8px;
 }
-/* line 585, ../sass/element/_listview.sass */
+/* line 596, ../sass/element/_listview.sass */
 .listview.container.downloads.s .c6 {
   width: 80px;
   text-align: right;
   padding-right: 8px;
 }
-/* line 590, ../sass/element/_listview.sass */
+/* line 601, ../sass/element/_listview.sass */
 .listview.container.s .playing {
   background-color: #dcffdc;
 }
@@ -1347,42 +1359,42 @@ form.form-playlist div.dayparts div.controls ul li.title {
 /**********************************************************
  * Styles Medium
  ********************************************************** */
-/* line 604, ../sass/element/_listview.sass */
+/* line 615, ../sass/element/_listview.sass */
 .listview.container.releases.m .c1.list_body_item {
   background-image: url(/static/img/base/defaults/listview.release.xl.png);
   background-size: 54px 54px;
 }
-/* line 609, ../sass/element/_listview.sass */
+/* line 620, ../sass/element/_listview.sass */
 .listview.container.artists.m .c1.list_body_item {
   background-image: url(/static/img/base/defaults/listview.artist.xl.png);
   background-size: 54px 54px;
 }
-/* line 612, ../sass/element/_listview.sass */
+/* line 623, ../sass/element/_listview.sass */
 .listview.container.artists.m .c2 {
   width: 214px;
 }
-/* line 620, ../sass/element/_listview.sass */
+/* line 631, ../sass/element/_listview.sass */
 .listview.container.labels.m .c2 {
   width: 260px;
 }
-/* line 624, ../sass/element/_listview.sass */
+/* line 635, ../sass/element/_listview.sass */
 .listview.container.labels.m .c3 .relations > ul {
   position: relative;
   top: 16px;
 }
-/* line 628, ../sass/element/_listview.sass */
+/* line 639, ../sass/element/_listview.sass */
 .listview.container.labels.m .c3 .relations > ul li {
   padding-right: 7px;
 }
-/* line 630, ../sass/element/_listview.sass */
+/* line 641, ../sass/element/_listview.sass */
 .listview.container.labels.m .c3 .relations > ul li a > span.service {
   display: none;
 }
-/* line 633, ../sass/element/_listview.sass */
+/* line 644, ../sass/element/_listview.sass */
 .listview.container.labels.m .c4 {
   position: relative;
 }
-/* line 637, ../sass/element/_listview.sass */
+/* line 648, ../sass/element/_listview.sass */
 .listview.container.labels.m .c4 ul.tags {
   position: absolute;
   bottom: 0px;
@@ -1390,7 +1402,7 @@ form.form-playlist div.dayparts div.controls ul li.title {
   opacity: 0.88;
   padding-bottom: 2px;
 }
-/* line 643, ../sass/element/_listview.sass */
+/* line 654, ../sass/element/_listview.sass */
 .listview.container.labels.m .c4 ul.tags li {
   margin: 2px 2px 0 0;
   padding: 0 4px;
@@ -1401,35 +1413,35 @@ form.form-playlist div.dayparts div.controls ul li.title {
   float: right;
   text-transform: uppercase;
 }
-/* line 652, ../sass/element/_listview.sass */
+/* line 663, ../sass/element/_listview.sass */
 .listview.container.labels.m .c4 ul.tags li.active {
   background: #00bb00;
   border-color: #00bb00;
   color: white;
 }
-/* line 657, ../sass/element/_listview.sass */
+/* line 668, ../sass/element/_listview.sass */
 .listview.container.labels.m .c5 {
   width: 40px;
 }
-/* line 661, ../sass/element/_listview.sass */
+/* line 672, ../sass/element/_listview.sass */
 .listview.container.playlist.m .c1.list_body_item {
   background-image: url(/static/img/base/defaults/listview.playlist.xl.png);
   background-size: 54px 54px;
 }
-/* line 668, ../sass/element/_listview.sass */
+/* line 679, ../sass/element/_listview.sass */
 .listview.container.profile.m .c1.list_body_item {
   background-image: url(/static/img/base/defaults/listview.profile.xl.png);
   background-size: 54px 54px;
 }
-/* line 673, ../sass/element/_listview.sass */
+/* line 684, ../sass/element/_listview.sass */
 .listview.container.profile.m .c3 {
   width: 178px;
 }
-/* line 675, ../sass/element/_listview.sass */
+/* line 686, ../sass/element/_listview.sass */
 .listview.container.profile.m .c4 {
   position: relative;
 }
-/* line 679, ../sass/element/_listview.sass */
+/* line 690, ../sass/element/_listview.sass */
 .listview.container.profile.m .c4 ul.tags {
   position: absolute;
   bottom: 0px;
@@ -1437,7 +1449,7 @@ form.form-playlist div.dayparts div.controls ul li.title {
   opacity: 0.88;
   padding-bottom: 2px;
 }
-/* line 685, ../sass/element/_listview.sass */
+/* line 696, ../sass/element/_listview.sass */
 .listview.container.profile.m .c4 ul.tags li {
   margin: 2px 2px 0 0;
   padding: 0 4px;
@@ -1448,38 +1460,38 @@ form.form-playlist div.dayparts div.controls ul li.title {
   float: right;
   text-transform: uppercase;
 }
-/* line 694, ../sass/element/_listview.sass */
+/* line 705, ../sass/element/_listview.sass */
 .listview.container.profile.m .c4 ul.tags li.active {
   background: #00bb00;
   border-color: #00bb00;
   color: white;
 }
-/* line 699, ../sass/element/_listview.sass */
+/* line 710, ../sass/element/_listview.sass */
 .listview.container.m {
   font-size: 90%;
 }
-/* line 701, ../sass/element/_listview.sass */
+/* line 712, ../sass/element/_listview.sass */
 .listview.container.m .list_body_item, .listview.container.m .list_header_item {
   padding: 2px;
 }
-/* line 704, ../sass/element/_listview.sass */
+/* line 715, ../sass/element/_listview.sass */
 .listview.container.m .c1 {
   width: 84px;
   background-position: 28px 5px;
   height: 58px;
 }
-/* line 708, ../sass/element/_listview.sass */
+/* line 719, ../sass/element/_listview.sass */
 .listview.container.m .c1 img {
   width: 84px;
   height: 58px;
 }
-/* line 711, ../sass/element/_listview.sass */
+/* line 722, ../sass/element/_listview.sass */
 .listview.container.m .c1 ul li {
   display: block;
   width: 16px;
   padding: 2px 0 0 0px;
 }
-/* line 716, ../sass/element/_listview.sass */
+/* line 727, ../sass/element/_listview.sass */
 .listview.container.m .c1 ul li a {
   display: block;
   width: 16px;
@@ -1487,15 +1499,15 @@ form.form-playlist div.dayparts div.controls ul li.title {
   background-position: 0 0;
   background-repeat: no-repeat;
 }
-/* line 722, ../sass/element/_listview.sass */
+/* line 733, ../sass/element/_listview.sass */
 .listview.container.m .c1 ul li a:hover {
   background-position: 0 -16px;
 }
-/* line 724, ../sass/element/_listview.sass */
+/* line 735, ../sass/element/_listview.sass */
 .listview.container.m .c1 ul li.play a {
   background-image: url(/static/img/base/listview.row.play.button.png);
 }
-/* line 726, ../sass/element/_listview.sass */
+/* line 737, ../sass/element/_listview.sass */
 .listview.container.m .c1 ul li.play span {
   background-image: url(/static/img/base/listview.row.play.button.disabled.png);
   display: block;
@@ -1504,28 +1516,28 @@ form.form-playlist div.dayparts div.controls ul li.title {
   background-position: 0 0;
   background-repeat: no-repeat;
 }
-/* line 736, ../sass/element/_listview.sass */
+/* line 747, ../sass/element/_listview.sass */
 .listview.container.m .playing ul li.play a {
   background-position: 0 -16px;
 }
-/* line 739, ../sass/element/_listview.sass */
+/* line 750, ../sass/element/_listview.sass */
 .listview.container.m .c2 {
   width: 240px;
 }
-/* line 741, ../sass/element/_listview.sass */
+/* line 752, ../sass/element/_listview.sass */
 .listview.container.m .c2.slim {
   width: 218px;
 }
-/* line 743, ../sass/element/_listview.sass */
+/* line 754, ../sass/element/_listview.sass */
 .listview.container.m .c3 {
   width: 78px;
 }
-/* line 745, ../sass/element/_listview.sass */
+/* line 756, ../sass/element/_listview.sass */
 .listview.container.m .c3.external {
   padding-top: 6px;
   width: 100px;
 }
-/* line 748, ../sass/element/_listview.sass */
+/* line 759, ../sass/element/_listview.sass */
 .listview.container.m .c4 {
   width: auto;
 }
@@ -1535,60 +1547,60 @@ form.form-playlist div.dayparts div.controls ul li.title {
  ***********************************************************/
  *
  * /* Reset all divs to block display (instead of table-way) */
-/* line 802, ../sass/element/_listview.sass */
+/* line 813, ../sass/element/_listview.sass */
 .listview.container.releases.l .list_body_row.item {
   background-image: url(/static/img/base/defaults/listview.release.xl.png);
 }
-/* line 805, ../sass/element/_listview.sass */
+/* line 816, ../sass/element/_listview.sass */
 .listview.container.releases.l .list_body_row.item .iconset-license {
   font-size: 14px;
 }
-/* line 809, ../sass/element/_listview.sass */
+/* line 820, ../sass/element/_listview.sass */
 .listview.container.artists.l .list_body_row.item {
   background-image: url(/static/img/base/defaults/listview.artist.xl.png);
 }
-/* line 813, ../sass/element/_listview.sass */
+/* line 824, ../sass/element/_listview.sass */
 .listview.container.playlist.l .list_body_row.item {
   background-image: url(/static/img/base/defaults/listview.playlist.xl.png);
 }
-/* line 815, ../sass/element/_listview.sass */
+/* line 826, ../sass/element/_listview.sass */
 .listview.container.playlist.l .list_body_row.item .wrapper_icon {
   width: 100%;
 }
-/* line 817, ../sass/element/_listview.sass */
+/* line 828, ../sass/element/_listview.sass */
 .listview.container.playlist.l .list_body_row.item .wrapper_icon ul.action {
   width: 16px;
   float: left;
 }
-/* line 821, ../sass/element/_listview.sass */
+/* line 832, ../sass/element/_listview.sass */
 .listview.container.playlist.l .list_body_row.item .wrapper_icon ul.indicator li {
   padding: 2px 4px 0 0;
   font-size: 200%;
 }
 
-/* line 825, ../sass/element/_listview.sass */
+/* line 836, ../sass/element/_listview.sass */
 .listview.container.l {
   display: block;
   font-size: 90%;
 }
-/* line 830, ../sass/element/_listview.sass */
+/* line 841, ../sass/element/_listview.sass */
 .listview.container.l .list_body_item, .listview.container.l .list_header_item {
   padding: 2px;
 }
-/* line 835, ../sass/element/_listview.sass */
+/* line 846, ../sass/element/_listview.sass */
 .listview.container.l .list_body_row.item {
   background-size: 197px 197px;
 }
-/* line 839, ../sass/element/_listview.sass */
+/* line 850, ../sass/element/_listview.sass */
 .listview.container.l div.list_body {
   display: block;
   /* actually not a real 'row' in this style */
 }
-/* line 842, ../sass/element/_listview.sass */
+/* line 853, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.break_line {
   height: 55px;
 }
-/* line 846, ../sass/element/_listview.sass */
+/* line 857, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row {
   display: block;
   float: left;
@@ -1599,61 +1611,62 @@ form.form-playlist div.dayparts div.controls ul li.title {
   overflow: hidden;
   border-bottom: 1px solid #dddddd;
   background-color: #333333;
+  position: relative;
   margin: 9px 14px 0 0;
   /* Play icon */
   /* Adjustable infoo panel */
 }
-/* line 862, ../sass/element/_listview.sass */
+/* line 875, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row.selection div.wrapper_info, .listview.container.l div.list_body div.list_body_row.selection div.wrapper_action {
   background-color: #e4ffe4;
 }
-/* line 865, ../sass/element/_listview.sass */
+/* line 878, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row.hover {
   background-color: white;
 }
-/* line 867, ../sass/element/_listview.sass */
+/* line 880, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row.hover .wrapper_info {
   background-color: whitesmoke;
 }
-/* line 869, ../sass/element/_listview.sass */
+/* line 882, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row.hover .wrapper_action {
   background-color: whitesmoke;
 }
-/* line 871, ../sass/element/_listview.sass */
+/* line 884, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row.selection.hover {
   background-color: white;
 }
-/* line 876, ../sass/element/_listview.sass */
+/* line 889, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row.playing ul li.play a {
   background-position: 0 -16px;
 }
-/* line 882, ../sass/element/_listview.sass */
+/* line 895, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row:nth-child(4n) {
   margin: 9px 0 0 0;
 }
-/* line 888, ../sass/element/_listview.sass */
+/* line 901, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row div.list_body_item {
   display: block;
   border-bottom: none;
 }
-/* line 893, ../sass/element/_listview.sass */
+/* line 906, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row div.list_body_item.action .wrapper {
   width: 36px;
   padding: 0 0 0 150px;
 }
-/* line 898, ../sass/element/_listview.sass */
+/* line 911, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .wrapper_icon {
   width: 24px;
   height: 32px;
   padding: 2px 0 0 4px;
 }
-/* line 904, ../sass/element/_listview.sass */
+/* line 917, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .wrapper_icon ul li {
   display: block;
   width: 16px;
   padding: 2px 0 0 0px;
 }
-/* line 909, ../sass/element/_listview.sass */
+/* line 922, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .wrapper_icon ul li a {
   display: block;
   width: 16px;
@@ -1661,15 +1674,15 @@ form.form-playlist div.dayparts div.controls ul li.title {
   background-position: 0 0;
   background-repeat: no-repeat;
 }
-/* line 915, ../sass/element/_listview.sass */
+/* line 928, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .wrapper_icon ul li a:hover {
   background-position: 0 -16px;
 }
-/* line 917, ../sass/element/_listview.sass */
+/* line 930, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .wrapper_icon ul li.play a {
   background-image: url(/static/img/base/listview.row.play.button.png);
 }
-/* line 919, ../sass/element/_listview.sass */
+/* line 932, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .wrapper_icon ul li.play span {
   background-image: url(/static/img/base/listview.row.play.button.disabled.png);
   display: block;
@@ -1678,7 +1691,7 @@ form.form-playlist div.dayparts div.controls ul li.title {
   background-position: 0 0;
   background-repeat: no-repeat;
 }
-/* line 929, ../sass/element/_listview.sass */
+/* line 942, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .spacer {
   position: relative;
   cursor: pointer;
@@ -1686,11 +1699,11 @@ form.form-playlist div.dayparts div.controls ul li.title {
   -webkit-transition-property: height;
   -webkit-transition-duration: 0.1s;
 }
-/* line 938, ../sass/element/_listview.sass */
+/* line 951, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .spacer.license {
   background-position: right bottom;
 }
-/* line 942, ../sass/element/_listview.sass */
+/* line 955, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .spacer ul.tags {
   position: absolute;
   bottom: 0px;
@@ -1698,7 +1711,7 @@ form.form-playlist div.dayparts div.controls ul li.title {
   opacity: 0.88;
   padding-bottom: 2px;
 }
-/* line 948, ../sass/element/_listview.sass */
+/* line 961, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .spacer ul.tags li {
   margin: 2px 2px 0 0;
   padding: 0 4px;
@@ -1709,12 +1722,12 @@ form.form-playlist div.dayparts div.controls ul li.title {
   float: right;
   text-transform: uppercase;
 }
-/* line 957, ../sass/element/_listview.sass */
+/* line 970, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .spacer ul.tags li.active {
   background: #00bb00;
   border-color: #00bb00;
 }
-/* line 967, ../sass/element/_listview.sass */
+/* line 981, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row.hover ul.tags {
   position: absolute;
   opacity: 1;
@@ -1722,160 +1735,189 @@ form.form-playlist div.dayparts div.controls ul li.title {
   -webkit-transition-property: opacity, background-color;
   -webkit-transition-duration: 0.1s;
 }
-/* line 973, ../sass/element/_listview.sass */
+/* line 987, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row.hover ul.tags li {
   border: 1px solid #626262;
 }
-/* line 979, ../sass/element/_listview.sass */
+/* line 993, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .wrapper_info {
   background-color: white;
 }
-/* line 981, ../sass/element/_listview.sass */
+/* line 995, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .wrapper_info ul li {
   /*padding: 2px 2px 2px 5px */
 }
-/* line 983, ../sass/element/_listview.sass */
+/* line 997, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .wrapper_info .wrapper_inner {
   height: 59px;
   overflow: hidden;
 }
-/* line 990, ../sass/element/_listview.sass */
+/* line 1004, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .wrapper_action {
   background: white;
 }
-/* line 992, ../sass/element/_listview.sass */
+/* line 1006, ../sass/element/_listview.sass */
 .listview.container.l div.list_body div.list_body_row .wrapper_action li {
   float: right;
 }
+/* line 1012, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.marker {
+  position: absolute;
+  top: 10px;
+  right: -30px;
+}
+/* line 1016, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.marker span {
+  text-transform: uppercase;
+  background: white;
+  display: block;
+  text-align: center;
+  -webkit-box-shadow: 2px 2px 4px 1px rgba(51, 51, 51, 0.35);
+  -moz-box-shadow: 2px 2px 4px 1px rgba(51, 51, 51, 0.35);
+  box-shadow: 2px 2px 4px 1px rgba(51, 51, 51, 0.35);
+  width: 100px;
+  padding: 2px 0;
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+/* line 1029, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.marker span a {
+  color: black;
+}
+/* line 1032, ../sass/element/_listview.sass */
+.listview.container.l div.list_body div.marker.promo span {
+  background: white;
+}
 
 /* license icon display */
-/* line 1031, ../sass/element/_listview.sass */
+/* line 1066, ../sass/element/_listview.sass */
 .listview.container .list_body_item.links.external ul li {
   float: left;
 }
-/* line 1033, ../sass/element/_listview.sass */
+/* line 1068, ../sass/element/_listview.sass */
 .listview.container .list_body_item.links.external ul li a {
   font-size: 16px;
   color: #5a5a5a;
 }
-/* line 1036, ../sass/element/_listview.sass */
+/* line 1071, ../sass/element/_listview.sass */
 .listview.container .list_body_item.links.external ul li a:hover {
   color: #6633cc;
   text-decoration: none;
 }
-/* line 1044, ../sass/element/_listview.sass */
+/* line 1079, ../sass/element/_listview.sass */
 .listview.container.s .list_body_item.license {
   background-position: center center;
   background-position-y: 5px;
 }
-/* line 1050, ../sass/element/_listview.sass */
+/* line 1085, ../sass/element/_listview.sass */
 .listview.container.m .list_body_item.license {
   background-position: 0 4px;
 }
 
 /* overrides for states */
-/* line 1057, ../sass/element/_listview.sass */
+/* line 1092, ../sass/element/_listview.sass */
 .listview.container.downloads .c1 {
   background-repeat: no-repeat;
   background-position: 2px 2px;
   width: 20px;
 }
-/* line 1061, ../sass/element/_listview.sass */
+/* line 1096, ../sass/element/_listview.sass */
 .listview.container.downloads .c1 img {
   width: 16px;
   height: 16px;
 }
-/* line 1066, ../sass/element/_listview.sass */
+/* line 1101, ../sass/element/_listview.sass */
 .listview.container.downloads .list_body_row.init .list_body_item {
   color: #ababab;
 }
-/* line 1068, ../sass/element/_listview.sass */
+/* line 1103, ../sass/element/_listview.sass */
 .listview.container.downloads .list_body_row.init .c1 {
   background-image: url(/static/img/base/listview.downloads.init.png);
 }
-/* line 1072, ../sass/element/_listview.sass */
+/* line 1107, ../sass/element/_listview.sass */
 .listview.container.downloads .list_body_row.running .list_body_item {
   color: #ababab;
 }
-/* line 1074, ../sass/element/_listview.sass */
+/* line 1109, ../sass/element/_listview.sass */
 .listview.container.downloads .list_body_row.running .c1 {
   background-image: url(/static/img/base/listview.downloads.running.png);
 }
-/* line 1078, ../sass/element/_listview.sass */
+/* line 1113, ../sass/element/_listview.sass */
 .listview.container.downloads .list_body_row.done .c1 {
   background-image: url(/static/img/base/listview.downloads.done.png);
 }
-/* line 1082, ../sass/element/_listview.sass */
+/* line 1117, ../sass/element/_listview.sass */
 .listview.container.downloads .list_body_row.error .list_body_item {
   background-color: #fff0e1;
   color: #5a5a5a;
 }
-/* line 1085, ../sass/element/_listview.sass */
+/* line 1120, ../sass/element/_listview.sass */
 .listview.container.downloads .list_body_row.error .c1 {
   background-image: url(/static/img/base/listview.downloads.error.png);
 }
-/* line 1089, ../sass/element/_listview.sass */
+/* line 1124, ../sass/element/_listview.sass */
 .listview.container.downloads .list_body_row.done.downloaded .list_body_item {
   background-color: #e4ffe4;
 }
-/* line 1091, ../sass/element/_listview.sass */
+/* line 1126, ../sass/element/_listview.sass */
 .listview.container.downloads .list_body_row.done.downloaded .c1 {
   /* background-color: #ff00ff */
   background-image: url(/static/img/base/listview.downloads.downloaded.png);
 }
 
 /* highlighter */
-/* line 1099, ../sass/element/_listview.sass */
+/* line 1134, ../sass/element/_listview.sass */
 .listview.container .list_body span.highlight {
   background-color: #ddffd9;
   color: #00bb00;
 }
 
 /* ---------- tagbar/search ---------- */
-/* line 1106, ../sass/element/_listview.sass */
+/* line 1141, ../sass/element/_listview.sass */
 .__searchbar {
   margin-top: 8px;
   z-index: 1002;
 }
-/* line 1108, ../sass/element/_listview.sass */
+/* line 1143, ../sass/element/_listview.sass */
 .__searchbar.hover {
   background-color: #333333 !important;
 }
-/* line 1113, ../sass/element/_listview.sass */
+/* line 1148, ../sass/element/_listview.sass */
 .__searchbar .tagbar {
   background: none;
   border: none;
 }
-/* line 1122, ../sass/element/_listview.sass */
+/* line 1157, ../sass/element/_listview.sass */
 .__searchbar #searchbar_input {
   border: 0px none;
   background: none repeat scroll 0% 0% transparent;
   margin: 0px;
   padding: 2px 2px 0px 4px;
 }
-/* line 1128, ../sass/element/_listview.sass */
+/* line 1163, ../sass/element/_listview.sass */
 .__searchbar #searchbar_input.blur {
   color: #999999;
 }
-/* line 1130, ../sass/element/_listview.sass */
+/* line 1165, ../sass/element/_listview.sass */
 .__searchbar #searchbar_input.focus {
   color: #333333;
 }
-/* line 1132, ../sass/element/_listview.sass */
+/* line 1167, ../sass/element/_listview.sass */
 .__searchbar a #searchbar_input {
   margin: 0 0 0 0;
 }
-/* line 1134, ../sass/element/_listview.sass */
+/* line 1169, ../sass/element/_listview.sass */
 .__searchbar a #searchbar_input.blur {
   color: #00bb00;
 }
-/* line 1136, ../sass/element/_listview.sass */
+/* line 1171, ../sass/element/_listview.sass */
 .__searchbar a #searchbar_input.focus {
   color: #333333;
 }
 
 /* ---------- tagbar/search for gianluca :) ---------- */
-/* line 1141, ../sass/element/_listview.sass */
+/* line 1176, ../sass/element/_listview.sass */
 .searchbar {
   padding: 0 0 3px 0;
   background-color: #efefef;
@@ -1884,27 +1926,27 @@ form.form-playlist div.dayparts div.controls ul li.title {
   margin-top: 8px;
   z-index: 1002;
 }
-/* line 1147, ../sass/element/_listview.sass */
+/* line 1182, ../sass/element/_listview.sass */
 .searchbar.hover {
   background-color: #efefef;
   -webkit-transition-property: background-color;
   -webkit-transition-duration: 0.3s;
 }
-/* line 1155, ../sass/element/_listview.sass */
+/* line 1190, ../sass/element/_listview.sass */
 .searchbar .search-input {
   margin: 3px 0 0 2px;
   height: 17px;
   padding: 0;
 }
-/* line 1159, ../sass/element/_listview.sass */
+/* line 1194, ../sass/element/_listview.sass */
 .searchbar .search-input ::-webkit-input-placeholder {
   color: #777777;
 }
-/* line 1163, ../sass/element/_listview.sass */
+/* line 1198, ../sass/element/_listview.sass */
 .searchbar .search-input span, .searchbar .search-input i {
   display: none;
 }
-/* line 1165, ../sass/element/_listview.sass */
+/* line 1200, ../sass/element/_listview.sass */
 .searchbar .search-input input {
   border: 0px none;
   box-shadow: none !important;
@@ -1914,62 +1956,62 @@ form.form-playlist div.dayparts div.controls ul li.title {
   line-height: 17px;
   padding: 0px 2px 0px 4px;
 }
-/* line 1173, ../sass/element/_listview.sass */
+/* line 1208, ../sass/element/_listview.sass */
 .searchbar .search-input input.blur {
   color: #5a5a5a;
 }
-/* line 1175, ../sass/element/_listview.sass */
+/* line 1210, ../sass/element/_listview.sass */
 .searchbar .search-input input.focus {
   color: #333333;
 }
-/* line 1177, ../sass/element/_listview.sass */
+/* line 1212, ../sass/element/_listview.sass */
 .searchbar .search-input a #searchbar_input {
   margin: 0 0 0 0;
 }
-/* line 1179, ../sass/element/_listview.sass */
+/* line 1214, ../sass/element/_listview.sass */
 .searchbar .search-input a #searchbar_input.blur {
   color: #00bb00;
 }
-/* line 1181, ../sass/element/_listview.sass */
+/* line 1216, ../sass/element/_listview.sass */
 .searchbar .search-input a #searchbar_input.focus {
   color: #333333;
 }
-/* line 1186, ../sass/element/_listview.sass */
+/* line 1221, ../sass/element/_listview.sass */
 .searchbar .search-input.active .inner {
   background: #ddffd9;
   border: 1px solid white;
   border-right-color: #7ab89b;
   border-bottom-color: #7ab89b;
 }
-/* line 1191, ../sass/element/_listview.sass */
+/* line 1226, ../sass/element/_listview.sass */
 .searchbar .search-input.active .inner input {
   color: #00bb00;
 }
-/* line 1193, ../sass/element/_listview.sass */
+/* line 1228, ../sass/element/_listview.sass */
 .searchbar .search-input.active .inner i {
   display: inline;
 }
-/* line 1195, ../sass/element/_listview.sass */
+/* line 1230, ../sass/element/_listview.sass */
 .searchbar .search-input.active .inner span {
   color: #00bb00;
   padding: 0 0 0 5px;
   display: inline;
 }
-/* line 1201, ../sass/element/_listview.sass */
+/* line 1236, ../sass/element/_listview.sass */
 .searchbar .search-clear a {
   color: #5a5a5a;
 }
-/* line 1203, ../sass/element/_listview.sass */
+/* line 1238, ../sass/element/_listview.sass */
 .searchbar .search-clear a:hover {
   color: #00bb00;
   text-decoration: none;
 }
-/* line 1207, ../sass/element/_listview.sass */
+/* line 1242, ../sass/element/_listview.sass */
 .searchbar .filter-bar {
   float: right;
   margin: 0;
 }
-/* line 1210, ../sass/element/_listview.sass */
+/* line 1245, ../sass/element/_listview.sass */
 .searchbar .filter-bar a {
   color: #00bb00;
   background: #ddffd9;
@@ -1980,23 +2022,23 @@ form.form-playlist div.dayparts div.controls ul li.title {
   padding: 0px 6px 0px 5px !important;
   margin: 3px 2px 0px 1px !important;
 }
-/* line 1219, ../sass/element/_listview.sass */
+/* line 1254, ../sass/element/_listview.sass */
 .searchbar .filter-bar a:hover {
   text-decoration: none;
 }
-/* line 1223, ../sass/element/_listview.sass */
+/* line 1258, ../sass/element/_listview.sass */
 .searchbar i._icon.icon-delete {
   background-image: url(/static/img/prototype/tag_remove.png);
   background-position: 0 11px;
   white-space: nowrap;
   padding: 0 0 0 12px;
 }
-/* line 1230, ../sass/element/_listview.sass */
+/* line 1265, ../sass/element/_listview.sass */
 .searchbar .tagbar {
   background: none;
   border: none;
 }
-/* line 1234, ../sass/element/_listview.sass */
+/* line 1269, ../sass/element/_listview.sass */
 .searchbar .tagbar a {
   float: right;
   padding: 0px 6px 0px 5px !important;
@@ -2220,15 +2262,33 @@ section.comments.disqus #footer {
   line-height: 11px;
   text-align: left;
 }
-/* line 220, ../sass/element/_itemview.sass */
-.iteminfo .image img {
-  width: 135px;
+/* line 219, ../sass/element/_itemview.sass */
+.iteminfo .image {
+  text-align: right;
+  height: 170px;
 }
-/* line 224, ../sass/element/_itemview.sass */
+/* line 223, ../sass/element/_itemview.sass */
+.iteminfo .image .align {
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+/* line 227, ../sass/element/_itemview.sass */
+.iteminfo .image .align a, .iteminfo .image .align img {
+  vertical-align: middle;
+  width: 170px;
+  max-height: 170px;
+}
+/* line 232, ../sass/element/_itemview.sass */
+.iteminfo .image img {
+  width: 170px;
+  max-height: 170px;
+}
+/* line 239, ../sass/element/_itemview.sass */
 .iteminfo .rating {
   margin-top: 4px;
 }
-/* line 234, ../sass/element/_itemview.sass */
+/* line 250, ../sass/element/_itemview.sass */
 .iteminfo .container_content dl {
   padding: 0;
   margin: 0;
@@ -2236,12 +2296,12 @@ section.comments.disqus #footer {
   width: 100%;
   margin: 0 0 7px;
 }
-/* line 241, ../sass/element/_itemview.sass */
+/* line 257, ../sass/element/_itemview.sass */
 .iteminfo .container_content dl.contact div p {
   line-height: 140%;
   padding: 0 0 11px !important;
 }
-/* line 246, ../sass/element/_itemview.sass */
+/* line 262, ../sass/element/_itemview.sass */
 .iteminfo .container_content dl span.tag {
   margin: 2px 2px 0 0;
   padding: 0 4px;
@@ -2250,106 +2310,106 @@ section.comments.disqus #footer {
   border: 1px solid #333333;
   text-transform: uppercase;
 }
-/* line 257, ../sass/element/_itemview.sass */
+/* line 273, ../sass/element/_itemview.sass */
 .iteminfo .container_content dl.license p {
   padding: 4px 0 0 0 !important;
 }
-/* line 259, ../sass/element/_itemview.sass */
+/* line 275, ../sass/element/_itemview.sass */
 .iteminfo .container_content dl.license img {
   height: 10px;
 }
-/* line 264, ../sass/element/_itemview.sass */
+/* line 280, ../sass/element/_itemview.sass */
 .iteminfo .container_content dl dd.relations li {
   padding: 0 3px 0 0;
   margin: 0 3px 0 0;
   float: left;
 }
-/* line 268, ../sass/element/_itemview.sass */
+/* line 284, ../sass/element/_itemview.sass */
 .iteminfo .container_content dl dd.relations li span.service {
   display: none;
 }
-/* line 270, ../sass/element/_itemview.sass */
+/* line 286, ../sass/element/_itemview.sass */
 .iteminfo .container_content dl dd.relations li a {
   color: #5a5a5a;
   text-decoration: none;
 }
-/* line 273, ../sass/element/_itemview.sass */
+/* line 289, ../sass/element/_itemview.sass */
 .iteminfo .container_content dl dd.relations li a:hover {
   color: #6633cc;
 }
-/* line 275, ../sass/element/_itemview.sass */
+/* line 291, ../sass/element/_itemview.sass */
 .iteminfo .container_content dl dd.relations li a i {
   font-size: 180%;
   line-height: 17px;
 }
-/* line 282, ../sass/element/_itemview.sass */
+/* line 298, ../sass/element/_itemview.sass */
 .iteminfo .container_content dl.links.external dd {
   float: none;
 }
-/* line 290, ../sass/element/_itemview.sass */
+/* line 306, ../sass/element/_itemview.sass */
 .iteminfo .container_content li {
   padding: 0;
   margin: 0;
 }
-/* line 295, ../sass/element/_itemview.sass */
+/* line 311, ../sass/element/_itemview.sass */
 .iteminfo .container_content p {
   color: #666666;
 }
-/* line 297, ../sass/element/_itemview.sass */
+/* line 313, ../sass/element/_itemview.sass */
 .iteminfo .container_content p.label {
   width: 70px;
   color: black;
 }
-/* line 302, ../sass/element/_itemview.sass */
+/* line 318, ../sass/element/_itemview.sass */
 .iteminfo .container_image {
   padding: 14px;
 }
-/* line 304, ../sass/element/_itemview.sass */
+/* line 320, ../sass/element/_itemview.sass */
 .iteminfo .container_image a {
   display: block;
   border: 1px solid whitesmoke;
 }
-/* line 307, ../sass/element/_itemview.sass */
+/* line 323, ../sass/element/_itemview.sass */
 .iteminfo .container_image a:hover {
   border: 1px solid #00bb00;
 }
-/* line 312, ../sass/element/_itemview.sass */
+/* line 328, ../sass/element/_itemview.sass */
 .iteminfo .item_menu h3 {
   margin: 0;
   padding: 0;
   text-transform: uppercase;
   font-size: 140%;
 }
-/* line 317, ../sass/element/_itemview.sass */
+/* line 333, ../sass/element/_itemview.sass */
 .iteminfo .item_menu ul {
   margin: 0px;
 }
 
-/* line 328, ../sass/element/_itemview.sass */
+/* line 344, ../sass/element/_itemview.sass */
 .item_detail section.analyse table thead tr, .item_detail section.file-properties table thead tr {
   padding-bottom: 1px;
 }
-/* line 330, ../sass/element/_itemview.sass */
+/* line 346, ../sass/element/_itemview.sass */
 .item_detail section.analyse table thead tr th, .item_detail section.file-properties table thead tr th {
   text-align: left;
 }
-/* line 336, ../sass/element/_itemview.sass */
+/* line 352, ../sass/element/_itemview.sass */
 .item_detail section.analyse table tbody td.bar, .item_detail section.file-properties table tbody td.bar {
   width: 120px;
 }
-/* line 338, ../sass/element/_itemview.sass */
+/* line 354, ../sass/element/_itemview.sass */
 .item_detail section.analyse table tbody td.bar .holder, .item_detail section.file-properties table tbody td.bar .holder {
   margin: 4px 10px 0 0;
   background: #efefef;
   border: 1px solid #cdcdcd;
 }
-/* line 342, ../sass/element/_itemview.sass */
+/* line 358, ../sass/element/_itemview.sass */
 .item_detail section.analyse table tbody td.bar .holder .indicator, .item_detail section.file-properties table tbody td.bar .holder .indicator {
   height: 10px;
   background-color: #cdcdcd;
   position: relative;
 }
-/* line 346, ../sass/element/_itemview.sass */
+/* line 362, ../sass/element/_itemview.sass */
 .item_detail section.analyse table tbody td.bar .holder .indicator span, .item_detail section.file-properties table tbody td.bar .holder .indicator span {
   font-weight: bold;
   position: absolute;
@@ -2358,26 +2418,26 @@ section.comments.disqus #footer {
   font-size: 9px;
   line-height: 9px;
 }
-/* line 357, ../sass/element/_itemview.sass */
+/* line 373, ../sass/element/_itemview.sass */
 .item_detail section.statistics .choices-container ul {
   margin-top: 10px;
   clear: both;
 }
-/* line 360, ../sass/element/_itemview.sass */
+/* line 376, ../sass/element/_itemview.sass */
 .item_detail section.statistics .choices-container ul > li {
   padding: 0 30px 0 0;
   float: left;
 }
-/* line 363, ../sass/element/_itemview.sass */
+/* line 379, ../sass/element/_itemview.sass */
 .item_detail section.statistics .choices-container ul > li input, .item_detail section.statistics .choices-container ul > li label {
   float: left;
 }
-/* line 365, ../sass/element/_itemview.sass */
+/* line 381, ../sass/element/_itemview.sass */
 .item_detail section.statistics .choices-container ul > li label {
   padding-left: 10px;
 }
 
-/* line 393, ../sass/element/_itemview.sass */
+/* line 409, ../sass/element/_itemview.sass */
 .item_menu {
   padding: 0px;
   margin: 0px;
@@ -2387,7 +2447,7 @@ section.comments.disqus #footer {
   width: 100%;
   font-size: 90%;
 }
-/* line 404, ../sass/element/_itemview.sass */
+/* line 420, ../sass/element/_itemview.sass */
 .item_menu ul {
   line-height: 1em;
   list-style: none outside none;
@@ -2399,7 +2459,7 @@ section.comments.disqus #footer {
   bottom: -1px;
   margin-left: 0px;
 }
-/* line 414, ../sass/element/_itemview.sass */
+/* line 430, ../sass/element/_itemview.sass */
 .item_menu li {
   float: left;
   margin: 0;
@@ -2409,23 +2469,23 @@ section.comments.disqus #footer {
   padding: 0px;
   margin: 0 0 -1px 5px;
 }
-/* line 423, ../sass/element/_itemview.sass */
+/* line 439, ../sass/element/_itemview.sass */
 .item_menu li.spacer {
   border: none;
   border-top: 1px solid whitesmoke;
   border-bottom: 1px solid #bbbbbb;
   padding: 5px;
 }
-/* line 428, ../sass/element/_itemview.sass */
+/* line 444, ../sass/element/_itemview.sass */
 .item_menu li.on, .item_menu li.active {
   border-bottom: 1px solid white;
 }
-/* line 430, ../sass/element/_itemview.sass */
+/* line 446, ../sass/element/_itemview.sass */
 .item_menu li.on a, .item_menu li.active a {
   background-color: white;
   color: #00bb00;
 }
-/* line 435, ../sass/element/_itemview.sass */
+/* line 451, ../sass/element/_itemview.sass */
 .item_menu li a {
   background: none repeat scroll 0 0 #e1e1e1;
   color: #666666;
@@ -2435,87 +2495,87 @@ section.comments.disqus #footer {
   padding: 5px 10px;
   padding: 2px 10px;
 }
-/* line 444, ../sass/element/_itemview.sass */
+/* line 460, ../sass/element/_itemview.sass */
 .item_menu li a.on, .item_menu li a.active {
   border-bottom: white;
   background-color: white;
   color: #00bb00;
 }
-/* line 448, ../sass/element/_itemview.sass */
+/* line 464, ../sass/element/_itemview.sass */
 .item_menu li a.disabled {
   color: #c1c1c1;
   cursor: wait;
 }
-/* line 451, ../sass/element/_itemview.sass */
+/* line 467, ../sass/element/_itemview.sass */
 .item_menu li a:hover {
   border-bottom: none;
   background-color: white;
   color: #00bb00;
 }
-/* line 455, ../sass/element/_itemview.sass */
+/* line 471, ../sass/element/_itemview.sass */
 .item_menu li a.disabled:hover {
   border-bottom: none;
   background-color: #e1e1e1;
   color: #c1c1c1;
 }
 
-/* line 467, ../sass/element/_itemview.sass */
+/* line 483, ../sass/element/_itemview.sass */
 div.item_inner div.container.lyrics {
   font-size: 115%;
   line-height: 190%;
   font-style: italic;
 }
-/* line 472, ../sass/element/_itemview.sass */
+/* line 488, ../sass/element/_itemview.sass */
 div.item_inner div.container.lyrics p {
   margin-bottom: 14px;
 }
 
 /* specific items, maybe move to other files some time.. */
-/* line 483, ../sass/element/_itemview.sass */
+/* line 499, ../sass/element/_itemview.sass */
 section.item_inner .tab-pane section.profile.information h4 {
   text-transform: none;
   color: #a5a5a5;
 }
-/* line 486, ../sass/element/_itemview.sass */
+/* line 502, ../sass/element/_itemview.sass */
 section.item_inner .tab-pane section.profile.information dl {
   margin: 4px 0 8px;
 }
 
-/* line 499, ../sass/element/_itemview.sass */
+/* line 515, ../sass/element/_itemview.sass */
 .sidebar .listing.relations .social {
   height: 24px;
   margin: 2px 0 8px;
 }
-/* line 506, ../sass/element/_itemview.sass */
+/* line 522, ../sass/element/_itemview.sass */
 .sidebar .listing.relations .relations > ul li {
   cursor: pointer;
   padding: 4px 0 6px 0;
   border-bottom: 1px solid #efefef;
   clear: both;
 }
-/* line 511, ../sass/element/_itemview.sass */
+/* line 527, ../sass/element/_itemview.sass */
 .sidebar .listing.relations .relations > ul li a {
   color: #5a5a5a;
 }
-/* line 513, ../sass/element/_itemview.sass */
+/* line 529, ../sass/element/_itemview.sass */
 .sidebar .listing.relations .relations > ul li a:hover {
   text-decoration: none;
 }
-/* line 516, ../sass/element/_itemview.sass */
+/* line 532, ../sass/element/_itemview.sass */
 .sidebar .listing.relations .relations > ul li i {
   font-size: 160%;
   width: 40px;
   display: block;
   float: left;
 }
-/* line 521, ../sass/element/_itemview.sass */
+/* line 537, ../sass/element/_itemview.sass */
 .sidebar .listing.relations .relations > ul li span.service {
   top: 3px;
   position: relative;
   display: block;
   width: 100%;
 }
-/* line 527, ../sass/element/_itemview.sass */
+/* line 543, ../sass/element/_itemview.sass */
 .sidebar .listing.relations .relations > ul li:hover a {
   color: #6633cc;
 }

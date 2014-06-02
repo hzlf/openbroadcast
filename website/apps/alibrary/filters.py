@@ -1,6 +1,7 @@
 from django.utils.translation import ugettext as _
 import datetime
 import django_filters
+from alibrary import settings as alibrary_settings
 from alibrary.models import Release, Playlist, Artist, Media, Label
 
 ORDER_BY_FIELD = 'o'
@@ -86,15 +87,16 @@ class DateRangeFilter(django_filters.Filter):
         return qs
 
 
+
 class ReleaseFilter(django_filters.FilterSet):
     releasetype = CharListFilter(label="Release type")
-    release_country = CharListFilter(label="Country")
+    release_country__printable_name = CharListFilter(label="Release Country")
     media_release__license__name = CharListFilter(label="License")
     #main_format__name = CharListFilter(label="Release Format")
     releasedate = DateRangeFilter(label="Release date")
     class Meta:
         model = Release
-        fields = ['releasedate', 'releasetype', 'release_country', 'media_release__license__name', 'label__type', ]
+        fields = ['releasedate', 'releasetype', 'release_country__printable_name', 'media_release__license__name', 'label__type', ]
 
     @property
     def filterlist(self):
@@ -109,7 +111,34 @@ class ReleaseFilter(django_filters.FilterSet):
                 ds = self.queryset.values_list(name, flat=False).annotate(
                     n=models.Count("pk", distinct=True)).distinct()
 
-                filter_.entries = ds
+
+                # TODO: extreme hackish...
+                if name == 'releasetype':
+                    nd = []
+                    for d in ds:
+                        if d[0] == 'NULL':
+                            nd.append([d[0], d[1], _('Unknown')])
+                        else:
+                            nd.append([d[0], d[1], u'%s' % d[0].replace('_', ' ').title()])
+
+                    filter_.entries = nd
+
+                elif name == 'label__type':
+                    nd = []
+                    for d in ds:
+                        if d[0] == 'NULL':
+                            pass
+                            #nd.append([d[0], d[1], _('Unknown')])
+                        else:
+                            if d[0] != None:
+                                for x in alibrary_settings.LABELTYPE_CHOICES:
+                                    if x[0] == d[0]:
+                                        nd.append([d[0], d[1], x[1]])
+
+                    filter_.entries = nd
+
+                else:
+                    filter_.entries = ds
 
                 if ds not in flist:
                     flist.append(filter_)
@@ -126,7 +155,7 @@ class ArtistFilter(django_filters.FilterSet):
 
     class Meta:
         model = Artist
-        fields = ['type', 'country__continent', 'country__printable_name', 'professions__name']
+        fields = ['type', 'country__printable_name', 'professions__name']
 
     @property
     def filterlist(self):
@@ -146,11 +175,11 @@ class ArtistFilter(django_filters.FilterSet):
 
 class LabelFilter(django_filters.FilterSet):
     type = CharListFilter(label=_("Label type"))
-    country = CharListFilter(label=_("Country"))
+    country__printable_name = CharListFilter(label=_("Country"))
 
     class Meta:
         model = Label
-        fields = ['type', 'country', ]
+        fields = ['type', 'country__printable_name', ]
 
     @property
     def filterlist(self):
@@ -159,7 +188,25 @@ class LabelFilter(django_filters.FilterSet):
             for name, filter_ in self.filters.iteritems():
                 ds = self.queryset.values_list(name, flat=False).annotate(
                     n=models.Count("pk", distinct=True)).distinct()
-                filter_.entries = ds
+
+                # TODO: extreme hackish...
+                if name == 'type':
+                    nd = []
+                    for d in ds:
+                        if d[0] == 'NULL':
+                            pass
+                            #nd.append([d[0], d[1], _('Unknown')])
+                        else:
+                            if d[0] != None:
+                                for x in alibrary_settings.LABELTYPE_CHOICES:
+                                    if x[0] == d[0]:
+                                        nd.append([d[0], d[1], x[1]])
+
+                    filter_.entries = nd
+
+                else:
+                    filter_.entries = ds
+
                 if ds not in flist:
                     flist.append(filter_)
 
@@ -172,14 +219,28 @@ class MediaFilter(django_filters.FilterSet):
     license__name = CharListFilter(label=_("License"))
     base_bitrate = CharListFilter(label=_("Bitrate"))
     base_format = CharListFilter(label=_("Format"))
-    base_samplerate = CharListFilter(label=_("Samplerate"))
+    base_samplerate = CharListFilter(label=_("Samplerate (Hz)"))
     mediatype = CharListFilter(label=_("Type"))
     PROCESSED_CHOICES = (
         (0, _('Waiting')),
         (1, _('Done')),
         (2, _('Error')),
     )
-    processed = django_filters.ChoiceFilter(label=_("Status"), choices=PROCESSED_CHOICES)
+    KEY_CHOICES = (
+        (0, _('C')),
+        (1, _('Db')),
+        (2, _('D')),
+        (3, _('Eb')),
+        (4, _('E')),
+        (5, _('F')),
+        (6, _('Gb')),
+        (7, _('G')),
+        (8, _('Ab')),
+        (9, _('A')),
+        (10, _('Bb')),
+        (11, _('B')),
+    )
+    #processed = django_filters.ChoiceFilter(label=_("Status"), choices=PROCESSED_CHOICES)
 
     class Meta:
         model = Media
@@ -207,7 +268,36 @@ class MediaFilter(django_filters.FilterSet):
 
                     filter_.entries = nd
 
+                elif name == 'base_format':
+                    nd = []
+                    for d in ds:
+                        nd.append([d[0], d[1], d[0]])
+
+                    filter_.entries = nd
+
+                elif name == 'mediatype':
+                    nd = []
+                    for d in ds:
+                        if d[0] == 'NULL':
+                            nd.append([d[0], d[1], _('Unknown')])
+                        else:
+                            nd.append([d[0], d[1], u'%s' % d[0].replace('_', ' ').title()])
+
+                    filter_.entries = nd
+
+                elif name == 'key':
+                    nd = []
+                    for d in ds:
+                        if d[0]:
+                            nd.append([d[0], d[1], self.KEY_CHOICES[d[0]][1]])
+
+                    nd.sort()
+                    filter_.entries = nd
+
+
+
                 else:
+
                     filter_.entries = ds
 
 

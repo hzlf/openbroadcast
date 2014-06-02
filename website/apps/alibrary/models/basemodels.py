@@ -551,6 +551,26 @@ class RelationManager(models.Manager):
 
         return sorted
 
+    def highlighted(self, key=None):
+
+        qs = self.get_query_set().exclude(service__in=['generic', 'official',])
+
+        services = [
+                    'wikipedia',
+                    'youtube',
+                    ]
+
+        objects = dict([(obj.service, obj) for obj in qs])
+
+        sorted = []
+        for service in services:
+            if service in objects:
+                sorted.append(objects[service])
+
+        #sorted = [objects[service] for service in services]
+
+        return sorted
+
         #return qs.order_by('service')
 
     

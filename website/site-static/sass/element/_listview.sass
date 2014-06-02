@@ -483,10 +483,21 @@
       .c5
         width: 68px
         text-align: center
-        .iconset-license
-          position: relative
-          top: 10px
-          font-size: 14px
+        ul > li
+          width: 24px
+          padding-top: 10px
+          a
+            color: #333
+            &:hover
+              text-decoration: none
+              color: $linkColor
+          i
+            font-size: 145%
+        //
+          .iconset-license
+            position: relative
+            top: 10px
+            font-size: 14px
       .c6
         width: 40px
         padding-right: 0px
@@ -857,6 +868,8 @@
       border-bottom: 1px solid #DDDDDD
 
       background-color: #333
+
+      position: relative
 	  
       &.selection
         div.wrapper_info, div.wrapper_action
@@ -960,6 +973,7 @@
 
 
 
+
       // animate on item hover
 
       //
@@ -995,7 +1009,28 @@
           //
           //  font-size: 120%
 
+    div.marker
+      position: absolute
+      top: 10px
+      right: -30px
+      span
+        text-transform: uppercase
+        background: #fff
+        display: block
+        text-align: center
+        -webkit-box-shadow: 2px 2px 4px 1px rgba(51, 51, 51, 0.35)
+        -moz-box-shadow: 2px 2px 4px 1px rgba(51, 51, 51, 0.35)
+        box-shadow: 2px 2px 4px 1px rgba(51, 51, 51, 0.35)
+        width: 100px
+        padding: 2px 0
+        -webkit-transform: rotate(45deg)
+        -moz-transform: rotate(45deg)
+        transform: rotate(45deg)
+        a
+          color: #000
 
+      &.promo span
+        background: #fff
 
 
 

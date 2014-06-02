@@ -39,7 +39,7 @@
 
                     <li>
                         {% if item.type %}
-                            {{ item.type }}
+                            {{ item.type|capfirst }}
                         {% endif %}&nbsp;
                         <span class="life">
                             {% if item.date_start %}&nbsp;*{{ item.date_start.year }}{% endif %}

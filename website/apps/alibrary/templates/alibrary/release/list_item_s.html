@@ -20,6 +20,7 @@
             <li class="bold">
                 <a href="{{ item.get_absolute_url }}" title="{{ item.name }}">
                     {{ item.name|truncate_chars_inner:24 }}
+                    {% if item.release_country %}({{ item.release_country.iso2_code }}){% endif %}
                     {% topflop_for_object item %}
                 </a>
             </li>
@@ -90,7 +91,6 @@
                 {% endif %}
             </li>
             <li class="small">
-
                 {% if  item.catalognumber %}
                     {{ item.catalognumber }}
                 {% endif %}

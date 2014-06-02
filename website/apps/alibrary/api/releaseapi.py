@@ -64,6 +64,7 @@ class ReleaseResource(ModelResource):
         return [
               url(r"^(?P<resource_name>%s)/autocomplete%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('autocomplete'), name="alibrary-release_api-autocomplete"),
               url(r"^(?P<resource_name>%s)/autocomplete-name%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('autocomplete_name'), name="alibrary-release_api-autocomplete_name"),
+              url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/stats%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('stats'), name="alibrary-release_api-stats"),
         ]
 
 
@@ -215,4 +216,20 @@ class ReleaseResource(ModelResource):
             pass
 
         return bundle
-    
+
+
+
+    def stats(self, request, **kwargs):
+
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        release = Release.objects.get(**self.remove_api_resource_names(kwargs))
+
+        from statistics.util import ObjectStatistics
+        ostats = ObjectStatistics(release=release)
+        stats = ostats.generate()
+
+        self.log_throttled_access(request)
+        return self.create_response(request, stats)

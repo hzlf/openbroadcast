@@ -39,7 +39,8 @@ SERVE_MEDIA = False
 COMPRESS_OFFLINE = False
 COMPRESS_ENABLED = False
 
-LANGUAGES = [('en', 'en'), ('de', 'de'), ('fr', 'fr')]
+#LANGUAGES = [('en', 'en'), ('de', 'de'), ('fr', 'fr')]
+LANGUAGES = [('en', 'en'),]
 DEFAULT_LANGUAGE = 0
 
 DATABASES = {

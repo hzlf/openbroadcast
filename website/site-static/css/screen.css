@@ -40,7 +40,6 @@ ul.horizontal li {
   float: left;
   clear: left;
   width: 120px;
-  text-align: right;
 }
 /* line 17, ../sass/element/_style.sass */
 .dl-horizontal dd {
@@ -4770,71 +4769,83 @@ a:hover {
 .span3 {
   width: 260px;
 }
-
 /* line 163, ../sass/bootstrap/_mixins.sass */
+.span3.padded-h {
+  width: 230px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+/* line 165, ../sass/bootstrap/_mixins.sass */
 .span4 {
   width: 355px;
 }
-/* line 165, ../sass/bootstrap/_mixins.sass */
+/* line 167, ../sass/bootstrap/_mixins.sass */
 .span4.padded-h {
   width: 325px;
   padding-left: 15px;
   padding-right: 15px;
 }
 
-/* line 167, ../sass/bootstrap/_mixins.sass */
+/* line 169, ../sass/bootstrap/_mixins.sass */
 .span5 {
   width: 450px;
 }
 
-/* line 169, ../sass/bootstrap/_mixins.sass */
+/* line 171, ../sass/bootstrap/_mixins.sass */
 .span6 {
   width: 545px;
 }
+/* line 173, ../sass/bootstrap/_mixins.sass */
+.span6.padded-h {
+  width: 515px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
 
-/* line 171, ../sass/bootstrap/_mixins.sass */
+/* line 175, ../sass/bootstrap/_mixins.sass */
 .span7 {
   width: 640px;
 }
-/* line 173, ../sass/bootstrap/_mixins.sass */
+/* line 177, ../sass/bootstrap/_mixins.sass */
 .span7.padded-h {
   width: 610px;
   padding-left: 15px;
   padding-right: 15px;
 }
 
-/* line 175, ../sass/bootstrap/_mixins.sass */
+/* line 179, ../sass/bootstrap/_mixins.sass */
 .span8 {
   width: 735px;
 }
 
-/* line 177, ../sass/bootstrap/_mixins.sass */
+/* line 181, ../sass/bootstrap/_mixins.sass */
 .span9 {
   width: 830px;
 }
-/* line 179, ../sass/bootstrap/_mixins.sass */
+/* line 183, ../sass/bootstrap/_mixins.sass */
 .span9.padded-h {
   width: 800px;
   padding-left: 15px;
   padding-right: 15px;
 }
 
-/* line 181, ../sass/bootstrap/_mixins.sass */
+/* line 185, ../sass/bootstrap/_mixins.sass */
 .span10 {
   width: 925px;
 }
 
-/* line 183, ../sass/bootstrap/_mixins.sass */
+/* line 187, ../sass/bootstrap/_mixins.sass */
 .span11 {
   width: 1020px;
 }
 
-/* line 185, ../sass/bootstrap/_mixins.sass */
+/* line 189, ../sass/bootstrap/_mixins.sass */
 .span12,
 .container {
   width: 1115px;
 }
-/* line 188, ../sass/bootstrap/_mixins.sass */
+/* line 192, ../sass/bootstrap/_mixins.sass */
 .span12.padded-h,
 .container.padded-h {
   width: 1085px;
@@ -4842,62 +4853,62 @@ a:hover {
   padding-right: 15px;
 }
 
-/* line 191, ../sass/bootstrap/_mixins.sass */
+/* line 195, ../sass/bootstrap/_mixins.sass */
 .offset1 {
   margin-left: 120px;
 }
 
-/* line 193, ../sass/bootstrap/_mixins.sass */
+/* line 197, ../sass/bootstrap/_mixins.sass */
 .offset2 {
   margin-left: 215px;
 }
 
-/* line 195, ../sass/bootstrap/_mixins.sass */
+/* line 199, ../sass/bootstrap/_mixins.sass */
 .offset3 {
   margin-left: 310px;
 }
 
-/* line 197, ../sass/bootstrap/_mixins.sass */
+/* line 201, ../sass/bootstrap/_mixins.sass */
 .offset4 {
   margin-left: 405px;
 }
 
-/* line 199, ../sass/bootstrap/_mixins.sass */
+/* line 203, ../sass/bootstrap/_mixins.sass */
 .offset5 {
   margin-left: 500px;
 }
 
-/* line 201, ../sass/bootstrap/_mixins.sass */
+/* line 205, ../sass/bootstrap/_mixins.sass */
 .offset6 {
   margin-left: 595px;
 }
 
-/* line 203, ../sass/bootstrap/_mixins.sass */
+/* line 207, ../sass/bootstrap/_mixins.sass */
 .offset7 {
   margin-left: 690px;
 }
 
-/* line 205, ../sass/bootstrap/_mixins.sass */
+/* line 209, ../sass/bootstrap/_mixins.sass */
 .offset8 {
   margin-left: 785px;
 }
 
-/* line 207, ../sass/bootstrap/_mixins.sass */
+/* line 211, ../sass/bootstrap/_mixins.sass */
 .offset9 {
   margin-left: 880px;
 }
 
-/* line 209, ../sass/bootstrap/_mixins.sass */
+/* line 213, ../sass/bootstrap/_mixins.sass */
 .offset10 {
   margin-left: 975px;
 }
 
-/* line 211, ../sass/bootstrap/_mixins.sass */
+/* line 215, ../sass/bootstrap/_mixins.sass */
 .offset11 {
   margin-left: 1070px;
 }
 
-/* line 226, ../sass/bootstrap/_mixins.sass */
+/* line 230, ../sass/bootstrap/_mixins.sass */
 .row-fluid {
   width: 100%;
   *zoom: 1;
@@ -4911,60 +4922,60 @@ a:hover {
 .row-fluid:after {
   clear: both;
 }
-/* line 230, ../sass/bootstrap/_mixins.sass */
+/* line 234, ../sass/bootstrap/_mixins.sass */
 .row-fluid > [class*="span"] {
   float: left;
   margin-left: 2.128%;
 }
-/* line 232, ../sass/bootstrap/_mixins.sass */
+/* line 236, ../sass/bootstrap/_mixins.sass */
 .row-fluid > [class*="span"]:first-child {
   margin-left: 0;
 }
-/* line 235, ../sass/bootstrap/_mixins.sass */
+/* line 239, ../sass/bootstrap/_mixins.sass */
 .row-fluid > .span1 {
   width: 6.383%;
 }
-/* line 237, ../sass/bootstrap/_mixins.sass */
+/* line 241, ../sass/bootstrap/_mixins.sass */
 .row-fluid > .span2 {
   width: 14.894%;
 }
-/* line 239, ../sass/bootstrap/_mixins.sass */
+/* line 243, ../sass/bootstrap/_mixins.sass */
 .row-fluid > .span3 {
   width: 23.405%;
 }
-/* line 241, ../sass/bootstrap/_mixins.sass */
+/* line 245, ../sass/bootstrap/_mixins.sass */
 .row-fluid > .span4 {
   width: 31.916%;
 }
-/* line 243, ../sass/bootstrap/_mixins.sass */
+/* line 247, ../sass/bootstrap/_mixins.sass */
 .row-fluid > .span5 {
   width: 40.427%;
 }
-/* line 245, ../sass/bootstrap/_mixins.sass */
+/* line 249, ../sass/bootstrap/_mixins.sass */
 .row-fluid > .span6 {
   width: 48.938%;
 }
-/* line 247, ../sass/bootstrap/_mixins.sass */
+/* line 251, ../sass/bootstrap/_mixins.sass */
 .row-fluid > .span7 {
   width: 57.449%;
 }
-/* line 249, ../sass/bootstrap/_mixins.sass */
+/* line 253, ../sass/bootstrap/_mixins.sass */
 .row-fluid > .span8 {
   width: 65.96%;
 }
-/* line 251, ../sass/bootstrap/_mixins.sass */
+/* line 255, ../sass/bootstrap/_mixins.sass */
 .row-fluid > .span9 {
   width: 74.471%;
 }
-/* line 253, ../sass/bootstrap/_mixins.sass */
+/* line 257, ../sass/bootstrap/_mixins.sass */
 .row-fluid > .span10 {
   width: 82.982%;
 }
-/* line 255, ../sass/bootstrap/_mixins.sass */
+/* line 259, ../sass/bootstrap/_mixins.sass */
 .row-fluid > .span11 {
   width: 91.493%;
 }
-/* line 257, ../sass/bootstrap/_mixins.sass */
+/* line 261, ../sass/bootstrap/_mixins.sass */
 .row-fluid > .span12 {
   width: 100.004%;
 }
@@ -5619,73 +5630,73 @@ textarea[class*="span"],
   margin-left: 0;
 }
 
-/* line 269, ../sass/bootstrap/_mixins.sass */
+/* line 273, ../sass/bootstrap/_mixins.sass */
 input.span1,
 textarea.span1,
 .uneditable-input.span1 {
   width: 60px;
 }
-/* line 271, ../sass/bootstrap/_mixins.sass */
+/* line 275, ../sass/bootstrap/_mixins.sass */
 input.span2,
 textarea.span2,
 .uneditable-input.span2 {
   width: 155px;
 }
-/* line 273, ../sass/bootstrap/_mixins.sass */
+/* line 277, ../sass/bootstrap/_mixins.sass */
 input.span3,
 textarea.span3,
 .uneditable-input.span3 {
   width: 250px;
 }
-/* line 275, ../sass/bootstrap/_mixins.sass */
+/* line 279, ../sass/bootstrap/_mixins.sass */
 input.span4,
 textarea.span4,
 .uneditable-input.span4 {
   width: 345px;
 }
-/* line 277, ../sass/bootstrap/_mixins.sass */
+/* line 281, ../sass/bootstrap/_mixins.sass */
 input.span5,
 textarea.span5,
 .uneditable-input.span5 {
   width: 440px;
 }
-/* line 279, ../sass/bootstrap/_mixins.sass */
+/* line 283, ../sass/bootstrap/_mixins.sass */
 input.span6,
 textarea.span6,
 .uneditable-input.span6 {
   width: 535px;
 }
-/* line 281, ../sass/bootstrap/_mixins.sass */
+/* line 285, ../sass/bootstrap/_mixins.sass */
 input.span7,
 textarea.span7,
 .uneditable-input.span7 {
   width: 630px;
 }
-/* line 283, ../sass/bootstrap/_mixins.sass */
+/* line 287, ../sass/bootstrap/_mixins.sass */
 input.span8,
 textarea.span8,
 .uneditable-input.span8 {
   width: 725px;
 }
-/* line 285, ../sass/bootstrap/_mixins.sass */
+/* line 289, ../sass/bootstrap/_mixins.sass */
 input.span9,
 textarea.span9,
 .uneditable-input.span9 {
   width: 820px;
 }
-/* line 287, ../sass/bootstrap/_mixins.sass */
+/* line 291, ../sass/bootstrap/_mixins.sass */
 input.span10,
 textarea.span10,
 .uneditable-input.span10 {
   width: 915px;
 }
-/* line 289, ../sass/bootstrap/_mixins.sass */
+/* line 293, ../sass/bootstrap/_mixins.sass */
 input.span11,
 textarea.span11,
 .uneditable-input.span11 {
   width: 1010px;
 }
-/* line 291, ../sass/bootstrap/_mixins.sass */
+/* line 295, ../sass/bootstrap/_mixins.sass */
 input.span12,
 textarea.span12,
 .uneditable-input.span12 {
@@ -5704,20 +5715,20 @@ textarea[readonly] {
   cursor: not-allowed;
 }
 
-/* line 312, ../sass/bootstrap/_mixins.sass */
+/* line 316, ../sass/bootstrap/_mixins.sass */
 .control-group.warning > label,
 .control-group.warning .help-block,
 .control-group.warning .help-inline {
   color: #c09853;
 }
-/* line 317, ../sass/bootstrap/_mixins.sass */
+/* line 321, ../sass/bootstrap/_mixins.sass */
 .control-group.warning input,
 .control-group.warning select,
 .control-group.warning textarea {
   color: #c09853;
   border-color: #c09853;
 }
-/* line 322, ../sass/bootstrap/_mixins.sass */
+/* line 326, ../sass/bootstrap/_mixins.sass */
 .control-group.warning input:focus,
 .control-group.warning select:focus,
 .control-group.warning textarea:focus {
@@ -5726,7 +5737,7 @@ textarea[readonly] {
   -moz-box-shadow: 0 0 6px #dbc59e;
   box-shadow: 0 0 6px #dbc59e;
 }
-/* line 326, ../sass/bootstrap/_mixins.sass */
+/* line 330, ../sass/bootstrap/_mixins.sass */
 .control-group.warning .input-prepend .add-on,
 .control-group.warning .input-append .add-on {
   color: #c09853;
@@ -5734,20 +5745,20 @@ textarea[readonly] {
   border-color: #c09853;
 }
 
-/* line 312, ../sass/bootstrap/_mixins.sass */
+/* line 316, ../sass/bootstrap/_mixins.sass */
 .control-group.error > label,
 .control-group.error .help-block,
 .control-group.error .help-inline {
   color: #ff743e;
 }
-/* line 317, ../sass/bootstrap/_mixins.sass */
+/* line 321, ../sass/bootstrap/_mixins.sass */
 .control-group.error input,
 .control-group.error select,
 .control-group.error textarea {
   color: #ff743e;
   border-color: #ff743e;
 }
-/* line 322, ../sass/bootstrap/_mixins.sass */
+/* line 326, ../sass/bootstrap/_mixins.sass */
 .control-group.error input:focus,
 .control-group.error select:focus,
 .control-group.error textarea:focus {
@@ -5756,7 +5767,7 @@ textarea[readonly] {
   -moz-box-shadow: 0 0 6px #ffbda4;
   box-shadow: 0 0 6px #ffbda4;
 }
-/* line 326, ../sass/bootstrap/_mixins.sass */
+/* line 330, ../sass/bootstrap/_mixins.sass */
 .control-group.error .input-prepend .add-on,
 .control-group.error .input-append .add-on {
   color: #ff743e;
@@ -5764,20 +5775,20 @@ textarea[readonly] {
   border-color: #ff743e;
 }
 
-/* line 312, ../sass/bootstrap/_mixins.sass */
+/* line 316, ../sass/bootstrap/_mixins.sass */
 .control-group.success > label,
 .control-group.success .help-block,
 .control-group.success .help-inline {
   color: #00bb00;
 }
-/* line 317, ../sass/bootstrap/_mixins.sass */
+/* line 321, ../sass/bootstrap/_mixins.sass */
 .control-group.success input,
 .control-group.success select,
 .control-group.success textarea {
   color: #00bb00;
   border-color: #00bb00;
 }
-/* line 322, ../sass/bootstrap/_mixins.sass */
+/* line 326, ../sass/bootstrap/_mixins.sass */
 .control-group.success input:focus,
 .control-group.success select:focus,
 .control-group.success textarea:focus {
@@ -5786,7 +5797,7 @@ textarea[readonly] {
   -moz-box-shadow: 0 0 6px #22ff22;
   box-shadow: 0 0 6px #22ff22;
 }
-/* line 326, ../sass/bootstrap/_mixins.sass */
+/* line 330, ../sass/bootstrap/_mixins.sass */
 .control-group.success .input-prepend .add-on,
 .control-group.success .input-append .add-on {
   color: #00bb00;

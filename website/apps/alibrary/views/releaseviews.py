@@ -189,6 +189,14 @@ class ReleaseListView(PaginationMixin, ListView):
             f = {'item_type': 'release' , 'item': creator, 'label': _('Added by')}
             self.relation_filter.append(f)
 
+        # filter by promo flag
+        promo_filter = self.request.GET.get('promo', None)
+        if promo_filter and promo_filter.isnumeric() and int(promo_filter) == 1:
+            from django.db.models import F
+            qs = qs.filter(releasedate__gte=F('publish_date')).distinct()
+            f = {'item_type': 'release' , 'item': _('Promotional releases'), 'label': 'Filter'}
+            self.relation_filter.append(f)
+
 
 
 

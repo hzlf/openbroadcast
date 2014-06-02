@@ -160,6 +160,8 @@
       +gridSystem-columns-padded($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 2, $basePadding) 
   .span3
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 3)
+    &.padded-h
+      +gridSystem-columns-padded($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 3, $basePadding)
   .span4
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 4)
     &.padded-h
@@ -168,6 +170,8 @@
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 5)
   .span6
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 6)
+    &.padded-h
+      +gridSystem-columns-padded($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 6, $basePadding)
   .span7
     +gridSystem-columns($gridGutterWidth, $gridColumnWidth, $gridRowWidth, 7)
     &.padded-h

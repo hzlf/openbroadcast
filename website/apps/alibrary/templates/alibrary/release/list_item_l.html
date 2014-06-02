@@ -33,6 +33,20 @@
 
 
 
+    {% if item.is_new %}
+    <div class="marker new">
+        <span><a href="{% spurl base=request.get_full_path toggle_query="new=1,0" %}" title="{% trans "Show promotional releases only" %}">new</a></span>
+    </div>
+    {% endif %}
+
+    {% if item.is_promotional %}
+    <div class="marker promo">
+        <span><a href="{% spurl base=request.get_full_path toggle_query="promo=1,0" %}" title="{% trans "Show promotional releases only" %}">promo</a></span>
+    </div>
+    {% endif %}
+
+
+
     <div class="wrapper_info">
 
         <div class="wrapper_inner">
@@ -43,9 +57,11 @@
 
 
                 <ul class="title">
+
                     <li class="bold">
                         <a href="{{ item.get_absolute_url }}"
                            title="{{ item.name }}"> {{ item.name|truncate_chars_inner:18 }}
+                            {% if item.release_country %}({{ item.release_country.iso2_code }}){% endif %}
                             {% cache 3600 "topflop_release" item.pk item.updated %}
                             {% topflop_for_object item %}
                             {% endcache %}
@@ -97,7 +113,7 @@
                     </li>
                 </ul>
 
-                {% if item.label %}
+                {% if item.label or item.releasedate %}
                 <ul class="horizontal clearfix unstyled">
                     <li style="white-space:nowrap;">
                         {% if item.label %}
@@ -117,9 +133,14 @@
 
                     </li>
                     <li class="small" style="float: right;">
+                        {% if  item.releasedate %}
+                            {{ item.releasedate|date:"Y/m/d" }}
+                        {% endif %}
+                        {% comment %}
                         {% if  item.catalognumber %}
                             {{ item.catalognumber }}
                         {% endif %}
+                        {% endcomment %}
                     </li>
                 </ul>
                 {% endif %}

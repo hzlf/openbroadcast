@@ -1,5 +1,5 @@
 {% load truncate i18n thumbnail arating_tags email_obfuscator spurl %}
-<div class="span7 padded-h container_content">
+<div class="span6 padded-h container_content">
 
 	<div class="page-header">
 		<h2>{{ object.name|truncate_chars_inner:40 }} <small>{{ object.get_type_display }}</small></h2>
@@ -198,12 +198,14 @@
 
 </div>
 
-<div class="span2 padded-h padded-v">
+<div class="span3 padded-h padded-v">
 
 	<div class="image">
 		{% if object.main_image %}
-		<a href="{% thumbnail object.main_image 1200x1200 upscale %}" class="zoomable cboxElement"> <img src="{% thumbnail object.main_image 172x172 upscale subject_location=object.main_image.subject_location %}" alt="Cover" /> </a>
-		{% else %}
+        <div class="align">
+		    <a href="{% thumbnail object.main_image 1200x1200 upscale %}" class="zoomable cboxElement"> <img src="{% thumbnail object.main_image 170x170 upscale subject_location=object.main_image.subject_location %}" alt="Cover" /> </a>
+		</div>
+        {% else %}
 		<img src="/static/img/base/defaults/listview.artist.xl.png" alt="{% trans "No cover available" %}" />
 		{% endif %}
 	</div>

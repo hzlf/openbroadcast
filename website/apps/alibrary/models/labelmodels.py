@@ -40,7 +40,7 @@ from mptt.models import MPTTModel, TreeForeignKey
 # django-extensions (http://packages.python.org/django-extensions/)
 from django_extensions.db.fields import UUIDField, AutoSlugField
 
-
+from alibrary import settings as alibrary_settings
 
 # logging
 import logging
@@ -115,16 +115,9 @@ class Label(MPTTModel, MigrationMixin):
     listed = models.BooleanField(verbose_name='Include in listings', default=True, help_text=_('Should this Label be shown on the default Label-list?'))
     disable_link = models.BooleanField(verbose_name='Disable Link', default=False, help_text=_('Disable Linking. Useful e.g. for "Unknown Label"'))
     disable_editing = models.BooleanField(verbose_name='Disable Editing', default=False, help_text=_('Disable Editing. Useful e.g. for "Unknown Label"'))
+
     
-    TYPE_CHOICES = (
-        ('unknown', _('Unknown')),
-        ('major', _('Major Label')),
-        ('indy', _('Independent Label')),
-        ('net', _('Netlabel')),
-        ('event', _('Event Label')),
-    )
-    
-    type = models.CharField(verbose_name="Label type", max_length=12, default='unknown', choices=TYPE_CHOICES)
+    type = models.CharField(verbose_name="Label type", max_length=12, default='unknown', choices=alibrary_settings.LABELTYPE_CHOICES)
 
 
     # relations a.k.a. links
