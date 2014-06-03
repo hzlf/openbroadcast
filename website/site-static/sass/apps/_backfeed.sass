@@ -4,7 +4,8 @@ div.backfeed
   left: 0
   top: 25%
 
-
+  .wrapper
+    -webkit-box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, 0.12)
 
   // toggle element
   .toggle
@@ -12,7 +13,8 @@ div.backfeed
       display: block
       padding: 10px
       background: $main-a
-      color: #333
+      color: #fff
+      text-decoration: none
       span
         display: none
   &.hover
@@ -22,11 +24,18 @@ div.backfeed
   .content-holder
     display: none
 
+    input, textarea
+      width: 291px
+      margin-bottom: 4px
+      &.error
+        border-color: orangered
+
+
 
 
   &.expanded
 
-    min-width: 320px
+    width: 320px
 
     .toggle a span
       display: inline
@@ -38,7 +47,6 @@ div.backfeed
 
   // aside content
   .content-holder
-    padding-top: 20px
-    padding-left: 20px
+    padding: 10px
     min-height: 200px
     background: $grayLightest

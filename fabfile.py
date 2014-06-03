@@ -198,6 +198,13 @@ def deploy(branch=None):
             pass
 
 
+        # copy documentation
+        try:
+            run('cp -R %s/src_new/doc/_build/html %s/doc' % (env.path, env.storage))
+        except Exception, e:
+            pass
+
+
 
         """
         everything should be ready now, so directories can be swapped

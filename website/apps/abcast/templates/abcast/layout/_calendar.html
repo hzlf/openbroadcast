@@ -1,4 +1,4 @@
-{% load i18n calc spurl %}
+{% load i18n calc spurl dateutil_tags %}
 
 <div id="mainbody" class="printAlignLeft" style="">
 
@@ -11,10 +11,12 @@
                 <li>
                     <a href="{% spurl base=request.get_full_path trigger_query="days_offset={{ days_offset|subtract:28 }}" %}"><i class="icon-angle-left"></i><i class="icon-angle-left"></i><small>{% trans "Previous Month" %}</small></a>
                     <a href="{% spurl base=request.get_full_path trigger_query="days_offset={{ days_offset|subtract:7 }}" %}"><i class="icon-angle-left"></i><small>{% trans "Previous Week" %}</small></a>
+                    <a href="{% spurl base=request.get_full_path trigger_query="days_offset={{ days_offset|subtract:1 }}" %}"><i class="icon-angle-left"></i><small>{% trans "Day -" %}</small></a>
                 </li>
 
                 <li class="week-number">{% trans "Week" %} {{ range_start.isocalendar.1 }}, {{ range_start|date:"F Y" }}</li>
                 <li class="pull-right">
+                    <a href="{% spurl base=request.get_full_path trigger_query="days_offset={{ days_offset|add:1 }}" %}"><i class="icon-angle-right"></i><small>{% trans "Day +" %}</small></a>
                     <a href="{% spurl base=request.get_full_path trigger_query="days_offset={{ days_offset|add:7 }}" %}"><i class="icon-angle-right"></i><small>{% trans "Next Week" %}</small></a>
                     <a href="{% spurl base=request.get_full_path trigger_query="days_offset={{ days_offset|add:28 }}" %}"><i class="icon-angle-right"></i><i class="icon-angle-right"></i><small>{% trans "Next Month" %}</small></a>
                 </li>
@@ -36,9 +38,9 @@
 						<th scope="col">
 						<div class="wk-dayname">
 							{% if days|length < 8 %}
-							<span class="wk-daylink">{{ date|date:"m / d" }}</span>
+							<span class="wk-daylink">{{ date|date:"D. j." }}</span>
 							{% else %}
-							<span class="wk-daylink">{{ date|date:"m / d" }}</span>
+							<span class="wk-daylink">{{ date|date:"D. j." }}</span>
 							{% endif %}
 							<ul class="unstyled horizontal day-actions">
 								{% if date > today %}
@@ -278,6 +280,11 @@
 								{% if date == today %}
 								<div class="tg-today" style="height:1008px;margin-bottom:-1008px;">&nbsp;</div>
 								{% endif %}
+
+
+                                {% if date|is_weekend %}
+                                <div class="tg-weekend" style="height:1008px;margin-bottom:-1008px;">&nbsp;</div>
+                                {% endif %}
 
 								<div class="tg-col-eventwrapper" style="height:1008px;margin-bottom:-1008px;">
 

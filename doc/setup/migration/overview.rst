@@ -117,3 +117,18 @@ http://openbroadcast.ch/en/content/library/media/1-barbarella/detail.html
 .. code-block:: bash
 
     ./manage.py migrate_legacy --type=media --legacy_id=1
+
+
+
+
+Run the migrations (the order _matters_!)
+*****************************************
+
+Try first with a small set ( `--limit=10` ) - then with more/all data
+
+
+./manage.py migrate_legacy --type=user --limit=10
+./manage.py migrate_legacy --type=user --limit=10000
+./manage.py migrate_legacy --type=group --limit=10000
+
+# now check on the web!!

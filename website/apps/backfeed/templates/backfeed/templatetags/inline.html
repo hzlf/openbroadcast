@@ -19,7 +19,7 @@
     <div class="wrapper">
 
         <div class="toggle">
-            <a class="" href="#"><i class="fa fa-envelope"></i> <span class="title">{% trans "Feedback" %}</span><span
+            <a class="" href="#"><i class="icon icon-envelope"></i> <span class="title">{% trans "Feedback" %}</span><span
                     class="right close">x</span></a>
         </div>
 
@@ -27,39 +27,30 @@
 
 
             <form id="backfeed_form">
-                <div class="row">
-                    <div class="large-12 columns">
-                        <input type="text" name="subject" placeholder="{% trans "Subject" %}"/>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="large-12 columns">
 
-                        <textarea rows="5" name="message" placeholder="{% trans "Message" %}"></textarea>
+                <div>
+                    <input type="text" name="subject" placeholder="{% trans "Subject" %}"/>
+                    <textarea rows="5" name="message" placeholder="{% trans "Message" %}"></textarea>
+                </div>
 
-                    </div>
+
+                <div>
+                    <a href="#" class="button tiny right submit"><i class="fa fa-reply"></i> Send</a>
                 </div>
-                <div class="row">
-                    <div class="large-12 columns">
-                        <a href="#" class="button tiny right submit"><i class="fa fa-reply"></i> Send</a>
-                    </div>
-                </div>
+
+
             </form>
 
 
-            <div class="row">
-                <div class="large-12 columns">
-                    <div id="backfeed_success" style="display: none;">
-                        <p>{% trans "Thanks a lot for your feedback!" %}</p>
-                    </div>
-
-                    <div id="backfeed_errors" style="display: none;">
-                        <p>{% trans "Errors occured while processing your feedback." %}</p>
-                    </div>
-                </div>
-                </form>
-
+            <div id="backfeed_success" style="display: none;">
+                <p>{% trans "Thanks a lot for your feedback!" %}</p>
             </div>
+
+            <div id="backfeed_errors" style="display: none;">
+                <p>{% trans "Errors occured while processing." %}</p>
+            </div>
+
+
 
 
         </div>

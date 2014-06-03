@@ -12613,41 +12613,54 @@ div.backfeed {
   left: 0;
   top: 25%;
 }
-/* line 11, ../sass/apps/_backfeed.sass */
+/* line 7, ../sass/apps/_backfeed.sass */
+div.backfeed .wrapper {
+  -webkit-box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, 0.12);
+}
+/* line 12, ../sass/apps/_backfeed.sass */
 div.backfeed .toggle a {
   display: block;
   padding: 10px;
   background: #00bb00;
-  color: #333333;
+  color: white;
+  text-decoration: none;
 }
-/* line 16, ../sass/apps/_backfeed.sass */
+/* line 18, ../sass/apps/_backfeed.sass */
 div.backfeed .toggle a span {
   display: none;
 }
-/* line 19, ../sass/apps/_backfeed.sass */
+/* line 21, ../sass/apps/_backfeed.sass */
 div.backfeed.hover .toggle a span.title {
   display: inline;
 }
-/* line 22, ../sass/apps/_backfeed.sass */
+/* line 24, ../sass/apps/_backfeed.sass */
 div.backfeed .content-holder {
   display: none;
 }
 /* line 27, ../sass/apps/_backfeed.sass */
-div.backfeed.expanded {
-  min-width: 320px;
+div.backfeed .content-holder input, div.backfeed .content-holder textarea {
+  width: 291px;
+  margin-bottom: 4px;
 }
-/* line 31, ../sass/apps/_backfeed.sass */
+/* line 30, ../sass/apps/_backfeed.sass */
+div.backfeed .content-holder input.error, div.backfeed .content-holder textarea.error {
+  border-color: orangered;
+}
+/* line 36, ../sass/apps/_backfeed.sass */
+div.backfeed.expanded {
+  width: 320px;
+}
+/* line 40, ../sass/apps/_backfeed.sass */
 div.backfeed.expanded .toggle a span {
   display: inline;
 }
-/* line 34, ../sass/apps/_backfeed.sass */
+/* line 43, ../sass/apps/_backfeed.sass */
 div.backfeed.expanded .content-holder {
   display: block;
 }
-/* line 40, ../sass/apps/_backfeed.sass */
+/* line 49, ../sass/apps/_backfeed.sass */
 div.backfeed .content-holder {
-  padding-top: 20px;
-  padding-left: 20px;
+  padding: 10px;
   min-height: 200px;
   background: #fafafa;
 }

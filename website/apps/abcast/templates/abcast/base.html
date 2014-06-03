@@ -1,5 +1,5 @@
 {% extends "layout_base.html" %}
-{% load spurl cache i18n truncate cache sekizai_tags %}
+{% load spurl cache i18n truncate cache sekizai_tags spurl %}
 
 {% block heading %}
 <div id="heading">
@@ -9,7 +9,16 @@
 
 {% block modnav %}
 <div id="modnav">
-	{% include "skeleton/modnav.html" %}
+
+    {# include "skeleton/modnav.html" #}
+    {% comment %}hardcoded navigation here{% endcomment %}
+
+    <ul class="unstyled">
+        <li class="descendant"><a href="{% spurl base=url set_query="num_days=7" %}">{% trans "One week" %}</a></li>
+        <li class="descendant"><a href="{% spurl base=url set_query="num_days=14" %}">{% trans "Two weeks" %}</a></li>
+    </ul>
+    <div class="clearfix"></div>
+
 </div>
 {% endblock %}
 

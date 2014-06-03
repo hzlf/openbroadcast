@@ -288,7 +288,10 @@ def post_save_channel(sender, **kwargs):
     obj = kwargs['instance']
 
     # call notification
-    notify.start_play(obj.on_air, obj)
+    try:
+        notify.start_play(obj.on_air, obj)
+    except:
+        pass
 
 post_save.connect(post_save_channel, sender=Channel)
 

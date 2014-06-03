@@ -82,6 +82,7 @@ from alibrary.util.echonest import EchonestWorker
 import arating
 
 USE_CELERYD = True
+AUTOCREATE_ECHOPRINT = False
 
 LOOKUP_PROVIDERS = (
     #('discogs', _('Discogs')),
@@ -1271,8 +1272,11 @@ def media_post_save(sender, **kwargs):
     
     
     if obj.master and obj.echoprint_status == 0:
-        log.info('Media id: %s - Echoprint' % (obj.pk))
-        obj.update_echoprint()
+        if AUTOCREATE_ECHOPRINT:
+            log.info('Media id: %s - Echoprint' % (obj.pk))
+            obj.update_echoprint()
+        else:
+            log.info('Media id: %s - skipping echoprint generation' % (obj.pk))
     
     if obj.master and obj.conversion_status == 0 and obj.echoprint_status != 0:
         log.info('Media id: %s - Re-Process' % (obj.pk))

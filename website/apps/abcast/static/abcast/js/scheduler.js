@@ -287,9 +287,10 @@ SchedulerApp = function () {
             self.selected_object = data;
             self.display_selection(data);
             // call view to save state to session. (hmm...what for?)
-            var url = '/program/scheduler/select-playlist/?playlist_id=' + data.id;
-            $.get(url, function (data) {
-            });
+            if(data.id != undefined) {
+                var url = '/program/scheduler/select-playlist/?playlist_id=' + data.id;
+                $.get(url, function (data) {})
+            };
         });
 
 

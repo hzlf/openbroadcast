@@ -474,8 +474,8 @@ INSTALLED_APPS = (
     #'django_db_signals',
 
     # blog
-    'zinnia',
-    'cmsplugin_zinnia', # somehow not working.. ivestigate!!
+    #'zinnia',
+    #'cmsplugin_zinnia', # somehow not working.. ivestigate!!
 
     'bcmon',
     'genericrelations',

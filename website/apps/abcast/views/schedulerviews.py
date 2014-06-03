@@ -57,7 +57,13 @@ def schedule(request):
     data['get'] = request.GET
     
     num_days = request.GET.get('num_days', SCHEDULER_NUM_DAYS)
-    data['num_days'] = int(num_days)
+    num_days = int(num_days)
+    if num_days < 7:
+        num_days = 7
+    if num_days > 14:
+        num_days = 14
+
+    data['num_days'] = num_days
     
     days = []
     today = datetime.datetime.now() 

@@ -58,8 +58,17 @@ BackfeedUi = function () {
     };
 
     this.show_errors = function(errors) {
+
+        $('input, textarea', self.el).removeClass('error');
+
         $('#backfeed_success', self.el).hide();
         $('#backfeed_errors', self.el).show();
+
+        $.each(errors, function(k, v){
+            $("[name='" + k + "']", self.el).addClass('error');
+
+        });
+
     };
 
 

@@ -14,13 +14,7 @@ class SchedulerMenu(CMSAttachMenu):
     
     def get_nodes(self, request):
         nodes = []
-        """"""
-        node = NavigationNode(
-            _('Day'),
-            '#',
-            7201
-        )
-        nodes.append(node)
+
         node = NavigationNode(
             _('Week'),
             '#',
@@ -28,7 +22,7 @@ class SchedulerMenu(CMSAttachMenu):
         )
         nodes.append(node)
         node = NavigationNode(
-            _('Month'),
+            _('Two weeks'),
             '#',
             7203
         )

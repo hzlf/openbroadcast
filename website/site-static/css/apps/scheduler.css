@@ -943,77 +943,82 @@ input.autocomplete {
 
 /* line 633, ../../sass/apps/scheduler.sass */
 .tg-today {
-  background-color: #f1f1f1;
+  background-color: rgba(50, 201, 3, 0.12);
 }
 
-/* line 636, ../../sass/apps/scheduler.sass */
+/* line 637, ../../sass/apps/scheduler.sass */
+.tg-weekend {
+  background-color: rgba(3, 3, 3, 0.03);
+}
+
+/* line 641, ../../sass/apps/scheduler.sass */
 .bg-exists .tg-today {
   background-color: #eeeeee;
   opacity: 0.5;
   filter: alpha(opacity=50);
 }
 
-/* line 641, ../../sass/apps/scheduler.sass */
+/* line 646, ../../sass/apps/scheduler.sass */
 .tg-spanningwrapper {
   position: relative;
   margin: 1px 0 0 1px;
 }
 
-/* line 645, ../../sass/apps/scheduler.sass */
+/* line 650, ../../sass/apps/scheduler.sass */
 .tg-chipspanningwrapper {
   line-height: 0;
   margin: 0 10px 0 1px;
   z-index: 1;
 }
 
-/* line 650, ../../sass/apps/scheduler.sass */
+/* line 655, ../../sass/apps/scheduler.sass */
 .tg-hourmarkers {
   position: absolute;
   width: 100%;
 }
 
-/* line 654, ../../sass/apps/scheduler.sass */
+/* line 659, ../../sass/apps/scheduler.sass */
 .tg-markercell {
   height: 42px;
 }
 
-/* line 657, ../../sass/apps/scheduler.sass */
+/* line 662, ../../sass/apps/scheduler.sass */
 .tg-markercell60 {
   height: 60px;
 }
 
-/* line 660, ../../sass/apps/scheduler.sass */
+/* line 665, ../../sass/apps/scheduler.sass */
 .tg-dualmarker, .tg-dualmarker60 {
   border-bottom: 1px dotted #dddddd;
   border-top: 1px solid #dddddd;
   font-size: 1px;
 }
 
-/* line 665, ../../sass/apps/scheduler.sass */
+/* line 670, ../../sass/apps/scheduler.sass */
 .tg-dualmarker {
   height: 20px;
   margin-bottom: 20px;
 }
 
-/* line 669, ../../sass/apps/scheduler.sass */
+/* line 674, ../../sass/apps/scheduler.sass */
 .tg-dualmarker60 {
   height: 29px;
   margin-bottom: 29px;
 }
 
-/* line 677, ../../sass/apps/scheduler.sass */
+/* line 682, ../../sass/apps/scheduler.sass */
 #mainbody {
   margin-left: 0px;
   padding-top: 14px;
   width: 830px;
 }
 
-/* line 683, ../../sass/apps/scheduler.sass */
+/* line 688, ../../sass/apps/scheduler.sass */
 .dp-cell.dp-dayh {
   text-align: center;
 }
 
-/* line 686, ../../sass/apps/scheduler.sass */
+/* line 691, ../../sass/apps/scheduler.sass */
 .calHeader, #dp_0_cur {
   color: #222222;
   font-weight: normal;
@@ -1022,37 +1027,37 @@ input.autocomplete {
   position: relative;
 }
 
-/* line 693, ../../sass/apps/scheduler.sass */
+/* line 698, ../../sass/apps/scheduler.sass */
 .calHeader, .goog-zippy-expanded .monthtableSpace {
   margin-left: -16px;
   margin-right: -5px;
 }
 
-/* line 697, ../../sass/apps/scheduler.sass */
+/* line 702, ../../sass/apps/scheduler.sass */
 .calHeader {
   padding: 2px 0;
 }
 
-/* line 700, ../../sass/apps/scheduler.sass */
+/* line 705, ../../sass/apps/scheduler.sass */
 .calHeaderSpace {
   margin-left: 4px;
 }
 
-/* line 703, ../../sass/apps/scheduler.sass */
+/* line 708, ../../sass/apps/scheduler.sass */
 .calHeader:hover {
   background-color: #eeeeee;
 }
 
-/* line 708, ../../sass/apps/scheduler.sass */
+/* line 713, ../../sass/apps/scheduler.sass */
 #calcontent.eui-s .calHeader, #calcontent.eui-s #dp_0_cur {
   line-height: 24px;
 }
-/* line 711, ../../sass/apps/scheduler.sass */
+/* line 716, ../../sass/apps/scheduler.sass */
 #calcontent.eui-t .calHeader, #calcontent.eui-t #dp_0_cur {
   line-height: 20px;
 }
 
-/* line 715, ../../sass/apps/scheduler.sass */
+/* line 720, ../../sass/apps/scheduler.sass */
 .st-grid .te-t, .st-grid .te-s {
   font-size: 100%;
 }
