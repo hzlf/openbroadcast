@@ -81,7 +81,13 @@
             {% if provider == "musicbrainz" %}
                 <div class="row-fluid">
 
-                    <div class="span12">
+                    <div class="span2">
+                        {% if  result.thumb %}
+                            <img src="/static/img/base/defaults/listview.release.xl.png" data-carchive_url="{{ result.thumb }}">
+                        {% endif %}
+                    </div>
+
+                    <div class="span10">
 
 
 

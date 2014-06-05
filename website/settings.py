@@ -586,6 +586,14 @@ THUMBNAIL_PROCESSORS = (
     'easy_thumbnails.processors.filters',
 )
 THUMBNAIL_QUALITY = 80
+THUMBNAIL_BASEDIR = 'thumbnails'
+THUMBNAIL_PRESERVE_EXTENSIONS = ('png',)
+THUMBNAIL_NAMER = 'easy_thumbnails.namers.hashed'
+
+""""""
+SOUTH_MIGRATION_MODULES = {
+        'easy_thumbnails': 'easy_thumbnails.south_migrations',
+    }
 
 """
 Emial & messageing settings

@@ -30,6 +30,8 @@ from lib.widgets.widgets import ReadOnlyIconField
 
 from lib.util.filer_extra import url_to_file
 
+from alibrary.util.storage import get_file_from_url
+
 
 
 ACTION_LAYOUT =  action_layout = FormActions(
@@ -182,43 +184,13 @@ class ArtistForm(ModelForm):
         
         cd = super(ArtistForm, self).clean()
 
-        print "** ArtistForm cleaned data **********"
-        print cd
-        print "*************************************"
-        
-        main_image = cd.get('main_image', None)
-        remote_image = cd.get('remote_image', None)
-
-        if main_image:
-            try:
-                ui = cd['main_image']
-                dj_file = DjangoFile(open(ui.temporary_file_path()), name='cover.jpg')
-                cd['main_image'], created = Image.objects.get_or_create(
-                                    original_filename='cover_%s.jpg' % self.instance.pk,
-                                    file=dj_file,
-                                    folder=self.instance.folder,
-                                    is_public=True)
-            except Exception, e:
-                print e
-                pass
-
-
-
-
-        elif remote_image:
-            print "adding image (remote)"
-            try:
-                cd['main_image'] = url_to_file(remote_image, self.instance.folder)
-            except Exception, e:
-                print e
-            
-        else:
-            cd['main_image'] = self.instance.main_image
-
+        if cd.get('remote_image', None):
+            remote_file = get_file_from_url(cd['remote_image'])
+            if remote_file:
+                cd['main_image'] = remote_file
 
         return cd
 
-    # TODO: take a look at save
     def save(self, *args, **kwargs):
         return super(ArtistForm, self).save(*args, **kwargs)
    

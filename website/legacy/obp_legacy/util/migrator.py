@@ -19,6 +19,7 @@ from settings import MEDIA_ROOT
 from obp_legacy.models import *
 
 from lib.util import filer_extra
+from alibrary.util.storage import get_file_from_path
 
 from l10n.models import Country
 
@@ -222,7 +223,8 @@ class ReleaseMigrator(Migrator):
                 img_path = os.path.join(LEGACY_STORAGE_ROOT, 'images', 'release', id_to_location(obj.legacy_id), 'original.jpg')
                 log.debug('image path: %s' % img_path)
                 if os.path.isfile(img_path):
-                    img = filer_extra.path_to_file(img_path, obj.folder)
+                    #img = filer_extra.path_to_file(img_path, obj.folder)
+                    img = get_file_from_path(img_path)
                     obj.main_image = img
                 else:
                     log.debug('image does not exist at: %s' % img_path)
@@ -547,7 +549,8 @@ class ArtistMigrator(Migrator):
                 img_path = os.path.join(LEGACY_STORAGE_ROOT, 'images', 'artist', id_to_location(obj.legacy_id), 'original.jpg')
                 log.debug('image path: %s' % img_path)
                 if os.path.isfile(img_path):
-                    img = filer_extra.path_to_file(img_path, obj.folder)
+                    #img = filer_extra.path_to_file(img_path, obj.folder)
+                    img = get_file_from_path(img_path)
                     obj.main_image = img
                 else:
                     log.debug('image does not exist at: %s' % img_path)
@@ -724,7 +727,8 @@ class LabelMigrator(Migrator):
                 img_path = os.path.join(LEGACY_STORAGE_ROOT, 'images', 'label', id_to_location(obj.legacy_id), 'original.jpg')
                 log.debug('image path: %s' % img_path)
                 if os.path.isfile(img_path):
-                    img = filer_extra.path_to_file(img_path, obj.folder)
+                    #img = filer_extra.path_to_file(img_path, obj.folder)
+                    img = get_file_from_path(img_path)
                     obj.main_image = img
                 else:
                     log.debug('image does not exist at: %s' % img_path)

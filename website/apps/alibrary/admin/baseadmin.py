@@ -125,7 +125,7 @@ class MediaInline(admin.TabularInline):
     model = Media
     exclude = ['description','slug','processed','echoprint_status','conversion_status', 'd_tags', 'echonest_id', 'danceability', 'energy', 'liveness', 'loudness', 'speechiness', 'start_of_fade_out', 'echonest_duration', 'tempo', 'key', 'sections','master_sha1', 'base_format', 'base_filesize', 'base_duration', 'base_samplerate', 'base_bitrate', 'filename', 'publish_date', 'status', 'owner', 'creator', 'publisher', 'medianumber', 'master', 'mediatype' ]
     readonly_fields = ['artist', ]
-    extra = 1
+    extra = 0
     
 class FormatAdmin(BaseAdmin):
     
@@ -182,9 +182,9 @@ class ReleaseAdmin(BaseAdmin):
     list_filter = ('releasetype',)
     
     date_hierarchy = 'created'
-    
-    #inlines = [RelationsInline, MediaInline, ReleaseExtraartistsInline, DownloadreleaseInline, HardwarereleaseInline]
-    inlines = [ReleaseAlbumartistsInline, ReleaseMediaInline, RelationsInline, MediaInline, ReleaseExtraartistsInline]
+
+    #inlines = [ReleaseAlbumartistsInline, ReleaseMediaInline, RelationsInline, MediaInline, ReleaseExtraartistsInline]
+    inlines = [ReleaseAlbumartistsInline, RelationsInline, MediaInline, ReleaseExtraartistsInline]
     #prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ['slug', 'license', 'd_tags']
     
@@ -201,8 +201,9 @@ class ReleaseAdmin(BaseAdmin):
         ('Users', {'fields' : ['owner', 'creator', 'publisher']}),
     ]
     
-admin.site.register(Release, ReleaseAdmin)
-  
+admin.site.register(Release)
+#admin.site.register(Release, ReleaseAdmin)
+
 
 
 class ArtistMembersInline(admin.TabularInline):
@@ -255,7 +256,8 @@ class ArtistAdmin(PlaceholderAdmin, BaseAdmin):
         #('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
     ]
     
-admin.site.register(Artist, ArtistAdmin)
+#admin.site.register(Artist, ArtistAdmin)
+admin.site.register(Artist)
 admin.site.register(NameVariation)
 
 class LicenseAdmin(reversion.VersionAdmin, MultilingualModelAdmin):

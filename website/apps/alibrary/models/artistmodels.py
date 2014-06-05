@@ -14,8 +14,6 @@ from django_extensions.db.fields import UUIDField, AutoSlugField
 
 # cms
 from cms.models import CMSPlugin, Page
-from cms.models.fields import PlaceholderField
-from cms.utils.placeholder import get_page_from_placeholder_if_exists
 
 # filer
 from filer.models.filemodels import *
@@ -49,13 +47,16 @@ from alibrary.models.releasemodels import *
 
 from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
+from alibrary.util.storage import get_path_for_object, OverwriteStorage
 
 LOOKUP_PROVIDERS = (
     ('discogs', _('Discogs')),
     ('musicbrainz', _('Musicbrainz')),
 )
 
-
+def upload_image_to(instance, filename):
+    filename, extension = os.path.splitext(filename)
+    return os.path.join(get_path_for_object(instance), 'image%s' % extension.lower())
 
 class NameVariation(models.Model):
 
@@ -91,7 +92,9 @@ class Artist(MigrationMixin):
         ('other', _('Other')),
     )
     type = models.CharField(verbose_name="Artist type", max_length=120, blank=True, null=True, choices=TYPE_CHOICES)
-    main_image = FilerImageField(null=True, blank=True, related_name="artist_main_image", rel='')
+    main_image = models.ImageField(verbose_name=_('Image'), upload_to=upload_image_to, storage=OverwriteStorage(), null=True, blank=True)
+    #main_image = FilerImageField(null=True, blank=True, related_name="artist_main_image", rel='')
+
     real_name = models.CharField(max_length=200, blank=True, null=True)
     disambiguation = models.CharField(max_length=256, blank=True, null=True)
     

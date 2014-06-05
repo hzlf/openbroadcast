@@ -115,7 +115,7 @@ class Media(CachingMixin, MigrationMixin):
 
     # core fields
     uuid = RUUIDField(primary_key=False)
-    name = models.CharField(max_length=360, db_index=True)
+    name = models.CharField(max_length=255, db_index=True)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
     STATUS_CHOICES = (

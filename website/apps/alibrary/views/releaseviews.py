@@ -376,11 +376,14 @@ class ReleaseEditView(UpdateView):
             for te in releasemedia_form.cleaned_data:
 
                 print te['artist']
-                if not te['artist'].pk:
-                    print 'no artist yet - create: %s' % te['artist']
-                    te['artist'].save()
-                    te['id'].artist = te['artist']
-                    te['id'].save()
+                try:
+                    if not te['artist'].pk:
+                        print 'no artist yet - create: %s' % te['artist']
+                        te['artist'].save()
+                        te['id'].artist = te['artist']
+                        te['id'].save()
+                except:
+                    pass
 
 
             """

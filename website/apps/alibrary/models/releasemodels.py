@@ -24,8 +24,6 @@ from django_extensions.db.fields import UUIDField
 
 # cms
 from cms.models import CMSPlugin, Page
-from cms.models.fields import PlaceholderField
-from cms.utils.placeholder import get_page_from_placeholder_if_exists
 
 # filer
 from filer.models.filemodels import *
@@ -57,6 +55,7 @@ logger = logging.getLogger(__name__)
 
 from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
+from alibrary.util.storage import get_path_for_object, OverwriteStorage
 
 import arating
     
@@ -66,6 +65,7 @@ from alibrary.models.basemodels import *
 from alibrary.models.artistmodels import *
 from alibrary.models.labelmodels import Label
 from alibrary.models.mediamodels import Media
+
 
 
 
@@ -96,6 +96,17 @@ class ReleaseManager(models.Manager):
 
 
 
+def upload_cover_to(instance, filename):
+    filename, extension = os.path.splitext(filename)
+    return os.path.join(get_path_for_object(instance), 'cover%s' % extension.lower())
+
+
+def filename_by_uuid(instance, filename, root='release'):
+    filename, extension = os.path.splitext(filename)
+    filename = instance.uuid.replace('-', '/')[6:] + extension
+    return os.path.join(root, filename)
+
+
 class Release(MigrationMixin):
     
     # core fields
@@ -105,13 +116,12 @@ class Release(MigrationMixin):
     
     license = models.ForeignKey(License, blank=True, null=True, related_name='release_license')
 
-    # TODO: Refactor to l10n !!
-    #release_country = CountryField(blank=True, null=True)
     release_country = models.ForeignKey(Country, blank=True, null=True)
     
     uuid = UUIDField()
     
-    main_image = FilerImageField(null=True, blank=True, related_name="release_main_image", rel='')
+    #main_image = FilerImageField(null=True, blank=True, related_name="release_main_image", rel='')
+    main_image = models.ImageField(verbose_name=_('Cover'), upload_to=upload_cover_to, storage=OverwriteStorage(), null=True, blank=True)
     cover_image = FilerImageField(null=True, blank=True, related_name="release_cover_image", rel='', help_text=_('Cover close-up. Used e.g. for embedding in digital files.'))
     
     
@@ -128,9 +138,7 @@ class Release(MigrationMixin):
     releasedate = models.DateField(blank=True, null=True)
     releasedate_approx = ApproximateDateField(verbose_name="Releasedate", blank=True, null=True)
     
-    
-    
-    
+
     pressings = models.PositiveIntegerField(max_length=12, default=0)
     
     totaltracks = models.IntegerField(null=True, blank=True)
@@ -155,9 +163,6 @@ class Release(MigrationMixin):
     excerpt = models.TextField(blank=True, null=True)
     description = extra.MarkdownTextField(blank=True, null=True)
 
-    
-    # cms field
-    placeholder_1 = PlaceholderField('placeholder_1')
 
     releasetype = models.CharField(verbose_name="Release type", max_length=24, blank=True, null=True, choices=alibrary_settings.RELEASETYPE_CHOICES)
 
@@ -442,13 +447,14 @@ class Release(MigrationMixin):
         return artists
     
     def get_downloads(self):
-        
-        downloads = File.objects.filter(folder=self.get_folder('downloads')).all()
 
+        return None
+        """
+        downloads = File.objects.filter(folder=self.get_folder('downloads')).all()
         if len(downloads) < 1:
             return None
-        
         return downloads
+        """
     
     
     
@@ -533,23 +539,23 @@ class Release(MigrationMixin):
             
         """
         adding assets if any
-        """
-
         asset_files = File.objects.filter(folder=self.get_folder('assets')).all()
         for asset_file in asset_files:
-            
             if asset_file.name:
                 file_name = asset_file.name
             else:
                 file_name = asset_file.original_filename
-            
             archive_file.write(asset_file.path, file_name)
+        """
 
             
         return cache_file_path
 
     def get_extraimages(self):
-        
+
+        return None
+
+        """
         if self.folder:
             folder = self.get_folder('pictures')
             images = folder.files.instance_of(Image)
@@ -558,9 +564,10 @@ class Release(MigrationMixin):
             return images
         else:
             return None
+        """
                 
                 
-
+    """
     def get_folder(self, name):
         
         if name == 'cache':
@@ -570,7 +577,7 @@ class Release(MigrationMixin):
             folder, created = Folder.objects.get_or_create(name=name, parent=self.folder)
             
         return folder
-    
+    """
     
     
     # OBSOLETE

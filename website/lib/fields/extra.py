@@ -36,14 +36,15 @@ class AdvancedFileInput(ClearableFileInput):
     
 
 
-    template_with_initial = '<ul><li>%(initial)s</li><li>%(clear_template)s</li><li>%(input_text)s: %(input)s</li></ul>'
+    #template_with_initial = '<ul class="unstyled"><li>%(initial)s</li><li>%(clear_template)s</li><li>%(input_text)s: %(input)s</li></ul>'
+    template_with_initial = '<ul class="unstyled"><li>%(initial)s</li><li>%(input_text)s: %(input)s</li></ul>'
     template_with_clear = '%(clear)s <label for="%(clear_checkbox_id)s">%(clear_checkbox_label)s</label>'
 
     def __init__(self, *args, **kwargs):
 
         self.url_length = kwargs.pop('url_length',30)
         self.preview = kwargs.pop('preview',True)
-        self.image_width = kwargs.pop('image_width',200)
+        self.image_width = kwargs.pop('image_width',140)
         super(AdvancedFileInput, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None,):

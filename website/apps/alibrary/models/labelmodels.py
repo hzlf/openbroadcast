@@ -52,6 +52,7 @@ import arating
 from alibrary.models import MigrationMixin
 from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
+from alibrary.util.storage import get_path_for_object, OverwriteStorage
 
 
 from lib.fields import extra
@@ -61,6 +62,11 @@ LOOKUP_PROVIDERS = (
     ('discogs', _('Discogs')),
     ('musicbrainz', _('Musicbrainz')),
 )
+
+def upload_image_to(instance, filename):
+    filename, extension = os.path.splitext(filename)
+    return os.path.join(get_path_for_object(instance), 'logo%s' % extension.lower())
+
 
 class LabelManager(models.Manager):
 
@@ -87,8 +93,8 @@ class Label(MPTTModel, MigrationMixin):
     phone = PhoneNumberField(blank=True, null=True)
     fax = PhoneNumberField(blank=True, null=True)
     
-    
-    main_image = FilerImageField(null=True, blank=True, related_name="label_main_image", rel='')
+    main_image = models.ImageField(verbose_name=_('Cover'), upload_to=upload_image_to, storage=OverwriteStorage(), null=True, blank=True)
+    #main_image = FilerImageField(null=True, blank=True, related_name="label_main_image", rel='')
     
     description = extra.MarkdownTextField(blank=True, null=True)
     

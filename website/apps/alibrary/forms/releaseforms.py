@@ -25,7 +25,12 @@ from lib.widgets.widgets import ReadOnlyIconField
 
 from lib.widgets.widgets import ReadOnlyField
 
+
+from lib.fields.extra import AdvancedFileInput
+
 from lib.util.filer_extra import url_to_file
+
+from alibrary.util.storage import get_file_from_url
 
 
 
@@ -238,6 +243,7 @@ class ReleaseForm(ModelForm):
 
 
     main_image = forms.Field(widget=FileInput(), required=False)
+    #main_image = forms.Field(widget=AdvancedFileInput(), required=False)
     remote_image = forms.URLField(required=False)
     #releasedate = forms.DateField(required=False,widget=forms.DateInput(format = '%Y-%m-%d'), input_formats=('%Y-%m-%d',))
     releasedate_approx = ApproximateDateFormField(label="Releasedate", required=False)
@@ -254,57 +260,20 @@ class ReleaseForm(ModelForm):
 
         cd = super(ReleaseForm, self).clean()
 
-        print
-        print "ReleaseForm: clean"
-        print cd
-        print
-
-        label = cd['label']
         try:
+            label = cd['label']
             if not label.pk:
-                print "SEEMS TO BE NEW ONE..."
                 label.save()
         except:
             pass
 
-
-        main_image = cd.get('main_image', None)
-        remote_image = cd.get('remote_image', None)
-
-        if main_image:
-            print "adding image (main)"
-            try:
-                ui = cd['main_image']
-                dj_file = DjangoFile(open(ui.temporary_file_path()), name='cover.jpg')
-                cd['main_image'], created = Image.objects.get_or_create(
-                                    original_filename='cover_%s.jpg' % self.instance.pk,
-                                    file=dj_file,
-                                    folder=self.instance.folder,
-                                    is_public=True)
-            except Exception, e:
-                print e
-                pass
-
-
-
-
-        elif remote_image:
-            print "adding image (remote)"
-            try:
-                cd['main_image'] = url_to_file(remote_image, self.instance.folder)
-            except Exception, e:
-                print e
-
-
-        else:
-            cd['main_image'] = self.instance.main_image
-
-
-
+        if cd.get('remote_image', None):
+            remote_file = get_file_from_url(cd['remote_image'])
+            if remote_file:
+                cd['main_image'] = remote_file
 
         return cd
 
-    # TODO: take a look at save
     def save(self, *args, **kwargs):
         return super(ReleaseForm, self).save(*args, **kwargs)
 

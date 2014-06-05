@@ -163,32 +163,30 @@ def provider_search(request, *args, **kwargs):
         log.debug('query url: %s' % (url))
         r = requests.get(url)
 
-        print '/////////////////////////////////////////////////////'
-        print r.text
-        print '/////////////////////////////////////////////////////'
 
         if item_type == 'release':
             results = json.loads(r.text)['releases']
             for result in results:
                 result['uri'] = 'http://musicbrainz.org/release/%s' % result['id']
+                result['thumb'] = 'http://coverartarchive.org/%s/%s' % (item_type, result['id'])
 
         if item_type == 'artist':
             results = json.loads(r.text)['artist']
             for result in results:
                 result['uri'] = 'http://musicbrainz.org/artist/%s' % result['id']
+                result['thumb'] = 'http://coverartarchive.org/%s/%s' % (item_type, result['id'])
 
         if item_type == 'label':
             results = json.loads(r.text)['labels']
             for result in results:
                 result['uri'] = 'http://musicbrainz.org/label/%s' % result['id']
+                result['thumb'] = 'http://coverartarchive.org/%s/%s' % (item_type, result['id'])
 
         if item_type == 'media':
             results = json.loads(r.text)['recording']
             for result in results:
                 result['uri'] = 'http://musicbrainz.org/recording/%s' % result['id']
 
-
-    print r.json()
 
     data = {
         'query': query,

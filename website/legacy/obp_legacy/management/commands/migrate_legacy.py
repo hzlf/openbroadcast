@@ -77,6 +77,14 @@ class LegacyImporter(object):
                     legacy_obj.migrated = datetime.now()
                     legacy_obj.save()
 
+            if(self.object_type == 'label'):
+
+                if self.legacy_id:
+                    legacy_obj = Labels.objects.using('legacy').get(id=int(self.legacy_id))
+                    obj, status = get_label_by_legacy_object(legacy_obj, force=True)
+                    legacy_obj.migrated = datetime.now()
+                    legacy_obj.save()
+
             return
 
         if(self.object_type == 'release'):
