@@ -186,6 +186,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'social_auth.context_processors.backends_data',
     #'social_auth.context_processors.social_auth_by_type_backends',
     'social_auth.context_processors.social_auth_login_redirect',
+
+    'lib.context_processors.debug',
+
 )
 
 ROOT_URLCONF = 'urls'

@@ -88,8 +88,25 @@ class ReleaseMigrator(Migrator):
             if legacy_obj.totaltracks:
                 obj.totaltracks = legacy_obj.totaltracks
 
-            if legacy_obj.releasecountry and len(legacy_obj.releasecountry) == 2:
-                obj.release_country = legacy_obj.releasecountry
+            if legacy_obj.releasecountry:
+                log.debug('releasecountry: %s' % legacy_obj.releasecountry)
+                releasecountry = None
+                if len(legacy_obj.releasecountry) == 2:
+                    try:
+                        releasecountry = Country.objects.get(iso2_code=legacy_obj.releasecountry)
+                    except Exception, e:
+                        pass
+
+                else:
+                    try:
+                        releasecountry = Country.objects.get(printable_name=legacy_obj.releasecountry)
+                    except Exception, e:
+                        pass
+
+                if releasecountry:
+                    log.debug('got country: %s' % releasecountry.name)
+                    obj.release_country = releasecountry
+
 
             if legacy_obj.releasedate:
                 log.debug('legacy-date: %s' % legacy_obj.releasedate)
@@ -202,7 +219,7 @@ class ReleaseMigrator(Migrator):
             Get image
             """
             try:
-                img_path = os.path.join(LEGACY_STORAGE_ROOT, 'static', 'images', 'release', id_to_location(obj.legacy_id), 'original.jpg')
+                img_path = os.path.join(LEGACY_STORAGE_ROOT, 'images', 'release', id_to_location(obj.legacy_id), 'original.jpg')
                 log.debug('image path: %s' % img_path)
                 if os.path.isfile(img_path):
                     img = filer_extra.path_to_file(img_path, obj.folder)
@@ -331,7 +348,7 @@ class MediaMigrator(Migrator):
                 base_path = '%s%s' % (LEGACY_STORAGE_ROOT, 'media/')
                 media_dir = '%s%s/' % (base_path, id_to_location(obj.legacy_id))
 
-                if legacy_obj.has_flac_default == 1:
+                if legacy_obj.has_flac_default == 1 and os.path.isfile('%sdefault.flac' % (media_dir)):
                     media_path = '%sdefault.flac' % (media_dir)
                 else:
                     media_path = '%sdefault.mp3' % (media_dir)
@@ -527,7 +544,7 @@ class ArtistMigrator(Migrator):
             Get image
             """
             try:
-                img_path = os.path.join(LEGACY_STORAGE_ROOT, 'static', 'images', 'artist', id_to_location(obj.legacy_id), 'original.jpg')
+                img_path = os.path.join(LEGACY_STORAGE_ROOT, 'images', 'artist', id_to_location(obj.legacy_id), 'original.jpg')
                 log.debug('image path: %s' % img_path)
                 if os.path.isfile(img_path):
                     img = filer_extra.path_to_file(img_path, obj.folder)
@@ -704,7 +721,7 @@ class LabelMigrator(Migrator):
             Get image
             """
             try:
-                img_path = os.path.join(LEGACY_STORAGE_ROOT, 'static', 'images', 'label', id_to_location(obj.legacy_id), 'original.jpg')
+                img_path = os.path.join(LEGACY_STORAGE_ROOT, 'images', 'label', id_to_location(obj.legacy_id), 'original.jpg')
                 log.debug('image path: %s' % img_path)
                 if os.path.isfile(img_path):
                     img = filer_extra.path_to_file(img_path, obj.folder)
@@ -1173,11 +1190,11 @@ class PlaylistMigrator(Migrator):
             obj.target_duration = (int(container.target_duration) * 15 * 60)
 
             # TODO: Broadcast segment mapping
-            bcs = json.loads(container.best_broadcast_segment)
-            for bc in bcs:
-                if bc[0] == 1:
-                    print 'Mo:',
-                    print bc[1]
+            #bcs = json.loads(container.best_broadcast_segment)
+            #for bc in bcs:
+            #    if bc[0] == 1:
+            #        print 'Mo:',
+            #        print bc[1]
 
             PlaylistItemPlaylist.objects.filter(playlist=obj).delete()
             """"""
@@ -1185,7 +1202,7 @@ class PlaylistMigrator(Migrator):
             position = 0
             for lm in legacy_media:
                 print lm
-                if 'source' in lm and lm['source'] == 'ml':
+                if 'source' in lm and lm['source'] == 'ml' and 'ident' in lm:
                     tm = Medias.objects.using('legacy').get(id=int(lm['ident']))
                     print tm.name
                     print 'pos: %s' % position

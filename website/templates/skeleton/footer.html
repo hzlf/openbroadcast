@@ -2,3 +2,15 @@
 	© openbroadcast.ch {% now "Y" %} |
 	Renggerstrasse 31, CH-8038 Zurich, Switzerland
 </p>
+{% if DEBUG %}
+
+    <div id="debug_container" style="width: 100%; opacity: 0.6; font-size: 90%;">
+        <dl class="dl-horizontal">
+            <dt>Object ID:</dt>
+            <dd>{{ object.id }}</dd>
+            <dt>Legacy ID:</dt>
+            <dd>{{ object.legacy_id }}</dd>
+        </dl>
+    </div>
+
+{% endif %}

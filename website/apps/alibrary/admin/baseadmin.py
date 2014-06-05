@@ -193,7 +193,7 @@ class ReleaseAdmin(BaseAdmin):
     """"""
     fieldsets = [
         (None,  {
-                'fields': ['name', 'slug', ('main_image', 'cover_image',), ('label', 'catalognumber'), ('releasedate', 'release_country', 'license'), ('releasetype', 'pressings'), 'publish_date', 'enable_comments', 'main_format', 'd_tags', 'excerpt', 'description']
+                'fields': ['name', 'slug', 'main_image', ('label', 'catalognumber'), ('releasedate', 'release_country', 'license'), ('releasetype', 'pressings'), 'publish_date', 'enable_comments', 'main_format', 'd_tags', 'excerpt', 'description']
                 }),
         #('Artist relations',  {
         #        'fields': ['album_artists', 'album_artists_join',]

@@ -115,7 +115,7 @@ class Media(CachingMixin, MigrationMixin):
 
     # core fields
     uuid = RUUIDField(primary_key=False)
-    name = models.CharField(max_length=200, db_index=True)
+    name = models.CharField(max_length=360, db_index=True)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
     
     STATUS_CHOICES = (
@@ -1259,7 +1259,7 @@ def media_post_save(sender, **kwargs):
 
     # save the folder path
     if not obj.folder and obj.master:
-        folder = "private/%s/" % (obj.uuid.replace('-', '/'))
+        folder = "private/%s/" % (obj.uuid.replace('-', '/')[6:])
         log.info('Adding folder: %s' % (folder))
         obj.folder = folder
         obj.save()
@@ -1277,8 +1277,10 @@ def media_post_save(sender, **kwargs):
             obj.update_echoprint()
         else:
             log.info('Media id: %s - skipping echoprint generation' % (obj.pk))
-    
-    if obj.master and obj.conversion_status == 0 and obj.echoprint_status != 0:
+
+    # TODO: investigate!
+    #if obj.master and obj.conversion_status == 0 and obj.echoprint_status != 0:
+    if obj.master and obj.conversion_status == 0:
         log.info('Media id: %s - Re-Process' % (obj.pk))
         obj.generate_media_versions()
         
