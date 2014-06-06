@@ -63,8 +63,8 @@ class MediaResource(ModelResource):
         bundle.data['duration'] = bundle.obj.get_duration()
         try:
             waveform_image = bundle.obj.get_waveform_image()
-            print '****'
-            print waveform_image
+            #print '****'
+            #print waveform_image
             if waveform_image:
                 waveform_image = bundle.obj.get_waveform_url()
 

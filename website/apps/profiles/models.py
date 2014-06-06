@@ -43,7 +43,7 @@ def filename_by_uuid(instance, filename):
     path = "profiles/"
     
     # splitted
-    filename = instance.uuid.replace('-', '/')[6:] + extension
+    filename = instance.uuid.replace('-', '/')[4:] + extension
     
     return os.path.join(path, filename)
 

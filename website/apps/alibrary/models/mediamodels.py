@@ -108,7 +108,7 @@ def clean_filename(filename):
 # TODO: depreciated
 def masterpath_by_uuid(instance, filename):
     filename, extension = os.path.splitext(filename)
-    folder = "private/%s/" % (instance.uuid.replace('-', '/')[6:])
+    folder = "private/%s/" % (instance.uuid.replace('-', '/')[4:])
     #filename = instance.uuid.replace('-', '/') + extension
     filename = u'master'
     return os.path.join(folder, "%s%s" % (clean_filename(filename).lower(), extension.lower()))
@@ -1413,7 +1413,7 @@ def media_post_save(sender, **kwargs):
     """
     # save/create directory
     if not obj.folder and obj.master:
-        folder = "private/%s/" % (obj.uuid.replace('-', '/')[6:])
+        folder = "private/%s/" % (obj.uuid.replace('-', '/')[4:])
         log.info('Adding folder: %s' % (folder))
         obj.folder = folder
         obj.save()
