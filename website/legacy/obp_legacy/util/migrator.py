@@ -389,7 +389,7 @@ class MediaMigrator(Migrator):
 
                 if os.path.isfile(media_path):
 
-                    folder = "private/%s/" % (obj.uuid.replace('-', '/')[4:])
+                    folder = "private/%s/" % (obj.uuid.replace('-', '/')[5:])
                     filename, extension = os.path.splitext(media_path)
                     dst = os.path.join(folder, "master%s" % extension.lower())
 

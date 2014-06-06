@@ -3,7 +3,7 @@ import uuid
 from django.db.models import CharField
 
 UUID_BASE_ID = 'fff0'
-UUID_BASE_VERSION = 1
+UUID_BASE_VERSION = 4
 UUID_BASE_NAME = 'anorg.net'
 UUID_BASE_NAMESPACE = uuid.NAMESPACE_DNS
     
@@ -48,8 +48,6 @@ class UUIDField(CharField):
             super(UUIDField, self).contribute_to_class(cls, name)
 
     def create_uuid(self):
-        
-        print 'UUID - Version: %s' % self.version
 
         if not self.version or self.version == 4:
             res = uuid.uuid4()
