@@ -99,8 +99,9 @@ class LegacyImporter(object):
         
         if(self.object_type == 'media'):
 
-            objects = Medias.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:self.limit]
-        
+            #objects = Medias.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:self.limit]
+            objects = Medias.objects.using('legacy').filter(migrated=None).exclude(name=u'').order_by('-created').all()[0:self.limit]
+
             print 'NUM OBJECTS: %s' % objects.count()
         
             for legacy_obj in objects:

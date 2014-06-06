@@ -241,7 +241,13 @@ class MediaFilter(django_filters.FilterSet):
     PROCESSED_CHOICES = (
         (0, _('Waiting')),
         (1, _('Done')),
+        (99, _('Error')),
+    )
+    CONVERSION_STATUS_CHOICES = (
+        (0, _('Init')),
+        (1, _('Completed')),
         (2, _('Error')),
+        (99, _('Error')),
     )
     KEY_CHOICES = (
         (0, _('C')),
@@ -261,7 +267,7 @@ class MediaFilter(django_filters.FilterSet):
 
     class Meta:
         model = Media
-        fields = ['license__name', 'mediatype', 'base_bitrate', 'base_format', 'base_samplerate', 'processed', 'tempo', 'key']
+        fields = ['license__name', 'mediatype', 'base_bitrate', 'base_format', 'base_samplerate', 'conversion_status', 'processed', 'tempo', 'key']
 
     @property
     def filterlist(self):
@@ -281,7 +287,23 @@ class MediaFilter(django_filters.FilterSet):
                 if name == 'processed':
                     nd = []
                     for d in ds:
-                        nd.append([d[0], d[1], self.PROCESSED_CHOICES[d[0]][1]])
+                        if d[0] == 'NULL':
+                            pass
+                            #nd.append([d[0], d[1], _('Unknown')])
+                        else:
+                            if d[0] != None:
+                                for x in self.PROCESSED_CHOICES:
+                                    if x[0] == d[0]:
+                                        nd.append([d[0], d[1], x[1]])
+
+                    filter_.entries = nd
+
+                if name == 'conversion_status__disabled__':
+                    nd = []
+                    for d in ds:
+                        for x in self.CONVERSION_STATUS_CHOICES:
+                            if x[0] == d[0]:
+                                nd.append([d[0], d[1], x[1]])
 
                     filter_.entries = nd
 

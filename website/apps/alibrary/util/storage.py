@@ -18,22 +18,27 @@ log = logging.getLogger(__name__)
 class NoUUIDException(Exception):
     pass
 
-def get_path_for_object(obj):
+def get_dir_for_object(obj, prefix=None, app_dir=None, object_dir=None):
 
-    classname = obj.__class__.__name__.lower()
     if not obj.uuid:
-        raise NoUUIDException("get_path_for_object needs an object with uuid property! and this property needs a value!")
+        raise NoUUIDException("get_dir_for_object needs an object with uuid property! and this property needs a value!")
 
-    try:
-        appname = obj._meta.app_label
-    except:
-        appname = None
+    if not object_dir:
+        object_dir = obj.__class__.__name__.lower()
 
-    if appname:
-        path = os.path.join(appname, classname, obj.uuid.replace('-', '/')[6:])
-    else:
-        path = os.path.join(classname, obj.uuid.replace('-', '/')[6:])
+    if not app_dir:
+        try:
+            app_dir = obj._meta.app_label.lower()
+        except:
+            app_dir = None
 
+    path = os.path.join(object_dir, obj.uuid.replace('-', '/')[6:])
+
+    if app_dir:
+        path = os.path.join(app_dir, path)
+
+    if prefix:
+        path = os.path.join(prefix, path)
 
     return path
 

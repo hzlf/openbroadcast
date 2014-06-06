@@ -55,7 +55,7 @@ logger = logging.getLogger(__name__)
 
 from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
-from alibrary.util.storage import get_path_for_object, OverwriteStorage
+from alibrary.util.storage import get_dir_for_object, OverwriteStorage
 
 import arating
     
@@ -98,7 +98,7 @@ class ReleaseManager(models.Manager):
 
 def upload_cover_to(instance, filename):
     filename, extension = os.path.splitext(filename)
-    return os.path.join(get_path_for_object(instance), 'cover%s' % extension.lower())
+    return os.path.join(get_dir_for_object(instance), 'cover%s' % extension.lower())
 
 
 def filename_by_uuid(instance, filename, root='release'):

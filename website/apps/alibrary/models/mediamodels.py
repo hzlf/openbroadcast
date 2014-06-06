@@ -3,6 +3,7 @@ import shutil
 import time
 import subprocess
 import json
+import ntpath
 
 # django
 from django.db import models
@@ -14,6 +15,8 @@ from django.core.urlresolvers import reverse
 
 # TODO: only import needed settings
 from settings import *
+
+from django.conf import settings
 
 
 
@@ -76,6 +79,7 @@ from alibrary.models.artistmodels import *
 from alibrary.models.playlistmodels import PlaylistItem, Playlist
 
 from alibrary.util.slug import unique_slugify
+from alibrary.util.storage import get_dir_for_object, OverwriteStorage
 
 from alibrary.util.echonest import EchonestWorker
 
@@ -93,6 +97,7 @@ LOOKUP_PROVIDERS = (
 from caching.base import CachingMixin, CachingManager
 
 
+# TODO: depreciated
 def clean_filename(filename):
     import unicodedata
     import string
@@ -100,6 +105,7 @@ def clean_filename(filename):
     cleaned = unicodedata.normalize('NFKD', filename).encode('ASCII', 'ignore')
     return ''.join(c for c in cleaned if c in valid_chars)
 
+# TODO: depreciated
 def masterpath_by_uuid(instance, filename):
     filename, extension = os.path.splitext(filename)
     folder = "private/%s/" % (instance.uuid.replace('-', '/')[6:])
@@ -109,6 +115,19 @@ def masterpath_by_uuid(instance, filename):
 
 
 
+
+def upload_master_to(instance, filename):
+    filename, extension = os.path.splitext(filename)
+    return os.path.join(get_dir_for_object(instance), 'master%s' % extension.lower())
+
+
+
+def audiotools_progress(x, y):
+    p = (x * 100 / y)
+    last_p = None
+    if (p%10) == 0:
+        pass
+        #log.debug('conversion: %s' % p)
 
 class Media(CachingMixin, MigrationMixin):
 #class Media(MigrationMixin):
@@ -138,7 +157,7 @@ class Media(CachingMixin, MigrationMixin):
     PROCESSED_CHOICES = (
         (0, _('Waiting')),
         (1, _('Done')),
-        (2, _('Error')),
+        (99, _('Error')),
     )
     processed = models.PositiveIntegerField(max_length=2, default=0, choices=PROCESSED_CHOICES)
     
@@ -146,6 +165,7 @@ class Media(CachingMixin, MigrationMixin):
         (0, _('Init')),
         (1, _('Assigned')),
         (2, _('Error')),
+        (99, _('Error')),
     )
     echoprint_status = models.PositiveIntegerField(max_length=2, default=0, choices=ECHOPRINT_STATUS_CHOICES)
         
@@ -153,6 +173,7 @@ class Media(CachingMixin, MigrationMixin):
         (0, _('Init')),
         (1, _('Completed')),
         (2, _('Error')),
+        (99, _('Error')),
     )
     conversion_status = models.PositiveIntegerField(max_length=2, default=0, choices=CONVERSION_STATUS_CHOICES)
     
@@ -252,7 +273,9 @@ class Media(CachingMixin, MigrationMixin):
     #folder = models.ForeignKey(Folder, blank=True, null=True, related_name='media_folder', editable=False, on_delete=models.SET_NULL)
     
     # File related (new)
-    master = models.FileField(max_length=1024, upload_to=masterpath_by_uuid, blank=True, null=True)
+    #master = models.FileField(max_length=1024, upload_to=masterpath_by_uuid, blank=True, null=True)
+    filename = models.CharField(verbose_name=_('Original filename'), max_length=256, blank=True, null=True)
+    master = models.FileField(max_length=1024, upload_to=upload_master_to, blank=True, null=True)
     master_sha1 = models.CharField(max_length=64, db_index=True, blank=True, null=True)
     
     
@@ -264,7 +287,6 @@ class Media(CachingMixin, MigrationMixin):
     base_duration = models.FloatField(verbose_name=_('Duration'), blank=True, null=True)
     base_samplerate = models.PositiveIntegerField(verbose_name=_('Samplerate'), blank=True, null=True)
     base_bitrate = models.PositiveIntegerField(verbose_name=_('Bitrate'), blank=True, null=True)
-    filename = models.CharField(verbose_name=_('Original filename'), max_length=256, blank=True, null=True)
 
     # echonest data
     echonest_id = models.CharField(max_length=20, blank=True, null=True)
@@ -419,15 +441,15 @@ class Media(CachingMixin, MigrationMixin):
 
     @property
     def has_video(self):
-        vrs = self.relations.filter(service__in=['youtube', 'vimeo'])
-        return vrs.count() > 0
+        return self.relations.filter(service__in=['youtube', 'vimeo']).count() > 0
     
-    
+
+    # TODO: still needed?
     def get_products(self):
         return self.mediaproduct.all()
     
     
-    
+    # TODO: still needed?
     def get_download_url(self, format, version):
         
         return '%sdownload/%s/%s/' % (self.get_absolute_url(), format, version)
@@ -437,8 +459,22 @@ class Media(CachingMixin, MigrationMixin):
         try:
             return self.master.path
         except Exception, e:
-            print e
+            log.warning('unable to get master path for: %s' % self.name)
+
+
+    def get_directory(self, absolute=False):
+
+        if self.folder and absolute:
+            return os.path.join(settings.MEDIA_ROOT, self.folder)
+
+        elif self.folder:
+            return self.folder
+
+        else:
+            log.warning('unable to get directory path for: %s - %s' % (self.pk, self.name))
             return None
+
+
     
     # full absolute path
     def get_folder_path(self, subfolder=None):
@@ -481,7 +517,11 @@ class Media(CachingMixin, MigrationMixin):
     
     def get_default_stream_file(self):
         return self.get_stream_file('mp3', 'base')
-    
+
+
+
+    # TODO: depreciated version - remove
+    """
     def get_cache_file(self, format, version):
         
         filename = str(version) + '.' + str(format)
@@ -492,7 +532,23 @@ class Media(CachingMixin, MigrationMixin):
             return None
         
         return full_path
-    
+    """
+
+    def get_cache_file(self, format, version='base', absolute=True):
+
+        versions_directory = os.path.join(self.get_directory(absolute=absolute), 'versions')
+        path = os.path.join(versions_directory, '%s.%s' % (version, format))
+        if absolute:
+            path = os.path.join(settings.MEDIA_ROOT, path)
+
+        if os.path.isfile(path):
+            return path
+
+        return None
+
+
+
+
     def get_waveform_image(self):
         
         waveform_image = self.get_cache_file('png', 'waveform')
@@ -719,15 +775,28 @@ class Media(CachingMixin, MigrationMixin):
     
             src_path = self.master.path;
             tmp_path = os.path.join(tmp_directory, 'tmp.wav')
-            dst_path = os.path.join(self.get_folder_path('cache'), 'waveform.png')
+
+            versions_directory = os.path.join(self.get_directory(absolute=True), 'versions')
+            dst_path = os.path.join(versions_directory, 'waveform.png')
             
             print 'create waveform'
             print 'src_path: %s' % src_path
             print 'tmp_path: %s' % tmp_path
             print 'dst_path: %s' % dst_path
 
+
+
+
+            if os.path.isfile('/opt/local/bin/sox'):
+                sox_binary = '/opt/local/bin/sox'
+            else:
+                sox_binary = '/usr/bin/sox'
+
+            print '%s %s %s' % (sox_binary, src_path, tmp_path)
+
+
             p = subprocess.Popen([
-                '/usr/bin/sox', src_path, tmp_path
+                sox_binary, src_path, tmp_path
             ], stdout=subprocess.PIPE)
             stdout = p.communicate()
             print stdout
@@ -807,11 +876,118 @@ class Media(CachingMixin, MigrationMixin):
         
         
         pass
+
+
+    # TODO: implement!
+    # access media versions
+    def get_version(self, bitrate=320, format='mp3', absolute=False):
+
+        path = ''
+
+        if absolute:
+            path = os.path.join(settings.MEDIA_ROOT, path)
+
+        return path
        
        
        
-       
-       
+    # create converted (mp3) versions of master file
+    def create_versions(self):
+
+        log.info('create versions for: %s | %s' % (self.pk, self.name))
+        if USE_CELERYD:
+            self.create_versions_task.delay(self)
+        else:
+            self.create_versions_task(self)
+
+    # create converted (mp3) versions of master file
+    @task
+    def create_versions_task(obj):
+
+        """
+        for the moment we either
+         - create a high-quality mp3 in case of non-MP3 files
+         - or symlink the file if it is an MP3 already
+
+         'versions' are stored in the sub-directory 'versions', following the pattern:
+         <base/or/bitrate>.mp3
+        """
+
+        SUPPORTED_FORMATS = ['mp3', 'flac', 'aif', 'aiff', 'mp4', 'ogg']
+
+        # check if 'versions' directory exists - if not create it
+        versions_directory = os.path.join(obj.get_directory(absolute=True), 'versions')
+        log.debug('versions directory: %s' % versions_directory)
+        if versions_directory:
+            if not os.path.exists(versions_directory):
+                os.makedirs(versions_directory, 0755)
+
+        else:
+            log.warning('unable to create verisons dir: %s' % versions_directory)
+            return
+
+        # remove current files
+        for file in os.listdir(versions_directory):
+            file_path = os.path.join(versions_directory, file)
+            try:
+                log.debug('unlinking: %s' % file_path)
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception, e:
+                log.warning('unable to unlink: %s - %s' % (file_path, e))
+
+
+        # check type of source file
+        if not obj.master:
+            raise Exception('master needed for conversion')
+
+        if not os.path.isfile(obj.master.path):
+            raise IOError('file does not exist: %s' % obj.master.path)
+
+
+        master_format = os.path.splitext(obj.master.path)[1][1:].strip().lower()
+        version_path = os.path.join(versions_directory, 'base.mp3')
+
+
+        if not master_format in SUPPORTED_FORMATS:
+            raise IOError('format not supported: %s' % obj.master.path)
+
+        if master_format == 'mp3':
+            log.debug('in MP3 format already: symlinking to vorsions folder: %s' % obj.master)
+            if not os.path.lexists(version_path):
+                os.symlink(obj.master.path, version_path)
+
+        else:
+            log.info('conversion needed: %s to MP3' % master_format)
+            try:
+                audiotools.open(obj.master.path).convert(
+                    version_path,
+                    audiotools.MP3Audio, compression=0, progress=audiotools_progress)
+            except Exception, e:
+                log.warning('audiotools exception: %s' % e)
+
+            if os.path.isfile(version_path):
+                log.info('conversion complete: %s' % version_path)
+            else:
+                log.warning('unable to convert: %s to MP3' % master_format)
+
+
+
+        # self-check
+        if os.path.isfile(version_path) or os.path.lexists(version_path):
+            log.info('media %s - versions created' % obj.pk)
+            obj.conversion_status = 1
+            obj.save()
+        else:
+            log.warning('media %s - error creating versions' % obj.pk)
+            obj.conversion_status = 99
+            obj.save()
+
+
+
+
+
+
             
     """
     progress/callback functions
@@ -827,25 +1003,14 @@ class Media(CachingMixin, MigrationMixin):
         pass
         #print 'waveform:',
         #print str(percentage)
-        
-        
+
     
-    def dummy(self):
-        
-        formats_media = FORMATS_MEDIA
-        
-        for source, versions in formats_media.iteritems():
-            for version in versions:
-                print "%s/%s" % (source, version)
-    
-    
+
+    # TODO: depreciated
     def generate_media_versions(self):
         log = logging.getLogger('alibrary.mediamodels.generate_media_versions')
         self.generate_media_versions_task.delay(self)
-        
-    """
-    format conversion & co. takes the master and processes versions as configured
-    """
+
     @task
     def generate_media_versions_task(obj):
         
@@ -1101,13 +1266,10 @@ class Media(CachingMixin, MigrationMixin):
 
 
 
-    """
-    Echoprint analyzer
-    """
+    # Echoprint analyzer
     def echonest_analyze(self):
 
         log.info('Start echoprint_analyze: %s' % (self.pk))
-
         if USE_CELERYD:
             self.echonest_analyze_task.delay(self)
         else:
@@ -1128,91 +1290,46 @@ class Media(CachingMixin, MigrationMixin):
 
         
     def save(self, *args, **kwargs):
-        
-        log = logging.getLogger('alibrary.mediamodels.save')
-        log.info('Media id: %s - Save' % (self.pk))
 
+        log.debug('Media id: %s - Save' % (self.pk))
 
-        """
-        Assign a default license
-        """
+        # Assign a default license
         if not self.license:
             try:
                 license = License.objects.filter(is_default=True)[0]
                 self.license = license
+                log.debug('applied default license' % (license.name))
             except:
-                print 'no default license available'
+                log.warning('no default license available')
         
-    
-        """
-        check if master changed. if yes we need to reprocess the cached files
-        """
 
+        # check if master changed. if yes we need to reprocess the cached files
         if self.uuid is not None:
-            
-            print 'UUID: %s' % self.uuid
-
             try:
-                #orig = Media.objects.get(uuid=self.uuid)
                 orig = Media.objects.filter(uuid=self.uuid)[0]
                 if orig.master != self.master:
-                    log.info('Media id: %s - Master changed from "%s" to "%s"' % (self.uuid, orig.master, self.master))
+                    log.info('Media id: %s - Master changed from "%s" to "%s"' % (self.pk, orig.master, self.master))
+
+                    # set 'original filename'
+                    self.original_filename = self.master.name
+                    self.filename = self.original_filename
+                    # reset processing flags
                     self.processed = 0
                     self.conversion_status = 0
                     self.echoprint_status = 0
 
             except Exception, e:
                 print e
-                pass
-            
-        
-        try:
-            cache_folder = self.folder
-        except Exception, e:
-            #print e
-            log.info('Media id: %s - cache folder does not exist' % (self.pk))
-            cache_folder = None
 
 
 
-
-        if self.master and self.processed != 1:
-            log.info('Media id: %s - set master path to: %s' % (self.pk, self.master.path))
-            iext = None
-            try:
-                iext = os.path.splitext(self.master.path)[1].lower()
-                iext = iext[1:]
-                audiofile = audiotools.open(self.master.path)
-                
-                base_format = iext
-                base_bitrate = audiofile.bits_per_sample()
-                base_samplerate = audiofile.sample_rate()
-                base_filesize = os.path.getsize(self.master.path)
-                base_duration = audiofile.seconds_length()
-                
-                self.processed = 1
-            except Exception, e:
-                #print e
-                base_bitrate = None
-                base_samplerate = None
-                base_filesize = None
-                base_duration = None
-                self.processed = 2
-                
-            self.base_format = iext
-            self.base_bitrate = base_bitrate
-            self.base_samplerate = base_samplerate
-            self.base_filesize = base_filesize
-            self.base_duration = base_duration
-            
-
-        
+        # sha1 for quick duplicate checks
         if self.master:
             self.master_sha1 = self.generate_sha1()
         else:
             self.master_sha1 = None
-                
-                
+
+
         unique_slugify(self, self.name)
 
         # update d_tags
@@ -1222,55 +1339,86 @@ class Media(CachingMixin, MigrationMixin):
         
         self.tags = t_tags;
         self.d_tags = t_tags;
-        
+
         super(Media, self).save(*args, **kwargs)
 
 
-try:
-    tagging.register(Media)
-except:
-    pass
-
-# register
-# post_save.connect(library_post_save, sender=Media)   
-        
-        
-arating.enable_voting_on(Media)
 
 
-""""""
-from actstream import action
-def action_handler(sender, instance, created, **kwargs):
-
-    if instance.get_last_editor():
-        log.debug('last editor seems to be: %s' % instance.get_last_editor())
-        try:
-            action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
-        except Exception, e:
-            print 'error attaching action_handler: %s' % e
-
-post_save.connect(action_handler, sender=Media)
         
 # media post save
 def media_post_save(sender, **kwargs):
-    
-    log = logging.getLogger('alibrary.mediamodels.media_post_save')
-    obj = kwargs['instance']
 
-    # save the folder path
+    obj = kwargs['instance']
+    log.info('Media id: %s - Processed state: %s' % (obj.pk, obj.processed))
+
+    # create object directory ?
+    if not obj.folder:
+        log.debug('no directory for media %s - create it.' % obj.pk)
+        directory = get_dir_for_object(obj)
+        abs_directory = os.path.join(settings.MEDIA_ROOT, directory)
+
+        try:
+            if not os.path.exists(abs_directory):
+                os.makedirs(abs_directory, 0755)
+
+            obj.folder = directory
+            log.info('creating directory: %s' % abs_directory)
+
+            obj.save()
+
+        except Exception, e:
+            log.warning('unable to create directory: %s - %s' % (abs_directory, e))
+            obj.folder = None
+            obj.status = 99
+            obj.save()
+
+
+    if obj.status == 99:
+        log.warning('media %s - status is error > return' % obj.pk)
+        return
+
+
+    # extract files 'hard facts'
+    if obj.master and obj.processed != 1 and obj.processed != 99:
+        log.info('Media id: %s - reprocess master at: %s' % (obj.pk, obj.master.path))
+
+        try:
+            obj.base_format = os.path.splitext(obj.master.path)[1][1:].lower()
+
+            audiofile = audiotools.open(obj.master.path)
+
+            obj.base_bitrate = audiofile.bits_per_sample()
+            obj.base_samplerate = audiofile.sample_rate()
+            obj.base_filesize = os.path.getsize(obj.master.path)
+            obj.base_duration = audiofile.seconds_length()
+
+            obj.processed = 1 # done
+
+        except Exception, e:
+
+            log.warning('media %s - unable to process: %s' % (obj.pk, e))
+
+            obj.base_format = None
+            obj.base_bitrate = None
+            obj.base_samplerate = None
+            obj.base_filesize = None
+            obj.base_duration = None
+            obj.processed = 99 # error
+
+        obj.save()
+
+
+
+    """
+    # save/create directory
     if not obj.folder and obj.master:
         folder = "private/%s/" % (obj.uuid.replace('-', '/')[6:])
         log.info('Adding folder: %s' % (folder))
         obj.folder = folder
         obj.save()
+    """
 
-    
-    log.info('Media id: %s - Processed state: %s' % (obj.pk, obj.processed))
-    
-
-    
-    
-    
     if obj.master and obj.echoprint_status == 0:
         if AUTOCREATE_ECHOPRINT:
             log.info('Media id: %s - Echoprint' % (obj.pk))
@@ -1281,15 +1429,16 @@ def media_post_save(sender, **kwargs):
     # TODO: investigate!
     #if obj.master and obj.conversion_status == 0 and obj.echoprint_status != 0:
     if obj.master and obj.conversion_status == 0:
-        log.info('Media id: %s - Re-Process' % (obj.pk))
+        log.info('Media id: %s - re-process conversion' % (obj.pk))
+        obj.create_versions()
+        """
+        # TODO: depreciate
         obj.generate_media_versions()
-        
-        
+        """
 
-# register
 post_save.connect(media_post_save, sender=Media) 
         
-# media post save
+
 def media_pre_delete(sender, **kwargs):
     
     log = logging.getLogger('alibrary.mediamodels.media_pre_delete')
@@ -1302,14 +1451,31 @@ def media_pre_delete(sender, **kwargs):
     except Exception, e:
         log.warning('unable to delete fingerprint for media_id: %s' % obj.id)
 
+pre_delete.connect(media_pre_delete, sender=Media)
 
-    # try to delete relations
 
-        
-        
 
-# register
-pre_delete.connect(media_pre_delete, sender=Media)    
+
+arating.enable_voting_on(Media)
+from actstream import action
+def action_handler(sender, instance, created, **kwargs):
+
+    if instance.get_last_editor():
+        log.debug('last editor seems to be: %s' % instance.get_last_editor())
+        try:
+            action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
+        except Exception, e:
+            print 'error attaching action_handler: %s' % e
+
+post_save.connect(action_handler, sender=Media)
+
+
+try:
+    tagging.register(Media)
+except:
+    pass
+
+
 
 class MediaExtraartists(models.Model):
     artist = models.ForeignKey('Artist', related_name='extraartist_artist')
@@ -1338,10 +1504,6 @@ class MediaPlugin(CMSPlugin):
     # meta
     class Meta:
         app_label = 'alibrary'
-
-
-
-
 
 
     

@@ -3,6 +3,7 @@ import re
 import shutil
 import json
 import datetime
+import ntpath
 
 from django.core.validators import email_re
 from django.core.validators import URLValidator
@@ -174,9 +175,10 @@ class ReleaseMigrator(Migrator):
                 for entry in legacy_obj.various_links.splitlines():
                     try:
                         validate_url(entry)
-                        rel = Relation(content_object=obj, url=entry)
-                        log.debug('url (from various): %s' % rel.url)
-                        rel.save()
+                        if len(entry) < 500:
+                            rel = Relation(content_object=obj, url=entry)
+                            log.debug('url (from various): %s' % rel.url)
+                            rel.save()
 
                     except ValidationError, e:
                         print e
@@ -342,7 +344,37 @@ class MediaMigrator(Migrator):
                     print e
 
             """
-            Get path to file
+            migrate actual file
+            """
+
+
+            legacy_dir = os.path.join(LEGACY_STORAGE_ROOT, 'media', id_to_location(obj.legacy_id))
+
+            log.debug('legacy dir: %s' % legacy_dir)
+
+            if legacy_obj.has_flac_default == 1 and os.path.isfile(os.path.join(legacy_dir, 'default.flac')):
+                legacy_path = os.path.join(legacy_dir, 'default.flac')
+                log.debug('got FLAC file: %s' % legacy_path)
+            else:
+                legacy_path = os.path.join(legacy_dir, 'default.mp3')
+                log.debug('got MP3 file: %s' % legacy_path)
+
+
+
+            log.debug('legacy path: %s' % legacy_path)
+
+            if os.path.isfile(legacy_path):
+                obj.master = get_file_from_path(legacy_path)
+
+            else:
+                log.warning('file does not exist: %s' % legacy_path)
+
+
+            try:
+                pass
+            except Exception, e:
+                print e
+
             """
             try:
 
@@ -380,6 +412,7 @@ class MediaMigrator(Migrator):
 
             except:
                 pass
+            """
 
 
             obj.save()
@@ -510,9 +543,10 @@ class ArtistMigrator(Migrator):
                 for entry in legacy_obj.various_links.splitlines():
                     try:
                         validate_url(entry)
-                        rel = Relation(content_object=obj, url=entry)
-                        log.debug('url (from various): %s' % rel.url)
-                        rel.save()
+                        if len(entry) < 500:
+                            rel = Relation(content_object=obj, url=entry)
+                            log.debug('url (from various): %s' % rel.url)
+                            rel.save()
 
                     except ValidationError, e:
                         print e
@@ -688,9 +722,10 @@ class LabelMigrator(Migrator):
 
                     try:
                         validate_url(entry)
-                        rel = Relation(content_object=obj, url=entry)
-                        log.debug('url (from various): %s' % rel.url)
-                        rel.save()
+                        if len(entry) < 500:
+                            rel = Relation(content_object=obj, url=entry)
+                            log.debug('url (from various): %s' % rel.url)
+                            rel.save()
 
                     except ValidationError, e:
                         print e

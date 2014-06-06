@@ -2,7 +2,7 @@ import os
 
 from django.views.generic import DetailView, ListView, UpdateView
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, HttpResponseBadRequest
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.cache import never_cache
 from django.db.models import Q
@@ -123,7 +123,7 @@ class MediaListView(PaginationMixin, ListView):
             | Q(artist__name__icontains=q))\
             .distinct()
         else:
-            qs = Media.objects.all()
+            qs = Media.objects.exclude(name=u'')
             
             
         order_by = self.request.GET.get('order_by', None)
@@ -394,6 +394,7 @@ def media_download(request, slug, format, version):
     
     return sendfile(request, cache_file, attachment=True, attachment_filename=filename)
 
+
 @never_cache
 def stream_html5(request, uuid):
     
@@ -418,8 +419,13 @@ def stream_html5(request, uuid):
         create_event(request.user, media, None, 'stream')
     except:
         pass
-    
-    return sendfile(request, media.get_cache_file('mp3', 'base'))
+
+    media_file = media.get_cache_file('mp3', 'base')
+
+    if not media_file:
+        return HttpResponseBadRequest('unable to get cache file')
+
+    return sendfile(request, media_file)
 
 
 

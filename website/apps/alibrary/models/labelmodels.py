@@ -52,7 +52,7 @@ import arating
 from alibrary.models import MigrationMixin
 from alibrary.util.signals import library_post_save
 from alibrary.util.slug import unique_slugify
-from alibrary.util.storage import get_path_for_object, OverwriteStorage
+from alibrary.util.storage import get_dir_for_object, OverwriteStorage
 
 
 from lib.fields import extra
@@ -65,7 +65,7 @@ LOOKUP_PROVIDERS = (
 
 def upload_image_to(instance, filename):
     filename, extension = os.path.splitext(filename)
-    return os.path.join(get_path_for_object(instance), 'logo%s' % extension.lower())
+    return os.path.join(get_dir_for_object(instance), 'logo%s' % extension.lower())
 
 
 class LabelManager(models.Manager):

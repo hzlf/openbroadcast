@@ -2,7 +2,7 @@
 
 #sshfs root@172.20.10.84:/var/www/obp/data ~/sshfs/obp_legacy/
 
-sshfs root@vz.obp:/nas/prod/ml ~/sshfs/obp_legacy/
+sshfs -o reconnect -o ro root@vz.obp:/nas/prod/ml ~/sshfs/obp_legacy/
 
 
 # on server (vz host)
