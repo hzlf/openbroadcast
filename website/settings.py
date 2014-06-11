@@ -522,6 +522,7 @@ FIXTURE_DIRS = [
 ]
 DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
+    'SHOW_TOOLBAR_CALLBACK': 'lib.show_debug_toolbar.show',
 }
 TEMP_DIR = '%s/%s' % (PROJECT_DIR, 'temp')
 

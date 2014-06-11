@@ -342,10 +342,13 @@ class Media(CachingMixin, MigrationMixin):
     @property
     def classname(self):
         return self.__class__.__name__
-    
+
+    # TODO: remove - duplicate
+    """
     def get_duration(self):
         return self.base_duration
-    
+    """
+
     def get_versions(self):
         try:
             return reversion.get_for_object(self)

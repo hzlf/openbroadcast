@@ -60,7 +60,7 @@ def upload_image_to(instance, filename):
 
 class NameVariation(models.Model):
 
-    name = models.CharField(max_length=200, db_index=True)
+    name = models.CharField(max_length=250, db_index=True)
     artist = models.ForeignKey('Artist', related_name="namevariations", on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
@@ -82,7 +82,7 @@ class ArtistManager(models.Manager):
 class Artist(MigrationMixin):
     
     uuid = UUIDField(primary_key=False)
-    name = models.CharField(max_length=200, db_index=True)
+    name = models.CharField(max_length=250, db_index=True)
     slug = AutoSlugField(populate_from='name', editable=True, blank=True, overwrite=True)
 
 
@@ -95,7 +95,7 @@ class Artist(MigrationMixin):
     main_image = models.ImageField(verbose_name=_('Image'), upload_to=upload_image_to, storage=OverwriteStorage(), null=True, blank=True)
     #main_image = FilerImageField(null=True, blank=True, related_name="artist_main_image", rel='')
 
-    real_name = models.CharField(max_length=200, blank=True, null=True)
+    real_name = models.CharField(max_length=250, blank=True, null=True)
     disambiguation = models.CharField(max_length=256, blank=True, null=True)
     
     #country = CountryField(blank=True, null=True)
