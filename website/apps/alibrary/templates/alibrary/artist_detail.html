@@ -57,12 +57,14 @@
 
     <div class="item_menu" id="item_menu">
         <ul class="nav nav-tabs">
-            <li class="{% if releases.object_list.count > 0 %}active{% endif %}">
+            <li class="active">
                 <a href="#tracklist" data-toggle="tab">{% trans "Overview" %}</a>
             </li>
-            <li class="{% if releases.object_list.count < 1 and m_contrib > 1 %}active{% endif %}">
+            {% if m_contrib.count > 0 %}
+            <li>
                 <a href="#contribution" data-toggle="tab">{% trans "Credited" %} ({{ m_contrib.count }})</a>
             </li>
+            {% endif %}
             <li>
                 <a href="#biography" data-toggle="tab">{% trans "Biography" %}</a>
             </li>
