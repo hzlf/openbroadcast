@@ -65,12 +65,16 @@
                 <a href="#contribution" data-toggle="tab">{% trans "Credited" %} ({{ m_contrib.count }})</a>
             </li>
             {% endif %}
+            {% if object.biography %}
             <li>
                 <a href="#biography" data-toggle="tab">{% trans "Biography" %}</a>
             </li>
+            {% endif %}
+            {% if object.agencies.count > 0 %}
             <li>
                 <a href="#management" data-toggle="tab">{% trans "Management" %}</a>
             </li>
+            {% endif %}
             <li>
                 <a href="#history" data-toggle="tab">{% trans "Edit History" %}</a>
             </li>
@@ -232,22 +236,6 @@
 
         </section>
 
-        {% if object.relations.generic.count > 0 %}
-            <section class="relations">
-                <h2>{% trans "More relations" %}</h2>
-                <ul class="unstyled">
-                    {% for relation in object.relations.generic %}
-                        <li>
-                            <a href="{{ relation.url }}" class="skip-external"
-                               title="Show on {{ relation.url }}">{{ relation.url }}</a>
-                        </li>
-
-                    {% endfor %}
-                </ul>
-
-            </section>
-        {% endif %}
-
     </div>
 
     <div class="tab-pane" id="management">
@@ -364,7 +352,7 @@
     </div>
 
     <div class="item relations">
-        {% relations_inline object %}
+        {% all_relations_inline object %}
     </div>
 
 {% endblock %}

@@ -16,10 +16,12 @@
     {% for relation in object.relations.generic %}
         <li>
             <a href="{{ relation.url }}" class="skip-external"
-               title="Show on {{ relation.url }}">{{ relation.url|truncate_chars_inner:40 }}</a>
+               title="Show on {{ relation.url }}">{{ relation.url|truncate_chars_inner:27 }}</a>
+
             {% if relation.service == "official" %}
-                <small><i class="icon icon-star"></i> {% trans "official" %}</small>
+                <small><!--<i class="icon icon-star"></i>-->{% trans "official" %}</small>
             {% endif %}
+
         </li>
 
     {% endfor %}
