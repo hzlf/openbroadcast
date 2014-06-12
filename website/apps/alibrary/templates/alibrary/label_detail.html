@@ -1,6 +1,6 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags wiki_tags sekizai_tags %}
+{% load truncate i18n thumbnail arating_tags wiki_tags sekizai_tags alibrary_tags url_tags spurl %}
 
 {% block heading %}
     <!-- view specific scripts -->
@@ -45,19 +45,9 @@
 
 	<div class="item_menu" id="item_menu">
 		<ul class="nav nav-tabs">
-			<li class="{%  if releases.object_list.count > 0 %}active{% endif %}">
-				<a href="#tracklist" data-toggle="tab">{% trans "Overview" %}</a>
+			<li class="active">
+				<a href="#overview" data-toggle="tab">{% trans "Overview" %}</a>
 			</li>
-			<!--
-			<li class="{%  if releases.object_list.count < 1 and m_contrib > 1 %}active{% endif %}">
-				<a href="#contribution" data-toggle="tab">{% trans "Contributions" %} ({{ m_contrib.count }})</a>
-			</li>
-			-->
-			<!--
-			<li>
-				<a href="#biography" data-toggle="tab">{% trans "Biography" %}</a>
-			</li>
-			-->
 			<li>
 				<a href="#history" data-toggle="tab">{% trans "Edit History" %}</a>
 			</li>
@@ -70,7 +60,7 @@
 
 		<div class="tab-content">
 
-			<div class="tab-pane {%  if releases.object_list.count > 0 %}active{% endif %}" id="tracklist" class="topflop">
+			<div class="tab-pane active" id="overview" class="topflop">
 				
 				<section class="description">
 					<h2>{% trans "Label description" %}</h2>
@@ -80,106 +70,48 @@
 			
 				</section>
 					
-				
-				<section class="flop">
-					
-					<h2>{% trans "Releases" %}</h2>
-					
-					<div class="pagination">
-					    {{ releases.render }}
-					</div>
-					
-					<div class="listview container releases inner l">
-	
-	
-						<div class="list_header"></div>
-	
-						<div class="list_body">
-							
-							
-							{% for item in releases.object_list %}
-							{% include "alibrary/release/list_item_l.html" %}
-							{% endfor %}
-						</div>
-					</div>
-				
-				</section>
-				
+
+
+                <section class="top">
+                    {% url alibrary-release-list as release_list %}
+
+                    <h2>
+                        {% trans "Releases" %}
+                                    <span class="pull-right">
+                                        <a href="{% spurl path=release_list query="label={{ object.slug }}" %}">
+                                            <i class="icon-chevron-sign-right"></i>
+                                            {% trans "Show all" %} {{ object.get_releases.count }} {% trans "releases on" %} {{ object.name }}
+                                        </a>
+                                    </span>
+                    </h2>
+
+                    <div class="listview container releases inner l">
+
+                        <div class="list_header"></div>
+
+                        <div class="list_body">
+
+                            {% for item in releases %}
+                                {% include "alibrary/release/list_item_l.html" %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </section>
+
 			</div>
 
 			<div class="tab-pane" id="history">
 
 				<section class="history">
-					
+
 					<h2>{% trans "Edit history" %}</h2>
-					
+
 					{% include "alibrary/element/_object_history.html" %}
 				</section>
 
 			</div>
 
-			<div class="tab-pane {%  if releases.object_list.count < 1 and m_contrib > 1 %}active{% endif %}" id="contribution">
-				
-				
-				
-
-				
-				<section class="contribution">
-					
-					<h2>{% trans "Appears on" %}</h2>
-					
-					<div class="listview container medias s">
-	
-	
-						<div class="list_header"></div>
-	
-						<div class="list_body">
-							
-							{% with highlight=object extended=1 %}
-							{% for item in m_contrib %}
-							{% include "alibrary/media/_list_item_foreign_xs.html" %}
-							{% endfor %}
-							{% endwith %}
-						</div>
-					</div>
-				
-				</section>
-				
-				
-			</div>
-
-			<div class="tab-pane" id="biography">
-				<section class="description">
-					<h2>{% trans "Artist description" %}</h2>
-					<div class="description markdown padded-h">
-						{% wikify object.description %}
-					</div>
-			
-				</section>
-				
-				{% if object.relations.generic.count > 0 %}
-				<section class="relations">
-					<h2>{% trans "More relations" %}</h2>
-						<ul class="unstyled">
-						{% for relation in object.relations.generic %}
-						<li><a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.url }}">{{ relation.url }}</a></li>
-						
-						{% endfor %}
-						</ul>
-					
-				</section>
-				{% endif %}
-				
-				
-			</div>
-			
-			
-			<div class="tab-pane" id="broadcasts">
-				...
-			</div>
-			
-			
-			
 			
 		</div>
 
@@ -204,6 +136,33 @@
 
 {% endblock %}
 
-{% block sidebar %}
+{% block sidebar__ %}
 {% include "alibrary/label/sidebar/_detail.html" %}
+{% endblock %}
+
+
+{% block sidebar %}
+
+    {% include "alibrary/release/sidebar/_detail.html" %}
+
+    <div class="listing relations" style="padding-top: 8px;">
+
+        <div class="page-header">
+            <h2>{% trans "Show/share on" %}
+                <small>{% trans "external links" %}</small>
+            </h2>
+
+            <div class="item social">
+                <div class="fb-like" data-href="{% fullurl %}" data-width="200" data-layout="button_count"
+                     data-show-faces="false" data-send="true"></div>
+            </div>
+
+        </div>
+
+        <div class="item relations">
+            {% all_relations_inline object %}
+        </div>
+
+    </div>
+
 {% endblock %}

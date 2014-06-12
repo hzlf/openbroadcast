@@ -140,8 +140,11 @@ class Release(MigrationMixin):
     
 
     pressings = models.PositiveIntegerField(max_length=12, default=0)
-    
-    totaltracks = models.IntegerField(null=True, blank=True)
+
+    TOTALTRACKS_CHOICES = ((x, x) for x in range(1, 101))
+    totaltracks = models.IntegerField(verbose_name=_('Total Tracks'), blank=True, null=True, choices=TOTALTRACKS_CHOICES)
+
+
     asin = models.CharField(max_length=150, blank=True)
     
     RELEASESTATUS_CHOICES = (

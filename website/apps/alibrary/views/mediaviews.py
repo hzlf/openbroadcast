@@ -255,7 +255,7 @@ class MediaDetailView(DetailView):
         ps = []
         try:
             pis = PlaylistItem.objects.filter(object_id=obj.id, content_type=ContentType.objects.get_for_model(obj))
-            ps = Playlist.objects.filter(items__in=pis)
+            ps = Playlist.objects.exclude(type='basket').filter(items__in=pis)
         except:
             pass
         

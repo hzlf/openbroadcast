@@ -5043,7 +5043,7 @@ h1, h2, h3, h4, h5, h6 {
 /* line 32, ../sass/site/_type.sass */
 h1 small, h2 small, h3 small, h4 small, h5 small, h6 small {
   font-weight: normal;
-  color: #cccccc;
+  color: #aaaaaa;
 }
 
 /* line 36, ../sass/site/_type.sass */
@@ -12155,6 +12155,69 @@ ul.ui-autocomplete > li img {
   border: none;
   background: #5a5a5a;
   padding: 4px 2px 4px 6px;
+}
+
+/* line 75, ../sass/apps/_alibrary.sass */
+div.daypart-grid > ul {
+  width: 40px;
+  margin-right: 4px;
+  float: left;
+}
+/* line 80, ../sass/apps/_alibrary.sass */
+div.daypart-grid > ul > li.heading {
+  background: transparent;
+  color: #999999;
+  font-size: 9px;
+}
+/* line 84, ../sass/apps/_alibrary.sass */
+div.daypart-grid > ul > li.daypart {
+  background: gainsboro;
+  border: 1px solid white;
+}
+/* line 89, ../sass/apps/_alibrary.sass */
+div.daypart-grid > ul > li.daypart > a {
+  display: block;
+  height: 4px;
+}
+/* line 93, ../sass/apps/_alibrary.sass */
+div.daypart-grid > ul > li.daypart:nth-child(2) {
+  background-color: #fbd1ff;
+  border-color: #fbd1ff;
+}
+/* line 96, ../sass/apps/_alibrary.sass */
+div.daypart-grid > ul > li.daypart:nth-child(3) {
+  background-color: #ffd8bf;
+  border-color: #ffd8bf;
+}
+/* line 99, ../sass/apps/_alibrary.sass */
+div.daypart-grid > ul > li.daypart:nth-child(4) {
+  background-color: #fff9bf;
+  border-color: #fff9bf;
+}
+/* line 102, ../sass/apps/_alibrary.sass */
+div.daypart-grid > ul > li.daypart:nth-child(5) {
+  background-color: #ccffbf;
+  border-color: #ccffbf;
+}
+/* line 105, ../sass/apps/_alibrary.sass */
+div.daypart-grid > ul > li.daypart:nth-child(6) {
+  background-color: #bfffeb;
+  border-color: #bfffeb;
+}
+/* line 108, ../sass/apps/_alibrary.sass */
+div.daypart-grid > ul > li.daypart:nth-child(7) {
+  background-color: #bfe9ff;
+  border-color: #bfe9ff;
+}
+/* line 111, ../sass/apps/_alibrary.sass */
+div.daypart-grid > ul > li.daypart:nth-child(8) {
+  background-color: #bfc7ff;
+  border-color: #bfc7ff;
+}
+/* line 115, ../sass/apps/_alibrary.sass */
+div.daypart-grid > ul > li.daypart.selected {
+  background-color: #00bb00 !important;
+  border: 1px solid #00bb00;
 }
 
 /* line 4, ../sass/apps/_collector.sass */

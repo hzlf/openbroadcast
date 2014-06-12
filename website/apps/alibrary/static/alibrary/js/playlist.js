@@ -373,69 +373,6 @@ PlaylistUi = function () {
         }
     };
 
-
-    /* refactored to ninjucks */
-    this.__old__update_playlist_display = function (data) {
-
-        // console.log(data)
-
-        var status_map = new Array;
-        status_map[0] = 'init';
-        status_map[1] = 'done';
-        status_map[2] = 'ready';
-        status_map[3] = 'progress';
-        status_map[4] = 'downloaded';
-        status_map[99] = 'error';
-
-        for (var i in data.objects) {
-
-            var item = data.objects[i];
-            var target_element = $('#playlist_holder_' + item.id);
-
-            item.status_key = status_map[item.status];
-
-            // console.log(item);
-
-            // filter out current playlist
-            if (item.is_current) {
-
-                if (item.id in self.current_items) {
-                    self.current_items[item.id] = item;
-                    console.log('item already present');
-
-                    //if(item.updated != target_element.attr('data-updated')) {
-                    console.log('update detected');
-
-                    var html = ich.tpl_playlists_inline({object: item});
-
-                    html.attr('data-updated', item.updated);
-                    target_element.replaceWith(html);
-                    //}
-
-                } else {
-
-                    var html = ich.tpl_playlists_inline({object: item});
-                    html.attr('data-last_status', item.status);
-                    self.inline_dom_element.append(html);
-
-                    self.current_items[item.id] = item;
-
-                    try {
-                        console.log('trying to subscribe to pushy with: ' + item.resource_uri);
-                        pushy.subscribe(item.resource_uri, self.update_playlists);
-                    } catch (e) {
-                        console.log('error subscribe to pushy:', e);
-                    }
-
-
-                }
-            } else {
-                // remove item if not the current one
-                target_element.remove();
-            }
-        }
-    };
-
     this.update_playlist_selector = function (data) {
 
         // console.log(this.current_data, data)
@@ -527,12 +464,30 @@ CollectorApp = (function () {
                     // callbacks etc
                     async: false
                 });
+            }
+
+            // special situation - action invoked from sidebar
+            if($(this).hasClass('selection-required')){
+                // alert('sidebar')
+                _media = [];
+                $('.list_body .item.selection').each(function(i, el){
+                    el = $(el);
+                    var item_id = el.data('id');
+                    var item_uuid = el.data('uuid');
+                    _media.push({id: item_id, uuid: item_uuid});
+
+                });
+
+                self.media_to_collect = _media;
 
             }
 
             console.log(self.media_to_collect);
 
-            self.dialogue(e);
+
+            if(self.media_to_collect && self.media_to_collect.length){
+                self.dialogue(e);
+            }
 
 
         });

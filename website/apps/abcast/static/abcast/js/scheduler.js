@@ -688,7 +688,7 @@ var EmissionApp = function () {
                 }
             }
         });
-    }
+    };
 
     this.bindings = function () {
 

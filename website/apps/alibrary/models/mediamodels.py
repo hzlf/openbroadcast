@@ -62,6 +62,8 @@ from shop.models import Product
 # audio processing / waveform
 from lib.audioprocessing.processing import create_wave_images, AudioProcessingException
 
+from lib.fields.languages import LanguageField
+
 # hash
 from lib.util.sha1 import sha1_by_file
 
@@ -82,7 +84,7 @@ from alibrary.util.slug import unique_slugify
 from alibrary.util.storage import get_dir_for_object, OverwriteStorage
 
 from alibrary.util.echonest import EchonestWorker
-
+from caching.base import CachingMixin, CachingManager
 import arating
 
 USE_CELERYD = True
@@ -94,7 +96,39 @@ LOOKUP_PROVIDERS = (
 )
 
 
-from caching.base import CachingMixin, CachingManager
+VERSION_CHOICES = (
+    ('original', _('Original')),
+    ('remix', _('Remix')),
+    ('cover', _('Cover')),
+    ('live', _('Live Version')),
+    ('studio', _('Studio Version')),
+    ('radio', _('Radio Version')),
+    ('demo', _('Demo Version')),
+    ('other', _('Other')),
+)
+
+MEDIATYPE_CHOICES = (
+    (_('Single content recording'), (
+            ('song', _('Song')),
+            ('acappella', _('A cappella')),
+            ('soundeffects', _('Sound effects')),
+            ('soundtrack', _('Soundtrack')),
+            ('spokenword', _('Spokenword')),
+            ('interview', _('Interview')),
+            ('jingle', _('Jingle')),
+        )
+    ),
+    (_('Multiple content recording'), (
+            ('djmix', _('DJ-Mix')),
+            ('concert', _('Concert')),
+            ('liveact', _('Live Act (PA)')),
+        )
+    ),
+    ('other', _('Other')),
+    (None, _('Unknown')),
+)
+
+
 
 
 # TODO: depreciated
@@ -176,67 +210,31 @@ class Media(CachingMixin, MigrationMixin):
         (99, _('Error')),
     )
     conversion_status = models.PositiveIntegerField(max_length=2, default=0, choices=CONVERSION_STATUS_CHOICES)
-    
-    
-    
+
     lock = models.PositiveIntegerField(max_length=1, default=0, editable=False)
-    
-    tracknumber = models.PositiveIntegerField(max_length=12, default=0)
+
+    TRACKNUMBER_CHOICES = ((x, x) for x in range(1, 101))
+    tracknumber = models.PositiveIntegerField(verbose_name=_('Track Number'), max_length=12, blank=True, null=True, choices=TRACKNUMBER_CHOICES)
+
     opus_number = models.CharField(max_length=200, blank=True, null=True)
 
-    MEDIANUMBER_CHOICES = (
-        (0, '0'),
-        (1, '1'),
-        (2, '2'),
-        (3, '3'),
-        (4, '4'),
-        (5, '5'),
-        (6, '6'),
-        (7, '7'),
-        (8, '8'),
-    )
+    MEDIANUMBER_CHOICES = ((x, x) for x in range(1, 51))
     # a.k.a. "Disc number"
     medianumber = models.PositiveIntegerField(verbose_name=_('a.k.a. "Disc number'), blank=True, null=True, max_length=12, choices=MEDIANUMBER_CHOICES)
     
 
 
-    MEDIATYPE_CHOICES = (
-        (_('Single content recording'), (
-                ('song', _('Song')),
-                ('acappella', _('A cappella')),
-                ('soundeffects', _('Sound effects')),
-                ('soundtrack', _('Soundtrack')),
-                ('spokenword', _('Spokenword')),
-                ('interview', _('Interview')),
-            )
-        ),
-        (_('Multiple content recording'), (
-                ('djmix', _('DJ-Mix')),
-                ('concert', _('Concert')),
-                ('liveact', _('Live Act (PA)')),
-            )
-        ),
-        ('other', _('Other')),
-        (None, _('Unknown')),
-    )
+
 
     mediatype = models.CharField(verbose_name=_('Type'), max_length=12, default='song', choices=MEDIATYPE_CHOICES)
 
-    VERSION_CHOICES = (
-        ('original', _('Original')),
-        ('remix', _('Remix')),
-        ('cover', _('Cover')),
-        ('live', _('Live Version')),
-        ('studio', _('Studio Version')),
-        ('radio', _('Radio Version')),
-        ('demo', _('Demo Version')),
-        ('other', _('Other')),
-    )
+
     version = models.CharField(max_length=12, blank=True, null=True, default='track', choices=VERSION_CHOICES)
 
 
     description = models.TextField(verbose_name="Extra Description / Tracklist", blank=True, null=True)
     lyrics = models.TextField(blank=True, null=True)
+    lyrics_language = LanguageField(blank=True, null=True)
 
     duration = models.PositiveIntegerField(verbose_name="Duration (in ms)", max_length=12, blank=True, null=True, editable=False)
     

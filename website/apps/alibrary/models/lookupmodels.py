@@ -727,6 +727,8 @@ class APILookup(models.Model):
 
                 data[k] = mapped
 
+
+
             # tagging
             if k == 'tags':
                 try:
@@ -740,11 +742,15 @@ class APILookup(models.Model):
 
         # try to remap country
         if 'country' in res:
+
+            pass
+            """
             try:
                 c = Country.objects.get(iso2_code=res['country'])
                 res['country'] = c.pk
             except:
                 pass
+            """
 
         print 'DTAGS:'
         print d_tags

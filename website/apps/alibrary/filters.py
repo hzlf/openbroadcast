@@ -267,7 +267,7 @@ class MediaFilter(django_filters.FilterSet):
 
     class Meta:
         model = Media
-        fields = ['license__name', 'mediatype', 'base_bitrate', 'base_format', 'base_samplerate', 'conversion_status', 'processed', 'tempo', 'key']
+        fields = ['license__name', 'mediatype', 'base_bitrate', 'base_format', 'base_samplerate', 'conversion_status', 'processed', 'tempo', 'key', 'lyrics_language', 'version']
 
     @property
     def filterlist(self):
@@ -329,6 +329,30 @@ class MediaFilter(django_filters.FilterSet):
                     for d in ds:
                         if d[0]:
                             nd.append([d[0], d[1], self.KEY_CHOICES[d[0]][1]])
+
+                    nd.sort()
+                    filter_.entries = nd
+
+                elif name == 'lyrics_language':
+                    from lib.fields.languages import LANGUAGES
+                    nd = []
+                    for d in ds:
+                        for x in LANGUAGES:
+                            if x[0] == d[0]:
+                                nd.append([d[0], d[1], x[1]])
+
+
+                    nd.sort()
+                    filter_.entries = nd
+
+                elif name == 'version':
+                    from alibrary.models.mediamodels import VERSION_CHOICES
+                    nd = []
+                    for d in ds:
+                        for x in VERSION_CHOICES:
+                            if x[0] == d[0]:
+                                nd.append([d[0], d[1], x[1]])
+
 
                     nd.sort()
                     filter_.entries = nd

@@ -245,13 +245,16 @@ class LabelDetailView(DetailView):
         self.extra_context['media'] = m_list
         """
         
-        """"""
+        """
         page_num = self.request.GET.get('r_page', 1)
         release_list = Release.objects.filter(label=obj).distinct()
         p = Paginator(release_list, m_ipp, request=self.request, query_param_prefix='r_')
         r_list = p.page(page_num)
+        """
 
-        self.extra_context['releases'] = r_list
+
+        releases = Release.objects.filter(label=obj).order_by('-releasedate').distinct()[:8]
+        self.extra_context['releases'] = releases
         
         
         

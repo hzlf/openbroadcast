@@ -20,7 +20,7 @@ from ac_tagging.widgets import TagAutocompleteTagIt
 
 from lib.widgets.widgets import ReadOnlyIconField
 
-
+MAX_TRACKNUMBER = 100 + 1
 
 ACTION_LAYOUT =  action_layout = FormActions(
                 HTML('<button type="submit" name="save" value="save" class="btn btn-primary pull-right ajax_submit" id="submit-id-save-i-classicon-arrow-upi"><i class="icon-save icon-white"></i> Save</button>'),            
@@ -59,7 +59,7 @@ class MediaForm(ModelForm):
 
     class Meta:
         model = Media
-        fields = ('name', 'description', 'lyrics', 'artist', 'tracknumber', 'medianumber', 'opus_number', 'mediatype', 'version', 'license', 'release', 'd_tags', 'isrc', )
+        fields = ('name', 'description', 'lyrics', 'lyrics_language', 'artist', 'tracknumber', 'medianumber', 'opus_number', 'mediatype', 'version', 'license', 'release', 'd_tags', 'isrc', )
 
 
     def __init__(self, *args, **kwargs):
@@ -132,6 +132,7 @@ class MediaForm(ModelForm):
 
         lyrics_layout = Fieldset(
                 'Lyrics',
+                LookupField('lyrics_language', css_class='input-xxlarge'),
                 LookupField('lyrics', css_class='input-xxlarge'),
         )
         
@@ -172,7 +173,8 @@ class MediaForm(ModelForm):
     """
     name = forms.CharField(required=True, label='Title')
     artist = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False)
-    description = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")   
+    description = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")
+
 
     
     #license = selectable.AutoCompleteSelectField(LicenseLookup, widget=selectable.AutoComboboxSelectWidget(lookup_class=LicenseLookup), allow_new=False, required=False, label=_('License'))

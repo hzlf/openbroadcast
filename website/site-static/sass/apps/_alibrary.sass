@@ -68,3 +68,51 @@
       border: none
       background: #5a5a5a
       padding: 4px 2px 4px 6px
+
+
+// special elements
+div.daypart-grid
+  > ul
+    width: 40px
+    margin-right: 4px
+    float: left
+    > li
+      &.heading
+        background: transparent
+        color: #999
+        font-size: 9px
+      &.daypart
+
+        background: #dcdcdc
+        border: 1px solid white
+
+        > a
+          display: block
+          height: 4px
+
+        &:nth-child(2)
+          background-color: #FBD1FF
+          border-color: #FBD1FF
+        &:nth-child(3)
+          background-color: #FFD8BF
+          border-color: #FFD8BF
+        &:nth-child(4)
+          background-color: #FFF9BF
+          border-color: #FFF9BF
+        &:nth-child(5)
+          background-color: #CCFFBF
+          border-color: #CCFFBF
+        &:nth-child(6)
+          background-color: #BFFFEB
+          border-color: #BFFFEB
+        &:nth-child(7)
+          background-color: #BFE9FF
+          border-color: #BFE9FF
+        &:nth-child(8)
+          background-color: #BFC7FF
+          border-color: #BFC7FF
+
+        &.selected
+          background-color: #0B0 !important
+          border: 1px solid #0B0
+

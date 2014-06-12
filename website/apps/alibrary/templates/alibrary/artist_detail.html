@@ -61,7 +61,7 @@
                 <a href="#tracklist" data-toggle="tab">{% trans "Overview" %}</a>
             </li>
             <li class="{% if releases.object_list.count < 1 and m_contrib > 1 %}active{% endif %}">
-                <a href="#contribution" data-toggle="tab">{% trans "Contributions" %} ({{ m_contrib.count }})</a>
+                <a href="#contribution" data-toggle="tab">{% trans "Credited" %} ({{ m_contrib.count }})</a>
             </li>
             <li>
                 <a href="#biography" data-toggle="tab">{% trans "Biography" %}</a>
@@ -155,7 +155,7 @@
 				</div>
 				-->
 
-        <section class="flop">
+        <section class="top">
             {% url alibrary-release-list as release_list %}
 
             <h2>

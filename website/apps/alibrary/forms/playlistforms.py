@@ -14,6 +14,7 @@ import selectable.forms as selectable
 from alibrary.lookups import *
 from ac_tagging.widgets import TagAutocompleteTagIt
 from lib.widgets.widgets import ReadOnlyIconField
+from lib.fields.extra import AdvancedFileInput
 
 
 from alibrary import settings as alibrary_settings
@@ -203,7 +204,8 @@ class PlaylistForm(ModelForm):
         
 
     
-    main_image = forms.Field(widget=FileInput(), required=False)
+    #main_image = forms.Field(widget=FileInput(), required=False)
+    main_image = forms.Field(widget=AdvancedFileInput(), required=False)
     d_tags = TagField(widget=TagAutocompleteTagIt(max_tags=9), required=False, label=_('Tags'))
     description = forms.CharField(widget=PagedownWidget(), required=False, help_text="Markdown enabled text")
 

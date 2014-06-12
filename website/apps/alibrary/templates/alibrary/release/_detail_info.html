@@ -1,4 +1,4 @@
-{% load truncate i18n thumbnail arating_tags alibrary_tags spacify_tags %}
+{% load truncate i18n thumbnail arating_tags alibrary_tags spacify_tags atracker_tags %}
 
 <div class="span6 padded-h container_content">
 
@@ -53,7 +53,7 @@
     {% endif %}
 
     {% if object.catalognumber %}
-        <dt>{% trans "Catalog Number" %}:</dt>
+        <dt>{% trans "Catalog No." %}:</dt>
         <dd>{{ object.catalognumber }}</dd>
     {% endif %}
 
@@ -65,10 +65,10 @@
 		-->
 
     {% if object.is_promotional %}
-        <dt>{% trans "Release Date" %}:</dt>
+        <dt>{% trans "Release date" %}:</dt>
         <dd>{{ object.releasedate|date:"SHORT_DATE_FORMAT" }} ({% trans "Promo release" %})</dd>
     {% else %}{% if object.releasedate_approx %}
-        <dt>{% trans "Release Date" %}:</dt>
+        <dt>{% trans "Release date" %}:</dt>
         <dd>{{ object.releasedate_approx }}</dd>
     {% endif %}{% endif %}
 
@@ -102,37 +102,6 @@
 
 </dl>
 
-<!--
-	<dl class="dl-horizontal">
-
-		<dt>
-			{% trans "Show on" %}:
-		</dt>
-		<dd class="horizontal relations">
-            {% relations_inline object %}
-            <div class="clear"></div>
-		</dd>
-
-	</dl>
-    -->
-
-<!--
-	<dl class="dl-horizontal">
-
-		<dt>
-			{% trans "Show on (debug)" %}:
-		</dt>
-		<dd class="horizontal relations">
-			{% for relation in object.relations.specific %}
-			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}">
-    {{ relation.service }}</a>
-
-			{% endfor %}
-			<div class="clear"></div>
-		</dd>
-
-	</dl>
-    -->
 
 
 {% if object.relations.generic %}
@@ -160,22 +129,6 @@
     </dl>
 {% endif %}
 
-<!--
-	<dl class="dl-horizontal links external">
-
-		<dt>
-			{% trans "Show on" %}:
-		</dt>
-		<dd class="horizontal">
-			{% for relation in object.relations.specific %}
-			<a href="{{ relation.url }}" title="Show on {{ relation.get_service_display }}" class="external
-    {{ relation.service }}"><img src="/static/img/base/spacer.png" alt="{{ relation.get_service_display }}" style="width: 16px; height: 16px;"></a>
-			{% endfor %}
-			<div class="clear"></div>
-		</dd>
-
-	</dl>
-	-->
 
 <dl class="dl-horizontal sub">
 
@@ -194,13 +147,13 @@
             <span class="value"><a href="{{ object.creator.get_absolute_url }}">{{ object.creator }}</a></span> |
         {% endif %}
 
-        {% comment %}
+        {% comment %} {% endcomment %}
         {% if object.get_last_revision %}
             <span class="key">{% trans "Last edit by" %}:</span><span class="value"><a
                 href="{{ object.get_last_revision.user.get_profile.get_absolute_url }}">{{ object.get_last_revision.user }}</a></span>
             |
         {% endif %}
-        {% endcomment %}
+
 
         <!---->
 
@@ -211,15 +164,16 @@
 
             </span>
         {% endif %}
-        <!--
+        {% comment %}
 			{% if object.publisher %}
 			<span class="key">{% trans "Published by" %}:</span> <span class="value"><a href="#">{{ object.publisher }}</a></span>
 			{% endif %}
-			-->
+		{% endcomment %}
 
         &nbsp;
     </dd>
 
+    <!--
     <dt>
         {% trans "Stats" %}:
     </dt>
@@ -228,6 +182,7 @@
         <span class="value">173</span> <span class="key">{% trans "Plays" %}</span> |
         <span class="value">28</span> <span class="key">{% trans "Downloads" %}</span>
     </dd>
+    -->
 
     {% if object.tags %}
         <dt>

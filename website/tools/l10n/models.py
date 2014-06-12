@@ -70,7 +70,7 @@ class Country(models.Model):
         ordering = ('name',)
 
     def __unicode__(self):
-        return self.printable_name
+        return '%s (%s)' % (self.printable_name, self.iso2_code)
 
 
 class AdminArea(models.Model):

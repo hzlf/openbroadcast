@@ -37,14 +37,14 @@ class AdvancedFileInput(ClearableFileInput):
 
 
     #template_with_initial = '<ul class="unstyled"><li>%(initial)s</li><li>%(clear_template)s</li><li>%(input_text)s: %(input)s</li></ul>'
-    template_with_initial = '<ul class="unstyled"><li>%(initial)s</li><li>%(input_text)s: %(input)s</li></ul>'
+    template_with_initial = '<ul class="advancedfileinput unstyled"><li>%(initial)s</li><li>%(input_text)s: %(input)s</li></ul>'
     template_with_clear = '%(clear)s <label for="%(clear_checkbox_id)s">%(clear_checkbox_label)s</label>'
 
     def __init__(self, *args, **kwargs):
 
         self.url_length = kwargs.pop('url_length',30)
         self.preview = kwargs.pop('preview',True)
-        self.image_width = kwargs.pop('image_width',140)
+        self.image_width = kwargs.pop('image_width',125)
         super(AdvancedFileInput, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None,):
@@ -63,7 +63,9 @@ class AdvancedFileInput(ClearableFileInput):
 
             template = self.template_with_initial
             if self.preview:
-                substitutions['initial'] = (u'<a href="{0}" target="_blank"><img src="{0}" width="{1}"></a><br>'.format
+                #substitutions['initial'] = (u'<a href="{0}" target="_blank"><img src="{0}" width="{1}"></a><br>'.format
+                #    (escape(value.url), self.image_width))
+                substitutions['initial'] = (u'<div data-image_url="{0}"><img src="{0}" width="{1}"></div>'.format
                     (escape(value.url), self.image_width))
             else:
                 substitutions['initial'] = (u'<a href="{0}">{1}</a>'.format

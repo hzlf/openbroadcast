@@ -46,6 +46,9 @@ ACTION_LAYOUT_EXTENDED =  action_layout = FormActions(
         )
 
 
+MAX_TRACKNUMBER = 100 + 1
+
+
 class ReleaseActionForm(Form):
 
     def __init__(self, *args, **kwargs):
@@ -242,8 +245,8 @@ class ReleaseForm(ModelForm):
 
 
 
-    main_image = forms.Field(widget=FileInput(), required=False)
-    #main_image = forms.Field(widget=AdvancedFileInput(), required=False)
+    #main_image = forms.Field(widget=FileInput(), required=False)
+    main_image = forms.Field(widget=AdvancedFileInput(), required=False)
     remote_image = forms.URLField(required=False)
     #releasedate = forms.DateField(required=False,widget=forms.DateInput(format = '%Y-%m-%d'), input_formats=('%Y-%m-%d',))
     releasedate_approx = ApproximateDateFormField(label="Releasedate", required=False)
@@ -293,23 +296,14 @@ class BaseReleaseMediaFormSet(BaseInlineFormSet):
         super(BaseReleaseMediaFormSet, self).__init__(*args, **kwargs)
 
         self.helper = FormHelper()
-        self.helper.form_id = "id_releasemediainline_form_%s" % 'asd'
-        self.helper.form_class = 'form-horizontal'
-        self.helper.form_method = 'post'
-        self.helper.form_action = ''
         self.helper.form_tag = False
-
-
-
 
         base_layout = Row(
                 Column(
                        Field('tracknumber', css_class='input-small'),
                        Field('mediatype', css_class='input-small'),
                        Field('license', css_class='input-small'),
-
-                       #Field('DELETE', css_class='input-mini'),
-
+                       Field('DELETE', css_class='input-mini'),
                        css_class='span3'
                        ),
                 Column(
@@ -321,6 +315,7 @@ class BaseReleaseMediaFormSet(BaseInlineFormSet):
                        ),
                 css_class='releasemedia-row row-fluid',
         )
+
 
         self.helper.add_layout(base_layout)
 
@@ -362,13 +357,13 @@ class BaseReleaseMediaForm(ModelForm):
 
 
     artist = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False)
-    tracknumber =  forms.CharField(label=_('No.'))
+    TRACKNUMBER_CHOICES =  [(None, '---')] + list(((str(x), x) for x in range(1, 101)))
+    tracknumber =  forms.ChoiceField(label=_('No.'), required=False, choices=TRACKNUMBER_CHOICES)
     #filename =  forms.CharField(widget=ReadOnlyField(), label=_('Original File'), required=False)
 
     def clean_license(self):
         instance = getattr(self, 'instance', None)
         if instance and instance.release.publish_date:
-            #return
             return instance.license
         else:
             return self.cleaned_data['license']

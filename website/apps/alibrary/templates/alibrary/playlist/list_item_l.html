@@ -72,9 +72,11 @@
                         <span class="small">{{ item.items.count }} {% trans "Tracks" %}</span>
                         {% endcomment %}
 
+                        {% if item.type == 'broadcast' %}
                         <span class="pull-right">
                             <span class="small">{{ item.get_status_display }}</span>
                         </span>
+                        {% endif %}
 
                     </li>
 

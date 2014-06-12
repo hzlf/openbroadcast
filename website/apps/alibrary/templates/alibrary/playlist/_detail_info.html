@@ -58,12 +58,6 @@
         </dd>
 
 
-		{% if object.dayparts.count > 0 %}
-		<dt>{% trans "Broadcast Dayparts" %}:</dt>
-		<dd>{% dayparts_inline object %}</dd>
-		{% endif %}
-
-
 		{% if object.seasons.count > 0 %}
 		<dt>{% trans "Broadcast Seasons" %}:</dt>
 		<dd>{% m2m_inline object.seasons.all %}</dd>
@@ -73,8 +67,20 @@
 		<dt>{% trans "Broadcast Weather" %}:</dt>
 		<dd>{% m2m_inline object.weather.all %}</dd>
 		{% endif %}
+
+
+		{% if object.dayparts.count > 0 %}
+		<dt>{% trans "Broadcast Dayparts" %}:</dt>
+		<dd>
+            {# dayparts_inline object #}
+            <div class="daypart-grid">
+            {% dayparts_grid object %}
+            </div>
+        <div class="clear"></div>
+        </dd>
+		{% endif %}
 		
-		<!--
+		{% comment %}
 		<dt>
 		{% trans "Edit History" %}:
 		</dt>
@@ -93,7 +99,8 @@
 		{% endif %}
 		&nbsp;
 		</dd>
-		-->
+
+
 
 		<dt>
 			{% trans "Stats" %}:
@@ -101,6 +108,8 @@
 		<dd>
 			<span class="value">{{ object.get_emissions.count }}</span> <span class="key">{% trans "Airplays" %}</span> | <span class="value">{{ object.get_emissions.count }}</span> <span class="key">{% trans "Plays" %}</span> | <span class="value">28</span> <span class="key">{% trans "Downloads" %}</span>
 		</dd>
+
+		{% endcomment %}
 
     {% if object.tags %}
         <dt>
@@ -121,7 +130,7 @@
 
 	<div class="image">
 		{% if object.main_image %}
-		<a href="{% thumbnail object.main_image 800x800 crop upscale %}" class="zoomable cboxElement"> <img src="{% thumbnail object.main_image 172x172 crop upscale subject_location=object.main_image.subject_location %}" alt="Cover" /> </a>
+		<a href="{% thumbnail object.main_image 1200x1200 upscale %}" class="zoomable cboxElement"> <img src="{% thumbnail object.main_image 172x172 crop upscale subject_location=object.main_image.subject_location %}" alt="Cover" /> </a>
 		{% else %}
 		<img src="/static/img/base/defaults/listview.playlist.xl.png" alt="{% trans "No cover available" %}" />
 		{% endif %}

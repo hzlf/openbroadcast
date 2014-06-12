@@ -109,9 +109,11 @@
             <li>
                 {{ item.get_type_display }}
             </li>
+            {% if item.type == 'broadcast' %}
             <li class="small">
                 {{ item.get_status_display }}
             </li>
+            {% endif %}
         </ul>
     </div>
 

@@ -33,6 +33,8 @@ form input
 
 
 
+
+
 // overrides
 .help-block
   display: inline
@@ -114,8 +116,11 @@ fieldset
   #div_id_remote_image
     display: none
 
-
-
+form ul.advancedfileinput
+  width: 300px
+  float: left
+  li:first-child
+    margin-bottom: 10px
 
 
 form.form-horizontal
@@ -569,10 +574,16 @@ form.form-playlist
       padding: 4px 0px 0
       
       li
+
+        width: 87px
+
         margin: 0 2px 2px 0
         padding: 1px 4px 0 4px
         height: 18px
         border: 1px solid #ccc
+
+        label
+          text-align: center
         
         &:hover
           border-color: #555

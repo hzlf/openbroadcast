@@ -435,6 +435,9 @@ EditUi = function () {
             'main_image',
             'namevariations',
             'releasedate_approx',
+            'release_country',
+            'country',
+            'type',
             'd_tags'
         ];
 
@@ -538,6 +541,10 @@ EditUi = function () {
             if (data.tracklist) {
                 self.offset_selector();
                 self.media_lookup(data);
+            }
+
+            if (data.media) {
+                self.media_lookup_mb(data);
             }
 
 
@@ -663,8 +670,10 @@ EditUi = function () {
         select.html(html);
     };
 
+
     /*
      * Mapping track-based data
+     * Discogs version
      */
     this.media_lookup = function (data) {
         var container = $('#release_media_form');
@@ -692,7 +701,7 @@ EditUi = function () {
             // check if we have a tracknumber
             var tracknumber = null
             try {
-                var tracknumber = parseInt($('input[name$="tracknumber"]', el).val());
+                var tracknumber = parseInt($('select[name$="tracknumber"] option:selected', el).val());
             } catch (e) {
                 debug.debug(e);
             }
@@ -765,6 +774,105 @@ EditUi = function () {
 
     };
 
+    /*
+     * Mapping track-based data
+     * Musicbrainz version
+     */
+    this.media_lookup_mb = function (data) {
+
+
+        var container = $('#release_media_form');
+        debug.debug('data:', data);
+
+
+        // reset the lookup results
+        $('.field-lookup .field-lookup-holder', container).hide();
+        $('.field-lookup span', container).html('');
+        // reset markers
+        $('.field-lookup .field-lookup-holder', container).removeClass('lookup-match');
+        $('.field-lookup .field-lookup-holder', container).removeClass('lookup-diff');
+
+
+        var tracklist = data.media[0].tracks;
+
+        console.log(tracklist);
+
+
+        // offset tracks - in case of 'non-track-meta'
+        var offset = self.lookup_offset;
+
+        $('.releasemedia-row', container).each(function (i, el) {
+
+            // check if we have a tracknumber
+            var tracknumber = null
+            try {
+                var tracknumber = parseInt($('select[name$="tracknumber"] option:selected', el).val());
+            } catch (e) {
+                debug.debug(e);
+            }
+
+            // ok got one, try to map. tracknumber is 1-based, index of tracklist 0-based
+            if (tracknumber && tracknumber != 0) {
+                var meta = false;
+
+                $.each(tracklist, function(i, el){
+
+                   if(el.number && el.number == tracknumber) {
+                       meta = el;
+                   }
+
+                });
+
+                debug.debug('tracknumber:', tracknumber, 'meta:', meta);
+
+                // apply meta lookup information
+                if (meta) {
+
+
+                    // media name
+                    var value = meta.title;
+                    var holder_name = $('.field-lookup-holder span[id$="name"]', el);
+                    holder_name.html(value);
+                    holder_name.parent().fadeIn(100);
+                    // mark
+                    var target_name = $('#' + self.field_prefix + holder_name.attr('id').replace(self.lookup_prefix, ''));
+                    if (value.toLowerCase() == target_name.val().toLowerCase()) {
+                        holder_name.parent().addClass('lookup-match');
+                    } else {
+                        holder_name.parent().addClass('lookup-diff');
+                    }
+
+
+                    // media artist name
+                    value = '';
+                    if (meta.artists && meta.artists.length > 0) {
+                        value = meta.artists[0].name;
+                    } else if (data.artists && data.artists.length > 0) {
+                        value = data.artists[0].name;
+                    }
+                    var holder_artist = $('.field-lookup-holder span[id$="artist_0"]', el);
+                    holder_artist.html(value);
+                    holder_artist.parent().fadeIn(100);
+                    // mark
+                    var target_artist = $('#' + self.field_prefix + holder_artist.attr('id').replace(self.lookup_prefix, ''));
+                    if (value == target_artist.val()) {
+                        holder_artist.parent().addClass('lookup-match');
+                    } else {
+                        holder_artist.parent().addClass('lookup-diff');
+                    }
+                }
+
+
+            }
+
+
+            console.log('tracknumber:', tracknumber);
+
+
+        });
+
+    };
+
 
     this.lookup_compare = function (key, data) {
 
@@ -803,6 +911,8 @@ EditUi = function () {
         var val = el.html();
         var target = $('#' + self.field_prefix + key);
 
+        var skip_apply = false;
+
 
         console.log('apply value:', val, ' key: ', key, 'prefix:', self.lookup_prefix);
 
@@ -819,8 +929,9 @@ EditUi = function () {
             var target_b = $('#' + self.field_prefix + 'remote_image');
 
             // reflect change in info-panel
-            $('.iteminfo .image a').attr('href','#');
-            $('.iteminfo .image img').attr('src',val_b);
+            //$('.iteminfo .image a').attr('href','#');
+            //$('.iteminfo .image img').attr('src',val_b);
+            $('#div_id_main_image .advancedfileinput img').attr('src',val_b);
 
             target_b.val(val_b);
         }
@@ -834,6 +945,27 @@ EditUi = function () {
             });
         }
         ;
+
+        // handle country mapping (kind of hakish...)
+        if (key == 'release_country') {
+            var target = $('#' + self.field_prefix + 'release_country option:contains((' + val + '))');
+            target.prop("selected", "selected");
+            skip_apply = true;
+        }
+        if (key == 'country') {
+            var target = $('#' + self.field_prefix + 'country option:contains((' + val + '))');
+            target.prop("selected", "selected");
+            skip_apply = true;
+        }
+
+        // artist type mapping
+        if (key == 'type' && $('form.form-artist').length) {
+
+            var target = $('#' + self.field_prefix + 'type option:contains(' + val + ')');
+            target.prop("selected", "selected");
+            skip_apply = true;
+        }
+
 
 
         // handle pagedown-preview
@@ -866,7 +998,10 @@ EditUi = function () {
         el.parent().removeClass('lookup-diff');
         el.parent().addClass('lookup-match');
 
-        target.val($.decodeHTML(val));
+        if(!skip_apply){
+            target.val($.decodeHTML(val));
+        }
+
 
         // hack for autocomlete fields - trigger search dialog
         if (key.endsWith('_0')) {

@@ -2,7 +2,15 @@
 <div class="span6 padded-h container_content">
 
 	<div class="page-header">
-		<h2>{{ object.name|truncate_chars_inner:40 }}{% if object.country %} ({{ object.country.iso2_code }}){% endif %} <small>{{ object.get_type_display }}</small></h2>
+		<h2>{{ object.name|truncate_chars_inner:40 }}
+        {% if object.country %}({{ object.country.iso2_code }}){% endif %}
+        <small>{{ object.get_type_display }}</small>
+        <small>
+            {% if object.date_start %}&nbsp;*{{ object.date_start.year }}{% endif %}
+            {% if object.date_end %}&nbsp;&#10013;{{ object.date_end.year }}{% endif %}
+        </small>
+
+        </h2>
 	</div>
 
 	<dl class="dl-horizontal main">
@@ -48,7 +56,7 @@
 
 		{% if object.real_name %}
 		<dt>
-			{% trans "Realname" %}:
+			{% trans "Real name" %}:
 		</dt>
 		<dd>
 			{{ object.real_name }}
@@ -121,64 +129,8 @@
 	</dl>
 
 
-    <!--
-	<dl class="dl-horizontal">
 
-		<dt>
-			{% trans "Show on" %}:
-		</dt>
-		<dd class="horizontal relations">
-			{% for relation in object.relations.specific %}
-			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}"><i class="cicon-{{ relation.service }}"></i></a>
-			
-			{% endfor %}
-			<div class="clear"></div>
-		</dd>
 
-	</dl>
-
-	<dl class="dl-horizontal">
-
-		<dt>
-			{% trans "Show on (debug)" %}:
-		</dt>
-		<dd class="horizontal relations">
-			{% for relation in object.relations.specific %}
-			<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}">{{ relation.service }}</a>
-			
-			{% endfor %}
-			<div class="clear"></div>
-		</dd>
-
-	</dl>
-	-->
-
-    <!--
-{% if object.relations.generic %}
-    <dl class="dl-horizontal">
-
-        <dt>
-            {% trans "Relations" %}:
-        </dt>
-        <dd class="horizontal">
-            <ul class="unstyled">
-                {% for relation in object.relations.generic %}
-                    <li>
-                        <a href="{{ relation.url }}" class="skip-external"
-                           title="Show on {{ relation.url }}">{{ relation.url }}</a>
-                        {% if relation.service == "official" %}
-                            <small><i class="icon icon-star"></i> {% trans "official" %}</small>
-                        {% endif %}
-                    </li>
-
-                {% endfor %}
-            </ul>
-            <div class="clear"></div>
-        </dd>
-
-    </dl>
-{% endif %}
-    -->
 
 
 	<dl class="dl-horizontal sub">
@@ -208,18 +160,6 @@
 			&nbsp;
 		</dd>
 
-		<!--
-		<dt>
-			{% trans "Stats" %}:
-		</dt>
-		<dd>
-			<span class="value">3</span> <span class="key">{% trans "Airplays" %}</span> /
-			<span class="value">173</span> <span class="key">{% trans "Plays" %}</span> /
-			<span class="value">28</span> <span class="key">{% trans "Downloads" %}</span>
-		</dd>
-		-->
-		
-
         {% if object.tags %}
             <dt>
                 {% trans "Tags" %}:
@@ -239,7 +179,7 @@
 
 	<div class="image">
 		{% if object.main_image %}
-		<a href="{% thumbnail object.main_image 1200x1200 crop upscale %}" class="zoomable cboxElement"> <img src="{% thumbnail object.main_image 170x170 crop upscale subject_location=object.main_image.subject_location %}" alt="Cover" /> </a>
+		<a href="{% thumbnail object.main_image 1200x1200 upscale %}" class="zoomable cboxElement"> <img src="{% thumbnail object.main_image 170x170 crop upscale subject_location=object.main_image.subject_location %}" alt="Cover" /> </a>
 		{% else %}
 		<img src="/static/img/base/defaults/listview.artist.xl.png" alt="{% trans "No cover available" %}" />
 		{% endif %}

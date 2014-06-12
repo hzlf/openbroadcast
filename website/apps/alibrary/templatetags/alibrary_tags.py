@@ -68,6 +68,13 @@ def dayparts_visual(context, object):
     context.update({'available_dayparts': Daypart.objects.active().order_by('day')})
     return context
 
+@register.inclusion_tag('alibrary/templatetags/dayparts_grid.html', takes_context=True)
+def dayparts_grid(context, object):
+    context.update({'object': object})
+    context.update({'object_dayparts': object.dayparts.all()})
+    context.update({'available_dayparts': Daypart.objects.active().order_by('day', 'time_start')})
+    return context
+
 @register.inclusion_tag('alibrary/templatetags/m2m_inline.html', takes_context=True)
 def m2m_inline(context, items):
     context.update({'items': items})
@@ -76,4 +83,9 @@ def m2m_inline(context, items):
 @register.inclusion_tag('alibrary/templatetags/relations_inline.html', takes_context=True)
 def relations_inline(context, object):
     context.update({'object': object})
+    return context
+
+@register.inclusion_tag('alibrary/templatetags/relations_inline.html', takes_context=True)
+def all_relations_inline(context, object):
+    context.update({'object': object, 'include_generic': True})
     return context

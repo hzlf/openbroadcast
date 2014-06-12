@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n truncate %}
 
 <ul class="unstyled">
 {% for relation in object.relations.specific %}
@@ -10,3 +10,18 @@
     </li>
 {% endfor %}
 </ul>
+
+{% if include_generic %}
+<ul class="unstyled" style="margin-top: 20px;">
+    {% for relation in object.relations.generic %}
+        <li>
+            <a href="{{ relation.url }}" class="skip-external"
+               title="Show on {{ relation.url }}">{{ relation.url|truncate_chars_inner:40 }}</a>
+            {% if relation.service == "official" %}
+                <small><i class="icon icon-star"></i> {% trans "official" %}</small>
+            {% endif %}
+        </li>
+
+    {% endfor %}
+</ul>
+{% endif %}
