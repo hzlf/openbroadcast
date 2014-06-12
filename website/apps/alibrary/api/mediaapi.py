@@ -7,6 +7,7 @@ from tastypie.authentication import *
 from tastypie.authorization import *
 from tastypie.resources import ModelResource
 from tastypie.utils import trailing_slash
+from tastypie.cache import SimpleCache
 
 from easy_thumbnails.files import get_thumbnailer
 
@@ -37,6 +38,7 @@ class MediaResource(ModelResource):
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
             'id': ['exact', 'in'],
         }
+        cache = SimpleCache(timeout=600)
 
 
     """

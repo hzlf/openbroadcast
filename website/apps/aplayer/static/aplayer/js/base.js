@@ -252,6 +252,23 @@ aplayer.base.load_playlist = function (uri) {
                     aplayer.base.set_playlist(media);
                     aplayer.base.complete_playlist()
 
+                } else if (uri.indexOf("artist") != -1) {
+
+                    var media = [];
+
+                    // got artist object to play, additional api-query required
+                    var url = uri + 'top-tracks/'
+
+                    $.get(url, function(data){
+                       console.log(data)
+                        aplayer.base.set_playlist(data);
+                        aplayer.base.complete_playlist()
+                    });
+
+
+
+
+
                 } else if (uri.indexOf("channel") != -1) {
                     aplayer.base.set_playlist([result]);
                 } else {

@@ -53,6 +53,7 @@ class ArtistResource(ModelResource):
               url(r"^(?P<resource_name>%s)/autocomplete%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('autocomplete'), name="alibrary-artist_api-autocomplete"),
               # for compatibility, remove later on
               url(r"^(?P<resource_name>%s)/autocomplete-name%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('autocomplete'), name="alibrary-artist_api-autocomplete"),
+              url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/top-tracks%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('top_tracks'), name="alibrary-artist_api-top_tracks"),
               url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/stats%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('stats'), name="alibrary-artist_api-stats"),
         ]
         
@@ -138,3 +139,24 @@ class ArtistResource(ModelResource):
 
         self.log_throttled_access(request)
         return self.create_response(request, stats)
+
+
+    def top_tracks(self, request, **kwargs):
+
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        artist = Artist.objects.get(**self.remove_api_resource_names(kwargs))
+        objects = []
+        from alibrary.models.mediamodels import Media
+        from alibrary.api.mediaapi import MediaResource
+        top_media = Media.objects.filter(artist=artist).order_by('?')[:6]
+
+        for media in top_media:
+            bundle = MediaResource().build_bundle(obj=media, request=request)
+            data = MediaResource().full_dehydrate(bundle)
+            objects.append(data)
+
+        self.log_throttled_access(request)
+        return self.create_response(request, objects)

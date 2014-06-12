@@ -124,13 +124,20 @@ class MaintenanceWorker(object):
 
         if self.action == 'self_check_playlists':
 
-            from alibrary.models.mediamodels import self_check_playlists
+            from alibrary.models.playlistmodels import self_check_playlists
 
             # reset
             # ps = Playlist.objects.all()
-            # ps.update(status=11)
+            # ps.update(status=1)
 
             self_check_playlists()
+
+
+        if self.action == 'degrade_playlists':
+            from alibrary.models.playlistmodels import Playlist
+            ps = Playlist.objects.filter(type='broadcast').exclude(status=1)
+
+            ps.update(type='playlist', status=1)
 
 
 
@@ -257,7 +264,7 @@ class Command(NoArgsCommand):
                     action='store',
                     dest='action',
                     default=None,
-                    help='Import files located in the path into django-filer'),
+                    help='action to perform'),
         make_option('--id',
                     action='store',
                     dest='id',

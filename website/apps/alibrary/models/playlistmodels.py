@@ -721,7 +721,7 @@ def self_check_playlists():
         if p.broadcast_status == 1:
             p.status = 1 # 'ready'
         else:
-            p.status = 99 # 'errot'
+            p.status = 99 # 'error'
 
         p.save()
 
