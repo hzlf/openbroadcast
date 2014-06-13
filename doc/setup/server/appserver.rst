@@ -119,4 +119,57 @@ Ogg FLAC         Python           flac
 Ogg Vorbis       oggdec           oggdec
 ===============  ===============  ===============
 
-aptitude install mpg123 twolame lame flac vorbis-tools
+
+
+.. code-block:: bash
+
+    aptitude install mpg123 twolame lame flac vorbis-tools
+
+
+Web Application
+***************
+
+
+.. code-block:: bash
+
+    easy_install pip
+    pip install virtualenv
+
+.. code-block:: bash
+
+    mkdir ~/.pip/cache
+    nano ~/.pip/pip.conf
+
+.. code-block:: bash
+
+    [global]
+    download_cache = ~/.pip/cache
+
+
+
+
+Now try to run the deployment-script on your local machine.
+
+.. note::
+
+    VPN-connection required!
+
+
+
+
+.. code-block:: bash
+
+    cd <code root>
+    fab prod_openbroadcast_ch deploy
+
+.. note::
+
+    If anything fails during deployment just try to run the script again...
+
+
+
+
+
+
+
+

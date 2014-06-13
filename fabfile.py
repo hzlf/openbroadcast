@@ -237,8 +237,17 @@ def deploy(branch=None):
             pass
         """
 
-        # reload app-server
-        reload_gunicorn()
+        # restart app-server
+
+        try:
+            run('supervisorctl restart %s' % env.site_id)
+        except Exception, e:
+            print '!!!!!! APP-SERVER WARNING !!!!!!!'
+            print e
+            print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+
+
+        # reload_gunicorn()
         restart_services()
 
         # cleanup
