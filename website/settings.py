@@ -385,7 +385,7 @@ INSTALLED_APPS = (
     'l10n',
     'guardian',
     'filer',
-    'private_files',
+    #'private_files',
 
     'profiles',
     'sendfile',
@@ -505,9 +505,9 @@ INSTALLED_APPS = (
     'dev',
 
     # spf
-    'csvimport',
-    'spf',
-    'fprint',
+    #'csvimport',
+    #'spf',
+    #n'fprint',
 
     'actstream',
 )

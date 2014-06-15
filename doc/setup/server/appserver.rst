@@ -130,10 +130,20 @@ Web Application
 ***************
 
 
+packages
+
+.. code-block:: bash
+
+   aptitude install python-dev libmysqlclient-dev mysql libsndfile libsndfile-dev libmemcached-dev
+
+
 .. code-block:: bash
 
     easy_install pip
+    pip install pip==1.4.1
     pip install virtualenv
+
+    mkdir -p /var/log/django/
 
 .. code-block:: bash
 
@@ -147,15 +157,21 @@ Web Application
 
 
 
+Prepare storage directories
+
+.. code-block:: bash
+
+    mkdir -p /nas/storage/prod.openbroadcast.ch/media
+    mkdir /nas/storage/prod.openbroadcast.ch/static
+    mkdir /nas/storage/prod.openbroadcast.ch/doc
+
+
 
 Now try to run the deployment-script on your local machine.
 
 .. note::
 
     VPN-connection required!
-
-
-
 
 .. code-block:: bash
 

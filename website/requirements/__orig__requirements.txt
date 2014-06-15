@@ -1,0 +1,159 @@
+# server & deployment
+gunicorn-console>=0.1.12
+gunicorn==0.13.4 # important! newer version does not work
+
+# code coverage and ci
+django-jenkins==0.12.1
+pyflakes==0.5.0
+pep8==1.0.1
+pylint>=0.2
+coverage==3.5.2
+
+# caching 
+python-memcached>=1.48
+python-varnish>=0.2.1
+johnny-cache
+
+akismet
+redis
+
+django-model-utils==1.2.0
+
+django-csvimport
+unicodecsv
+
+django-missing
+
+mimeparse
+
+django-cache-machine==0.6
+
+# development
+django-extensions>=0.9
+Werkzeug
+django-debug-toolbar>=0.8.4
+
+# task queue
+celery>=2.5.3,<3.0.0
+django-celery==2.5.5
+
+
+# file handling
+#django-private-files==0.1.2
+
+# core modules
+#django==1.4.5
+django==1.4.13
+django-cms==2.3.8
+
+django-mptt==0.5.2
+django-sekizai>=0.6.1
+html5lib>=0.9.0
+
+django-reversion==1.6.6
+django-staticfiles==1.2.1
+
+django-polymorphic==0.2
+django-compressor>=1.1.2
+django-mailer==0.1.0
+django-email-confirmation==0.2
+django-guardian==1.0.4
+django-classy-tags>=0.3.4.1
+django-avatar
+
+django-common>=0.1.51
+
+django-social-auth>=0.7.23
+dropbox
+
+django-admin-shortcuts==1.2.5
+
+# encryption
+pycrypto
+django-crypto
+
+django-activity-stream==0.4.4
+
+django-admin-tools
+
+# tagging
+django-tagging==0.3.1
+
+#-e git+git://github.com/mvpdev/django-eav.git#egg=django-eav
+
+# custom modules [moved to repo]
+# -e git+https://github.com/ohrstrom/django-pushy.git#egg=django-pushy
+# -e git+https://github.com/ohrstrom/django-nunjucks.git#egg=django-nunjucks
+
+# api clients
+discogs-client==1.1.1
+
+django-floppyforms>=1.0
+django-autocomplete-light==1.1.31
+django-dajaxice
+django-dajax
+django-badbrowser
+django-email-obfuscator
+# django-phonenumber-field # moved to repo
+django-modeltranslation==0.5
+
+URLObject
+django-countries==1.2
+
+
+-e git+git://github.com/newvem/pytz.git#egg=pytz
+
+# add-ons
+django-disqus==0.4.1
+django-crispy-forms
+
+django-notification
+django-sendfile>=0.3.0
+# django-multilingual-ng>=0.1.21
+
+# CMS related & plugins
+markdown
+django-pagedown
+cmsplugin-pagedown
+
+# rest / API
+django-oauth2-provider==0.2.6
+
+# python libs
+PIL>=1.1.7
+#MySQL-python>=1.2.3
+South>=0.7.3
+BeautifulSoup>=3.2.0
+
+oauth2==1.5.211
+python-openid>=2.2.5
+vobject>=0.8.1c
+chardet>=1.0.1
+textile
+easy-thumbnails==2.0.1
+python-magic
+pystache==0.3.1
+
+html2text
+
+
+# audio processing
+pyacoustid
+numpy
+-e git://github.com/hzlf/python-audio-tools.git#egg=python-audio-tools
+docutils>=0.8.1
+scikits.audiolab>=0.11.0
+
+# repo installs
+-e git://github.com/snoball/facebook-python-sdk.git#egg=FacebookSDK
+#-e git://github.com/alex/django-filter.git#egg=django-filter
+
+-e git://github.com/toastdriven/django-haystack.git#egg=django-haystack
+pysolr
+
+
+# -e git+https://github.com/echonest/pyechonest.git#egg=pyechonest # moved to repo
+
+
+# shop
+django-paypal==0.1.2

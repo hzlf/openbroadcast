@@ -41,7 +41,7 @@ from filer.fields.file import FilerFileField
 from django_extensions.db.fields.json import JSONField
 
 # private_files
-from private_files import PrivateFileField
+#from private_files import PrivateFileField
 
 # modules
 #from taggit.managers import TaggableManager
