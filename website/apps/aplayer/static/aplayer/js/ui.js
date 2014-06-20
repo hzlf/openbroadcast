@@ -39,6 +39,10 @@ aplayer.ui.bind = function() {
 
 		e.preventDefault();
 
+        // TODO: make better...
+        $('body').addClass('loading-playlist');
+
+
         var ct = $(this).data('ct');
 		var uri = $(this).data('resource_uri');
 		var offset = $(this).data('offset');
@@ -402,55 +406,8 @@ aplayer.ui.update = function(aplayer) {
 	
 		}
 		
-		
-		
-		
 		// console.log(state_changed, 'changed');
 		var body = $('body');
-		//if(this.state_changed || this.media_changed) {
-		
-			$('body').addClass('aplayer-active');
-			$('div.content.aplayer').addClass('active');
-		
-			body.removeClass('buffering playing paused idle');
-			body.addClass(aplayer.states.state);
-		//}
-		// console.log(media);
-		
-		
-		
-		
-		
-		// main window
-		//if(this.type == 'main') {
-	
-		// inline player (maybe refactor..)
-        /*
-		var container = $('div#aplayer_inline');
-		if(container.length) {
-			
-			// console.log('got container');
-
-			container.addClass('active');
-
-			$('li.current', container).html(util.format_time(aplayer.states.position));
-			$('li.total', container).html(util.format_time(aplayer.states.duration));
-
-			$('ul.timing', container).fadeIn(500);
-
-			//console.log('media !!!!!!', media);
-
-			$('.media_name a', container).html(media.name);
-			$('.media_name a', container).attr('href', media.absolute_url);
-			$('.artist_name a', container).html(media.artist.name);
-			$('.artist_name a', container).attr('href', media.artist.absolute_url);
-			$('.release_name a', container).html(media.release.name);
-			$('.release_name a', container).attr('href', media.release.absolute_url);
-
-			$('.indicator', container).css('width', aplayer.states.position_rel + '%');
-			
-		}
-		*/
 
         // refactored version, using InlinePlayer
         if(window.aplayer.inline) {
@@ -491,6 +448,11 @@ aplayer.ui.update = function(aplayer) {
 	}
 
 	// console.log(aplayer.states, local.type);
+    // TODO: make better...
+    $('body').removeClass('loading-playlist');
+
+
+
 };
 
 
@@ -580,6 +542,10 @@ aplayer.ui.playlist_display = function(aplayer, target) {
 		target.append(html);
 		
 	};
+
+
+
+
 
 };
 
