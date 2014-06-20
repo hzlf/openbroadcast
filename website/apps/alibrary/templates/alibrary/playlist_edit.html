@@ -124,6 +124,20 @@
 
                 <div class="tab-pane active" id="metadata">
 
+                    {% if form_errors %}
+                    {% include "element/forms/_merged_form_errors.html" %}
+                    {% endif %}
+
+                    {% comment %}{% endcomment %}
+                    {% if form.errors or form.non_field_errors %}
+                        {% with ctype='playlist'%}
+                        {% include "element/forms/_form_errors.html" %}
+                        {% endwith %}
+                    {% endif %}
+
+
+
+
                     <form class="form-horizontal form-compact form-playlist"
                           method="post"
                           id=""

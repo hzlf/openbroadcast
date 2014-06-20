@@ -93,10 +93,24 @@
     </dt>
     <dd>
         {% if object.get_license %}
-            <a href="{{ object.get_license.get_absolute_url }}" title="{% trans "License details" %}" class="iconset iconset-license">{{ object.get_license.iconset_display }}</a>
+            {% if object.get_license.iconset %}
+                <a href="{{ object.get_license.get_absolute_url }}"
+                   title="{% trans "License details" %}"
+                   class="iconset iconset-license">
+                       {{ object.get_license.iconset_display }}
+                </a>
+            {% else %}
+                <span>{{ object.get_license.name }}</span>
+            {% endif %}
+
+
+
         {% else %}
             &nbsp;
         {% endif %}
+
+
+
     </dd>
 
 

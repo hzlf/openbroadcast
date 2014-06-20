@@ -20,6 +20,7 @@ PlaylistEditor = function () {
 
     // readonly mode for locked playlists
     this.readonly = false;
+    this.enable_crossfades = false;
 
     // holding the playlist
     this.current_playlist;
@@ -251,7 +252,7 @@ PlaylistEditor = function () {
                 return false;
             } else {
 
-                console.log(q);
+                debug.debug(q);
                 self.ac.search(q);
 
             }
@@ -489,7 +490,7 @@ PlaylistEditor = function () {
         }
 
 
-        console.log('durations', durations)
+        debug.debug('durations', durations)
 
 
         html = nj.render('alibrary/nj/playlist/_transform_duration.html', {
@@ -696,6 +697,8 @@ PlaylistEditorItem = function () {
 
     // readonly mode for locked playlists
     this.readonly = false;
+    this.enable_crossfades = false;
+    this.enable_drag_n_drop = false;
 
     this.el_background;
     this.el_buffer;
@@ -737,6 +740,7 @@ PlaylistEditorItem = function () {
         self.item = item;
         this.playlist_editor = playlist_editor;
         this.readonly = playlist_editor.readonly;
+        this.enable_crossfades = playlist_editor.enable_crossfades;
 
         //debug.debug('PlaylistEditorItem - init');
         self.api_url = self.item.resource_uri;
@@ -755,7 +759,8 @@ PlaylistEditorItem = function () {
 
             html = nj.render('alibrary/nj/playlist/editor_item.html', {
                 object: self.item,
-                readonly: self.readonly
+                readonly: self.readonly,
+                enable_crossfades: self.enable_crossfades
             });
         }
 
@@ -1022,133 +1027,140 @@ PlaylistEditorItem = function () {
             /*
              * cue handling
              */
-            var c_cue_size = 8;
-            var c_cue_attr = { stroke: self.envelope_color, 'stroke-width': 2, 'fill-opacity': .1, r: 0, cursor: 'move'};
 
-            var cp = [];
-            cp[0] = [
-                ["M", c_cue_size, 2],
-                ["L", 0, 2],
-                ["L", 0, self.size_y],
-                ["L", c_cue_size, self.size_y]
-            ];
-            cp[1] = [
-                ["M", 0, 2],
-                ["L", c_cue_size, 2],
-                ["L", c_cue_size, self.size_y],
-                ["L", 0, self.size_y]
-            ];
+            if(self.enable_drag_n_drop) {
+                var c_cue_size = 8;
+                var c_cue_attr = { stroke: self.envelope_color, 'stroke-width': 2, 'fill-opacity': .1, r: 0, cursor: 'move'};
 
-            self.el_controls_cue = this.r.set(
-                    this.r.path(cp[0]).attr(c_cue_attr),
-                    this.r.path(cp[1]).attr(c_cue_attr)
-                ).mouseover(function (set) {
-                    debug.debug('set', set)
-                    this.animate({"fill-opacity": .55, fill: self.envelope_color}, 100);
-                }).mouseout(function () {
-                    this.animate(c_cue_attr, 300);
-                });
+                var cp = [];
+                cp[0] = [
+                    ["M", c_cue_size, 2],
+                    ["L", 0, 2],
+                    ["L", 0, self.size_y],
+                    ["L", c_cue_size, self.size_y]
+                ];
+                cp[1] = [
+                    ["M", 0, 2],
+                    ["L", c_cue_size, 2],
+                    ["L", c_cue_size, self.size_y],
+                    ["L", 0, self.size_y]
+                ];
 
-            // specific update functions
-            self.el_controls_cue[0].update = function (x, y) {
-                // get X
-                var X = this.transform()[0][1] + x;
+                self.el_controls_cue = this.r.set(
+                        this.r.path(cp[0]).attr(c_cue_attr),
+                        this.r.path(cp[1]).attr(c_cue_attr)
+                    ).mouseover(function (set) {
+                        debug.debug('set', set)
+                        this.animate({"fill-opacity": .55, fill: self.envelope_color}, 100);
+                    }).mouseout(function () {
+                        this.animate(c_cue_attr, 300);
+                    });
 
-                // set envelope
-                path[1][1] = X + self.abs_to_px(self.item.fade_in);
-                path[0][1] = X;
-                self.el_envelope.animate({path: path}, 0);
+                // specific update functions
+                self.el_controls_cue[0].update = function (x, y) {
+                    // get X
+                    var X = this.transform()[0][1] + x;
 
-                // set envelope controls
-                self.el_controls_fade[0].attr({x: X + self.abs_to_px(self.item.fade_in)});
+                    // set envelope
+                    path[1][1] = X + self.abs_to_px(self.item.fade_in);
+                    path[0][1] = X;
+                    self.el_envelope.animate({path: path}, 0);
 
-                // set self + update display
-                this.transform('T' + X + ',0')
-                $('.cue_in', self.dom_element).val(Math.floor(self.px_to_abs(X)));
-            };
-            self.el_controls_cue[1].update = function (x, y) {
-                // get X
-                var X = this.transform()[0][1] + x;
+                    // set envelope controls
+                    self.el_controls_fade[0].attr({x: X + self.abs_to_px(self.item.fade_in)});
 
-                // set envelope
-                path[2][1] = X - self.abs_to_px(self.item.fade_out);
-                path[3][1] = X;
-                self.el_envelope.animate({path: path}, 0);
+                    // set self + update display
+                    this.transform('T' + X + ',0')
+                    $('.cue_in', self.dom_element).val(Math.floor(self.px_to_abs(X)));
+                };
+                self.el_controls_cue[1].update = function (x, y) {
+                    // get X
+                    var X = this.transform()[0][1] + x;
 
-                // set envelope controls
-                self.el_controls_fade[1].attr({x: X - self.abs_to_px(self.item.fade_out)});
+                    // set envelope
+                    path[2][1] = X - self.abs_to_px(self.item.fade_out);
+                    path[3][1] = X;
+                    self.el_envelope.animate({path: path}, 0);
 
-                // set self + update display
-                this.transform('T' + X + ',0')
-                $('.cue_out', self.dom_element).val(Math.floor(self.co.duration - self.px_to_abs(X + c_cue_size)));
-            };
+                    // set envelope controls
+                    self.el_controls_fade[1].attr({x: X - self.abs_to_px(self.item.fade_out)});
 
-            // transform to current values
-            self.el_controls_cue[0].transform('T' + x[0] + ',0');
-            self.el_controls_cue[1].transform('T' + (x[3] - c_cue_size ) + ',0');
-            self.el_controls_cue.drag(self.controls_cue_onmove, self.controls_cue_onstart, self.controls_cue_onend);
+                    // set self + update display
+                    this.transform('T' + X + ',0')
+                    $('.cue_out', self.dom_element).val(Math.floor(self.co.duration - self.px_to_abs(X + c_cue_size)));
+                };
 
+                // transform to current values
+                self.el_controls_cue[0].transform('T' + x[0] + ',0');
+                self.el_controls_cue[1].transform('T' + (x[3] - c_cue_size ) + ',0');
+                self.el_controls_cue.drag(self.controls_cue_onmove, self.controls_cue_onstart, self.controls_cue_onend);
+            }
 
             /*
              * fade handling
              */
-            var c_fade_size = 6;
-            var c_fade_attr = { fill: self.envelope_color, 'stroke-width': 10, 'stroke-opacity': .20, r: 1, cursor: 'move'};
 
-            self.el_controls_fade = this.r.set(
-                    this.r.rect(x[1] - c_fade_size / 2, this.envelope_top - c_fade_size / 2, c_fade_size, c_fade_size).attr(c_fade_attr),
-                    this.r.rect(x[2] - c_fade_size / 2, this.envelope_top - c_fade_size / 2, c_fade_size, c_fade_size).attr(c_fade_attr)
-                ).mouseover(function () {
-                    this.animate({"stroke-opacity": .75, stroke: self.envelope_color}, 100);
-                }).mouseout(function () {
-                    this.animate(c_fade_attr, 300);
-                });
+            if(self.enable_drag_n_drop) {
+                var c_fade_size = 6;
+                var c_fade_attr = { fill: self.envelope_color, 'stroke-width': 10, 'stroke-opacity': .20, r: 1, cursor: 'move'};
 
-            // specific update functions
-            self.el_controls_fade[0].update = function (x, y) {
-                var X = this.attr("x") + x, Y = this.attr("y") + y;
-                this.attr({x: X});
-                path[1][1] = X;
-                self.el_envelope.animate({path: path}, 0);
-                $('.fade_in', self.dom_element).val(Math.floor(self.px_to_abs(X)) - self.item.cue_in);
-            };
-            self.el_controls_fade[1].update = function (x, y) {
-                var X = this.attr("x") + x, Y = this.attr("y") + y;
-                this.attr({x: X});
-                path[2][1] = X;
-                self.el_envelope.animate({path: path}, 0);
-                $('.fade_out', self.dom_element).val(Math.floor(self.co.duration - self.px_to_abs(X)) - self.item.cue_out);
-            };
-            self.el_controls_fade.drag(self.controls_fade_onmove, self.controls_fade_onstart, self.controls_fade_onend);
-            self.el_controls_fade.dblclick(self.controls_fade_dbclick);
+                self.el_controls_fade = this.r.set(
+                        this.r.rect(x[1] - c_fade_size / 2, this.envelope_top - c_fade_size / 2, c_fade_size, c_fade_size).attr(c_fade_attr),
+                        this.r.rect(x[2] - c_fade_size / 2, this.envelope_top - c_fade_size / 2, c_fade_size, c_fade_size).attr(c_fade_attr)
+                    ).mouseover(function () {
+                        this.animate({"stroke-opacity": .75, stroke: self.envelope_color}, 100);
+                    }).mouseout(function () {
+                        this.animate(c_fade_attr, 300);
+                    });
+
+                // specific update functions
+                self.el_controls_fade[0].update = function (x, y) {
+                    var X = this.attr("x") + x, Y = this.attr("y") + y;
+                    this.attr({x: X});
+                    path[1][1] = X;
+                    self.el_envelope.animate({path: path}, 0);
+                    $('.fade_in', self.dom_element).val(Math.floor(self.px_to_abs(X)) - self.item.cue_in);
+                };
+                self.el_controls_fade[1].update = function (x, y) {
+                    var X = this.attr("x") + x, Y = this.attr("y") + y;
+                    this.attr({x: X});
+                    path[2][1] = X;
+                    self.el_envelope.animate({path: path}, 0);
+                    $('.fade_out', self.dom_element).val(Math.floor(self.co.duration - self.px_to_abs(X)) - self.item.cue_out);
+                };
+                self.el_controls_fade.drag(self.controls_fade_onmove, self.controls_fade_onstart, self.controls_fade_onend);
+                self.el_controls_fade.dblclick(self.controls_fade_dbclick);
+            }
 
 
             // crossfade handler
-            var c_cross_size = 8;
-            var c_cross_attr = { y: self.size_y - 2, height: 12, stroke: "red", 'stroke-opacity': 0.1, 'stroke-width': 8, fill: '#ff0000', cursor: 'move'};
+            if(self.enable_crossfades){
+                var c_cross_size = 8;
+                var c_cross_attr = { y: self.size_y - 2, height: 12, stroke: "red", 'stroke-opacity': 0.1, 'stroke-width': 8, fill: '#ff0000', cursor: 'move'};
 
 
-            self.el_controls_cross = this.r.rect(-10, self.size_y - 2, 2, self.size_y + 6).attr(c_cross_attr)
-                .mouseover(function (set) {
-                    this.animate({"fill-opacity": .55, y: 0, height: self.size_y + 6}, 100);
-                }).mouseout(function () {
-                    this.animate(c_cross_attr, 300);
-                });
+                self.el_controls_cross = this.r.rect(-10, self.size_y - 2, 2, self.size_y + 6).attr(c_cross_attr)
+                    .mouseover(function (set) {
+                        this.animate({"fill-opacity": .55, y: 0, height: self.size_y + 6}, 100);
+                    }).mouseout(function () {
+                        this.animate(c_cross_attr, 300);
+                    });
 
 
-            self.el_controls_cross.update = function (x, y) {
-                var X = this.attr("x") + x, Y = this.attr("y") + y;
-                this.attr({x: X});
-                $('.fade_cross', self.dom_element).val(self.co.duration - (Math.floor(self.px_to_abs(X)) + self.item.cue_out));
-            };
+                self.el_controls_cross.update = function (x, y) {
+                    var X = this.attr("x") + x, Y = this.attr("y") + y;
+                    this.attr({x: X});
+                    $('.fade_cross', self.dom_element).val(self.co.duration - (Math.floor(self.px_to_abs(X)) + self.item.cue_out));
+                };
 
-            if (self.item.fade_cross && self.item.fade_cross > 0) {
-                this.el_controls_cross.animate({x: self.abs_to_px(self.co.duration - self.item.cue_out - self.item.fade_cross - 1)}, 100);
-            } else {
-                this.el_controls_cross.animate({x: self.abs_to_px(self.co.duration) - 2}, 100);
+                if (self.item.fade_cross && self.item.fade_cross > 0) {
+                    this.el_controls_cross.animate({x: self.abs_to_px(self.co.duration - self.item.cue_out - self.item.fade_cross - 1)}, 100);
+                } else {
+                    this.el_controls_cross.animate({x: self.abs_to_px(self.co.duration) - 2}, 100);
+                }
+
+                self.el_controls_cross.drag(self.controls_cross_onmove, self.controls_cross_onstart, self.controls_cross_onend);
             }
-
-            self.el_controls_cross.drag(self.controls_cross_onmove, self.controls_cross_onstart, self.controls_cross_onend);
 
         }
 
@@ -1217,6 +1229,16 @@ PlaylistEditorItem = function () {
         debug.debug('controls_fade_onend', e.offsetX);
         self.playlist_editor.update_by_uuid(self.item.uuid);
     }
+
+
+    // validators
+    this.validate_fade = function(pos_new) {
+
+        debug.debug(pos_new);
+
+        return false;
+    };
+
 
 
     this.get_x_points = function () {

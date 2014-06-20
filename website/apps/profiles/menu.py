@@ -15,9 +15,9 @@ class ProfileMenu(CMSAttachMenu):
         
         """"""
         node = NavigationNode(
-            _('All Profiles'),
+            _('All Users'),
             reverse('profiles-profile-list'),
-            171
+            110
         )
         nodes.append(node)
         
@@ -34,6 +34,15 @@ class ProfileMenu(CMSAttachMenu):
                 _('Edit my Profile'),
                 reverse('profiles-profile-edit'),
                 121
+            )
+            nodes.append(node)
+
+        if request.user.is_authenticated() and request.user.profile and request.user.profile.is_approved:
+
+            node = NavigationNode(
+                _('My Invitations'),
+                reverse('profiles-profile-invitations'),
+                123
             )
             nodes.append(node)
         

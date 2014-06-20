@@ -10,6 +10,8 @@ SchedulerApp = function () {
 
     var self = this;
 
+    this.readonly = true;
+
     this.lookup_prefix = 'lookup_id_';
     this.field_prefix = 'id_';
     this.api_url = false;
@@ -45,6 +47,7 @@ SchedulerApp = function () {
 
         debug.debug('scheduler: init');
         debug.debug(self.api_url);
+        debug.debug('readonly:', self.readonly);
 
         if ($.cookie('scheduler_copy_paste_source')) {
             self.copy_paste_source = $.cookie('scheduler_copy_paste_source');
@@ -252,6 +255,7 @@ SchedulerApp = function () {
 
             if (!(item.uuid in self.emissions)) {
                 var emission = new EmissionApp;
+                emission.readonly = self.readonly;
                 emission.ppd = self.ppd;
                 emission.pph = self.pph;
                 emission.num_days = self.num_days;
@@ -297,7 +301,7 @@ SchedulerApp = function () {
     };
     this.display_selection = function (data) {
 
-        debug.debug('display_selection', data);
+        // debug.debug('display_selection', data);
         var container = $('#container_selection');
         var d = {
             object: data
@@ -502,6 +506,7 @@ SchedulerApp = function () {
 var EmissionApp = function () {
 
     var self = this;
+    this.readonly = true;
     this.api_url
     this.container
     this.dom_element = false;
@@ -647,12 +652,14 @@ var EmissionApp = function () {
 
                         // Set the content manually (required!)
                         var d = {
+                            readonly: self.readonly,
                             top: 10,
                             height: 200,
                             object: data
                         }
 
                         var html = nj.render('abcast/nj/emission_popup.html', d);
+
 
                         // this.set('content.title.text', data.name);
                         this.set('content.text', html);

@@ -33,15 +33,32 @@ form input
 
 
 
+// HELP TEXT
+// ---------
 
+.help-block
+  display: block
+  margin-top: 5px
+  margin-bottom: 0
+  //color: $grayLight
+  color: #999
 
 // overrides
-.help-block
+.__help-block__
   display: inline
   margin: 2px 4px 0 10px
   color: #999
   float: left
   margin-left: 10px
+
+
+
+.help-inline
+  display: inline-block
+  //+ie7-inline-block
+  margin-bottom: 9px
+  vertical-align: middle
+  padding-left: 5px
 
 .ui-helper-hidden-accessible
   display: none
@@ -628,3 +645,47 @@ form.form-playlist
 
 // also in playlist form [but outside from-tag]
 // refactored to own file
+
+
+// general form errors
+div.form-errors
+  margin: 20px 0 14px
+  padding: 10px
+  //border: 1px solid #FF743E
+  background: #FFEED4
+  strong
+    color: #FF743E
+
+  // merged error list
+  ul.errorlist:not(:first-child)
+    list-style: none
+    margin: 0 0 2px 0
+    clear: both
+
+    > li
+      //width: 280px
+      padding: 6px 0 2px
+      border-bottom: 1px solid rgba(255, 116, 62, 0.18)
+      > ul
+        list-style: none
+        //float: right
+        font-style: italic
+
+      > ul > li
+        font-style: italic
+
+
+
+  // dl-version, single forms
+  dl
+    margin: 4px 0
+    dt
+      width: 100px
+    dd
+      margin-left: 100px
+      ul.errorlist
+        margin: 0
+        font-style: italic
+        list-style: none
+
+

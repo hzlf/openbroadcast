@@ -15,18 +15,20 @@ class ActionMenu(CMSAttachMenu):
         
         """"""
         node = NavigationNode(
-            _('All Actions'),
+            _('All Activities'),
             reverse('actstream-action-list'),
             201
         )
         nodes.append(node)
+
+        if request.user.is_active:
         
-        node = NavigationNode(
-            _('My Actions'),
-            '%s?username=%s' % (reverse('actstream-action-list'), request.user.username),
-            211
-        )
-        nodes.append(node)
+            node = NavigationNode(
+                _('My Activities'),
+                '%s?username=%s' % (reverse('actstream-action-list'), request.user.username),
+                211
+            )
+            nodes.append(node)
 
         
         return nodes

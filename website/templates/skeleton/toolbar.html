@@ -38,7 +38,7 @@
 
   						<li><a href="{% url socialauth_begin "twitter" %}?next={{ request.get_full_path }}"><i class="icon-twitter"></i></a></li>
   						<li><a href="{% url socialauth_begin "facebook" %}?next={{ request.get_full_path }}"><i class="icon-facebook"></i></a></li>
-  						<li><a href="{% url socialauth_begin "google" %}?next={{ request.get_full_path }}"><i class="icon-google-plus"></i></a></li>
+  						<li><a href="{% url socialauth_begin "google-oauth2" %}?next={{ request.get_full_path }}"><i class="icon-google-oauth2"></i></a></li>
  						<li><a href="{% url socialauth_begin "github" %}?next={{ request.get_full_path }}"><i class="icon-github"></i></a></li>
 
  					

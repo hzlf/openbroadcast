@@ -235,14 +235,25 @@ def profile_edit(request, template_name='profiles/profile_form.html'):
             #return HttpResponseRedirect(reverse('profile_detail', kwargs={'username': request.user.username}))
             return HttpResponseRedirect(reverse('profiles-profile-edit'))
         else:
+
+            from lib.util.form_errors import merge_form_errors
+            form_errors = merge_form_errors([
+                user_form,
+                profile_form,
+                service_formset,
+                link_formset,
+            ])
+
             context = {
                 'object': profile,
                 'action_form': ActionForm(),
                 'profile_form': profile_form,
                 'user_form': user_form,
                 'service_formset': service_formset,
-                'link_formset': link_formset
+                'link_formset': link_formset,
+                'form_errors': form_errors,
             }
+
     else:
         profile = Profile.objects.get(user=request.user)
         link_formset = LinkFormSet(instance=profile)
@@ -320,5 +331,49 @@ def respond(request, code):
     return type('Response%d' % code, (HttpResponse, ), {'status_code': code})()
 
 
+
+
+
+
+"""
+invitation based views / hackish here but still better than in invitation module...
+"""
+
+
+
+
+class InvitationListView(PaginationMixin, ListView):
+
+    # context_object_name = "artist_list"
+    template_name = "profiles/invitation_list.html"
+    paginate_by = PAGINATE_BY
+    extra_context = {}
+
+    def get_paginate_by(self, queryset):
+
+        ipp = self.request.GET.get('ipp', PAGINATE_BY_DEFAULT)
+        if ipp:
+            try:
+                if int(ipp) in PAGINATE_BY:
+                    return int(ipp)
+            except Exception, e:
+                pass
+
+        return self.paginate_by
+
+    def get_context_data(self, **kwargs):
+
+        context = super(InvitationListView, self).get_context_data(**kwargs)
+        #context.update(self.extra_context)
+        return context
+
+
+    def get_queryset(self, **kwargs):
+
+        kwargs = {}
+        from invitation.models import Invitation
+        qs = Invitation.objects.filter(user=self.request.user)
+
+        return qs
 
 

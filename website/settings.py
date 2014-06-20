@@ -666,14 +666,14 @@ AUTHENTICATION_BACKENDS = (
     'social_auth.backends.twitter.TwitterBackend',
     'social_auth.backends.facebook.FacebookBackend',
     #'social_auth.backends.google.GoogleOAuthBackend',
-    #'social_auth.backends.google.GoogleOAuth2Backend',
+    'social_auth.backends.google.GoogleOAuth2Backend',
     'social_auth.backends.google.GoogleBackend',
     'social_auth.backends.contrib.dropbox.DropboxBackend',
     'social_auth.backends.contrib.soundcloud.SoundcloudBackend',
     #'social_auth.backends.yahoo.YahooBackend',
     #'social_auth.backends.browserid.BrowserIDBackend',
-    'social_auth.backends.contrib.linkedin.LinkedinBackend',
-    'social_auth.backends.contrib.disqus.DisqusBackend',
+    #'social_auth.backends.contrib.linkedin.LinkedinBackend',
+    #'social_auth.backends.contrib.disqus.DisqusBackend',
     #'social_auth.backends.contrib.livejournal.LiveJournalBackend',
     #'social_auth.backends.contrib.orkut.OrkutBackend',
     #'social_auth.backends.contrib.foursquare.FoursquareBackend',
@@ -692,30 +692,27 @@ AUTHENTICATION_BACKENDS = (
     # guardian
     'guardian.backends.ObjectPermissionBackend',
 )
-TWITTER_CONSUMER_KEY = 'Fbp98cYDsI3mY51krZVhVg'
-TWITTER_CONSUMER_SECRET = 'ZTOXzo3zJH4AG1Q6rTHxsiKorDqeQkNWixThiZEfrc'
-FACEBOOK_APP_ID = '230293190458969'
-FACEBOOK_API_SECRET = 'd1976697cff7f61410152af2f7b12db3'
+TWITTER_CONSUMER_KEY = ''
+TWITTER_CONSUMER_SECRET = ''
+FACEBOOK_APP_ID = ''
+FACEBOOK_API_SECRET = ''
 FACEBOOK_EXTENDED_PERMISSIONS = ['email', ]
-LINKEDIN_CONSUMER_KEY = 'aaa'
-LINKEDIN_CONSUMER_SECRET = 'bbb'
-GOOGLE_CONSUMER_KEY = 'aaa'
-GOOGLE_CONSUMER_SECRET = 'bbb'
-GOOGLE_OAUTH2_CLIENT_ID = 'aaa'
-GOOGLE_OAUTH2_CLIENT_SECRET = 'bbb'
-FOURSQUARE_CONSUMER_KEY = 'aaa'
-FOURSQUARE_CONSUMER_SECRET = 'bbb'
-YAHOO_CONSUMER_KEY = 'aaa'
-YAHOO_CONSUMER_SECRET = 'bbb'
-GITHUB_APP_ID = '93b8c5a82ee21f19e4c3'
-GITHUB_API_SECRET = 'a2602afb10e29096b101e3b698403996a6e86d70'
-DROPBOX_APP_ID = 'hysrslzv780iu8n'
-DROPBOX_API_SECRET = '5y9ldihkc9ot6cz'
-SOUNDCLOUD_CLIENT_ID = 'f009f9ca05053570a2c05d55f08f3dc8'
-SOUNDCLOUD_CLIENT_SECRET = 'ad689159fcecc12e14664084ab495874'
-#LOGIN_URL          = '/login-form/'
-#LOGIN_REDIRECT_URL = '/logged-in/'
-#LOGIN_ERROR_URL    = '/login-error/'
+LINKEDIN_CONSUMER_KEY = ''
+LINKEDIN_CONSUMER_SECRET = ''
+GOOGLE_CONSUMER_KEY = ''
+GOOGLE_CONSUMER_SECRET = ''
+GOOGLE_OAUTH2_CLIENT_ID = ''
+GOOGLE_OAUTH2_CLIENT_SECRET = ''
+FOURSQUARE_CONSUMER_KEY = ''
+FOURSQUARE_CONSUMER_SECRET = ''
+YAHOO_CONSUMER_KEY = ''
+YAHOO_CONSUMER_SECRET = ''
+GITHUB_APP_ID = ''
+GITHUB_API_SECRET = ''
+DROPBOX_APP_ID = ''
+DROPBOX_API_SECRET = ''
+SOUNDCLOUD_CLIENT_ID = ''
+SOUNDCLOUD_CLIENT_SECRET = ''
 
 # invitation
 INVITATION_INVITE_ONLY = False
@@ -802,8 +799,8 @@ HAYSTACK_CONNECTIONS = {
 Messaging
 https://bitbucket.org/psam/django-postman/wiki/Quick_Start_Guide
 """
-# POSTMAN_DISALLOW_ANONYMOUS = True  # default is False
-# POSTMAN_DISALLOW_MULTIRECIPIENTS = True  # default is False
+POSTMAN_DISALLOW_ANONYMOUS = True
+POSTMAN_DISALLOW_MULTIRECIPIENTS = True
 # POSTMAN_DISALLOW_COPIES_ON_REPLY = True  # default is False
 # POSTMAN_DISABLE_USER_EMAILING = True  # default is False
 POSTMAN_AUTO_MODERATE_AS = True  # default is None

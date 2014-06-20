@@ -94,7 +94,11 @@ class PlaylistListView(PaginationMixin, ListView):
         q = self.request.GET.get('q', None)
 
         #qs = Playlist.objects.all()
-        qs = Playlist.objects.filter(~Q(type='basket') | Q(user__pk=self.request.user.pk))
+        if self.request.user.is_authenticated():
+            qs = Playlist.objects.filter(~Q(type='basket') | Q(user__pk=self.request.user.pk))
+            #qs = Playlist.objects.filter(~Q(type='basket'))
+        else:
+            qs = Playlist.objects.exclude(type='basket')
 
 
         
@@ -229,52 +233,57 @@ class PlaylistEditView(UpdateView):
     template_name = "alibrary/playlist_edit.html"
     success_url = '#'
     form_class = PlaylistForm
-    
+
     def __init__(self, *args, **kwargs):
         super(PlaylistEditView, self).__init__(*args, **kwargs)
-        
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(PlaylistEditView, self).dispatch(*args, **kwargs)
-        
+
+    #@method_decorator(login_required)
+    #def dispatch(self, *args, **kwargs):
+    #    return super(PlaylistEditView, self).dispatch(*args, **kwargs)
+
     def get_initial(self):
         self.initial.update({ 'user': self.request.user })
         return self.initial
-        
+
 
     def get_context_data(self, **kwargs):
-        
+
         context = super(PlaylistEditView, self).get_context_data(**kwargs)
-        
-        context['action_form'] = ActionForm()        
+
+        context['action_form'] = ActionForm()
         context['releasemedia_form'] = ReleaseMediaFormSet(instance=self.object)
         context['user'] = self.request.user
         context['request'] = self.request
         context['permission_form'] =  UserObjectPermissionsForm(self.request.user, self.object, self.request.POST or None)
-        
+
         return context
-    
+
     def form_valid(self, form):
-        context = self.get_context_data()        
-        print 'validation:'
-        
+        context = self.get_context_data()
+
+        print 'PlaylistEditView - form_valid'
+
         # validation
         if form.is_valid():
-            print 'form valid'
-            
             self.object.tags = form.cleaned_data['d_tags']
-            
+
             # temporary instance to validate inline forms against
             tmp = form.save(commit=False)
-            
+
             form.save()
             form.save_m2m()
-            
 
             return HttpResponseRedirect('#')
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+
+            from lib.util.form_errors import merge_form_errors
+            form_errors = merge_form_errors([form,])
+
+            print form_errors
+
+
+            return self.render_to_response(self.get_context_data(form=form, form_errors=form_errors))
         
 
 

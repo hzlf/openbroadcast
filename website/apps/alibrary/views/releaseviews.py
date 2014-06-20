@@ -345,6 +345,12 @@ class ReleaseEditView(UpdateView):
         relation_form = context['relation_form']
 
 
+        print '//////////////////////////////////////////////'
+        print '//////////////////////////////////////////////'
+        print '//////////////////////////////////////////////'
+        print '//////////////////////////////////////////////'
+
+
         valid = False
 
 
@@ -420,10 +426,23 @@ class ReleaseEditView(UpdateView):
         if valid:
             return HttpResponseRedirect('#')
         else:
-            print '!!! ERRORS!!!!!!!!!!!!!!!!!!!!!!!!'
-            print releasemedia_form.errors
 
-            return self.render_to_response(self.get_context_data(form=form, releasemedia_form=releasemedia_form))
+            from lib.util.form_errors import merge_form_errors
+            form_errors = merge_form_errors([
+                form,
+                releasemedia_form,
+                relation_form,
+            ])
+
+            print '//////////////////////////////////////////'
+            print form_errors
+
+
+            return self.render_to_response(self.get_context_data(
+                form=form,
+                releasemedia_form=releasemedia_form,
+                form_errors=form_errors
+            ))
 
 
     

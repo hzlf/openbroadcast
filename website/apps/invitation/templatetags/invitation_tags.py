@@ -15,3 +15,15 @@ def admin_reward_link():
         {% admin_reward_link %}
     """
     return {'INVITE_ONLY': INVITE_ONLY}
+
+
+@register.inclusion_tag('invitation/templatetags/_invitations_by_user.html')
+def invitations_by_user(user):
+    """
+    Adds a reward action if INVITE_ONLY is ``True``.
+
+    Usage::
+
+        {% admin_reward_link %}
+    """
+    return {'INVITE_ONLY': INVITE_ONLY}

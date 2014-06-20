@@ -8,7 +8,7 @@ from tastypie.authentication import *
 from tastypie.authorization import *
 from tastypie.resources import ModelResource
 from tastypie.utils import trailing_slash
-
+from tastypie.http import HttpUnauthorized
 from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
 from alibrary.models import Playlist
 from abcast.models import Emission, Channel
@@ -155,6 +155,10 @@ class EmissionResource(ModelResource):
 
     def emission_update(self, request, **kwargs):
 
+        # TODO: check for scheduler permissions
+        if not request.user.is_authenticated():
+            return HttpUnauthorized()
+
 
         e = Emission.objects.get(**self.remove_api_resource_names(kwargs))
 
@@ -174,6 +178,10 @@ class EmissionResource(ModelResource):
         return self.json_response(request, data)
 
     def reschedule(self, request, **kwargs):
+
+        # TODO: check for scheduler permissions
+        if not request.user.is_authenticated():
+            return HttpUnauthorized()
 
         log = logging.getLogger('abcast.schedulerapi.reschedule')
 

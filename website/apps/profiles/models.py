@@ -70,7 +70,7 @@ class Profile(MigrationMixin):
     
     #Personal
     gender = models.PositiveSmallIntegerField(_('gender'), choices=GENDER_CHOICES, blank=True, null=True)
-    birth_date = models.DateField(_('Date of birth'), blank=True, null=True)
+    birth_date = models.DateField(_('Date of birth'), blank=True, null=True, help_text=_('Format: YYYY-MM-DD'))
     
     # Profile
     description = extra.MarkdownTextField(blank=True, null=True)

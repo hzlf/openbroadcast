@@ -129,7 +129,7 @@ class ProfileForm(ModelForm):
         
         
     from floppyforms.widgets import DateInput
-    birth_date = forms.DateField(widget=DateInput(), required=False,)
+    #birth_date = forms.DateField(widget=DateInput(), required=False, help_text=_('Format: YYYY/MM/DD'))
     description = forms.CharField(widget=PagedownWidget(), required=False, help_text=_('Markdown enabled'))
     d_tags = TagField(widget=TagAutocompleteTagIt(max_tags=9), required=False, label=_('Tags'))
     

@@ -146,7 +146,7 @@ class Emission(BaseModel, CachingMixin):
     content_object = generic.GenericForeignKey('content_type', 'object_id')
     
     locked = models.BooleanField(default=False)
-    
+
     
     # manager
     objects = EmissionManager()
@@ -156,6 +156,10 @@ class Emission(BaseModel, CachingMixin):
         verbose_name = _('Emission')
         verbose_name_plural = _('Emissions')
         ordering = ('created', )
+
+        permissions = (
+            ('schedule_emission', 'Schedule Emission'),
+        )
     
     
     def __unicode__(self):

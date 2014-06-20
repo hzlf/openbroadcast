@@ -40,7 +40,7 @@ class CharListFilter(django_filters.Filter):
 class ActionFilter(django_filters.FilterSet):
 
     verb = CharListFilter(label="Action")
-    #expertise__name = CharListFilter(label="Expertise")
+    target_content_type = CharListFilter(label="Object")
     #user__groups = CharListFilter(label="Access level")
     #mentor__username = CharListFilter(label="Mentor")
     class Meta:

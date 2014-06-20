@@ -155,6 +155,25 @@
             </section>
         {% endif %}
 
+        {% if object.extraartist_media.count > 0 %}
+        <section>
+
+
+            <h2 style="margin-top: 20px;">{% trans "Credits & Credited Artists" %}</h2>
+
+
+            <ul class="__horizontal unstyled small">
+                {% for ea in object.extraartist_media.all %}
+                    <li>
+                        <a href="{{ ea.artist.get_absolute_url }}">{{ ea.artist.name }}</a>
+                        <small>[{{ ea.profession.name }}]</small>
+                    </li>
+                {% endfor %}
+            </ul>
+
+        </section>
+        {% endif %}
+
 
         {% if object.echonest_id %}
             <section class="analyse">
@@ -286,18 +305,6 @@
                     {% endwith %}
                 </div>
             </div>
-
-            <h2 style="margin-top: 20px;">{% trans "Credits & Credited Artists" %}</h2>
-
-
-            <ul class="__horizontal unstyled small">
-                {% for ea in object.extraartist_media.all %}
-                    <li>
-                        <a href="{{ ea.artist.get_absolute_url }}">{{ ea.artist.name }}</a>
-                        <small>[{{ ea.profession.name }}]</small>
-                    </li>
-                {% endfor %}
-            </ul>
 
 
         </section>

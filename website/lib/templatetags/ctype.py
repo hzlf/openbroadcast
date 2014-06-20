@@ -16,6 +16,6 @@ def ct_pk_by_object(obj):
 @register.filter 
 def ct_name_by_object(obj):
     try:
-        return ContentType.objects.get_for_model(obj)
+        return '%s'.capitalize() % ContentType.objects.get_for_model(obj)
     except:
         return None

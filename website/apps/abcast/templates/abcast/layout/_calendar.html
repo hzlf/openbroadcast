@@ -1,4 +1,4 @@
-{% load i18n calc spurl dateutil_tags %}
+{% load i18n calc spurl dateutil_tags guardian_tags %}
 
 <div id="mainbody" class="printAlignLeft" style="">
 
@@ -42,6 +42,9 @@
 							{% else %}
 							<span class="wk-daylink">{{ date|date:"D. j." }}</span>
 							{% endif %}
+
+
+                            {% if perms.abcast.schedule_emission %}
 							<ul class="unstyled horizontal day-actions">
 								{% if date > today %}
 								<li><a href="#" data-action="paste" data-date="{{ date|date:"Y-m-d" }}" title="{% trans "Paste day" %}"><i class="icon-paste"></i></a></li>
@@ -51,6 +54,10 @@
 								{% endif %}
 								<li><a href="#" data-action="copy" data-date="{{ date|date:"Y-m-d" }}" title="{% trans "Copy day" %}"><i class="icon-copy"></i></a></li>
 							</ul>
+                            {% endif %}
+
+
+
 						</div></th>
 						{% endfor %}
 						<th class="wk-dummyth" rowspan="3" style="width: 17px;">&nbsp;</th>

@@ -4398,6 +4398,44 @@ div.autocomplete.holder .result .listing .item.hover em.highlight {
   padding: 15px;
 }
 
+/* line 5, ../sass/element/_socialauth.sass */
+div.social-auth ul > li {
+  *zoom: 1;
+  padding: 2px 2px 2px 0px;
+}
+/* line 18, ../sass/bourbon/addons/_clearfix.scss */
+div.social-auth ul > li:before, div.social-auth ul > li:after {
+  content: " ";
+  display: table;
+}
+/* line 23, ../sass/bourbon/addons/_clearfix.scss */
+div.social-auth ul > li:after {
+  clear: both;
+}
+/* line 8, ../sass/element/_socialauth.sass */
+div.social-auth ul > li i {
+  display: block;
+  width: 20px;
+  float: left;
+  padding-top: 4px;
+  text-align: center;
+}
+/* line 14, ../sass/element/_socialauth.sass */
+div.social-auth ul > li span {
+  padding-left: 4px;
+  float: left;
+}
+
+/* line 21, ../sass/element/_socialauth.sass */
+ul.social-auth > li {
+  padding: 2px 2px 20px 0px;
+  margin-right: 20px;
+}
+/* line 24, ../sass/element/_socialauth.sass */
+ul.social-auth > li i {
+  opacity: 0.7;
+}
+
 /* legacy styles */
 /*  ColorBox Core Style
  *  The following rules are the styles that are consistant between themes.
@@ -5851,26 +5889,7 @@ select:focus:required:invalid:focus {
   color: #cccccc;
 }
 
-/* line 333, ../sass/site/_forms.sass */
-.help-block {
-  display: block;
-  margin-top: 5px;
-  margin-bottom: 0;
-  color: #cccccc;
-}
-
-/* line 340, ../sass/site/_forms.sass */
-.help-inline {
-  display: inline-block;
-  *display: inline;
-  /* IE7 inline-block hack */
-  *zoom: 1;
-  margin-bottom: 9px;
-  vertical-align: middle;
-  padding-left: 5px;
-}
-
-/* line 352, ../sass/site/_forms.sass */
+/* line 337, ../sass/site/_forms.sass */
 .input-prepend,
 .input-append {
   margin-bottom: 5px;
@@ -5888,7 +5907,7 @@ select:focus:required:invalid:focus {
 .input-append:after {
   clear: both;
 }
-/* line 357, ../sass/site/_forms.sass */
+/* line 342, ../sass/site/_forms.sass */
 .input-prepend input,
 .input-prepend .uneditable-input,
 .input-append input,
@@ -5897,7 +5916,7 @@ select:focus:required:invalid:focus {
   -moz-border-radius: 0 0px 0px 0;
   border-radius: 0 0px 0px 0;
 }
-/* line 360, ../sass/site/_forms.sass */
+/* line 345, ../sass/site/_forms.sass */
 .input-prepend input:focus,
 .input-prepend .uneditable-input:focus,
 .input-append input:focus,
@@ -5905,12 +5924,12 @@ select:focus:required:invalid:focus {
   position: relative;
   z-index: 2;
 }
-/* line 363, ../sass/site/_forms.sass */
+/* line 348, ../sass/site/_forms.sass */
 .input-prepend .uneditable-input,
 .input-append .uneditable-input {
   border-left-color: #cccccc;
 }
-/* line 365, ../sass/site/_forms.sass */
+/* line 350, ../sass/site/_forms.sass */
 .input-prepend .add-on,
 .input-append .add-on {
   float: left;
@@ -5931,20 +5950,20 @@ select:focus:required:invalid:focus {
   -moz-border-radius: 0px 0 0 0px;
   border-radius: 0px 0 0 0px;
 }
-/* line 381, ../sass/site/_forms.sass */
+/* line 366, ../sass/site/_forms.sass */
 .input-prepend .active,
 .input-append .active {
   background-color: #55ff55;
   border-color: #00bb00;
 }
 
-/* line 386, ../sass/site/_forms.sass */
+/* line 371, ../sass/site/_forms.sass */
 .input-prepend .add-on {
   *margin-top: 1px;
   /* IE6-7 */
 }
 
-/* line 391, ../sass/site/_forms.sass */
+/* line 376, ../sass/site/_forms.sass */
 .input-append input,
 .input-append .uneditable-input {
   float: left;
@@ -5952,12 +5971,12 @@ select:focus:required:invalid:focus {
   -moz-border-radius: 0px 0 0 0px;
   border-radius: 0px 0 0 0px;
 }
-/* line 395, ../sass/site/_forms.sass */
+/* line 380, ../sass/site/_forms.sass */
 .input-append .uneditable-input {
   border-left-color: #eeeeee;
   border-right-color: #cccccc;
 }
-/* line 398, ../sass/site/_forms.sass */
+/* line 383, ../sass/site/_forms.sass */
 .input-append .add-on {
   margin-right: 0;
   margin-left: -1px;
@@ -5965,16 +5984,16 @@ select:focus:required:invalid:focus {
   -moz-border-radius: 0 0px 0px 0;
   border-radius: 0 0px 0px 0;
 }
-/* line 402, ../sass/site/_forms.sass */
+/* line 387, ../sass/site/_forms.sass */
 .input-append input:first-child {
   *margin-left: -160px;
 }
-/* line 406, ../sass/site/_forms.sass */
+/* line 391, ../sass/site/_forms.sass */
 .input-append input:first-child + .add-on {
   *margin-left: -21px;
 }
 
-/* line 412, ../sass/site/_forms.sass */
+/* line 397, ../sass/site/_forms.sass */
 .search-query {
   padding-left: 14px;
   padding-right: 14px;
@@ -5984,7 +6003,7 @@ select:focus:required:invalid:focus {
   border-radius: 0px;
 }
 
-/* line 428, ../sass/site/_forms.sass */
+/* line 413, ../sass/site/_forms.sass */
 .form-search input,
 .form-search textarea,
 .form-search select,
@@ -6003,14 +6022,14 @@ select:focus:required:invalid:focus {
   display: inline-block;
   margin-bottom: 0;
 }
-/* line 436, ../sass/site/_forms.sass */
+/* line 421, ../sass/site/_forms.sass */
 .form-search .hide,
 .form-inline .hide,
 .form-horizontal .hide {
   display: none;
 }
 
-/* line 439, ../sass/site/_forms.sass */
+/* line 424, ../sass/site/_forms.sass */
 .form-search label,
 .form-inline label,
 .form-search .input-append,
@@ -6020,7 +6039,7 @@ select:focus:required:invalid:focus {
   display: inline-block;
 }
 
-/* line 449, ../sass/site/_forms.sass */
+/* line 434, ../sass/site/_forms.sass */
 .form-search .input-append .add-on,
 .form-inline .input-prepend .add-on,
 .form-search .input-append .add-on,
@@ -6028,7 +6047,7 @@ select:focus:required:invalid:focus {
   vertical-align: middle;
 }
 
-/* line 457, ../sass/site/_forms.sass */
+/* line 442, ../sass/site/_forms.sass */
 .form-search .radio,
 .form-inline .radio,
 .form-search .checkbox,
@@ -6037,18 +6056,18 @@ select:focus:required:invalid:focus {
   vertical-align: middle;
 }
 
-/* line 465, ../sass/site/_forms.sass */
+/* line 450, ../sass/site/_forms.sass */
 .control-group {
   margin-bottom: 9px;
 }
 
-/* line 469, ../sass/site/_forms.sass */
+/* line 454, ../sass/site/_forms.sass */
 legend + .control-group {
   margin-top: 18px;
   -webkit-margin-top-collapse: separate;
 }
 
-/* line 478, ../sass/site/_forms.sass */
+/* line 463, ../sass/site/_forms.sass */
 .form-horizontal .control-group {
   margin-bottom: 9px;
   *zoom: 1;
@@ -6062,28 +6081,28 @@ legend + .control-group {
 .form-horizontal .control-group:after {
   clear: both;
 }
-/* line 482, ../sass/site/_forms.sass */
+/* line 467, ../sass/site/_forms.sass */
 .form-horizontal .control-label {
   float: left;
   width: 140px;
   padding-top: 2px;
   text-align: right;
 }
-/* line 488, ../sass/site/_forms.sass */
+/* line 473, ../sass/site/_forms.sass */
 .form-horizontal .controls {
   margin-left: 160px;
 }
-/* line 490, ../sass/site/_forms.sass */
+/* line 475, ../sass/site/_forms.sass */
 .form-horizontal .controls select {
   height: 20px;
 }
-/* line 492, ../sass/site/_forms.sass */
+/* line 477, ../sass/site/_forms.sass */
 .form-horizontal .controls input {
   height: 17px;
   padding: 1px 0 0 4px;
   line-height: 11px;
 }
-/* line 497, ../sass/site/_forms.sass */
+/* line 482, ../sass/site/_forms.sass */
 .form-horizontal .form-actions {
   padding-left: 160px;
 }
@@ -9001,6 +9020,16 @@ a .icon-rotate-90:before, a .icon-rotate-180:before, a .icon-rotate-270:before, 
 /* line 381, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
 .icon-renren:before {
   content: "\f18b";
+}
+
+/* line 386, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-google:before {
+  content: "\f0d5";
+}
+
+/* line 387, ../sass/bootstrap/addons/font-awesome-3.2.1/_icons.scss */
+.icon-google-oauth2:before {
+  content: "\f0d5";
 }
 
 /* ============================================================

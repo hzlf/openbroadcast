@@ -1,5 +1,5 @@
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.utils.translation import ugettext
@@ -23,6 +23,10 @@ def invite(request, success_url=None,
            form_class=InvitationForm,
            template_name='invitation/invitation_form.html',
            extra_context=None):
+
+    if not request.user.profile.is_approved:
+        return HttpResponseForbidden('Unauthorized')
+
     """
     Create an invitation and send invitation email.
 

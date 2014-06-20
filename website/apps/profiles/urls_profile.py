@@ -5,6 +5,7 @@ urlpatterns = patterns('profiles.views',
                                                
     url(r'^$', ProfileListView.as_view(), name='profiles-profile-list'),
     url(r'^edit/$',  view='profile_edit', name='profiles-profile-edit'),
+    url(r'^invitations/$',  InvitationListView.as_view(), name='profiles-profile-invitations'),
     url(r'^force-login/(?P<username>[-\w]+)/$', view='profile_force_login', name='profiles-profile-force-login'),
     url(r'^(?P<slug>[-\w]+)/$', ProfileDetailView.as_view(), name='profiles-profile-detail'),
     

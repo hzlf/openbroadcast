@@ -1450,7 +1450,7 @@ def media_pre_delete(sender, **kwargs):
         log.info('delete fingerprint on server id: %s' % obj.id)
         fp.delete("%s" % obj.id)
     except Exception, e:
-        log.warning('unable to delete fingerprint for media_id: %s' % obj.id)
+        log.warning('unable to delete fingerprint for media_id: %s - %s' % (obj.id, e))
 
 pre_delete.connect(media_pre_delete, sender=Media)
 
@@ -1479,8 +1479,8 @@ except:
 
 
 class MediaExtraartists(models.Model):
-    artist = models.ForeignKey('Artist', related_name='extraartist_artist')
-    media = models.ForeignKey('Media', related_name='extraartist_media')
+    artist = models.ForeignKey('Artist', related_name='extraartist_artist', on_delete=models.CASCADE)
+    media = models.ForeignKey('Media', related_name='extraartist_media', on_delete=models.CASCADE)
     # function = models.CharField(max_length=128, blank=True, null=True)
     profession = models.ForeignKey(Profession, verbose_name='Role/Profession', related_name='media_extraartist_profession', blank=True, null=True)   
     class Meta:

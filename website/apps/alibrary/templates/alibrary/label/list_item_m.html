@@ -67,6 +67,7 @@
 
         <ul class="unstyled action secondary horizontal">
 
+            {% comment %}
             <li>
                 <a href="#"
                    class="{% if not perms.alibrary.downoad_media or not item.publish_date %} disabled{% endif %}"
@@ -86,6 +87,7 @@
                     <i class="icon icon-plus"></i>
                 </a>
             </li>
+            {% endcomment %}
 
             {% if  perms.alibrary.change_label %}
                 <li>

@@ -1,6 +1,6 @@
 {% extends "layout_base.html" %}
 
-{% load truncate i18n thumbnail arating_tags markup wiki_tags sekizai_tags activity_tags atracker_tags spurl %}
+{% load truncate ctype i18n thumbnail arating_tags markup wiki_tags sekizai_tags activity_tags atracker_tags spurl %}
 
 {% block heading %}
     <!-- heading / icon (large one) -->
@@ -111,9 +111,11 @@
                 <a href="#activities" data-toggle="tab">{% trans "Activities" %}</a>
             </li>
 
+            {% comment %}
             <li>
                 <a href="#statistics" data-toggle="tab">{% trans "Statistics" %}</a>
             </li>
+            {% endcomment %}
 
 
         </ul>
@@ -386,11 +388,13 @@
                 {% for action in user_stream %}
                     <tr>
                         <td>
+
+
                             {% if action.target %}
                                 {% if action.target.classname == 'Media' %}
                                     Track
                                 {% else %}
-                                    {{ action.target.classname }}
+                                   {{  action.target|ct_name_by_object|title }}
                                 {% endif %}
                             {% else %}
                                 &nbsp;
@@ -407,7 +411,11 @@
                             {{ action.verb }}
 
                             {% if action.target %}
-                                <a href="{{ action.target.get_absolute_url }}">"{{ action.target.name|truncate_chars_inner:60 }}"</a>
+                                {% if action.target.username %}
+                                    <a href="{{ action.target.get_absolute_url }}">"{% firstof action.target.get_full_name|truncate_chars_inner:60 action.target.username|truncate_chars_inner:60 %}"</a>
+                                {% else %}
+                                    <a href="{{ action.target.get_absolute_url }}">"{{ action.target.name|truncate_chars_inner:60 }}"</a>
+                                {% endif %}
                             {% endif %}
 
 

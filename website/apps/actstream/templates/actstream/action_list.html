@@ -1,5 +1,5 @@
 {% extends "layout_base.html" %}
-{% load spurl cache i18n truncate cache activity_tags %}
+{% load spurl cache i18n truncate ctype cache activity_tags %}
 
 {% block heading %}
 <!-- heading / icon (large one) -->
@@ -24,7 +24,7 @@
 {% endblock %}
 
 {% block searchbar %}
-<!--
+{% comment %}
 <div class="searchbar">
 	<div class="tagbar">
 
@@ -47,7 +47,7 @@
 </div>
 
 <div id="autocomplete_holder" class="autocomplete holder"></div>
--->
+{% endcomment %}
 {% endblock %}
 
 {% block inner %}
@@ -63,48 +63,43 @@
 <div class="listview container actions {{ list_style }}">
 
 	<table class="table table-condensed striped action">
-		<!--
-		<thead>
-		<tr>
-		<th>User</th>
-		<th>Time</th>
-		<th>Comment</th>
-		</tr>
-		</thead>
-		-->
+
 		<tbody>
 
 			{% for action in action_list %}
 			<tr>
-				
 				<td>
-                {% if action.target %}
-                    {% if action.target.classname == 'Media' %}
-                        Track
+                    {% if action.target %}
+                        {% if action.target.classname == 'Media' %}
+                            Track
+                        {% else %}
+                             {{  action.target|ct_name_by_object|title }}
+                        {% endif %}
                     {% else %}
-                        {{ action.target.classname }}
+                        &nbsp;
                     {% endif %}
-                {% else %}
-                    &nbsp;
-                {% endif %}
-				<td>
-					
-					
-				{% if action.actor %}
-				
-					{% if action.actor == user and 1 == 2 %}
-					{% trans "You" %}
-					{% else %}
-					<a href="{{ action.actor.get_profile.get_absolute_url }}">{% firstof action.actor.get_full_name action.actor %}</a>
-					{% endif %} 
-				
-				{% endif %} 
-					
-				{{ action.verb }}
-					
-                        {% if action.target %}
+                    <td>
+
+
+                    {% if action.actor %}
+
+                        {% if action.actor == user and 1 == 2 %}
+                        {% trans "You" %}
+                        {% else %}
+                        <a href="{{ action.actor.get_profile.get_absolute_url }}">{% firstof action.actor.get_full_name action.actor %}</a>
+                        {% endif %}
+
+                    {% endif %}
+
+                    {{ action.verb }}
+
+                    {% if action.target %}
+                        {% if action.target.username %}
+                            <a href="{{ action.target.get_absolute_url }}">"{% firstof action.target.get_full_name|truncate_chars_inner:60 action.target.username|truncate_chars_inner:60 %}"</a>
+                        {% else %}
                             <a href="{{ action.target.get_absolute_url }}">"{{ action.target.name|truncate_chars_inner:60 }}"</a>
                         {% endif %}
+                    {% endif %}
 				</td>
 
 				<td><span class="pull-right">{{ action.timestamp|timesince }} {% trans "ago" %}</span></td>
@@ -155,10 +150,10 @@
 	</p>
 	{% for action in user_stream %}
 	<li>
-		
+
 		{# display_timestamped_action action #}
-		
-		
+
+
 		<!---->
 		{% trans "You" %}
 		{{ action.verb }}
@@ -168,7 +163,7 @@
 		<a href="{{ action.target.get_absolute_url }}">{{ action.target }}</a>
 		{% endif %}
 
-		
+
 	</li>
 	{% endfor%}
 </ul>

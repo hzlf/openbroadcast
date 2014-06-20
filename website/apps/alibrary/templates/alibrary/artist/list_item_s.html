@@ -72,6 +72,7 @@
 
         <ul class="unstyled action secondary horizontal">
 
+            {% comment %}
             <li>
                 <a href="#"
                    class="downloadable queue{% if not perms.alibrary.downoad_media %} disabled{% endif %}"
@@ -90,6 +91,7 @@
                     <i class="icon icon-plus"></i>
                 </a>
             </li>
+            {% endcomment %}
 
             {% if  perms.alibrary.change_artist %}
                 <li>

@@ -12,13 +12,13 @@
             <ul class="unstyled">
                 <li>
                     <a href="#" data-action="stop" class="visible-while-playing">
-                        <i class=" icon-stop icon-large"></i>
+                        &nbsp;&nbsp;<i class=" icon-stop icon-large"></i>
                     </a>
                     <a href="#" data-action="play" class="hidden-while-playing">
-                        <i class=" icon-play icon-large"></i>
+                        &nbsp;&nbsp;<i class=" icon-play icon-large"></i>
                     </a>
                     <a href="#" data-action="pause" class="">
-                        <i class=" icon-pause icon-large"></i>
+                        &nbsp;&nbsp;<i class=" icon-pause icon-large"></i>
                     </a>
                 </li>
             </ul>
@@ -62,12 +62,14 @@
                 </li>
             </ul>
         </div>
-
+        <!---->
         <div class="span1 fade-cue" style="width: 80px;">
 
             <div class="row-fluid pull-right">
 
                 <div class="span11" style="margin-left: 0">
+
+                    {% if enable_crossfades %}
 
                     {% if not readonly %}
                         <input class="fade_cross" type="text" value="{{ object.fade_cross }}"/>
@@ -76,6 +78,11 @@
                     <span>{{ object.fade_cross|ms2time }}</span><a class="editor preview"
                                                                    data-preview="fade_cross"
                                                                    href="#"><i class="icon-volume-up icon-small"></i></a>
+
+                    {% else %}
+                    <span>{{ object.fade_cross|ms2time }}</span>
+                    {% endif %}
+
                 </div>
 
             </div>
@@ -93,6 +100,7 @@
 
                     <span>{{ object.fade_in|ms2time }}</span> <a class="editor preview" data-preview="fade_in" href="#"><i
                         class="icon-volume-up icon-small"></i></a>
+
                 </div>
                 <div class="span6" style="margin-left: 0">
 
@@ -139,7 +147,7 @@
                 <li>
 
                     <a href="#" data-action="collect" class=" pull-right">
-                        <i class="icon-plus icon-large"></i>
+                        &nbsp;&nbsp;<i class="icon-plus icon-large"></i>
                     </a>
 
                     {% if not readonly %}
