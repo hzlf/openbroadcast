@@ -4,7 +4,7 @@
  * See LICENSE.txt
  *
  * WARNING!!!
- * this code is extremly bad. it is taken from an old (also bad) project and
+ * this code is extremly bad. it is taken from an old (also bad) project and was
  * extended again and again.
  * refactoring is neccessary - but at the moment no time and no budget
  *********************************************************************************/
@@ -32,90 +32,6 @@ aplayer.ui.init = function() {
  * Interface bindings (live ones)
  *********************************************************************************/
 aplayer.ui.bind = function() {
-
-    /***************************************************************
-     * LEGACY VERSION !!
-     ***************************************************************/
-
-	// handles '.playable' elements
-    // used to play media items
-	$('.___playable.popup').live('click', function(e) {
-
-		e.preventDefault();
-
-        // TODO: maybe change resource handling, as some legacy code/switches here
-        var ct = $(this).data('ct');
-
-
-		var action = $(this).attr('href').split('#');
-        console.log('action: ', action)
-
-		var uri = action[0];
-		var offset = action[1];
-		var mode = action[2];
-		var token = 'xx-yy-zz';
-		var source = 'alibrary';
-
-        // ct based switches
-        if (ct == 'media_set') {
-            // media set -> ignore uri and build one by ourselves
-
-            // get all items currently shown
-            var item_ids = [];
-            var item_id = $(this).parents('.item').data('item_id');
-            var container = $(this).parents('.container');
-
-            $('.item.media', container).each(function(i, el){
-                var current_id = $(el).data('item_id');
-                if (current_id == item_id) {
-                    offset = i;
-                }
-                item_ids.push(current_id)
-            })
-
-            uri = '/api/v1/track/?id__in=' + item_ids.join(',')
-
-        }
-
-		aplayer.base.play_in_popup(uri, token, offset, mode, false, source);
-
-        /* TESTING:
-        aplayer.base.play_in_popup('/api/v1/track/?id__in=11,12', 'xyz', 0, 'replace', false, 'alibrary')
-        http://local.openbroadcast.ch:8080/api/v1/track/?format=json&id__in=11,12
-         */
-		
-		// return false;
-		
-	});
-
-
-
-	// handles '.streamable' elements
-    // used to play webstreams
-	$('.___streamable.popup').live('click', function(e) {
-
-
-		e.preventDefault();
-
-		var resource_uri = $(this).data('resource_uri');
-
-		console.log(resource_uri);
-
-		var action = $(this).attr('href').split('#');
-
-		var uri = resource_uri;
-		var offset = 0;
-		var mode = 'replace';
-		var token = 'xx-yy-zz';
-		var source = 'abcast';
-
-		aplayer.base.play_in_popup(uri, token, offset, mode, false, source);
-
-		return false;
-
-	});
-
-
 
 	// handles '.playable' elements
     // used to play media items
@@ -176,20 +92,6 @@ aplayer.ui.bind = function() {
         aplayer.base.play_in_popup(uri, token, offset, mode, false, source);
 
     });
-
-
-
-
-
-
-
-
-
-
-
-
-
-	
 	
 	// handles cuepoints
 	$('a.cuepoint', '.content').live('click', function(e) {
@@ -307,6 +209,14 @@ aplayer.ui.bind = function() {
           var values = $(this).val();
             aplayer.player.setVolume(values)
        }
+    });
+
+
+    // window resize - adjust playlist screen
+    $(window).on('resize', function(){
+        var win = $(this);
+        var inner_height = win.height() - (238);
+        $('#aplayer_playlist').css('height', inner_height);
     });
 
 
