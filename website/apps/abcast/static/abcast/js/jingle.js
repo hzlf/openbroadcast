@@ -254,9 +254,10 @@ JingleUi = function() {
 		
 			if( ! Object.equals(this.current_data, data)) {
 				console.log('data changed');
-	
-				var html = ich.tpl_jingles_inline_selector(data);
-				$('.jingle-selector', self.inline_dom_element.parent()).html(html);
+
+                // TODO: fix ich templates resp refactor to nj
+				//var html = ich.tpl_jingles_inline_selector(data);
+				//$('.jingle-selector', self.inline_dom_element.parent()).html(html);
 	
 			} else {
 				console.log('data unchanged');

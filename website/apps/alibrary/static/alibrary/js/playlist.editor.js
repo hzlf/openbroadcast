@@ -967,9 +967,12 @@ PlaylistEditorItem = function () {
         }
 
         // update cues
-        debug.debug('t' + Math.floor(self.abs_to_px(self.item.cue_in)) + ',0')
-        debug.debug(self.el_controls_cue[0].transform());
-        self.el_controls_cue[0].transform('T' + Math.floor(self.abs_to_px(self.item.cue_in)) + ',0');
+        try {
+            self.el_controls_cue[0].transform('T' + Math.floor(self.abs_to_px(self.item.cue_in)) + ',0');
+        } catch (e) {
+
+        }
+
 
         /*
          var temp = self.el_controls_cue[0].clone();
