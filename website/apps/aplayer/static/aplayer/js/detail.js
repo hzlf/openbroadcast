@@ -65,15 +65,15 @@ DetailPlayer = function () {
 
 
         $('.waveform', self.dom_element).live('click', function (e) {
-            // console.log(e.offsetX);
-            // console.log(self.px_to_abs(e.offsetX));
+            // debug.debug(e.offsetX);
+            // debug.debug(self.px_to_abs(e.offsetX));
 
             var pos = Number(e.offsetX / self.size_x * self.item.duration / 1000);
 
             // check if media is currently playing
 
-            // console.log('playing item:', self.aplayer_states.uuid);
-            // console.log('seeking item:', self.item.uuid)
+            // debug.debug('playing item:', self.aplayer_states.uuid);
+            // debug.debug('seeking item:', self.item.uuid)
 
             if (self.item && self.aplayer_states && self.aplayer_states.uuid == self.item.uuid) {
                 self.player.seek(pos);
@@ -151,7 +151,7 @@ DetailPlayer = function () {
 
     this.init_waveform = function () {
 
-        // console.log('PlaylistEditorItem - init_waveform');
+        // debug.debug('PlaylistEditorItem - init_waveform');
         this.r = Raphael(self.waveform_dom_id, self.size_x, self.size_y + 16);
 
         self.el_background = this.r.rect(0, 0, self.size_x, self.size_y).attr({ stroke: "none", fill: self.waveform_fill });
@@ -167,12 +167,12 @@ DetailPlayer = function () {
 
     this.init_markers = function (sections) {
 
-        console.log('init_markers:', sections)
+        debug.debug('init_markers:', sections)
 
         if (sections.length > 1) {
 
             $(sections).each(function (i, section) {
-                console.log('section', section);
+                debug.debug('section', section);
 
                 var pos_x = section.start / self.item.duration * 1000 * self.size_x;
 
@@ -211,18 +211,18 @@ DetailPlayer = function () {
 
 
     this.update = function (aplayer) {
-        // console.log(aplayer);
+        // debug.debug(aplayer);
 
         // check if current media is playing
         if (aplayer.states && aplayer.states.uuid && aplayer.states.uuid == self.item.uuid) {
 
-            //console.log(aplayer);
+            //debug.debug(aplayer);
             self.player = aplayer.player;
             self.aplayer_states = aplayer.states;
 
             var pos_x = self.size_x / 100 * aplayer.states.position_rel;
 
-            //console.log(pos_x);
+            //debug.debug(pos_x);
 
             self.el_indicator.attr({ x: pos_x + 'px' });
         }
@@ -236,13 +236,13 @@ DetailPlayer = function () {
         classes: ['playing', 'paused'],
 
         play: function () {
-            console.log('events: ', 'play');
+            debug.debug('events: ', 'play');
             self.dom_element.removeClass('paused');
             self.dom_element.addClass('playing');
         },
 
         stop: function () {
-            console.log('events: ', 'stop');
+            debug.debug('events: ', 'stop');
             self.dom_element.removeClass('paused');
             self.dom_element.removeClass('playing');
 
@@ -250,19 +250,19 @@ DetailPlayer = function () {
         },
 
         pause: function () {
-            console.log('events: ', 'pause');
+            debug.debug('events: ', 'pause');
             self.dom_element.removeClass('playing');
             self.dom_element.addClass('paused');
         },
 
         resume: function () {
-            console.log('events: ', 'resume');
+            debug.debug('events: ', 'resume');
             self.dom_element.removeClass('paused');
             self.dom_element.addClass('playing');
         },
 
         finish: function () {
-            console.log('events: ', 'finish');
+            debug.debug('events: ', 'finish');
             self.dom_element.removeClass('paused');
             self.dom_element.removeClass('playing');
         }

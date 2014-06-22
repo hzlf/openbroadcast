@@ -47,7 +47,7 @@ InlinePlayer = function () {
 
             var action = $(this).data('action');
 
-            console.log('action', action);
+            debug.debug('action', action);
 
             if (action == 'pause') {
                 self.player.base.controls({action: 'pause' });
@@ -170,11 +170,11 @@ InlinePlayer = function () {
         var states = aplayer.states;
 
 
-        //console.log('aplayer:', aplayer)
-        //console.log('media:', media)
+        //debug.debug('aplayer:', aplayer)
+        //debug.debug('media:', media)
 
         if (self.state !== states.state) {
-            console.log('state changed');
+            debug.debug('state changed');
             self.state = states.state;
             self.current_media = media;
             self.update_state();
@@ -182,7 +182,7 @@ InlinePlayer = function () {
         }
 
         if (self.current_uuid !== media.uuid) {
-            console.log('media changed');
+            debug.debug('media changed');
             self.current_uuid = media.uuid;
             self.update_media();
             //self.display_listing();
@@ -244,7 +244,7 @@ InlinePlayer = function () {
     }
 
     this.update_media = function () {
-        console.log('self.current_media', self.current_media)
+        debug.debug('self.current_media', self.current_media)
 
         $('.playhead .waveform img').attr('src', self.current_media.waveform_image);
     }
@@ -267,13 +267,13 @@ InlinePlayer = function () {
         classes: ['playing', 'paused'],
 
         play: function () {
-            console.log('events: ', 'play');
+            debug.debug('events: ', 'play');
             self.dom_element.removeClass('paused');
             self.dom_element.addClass('playing');
         },
 
         stop: function () {
-            console.log('events: ', 'stop');
+            debug.debug('events: ', 'stop');
             self.dom_element.removeClass('paused');
             self.dom_element.removeClass('playing');
 
@@ -281,19 +281,19 @@ InlinePlayer = function () {
         },
 
         pause: function () {
-            console.log('events: ', 'pause');
+            debug.debug('events: ', 'pause');
             self.dom_element.removeClass('playing');
             self.dom_element.addClass('paused');
         },
 
         resume: function () {
-            console.log('events: ', 'resume');
+            debug.debug('events: ', 'resume');
             self.dom_element.removeClass('paused');
             self.dom_element.addClass('playing');
         },
 
         finish: function () {
-            console.log('events: ', 'finish');
+            debug.debug('events: ', 'finish');
             self.dom_element.removeClass('paused');
             self.dom_element.removeClass('playing');
         }

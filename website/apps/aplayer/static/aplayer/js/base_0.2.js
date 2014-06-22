@@ -15,7 +15,7 @@ AplayerApp = function (context) {
     };
 
     this.init = function () {
-        console.log('AplayerApp: init');
+        debug.debug('AplayerApp: init');
 
         if (self.context == 'main') {
             self.init_main();
@@ -33,11 +33,11 @@ AplayerApp = function (context) {
      Initialisation
      *********************************************************/
     this.init_main = function () {
-        console.log('AplayerApp: init_main');
+        debug.debug('AplayerApp: init_main');
     };
 
     this.init_popup = function () {
-        console.log('AplayerApp: init_popup');
+        debug.debug('AplayerApp: init_popup');
         self.player = JWP(self);
     };
 
@@ -120,13 +120,13 @@ AplayerApp = function (context) {
         classes: ['playing', 'paused'],
 
         play: function () {
-            console.log('events: ', 'play');
+            debug.debug('events: ', 'play');
             self.dom_element.removeClass('paused');
             self.dom_element.addClass('playing');
         },
 
         stop: function () {
-            console.log('events: ', 'stop');
+            debug.debug('events: ', 'stop');
             self.dom_element.removeClass('paused');
             self.dom_element.removeClass('playing');
 
@@ -134,19 +134,19 @@ AplayerApp = function (context) {
         },
 
         pause: function () {
-            console.log('events: ', 'pause');
+            debug.debug('events: ', 'pause');
             self.dom_element.removeClass('playing');
             self.dom_element.addClass('paused');
         },
 
         resume: function () {
-            console.log('events: ', 'resume');
+            debug.debug('events: ', 'resume');
             self.dom_element.removeClass('paused');
             self.dom_element.addClass('playing');
         },
 
         finish: function () {
-            console.log('events: ', 'finish');
+            debug.debug('events: ', 'finish');
             self.dom_element.removeClass('paused');
             self.dom_element.removeClass('playing');
         }

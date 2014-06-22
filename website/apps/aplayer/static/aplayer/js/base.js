@@ -56,7 +56,7 @@ aplayer.base.init = function () {
         aplayer.player = aplayer.jwp('aplayer_container'); // loads player into #aplayer_container
     }
 
-    // console.log(aplayer.jwp, 'jwp');
+    // debug.debug(aplayer.jwp, 'jwp');
 
 };
 
@@ -151,7 +151,7 @@ aplayer.base.ready = function () {
  *********************************************************************************/
 aplayer.base.load = function (play) {
 
-    console.log('aplayer.base.load - callback from remote window. object to play:', play);
+    debug.debug('aplayer.base.load - callback from remote window. object to play:', play);
 
     // set mode
     if (play.source == 'abcast') {
@@ -189,7 +189,7 @@ aplayer.base.load = function (play) {
 
     aplayer.vars.source = play.source;
 
-    console.log('uri - ' + play.uri);
+    debug.debug('uri - ' + play.uri);
 
     aplayer.ui.hide_overlay();
 
@@ -204,7 +204,7 @@ aplayer.base.load = function (play) {
  *********************************************************************************/
 aplayer.base.load_playlist = function (uri) {
 
-    console.log('aplayer.base.load_playlist', uri);
+    debug.debug('aplayer.base.load_playlist', uri);
 
     if (uri) {
         data = {};
@@ -223,7 +223,7 @@ aplayer.base.load_playlist = function (uri) {
             dataType: "json",
             success: function (result, textStatus, jqXHR) {
 
-                console.log('loaded playlist:', result);
+                debug.debug('loaded playlist:', result);
 
                 // switch to handle releases & media api listings
                 if (uri.indexOf("release") != -1) {
@@ -246,7 +246,7 @@ aplayer.base.load_playlist = function (uri) {
 
                     var media = [];
                     $.each(result.items, function (i, item) {
-                        console.log('co:', item.item.content_object)
+                        debug.debug('co:', item.item.content_object)
                         media.push(item.item.content_object);
                     })
                     aplayer.base.set_playlist(media);
@@ -260,7 +260,7 @@ aplayer.base.load_playlist = function (uri) {
                     var url = uri + 'top-tracks/'
 
                     $.get(url, function(data){
-                       console.log(data)
+                       debug.debug(data)
                         aplayer.base.set_playlist(data);
                         aplayer.base.complete_playlist()
                     });
@@ -283,7 +283,7 @@ aplayer.base.load_playlist = function (uri) {
                     .css('padding-top', '17px')
                     .append('<p>error: ' + errorThrown + '</p>');
                 // alert('error: ' + errorThrown);
-                // console.log(errorThrown, 'Error');
+                // debug.debug(errorThrown, 'Error');
             }
         });
     }
@@ -298,7 +298,7 @@ aplayer.base.complete_playlist = function () {
             $.get(item.resource_uri, function (data) {
                 item.release = data.release;
                 item.artist = data.artist;
-                console.log('got data:', data)
+                debug.debug('got data:', data)
                 aplayer.vars.playlist[i] = el;
                 aplayer.ui.playlist_display(aplayer, $('#aplayer_playlist'));
 
@@ -318,7 +318,7 @@ aplayer.base.complete_playlist = function () {
  *********************************************************************************/
 aplayer.base.set_playlist = function (media) {
 
-    console.log('setting playlist to:', media);
+    debug.debug('setting playlist to:', media);
 
 
     // store playlist
@@ -360,7 +360,7 @@ aplayer.base.set_playlist = function (media) {
 
     aplayer.base.debug('done - aplayer.base.set_playlist()');
 
-    // console.log(result);
+    // debug.debug(result);
 
     aplayer.ui.playlist_display(aplayer, $('#aplayer_playlist'));
 
@@ -386,8 +386,8 @@ aplayer.base.play_in_popup = function (uri, token, offset, mode, force_seek, sou
     }
 
     if (aplayer.vars.debug) {
-        console.log('aplayer.base.play_in_popup() | uri, token, offset, mode, force_seek');
-        console.log(uri, token, offset, mode, force_seek);
+        debug.debug('aplayer.base.play_in_popup() | uri, token, offset, mode, force_seek');
+        debug.debug(uri, token, offset, mode, force_seek);
     }
 
 
@@ -437,7 +437,7 @@ aplayer.base.grab_player = function (focus) {
     } else {
 
         if (aplayer.vars.debug) {
-            console.log('found no player. create the popup or try to attach');
+            debug.debug('found no player. create the popup or try to attach');
         }
 
         aplayer.base.lock_popup(2000);
@@ -527,7 +527,7 @@ aplayer.base.interval = function () {
 
     if (local.type == 'popup') {
 
-        // console.log('interval popup');
+        // debug.debug('interval popup');
 
         var states = aplayer.states;
 
@@ -572,7 +572,7 @@ aplayer.base.interval = function () {
 
         }
         catch (err) {
-            // console.log(err, 'ERROR');
+            // debug.debug(err, 'ERROR');
         }
         ;
 
@@ -582,7 +582,7 @@ aplayer.base.interval = function () {
             /*
              var media = aplayer.vars.playlist[aplayer.states.current];
              if(aplayer.vars.debug) {
-             console.log(media);
+             debug.debug(media);
              }
              */
 
@@ -631,7 +631,7 @@ aplayer.base.prev_next = function (index, uuid) {
         aplayer.states.next = false;
     }
 
-    // console.log(aplayer.states, 'states');
+    // debug.debug(aplayer.states, 'states');
 
 
 };
@@ -661,7 +661,7 @@ aplayer.base.on_complete = function () {
 
 aplayer.base.subscribe_channel_data = function (channel) {
 
-    console.log('aplayer.base.subscribe_channel_data: ', channel)
+    debug.debug('aplayer.base.subscribe_channel_data: ', channel)
 
     try {
         aplayer.vars.playlist[aplayer.states.current].media = {
@@ -681,14 +681,14 @@ aplayer.base.subscribe_channel_data = function (channel) {
      });
      */
     pushy.subscribe(channel.resource_uri, function (data) {
-        console.log('pushy callbackk with data:', data);
+        debug.debug('pushy callbackk with data:', data);
         aplayer.base.update_channel_data(channel);
     });
 
 
 }
 aplayer.base.unsubscribe_channel_data = function () {
-    console.log('aplayer.base.unsubscribe_channel_data: ')
+    debug.debug('aplayer.base.unsubscribe_channel_data: ')
 
 
 }
@@ -696,11 +696,11 @@ aplayer.base.unsubscribe_channel_data = function () {
 
 aplayer.base.update_channel_data = function (channel) {
 
-    console.log('aplayer.base.update_channel_data: ', channel)
+    debug.debug('aplayer.base.update_channel_data: ', channel)
 
 
     $.get(channel.resource_uri, function (data) {
-        console.log('ON-AIR', data.on_air)
+        debug.debug('ON-AIR', data.on_air)
 
         var on_air = data.on_air;
         var media;
@@ -708,7 +708,7 @@ aplayer.base.update_channel_data = function (channel) {
 
         if (on_air.item) {
             $.get(on_air.item, function (media) {
-                console.log('media on air:', media)
+                debug.debug('media on air:', media)
                 aplayer.vars.playlist[aplayer.states.current].media = media;
 
                 aplayer.ui.screen_display(aplayer.states.current);
@@ -718,7 +718,7 @@ aplayer.base.update_channel_data = function (channel) {
         if (on_air.emission) {
             setTimeout(function () {
                 $.get(on_air.emission, function (data) {
-                    console.log('emission on air:', data)
+                    debug.debug('emission on air:', data)
                     aplayer.vars.playlist[aplayer.states.current].emission = emission;
                     aplayer.ui.screen_display(aplayer.states.current);
 
@@ -734,7 +734,7 @@ aplayer.base.update_channel_data = function (channel) {
     /*
      $.get(channel.resource_uri + 'on-air/', function (data) {
 
-     console.log('on air:', data);
+     debug.debug('on air:', data);
 
      var media;
      var emission;
@@ -744,7 +744,7 @@ aplayer.base.update_channel_data = function (channel) {
 
 
      $.get(data.playing.item, function (media) {
-     console.log('media on air:', media)
+     debug.debug('media on air:', media)
      aplayer.vars.playlist[aplayer.states.current].media = media;
 
      aplayer.ui.screen_display(aplayer.states.current);
@@ -763,7 +763,7 @@ aplayer.base.update_channel_data = function (channel) {
      // make sure api has data updated
      setTimeout(function () {
      $.get(data.playing.emission, function (data) {
-     console.log('emission on air:', data)
+     debug.debug('emission on air:', data)
      aplayer.vars.playlist[aplayer.states.current].emission = emission;
      aplayer.ui.screen_display(aplayer.states.current);
 
@@ -783,7 +783,7 @@ aplayer.base.update_channel_data = function (channel) {
      aplayer.vars.playlist[aplayer.states.current].emission = emission;
      aplayer.ui.screen_display(aplayer.states.current);
 
-     console.log('nothing on air');
+     debug.debug('nothing on air');
      }
 
      })
@@ -795,7 +795,7 @@ aplayer.base.update_channel_data = function (channel) {
 
 aplayer.base.controls = function (args) {
 
-    console.log('aplayer.base.controls:', args);
+    debug.debug('aplayer.base.controls:', args);
 
     var action = args.action || false;
     var index = args.index || false;
@@ -817,7 +817,7 @@ aplayer.base.controls = function (args) {
     var fast_polling = false;
     var update_ui = false;
 
-    // console.log(action, index, uuid, position);
+    // debug.debug(action, index, uuid, position);
 
     // stop polling (we only need this during play action)
     aplayer.base.stop_polling();
@@ -858,18 +858,18 @@ aplayer.base.controls = function (args) {
         if (aplayer.vars.source && aplayer.vars.source == 'alibrary') {
 
 
-            console.log('*** TRYING TO EXTRACT STREAM INFO ***')
-            console.log(aplayer.vars.playlist)
+            debug.debug('*** TRYING TO EXTRACT STREAM INFO ***')
+            debug.debug(aplayer.vars.playlist)
 
             try {
                 stream = aplayer.vars.playlist[index].stream;
-                console.log('stream:', stream);
+                debug.debug('stream:', stream);
                 // TODO: Hakish here - try to complete meta data
                 var el = aplayer.vars.playlist[index]
                 var idx = index;
-                console.log('ELEMENT:', aplayer.vars.playlist[index])
+                debug.debug('ELEMENT:', aplayer.vars.playlist[index])
             } catch (e) {
-                console.log('error', e);
+                debug.debug('error', e);
             }
 
         }
@@ -878,8 +878,8 @@ aplayer.base.controls = function (args) {
 
             var channel = aplayer.vars.playlist[index]
             stream = channel.stream;
-            console.log('channel:', channel);
-            console.log('stream:', stream);
+            debug.debug('channel:', channel);
+            debug.debug('stream:', stream);
 
             aplayer.base.subscribe_channel_data(channel);
 
@@ -938,12 +938,12 @@ aplayer.base.controls = function (args) {
         var p = aplayer.states.duration;
         p = p / 100 * position;
 
-        //console.log(aplayer.states.duration, 'aplayer.states.duration');
-        //console.log(p, 'p');
+        //debug.debug(aplayer.states.duration, 'aplayer.states.duration');
+        //debug.debug(p, 'p');
 
         if (uuid && uuid == aplayer.states.uuid) {
 
-            // console.log('seek with SAME uuid');
+            // debug.debug('seek with SAME uuid');
             jwp.seek(p);
 
             fast_polling = true;
@@ -951,7 +951,7 @@ aplayer.base.controls = function (args) {
 
         } else if (uuid) {
 
-            // console.log('seek with DIFFERENT uuid');
+            // debug.debug('seek with DIFFERENT uuid');
             var new_index = aplayer.vars.uuid_map[uuid];
             aplayer.base.controls({action: 'play', index: aplayer.vars.uuid_map[uuid]});
 
@@ -960,7 +960,7 @@ aplayer.base.controls = function (args) {
 
         } else {
 
-            // console.log('seek WITHOUT uuid');
+            // debug.debug('seek WITHOUT uuid');
 
 
             var vc = aplayer.player.getVolume();
@@ -978,8 +978,8 @@ aplayer.base.controls = function (args) {
              var vc = aplayer.player.getVolume();
              var cn = 10;
              for (var v = vc; v > 0; v--) {
-             console.log('v:' + v)
-             console.log('cn:' + cn)
+             debug.debug('v:' + v)
+             debug.debug('cn:' + cn)
              aplayer.player.setVolume(v)
              setTimeout(function () {
              aplayer.player.setVolume(v)
@@ -992,8 +992,8 @@ aplayer.base.controls = function (args) {
              cn += 100;
 
              for (var v = 0; v < vc; v++) {
-             console.log('v:' + v)
-             console.log('cn:' + cn)
+             debug.debug('v:' + v)
+             debug.debug('cn:' + cn)
              aplayer.player.setVolume(v)
              setTimeout(function () {
              aplayer.player.setVolume(v)
@@ -1012,11 +1012,11 @@ aplayer.base.controls = function (args) {
         if (uuid) {
         } else {
             uuid = aplayer.states.uuid;
-            // console.log('no uuid.. - use current:', uuid);
+            // debug.debug('no uuid.. - use current:', uuid);
 
         }
 
-        // console.log('seek:', position);
+        // debug.debug('seek:', position);
 
     }
 
@@ -1155,8 +1155,8 @@ aplayer.on_playlist = function (event) {
     var uuid = event.playlist[0].mediaid;
     var index = parseFloat(event.playlist[0].index);
 
-    // console.log(uuid, 'uuid');
-    // console.log(index, 'index');
+    // debug.debug(uuid, 'uuid');
+    // debug.debug(index, 'index');
 
     aplayer.vars.states.current = index;
     if (index > 0) {
@@ -1170,7 +1170,7 @@ aplayer.on_playlist = function (event) {
         aplayer.vars.states.next = false;
     }
 
-    //console.log(aplayer.vars.states, 'states');
+    //debug.debug(aplayer.vars.states, 'states');
 
 };
 
@@ -1324,7 +1324,7 @@ aplayer.base.debug = function (text) {
 
      var time = hour + ':' + min + ':' + sec;
      try {
-     console.log(text);
+     debug.debug(text);
      } catch (err) {
 
      }
