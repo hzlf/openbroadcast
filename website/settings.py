@@ -102,7 +102,7 @@ MIDDLEWARE_CLASSES = (
 
     'django.contrib.messages.middleware.MessageMiddleware',
     #'pagination.middleware.PaginationMiddleware',
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     # cms
     'cms.middleware.multilingual.MultilingualURLMiddleware',
     'cms.middleware.page.CurrentPageMiddleware',
@@ -372,7 +372,7 @@ INSTALLED_APPS = (
     #'notification',
     'notifications',
 
-    #'debug_toolbar',
+    'debug_toolbar',
     'mailer',
     'djcelery',
 
@@ -513,6 +513,9 @@ INSTALLED_APPS = (
 )
 
 ZINNIA_ENTRY_BASE_MODEL = 'cmsplugin_zinnia.placeholder.EntryPlaceholder'
+
+
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 """
 Mixed shizzle
@@ -903,8 +906,9 @@ api server
 MUSICBRAINZ_HOST = 'mb.anorg.net'
 MUSICBRAINZ_RATE_LIMIT = False
 
-DISCOGS_HOST = 'dgs.anorg.net'
+DISCOGS_HOST = '172.20.10.207:8099'
 DISCOGS_RATE_LIMIT = False
+
 
 """
 pusher / nodejs

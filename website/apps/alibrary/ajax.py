@@ -17,7 +17,6 @@ MUSICBRAINZ_HOST = getattr(settings, 'MUSICBRAINZ_HOST', None)
 DISCOGS_HOST = getattr(settings, 'DISCOGS_HOST', None)
 
 
-
 @dajaxice_register
 def api_lookup(request, *args, **kwargs):
 
@@ -145,7 +144,8 @@ def provider_search(request, *args, **kwargs):
         log.debug('query url: %s' % (url))
         r = requests.get(url)
         text = r.text
-        text = text.replace('api.discogs.com', 'localhost:8000')
+        if DISCOGS_HOST:
+            text = text.replace('api.discogs.com', DISCOGS_HOST)
         results = json.loads(text)['results']
         for result in results:
             result['uri'] = 'http://www.discogs.com%s' % result['uri']

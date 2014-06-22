@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 MUSICBRAINZ_HOST = getattr(settings, 'MUSICBRAINZ_HOST', 'musicbrainz.org')
+DISCOGS_HOST = getattr(settings, 'DISCOGS_HOST', None)
 
 
 ################
@@ -404,7 +405,8 @@ class APILookup(models.Model):
                         pass
 
                 try:
-                    res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', 'localhost:8000')
+                    if DISCOGS_HOST:
+                        res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', DISCOGS_HOST)
                     #res['remote_image'] = res['main_image'] = image.replace('api.discogs.com', 'dgs.anorg.net')
                     #res['remote_image'] = res['main_image'] = image
                 except:
