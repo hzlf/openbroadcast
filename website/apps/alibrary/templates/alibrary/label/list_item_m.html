@@ -57,7 +57,7 @@
 
         <ul class="tags unstyled">
             {% for tag in item.tags|slice:":9" %}
-                <li class="{% if tag.pk in active_tags %}active{% endif %}">{{ tag.name|truncate_chars_inner:10 }}</li>
+                <li class="{% if tag.pk in active_tags %}__active{% endif %}">{{ tag.name|truncate_chars_inner:10 }}</li>
             {% endfor %}
         </ul>
 
