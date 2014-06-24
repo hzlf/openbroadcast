@@ -448,6 +448,7 @@ CollectorApp = (function () {
                 self.media_to_collect = media;
 
             }
+
             // release -> we need to get it's media first
             if (container.hasClass('release')) {
 
@@ -460,7 +461,27 @@ CollectorApp = (function () {
                         }
                         self.media_to_collect = media;
                     },
-                    // TODO: maybe there is a way to make this a bit more elegant...
+                    // callbacks etc
+                    async: false
+                });
+            }
+
+            // playlist -> we need to get it's media first
+            if (container.hasClass('playlist')) {
+
+                $.ajax({
+                    url: resource_uri,
+                    success: function (data) {
+
+                        for (i in data.items) {
+                            var item = data.items[i].item;
+                            if(item.content_type == 'media') {
+                                media.push({id: item.content_object.id, uuid: item.content_object.uuid});
+                            }
+                        }
+
+                        self.media_to_collect = media;
+                    },
                     // callbacks etc
                     async: false
                 });
