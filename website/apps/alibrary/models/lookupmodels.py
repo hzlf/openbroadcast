@@ -438,11 +438,21 @@ class APILookup(models.Model):
 
         # some hacks to convert site url to api id
         v1_id = self.uri.split('/')[-1]
-        v1_url = 'http://api.discogs.com/label/%s?f=json' % v1_id
+        v1_url = 'http://%s/label/%s?f=json' % (DISCOGS_HOST, v1_id)
 
         print "#########################################"
         print v1_url
         r = requests.get(v1_url)
+
+
+        print r.status_code
+        print r.text
+
+        print
+        print
+        print
+        print
+
         v1_data= r.json()
 
         d_id = v1_data['resp']['label']['id']
