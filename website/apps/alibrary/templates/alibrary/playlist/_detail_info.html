@@ -2,7 +2,16 @@
 <div class="span7 padded-h container_content">
 
 	<div class="page-header">
-		<h2>{{ object.name|truncate_chars_inner:40 }} <small>{{ object.get_type_display }}</small></h2>
+		<h2>{{ object.name|truncate_chars_inner:40 }}
+            <small>
+                {{ object.get_type_display }}
+                {% if object.type == 'broadcast' %}
+                    ({{ object.get_status_display }})
+                {% endif %}
+
+
+            </small>
+        </h2>
 	</div>
 
 	<dl class="dl-horizontal main">
@@ -56,6 +65,19 @@
             {% if object.duration %}<small>{% trans "actual" %}:</small> {{ object.duration|msec_to_time }}{% endif %}
             {% if object.target_duration %}<small>{% trans "target" %}:</small> {{ object.target_duration|sec_to_time }}{% endif %}
         </dd>
+
+
+        {% if object.type == 'broadcast' and object.broadcast_status_messages %}
+        <dt>
+            {% trans "Issues" %}:
+        </dt>
+        <dd>
+            {% for message in object.broadcast_status_messages %}
+                <span class="tag_">{{ message }}</span>
+            {% endfor %}
+        </dd>
+        {% endif %}
+
 
 
 		{% if object.seasons.count > 0 %}
@@ -123,6 +145,10 @@
     {% endif %}
 
 	</dl>
+
+
+
+
 
 </div>
 

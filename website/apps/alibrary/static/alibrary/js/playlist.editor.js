@@ -9,7 +9,7 @@ PlaylistEditor = function () {
 
     this.interval = false;
     this.interval_loops = 0;
-    this.interval_duration = 10000;
+    this.interval_duration = 30000;
     //this.interval_duration = false;
     this.api_url = false;
     this.uuid = 'sdkhj';

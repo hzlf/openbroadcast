@@ -54,7 +54,7 @@ from alibrary import settings as alibrary_settings
 from caching.base import CachingMixin, CachingManager
 
 
-DURATION_MAX_DIFF = 2000 # two seconds...
+DURATION_MAX_DIFF = 2500 # ms
 
 
 def filename_by_uuid(instance, filename):
