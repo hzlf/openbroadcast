@@ -77,6 +77,7 @@
                 <th style="text-align: left; width: 320px;">{% trans "E-Mail" %}</th>
                 <th style="text-align: left;">{% trans "Date sent" %}</th>
                 <th style="text-align: left; width: 240px;">{% trans "Expires" %}</th>
+                <th>&nbsp;</th>
             </tr>
 		</thead>
 		{% for item in object_list %}
@@ -84,6 +85,7 @@
                 <td>{{ item.email }}</td>
                 <td>{{ item.date_invited }}</td>
                 <td>{{ item.expiration_date }}{% if not item.is_valid %} ({% trans "Expired" %}){% endif %}</td>
+                <td><a href="{% url profiles-invitation-delete pk=item.pk %}">{% trans "Delete" %}</a></td>
             </tr>
 		{% endfor %}
 
@@ -102,6 +104,7 @@
                 <th style="text-align: left; width: 320px;">{% trans "E-Mail" %}</th>
                 <th style="text-align: left;">{% trans "User" %}</th>
                 <th style="text-align: left; width: 240px;;">{% trans "Date joined" %}</th>
+                <th>&nbsp;</th>
             </tr>
 		</thead>
 		{% for profile in request.user.godchildren.all %}
@@ -109,6 +112,7 @@
                 <td>{{ profile.user.email }}</td>
                 <td><a href="{{ profile.user.get_absolute_url }}">{% firstof profile.user.get_full_name profile.user.username %}</a></td>
                 <td>{{ profile.user.date_joined }}</td>
+                <td></td>
             </tr>
 		{% endfor %}
 

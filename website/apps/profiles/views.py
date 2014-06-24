@@ -1,11 +1,12 @@
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.views.generic import list_detail
 from django.http import HttpResponse
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, View
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.core.urlresolvers import reverse
 from actstream.models import *
 from tagging.models import Tag
@@ -18,6 +19,8 @@ from profiles.forms import *
 from alibrary.models import Playlist, Release, Media
 from profiles.filters import ProfileFilter
 from lib.util import tagging_extra
+
+from invitation.models import Invitation
 
 
 PAGINATE_BY = getattr(settings, 'PROFILES_PAGINATE_BY', (12,24,36))
@@ -339,9 +342,6 @@ def respond(request, code):
 invitation based views / hackish here but still better than in invitation module...
 """
 
-
-
-
 class InvitationListView(PaginationMixin, ListView):
 
     # context_object_name = "artist_list"
@@ -375,5 +375,23 @@ class InvitationListView(PaginationMixin, ListView):
         qs = Invitation.objects.filter(user=self.request.user)
 
         return qs
+
+
+class InvitationDeleteView(View):
+
+    model = Invitation
+
+    def get(self, *args, **kwargs):
+
+        i = get_object_or_404(Invitation, pk=kwargs['pk'])
+
+        if not i.user == self.request.user:
+            return HttpResponseForbidden('permission denied')
+
+        if i.delete():
+            messages.add_message(self.request, messages.INFO, _('Deleted invitation for %s' % i.email))
+
+
+        return HttpResponseRedirect(reverse('profiles-invitations'))
 
 

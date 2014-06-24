@@ -41,7 +41,7 @@ class ProfileMenu(CMSAttachMenu):
 
             node = NavigationNode(
                 _('My Invitations'),
-                reverse('profiles-profile-invitations'),
+                reverse('profiles-invitations'),
                 123
             )
             nodes.append(node)
