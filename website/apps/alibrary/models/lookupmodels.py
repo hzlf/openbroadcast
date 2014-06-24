@@ -723,7 +723,7 @@ class APILookup(models.Model):
                         #print rel['url']
                         #print get_service_by_url(rel['url'], None)
                         mapped.append({
-                            'url': rel['url'],
+                            'url': rel['url']['resource'],
                             'service': get_service_by_url(rel['url']['resource'], None),
                             })
 
@@ -818,7 +818,7 @@ class APILookup(models.Model):
                         #print rel['url']
                         #print get_service_by_url(rel['url'], None)
                         mapped.append({
-                            'url': rel['url'],
+                            'url': rel['url']['resource'],
                             'service': get_service_by_url(rel['url']['resource'], None),
                             })
 
@@ -912,7 +912,7 @@ class APILookup(models.Model):
                 for rel in data[k]:
                     if 'url' in rel:
                         mapped.append({
-                            'url': rel['url'],
+                            'url': rel['url']['resource'],
                             'service': get_service_by_url(rel['url']['resource'], None),
                             })
 
@@ -933,9 +933,12 @@ class APILookup(models.Model):
         if 'country' in res:
             try:
                 c = Country.objects.get(iso2_code=res['country'])
-                res['country'] = c.pk
+                #res['country'] = c.pk
             except:
                 pass
+
+
+
 
         print 'DTAGS:'
         print d_tags
