@@ -306,7 +306,7 @@ class Playlist(MigrationMixin, models.Model):
                     status = False
                 criteria = {
                     'key': 'scheduled',
-                    'name': _('Playlist scheduled'),
+                    'name': _('Playlist not scheduled'),
                     'status': schedule_count < 1,
                     'warning': _('This playlist has already ben scheduled %s times. Remove all scheduler entries to "un-broadcast" this playlist.' % schedule_count),
                 }
@@ -449,12 +449,15 @@ class Playlist(MigrationMixin, models.Model):
         transformation = self.get_transform_status(type)
         status = transformation['status']
 
-        if type == 'broadcast':
+        if type == 'broadcast' and status:
             _status, messages = self.self_check()
             if _status == 1:
                 status = True
 
         if status:
+
+            print 'STATUS OK - WILL DO THE CONVERSION!!'
+
             self.type = type
             self.save()
 
