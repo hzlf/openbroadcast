@@ -470,7 +470,7 @@ CollectorApp = (function () {
             if (container.hasClass('playlist')) {
 
                 $.ajax({
-                    url: resource_uri,
+                    url: resource_uri + '?all=1',
                     success: function (data) {
 
                         for (i in data.items) {
