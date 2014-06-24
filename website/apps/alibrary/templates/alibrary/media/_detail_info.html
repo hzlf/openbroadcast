@@ -41,6 +41,20 @@
 		</dd>
 		{% endif %}
 
+		<dt>
+			{% trans "Date Created" %}:
+		</dt>
+		<dd>
+			{{ object.created|date:"DATETIME_FORMAT" }}
+		</dd>
+
+		<dt>
+			{% trans "Last Updated" %}:
+		</dt>
+		<dd>
+			{{ object.updated|date:"DATETIME_FORMAT" }}
+		</dd>
+
 		{% if object.publish_date %}
 		<dt>
 			{% trans "Published" %}:
