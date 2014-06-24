@@ -46,6 +46,7 @@
 		<tr>
 			<th>{% trans "Status" %}</th>
 			<th>{% trans "Created" %}</th>
+			<th>{% trans "Notes" %}</th>
 			<!--<th>{% trans "Type" %}</th>-->
 			<th>{% trans "Stats" %}</th>
 			<th>{% trans "Actions" %}</th>
@@ -83,12 +84,16 @@
 			</td>
 			
 			<td>
-
-					<a href="{{ object.get_absolute_url }}" rel="tooltip" class="tooltipable" title="{{ object.notes }}">{% blocktrans with created=object.created|timesince %}{{ created }} ago{% endblocktrans %}</a>
-
-					{% blocktrans with created=object.created|timesince %}{{ created }} ago{% endblocktrans %}	
-
+                <a href="{{ object.get_absolute_url }}" title="{{ object.notes }}">
+                {{ object.created|date:'SHORT_DATETIME_FORMAT' }}
+                </a>
 			</td>
+
+            <td>
+                {% if  object.notes %}
+                {{ object.notes|truncatechars:64 }}
+                {% endif %}
+            </td>
 			
 			<!--
 			<td>{{ object.get_type_display }}</td>
