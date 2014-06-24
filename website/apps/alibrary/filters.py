@@ -137,7 +137,20 @@ class ReleaseFilter(django_filters.FilterSet):
 
                     filter_.entries = nd
 
+
+
+                elif name == 'release_country__printable_name':
+                    nd = []
+                    for d in ds:
+                        nd.append([d[0], d[1]])
+
+                    nd.sort()
+                    filter_.entries = nd
+
+
+
                 else:
+                    #ds.sort()
                     filter_.entries = ds
 
                 if ds not in flist:
@@ -182,6 +195,16 @@ class ArtistFilter(django_filters.FilterSet):
                 ds = self.queryset.values_list(name, flat=False).annotate(
                     n=models.Count("pk", distinct=True)).distinct()
                 filter_.entries = ds
+
+                if name == 'country__printable_name':
+                    nd = []
+                    for d in ds:
+                        nd.append([d[0], d[1]])
+
+                    nd.sort()
+                    filter_.entries = nd
+
+
                 if ds not in flist:
                     flist.append(filter_)
 
@@ -219,6 +242,16 @@ class LabelFilter(django_filters.FilterSet):
                                     if x[0] == d[0]:
                                         nd.append([d[0], d[1], x[1]])
 
+                    filter_.entries = nd
+
+
+
+                elif name == 'country__printable_name':
+                    nd = []
+                    for d in ds:
+                        nd.append([d[0], d[1]])
+
+                    nd.sort()
                     filter_.entries = nd
 
                 else:

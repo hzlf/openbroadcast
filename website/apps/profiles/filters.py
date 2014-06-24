@@ -61,7 +61,16 @@ class ProfileFilter(django_filters.FilterSet):
                 except:
                     ds = self.queryset.values_list(name, flat=False).annotate(n=models.Count("pk", distinct=True)).distinct()
                 
-                filter_.entries = ds
+                if name == 'country__printable_name':
+                    nd = []
+                    for d in ds:
+                        nd.append([d[0], d[1]])
+
+                    nd.sort()
+                    filter_.entries = nd
+
+                else:
+                    filter_.entries = ds
 
                 
                 if ds not in flist:
