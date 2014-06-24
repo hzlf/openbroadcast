@@ -31,12 +31,12 @@
 		</dd>
 		{% endif %}
 
-		{% if object.duration %}
+		{% if object.base_duration %}
 		<dt>
 			{% trans "Duration" %}:
 		</dt>
 		<dd>
-			{{ object.duration|msec_to_time }}
+			{{ object.base_duration|sec_to_time }}
 			&nbsp;
 		</dd>
 		{% endif %}
