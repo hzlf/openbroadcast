@@ -455,9 +455,6 @@ class Playlist(MigrationMixin, models.Model):
                 status = True
 
         if status:
-
-            print 'STATUS OK - WILL DO THE CONVERSION!!'
-
             self.type = type
             self.save()
 
