@@ -411,7 +411,7 @@ class PlaylistFilter(django_filters.FilterSet):
     type = CharListFilter(label=_("Type"))
     status = CharListFilter(label=_("Status"))
     target_duration = CharListFilter(label=_("Target Duration"))
-    dayparts = django_filters.ChoiceFilter(label="Dayparts")
+    dayparts = CharListFilter(label="Dayparts")
     weather__name = CharListFilter(label="Weather")
     seasons__name = CharListFilter(label="Season")
     #media_release__license__name = CharListFilter(label="License")
@@ -422,11 +422,13 @@ class PlaylistFilter(django_filters.FilterSet):
 
     def __init__(self, *args, **kwargs):
         super(PlaylistFilter, self).__init__(*args, **kwargs)
+
+        """
         self.filters['dayparts'].extra.update(
             {
                 'choices': DAY_CHOICES
             })
-
+        """
 
     @property
     def filterlist(self):
