@@ -1010,7 +1010,7 @@ WYM_CLASSES = ",\n".join([
 
 ACTSTREAM_SETTINGS = {
     'MODELS': ('auth.user', 'auth.group', 'alibrary.release', 'alibrary.playlist', 'alibrary.artist', 'alibrary.media', 'alibrary.label',
-               'zinnia.entry', 'abcast.emission', 'abcast.station'),
+               'abcast.emission', 'abcast.station'),
     'FETCH_RELATIONS': True,
     'USE_PREFETCH': True,
     'USE_JSONFIELD': True,

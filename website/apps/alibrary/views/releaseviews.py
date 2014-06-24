@@ -345,12 +345,6 @@ class ReleaseEditView(UpdateView):
         relation_form = context['relation_form']
 
 
-        print '//////////////////////////////////////////////'
-        print '//////////////////////////////////////////////'
-        print '//////////////////////////////////////////////'
-        print '//////////////////////////////////////////////'
-
-
         valid = False
 
 
@@ -359,7 +353,8 @@ class ReleaseEditView(UpdateView):
             self.object.tags = form.cleaned_data['d_tags']
 
             # temporary instance to validate inline forms against
-            tmp = form.save(commit=False)
+            with reversion.create_revision():
+                tmp = form.save(commit=False)
             releasemedia_form = ReleaseMediaFormSet(self.request.POST, instance=tmp)
             relation_form = ReleaseRelationFormSet(self.request.POST, instance=tmp)
             albumartist_form = AlbumartistFormSet(self.request.POST, instance=tmp)
@@ -411,9 +406,8 @@ class ReleaseEditView(UpdateView):
             form.save_m2m()
 
 
+
             if publish:
-                print 'publish:'
-                print publish
                 from datetime import datetime
                 obj.publish_date = datetime.now()
                 obj.publisher = self.request.user

@@ -5,6 +5,8 @@ Playout Server
 Master Stream-generation
 *********************
 
+ - Server: node06
+
 Software in use:
 
  - :abbr:`pypo (Python Playout)`
