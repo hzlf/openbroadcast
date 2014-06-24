@@ -123,6 +123,9 @@ EditUi = function () {
             self.apply_value(el);
         });
 
+
+
+
         $('.bulk_apply').live('click', function (e) {
 
             e.preventDefault();
@@ -948,12 +951,21 @@ EditUi = function () {
 
         // handle country mapping (kind of hakish...)
         if (key == 'release_country') {
-            var target = $('#' + self.field_prefix + 'release_country option:contains((' + val + '))');
+
+            if(val.length < 4) {
+                var target = $('#' + self.field_prefix + 'release_country option:contains((' + val + '))');
+            } else {
+                var target = $('#' + self.field_prefix + 'release_country option:contains(' + val + ' ()');
+            }
             target.prop("selected", "selected");
             skip_apply = true;
         }
         if (key == 'country') {
-            var target = $('#' + self.field_prefix + 'country option:contains((' + val + '))');
+            if(val.length < 4) {
+                var target = $('#' + self.field_prefix + 'country option:contains((' + val + '))');
+            } else {
+                var target = $('#' + self.field_prefix + 'country option:contains(' + val + ' ()');
+            }
             target.prop("selected", "selected");
             skip_apply = true;
         }
