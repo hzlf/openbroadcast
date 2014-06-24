@@ -191,7 +191,14 @@ class ProfileDetailView(DetailView):
         context = kwargs
         context_object_name = self.get_context_object_name(self.object)
         # get contributions
-        context['broadcasts'] = Playlist.objects.filter(user=self.object.user).order_by('-updated')
+        # TODO: this is kind of a hack...
+        if self.request.user == self.object.user:
+            context['broadcasts'] = Playlist.objects.filter(user=self.object.user).order_by('-updated')
+        else:
+            context['broadcasts'] = Playlist.objects.filter(user=self.object.user).exclude(type='basket').order_by('-updated')
+
+
+
         context['uploaded_releases'] = Release.objects.filter(creator=self.object.user).order_by('-created')
         context['uploaded_media'] = Media.objects.filter(creator=self.object.user).order_by('-created')
 
