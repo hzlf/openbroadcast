@@ -34,7 +34,7 @@ class Process(object):
         tags.add(UFID(encoding=3, owner='http://openbroadcast.ch', data=u'%s' % media.uuid))
         # remove genre
         tags.add(TCON(encoding=3, text=u''))
-        tags.add(TMED(encoding=3, text=u'DIGITAL'))
+        tags.add(TMED(encoding=3, text=u'Digital Media'))
         if media.tracknumber:
             tags.add(TRCK(encoding=3, text=u'%s' % media.tracknumber))
         if media.isrc:

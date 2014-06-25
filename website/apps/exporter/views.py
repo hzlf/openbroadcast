@@ -1,10 +1,10 @@
 import logging
 
-from django.views.generic import ListView, UpdateView, CreateView, DeleteView
+from django.views.generic import ListView, UpdateView, CreateView, DeleteView, View
 from django.views.generic.detail import TemplateResponseMixin
 from  django.views.generic.edit import FormMixin, ProcessFormView
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.utils.functional import lazy
@@ -52,6 +52,26 @@ class ExportDeleteView(DeleteView):
     def get_queryset(self):
         kwargs = {}
         return Export.objects.filter(user=self.request.user)
+
+
+
+class ExportDeleteAllView(View):
+
+    model = Export
+    success_url = lazy(reverse, str)("exporter-export-list")
+
+    def get_queryset(self):
+        kwargs = {}
+        return Export.objects.filter(user=self.request.user)
+
+    def get(self, *args, **kwargs):
+
+
+        Export.objects.filter(user=self.request.user).delete()
+
+
+
+        return HttpResponseRedirect(reverse('exporter-export-list'))
 
 
 

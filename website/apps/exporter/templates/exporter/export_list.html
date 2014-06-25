@@ -40,9 +40,10 @@
 
         <div class="page-header">
             <h2>{% trans "Your Downloads" %}
-                <small>{% trans "Please note that listed items older than 10 days will get removed automatically." %}</small>
+                <small>{% trans "Please note that downloads older than 10 days will get removed automatically." %}</small>
             </h2>
         </div>
+
         <div>
             <p>{% trans "Below you can find items you have marked for download. The corresponding files are being processed in the background – this can take a (short) while. " %}</p>
 
@@ -83,6 +84,15 @@
         </tbody>
 
     </table>
+
+
+
+
+    <div>
+        <a href="{% url exporter-export-delete-all %}" class="btn btn-mini pull-right">
+        {% trans "Clear all downloads" %}
+        </a>
+    </div>
 
 {% endblock %}
 
