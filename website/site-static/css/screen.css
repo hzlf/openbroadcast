@@ -11585,59 +11585,68 @@ span.dim {
 /* line 7, ../sass/apps/_exporter.sass */
 div.listview.export thead th {
   background-color: white;
+  font-weight: normal;
+  font-style: italic;
+  color: #999999;
+  border: none;
 }
-/* line 11, ../sass/apps/_exporter.sass */
+/* line 16, ../sass/apps/_exporter.sass */
 div.listview.export [class^="visible-while-"], div.listview.export [class*=" visible-while-"] {
   display: none;
 }
-/* line 17, ../sass/apps/_exporter.sass */
+/* line 22, ../sass/apps/_exporter.sass */
 div.listview.export .item.init .visible-while-init {
   display: inline-block;
 }
-/* line 24, ../sass/apps/_exporter.sass */
+/* line 29, ../sass/apps/_exporter.sass */
 div.listview.export .item.done .visible-while-done {
   display: inline-block;
   color: #6633cc;
 }
-/* line 29, ../sass/apps/_exporter.sass */
+/* line 34, ../sass/apps/_exporter.sass */
 div.listview.export .item.downloaded td {
   background-color: #ddffd9;
 }
-/* line 31, ../sass/apps/_exporter.sass */
+/* line 36, ../sass/apps/_exporter.sass */
 div.listview.export .item.downloaded .visible-while-downloaded {
   display: inline-block;
   color: #00bb00;
 }
-/* line 36, ../sass/apps/_exporter.sass */
+/* line 41, ../sass/apps/_exporter.sass */
 div.listview.export .item.ready .visible-while-ready {
   display: inline-block;
 }
-/* line 40, ../sass/apps/_exporter.sass */
+/* line 45, ../sass/apps/_exporter.sass */
 div.listview.export .item.progress .visible-while-progress {
   display: inline-block;
 }
-/* line 44, ../sass/apps/_exporter.sass */
+/* line 49, ../sass/apps/_exporter.sass */
 div.listview.export .item.error td {
   background-color: #ffeed4;
 }
-/* line 46, ../sass/apps/_exporter.sass */
+/* line 51, ../sass/apps/_exporter.sass */
 div.listview.export .item.error .visible-while-error {
   display: inline-block;
   color: #ff743e;
 }
-/* line 55, ../sass/apps/_exporter.sass */
+/* line 57, ../sass/apps/_exporter.sass */
+div.listview.export .item td small {
+  font-size: 88%;
+  opacity: 0.7;
+}
+/* line 62, ../sass/apps/_exporter.sass */
 div.listview.export .item .action.download a {
   color: #a5a5a5;
   color: #a5a5a6;
   cursor: wait;
 }
-/* line 62, ../sass/apps/_exporter.sass */
+/* line 69, ../sass/apps/_exporter.sass */
 div.listview.export .item.done .action.download a, div.listview.export .item.downloaded .action.download a {
   color: #6633cc;
   cursor: pointer;
 }
 
-/* line 71, ../sass/apps/_exporter.sass */
+/* line 78, ../sass/apps/_exporter.sass */
 .icon-pulse {
   -webkit-animation: pulsate-b 1s;
   -webkit-animation-iteration-count: infinite;
@@ -11645,35 +11654,35 @@ div.listview.export .item.done .action.download a, div.listview.export .item.dow
 }
 
 @-webkit-keyframes pulsate-b {
-  /* line 77, ../sass/apps/_exporter.sass */
+  /* line 84, ../sass/apps/_exporter.sass */
   0% {
     opacity: 1;
   }
 
-  /* line 79, ../sass/apps/_exporter.sass */
+  /* line 86, ../sass/apps/_exporter.sass */
   50% {
     opacity: 0.2;
   }
 
-  /* line 81, ../sass/apps/_exporter.sass */
+  /* line 88, ../sass/apps/_exporter.sass */
   100% {
     opacity: 1;
   }
 }
 
 @-webkit-keyframes pulsate-a {
-  /* line 85, ../sass/apps/_exporter.sass */
+  /* line 92, ../sass/apps/_exporter.sass */
   0% {
     -webkit-transform: scale(0.1, 0.1);
     opacity: 0;
   }
 
-  /* line 88, ../sass/apps/_exporter.sass */
+  /* line 95, ../sass/apps/_exporter.sass */
   50% {
     opacity: 1;
   }
 
-  /* line 90, ../sass/apps/_exporter.sass */
+  /* line 97, ../sass/apps/_exporter.sass */
   100% {
     webkit-transform: scale(1.2, 1.2);
     opacity: 0;

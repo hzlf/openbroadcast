@@ -47,7 +47,9 @@
 				{{ item.name|truncate_chars_inner:32 }}
 				{% if item.country %}({{ item.country }}){% endif %}
 				{% topflop_for_object item %} </a>
-
+                {% if item.lyrics %}
+                <small class="type" title="{{ item.lyrics }}">L</small>
+                {% endif %}
                 <!--
                 <small class="type">{{ item.get_mediatype_display }}</small>
                 -->

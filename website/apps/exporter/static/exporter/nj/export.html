@@ -6,12 +6,19 @@
         <i class="icon-ok-sign visible-while-downloaded"></i>
         <i class="icon-refresh icon-spin visible-while-ready"></i>
         <i class="icon-tasks visible-while-progress"></i>
-        <i class="icon-warning-sign icon-pulse visible-while-error"></i>
+        <i class="icon-warning-sign icon-pulse visible-while-error"
+           {% if object.status_msg %}
+               title="{{ object.status_msg }}"
+           {% endif %}
+           ></i>
 
     </td>
 
 
-    <td>{{ object.filename }}</td>
+    <td>
+        {{ object.filename }} <small>debug: {{ object.id }}</small>
+
+    </td>
     <td>{{ object.created|format_datetime('datetime') }}</td>
     <td>
         {% if object.downloaded %}
@@ -27,8 +34,10 @@
         {% endif %}
     </td>
     <td>
-        <a href="#" data-action="download"><i class="icon-download-alt"></i> Download</a>
 
+        {% if object.status == 1 or object.status == 4%}
+        <a href="#" data-action="download"><i class="icon-download-alt"></i> Download</a>
+        {% endif %}
     </td>
     <td>
 

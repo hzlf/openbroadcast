@@ -119,6 +119,37 @@ class MetaWorker(object):
 
 
 
+        if self.action == 'lyrics':
+            # using http://sahib.github.io/python-glyr/
+
+            from alibrary.models import Media
+            import plyr
+
+            ms = Media.objects.filter(lyrics=None)
+
+            print 'tracks without lyrics: %s' % ms.count()
+
+            for m in ms:
+
+                if m.name and m.artist.name:
+
+                    print '%s - %s' % (m.name, m.artist.name)
+
+                    q = plyr.Query(get_type='lyrics', artist=u'%s' % m.artist.name, title=u'%s' % m.name, parallel=10, verbosity=2, fuzzyness=2)
+                    result = q.commit()
+
+                    try:
+                        if len(result) > 0:
+                            m.lyrics = result[0].data
+                            m.save()
+
+                    except UnicodeError as err:
+                        print('Cannot display lyrics, conversion failed:', err)
+
+
+
+
+
 
 class Command(NoArgsCommand):
     """

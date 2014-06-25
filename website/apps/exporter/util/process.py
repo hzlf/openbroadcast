@@ -1,92 +1,115 @@
+import os
 import logging
 
-from audiotools import MetaData
-import audiotools
 from easy_thumbnails.files import get_thumbnailer
+
+from alibrary.util.relations import uuid_by_object
 
 log = logging.getLogger(__name__)
 
 class Process(object):
 
-    def __init__(self):
-        log = logging.getLogger('util.process.Process.__init__')
-
-
     def inject_metadata(self, path, media):
-        
-        log = logging.getLogger('util.process.Process.inject_metadata')
-        log.debug('inject metadata to: %s' % (path))
-        log.debug('source: %s' % (media))
-
-        """
-        audiotools.MetaData
-        http://audiotools.sourceforge.net/programming/audiotools.html?highlight=set_metadata#audiotools.MetaData
-        class audiotools.MetaData([track_name][, track_number][, track_total][, album_name][, artist_name]
-        [, performer_name][, composer_name][, conductor_name][, media][, ISRC][, catalog][, copyright]
-        [, publisher][, year][, data][, album_number][, album_total][, comment][, images])
-        """
-        meta = MetaData()
 
 
-        """
-        prepare metadata object
-        """
-        # track-level metadata
-        meta.track_name = media.name
-        meta.track_number = media.tracknumber
-        meta.media = 'DIGITAL'
-        meta.isrc = media.isrc
-        meta.genre = 2
-    
-        
-        # release-level metadata
-        if media.release:
-            meta.album_name = media.release.name
-            meta.catalog = media.release.catalognumber
-            meta.track_total = len(media.release.media_release.all())
-            
-            if media.release.releasedate:
-                try:
-                    meta.year = str(media.release.releasedate.year)
-                    meta.date = str(media.release.releasedate)
-                    
-                except Exception, e:
-                    print e
-            
-            try:
-                
-                cover_image = media.release.cover_image if media.release.cover_image else media.release.main_image
-                
-                if meta.supports_images() and cover_image:
-                    for i in meta.images():
-                        meta.delete_image(i)
-                        
-                    opt = dict(size=(200, 200), crop=True, bw=False, quality=80)
-                    image = get_thumbnailer(cover_image).get_thumbnail(opt)
-                    meta.add_image(get_raw_image(image.path, 0))
-                    
-            except Exception, e:
-                print e
-                
-            
-        # artist-level metadata
-        if media.artist:
-            meta.artist_name = media.artist.name
-                    
-        # label-level metadata
-        if media.release.label:
-            pass
-        
-        
-        audiotools.open(path).set_metadata(meta)
-        
+        self.metadata_mutagen(path, media)
+        #self.metadata_audiotools(path, media)
+
         return
 
 
 
 
+    def metadata_mutagen(self, path, media):
+
+        from mutagen.id3 import ID3, TRCK, TIT2, TPE1, TALB, TCON, TXXX, UFID, TSRC, TPUB, TMED, TRCK, TDRC
+
+        tags = ID3(path)
+
+        # reset tags
+        tags.delete()
+
+        # track-level metadata
+        tags.add(TIT2(encoding=3, text=u'%s' % media.name))
+        tags.add(UFID(encoding=3, owner='http://openbroadcast.ch', data=u'%s' % media.uuid))
+        # remove genre
+        tags.add(TCON(encoding=3, text=u''))
+        tags.add(TMED(encoding=3, text=u'DIGITAL'))
+        if media.tracknumber:
+            tags.add(TRCK(encoding=3, text=u'%s' % media.tracknumber))
+        if media.isrc:
+            tags.add(TSRC(encoding=3, text=u'%s' % media.isrc))
+
+        if uuid_by_object(media, 'musicbrainz'):
+            tags.add(UFID(encoding=3, owner='http://musicbrainz.org', data=u'%s' % uuid_by_object(media, 'musicbrainz')))
+
+        # release-level metadata
+        if media.release:
+            tags.add(TALB(encoding=3, text=u'%s' % media.release.name))
+            if media.release.catalognumber:
+                tags.add(TXXX(encoding=3, desc='CATALOGNUMBER', text=u'%s' % media.release.catalognumber))
+            if media.release.releasedate:
+                tags.add(TDRC(encoding=3, text=u'%s' % media.release.releasedate.year))
+            if media.release.release_country:
+                tags.add(TXXX(encoding=3, desc='MusicBrainz Album Release Country', text=u'%s' % media.release.release_country.iso2_code))
+            if media.release.totaltracks and media.tracknumber:
+                tags.add(TRCK(encoding=3, text=u'%s/%s' % (media.tracknumber, media.release.totaltracks)))
+            if media.release.releasedate:
+                tags.add(TDRC(encoding=3, text=u'%s' % media.release.releasedate.year))
+
+            if uuid_by_object(media.release, 'musicbrainz'):
+                tags.add(TXXX(encoding=3, desc='MusicBrainz Album Id', text=u'%s' % uuid_by_object(media.release, 'musicbrainz')))
+
+        # artist-level metadata
+        if media.artist:
+            tags.add(TPE1(encoding=3, text=u'%s' % media.artist.name))
+            if uuid_by_object(media.artist, 'musicbrainz'):
+                tags.add(TXXX(encoding=3, desc='MusicBrainz Artist Id', text=u'%s' % uuid_by_object(media.artist, 'musicbrainz')))
+
+        # label-level metadata
+        if media.release and media.release.label:
+            tags.add(TPUB(encoding=3, text=u'%s' % media.release.label.name))
+
+
+
+        tags.save(v1=0)
+
+        print 'MUTAGEN DONE'
+
+
+        return
+
+
+
+    def metadata_audiotools(self, path, media):
+
+        from audiotools import MetaData
+        import audiotools
+
+        meta = MetaData()
+
+        # release-level metadata
+        if media.release and media.release.main_image:
+
+            if meta.supports_images() and os.path.exists(media.release.main_image.path):
+                opt = dict(size=(200, 200), crop=True, bw=False, quality=80)
+                image = get_thumbnailer(media.release.main_image).get_thumbnail(opt)
+                meta.add_image(get_raw_image(image.path, 0))
+
+
+
+
+        audiotools.open(path).update_metadata(meta)
+
+        return
+
+
 
 def get_raw_image(filename, type):
+
+
+    import audiotools
+
     try:
         f = open(filename, 'rb')
         data = f.read()

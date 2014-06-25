@@ -112,6 +112,8 @@ class ExportResource(ModelResource):
         authentication =  MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
         authorization = Authorization()
         always_return_data = True
+        limit = 100
+        max_limit = 200
         filtering = {
             #'channel': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],

@@ -8,7 +8,7 @@ import shutil
 import logging
 
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.core.files import File as DjangoFile
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
@@ -26,7 +26,7 @@ from pushy.util import pushy_custom
 
 log = logging.getLogger(__name__)
 
-USE_CELERYD = True
+USE_CELERYD = False
 
 GENERIC_STATUS_CHOICES = (
     (0, _('Init')),
@@ -69,7 +69,11 @@ def create_export_path():
 
 
 def create_archive_dir(instance):
-    path = "export/cache/%s-%s/" % (time.strftime("%Y%m%d%H%M%S", time.gmtime()), instance.uuid)
+
+    #path = "export/cache/%s-%s/" % (time.strftime("%Y%m%d%H%M%S", time.gmtime()), instance.uuid)
+    path = "export/cache/%s/" % ('DEBUG')
+
+
     path_full = os.path.join(PROJECT_DIR, 'media', path)
 
     # debug - set to persistent directory for easier testing:
@@ -209,7 +213,6 @@ class Export(BaseModel):
 
         try:
 
-
             for item in obj.export_items.all():
 
                 log.debug('export ctype: %s | id: %s' % (item.content_type, item.object_id))
@@ -242,7 +245,7 @@ class Export(BaseModel):
 
                     for media in t_item.media_release.all():
 
-                        log.debug('export item: %s | id: %s' % ( media.name, media.pk))
+                        #log.debug('export item: %s | id: %s' % ( media.name, media.pk))
 
                         if obj.fileformat == 'mp3':
 
@@ -250,11 +253,16 @@ class Export(BaseModel):
                             filename = safe_name(filename)
                             #filepath = os.path.join(archive_cache_dir, filename)
                             filepath = os.path.join(item_cache_dir, filename)
+                            try:
+                                shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
+                            except Exception, e:
+                                print 'UNABLE TO COPY FILE WITH ID: %s' % media.pk
+                                pass
 
-                            shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
                             try:
                                 process.inject_metadata(filepath, media)
                             except Exception, e:
+                                print 'UNABLE TO INJECT METADATA: %s' % e
                                 pass
 
                         # just dummy - not possible...
@@ -264,10 +272,16 @@ class Export(BaseModel):
                             filename = safe_name(filename)
                             filepath = os.path.join(item_cache_dir, filename)
 
-                            shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
+                            try:
+                                shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
+                            except Exception, e:
+                                print 'UNABLE TO COPY FILE WITH ID: %s' % media.pk
+                                pass
+
                             try:
                                 process.inject_metadata(filepath, media)
                             except Exception, e:
+                                print 'UNABLE TO INJECT METADATA: %s' % e
                                 pass
 
                         playlist_items.append({'filename': filename, 'item': media})
@@ -329,7 +343,7 @@ class Export(BaseModel):
 
                         media = playlist_item.content_object
 
-                        log.debug('export item: %s | id: %s' % ( media.name, media.pk))
+                        #log.debug('export item: %s | id: %s' % ( media.name, media.pk))
 
                         if obj.fileformat == 'mp3':
 
@@ -338,10 +352,17 @@ class Export(BaseModel):
                             #filepath = os.path.join(archive_cache_dir, filename)
                             filepath = os.path.join(item_cache_dir, filename)
 
-                            shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
+                            try:
+                                shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
+                            except Exception, e:
+                                print 'UNABLE TO COPY FILE WITH ID: %s' % media.pk
+                                pass
+
+
                             try:
                                 process.inject_metadata(filepath, media)
                             except Exception, e:
+                                print 'UNABLE TO INJECT METADATA: %s' % e
                                 pass
 
                             playlist_items.append({'filename': filename, 'item': media})
@@ -357,6 +378,7 @@ class Export(BaseModel):
                             try:
                                 process.inject_metadata(filepath, media)
                             except Exception, e:
+                                print 'UNABLE TO INJECT METADATA: %s' % e
                                 pass
 
                             playlist_items.append({'filename': filename, 'item': media})
@@ -381,9 +403,9 @@ class Export(BaseModel):
                         str = render_to_string('exporter/txt/README.TXT', {'object': t_item})
                         txt.write(str)
 
-                    with open(os.path.join(item_cache_dir, '00 - playlist.m3u'), "w") as txt:
-                        str = render_to_string('exporter/txt/playlist.m3u', {'objects': playlist_items})
-                        txt.write(str)
+                    #with open(os.path.join(item_cache_dir, '00 - playlist.m3u'), "w") as txt:
+                    #    str = render_to_string('exporter/txt/playlist.m3u', {'objects': playlist_items})
+                    #    txt.write(str)
                     """
                     with open(os.path.join(item_cache_dir, 'LICENSE.TXT'), "w") as txt:
                         str = render_to_string('exporter/txt/LICENSE.TXT', { 'objects': playlist_items })
@@ -404,17 +426,20 @@ class Export(BaseModel):
                     item_cache_dir = os.path.join(archive_cache_dir, safe_name(t_item.name))
                     os.makedirs(item_cache_dir)
 
+                    print 'CACHE-DIR: %s' % item_cache_dir
+
                     # holder for playlist entries
                     playlist_items = []
 
                     # string format for filename
                     filename_format = '%s - %s.%s'
 
+                    print 'START ITEM LOOP'
                     for playlist_item in [t_item]:
 
                         media = playlist_item
 
-                        log.debug('export item: %s | id: %s' % ( media.name, media.pk))
+                        #log.debug('export item: %s | id: %s' % ( media.name, media.pk))
 
                         if obj.fileformat == 'mp3':
 
@@ -423,10 +448,20 @@ class Export(BaseModel):
                             #filepath = os.path.join(archive_cache_dir, filename)
                             filepath = os.path.join(item_cache_dir, filename)
 
-                            shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
                             try:
-                                process.inject_metadata(filepath, media)
+                                shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
                             except Exception, e:
+                                print 'UNABLE TO COPY FILE WITH ID: %s' % media.pk
+                                pass
+
+
+
+                            try:
+                                print 'PRE-INJECT METADATA'
+                                process.inject_metadata(filepath, media)
+                                print 'POST-INJECT METADATA'
+                            except Exception, e:
+                                print 'UNABLE TO INJECT METADATA: %s' % e
                                 pass
 
                             playlist_items.append({'filename': filename, 'item': media})
@@ -442,6 +477,7 @@ class Export(BaseModel):
                             try:
                                 process.inject_metadata(filepath, media)
                             except Exception, e:
+                                print 'UNABLE TO INJECT METADATA: %s' % e
                                 pass
 
                             playlist_items.append({'filename': filename, 'item': media})
@@ -466,9 +502,9 @@ class Export(BaseModel):
                         str = render_to_string('exporter/txt/README.TXT', {'object': t_item})
                         txt.write(str)
 
-                    with open(os.path.join(item_cache_dir, '00 - playlist.m3u'), "w") as txt:
-                        str = render_to_string('exporter/txt/playlist.m3u', {'objects': playlist_items})
-                        txt.write(str)
+                    #with open(os.path.join(item_cache_dir, '00 - playlist.m3u'), "w") as txt:
+                    #    str = render_to_string('exporter/txt/playlist.m3u', {'objects': playlist_items})
+                    #    txt.write(str)
                     """
                     with open(os.path.join(item_cache_dir, 'LICENSE.TXT'), "w") as txt:
                         str = render_to_string('exporter/txt/LICENSE.TXT', { 'objects': playlist_items })
@@ -499,7 +535,11 @@ class Export(BaseModel):
         """
         finally clean up
         """
-        shutil.rmtree(archive_dir, True)
+        try:
+            pass
+            #shutil.rmtree(archive_dir, True)
+        except:
+            pass
 
     def save(self, *args, **kwargs):
 
@@ -527,6 +567,24 @@ def post_save_export(sender, **kwargs):
 
 
 post_save.connect(post_save_export, sender=Export)
+
+
+def post_delete_export(sender, **kwargs):
+    obj = kwargs['instance']
+
+    if obj.file:
+        log.debug('Post delete action, remove file: %s' % obj.file.path)
+
+        directory = os.path.split(obj.file.path)[0]
+        try:
+            shutil.rmtree(directory, True)
+        except:
+            obj.file.delete(False)
+
+
+
+
+post_delete.connect(post_delete_export, sender=Export)
 
 
 def generate_export_filename(qs):

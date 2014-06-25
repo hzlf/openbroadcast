@@ -11,7 +11,8 @@ CONTINENTS = (
     ('AS', _('Asia')),
     ('OC',  _('Oceania')),
     ('SA', _('South America')),
-    ('AN', _('Antarctica'))
+    ('AN', _('Antarctica')),
+    ('WX', _('Worldwide'))
 )
 
 AREAS = (
