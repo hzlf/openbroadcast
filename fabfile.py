@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import with_statement
 from fabric.api import local, settings, abort, run, cd, env
+from fabric.contrib import files
 
 import urllib2
 import sys
@@ -88,6 +89,9 @@ def deploy(branch=None):
     except Exception, e:
         print 'unable to mkdir: %s - %s' % (env.path, e)
 
+
+    repository_exists = False
+
     with cd(env.path):  
         
         # create directory to save the local_config
@@ -101,21 +105,51 @@ def deploy(branch=None):
         except Exception, e:
             pass
 
-        try:
-            run('rm -Rf src_new')
-        except Exception, e:
-            pass
-        
-        run('mkdir src_new')
 
-        
-    with cd(env.path + '/src_new'):
-        
-        # aquire code from repository
-        run('git init')
-        run('git remote add -t %s -f origin %s' % (branch, env.git_url))
-        run('git fetch')
-        run('git checkout %s' % (branch))
+
+        if(files.exists('repository')):
+            repository_exists = True
+
+        print 'DO WE HAVE A REPOSITORY???'
+        print repository_exists
+
+
+
+        if not repository_exists:
+            try:
+                run('rm -Rf src_new')
+            except Exception, e:
+                pass
+            run('mkdir src_new')
+
+
+    if repository_exists:
+        run('cp -Rp repository src_new')
+
+        with cd(env.path + '/repository'):
+            run('git fetch origin %s' % (branch))
+
+        with cd(env.path):
+            run('cp -Rp repository src_new')
+
+
+    if not repository_exists:
+
+        with cd(env.path + '/src_new'):
+
+            # aquire code from repository
+            run('git init')
+            run('git remote add -t %s -f origin %s' % (branch, env.git_url))
+            run('git fetch')
+            run('git checkout %s' % (branch))
+
+        with cd(env.path):
+            run('cp -Rp src_new repository')
+
+
+
+
+
 
     with cd(env.path): 
 
