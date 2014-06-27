@@ -394,7 +394,10 @@ ExporterApp = (function () {
         }
 
         // run the queue
-        self.run(export_session, redirect);
+        if(self.run(export_session, redirect)) {
+            // TODO: refactor dependency
+            base.ui.ui_message('Download queued', 10000);
+        }
 
         /**/
 
@@ -403,13 +406,16 @@ ExporterApp = (function () {
 
 
 
-            // TODO: refactor dependency
-        base.ui.ui_message('Download queued', 10000);
+
 
 
     };
 
     this.run = function (export_session, redirect) {
+
+        var status;
+        var message;
+
         jQuery.ajax({
             url: export_session.resource_uri,
             type: 'PATCH',
@@ -420,12 +426,25 @@ ExporterApp = (function () {
             success: function (data) {
                 debug.debug('queue:', data);
                 export_session = data;
+
+                status = true
+
                 if (redirect) {
                     window.location.href = export_session.download_url;
                 }
             },
+            error: function (a,b,c) {
+                console.log(a,b,c)
+                //alert(c);
+                alert(a.responseText)
+
+            },
             async: true // this is the processing one - could take some time.
         });
+
+        return status;
+
+
     };
 
 });

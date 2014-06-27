@@ -67,6 +67,7 @@ class ExportDeleteAllView(View):
     def get(self, *args, **kwargs):
 
 
+        #Export.objects.filter(user=self.request.user).exclude(status__in=[2,3]).delete()
         Export.objects.filter(user=self.request.user).delete()
 
 

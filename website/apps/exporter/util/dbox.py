@@ -30,13 +30,16 @@ class Synchronizer(object):
                 secret = social_user.tokens['access_token'].split('&')[1].split('=')[1]
 
                 # Set Access Token on Session
-                dbox_session = session.DropboxSession(settings.DROPBOX_APP_ID, settings.DROPBOX_API_SECRET, 'app_folder')
-                dbox_session.set_token(secret, token)
+                dbox_session = session.DropboxSession(settings.DROPBOX_APP_ID,
+                                                      settings.DROPBOX_API_SECRET,
+                                                      'app_folder')
 
+                dbox_session.set_token(secret, token)
                 self.dbox_client = client.DropboxClient(dbox_session)
 
             except Exception, e:
                 log.warn(e)
+
 
 
     def upload(self, src, dst):
@@ -46,8 +49,10 @@ class Synchronizer(object):
 
         if USE_CELERYD:
             self.upload_task.delay(self, src, dst)
+            #dbox_upload.delay(self, src, dst)
         else:
             self.upload_task(self, src, dst)
+            #dbox_upload(self, src, dst)
 
     @task
     def upload_task(obj, src, dst):
@@ -59,8 +64,5 @@ class Synchronizer(object):
                 print "uploaded:", response
             except Exception, e:
                 log.warn(e)
-
-
-
 
 

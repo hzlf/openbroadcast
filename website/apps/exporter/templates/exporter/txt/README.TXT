@@ -1,6 +1,8 @@
+{% load absolute %}
 #####################################################
 # File downloaded from openbroadcast.ch             #
 #####################################################
 
-permalink: {{ object.get_absolute_url }}
+For details visit: {{ SITE_ROOT }}{{ object.get_absolute_url }}
 
+-----------------------------------------------------

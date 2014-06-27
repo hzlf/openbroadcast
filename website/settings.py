@@ -174,6 +174,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
     # mobile
     'django_mobile.context_processors.flavour',
+    'absolute.context_processors.absolute',
 
     # messaging
     'postman.context_processors.inbox',
@@ -448,6 +449,7 @@ INSTALLED_APPS = (
     'invitation',
 
     # api
+    'absolute',
     'tastypie',
     # oauth
     'provider',

@@ -55,10 +55,13 @@
                     <a href="{{ object.get_absolute_url }}"><i class="icon-edit"></i> Details</a>
                 </li>
                 -->
+                {% if object.status != 2 %}
                 <li>
-                    <a href="#" data-action="delete"><i class="icon-trash"></i>
-                        Delete</a>
+                    <a href="#" data-action="delete"><i class="icon-trash"></i>Delete</a>
                 </li>
+                {% else %}
+                    <li>...</li>
+                {% endif %}
                 <!--
                 <li class="divider"></li>
                 <li>

@@ -31,7 +31,7 @@ USE_CELERYD = False
 GENERIC_STATUS_CHOICES = (
     (0, _('Init')),
     (1, _('Done')),
-    (2, _('Ready')),
+    (2, _('Ready')), # a.k.a. 'queued'
     (3, _('Progress')),
     (4, _('Downloaded')),
     (99, _('Error')),
@@ -70,9 +70,8 @@ def create_export_path():
 
 def create_archive_dir(instance):
 
-    #path = "export/cache/%s-%s/" % (time.strftime("%Y%m%d%H%M%S", time.gmtime()), instance.uuid)
-    path = "export/cache/%s/" % ('DEBUG')
-
+    path = "export/cache/%s-%s/" % (time.strftime("%Y%m%d%H%M%S", time.gmtime()), instance.uuid)
+    #path = "export/cache/%s/" % ('DEBUG')
 
     path_full = os.path.join(PROJECT_DIR, 'media', path)
 
@@ -185,361 +184,31 @@ class Export(BaseModel):
     @task
     def process_task(obj):
 
+        target = 'download'
+
         from atracker.util import create_event
 
         process = Process()
+        status, result, messages = process.run(instance=obj, format=obj.fileformat)
 
-        dbox = None
-        # dbox = Synchronizer(obj.user)
+        if target == 'download':
 
-        log = logging.getLogger('exporter.models.process_task')
+            if result:
 
-        archive_dir = create_archive_dir(obj)
-        archive_cache_dir = os.path.join(archive_dir, 'cache/')
-        archive_path = os.path.join(archive_dir, 'archive') # .zip appended by 'make_archive'
+                obj.filesize = os.path.getsize(result)
+                obj.file = DjangoFile(open(result), u'archive')
 
-        # clean cache and recreate
-        shutil.rmtree(archive_cache_dir, True)
-        os.makedirs(archive_cache_dir)
+                # update status
+                obj.status = 1
+                obj.save()
+                process.clear_cache()
+            else:
+                obj.status = 99
+                obj.status_msg = messages
+                obj.save()
+                process.clear_cache()
 
-        log.debug('archive_dir: %s' % (archive_dir))
-        log.debug('archive_cache_dir: %s' % (archive_cache_dir))
-        log.debug('archive_path: %s' % (archive_path))
 
-        """
-        first collect respective items and store everything in a temporary directory
-        (the archive_cache_dir)
-        """
-
-        try:
-
-            for item in obj.export_items.all():
-
-                log.debug('export ctype: %s | id: %s' % (item.content_type, item.object_id))
-
-                # switching processing for different types
-
-                """
-                Releases
-                """
-                if item.content_type.name.lower() == 'release':
-
-                    t_item = item.content_object
-
-                    """
-                    create item specific path
-                    < Artist Name >/< Release Name >/...
-                    """
-
-                    # relative path, for any target
-                    item_rel_dir = os.path.join(safe_name(t_item.get_artist_display()), safe_name(t_item.name))
-                    item_cache_dir = os.path.join(archive_cache_dir, item_rel_dir)
-
-                    os.makedirs(item_cache_dir)
-
-                    # holder for playlist entries
-                    playlist_items = []
-
-                    # string format for filename
-                    filename_format = '%s - %s - %s.%s'
-
-                    for media in t_item.media_release.all():
-
-                        #log.debug('export item: %s | id: %s' % ( media.name, media.pk))
-
-                        if obj.fileformat == 'mp3':
-
-                            filename = filename_format % (media.tracknumber, media.name, media.artist.name, 'mp3')
-                            filename = safe_name(filename)
-                            #filepath = os.path.join(archive_cache_dir, filename)
-                            filepath = os.path.join(item_cache_dir, filename)
-                            try:
-                                shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
-                            except Exception, e:
-                                print 'UNABLE TO COPY FILE WITH ID: %s' % media.pk
-                                pass
-
-                            try:
-                                process.inject_metadata(filepath, media)
-                            except Exception, e:
-                                print 'UNABLE TO INJECT METADATA: %s' % e
-                                pass
-
-                        # just dummy - not possible...
-                        if obj.fileformat == 'flac':
-
-                            filename = filename_format % (media.tracknumber, media.name, media.artist.name, 'mp3')
-                            filename = safe_name(filename)
-                            filepath = os.path.join(item_cache_dir, filename)
-
-                            try:
-                                shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
-                            except Exception, e:
-                                print 'UNABLE TO COPY FILE WITH ID: %s' % media.pk
-                                pass
-
-                            try:
-                                process.inject_metadata(filepath, media)
-                            except Exception, e:
-                                print 'UNABLE TO INJECT METADATA: %s' % e
-                                pass
-
-                        playlist_items.append({'filename': filename, 'item': media})
-
-                        if dbox:
-                            dbox.upload(filepath, os.path.join('Releases', item_rel_dir, filename))
-
-                        create_event(obj.user, media, None, 'download')
-
-                    if t_item.main_image:
-                        try:
-                            shutil.copyfile(t_item.main_image.path, os.path.join(item_cache_dir, 'cover.jpg'))
-                        except Exception, e:
-                            print e
-                            pass
-
-
-                            #archive_file.write(t_item.main_image.path, 'cover.jpg')
-
-                    """
-                    Add additional assets
-                    REATME.TXT LICENSE.TXT etc
-                    """
-                    with open(os.path.join(item_cache_dir, 'README.TXT'), "w") as txt:
-                        str = render_to_string('exporter/txt/README.TXT', {'object': t_item})
-                        txt.write(str)
-
-                    """
-                    with open(os.path.join(item_cache_dir, '00 - playlist.m3u'), "w") as txt:
-                        str = render_to_string('exporter/txt/playlist.m3u', { 'objects': playlist_items })
-                        txt.write(str)
-
-                    with open(os.path.join(item_cache_dir, 'LICENSE.TXT'), "w") as txt:
-                        str = render_to_string('exporter/txt/LICENSE.TXT', { 'objects': playlist_items })
-                        txt.write(str)
-                    """
-
-                """
-                Playlist
-                """
-                if item.content_type.name.lower() == 'playlist':
-
-                    t_item = item.content_object
-
-                    """
-                    create item specific path
-                    < Playlist Name >/...
-                    """
-                    item_cache_dir = os.path.join(archive_cache_dir, safe_name(t_item.name))
-                    os.makedirs(item_cache_dir)
-
-                    # holder for playlist entries
-                    playlist_items = []
-
-                    # string format for filename
-                    filename_format = '%s - %s.%s'
-
-                    for playlist_item in t_item.get_items():
-
-                        media = playlist_item.content_object
-
-                        #log.debug('export item: %s | id: %s' % ( media.name, media.pk))
-
-                        if obj.fileformat == 'mp3':
-
-                            filename = filename_format % (media.name, media.artist.name, 'mp3')
-                            filename = safe_name(filename)
-                            #filepath = os.path.join(archive_cache_dir, filename)
-                            filepath = os.path.join(item_cache_dir, filename)
-
-                            try:
-                                shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
-                            except Exception, e:
-                                print 'UNABLE TO COPY FILE WITH ID: %s' % media.pk
-                                pass
-
-
-                            try:
-                                process.inject_metadata(filepath, media)
-                            except Exception, e:
-                                print 'UNABLE TO INJECT METADATA: %s' % e
-                                pass
-
-                            playlist_items.append({'filename': filename, 'item': media})
-
-                        # just dummy - not possible...
-                        if obj.fileformat == 'flac':
-
-                            filename = filename_format % (media.name, media.artist.name, 'mp3')
-                            filename = safe_name(filename)
-                            filepath = os.path.join(item_cache_dir, filename)
-
-                            shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
-                            try:
-                                process.inject_metadata(filepath, media)
-                            except Exception, e:
-                                print 'UNABLE TO INJECT METADATA: %s' % e
-                                pass
-
-                            playlist_items.append({'filename': filename, 'item': media})
-
-                        create_event(obj.user, media, None, 'download')
-
-                    if t_item.main_image:
-                        try:
-                            shutil.copyfile(t_item.main_image.path, os.path.join(item_cache_dir, 'image.jpg'))
-                        except Exception, e:
-                            print e
-                            pass
-
-
-                            #archive_file.write(t_item.main_image.path, 'cover.jpg')
-
-                    """
-                    Add additional assets
-                    REATME.TXT LICENSE.TXT etc
-                    """
-                    with open(os.path.join(item_cache_dir, 'README.TXT'), "w") as txt:
-                        str = render_to_string('exporter/txt/README.TXT', {'object': t_item})
-                        txt.write(str)
-
-                    #with open(os.path.join(item_cache_dir, '00 - playlist.m3u'), "w") as txt:
-                    #    str = render_to_string('exporter/txt/playlist.m3u', {'objects': playlist_items})
-                    #    txt.write(str)
-                    """
-                    with open(os.path.join(item_cache_dir, 'LICENSE.TXT'), "w") as txt:
-                        str = render_to_string('exporter/txt/LICENSE.TXT', { 'objects': playlist_items })
-                        txt.write(str)
-                    """
-
-                """
-                Media
-                """
-                if item.content_type.name.lower() == 'track':
-
-                    t_item = item.content_object
-
-                    """
-                    create item specific path
-                    < Playlist Name >/...
-                    """
-                    item_cache_dir = os.path.join(archive_cache_dir, safe_name(t_item.name))
-                    os.makedirs(item_cache_dir)
-
-                    print 'CACHE-DIR: %s' % item_cache_dir
-
-                    # holder for playlist entries
-                    playlist_items = []
-
-                    # string format for filename
-                    filename_format = '%s - %s.%s'
-
-                    print 'START ITEM LOOP'
-                    for playlist_item in [t_item]:
-
-                        media = playlist_item
-
-                        #log.debug('export item: %s | id: %s' % ( media.name, media.pk))
-
-                        if obj.fileformat == 'mp3':
-
-                            filename = filename_format % (media.name, media.artist.name, 'mp3')
-                            filename = safe_name(filename)
-                            #filepath = os.path.join(archive_cache_dir, filename)
-                            filepath = os.path.join(item_cache_dir, filename)
-
-                            try:
-                                shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
-                            except Exception, e:
-                                print 'UNABLE TO COPY FILE WITH ID: %s' % media.pk
-                                pass
-
-
-
-                            try:
-                                print 'PRE-INJECT METADATA'
-                                process.inject_metadata(filepath, media)
-                                print 'POST-INJECT METADATA'
-                            except Exception, e:
-                                print 'UNABLE TO INJECT METADATA: %s' % e
-                                pass
-
-                            playlist_items.append({'filename': filename, 'item': media})
-
-                        # just dummy - not possible...
-                        if obj.fileformat == 'flac':
-
-                            filename = filename_format % (media.name, media.artist.name, 'mp3')
-                            filename = safe_name(filename)
-                            filepath = os.path.join(item_cache_dir, filename)
-
-                            shutil.copyfile(media.get_cache_file('mp3', 'base'), filepath)
-                            try:
-                                process.inject_metadata(filepath, media)
-                            except Exception, e:
-                                print 'UNABLE TO INJECT METADATA: %s' % e
-                                pass
-
-                            playlist_items.append({'filename': filename, 'item': media})
-
-                        create_event(obj.user, media, None, 'download')
-
-                    if t_item.release and t_item.release.main_image:
-                        try:
-                            shutil.copyfile(t_item.release.main_image.path, os.path.join(item_cache_dir, 'image.jpg'))
-                        except Exception, e:
-                            print e
-                            pass
-
-
-                            #archive_file.write(t_item.main_image.path, 'cover.jpg')
-
-                    """
-                    Add additional assets
-                    REATME.TXT LICENSE.TXT etc
-                    """
-                    with open(os.path.join(item_cache_dir, 'README.TXT'), "w") as txt:
-                        str = render_to_string('exporter/txt/README.TXT', {'object': t_item})
-                        txt.write(str)
-
-                    #with open(os.path.join(item_cache_dir, '00 - playlist.m3u'), "w") as txt:
-                    #    str = render_to_string('exporter/txt/playlist.m3u', {'objects': playlist_items})
-                    #    txt.write(str)
-                    """
-                    with open(os.path.join(item_cache_dir, 'LICENSE.TXT'), "w") as txt:
-                        str = render_to_string('exporter/txt/LICENSE.TXT', { 'objects': playlist_items })
-                        txt.write(str)
-                    """
-
-            """
-            take the 'archive_cache_dir' and compress it to zip format
-            """
-            shutil.make_archive(archive_path, 'zip', archive_cache_dir)
-
-            """
-            get archive-file metadata and create a django-file
-            """
-            obj.file = DjangoFile(open(archive_path + '.zip'), u'archive.zip')
-            obj.filesize = os.path.getsize(archive_path + '.zip')
-
-
-            # update status
-            obj.status = 1
-            obj.save()
-
-        except Exception, e:
-            obj.status_msg = e
-            obj.status = 99
-            obj.save()
-
-        """
-        finally clean up
-        """
-        try:
-            pass
-            #shutil.rmtree(archive_dir, True)
-        except:
-            pass
 
     def save(self, *args, **kwargs):
 
