@@ -11,7 +11,10 @@ from django.contrib.contenttypes.models import ContentType
 from tagging.models import Tag
 from celery.task import task
 
+from l10n.models import Country
+
 from alibrary.models import Relation, Release, Artist, Media, MediaExtraartists, Profession, ArtistMembership
+from alibrary.util.storage import get_file_from_url
 from lib.util import filer_extra
 from alibrary.util import lookup
 from settings import MEDIA_ROOT
@@ -88,6 +91,10 @@ class Importer(object):
         
         if 'media_tracknumber' in rt and rt['media_tracknumber']:
             tracknumber = rt['media_tracknumber']
+
+        if not tracknumber:
+            if 'media_tracknumber' in it and it['media_tracknumber']:
+                tracknumber = it['media_tracknumber']
 
         if 'alibrary_media_id' in it and it['alibrary_media_id']:
             alibrary_media_id = it['alibrary_media_id']
@@ -583,9 +590,9 @@ def mb_complete_media_task(obj, mb_id, mb_release_id, excludes=()):
     r = requests.get(url)
     result = r.json()
 
-    print '*****************************************************************'
+
     print url
-    print '*****************************************************************'
+
 
     # get release based information (to map track- and disc-number)
     inc = ('recordings',)
@@ -593,18 +600,13 @@ def mb_complete_media_task(obj, mb_id, mb_release_id, excludes=()):
 
     r = requests.get(url)
     result_release = r.json()
-    print '*****************************************************************'
+
     print url
-    print '*****************************************************************'
 
-    print(result)
+    #print(result)
+    #print
+    #print(result_release)
 
-    print
-
-    print(result_release)
-
-
-    print '*****************************************************************'
 
     if DEBUG_WAIT:
         raw_input("Press Enter to continue...")
@@ -655,7 +657,6 @@ def mb_complete_media_task(obj, mb_id, mb_release_id, excludes=()):
 
     if 'relations' in result:
         for relation in result['relations']:
-
 
             # map artists
             if 'artist' in relation:
@@ -863,7 +864,8 @@ def mb_complete_release_task(obj, mb_id):
     # try to load & assign image
     if discogs_image:
         try:
-            img = filer_extra.url_to_file(discogs_image, obj.folder)
+            #img = filer_extra.url_to_file(discogs_image, obj.folder)
+            img = get_file_from_url(discogs_image)
             obj.main_image = img
             obj.save()
         except:
@@ -876,7 +878,8 @@ def mb_complete_release_task(obj, mb_id):
             r = requests.get(url)
             ca_result = r.json()
             ca_url = ca_result['images'][0]['image']
-            img = filer_extra.url_to_file(ca_url, obj.folder)
+            #img = filer_extra.url_to_file(ca_url, obj.folder)
+            img = get_file_from_url(ca_url)
             obj.main_image = img
             obj.save()
         except Exception, e:
@@ -962,7 +965,11 @@ def mb_complete_release_task(obj, mb_id):
     country = result.get('country', None)
     if country:
         log.debug('got country: %s' % (country))
-        obj.release_country = country
+        try:
+            release_country = Country.objects.filter(iso2_code=country)[0]
+            obj.release_country = release_country
+        except:
+            pass
 
     date = result.get('date', None)
     if date:
@@ -995,6 +1002,8 @@ def mb_complete_release_task(obj, mb_id):
     mb_url = 'http://musicbrainz.org/release/%s' % (mb_id)
     try:
         rel = Relation.objects.get(object_id=obj.pk, url=mb_url)
+        print 'got release relation:'
+        print rel
     except:
         log.debug('relation not here yet, add it: %s' % (mb_url))
         rel = Relation(content_object=obj, url=mb_url)
@@ -1073,7 +1082,8 @@ def mb_complete_artist_task(obj, mb_id):
     # try to load & assign image
     if discogs_image:
         try:
-            img = filer_extra.url_to_file(discogs_image, obj.folder)
+            #img = filer_extra.url_to_file(discogs_image, obj.folder)
+            img = get_file_from_url(discogs_image)
             obj.main_image = img
             obj.save()
         except:

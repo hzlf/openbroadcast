@@ -335,7 +335,7 @@ class Release(MigrationMixin):
     
     
     def get_media(self):
-        return Media.objects.filter(release=self).select_related()
+        return Media.objects.filter(release=self).order_by('tracknumber', 'name').select_related()
     
     def get_products(self):
         return self.releaseproduct.all()
@@ -430,7 +430,8 @@ class Release(MigrationMixin):
     
         if len(artists) > 1:
             from alibrary.models import Artist
-            artists = Artist.objects.filter(name="Various Artists")
+            a, c = Artist.objects.get_or_create(name="Various Artists")
+            artists = [a]
             
         return artists
 

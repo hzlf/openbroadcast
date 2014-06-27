@@ -18,6 +18,8 @@ ImporterUi = function() {
 	this.interval_loops = 0;
 	this.interval_duration = 50000;
 	this.api_url = false;
+
+    this.pushy_paused = false;
 	
 	this.importfiles = [];
 
@@ -43,9 +45,14 @@ ImporterUi = function() {
 		// set interval (now handled by pushy..)
 		// self.set_interval(self.run_interval, self.interval_duration);
 		pushy.subscribe(self.api_url, function() {
-        	self.run_interval();
+
+            if(!this.pushy_paused) {
+                self.run_interval();
+            }
         });
 		self.run_interval();
+
+
 	};
 
 	this.iface = function() {
@@ -259,6 +266,9 @@ ImporterUi = function() {
 
 	};
 	this.update_import_files_callback = function(data) {
+
+        console.log('update_import_files_callback', data);
+
 		self.update_list_display(data.files);
 		self.update_summary_display(data.files);
 		try {
@@ -267,9 +277,11 @@ ImporterUi = function() {
 		} catch(err) {
 			// debug.debug(err);
 		}
-		
-		
+
+        self.update_summary();
+
 	};
+
 	
 	this.update_summary_display = function(data) {
 		var container = $('#import_summary');
@@ -462,7 +474,20 @@ ImporterUi = function() {
 
 	};
 
-	this.update_list_display = function(data) {
+	this.update_list_display = function(data, force) {
+
+
+        var force_update = false;
+        if(force != undefined && force == true) {
+            force_update = true;
+        }
+
+        if(force_update) {
+            $('#result_holder').html('');
+            self.importfiles = [];
+        }
+
+
 		debug.debug(data);
 		$.each(data, function(i, item) {
 			debug.debug(item);
@@ -495,9 +520,14 @@ ImporterUi = function() {
 				
 			} else {
 				debug.debug('element exists in dom');
+
+
 			};
 			
 		});
+
+
+
 	};
 	
 	
@@ -514,7 +544,7 @@ ImporterUi = function() {
 		var count_error = 0;
 	
 		$.each(self.importfiles, function(i, item) {
-			console.log('update importfile / ImporterApp');
+			// console.log('update importfile / ImporterApp');
 			var data = item.local_data;
 
 			if (data.status == 'done') {

@@ -32,12 +32,8 @@ GENERIC_STATUS_CHOICES = (
     (11, _('Other')),
 )
 
-
-
 # extra fields
 from django_extensions.db.fields import *
-
-
 
 def clean_upload_path(instance, filename):
     import unicodedata
@@ -47,11 +43,6 @@ def clean_upload_path(instance, filename):
     cleaned_filename = unicodedata.normalize('NFKD', filename).encode('ASCII', 'ignore')    
     folder = "import/%s/" % time.strftime("%Y%m%d%H%M%S", time.gmtime())
     return os.path.join(folder, "%s%s" % (cleaned_filename.lower(), extension.lower()))
-
-
-
-
-
 
 
 class BaseModel(models.Model):
@@ -110,7 +101,6 @@ class Import(BaseModel):
         return ('importer-import-delete', [str(self.pk)])
     
 
-    
     @task
     def get_stats(self):
         stats = {}
@@ -132,10 +122,10 @@ class Import(BaseModel):
         return '%s%s/' % (url, self.pk)
     
     def apply_import_tag(self, importfile, **kwargs):
-        print 'apply_import_tag:'
-        print importfile.import_tag
-        
-        
+
+        #print 'apply_import_tag:'
+        #print importfile.import_tag
+
         if 'mb_release_id' in importfile.import_tag:
         
             mb_release_id = importfile.import_tag['mb_release_id']
@@ -143,10 +133,7 @@ class Import(BaseModel):
             qs = self.files.exclude(pk=importfile.pk)
             importfiles = qs.filter(status=2)
             for file in importfiles:
-                print 'mb results'
                 for mb in file.results_musicbrainz:
-                    print mb
-                    
                     # got a match - try to apply
                     if 'mb_id' in mb and mb['mb_id'] == mb_release_id:
                         print 'GOT A MATCH!!!'
@@ -162,8 +149,9 @@ class Import(BaseModel):
                         
                         kwargs['skip_apply_import_tag'] = True
                         file.save(**kwargs)
-                    
-                print
+
+                        return
+
                 
 
 
@@ -172,8 +160,6 @@ class Import(BaseModel):
     
     def add_to_collection(self, item):
         pass
-
-
 
 
     # importitem handling
@@ -198,8 +184,7 @@ class Import(BaseModel):
         ii_ids = ImportItem.objects.filter(content_type=ctype, import_session=self).values_list('object_id', flat=True)
         return ii_ids
 
-        
-    
+
     def save(self, *args, **kwargs):
         
         """
@@ -220,51 +205,6 @@ class Import(BaseModel):
     
 class ImportFile(BaseModel):
 
-    class Meta:
-        app_label = 'importer'
-        verbose_name = _('Import File')
-        verbose_name_plural = _('Import Files')
-        ordering = ('created', )
-    
-    filename = models.CharField(max_length=256, blank=True, null=True)
-    #file = models.FileField(upload_to='dummy')
-    file = models.FileField(max_length=256, upload_to=clean_upload_path)
-
-    import_session = models.ForeignKey(Import, verbose_name=_('Import'), null=True, related_name='files')
-    
-    mimetype = models.CharField(max_length=100, blank=True, null=True)
-    
-    messages = JSONField(blank=True, null=True, default=None)
-    
-    """
-    Result sets. Not stored in foreign model - as they are rather fix.
-    """
-    
-    settings = JSONField(blank=True, null=True)
-    
-    results_tag = JSONField(blank=True, null=True)
-    results_tag_status = models.PositiveIntegerField(verbose_name=_('Result Tags (ID3 & co)'), default=0, choices=GENERIC_STATUS_CHOICES)
-    
-    results_acoustid = JSONField(blank=True, null=True)
-    results_acoustid_status = models.PositiveIntegerField(verbose_name=_('Result Musicbrainz'), default=0, choices=GENERIC_STATUS_CHOICES)
-    
-    results_musicbrainz = JSONField(blank=True, null=True)
-    results_discogs_status = models.PositiveIntegerField(verbose_name=_('Result Musicbrainz'), default=0, choices=GENERIC_STATUS_CHOICES)
-    
-    results_discogs = JSONField(blank=True, null=True)
-    #results_discogs_status = models.PositiveIntegerField(verbose_name=_('Result Discogs'), default=0, choices=GENERIC_STATUS_CHOICES)
-    
-    import_tag = JSONField(blank=True, null=True)
-    
-    # actual media!
-    media = models.ForeignKey(Media, blank=True, null=True, related_name="importfile_media", on_delete=models.SET_NULL)
-    
-    imported_api_url = models.CharField(max_length=512, null=True, blank=True)
-
-    error = models.CharField(max_length=512, null=True, blank=True)
-    
-    
-        
     STATUS_CHOICES = (
         (0, _('Init')),
         (1, _('Done')),
@@ -277,7 +217,39 @@ class ImportFile(BaseModel):
         (99, _('Error')),
         (11, _('Other')),
     )
+    
+    filename = models.CharField(max_length=256, blank=True, null=True)
+    file = models.FileField(max_length=256, upload_to=clean_upload_path)
+    import_session = models.ForeignKey(Import, verbose_name=_('Import'), null=True, related_name='files')
+    mimetype = models.CharField(max_length=100, blank=True, null=True)
+    messages = JSONField(blank=True, null=True, default=None)
+    
+    """
+    Result sets. Not stored in foreign model - as they are rather fix.
+    """
+    settings = JSONField(blank=True, null=True)
+    results_tag = JSONField(blank=True, null=True)
+    results_tag_status = models.PositiveIntegerField(verbose_name=_('Result Tags (ID3 & co)'), default=0, choices=GENERIC_STATUS_CHOICES)
+    results_acoustid = JSONField(blank=True, null=True)
+    results_acoustid_status = models.PositiveIntegerField(verbose_name=_('Result Musicbrainz'), default=0, choices=GENERIC_STATUS_CHOICES)
+    results_musicbrainz = JSONField(blank=True, null=True)
+    results_discogs_status = models.PositiveIntegerField(verbose_name=_('Result Musicbrainz'), default=0, choices=GENERIC_STATUS_CHOICES)
+    results_discogs = JSONField(blank=True, null=True)
+    #results_discogs_status = models.PositiveIntegerField(verbose_name=_('Result Discogs'), default=0, choices=GENERIC_STATUS_CHOICES)
+    import_tag = JSONField(blank=True, null=True)
+    
+    # actual media!
+    media = models.ForeignKey(Media, blank=True, null=True, related_name="importfile_media", on_delete=models.SET_NULL)
+    imported_api_url = models.CharField(max_length=512, null=True, blank=True)
+    error = models.CharField(max_length=512, null=True, blank=True)
     status = models.PositiveIntegerField(default=0, choices=STATUS_CHOICES)
+
+
+    class Meta:
+        app_label = 'importer'
+        verbose_name = _('Import File')
+        verbose_name_plural = _('Import Files')
+        ordering = ('created', )
     
     
     def __unicode__(self):
@@ -287,14 +259,12 @@ class ImportFile(BaseModel):
     def get_api_url(self):
         url = reverse('api_dispatch_list', kwargs={'resource_name': 'importfile', 'api_name': 'v1'})
         return '%s%s/' % (url, self.pk)
-    
 
     #@models.permalink
     def get_delete_url(self):
         #return ('importer-upload-delete', [str(self.pk)])
         return ''
-    
-    
+
     def process(self):
         log = logging.getLogger('importer.models.process')
         log.info('Start processing ImportFile: %s' % (self.pk))
@@ -326,6 +296,51 @@ class ImportFile(BaseModel):
             if metadata:
                 log.info('sucessfully extracted metadata')
 
+            # check if we have musicbrainz-data available
+            media_mb_id = metadata['media_mb_id'] if 'media_mb_id' in metadata else None
+            artist_mb_id = metadata['artist_mb_id'] if 'artist_mb_id' in metadata else None
+            release_mb_id = metadata['release_mb_id'] if 'release_mb_id' in metadata else None
+
+            media_name = metadata['media_name'] if 'media_name' in metadata else None
+            artist_name = metadata['artist_name'] if 'artist_name' in metadata else None
+            release_name = metadata['release_name'] if 'release_name' in metadata else None
+            media_tracknumber = metadata['media_tracknumber'] if 'media_tracknumber' in metadata else None
+
+            if media_mb_id and artist_mb_id and release_mb_id:
+                print
+                print '******************************************************************'
+                print 'got musicbrainz match'
+                print 'media_name: %s' % media_name
+                print 'artist_name: %s' % artist_name
+                print 'release_name: %s' % release_name
+                print 'media_mb_id: %s' % media_mb_id
+                print 'artist_mb_id: %s' % artist_mb_id
+                print 'release_mb_id: %s' % release_mb_id
+                print 'media_tracknumber: %s' % media_tracknumber
+                print '******************************************************************'
+                print
+
+                if not media_id:
+                    print 'directly applying mb-data and send to import-queue'
+
+                    # build import tag
+                    import_tag = {
+                        'name': media_name,
+                        'artist': artist_name,
+                        'release': release_name,
+                        'media_tracknumber': media_tracknumber,
+                        'mb_track_id': media_mb_id,
+                        'mb_artist_id': artist_mb_id,
+                        'mb_release_id': release_mb_id,
+                    }
+
+                    obj.import_tag = import_tag
+                    obj.status = 6
+                    obj.save()
+                    return
+
+
+
         except Exception, e:
             print e
             obj.error = '%s' % e
@@ -352,16 +367,9 @@ class ImportFile(BaseModel):
         
         if media:
             obj.results_tag = metadata
-
             obj.media = media
-            
-            print "DUPLICATE!!!"
-            # obj.results_tag_status = True
-            # obj.status = 5
-            # obj.save()
-            
+
         else:
-            
             pass
             
     
@@ -450,6 +458,8 @@ class ImportFile(BaseModel):
         msg = {'key': 'save', 'content': 'object saved'}
         #self.messages.update(msg);
 
+        # self._pushy_ignore = True
+
         if not self.filename:
             self.filename = self.file.name
             
@@ -464,6 +474,9 @@ class ImportFile(BaseModel):
         if self.status == 2: # ready
             # try to apply import_tag to other files of this import session
             if not skip_apply_import_tag and self.import_session:
+                # TODO: this breaks the interface, as nearly infinite loop arises
+                #print 'skipping import_session.apply_import_tag'
+                print 'import_session.apply_import_tag'
                 self.import_session.apply_import_tag(self)
                 
         # check import_tag for completeness
@@ -472,18 +485,10 @@ class ImportFile(BaseModel):
             artist = self.import_tag.get('artist', None)
             release = self.import_tag.get('release', None)
             
-            #print 'media: %s' % media
-            #print 'artist: %s' % artist
-            #print 'release: %s' % release
-            
             if media and artist and release:
-                print 'all ok'
                 self.status = 2
             else:
-                print 'missing!'
                 self.status = 4
-
-            
 
         super(ImportFile, self).save(*args, **kwargs)
 
@@ -492,7 +497,6 @@ def post_save_importfile(sender, **kwargs):
     print 'post_save_importfile - kwargs'
 
     obj = kwargs['instance']
-
 
     # init: newly uploaded/created file. let's process (gather data) it
     if obj.status == 0:

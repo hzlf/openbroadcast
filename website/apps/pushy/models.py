@@ -23,6 +23,15 @@ def pushy_post_save(sender, **kwargs):
     obj = kwargs['instance']
     created = kwargs['created']
 
+
+    try:
+        pushy_ignore = obj._pushy_ignore
+    except:
+        pushy_ignore = False
+
+    if pushy_ignore:
+        return
+
     if created:
         action = 'create'
         try:

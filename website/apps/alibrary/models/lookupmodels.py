@@ -166,7 +166,7 @@ class APILookup(models.Model):
 
         # some hacks to convert site url to api id
         v1_id = self.uri.split('/')[-1]
-        v1_url = 'http://dgs.anorg.net/artist/%s?f=json' % v1_id
+        v1_url = 'http://%s/artist/%s?f=json' % (DISCOGS_HOST, v1_id)
 
         print 'mapping from v1 url:'
         print v1_url

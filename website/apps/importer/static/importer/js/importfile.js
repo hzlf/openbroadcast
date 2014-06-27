@@ -20,8 +20,11 @@ var ImportfileApp = function () {
 
         self.load(use_local_data);
         pushy.subscribe(self.api_url, function () {
-            debug.debug('pushy callback');
-            self.load()
+            if (!self.importer.pushy_paused) {
+                self.load();
+            } else {
+                console.log('pushy update paused')
+            }
         });
 
     };
@@ -281,23 +284,57 @@ var ImportfileApp = function () {
             var url = self.importer.api_url + 'apply-to-all/';
             var data = {
                 item_id: self.local_data.id,
-                ct: $(this).attr('data-ct'),
+                ct: $(this).attr('data-ct')
             }
 
             // data = JSON.stringify(data);
 
-            /**/
+            // suspend pushy updates
+            self.importer.pushy_paused = true;
+
+
             $.ajax({
                 type: "POST",
                 url: url,
-                dataType: "application/json",
-                contentType: 'application/json',
-                processData: true,
                 data: data,
                 success: function (data) {
-                    debug.debug(data);
+
+                    setTimeout(function () {
+                        self.importer.update_list_display(data.files, true);
+                        self.importer.update_summary_display(data.files);
+                        self.importer.update_summary(true);
+                        self.importer.pushy_paused = false;
+                    }, 500)
+                    console.log(data);
+                },
+                error: function (a, b, c) {
+
+                    setTimeout(function () {
+                        self.importer.pushy_paused = false;
+                    }, 500)
                 }
             });
+
+
+            /*
+             $.ajax({
+             type: "POST",
+             url: url,
+             dataType: "application/json",
+             contentType: 'application/json',
+             processData: true,
+             data: data
+             }).done(function(data){
+
+             alert('done');
+             console.log('apply-to-all:', data);
+
+             setTimeout(function(){
+             self.importer.pushy_paused = false;
+             }, 500)
+
+             });
+             */
 
 
         });
@@ -372,8 +409,31 @@ var ImportfileApp = function () {
             var url = self.api_url;
 
             /*
-            $.get(url, function (data) {
-                console.log(data);
+             $.get(url, function (data) {
+             console.log(data);
+
+             try {
+             data.results_tag = JSON.parse(data.results_tag);
+             data.results_acoustid = JSON.parse(data.results_acoustid);
+             data.results_musicbrainz = JSON.parse(data.results_musicbrainz);
+             data.import_tag = JSON.parse(data.import_tag);
+             data.messages = JSON.parse(data.messages);
+             } catch (err) {
+             data.results_tag = false;
+             console.log(err);
+             }
+
+
+             self.local_data = data;
+             self.display(data);
+             })
+             */
+
+
+            jQuery.ajaxQueue({
+                url: url,
+                dataType: "json"
+            }).done(function (data) {
 
                 try {
                     data.results_tag = JSON.parse(data.results_tag);
@@ -389,30 +449,7 @@ var ImportfileApp = function () {
 
                 self.local_data = data;
                 self.display(data);
-            })
-            */
-
-
-            jQuery.ajaxQueue({
-                url: url,
-                dataType: "json"
-            }).done(function (data) {
-
-                    try {
-                        data.results_tag = JSON.parse(data.results_tag);
-                        data.results_acoustid = JSON.parse(data.results_acoustid);
-                        data.results_musicbrainz = JSON.parse(data.results_musicbrainz);
-                        data.import_tag = JSON.parse(data.import_tag);
-                        data.messages = JSON.parse(data.messages);
-                    } catch (err) {
-                        data.results_tag = false;
-                        console.log(err);
-                    }
-
-
-                    self.local_data = data;
-                    self.display(data);
-                });
+            });
 
 
         }
@@ -422,7 +459,7 @@ var ImportfileApp = function () {
 
         // TODO: make more nice!!!
 
-        if(self.update_callback) {
+        if (self.update_callback) {
             self.update_callback(data);
         }
 
@@ -436,7 +473,7 @@ var ImportfileApp = function () {
 
         // try to set states
         var selected_mb_id = data.import_tag.mb_release_id;
-        console.log('selected_mb_id', selected_mb_id);
+        //console.log('selected_mb_id', selected_mb_id);
         if (selected_mb_id) {
             $('.mb_id-' + selected_mb_id, self.container).addClass('selected');
         }
@@ -451,7 +488,6 @@ var ImportfileApp = function () {
         } catch (e) {
             // pass
         }
-
 
 
     };

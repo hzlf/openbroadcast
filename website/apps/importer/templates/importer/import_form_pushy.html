@@ -116,7 +116,7 @@ $(document).ready(function() {
 		importer.ui.fileupload_options = {
 	        maxFileSize: 1000000000, // 1000 MB
 	        minFileSize: 200000,
-	        acceptFileTypes: /(\.|\/)(mp3|aif?f|wav|avi|flac|mp4|ogg|jpe?g)$/i,
+	        acceptFileTypes: /(\.|\/)(mp3|aif?f|wav|avi|flac|mp4|ogg)$/i,
             sequentialUploads: true,
 	        limitConcurrentUploads: 1
 	   };
@@ -138,7 +138,28 @@ $(document).ready(function() {
 	<div class="page-header">
 		<h2>{% trans "Upload" %} <small>{% trans "Add/Upload Files to the Import Queue" %}</small></h2>
 	</div>
+
 	<div>
+
+        <div class="alert alert-warning">
+            <strong>{% trans "Please note!" %}</strong>
+            <p>
+                {% blocktrans %}
+                The upload system tries to identify as exact as possible - however this is not an easy process.
+                You REALLY should process your files with the awesome "Picard" metadata-tagger before uploading them!!!
+                {% endblocktrans %}
+                <br>
+                <strong>{% blocktrans %}
+                Doing so will save you a lot of work when adding music to the Open Broadcast library!
+                {% endblocktrans %}</strong>
+            </p>
+            <ul>
+                <li><a href="https://musicbrainz.org/doc/MusicBrainz_Picard">MusicBrainz Picard</a></li>
+                <li><a href="https://musicbrainz.org/doc/How_to_Tag_Files_With_Picard">How to Tag Files With Picard</a></li>
+            </ul>
+        </div>
+
+
 		<p>{% trans "Either use the 'Add Files' button - or Drag and Drop the desired fils into the browser window." %}</p>
 	</div>
 

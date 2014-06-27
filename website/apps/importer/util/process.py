@@ -159,7 +159,8 @@ class Process(object):
                 dataset['media_tracknumber'] = int(tn[0])
                 dataset['media_totaltracks'] = int(tn[1])
             except Exception, e:
-                print e
+                pass
+                #print e
 
         except Exception, e:
             print e
@@ -605,7 +606,7 @@ class Process(object):
                     for relation in result['relations']:
                         if relation['type'] == 'discogs':
                             log.debug('got discogs url from release: %s' % relation['url'])
-                            release['discogs_url'] = relation['url']
+                            release['discogs_url'] = relation['url']['resource']
                 
                 
                 
@@ -624,7 +625,7 @@ class Process(object):
                     for relation in result['relations']:
                         if relation['type'] == 'discogs':
                             log.debug('got discogs url from release: %s' % relation['url'])
-                            release['discogs_master_url'] = relation['url']
+                            release['discogs_master_url'] = relation['url']['resource']
                         
                         
                         
@@ -1102,14 +1103,7 @@ class Process(object):
             rel['discogs_image'] = None
             
             try:
-                #relations = release['url-relation-list']
-                print
-                print 'RELATIONS'
-                print relations
-                print
-                print
                 try:
-                    
                     for relation in relations:
                         if relation['type'] == 'discogs':
                             rel['discogs_url'] = relation['target']
