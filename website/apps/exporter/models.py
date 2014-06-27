@@ -26,7 +26,7 @@ from pushy.util import pushy_custom
 
 log = logging.getLogger(__name__)
 
-USE_CELERYD = False
+USE_CELERYD = True
 
 GENERIC_STATUS_CHOICES = (
     (0, _('Init')),

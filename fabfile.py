@@ -106,14 +106,8 @@ def deploy(branch=None):
             pass
 
 
-
         if(files.exists('repository')):
             repository_exists = True
-
-        print 'DO WE HAVE A REPOSITORY???'
-        print repository_exists
-
-
 
         if not repository_exists:
             try:
@@ -127,14 +121,9 @@ def deploy(branch=None):
         run('cp -Rp repository src_new')
 
         with cd(env.path + '/repository'):
-            print
-            print
             print '------------------------------------------'
             run('git pull origin %s' % (branch))
             print '------------------------------------------'
-            print
-            print
-            print
 
         with cd(env.path):
             run('cp -Rp repository src_new')
@@ -226,7 +215,7 @@ def deploy(branch=None):
         # compress
         try:
             run('/srv/%s/bin/python /%s/src_new/website/manage.py collectstatic --noinput --verbosity=0' % (env.site_id, env.path))
-            run('/srv/%s/bin/python /%s/src/website/manage.py compress -f' % (env.site_id, env.path))
+            run('/srv/%s/bin/python /%s/src/website/manage.py compress -f --verbosity=0' % (env.site_id, env.path))
         except Exception, e:
             pass
 
