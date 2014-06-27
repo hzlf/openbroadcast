@@ -127,7 +127,14 @@ def deploy(branch=None):
         run('cp -Rp repository src_new')
 
         with cd(env.path + '/repository'):
-            run('git fetch origin %s' % (branch))
+            print
+            print
+            print '------------------------------------------'
+            run('git pull origin %s' % (branch))
+            print '------------------------------------------'
+            print
+            print
+            print
 
         with cd(env.path):
             run('cp -Rp repository src_new')
