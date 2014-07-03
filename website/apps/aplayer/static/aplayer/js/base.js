@@ -404,6 +404,8 @@ aplayer.base.play_in_popup = function (uri, token, offset, mode, force_seek, sou
         source: source
     };
 
+    console.log('play:', play)
+
     local.play = play;
 
     // TODO: investigate if this part is needed
@@ -878,6 +880,14 @@ aplayer.base.controls = function (args) {
 
             var channel = aplayer.vars.playlist[index]
             stream = channel.stream;
+
+            if(stream.error){
+                alert('Error: '+ stream.error);
+                return;
+            }
+
+            console.log('channel data', channel);
+
             debug.debug('channel:', channel);
             debug.debug('stream:', stream);
 

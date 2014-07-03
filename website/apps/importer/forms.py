@@ -1,6 +1,6 @@
 from django import forms
 from django.utils.translation import ugettext as _
-
+from django.utils.safestring import mark_safe
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import *
 from crispy_forms.bootstrap import FormActions
@@ -86,13 +86,15 @@ class ImportCreateModelForm(forms.ModelForm):
         self.helper.add_layout(layout)
     
     agree_terms = forms.BooleanField(
-        label = _('I agree to the Terms & Conditions'),
+        #label = _('I agree to the Terms & Conditions'),
+        label = mark_safe('%s <a href="%s">%s</a>' % (_('I agree to the'), '/legal/terms-and-conditions/', _('Terms & Conditions'))),
         initial = False,
         required = True,
     )
 
     agree_documentation = forms.BooleanField(
-        label = _('I read the ducumentation and know how Importing works'),
+        #label = _('I did read the ducumentation and know how Importing works'),
+        label = mark_safe('%s <a href="%s">%s</a> %s' % (_('I did read the'), '/documentation/plattform/', _('ducumentation'), _(' and understand how Importing works'))),
         initial = False,
         required = True,
     )

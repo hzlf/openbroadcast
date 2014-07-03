@@ -8,6 +8,7 @@ from django.views.decorators.cache import never_cache
 from django.db.models import Q
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import ugettext as _
 from tagging.models import Tag
 import reversion
 from sendfile import sendfile
@@ -126,8 +127,8 @@ class MediaListView(PaginationMixin, ListView):
             qs = Media.objects.exclude(name=u'')
             
             
-        order_by = self.request.GET.get('order_by', None)
-        direction = self.request.GET.get('direction', None)
+        order_by = self.request.GET.get('order_by', 'created')
+        direction = self.request.GET.get('direction', 'descending')
         
         if order_by and direction:
             if direction == 'descending':

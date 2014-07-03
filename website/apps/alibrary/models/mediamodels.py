@@ -443,6 +443,10 @@ class Media(CachingMixin, MigrationMixin):
     @property
     def has_video(self):
         return self.relations.filter(service__in=['youtube', 'vimeo']).count() > 0
+
+    @property
+    def get_videos(self):
+        return self.relations.filter(service__in=['youtube', 'vimeo'])
     
 
     # TODO: still needed?
@@ -1454,22 +1458,21 @@ def media_pre_delete(sender, **kwargs):
 
 pre_delete.connect(media_pre_delete, sender=Media)
 
-
-
-
-arating.enable_voting_on(Media)
 from actstream import action
 def action_handler(sender, instance, created, **kwargs):
 
-    if instance.get_last_editor():
+    if instance.get_last_editor() and instance.status == 1:
         log.debug('last editor seems to be: %s' % instance.get_last_editor())
         try:
-            action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
+            action.send(instance.get_last_editor(), verb='updated', target=instance)
         except Exception, e:
             print 'error attaching action_handler: %s' % e
 
 post_save.connect(action_handler, sender=Media)
 
+
+
+arating.enable_voting_on(Media)
 
 try:
     tagging.register(Media)

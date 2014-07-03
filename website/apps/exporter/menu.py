@@ -17,7 +17,7 @@ class ExportMenu(CMSAttachMenu):
         node = NavigationNode(
             _('My Exports'),
             reverse('exporter-export-list'),
-            191
+            191,
         )
         nodes.append(node)
         
@@ -25,7 +25,8 @@ class ExportMenu(CMSAttachMenu):
         node = NavigationNode(
             _('Settings'),
             reverse('exporter-export-settings'),
-            192
+            192,
+
         )
         nodes.append(node)
         

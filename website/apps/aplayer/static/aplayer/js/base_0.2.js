@@ -1,3 +1,7 @@
+/*
+inline version - used in sidebar at some places
+ */
+
 AplayerApp = function (context) {
 
     var self = this;

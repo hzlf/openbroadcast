@@ -80,7 +80,7 @@
 
 		$(document).ready(function() {
 
-            debug.setLevel(0);
+            debug.setLevel(2);
 
             if (!nunjucks.env) {
                 nunjucks.env = new nunjucks.Environment(new nunjucks.HttpLoader('{{ STATIC_URL }}'));

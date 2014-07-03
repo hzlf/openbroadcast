@@ -166,7 +166,7 @@ class Channel(BaseModel):
     )
     type = models.CharField(verbose_name=_('Type'), max_length=12, default='stream', choices=TYPE_CHOICES)
     
-    stream_url = models.CharField(max_length=256, null=True, blank=True)
+    stream_url = models.CharField(max_length=256, null=True, blank=True, help_text=_('setting the stream-url overrides server settings'))
     description = extra.MarkdownTextField(blank=True, null=True)
     
     station = models.ForeignKey('Station', null=True, blank=True, on_delete=models.SET_NULL)

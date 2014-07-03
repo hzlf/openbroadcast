@@ -48,7 +48,7 @@ class ReleaseResource(ModelResource):
             except:
                 pass
             
-            bundle.data['artist'] = bundle.obj.get_artists();
+        bundle.data['artist'] = bundle.obj.get_artists()
 
         return bundle
     

@@ -12,6 +12,7 @@ ExporterMain = function () {
 
     this.dom_id = 'export_list_holder';
     this.dom_element;
+    this.toc_accepted = false;
     this.pushy_key;
 
     this.export_items = [];
@@ -121,6 +122,13 @@ ExporterItem = function () {
         $(self.dom_element).on('click', 'a[data-action="download"]', function (e) {
             e.preventDefault();
             var download_url = self.local_data.download_url;
+
+
+            if(!self.exporter_app.toc_accepted) {
+                alert('You must accept the terms and conditions in order to download.');
+                return;
+            }
+
             if (self.local_data.status == 1) {
                 window.location.href = download_url;
             }
@@ -228,6 +236,7 @@ ExporterApp = (function () {
                 var item_type = $(this).data('ct');
                 items.push({item_type: item_type, item_id: item_id, format: format});
 
+
                 if (base.ui.use_effects) {
                     // $(this).effect("transfer", { to: "#nav_sub-content li a.downloads" }, 300);
                 }
@@ -248,6 +257,7 @@ ExporterApp = (function () {
             e.preventDefault();
             //e.stopPropagation();
 
+
             var item_type = $(this).data('ct');
             var item_id = $(this).data('id');
             var format = 'mp3';
@@ -259,71 +269,14 @@ ExporterApp = (function () {
              *  into an object
              */
 
-            items = new Array;
-            items.push({item_type: item_type, item_id: item_id, format: format});
-
-            self.queue(items, false);
-        });
-
-
-
-
-
-        // handling of 'downloadables' & resp. queues
-        // for single elements (through href/class)
-
-        //////////////////////////////////////////////////////
-        // LEGACY VERSION
-        // using href
-        //////////////////////////////////////////////////////
-        /*
-        $('.downloadable.queue').live('click', function (e) {
-
-            e.preventDefault();
-
-            // href is eg: "#release:324:flac"
-            var action = $(this).attr('href').substr(1).split(':');
-
-            var item_type = action[0];
-            var item_id = action[1];
-            var format = action[2];
 
             items = new Array;
             items.push({item_type: item_type, item_id: item_id, format: format});
 
             self.queue(items, false);
-
         });
-        */
 
-        /*
-         * Download multiple items
-         */
-        //////////////////////////////////////////////////////
-        // LEGACY VERSION
-        //////////////////////////////////////////////////////
-        /*
-        $('.action.selection_download a').live('click', function (e) {
 
-            var item_type = $(this).attr('href').substring(1);
-            // item_type = 'release';
-
-            items = new Array;
-            $('.list_body_row.selection').each(function (index) {
-                var item_id = $(this).attr('id').split("_").pop();
-                items.push({item_type: item_type, item_id: item_id, format: 'mp3'});
-
-                if (base.ui.use_effects) {
-                    $(this).effect("transfer", { to: "#nav_sub-content li a.downloads" }, 300);
-                }
-
-            });
-
-            self.queue(items, false);
-
-            return false;
-        });
-        */
     };
 
 
@@ -394,12 +347,9 @@ ExporterApp = (function () {
         }
 
         // run the queue
-        if(self.run(export_session, redirect)) {
-            // TODO: refactor dependency
-            base.ui.ui_message('Download queued', 10000);
-        }
 
-        /**/
+        var result = self.run(export_session, redirect);
+
 
 
 
@@ -427,11 +377,13 @@ ExporterApp = (function () {
                 debug.debug('queue:', data);
                 export_session = data;
 
-                status = true
+                status = true;
 
                 if (redirect) {
                     window.location.href = export_session.download_url;
                 }
+
+                base.ui.ui_message('Download queued', 10000);
             },
             error: function (a,b,c) {
                 console.log(a,b,c)

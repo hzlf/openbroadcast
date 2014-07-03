@@ -1,27 +1,18 @@
 from django.views.generic import DetailView, ListView, UpdateView
 from django.shortcuts import get_object_or_404, render_to_response
-
 from django.http import HttpResponseRedirect
 from django.conf import settings
-
 from django.template import RequestContext
-
 from pure_pagination.mixins import PaginationMixin
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
-
 from alibrary.models import Label, Release
-
 #from alibrary.forms import ReleaseForm
 from alibrary.forms import LabelForm, LabelActionForm, LabelRelationFormSet
-
 from alibrary.filters import LabelFilter
-
 from tagging.models import Tag
-
 from django.db.models import Q
-
+from django.utils.translation import ugettext as _
 import reversion
-
 from lib.util import tagging_extra
 from lib.util import change_message
 
@@ -114,8 +105,8 @@ class LabelListView(PaginationMixin, ListView):
             
             
             
-        order_by = self.request.GET.get('order_by', None)
-        direction = self.request.GET.get('direction', None)
+        order_by = self.request.GET.get('order_by', 'created')
+        direction = self.request.GET.get('direction', 'descending')
         
         if order_by and direction:
             if direction == 'descending':

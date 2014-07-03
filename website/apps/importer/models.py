@@ -21,7 +21,7 @@ from alibrary.models import Media
 
 log = logging.getLogger(__name__)
 
-USE_CELERYD = True
+USE_CELERYD = False
         
 GENERIC_STATUS_CHOICES = (
     (0, _('Init')),
@@ -295,6 +295,22 @@ class ImportFile(BaseModel):
             metadata = processor.extract_metadata(obj.file)
             if metadata:
                 log.info('sucessfully extracted metadata')
+
+            # check if we have obp-data available
+            obp_media_uuid = metadata['obp_media_uuid'] if 'obp_media_uuid' in metadata else None
+
+            if obp_media_uuid:
+                print
+                print '******************************************************************'
+                print 'got obp match'
+                print 'obp_media_uuid: %s' % obp_media_uuid
+                print '******************************************************************'
+                print
+
+                obj.status = 5
+                obj.media = Media.objects.get(uuid=obp_media_uuid)
+                obj.save()
+                return
 
             # check if we have musicbrainz-data available
             media_mb_id = metadata['media_mb_id'] if 'media_mb_id' in metadata else None

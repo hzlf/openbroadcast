@@ -16,6 +16,9 @@ from l10n.models import Country
 from alibrary.models import Relation, Release, Artist, Media, MediaExtraartists, Profession, ArtistMembership
 from alibrary.util.storage import get_file_from_url
 from lib.util import filer_extra
+
+from actstream import action
+
 from alibrary.util import lookup
 from settings import MEDIA_ROOT
 import musicbrainzngs
@@ -383,6 +386,7 @@ class Importer(object):
         if r_created:
             log.info('release created, try to complete: %s' % r)
             r.creator = obj.import_session.user
+            action.send(r.creator, verb='created', target=r)
             r = self.mb_complete_release(r, mb_release_id)
 
 
@@ -390,6 +394,7 @@ class Importer(object):
         if a_created:
             log.info('artist created, try to complete: %s' % a)
             a.creator = obj.import_session.user
+            action.send(a.creator, verb='created', target=a)
             a = self.mb_complete_artist(a, mb_artist_id)
         
 
@@ -398,6 +403,7 @@ class Importer(object):
         if m_created:
             log.info('media created, try to complete: %s' % m)
             m.creator = obj.import_session.user
+            action.send(m.creator, verb='created', target=m)
             m = self.mb_complete_media(m, mb_track_id, mb_release_id,  excludes=(mb_artist_id,))
             
         

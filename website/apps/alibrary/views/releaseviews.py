@@ -5,6 +5,7 @@ from django.http import HttpResponseForbidden, Http404, HttpResponseRedirect
 from django.utils import simplejson as json
 from django.conf import settings
 from django.template import RequestContext
+from django.utils.translation import ugettext as _
 from sendfile import sendfile
 
 from pure_pagination.mixins import PaginationMixin
@@ -135,8 +136,8 @@ class ReleaseListView(PaginationMixin, ListView):
             qs = Release.objects.select_related('label','media','license').all()
             
             
-        order_by = self.request.GET.get('order_by', None)
-        direction = self.request.GET.get('direction', None)
+        order_by = self.request.GET.get('order_by', 'created')
+        direction = self.request.GET.get('direction', 'descending')
         
         if order_by and direction:
             if direction == 'descending':

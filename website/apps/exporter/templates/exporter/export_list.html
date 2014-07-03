@@ -24,6 +24,17 @@
                     exporter.pushy_key = "{{ request.user.profile.uuid }}";
                     exporter.init();
                 });
+
+                $('#export_list_holder').css('opacity', 0.2);
+
+                $('#accept_toc').on('click', function(e){
+                    e.preventDefault()
+                    $('#export_list_holder').css('opacity', 1);
+                    exporter.toc_accepted = true;
+                })
+
+
+
             });
         </script>
     {% endaddtoblock %}
@@ -45,10 +56,28 @@
         </div>
 
         <div>
-            <p>{% trans "Below you can find items you have marked for download. The corresponding files are being processed in the background – this can take a (short) while. " %}</p>
-
-            <p>{% trans "As soon as a download item is ready, the \"Download\" link turns active and you can start to download it by clicking on the link." %}</p>
+            <p>{% trans "Below you can find items you have marked for download. The corresponding files are being processed in the background – this can take a (short) while. " %}<br>
+                {% trans "As soon as a download item is ready, the \"Download\" link turns active and you can start to download it by clicking on the link." %}</p>
         </div>
+
+
+
+        <div class="alert alert-warning">
+            <strong>{% trans "Terms and Conditions" %}</strong>
+            <p>
+                {% blocktrans %}
+                We do care about copyright and legal correctness.
+                {% endblocktrans %}
+                <br>
+                <strong>{% blocktrans %}
+                In order to download any data from Open Broadcast, you have to accept the terms and conditions, which can be found
+                {% endblocktrans %} <a href="/legal/terms-and-conditions/">{% trans "here" %}</a>.</strong>
+            </p>
+
+            <a id="accept_toc" class="btn btn-primary" href="#">I do accept the terms and conditions</a>
+
+        </div>
+
 
         <!-- Notification enabler -->
         <div class="util notify enable" style="display: none;">

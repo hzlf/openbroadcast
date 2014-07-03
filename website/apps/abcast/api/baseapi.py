@@ -102,7 +102,7 @@ class ChannelResource(ModelResource):
         """
         generate stream settings
         """
-        if bundle.obj.rtmp_app and bundle.obj.rtmp_path:
+        if (bundle.obj.rtmp_app and bundle.obj.rtmp_path) or bundle.obj.get_stream_url():
             stream = {
                       'file': '%s.stream' % bundle.obj.rtmp_path,
                      'rtmp_app': '%s' % bundle.obj.rtmp_app,
@@ -112,7 +112,9 @@ class ChannelResource(ModelResource):
                       'uuid': bundle.obj.uuid,
                       }
         else:
-            stream = {}
+            stream = {
+                'error': _('stream data not defined')
+            }
 
         bundle.data['stream'] = stream
         bundle.data['stream_url'] = bundle.obj.get_stream_url()

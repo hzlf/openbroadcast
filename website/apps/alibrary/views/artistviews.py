@@ -1,25 +1,18 @@
 from django.views.generic import DetailView, ListView, UpdateView
 from django.shortcuts import get_object_or_404, render_to_response
-
 from django.http import HttpResponseRedirect
 from django.conf import settings
-
 from django.template import RequestContext
-
+from django.utils.translation import ugettext as _
 from pure_pagination.mixins import PaginationMixin
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
-
 from alibrary.models import Artist, Label, Release, Media, NameVariation
 
 #from alibrary.forms import ReleaseForm
 from alibrary.forms import ArtistForm, ArtistActionForm, ArtistRelationFormSet, MemberFormSet, AliasFormSet
-
 from alibrary.filters import ArtistFilter
-
 from tagging.models import Tag
-
 import reversion
-
 from django.db.models import Q
 from lib.util import tagging_extra
 from lib.util import change_message
@@ -121,8 +114,8 @@ class ArtistListView(PaginationMixin, ListView):
             qs = Artist.objects.filter(media_artist__isnull=False).distinct()
 
             
-        order_by = self.request.GET.get('order_by', None)
-        direction = self.request.GET.get('direction', None)
+        order_by = self.request.GET.get('order_by', 'created')
+        direction = self.request.GET.get('direction', 'descending')
         
         if order_by and direction:
             if direction == 'descending':
