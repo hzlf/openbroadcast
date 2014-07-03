@@ -21,7 +21,7 @@ from alibrary.models import Media
 
 log = logging.getLogger(__name__)
 
-USE_CELERYD = False
+USE_CELERYD = True
         
 GENERIC_STATUS_CHOICES = (
     (0, _('Init')),
