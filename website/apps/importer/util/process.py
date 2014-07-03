@@ -138,19 +138,14 @@ class Process(object):
 
 
         # try to get obp identifyer
-
-        from mutagen.id3 import ID3
-        id3 = ID3(file.path)
-        print '//////////////////// META /////////////////////////'
-        print id3
-        print '//////////////////// META /////////////////////////'
-        obp_media_uuid = id3["UFID:http://openbroadcast.ch"].data.decode('ascii')
-        if obp_media_uuid:
-            print '*****************************'
-            print 'GOT OWN ID: %s' % obp_media_uuid
-            print '*****************************'
-
-            dataset['obp_media_uuid'] = obp_media_uuid
+        try:
+            from mutagen.id3 import ID3
+            id3 = ID3(file.path)
+            obp_media_uuid = id3["UFID:http://openbroadcast.ch"].data.decode('ascii')
+            if obp_media_uuid:
+                dataset['obp_media_uuid'] = obp_media_uuid
+        except:
+            pass
 
 
 
