@@ -115,7 +115,7 @@
     -->
     <div class="list_body_item c4">
         <ul class="unstyled">
-            <li>{{ item.base_duration|sec_to_time }} : {{ item.conversion_status }}</li>
+            <li>{{ item.base_duration|sec_to_time }}</li>
             <li>
                 {% if item.conversion_status == 0 %}<i class="icon icon-refresh icon-spin_"></i> {% endif %}
                 {% if item.conversion_status == 2 %}<i class="icon-warning-sign"></i> {% endif %}

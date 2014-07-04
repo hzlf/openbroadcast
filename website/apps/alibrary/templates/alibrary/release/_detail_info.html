@@ -4,7 +4,7 @@
 
 <div class="page-header">
     <h2>{{ object.name|truncate_chars_inner:40 }}
-        <small>{{ object.get_releasetype_display }}{% if object.release_country %} ({{ object.release_country.iso2_code }}){% endif %}</small>
+        <small>{% if object.releasetype %}{{ object.get_releasetype_display }} {% endif %}{% if object.release_country %} ({{ object.release_country.iso2_code }}){% endif %}</small>
     </h2>
 </div>
 
@@ -117,7 +117,7 @@
 </dl>
 
 
-
+{%  comment %}
 {% if object.relations.generic %}
     <dl class="dl-horizontal">
 
@@ -142,7 +142,7 @@
 
     </dl>
 {% endif %}
-
+{%  endcomment %}
 
 <dl class="dl-horizontal sub">
 

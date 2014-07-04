@@ -237,13 +237,11 @@ var ImportfileApp = function () {
                 });
             }
 
-
             var data = {
                 status: 0,
                 settings: settings
             };
 
-            debug.debug(data);
 
             /**/
             $.ajax({
@@ -272,6 +270,7 @@ var ImportfileApp = function () {
                 processData: false,
                 complete: function (data) {
                     self.container.fadeOut(200);
+                    self.importer.update_summary();
                 }
             });
 
@@ -301,8 +300,8 @@ var ImportfileApp = function () {
 
                     setTimeout(function () {
                         self.importer.update_list_display(data.files, true);
-                        self.importer.update_summary_display(data.files);
-                        self.importer.update_summary(true);
+                        //self.importer.update_summary_display(data);
+                        self.importer.update_summary(data);
                         self.importer.pushy_paused = false;
                     }, 500)
                     console.log(data);
@@ -314,28 +313,6 @@ var ImportfileApp = function () {
                     }, 500)
                 }
             });
-
-
-            /*
-             $.ajax({
-             type: "POST",
-             url: url,
-             dataType: "application/json",
-             contentType: 'application/json',
-             processData: true,
-             data: data
-             }).done(function(data){
-
-             alert('done');
-             console.log('apply-to-all:', data);
-
-             setTimeout(function(){
-             self.importer.pushy_paused = false;
-             }, 500)
-
-             });
-             */
-
 
         });
 
@@ -365,35 +342,45 @@ var ImportfileApp = function () {
         debug.debug('ac', id, name, ct);
 
         self.set_import_tag(import_tag);
-    }
+    };
 
     this.rebind = function () {
         // $('.tooltip-inline').tooltip({ html: true });
 
+        // just the info / help tooltip
         $('.tooltipable', self.container).tooltip();
 
+        $('.tooltip-inline', self.container).qtip({
 
-        $('.tooltip-inline', self.container).each(function (index) {
+            content: {
+                text: function(event, api) {
+                    $.ajax({
+                        url: $(this).data('resource_uri')
+                    })
+                    .then(function(data) {
+                        data.ct = 'release';
+                        var d = { item: data }
+                        var html = nj.render('importer/nj/popover.html', d);
+                        api.set('content.text', html);
+                    }, function(xhr, status, error) {
+                        api.set('content.text', status + ': ' + error);
+                    });
 
-            var el = $(this);
-            /*
-             $.get(el.data('resource_uri'), function (data) {
-
-             data.ct = el.data('ct');
-
-             var d = { item: data }
-
-             var html = nj.render('importer/nj/popover.html', d);
-
-             el.popover({content: html, title: data.name, trigger: 'hover', placement: 'top', html: true});
-             });
-             */
-
-
+                    return '<i class="icon-spinner icon-spin"></i> Loading data';
+                }
+            },
+            position: {
+                my: 'bottom center',
+                at: 'top center',
+                effect: false
+            },
+            style: {
+                classes: 'qtip-dark'
+            }
         });
 
+    };
 
-    }
 
     this.load = function (use_local_data) {
 
@@ -408,42 +395,36 @@ var ImportfileApp = function () {
             debug.debug('ImportfileApp - load: using remote data');
             var url = self.api_url;
 
-            /*
-             $.get(url, function (data) {
-             console.log(data);
-
-             try {
-             data.results_tag = JSON.parse(data.results_tag);
-             data.results_acoustid = JSON.parse(data.results_acoustid);
-             data.results_musicbrainz = JSON.parse(data.results_musicbrainz);
-             data.import_tag = JSON.parse(data.import_tag);
-             data.messages = JSON.parse(data.messages);
-             } catch (err) {
-             data.results_tag = false;
-             console.log(err);
-             }
-
-
-             self.local_data = data;
-             self.display(data);
-             })
-             */
-
-
             jQuery.ajaxQueue({
                 url: url,
                 dataType: "json"
             }).done(function (data) {
 
+                // ugly parser...
                 try {
                     data.results_tag = JSON.parse(data.results_tag);
-                    data.results_acoustid = JSON.parse(data.results_acoustid);
-                    data.results_musicbrainz = JSON.parse(data.results_musicbrainz);
-                    data.import_tag = JSON.parse(data.import_tag);
-                    data.messages = JSON.parse(data.messages);
                 } catch (err) {
                     data.results_tag = false;
-                    console.log(err);
+                }
+                try {
+                    data.results_acoustid = JSON.parse(data.results_acoustid);
+                } catch (err) {
+                    data.results_acoustid = false;
+                }
+                try {
+                    data.results_musicbrainz = JSON.parse(data.results_musicbrainz);
+                } catch (err) {
+                    data.results_musicbrainz = false;
+                }
+                try {
+                    data.import_tag = JSON.parse(data.import_tag);
+                } catch (err) {
+                    data.import_tag = false;
+                }
+                try {
+                    data.messages = JSON.parse(data.messages);
+                } catch (err) {
+                    data.messages = false;
                 }
 
 

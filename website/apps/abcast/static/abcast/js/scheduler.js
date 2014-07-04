@@ -685,7 +685,7 @@ var EmissionApp = function () {
             },
             hide: false,
             style: {
-                classes: 'qtip-dark qtip-dialogue qtip-shadow qtip-rounded popup-emission',
+                classes: 'qtip-dark qtip-dialogue qtip-shadow qtip-rounded popup-emission'
                 // width: '1000px'
             },
             // style : 'qtip-dark qtip-dialogue qtip-shadow qtip-rounded popup-emission',

@@ -115,6 +115,37 @@ class Import(BaseModel):
         stats['error'] = self.files.filter(status=99)
         
         return stats
+
+
+
+    def get_inserts(self):
+
+        inserts = {
+            'media_mb': [],
+            'artist_mb': [],
+            'release_mb': [],
+        }
+
+
+        for file in self.files.filter(status=2):
+            it = file.import_tag
+            if 'mb_track_id' in it:
+                if not it['mb_track_id'] in inserts['media_mb']:
+                    inserts['media_mb'].append(it['mb_track_id'])
+
+            if 'mb_artist_id' in it:
+                if not it['mb_artist_id'] in inserts['artist_mb']:
+                    inserts['artist_mb'].append(it['mb_artist_id'])
+
+            if 'mb_release_id' in it:
+                if not it['mb_release_id'] in inserts['release_mb']:
+                    inserts['release_mb'].append(it['mb_release_id'])
+
+
+
+
+        return inserts
+
         
 
     def get_api_url(self):
@@ -398,12 +429,8 @@ class ImportFile(BaseModel):
         obj.save()
         log.info('sucessfully aquired metadata')
 
-        """
-        """
-        print 'pre results_acoustid'
+
         obj.results_acoustid = processor.get_aid(obj.file)
-        print obj.results_acoustid
-        print 'post results_acoustid'
         obj.results_acoustid_status = True
         obj.save()
 

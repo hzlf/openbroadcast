@@ -23,6 +23,8 @@ ImporterUi = function() {
 	
 	this.importfiles = [];
 
+    this.summary;
+
 	// attach fu here
 	this.fileupload_id = false;
 	this.fileupload_options = false
@@ -110,6 +112,7 @@ ImporterUi = function() {
 		/* summary actions */
 		var container = $('#import_summary');
 		$(container).on('click', 'a.toggle', function(e){
+
 			e.preventDefault();
 			var cls = $(this).data('toggle');
 			
@@ -118,14 +121,14 @@ ImporterUi = function() {
 				$('i', this).removeClass('icon-angle-down');
 				$('i', this).addClass('icon-angle-up');
 				
-				$('.importfile.' + cls).show(100);
+				$('.importfile.' + cls).fadeIn(100);
 				$(this).data('toggle-active', 1);
 			} else {
 				
 				$('i', this).removeClass('icon-angle-up');
 				$('i', this).addClass('icon-angle-down');
 				
-				$('.importfile.' + cls).hide(300);
+				$('.importfile.' + cls).fadeOut(300);
 				$(this).data('toggle-active', 0);
 			}
 
@@ -270,7 +273,7 @@ ImporterUi = function() {
         console.log('update_import_files_callback', data);
 
 		self.update_list_display(data.files);
-		self.update_summary_display(data.files);
+		//self.update_summary_display(data);
 		try {
 			self.update_best_match(data.files);
 			self.apply_best_match(data.files);
@@ -278,66 +281,106 @@ ImporterUi = function() {
 			// debug.debug(err);
 		}
 
-        self.update_summary();
+        self.update_summary(data);
+
+	};
+
+
+	this.update_summary = function(data) {
+
+        // calculate counters
+        var counters = {
+            num_done: 0,
+            num_ready: 0,
+            num_working: 0,
+            num_warning: 0,
+            num_duplicate: 0,
+            num_error: 0
+        };
+		$.each(self.importfiles, function(i, item) {
+			// console.log('update importfile / ImporterApp');
+			var data = item.local_data;
+
+			if (data.status == 'done') {
+				counters.num_done++;
+			}
+			if (data.status == 'ready') {
+				counters.num_ready++;
+			}
+			if (data.status == 'working') {
+				counters.num_working++;
+			}
+			if (data.status == 'warning') {
+				counters.num_warning++;
+			}
+			if (data.status == 'duplicate') {
+				counters.num_duplicate++;
+			}
+			if (data.status == 'error') {
+				counters.num_error++;
+			}
+		});
+
+        // calculate inserts
+        // ignore media - as this is the same as "num_ready"
+        var inserts_artist = [];
+        var inserts_release = [];
+		$.each(self.importfiles, function(i, item) {
+			// console.log('update importfile / ImporterApp');
+			var data = item.local_data;
+			if (data.status == 'ready' || 1 == 1) {
+                var it = data.import_tag;
+                // possible situations
+                // no foreign id's at all: hmm, what to do then?
+                // internal id: ignore insert
+                // external (mb) id: add to insert
+                if(it.alibrary_artist_id == undefined) {
+                    if(!it.mb_artist_id == undefined) {
+                        if (inserts_artist.indexOf(it.mb_artist_id) < 0) {
+                            inserts_artist.push(it.mb_artist_id);
+                        }
+                    }
+                }
+
+                if(it.alibrary_release_id == undefined) {
+                    if(!it.mb_release_id == undefined) {
+                        if (inserts_release.indexOf(it.mb_release_id) < 0) {
+                            inserts_release.push(it.mb_release_id);
+                        }
+                    }
+                }
+
+			}
+		});
+        var inserts = {
+            num_media: counters.num_ready,
+            num_artists: inserts_artist.length,
+            num_releases: inserts_release.length
+
+        };
+
+        self.summary = {
+            counters: counters,
+            inserts: inserts
+        }
+
+        self.update_summary_display();
 
 	};
 
 	
-	this.update_summary_display = function(data) {
+	this.update_summary_display = function() {
+
 		var container = $('#import_summary');
-		var status_map = new Array;
-		status_map[0] = 'init';
-		status_map[1] = 'done';
-		status_map[2] = 'ready';
-		status_map[3] = 'working';
-		status_map[4] = 'warning';
-		status_map[5] = 'duplicate';
-		status_map[6] = 'queued';
-		status_map[7] = 'importing';
-		status_map[99] = 'error';
-
-		var count_init = 0;
-		var count_done = 0;
-		var count_ready = 0;
-		var count_working = 0;
-		var count_warning = 0;
-		var count_duplicate = 0;
-		var count_error = 0;
-
-		for (var i in data) {
-			var item = data[i];
-
-			if (item.status == 1) {
-				count_done++;
-			}
-			if (item.status == 2) {
-				count_ready++;
-			}
-			if (item.status == 3) {
-				count_working++;
-			}
-			if (item.status == 4) {
-				count_warning++;
-			}
-			if (item.status == 5) {
-				count_duplicate++;
-			}
-			if (item.status == 99) {
-				count_error++;
-			}
-		}
-		$('.item.done .num-files', container).html(count_done);
-		$('.item.ready .num-files', container).html(count_ready);
-		$('.item.working .num-files', container).html(count_working);
-		$('.item.warning .num-files', container).html(count_warning);
-		$('.item.duplicate .num-files', container).html(count_duplicate);
-		$('.item.error .num-files', container).html(count_error);
-		//debug.debug('count_ready:', count_ready);
-	
+        var html = nj.render('importer/nj/summary.html', self.summary);
+        container.html(html);
 	};
 
 
 	this.apply_best_match = function(data) {
+
+
+        console.log('APPLY BEST MATCH FOR:', data)
 	
 		var holder = $('#result_holder');
 		
@@ -373,6 +416,9 @@ ImporterUi = function() {
 	};
 
 	this.update_best_match = function(data) {
+
+
+        console.log('UPDATE BEST MATCH FOR:', data)
 
 		var active_releases = new Array;
 
@@ -529,202 +575,7 @@ ImporterUi = function() {
 
 
 	};
-	
-	
-	this.update_summary = function() {
-	
-		var container = $('#import_summary');
-	
-		var count_init = 0;
-		var count_done = 0;
-		var count_ready = 0;
-		var count_working = 0;
-		var count_warning = 0;
-		var count_duplicate = 0;
-		var count_error = 0;
-	
-		$.each(self.importfiles, function(i, item) {
-			// console.log('update importfile / ImporterApp');
-			var data = item.local_data;
 
-			if (data.status == 'done') {
-				count_done++;
-			}
-			if (data.status == 'ready') {
-				count_ready++;
-			}
-			if (data.status == 'working') {
-				count_working++;
-			}
-			if (data.status == 'warning') {
-				count_warning++;
-			}
-			if (data.status == 'duplicate') {
-				count_duplicate++;
-			}
-			if (data.status == 'error') {
-				count_error++;
-			}
-		});
-		
-		
-		$('.item.done .num-files', container).html(count_done);
-		$('.item.ready .num-files', container).html(count_ready);
-		$('.item.working .num-files', container).html(count_working);
-		$('.item.warning .num-files', container).html(count_warning);
-		$('.item.duplicate .num-files', container).html(count_duplicate);
-		$('.item.error .num-files', container).html(count_error);
-		
-		
-	
-	};
-	
-
-	this.update_list_display__ = function(data) {
-
-		// debug.debug(data)
-		// debug.debug(self.current_data)
-
-		var status_map = new Array;
-		status_map[0] = 'init';
-		status_map[1] = 'done';
-		status_map[2] = 'ready';
-		status_map[3] = 'working';
-		status_map[4] = 'warning';
-		status_map[5] = 'duplicate';
-		status_map[6] = 'queued';
-		status_map[99] = 'error';
-
-		for (var i in data) {
-
-			var item = data[i];
-			var target_result = $('#importfile_result_' + item.id);
-
-			if (item.status > -1) { // to check..
-
-				// sorry for this... don't know how to directly provide json from JSONField
-				try {
-					item.results_tag = JSON.parse(item.results_tag);
-					item.results_acoustid = JSON.parse(item.results_acoustid);
-					item.results_musicbrainz = JSON.parse(item.results_musicbrainz);
-					//item.messages = JSON.parse(item.messages);
-				} catch(err) {
-					item.results_tag = false;
-					//debug.debug(err);
-				}
-
-				//debug.debug(item.results_musicbrainz);
-
-				if (item.id in self.current_data) {
-					self.current_data[item.id] = item;
-					debug.debug('item already present');
-				} else {
-
-					var result = tmpl("template-import", item);
-
-					$('#result_holder').append(result);
-
-					self.current_data[item.id] = item;
-				}
-				
-				var target_result = $('#importfile_result_' + item.id);
-
-				// Applying gathered results
-				if (item.results_tag) {
-					
-					//debug.debug(item.results_tag)
-
-					// building the target
-					target_set = $('.provider-tag', target_result);
-					for (var k in item.results_tag) {
-						var res = item.results_tag[k]
-						// debug.debug(k, res);
-						$('.holder-' + k + ' .value', target_set).html(res);
-					}
-				}
-
-				if (item.results_acoustid) {
-
-					// building the target
-					target_set = $('.provider-tag', target_result);
-					for (var k in item.results_acoustid) {
-						var res = item.results_acoustid[k]
-						//debug.debug(k, res);
-						$('.holder-' + k + ' .value', target_set).html(res);
-					}
-				}
-
-				if (item.media) {
-
-					target_set = $('.status-imported', target_result);
-					
-					var res = tmpl("template-result-imported", item.media);
-					target_set.html(res);
-					
-				}
-
-
-
-
-
-				if (item.results_musicbrainz && item.results_musicbrainz.length > 0) {
-
-
-
-					// building the target
-					target_set = $('.musicbrainz-tag-holder', target_result);
-
-					if (item.id in self.musicbrainz_data) {
-						debug.debug('results_musicbrainz already present');
-					} else {
-						debug.debug('results_musicbrainz NOT present');
-						self.musicbrainz_data[item.id] = item.results_musicbrainz;
-						
-						var res = tmpl("template-result-musicbrainz", item);
-						target_set.html(res);
-					}
-
-					
-					
-					
-					/*
-					for (var k in item.results_musicbrainz) {
-						debug.debug(k);
-						var res = item.results_musicbrainz[k]
-						$('.holder-' + k + ' .value', target_set).html(res);
-					}
-					*/						
-
-				}
-
-				// Done - Hide selection forms & co
-				if (item.status == 1) {
-					
-					target_result.removeClass('queued');
-
-					$('.result-set', target_result).hide();
-					$('.result-actions', target_result).hide();
-
-				}
-				if (item.status == 6) {
-
-					$('.result-set', target_result).hide();
-					$('.result-actions', target_result).hide();
-
-				}
-
-				for (s in status_map) {
-					if (s != item.status) {
-						target_result.removeClass(status_map[s]);
-					}
-				}
-				target_result.addClass(status_map[item.status]);
-
-			}
-
-		}
-
-	};
 
 	this.api_lookup = function(item_type, item_id, provider) {
 

@@ -3630,8 +3630,8 @@ var Object = modules["object"];
 
 var HttpLoader = Object.extend({
     init: function(baseURL, neverUpdate) {
-        console.log("[nunjucks] Warning: only use HttpLoader in " +
-                    "development. Otherwise precompile your templates.");
+        //console.log("[nunjucks] Warning: only use HttpLoader in " +
+        //            "development. Otherwise precompile your templates.");
         this.baseURL = baseURL || '';
         this.neverUpdate = neverUpdate;
     },
@@ -3660,6 +3660,7 @@ var HttpLoader = Object.extend({
             }
         };
 
+        // TODO: just a quick hack to avoid too much reloads
         url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + Date.now();
 
         // Synchronous because this API shouldn't be used in

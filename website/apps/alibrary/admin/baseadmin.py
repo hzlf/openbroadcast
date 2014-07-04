@@ -123,7 +123,7 @@ class LabelInline(admin.TabularInline):
 
 class MediaInline(admin.TabularInline):
     model = Media
-    exclude = ['description','slug','processed','echoprint_status','conversion_status', 'd_tags', 'echonest_id', 'danceability', 'energy', 'liveness', 'loudness', 'speechiness', 'start_of_fade_out', 'echonest_duration', 'tempo', 'key', 'sections','master_sha1', 'base_format', 'base_filesize', 'base_duration', 'base_samplerate', 'base_bitrate', 'filename', 'publish_date', 'status', 'owner', 'creator', 'publisher', 'medianumber', 'master', 'mediatype' ]
+    exclude = ['description','slug','processed','echoprint_status','conversion_status', 'd_tags', 'echonest_id', 'lyrics', 'lyrics_language', 'danceability', 'energy', 'liveness', 'loudness', 'speechiness', 'start_of_fade_out', 'echonest_duration', 'tempo', 'key', 'sections','master_sha1', 'base_format', 'base_filesize', 'base_duration', 'base_samplerate', 'base_bitrate', 'filename', 'publish_date', 'status', 'owner', 'creator', 'publisher', 'medianumber', 'master', 'mediatype' ]
     readonly_fields = ['artist', ]
     extra = 0
     
@@ -184,16 +184,17 @@ class ReleaseAdmin(BaseAdmin):
     date_hierarchy = 'created'
 
     #inlines = [ReleaseAlbumartistsInline, ReleaseMediaInline, RelationsInline, MediaInline, ReleaseExtraartistsInline]
-    inlines = [ReleaseAlbumartistsInline, RelationsInline, MediaInline, ReleaseExtraartistsInline]
+    inlines = [ReleaseAlbumartistsInline, MediaInline, RelationsInline, ReleaseExtraartistsInline]
     #prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ['slug', 'license', 'd_tags']
+
     
     actions = [merge_selected]
     
     """"""
     fieldsets = [
         (None,  {
-                'fields': ['name', 'slug', 'main_image', ('label', 'catalognumber'), ('releasedate', 'release_country', 'license'), ('releasetype', 'pressings'), 'publish_date', 'enable_comments', 'main_format', 'd_tags', 'excerpt', 'description']
+                'fields': ['name', 'slug', 'main_image', ('label', 'catalognumber'), ('releasedate', 'release_country', 'license'), ('releasetype', 'pressings'), 'publish_date', 'enable_comments', 'main_format', 'd_tags', 'description']
                 }),
         #('Artist relations',  {
         #        'fields': ['album_artists', 'album_artists_join',]
@@ -201,8 +202,8 @@ class ReleaseAdmin(BaseAdmin):
         ('Users', {'fields' : ['owner', 'creator', 'publisher']}),
     ]
     
-admin.site.register(Release)
-#admin.site.register(Release, ReleaseAdmin)
+#admin.site.register(Release)
+admin.site.register(Release, ReleaseAdmin)
 
 
 

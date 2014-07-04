@@ -94,11 +94,11 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-
     'django.middleware.transaction.TransactionMiddleware',
     'reversion.middleware.RevisionMiddleware',
+
+
 
     'django.contrib.messages.middleware.MessageMiddleware',
     #'pagination.middleware.PaginationMiddleware',
@@ -131,6 +131,9 @@ MIDDLEWARE_CLASSES = (
     #'lib.middleware.social_auth_extra.SocialAuthExceptionExtraMiddleware',
 
     #'django.middleware.cache.FetchFromCacheMiddleware',
+
+    #'profiler.middleware.StatProfMiddleware',
+    #'profiler.middleware.ProfilerMiddleware',
 
 )
 
@@ -352,6 +355,9 @@ INSTALLED_APPS = (
     'esi',
 
     'template_timings_panel',
+
+    #'django_statsd',
+    #'profiler',
 
     #'turbolinks',
     'haystack',

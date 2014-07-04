@@ -4,6 +4,7 @@ import re
 import time
 import shutil
 import logging
+from Levenshtein import distance
 
 import requests
 from django.conf import settings
@@ -472,12 +473,12 @@ class Importer(object):
         
         
     def complete_import_tag(self, obj):
-        log = logging.getLogger('util.importer.complete_import_tag')
-        
-        
+
+
         import_tag = obj.import_tag
         results_musicbrainz = obj.results_musicbrainz
-        
+        results_tag = obj.results_tag
+
         
         """
         Apply musicbrainz tags if unique
@@ -485,7 +486,28 @@ class Importer(object):
         
         if len(results_musicbrainz) > 0:
             log.debug('got musicbrainz result -> apply it')
-            mb = results_musicbrainz[0]
+
+            mb = None
+
+            # try to match by name
+            tag_release_name = None
+            if 'release_name' in results_tag:
+                tag_release_name = results_tag['release_name']
+                print tag_release_name
+            for res in results_musicbrainz:
+                if tag_release_name and 'name' in res:
+                    result_release_name = res['name']
+
+                    print
+                    dist = distance(tag_release_name, result_release_name)
+                    print 'matching "%s" vs "%s" - dist: %s' % (tag_release_name, result_release_name, dist)
+
+                    if dist < 4:
+                        mb = res
+                        break
+
+            if not mb:
+                mb = results_musicbrainz[0]
             
             
             # media
@@ -516,23 +538,26 @@ class Importer(object):
         
         if 'artist' in import_tag:
             a = Artist.objects.filter(name=import_tag['artist'])
-            print a
+
             #if a.count() == 1:
             if a.count() > 0:
-                print a[0].get_api_url()
+                log.debug('artist: %s - %s' % (a[0].name, a[0].get_api_url()))
                 import_tag['alibrary_artist_id'] = a[0].pk
                 import_tag['alibrary_artist_resource_uri'] = a[0].get_api_url()
+            else:
+                log.debug('no artist to link with')
         else:
             print 'no artist name in tag'
         
         if 'release' in import_tag:
             r = Release.objects.filter(name=import_tag['release'])
-            print r
             #if r.count() == 1:
             if r.count() > 0:
-                print r[0].get_api_url()
+                log.debug('release: %s - %s' % (r[0].name, r[0].get_api_url()))
                 import_tag['alibrary_release_id'] = r[0].pk
                 import_tag['alibrary_release_resource_uri'] = r[0].get_api_url()
+            else:
+                log.debug('no release to link with')
         else:
             print 'no release name in tag'
         

@@ -60,7 +60,6 @@ class Process(object):
 
 
     def __init__(self):
-        log = logging.getLogger('util.process.Process.__init__')
 
         musicbrainzngs.set_useragent("NRG Processor", "0.01", "http://anorg.net/")
         musicbrainzngs.set_rate_limit(MUSICBRAINZ_RATE_LIMIT)
@@ -90,7 +89,6 @@ class Process(object):
     """
     def id_by_echoprint(self, file):
 
-        log = logging.getLogger()
 
         from ep.API import fp
         from lib.analyzer.echoprint import Echoprint
@@ -116,9 +114,7 @@ class Process(object):
     
     
     def extract_metadata(self, file):
-        
 
-        log = logging.getLogger('importer.process.extract_metadata')
         log.info('Extracting metadata for: %s' % (file.path))
         
         enc = locale.getpreferredencoding()
@@ -129,13 +125,7 @@ class Process(object):
             meta = MutagenFile(file.path)
             log.debug('using MutagenFile')
 
-        
         dataset = dict(METADATA_SET)
-
-        """
-        Mapping
-        """
-
 
         # try to get obp identifyer
         try:
@@ -296,8 +286,6 @@ class Process(object):
 
 
 
-        """"""
-        print
         print
         print "******************************************************************"
         print "* Aquired metadata"
@@ -307,11 +295,10 @@ class Process(object):
             try:
                 print "%s:   %s" % (k, m)
             except:
-                # encoding problem.. don't care
                 pass
         print "******************************************************************"
         print
-        print
+
 
         
         return dataset
@@ -322,15 +309,10 @@ class Process(object):
     """
     def get_aid(self, file):
 
-        log = logging.getLogger('importer.process.get_aid')
         log.info('Lookup acoustid for: %s' % (file.path))
 
         data = acoustid.match(AC_API_KEY, file.path)
 
-        print 'AID data:'
-        print data
-        print '---'
-        
         res = []
         i = 0
         for d in data:
@@ -343,19 +325,21 @@ class Process(object):
                  'selected': selected,
                  }
 
-            log.info('acoustid: got result - score: %s | mb id: %s' % (d[0], d[1]))
+
             if i < 5:
+                log.debug('acoustid: got result - score: %s | mb id: %s' % (d[0], d[1]))
                 res.append(t)
+            else:
+                pass
+                #log.debug('skipping acoustid, we have %s of them' % i)
             i += 1
 
         return res
 
        
     def get_musicbrainz(self, obj):
-        
-        log = logging.getLogger('importer.process.get_musicbrainz')
-        log.info('Lookup musicbrainz for importfile id: %s' % obj.pk)
 
+        log.info('Lookup musicbrainz for importfile id: %s' % obj.pk)
 
         """
         trying to get the tracknumber
@@ -423,7 +407,7 @@ class Process(object):
         releases = []
         for e in obj.results_acoustid:
             recording_id = e['id']
-            print 'recording mb_id: %s' % recording_id
+            log.info('recording mb_id: %s' % recording_id)
         
             """
             search query e.g.:
@@ -440,16 +424,19 @@ class Process(object):
                 url = '%s%s%s' % (url, '%20AND%20date:', releasedate)
             """
             
-            log.info('API url for request: %s' % url)
+            log.debug('API url for request: %s' % url)
             r = requests.get(url)
             
             result = r.json()
 
             if 'recording' in result:
-                print 'got recording: %s' % recording_id
+
+                log.info('recording on API mb_id: %s' % recording_id)
                 if len(result['recording']) > 0:
+
                     if 'releases' in result['recording'][0]:
-                        
+
+                        log.info('got releases on api: %s' % len(result['recording'][0]['releases']))
                         
                         """
                         fix missing dates
@@ -470,11 +457,10 @@ class Process(object):
                             # reset dummy-date
                             if release['date'] == '9999':
                                 release['date'] = None
-                            log.debug('First Date: %s' % release['date'])
+                            log.info('First Date: %s' % release['date'])
+
                         except Exception, e:
                             log.warning('Unable to sort by date: %s' % e)
-
-                            
                             sorted_releases = result['recording'][0]['releases']
                             
                             
@@ -487,13 +473,15 @@ class Process(object):
                             count = 0
                             current_names = []
                             for t_rel in sorted_releases:
-                                if not t_rel['title'] in current_names and count < 5:
+                                if (not t_rel['title'] in current_names and count < 8):
                                     #print 'FRESH NAME: %s' % t_rel['title']
+                                    log.debug('adding new release name to results: %s' % t_rel['title'])
                                     current_names.append(t_rel['title'])
                                     selected_releases.append(t_rel)
                                     count += 1
-                                #else:
-                                    #print 'NAME ALREADY HERE: %s' % t_rel['title']
+                                else:
+                                    pass
+                                    #log.debug('release name already in results: %s' % t_rel['title'])
                                     
                             
                             """
@@ -520,48 +508,29 @@ class Process(object):
                                 print e
                             
                             
+                            #if releasedate:
                             if releasedate and 1 == 2:
-                                print 'HAVE RELEASEDATE: %s' % releasedate
+                                #log.debug('got releasedate: %s' % releasedate)
                                 s_rd = releasedate[0:4]
                                 t_rd = selected_release['date'][0:4]
-                                
-                                print 'dates: %s | %s' % (s_rd, t_rd)
-                                
+
+                                log.debug('compare releasedates: %s | %s' % (s_rd, t_rd))
+
                                 if s_rd == t_rd:
                                     releases.append(selected_release)
                                 else:
-                                    print 'DATE MISMATCH'
+                                    pass
+                                    #log.debug('date mismatch')
                             
                             else:
                                 releases.append(selected_release)
-                              
-                
-                        """
-                        release['artist'] = result['recording'][0]['artist-credit'][0]['artist']
-                        release['recording'] = result['recording'][0]
-                        try:
-                            release['recording']['releases'] = None
-                        except Exception, e:
-                            print e
-                                                
-                        releases.append(release)
-                        
-                        
-                        if recording_id == '2b650c75-f24b-4988-be92-bde220277488':
-                            print '###############################################'
-                            self.pp.pprint(selected_release)
-                            print '###############################################'
-                        """
 
-            
-            
+        # TODO: think about limit
+        releases = releases[0:5]
 
-        print "PRE COMPLETE"
         releases = self.complete_releases(releases)
-        print "POST COMPLETE"
         releases = self.format_releases(releases)
 
-        
         self.pp.pprint(releases)
         
         return releases
@@ -877,11 +846,7 @@ class Process(object):
             try:
                 relations = result['release-group']['url-relation-list']
                 print
-                print
-                print '""""""""""""""""""""""""""""""""""""""""""""""""""'
                 print relations
-                print '""""""""""""""""""""""""""""""""""""""""""""""""""'
-                print
                 print
             except:
                 relations = None
@@ -917,12 +882,12 @@ class Process(object):
             
         master_releases = self.format_master_releases(master_releases)
             
-        print
+
         print
         print "MASTER RELEASES"
         print master_releases
         print
-        print
+
         
         
         
@@ -1158,8 +1123,5 @@ class Process(object):
         return releases
         
 
-        
-if __name__ == '__main__':
-    print "Hello World again from %s!" % __name__
         
         

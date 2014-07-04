@@ -1,3 +1,12 @@
+.listview.import
+
+  thead th
+    background-color: white
+    // text-align: center
+    font-weight: normal
+    font-style: italic
+    color: #999
+    border: none
 
 
 i.icon-padded
@@ -22,6 +31,15 @@ i.icon-obp
   width: 22px
   height: 22px
 
+// temporary
+i.ajax-loader
+  display: block
+  height: 32px
+  width: 32px
+  margin: 15px 32px 0 0
+  &.c3CA3B9
+    background-image: url(/static/img/icons/loader/loader.3CA3B9.gif)
+
 
 $duplicateBackground: #fffeac
 //$duplicateBackground: #ddffd9
@@ -33,6 +51,9 @@ section.importer-importfiles
 
   // base
   .listing
+
+
+
   
     .loading
       // opacity: 0.5
@@ -101,6 +122,18 @@ section.importer-importfiles
           // display: none
         div.result-set
           display: block
+
+
+        // progress bar
+        .progress
+          height: 5px
+          background: none
+          box-shadow: none
+
+          > .bar
+            height: 4px
+            background: #00bb00
+
     
       &.duplicate
         background-color: $duplicateBackground
@@ -156,9 +189,9 @@ section.importer-importfiles
       
       h3
         padding: 5px
-        font-size: 13px
+        font-size: 12px
         small
-          font-size: 11px
+          font-size: 10px
       
       
       // element styleing
@@ -258,15 +291,7 @@ section.importer-importfiles
       .input-minitext
         font-size: 10px
       
-      
-// temporary
-i.ajax-loader
-  display: block
-  height: 32px
-  width: 32px
-  margin: 15px 32px 0 0
-  &.c3CA3B9
-    background-image: url(/static/img/icons/loader/loader.3CA3B9.gif)
+
 
 // sidebar
 .import.summary
@@ -284,6 +309,18 @@ i.ajax-loader
     margin: 5px 0 5px 0
     border-bottom: 1px solid #efefef
     //background-color: #efefef
+
+    // counters
+    .counters
+      p
+        margin: 0
+      dl
+        margin: 6px 0 0 0
+        dt
+          float: left
+          width: 30px
+          text-align: right
+          padding-right: 4px
 
     a.toggle
       color: #333

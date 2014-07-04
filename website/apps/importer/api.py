@@ -116,7 +116,16 @@ class ImportResource(ModelResource):
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
             'uuid_key': ['exact',],
         }
-        
+
+
+
+
+    def dehydrate(self, bundle):
+        bundle.data['inserts'] = bundle.obj.get_inserts();
+        return bundle
+
+
+
     def save_related(self, obj):
         return True
     
@@ -175,6 +184,7 @@ class ImportResource(ModelResource):
         
         try:
             source = source[0]
+            print 'The source:'
             print source
             # print source.import_tag
         except:
@@ -200,7 +210,8 @@ class ImportResource(ModelResource):
                         dit.pop(key, None)
                         
                 import_file.import_tag = dit
-                import_file.save()
+                # TODO: investigate effect of "skip_apply_import_tag"
+                import_file.save(skip_apply_import_tag=True)
         
         
         bundle = self.build_bundle(obj=import_session, request=request)

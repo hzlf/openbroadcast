@@ -5,7 +5,7 @@ from pushy.settings import SETTINGS
 
 
 SOCKET_SERVER = SETTINGS.get('SOCKET_SERVER', None)
-DEBUG = SETTINGS.get('PUSHY_DEBUG', True)
+DEBUG = SETTINGS.get('PUSHY_DEBUG', False)
 
 register = template.Library()
 

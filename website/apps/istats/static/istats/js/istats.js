@@ -11,7 +11,7 @@ IstatsApp = function () {
 
         setInterval(function(){
             self.load();
-        }, 30000);
+        }, 60000);
 
         self.load();
     };
