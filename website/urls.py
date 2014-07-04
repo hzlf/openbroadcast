@@ -44,7 +44,6 @@ urlpatterns = patterns('',
 
     url(r'^backfeed/', include('backfeed.urls')),
 
-    url(r'^profiler/', include('profiler.urls')),
 
     
     #url(r"^profiles/", include("profiles.urls")),
