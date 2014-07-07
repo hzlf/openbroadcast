@@ -179,7 +179,7 @@ class Profile(MigrationMixin):
             t_tags += '%s, ' % tag    
         
         self.tags = t_tags
-        self.d_tags = t_tags
+        self.d_tags = t_tags[:1000]
 
         super(Profile, self).save(*args, **kwargs)
 
