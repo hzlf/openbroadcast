@@ -45,30 +45,7 @@
 				<small class="timestamp pull-right">{{ item.timestamp|date:"SHORT_DATETIME_FORMAT" }}</small>
 			</div>
 		</div>
-	
-	
-	
-		<!--
-		<div class="row-fluid">
-			<div class="span8">
-				<a class="link-main" href="{{ item.target.get_absolute_url }}" class="target">{{ item.target }}</a>
-			</div>
-			<div class="span4">
-				<span>{{ item.verb }}</span>
-			</div>
-		</div>
-		
-		<div class="row-fluid">
-			<div class="span8">
-				<span>{{ item.timestamp|timesince }}</span>
-			</div>
-			<div class="span4">
-				<small>{% trans "User" %} {{ item.actor }}</small>
-			</div>
-		</div>
-		-->
-		
-	
+
 	</div>
 	
 	{% endfor %}

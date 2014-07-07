@@ -233,8 +233,8 @@ def profile_edit(request, template_name='profiles/profile_form.html'):
 
     if request.POST:
         profile = Profile.objects.get(user=request.user)
-        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
         user_form = UserForm(request.POST, instance=request.user)
+        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
         service_formset = ServiceFormSet(request.POST, instance=profile)
         link_formset = LinkFormSet(request.POST, instance=profile)
 

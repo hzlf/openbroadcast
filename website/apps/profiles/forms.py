@@ -229,13 +229,15 @@ class UserForm(ModelForm):
     
     class Meta:
         model = User
-        fields = ('first_name', 'last_name')
+        fields = ('first_name', 'last_name', 'username', 'email')
         
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Fieldset(
                 _('User Details'),
+                Field('username', css_class='input-xlarge'),
+                Field('email', css_class='input-xlarge'),
                 Field('first_name', css_class='input-xlarge'),
                 Field('last_name', css_class='input-xlarge'),
             )

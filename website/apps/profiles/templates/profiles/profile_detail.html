@@ -421,7 +421,12 @@
 
                         </td>
 
-                        <td><span class="pull-right">{{ action.timestamp|timesince }} {% trans "ago" %}</span></td>
+                        <td>
+                            {% comment %}
+                            <span class="pull-right">{{ action.timestamp|timesince }} {% trans "ago" %}</span>
+                            {% endcomment %}
+                            <span class="pull-right">{{ action.timestamp }}</span>
+                        </td>
                     </tr>
 
                 {% endfor %}

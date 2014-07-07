@@ -178,9 +178,9 @@ class Profile(MigrationMixin):
         for tag in self.tags:
             t_tags += '%s, ' % tag    
         
-        self.tags = t_tags;
-        self.d_tags = t_tags[:1000];
-        
+        self.tags = t_tags
+        self.d_tags = t_tags
+
         super(Profile, self).save(*args, **kwargs)
 
 try:
