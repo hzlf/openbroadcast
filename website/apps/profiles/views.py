@@ -48,6 +48,10 @@ ORDER_BY = [
         'key': 'updated',
         'name': _('Last modified')
     },
+    {
+        'key': 'user__last_login',
+        'name': _('Last login')
+    },
 ]
 
 
