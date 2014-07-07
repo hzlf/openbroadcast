@@ -149,11 +149,17 @@ $(document).ready(function() {
                 The upload system tries to identify as exact as possible - however this is not so easy to do...
                 You REALLY should process your files with the awesome "Picard" metadata-tagger prior to uploading them!!!
                 {% endblocktrans %}
-                <br>
+            </p><p>
                 <strong>{% blocktrans %}
                 Doing so will save you a lot of work when adding music to the Open Broadcast library!
                 {% endblocktrans %}</strong>
+                <br>
+
+                <strong>{% blocktrans %}
+                    If picard does not recognize your files, Open Broadcast will neither.
+                {% endblocktrans %}</strong>
             </p>
+
             <ul>
                 <li><a href="https://musicbrainz.org/doc/MusicBrainz_Picard">MusicBrainz Picard</a></li>
                 <li><a href="https://musicbrainz.org/doc/How_to_Tag_Files_With_Picard">{% trans "How to Tag Files With Picard" %}</a></li>
