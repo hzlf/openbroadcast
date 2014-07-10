@@ -22,6 +22,8 @@ from alibrary.models import Media
 log = logging.getLogger(__name__)
 
 USE_CELERYD = True
+
+AUTOIMPORT_MB = False
         
 GENERIC_STATUS_CHOICES = (
     (0, _('Init')),
@@ -311,7 +313,22 @@ class ImportFile(BaseModel):
         
         # to prevent circular import errors
         from util.process import Process
-        
+
+        pre_sleep = 2
+
+        log.debug('sleping for %s seconds' % pre_sleep)
+        time.sleep(pre_sleep)
+        log.debug('wakeup after %s seconds' % pre_sleep)
+
+
+        if not obj.mimetype:
+            try:
+                mime = magic.Magic(mime=True)
+                obj.mimetype = mime.from_file(obj.file.path.encode('ascii', 'ignore'))
+            except Exception, e:
+                log.warning('Unable to determine mimetype: %s' % e)
+
+
         processor = Process()
         
         # duplicate check by sha1
@@ -353,7 +370,7 @@ class ImportFile(BaseModel):
             release_name = metadata['release_name'] if 'release_name' in metadata else None
             media_tracknumber = metadata['media_tracknumber'] if 'media_tracknumber' in metadata else None
 
-            if media_mb_id and artist_mb_id and release_mb_id:
+            if media_mb_id and artist_mb_id and release_mb_id and AUTOIMPORT_MB:
                 print
                 print '******************************************************************'
                 print 'got musicbrainz match'
@@ -543,10 +560,6 @@ def post_save_importfile(sender, **kwargs):
 
     # init: newly uploaded/created file. let's process (gather data) it
     if obj.status == 0:
-
-        if not obj.mimetype:
-            mime = magic.Magic(mime=True)
-            obj.mimetype = mime.from_file(obj.file.path.encode('ascii', 'ignore'))
 
         obj.process()
         

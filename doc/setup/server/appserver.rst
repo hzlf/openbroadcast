@@ -25,13 +25,14 @@ Echoprint installation
 
 .. code-block:: bash
 
-    aptitude install install ffmpeg libboost1.42-dev libtag1-dev zlib1g-dev
+    aptitude install  ffmpeg libboost-dev libtag1-dev zlib1g-dev
 
     cd
     cd src
     git clone https://github.com/echonest/echoprint-codegen.git
-    cd echoprint-codegen
-    make make install
+    cd echoprint-codegen/src
+    make
+    make install
 
     echoprint-codegen # test...
 

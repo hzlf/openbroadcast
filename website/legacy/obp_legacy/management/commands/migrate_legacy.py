@@ -78,6 +78,14 @@ class LegacyImporter(object):
                     legacy_obj.migrated = datetime.now()
                     legacy_obj.save()
 
+            if(self.object_type == 'artist'):
+
+                if self.legacy_id:
+                    legacy_obj = Artists.objects.using('legacy').get(id=int(self.legacy_id))
+                    obj, status = get_artist_by_legacy_object(legacy_obj, force=True)
+                    legacy_obj.migrated = datetime.now()
+                    legacy_obj.save()
+
             if(self.object_type == 'label'):
 
                 if self.legacy_id:
@@ -89,8 +97,6 @@ class LegacyImporter(object):
             if(self.object_type == 'playlist'):
 
                 if self.legacy_id:
-
-
 
                     from obp_legacy.models_legacy import ElggCmMaster
                     objects = ElggCmMaster.objects.using('legacy_legacy').filter(type='Container', migrated=None)[0:self.limit]

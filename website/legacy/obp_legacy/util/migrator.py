@@ -471,7 +471,7 @@ class ArtistMigrator(Migrator):
             obj.published = legacy_obj.published
 
             if legacy_obj.profile:
-                obj.description = legacy_obj.profile
+                obj.biography = legacy_obj.profile
 
             if legacy_obj.artisttype:
                 obj.type = legacy_obj.artisttype
