@@ -27,6 +27,18 @@ var ImportfileApp = function () {
             }
         });
 
+
+        // little hack to periodically try to fix missed updates
+        setInterval(function(){
+            //console.log('periodic reload to re-check status', self.local_data);
+            if(self.local_data && self.local_data.status == 'init') {
+                debug.debug('periodic reload to re-check status');
+                self.load();
+            }
+        }, 5000 + Math.floor(Math.random() * 1000))
+
+
+
     };
 
 
@@ -426,7 +438,6 @@ var ImportfileApp = function () {
                 } catch (err) {
                     data.messages = false;
                 }
-
 
                 self.local_data = data;
                 self.display(data);

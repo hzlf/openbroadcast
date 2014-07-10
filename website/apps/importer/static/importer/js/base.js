@@ -379,11 +379,14 @@ ImporterUi = function() {
 
 	this.apply_best_match = function(data) {
 
+        // TODO: investigate necessity
+        return;
+
 
         console.log('APPLY BEST MATCH FOR:', data)
-	
-		var holder = $('#result_holder');
-		
+
+
+
 		$('.importfile', holder).each(function(i, item) {
 			
 			//debug.debug(i);
@@ -416,6 +419,9 @@ ImporterUi = function() {
 	};
 
 	this.update_best_match = function(data) {
+
+        // TODO: investigate necessity
+        return;
 
 
         console.log('UPDATE BEST MATCH FOR:', data)
