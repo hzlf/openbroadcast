@@ -315,7 +315,6 @@ class ImportFile(BaseModel):
         from util.process import Process
 
         pre_sleep = 2
-
         log.debug('sleping for %s seconds' % pre_sleep)
         time.sleep(pre_sleep)
         log.debug('wakeup after %s seconds' % pre_sleep)
@@ -493,6 +492,13 @@ class ImportFile(BaseModel):
 
         log = logging.getLogger('importer.models.import_task')
         log.info('Starting import task for:  %s' % (obj.pk))
+
+        pre_sleep = 1
+        log.debug('sleping for %s seconds' % pre_sleep)
+        time.sleep(pre_sleep)
+        log.debug('wakeup after %s seconds' % pre_sleep)
+
+
         # to prevent circular import errors
         from util.importer import Importer
         importer = Importer()
@@ -560,10 +566,8 @@ def post_save_importfile(sender, **kwargs):
 
     # init: newly uploaded/created file. let's process (gather data) it
     if obj.status == 0:
-
         obj.process()
-        
-    
+
     if obj.status == 6:
         obj.do_import()
       

@@ -135,7 +135,7 @@ packages
 
 .. code-block:: bash
 
-   aptitude install python-dev libmysqlclient-dev mysql libsndfile libsndfile-dev libmemcached-dev libjpeg-dev zlib1g-dev libfreetype6-dev liblcms1-dev
+   aptitude install python-dev libmysqlclient-dev mysql libsndfile libsndfile-dev libmemcached-dev libjpeg-dev zlib1g-dev libfreetype6-dev liblcms1-dev libsox-fmt-all sox
 
 
 .. code-block:: bash
