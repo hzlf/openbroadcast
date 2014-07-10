@@ -336,6 +336,7 @@ class License(MPTTModel, MigrationMixin):
     uuid = models.CharField(max_length=36, unique=False, default=str(uuid.uuid4()), editable=False)
     
     key = models.CharField(verbose_name=_("License key"), help_text=_("used e.g. for the icon-names"), max_length=36, blank=True, null=True)
+    version = models.CharField(verbose_name=_("License version"), help_text=_("e.g. 2.5 CH"), max_length=36, blank=True, null=True)
 
     iconset =  models.CharField(verbose_name=_("Iconset"), help_text=_("e.g. cc-by, cc-nc, cc-sa"), max_length=36, blank=True, null=True)
 
@@ -344,8 +345,9 @@ class License(MPTTModel, MigrationMixin):
     
     restricted = models.NullBooleanField(null=True, blank=True)
     
-    is_default = models.BooleanField(default=False)
-    
+    is_default = models.NullBooleanField(default=False, null=True, blank=True)
+    selectable = models.NullBooleanField(default=True, null=True, blank=True)
+
 
     class Translation(TranslationModel):
         
@@ -369,13 +371,16 @@ class License(MPTTModel, MigrationMixin):
         app_label = 'alibrary'
         verbose_name = _('License')
         verbose_name_plural = _('Licenses')
-        ordering = ('name', )
+        ordering = ('parent__name', 'name', )
 
     class MPTTMeta:
         order_insertion_by = ['name']
     
     def __unicode__(self):
-        return self.name
+        if self.parent:
+            return '%s - %s' % (self.parent.name, self.name)
+        else:
+            return '%s' % (self.name)
     
     @models.permalink
     def get_absolute_url(self):

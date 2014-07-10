@@ -263,7 +263,7 @@ class Media(CachingMixin, MigrationMixin):
     # TODO: Fix this - guess should relate to Artist instead of Profession
     extra_artists = models.ManyToManyField('Artist', through='MediaExtraartists', blank=True, null=True)
     
-    license = models.ForeignKey(License, blank=True, null=True, related_name='media_license')
+    license = models.ForeignKey(License, blank=True, null=True, related_name='media_license', limit_choices_to={'selectable': True}, on_delete=models.PROTECT)
     
     # File related (old)
     #master = FilerAudioField(blank=True, null=True, related_name='media_master')
@@ -272,7 +272,8 @@ class Media(CachingMixin, MigrationMixin):
     
     # File related (new)
     #master = models.FileField(max_length=1024, upload_to=masterpath_by_uuid, blank=True, null=True)
-    filename = models.CharField(verbose_name=_('Original filename'), max_length=256, blank=True, null=True)
+    filename = models.CharField(verbose_name=_('Filename'), max_length=256, blank=True, null=True)
+    original_filename = models.CharField(verbose_name=_('Original filename'), max_length=256, blank=True, null=True)
     master = models.FileField(max_length=1024, upload_to=upload_master_to, blank=True, null=True)
     master_sha1 = models.CharField(max_length=64, db_index=True, blank=True, null=True)
     
@@ -918,7 +919,7 @@ class Media(CachingMixin, MigrationMixin):
          <base/or/bitrate>.mp3
         """
 
-        SUPPORTED_FORMATS = ['mp3', 'flac', 'aif', 'aiff', 'mp4', 'ogg']
+        SUPPORTED_FORMATS = ['mp3', 'flac', 'aif', 'aiff', 'mp4', 'm4a', 'ogg', 'vorbis', 'wav']
 
         # check if 'versions' directory exists - if not create it
         versions_directory = os.path.join(obj.get_directory(absolute=True), 'versions')
@@ -970,6 +971,23 @@ class Media(CachingMixin, MigrationMixin):
                     audiotools.MP3Audio, compression=0, progress=audiotools_progress)
             except Exception, e:
                 log.warning('audiotools exception: %s' % e)
+
+                try:
+
+                    lame_binary = '/opt/local/bin/lame'
+
+                    log.info('trying with lame: %s' % lame_binary)
+                    p = subprocess.Popen([
+                        lame_binary, obj.master.path, version_path
+                    ], stdout=subprocess.PIPE)
+                    stdout = p.communicate()
+                    print stdout
+                except Exception, e:
+                    log.warning('lame did fail as well: %s' % e)
+
+
+
+
 
             if os.path.isfile(version_path):
                 log.info('conversion complete: %s' % version_path)
@@ -1303,9 +1321,9 @@ class Media(CachingMixin, MigrationMixin):
             try:
                 license = License.objects.filter(is_default=True)[0]
                 self.license = license
-                log.debug('applied default license' % (license.name))
-            except:
-                log.warning('no default license available')
+                log.debug('applied default license: %s' % license.name)
+            except Exception, e:
+                log.warning('unable to apply default license: %s' % e)
         
 
         # check if master changed. if yes we need to reprocess the cached files
@@ -1316,8 +1334,9 @@ class Media(CachingMixin, MigrationMixin):
                     log.info('Media id: %s - Master changed from "%s" to "%s"' % (self.pk, orig.master, self.master))
 
                     # set 'original filename'
-                    self.original_filename = self.master.name
-                    self.filename = self.original_filename
+                    if not self.original_filename and self.master.name:
+                        self.original_filename = self.master.name[0:250]
+
                     # reset processing flags
                     self.processed = 0
                     self.conversion_status = 0

@@ -34,33 +34,30 @@
 
         <section id="license">
 
+            {% if object.excerpt %}
+            {% comment %}
             <div class="page-header padded">
                 <h3>{% trans "Excerpt" %}
                     <small>{% trans "in a few words" %}</small>
                 </h3>
             </div>
-
-            <div class="row">
-                <div class="span9 markdown-inline">
-                    <div style="padding: 0px 15px;">
-                     {{ object.excerpt|markdown:"safe" }}
-                    </div>
-                </div>
+            {% endcomment %}
+            <div class="markdown page-content padded">
+                {{ object.excerpt|markdown:"safe" }}
             </div>
+            {% endif %}
+
+            {% if object.license_text %}
             <div class="page-header padded">
                 <h3>{% trans "License Text" %}
                     <small>{% trans "From a lawyer point of view" %}</small>
                 </h3>
             </div>
 
-            <div class="row">
-                <div class="span9 markdown-inline">
-                    <div style="padding: 0px 15px;">
-                     {{ object.license_text|markdown:"safe" }}
-                    </div>
-                </div>
+            <div class="markdown page-content padded">
+                {{ object.license_text|markdown:"safe" }}
             </div>
-
+            {% endif %}
 
         </section>
 

@@ -10,12 +10,14 @@
 
     <dl class="dl-horizontal main">
 
+        {% if object.version %}
         <dt>
             {% trans "Version" %}:
         </dt>
         <dd>
-            {{ object.id }}
+            {{ object.version }}
         </dd>
+        {% endif %}
 
         <dt>
             {% trans "Created" %}:

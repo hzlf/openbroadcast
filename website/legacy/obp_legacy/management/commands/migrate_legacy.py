@@ -23,6 +23,7 @@ from obp_legacy.util.migrator import get_media_by_legacy_object
 from obp_legacy.util.migrator import get_playlist_by_legacy_object
 from obp_legacy.util.migrator import get_user_by_legacy_legacy_object
 from obp_legacy.util.migrator import get_community_by_legacy_legacy_object
+from obp_legacy.util.migrator import get_license_by_legacy_object
 
 
 DEFAULT_LIMIT = 100
@@ -82,6 +83,20 @@ class LegacyImporter(object):
                 if self.legacy_id:
                     legacy_obj = Labels.objects.using('legacy').get(id=int(self.legacy_id))
                     obj, status = get_label_by_legacy_object(legacy_obj, force=True)
+                    legacy_obj.migrated = datetime.now()
+                    legacy_obj.save()
+
+            if(self.object_type == 'playlist'):
+
+                if self.legacy_id:
+
+
+
+                    from obp_legacy.models_legacy import ElggCmMaster
+                    objects = ElggCmMaster.objects.using('legacy_legacy').filter(type='Container', migrated=None)[0:self.limit]
+
+                    legacy_obj = ElggCmMaster.objects.using('legacy_legacy').get(ident=int(self.legacy_id))
+                    obj, status = get_playlist_by_legacy_object(legacy_obj, force=True)
                     legacy_obj.migrated = datetime.now()
                     legacy_obj.save()
 
@@ -166,6 +181,17 @@ class LegacyImporter(object):
                 obj, status = get_playlist_by_legacy_object(legacy_obj)                
                 legacy_obj.migrated = datetime.now()
                 legacy_obj.save()
+
+
+        if(self.object_type == 'license'):
+
+            from obp_legacy.models import Licenses
+            objects = Licenses.objects.using('legacy').all()
+
+            for legacy_obj in objects:
+                print legacy_obj
+                obj, status = get_license_by_legacy_object(legacy_obj)
+
 
 
     def check(self):

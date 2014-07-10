@@ -87,10 +87,6 @@ def get_file_from_path(path, filename=None):
         if not filename:
             filename = ntpath.basename(path)
 
-            print '/////////////////////////////////'
-            print filename
-
-
         else:
             filename = safe_filename(filename)
 

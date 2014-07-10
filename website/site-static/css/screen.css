@@ -5164,13 +5164,32 @@ h6 {
   line-height: 1;
 }
 
-/* line 90, ../sass/site/_type.sass */
+/* line 87, ../sass/site/_type.sass */
+.page-content {
+  padding-top: 5px;
+}
+/* line 92, ../sass/site/_type.sass */
+.page-content.padded {
+  padding: 15px;
+}
+/* line 94, ../sass/site/_type.sass */
+.page-content.padded-h {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+/* line 97, ../sass/site/_type.sass */
+.page-content.padded-v {
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+/* line 105, ../sass/site/_type.sass */
 ul, ol {
   padding: 0;
   margin: 0 0 9px 25px;
 }
 
-/* line 94, ../sass/site/_type.sass */
+/* line 109, ../sass/site/_type.sass */
 ul ul,
 ul ol,
 ol ol,
@@ -5178,52 +5197,52 @@ ol ul {
   margin-bottom: 0;
 }
 
-/* line 100, ../sass/site/_type.sass */
+/* line 115, ../sass/site/_type.sass */
 ul {
   list-style: disc;
 }
 
-/* line 103, ../sass/site/_type.sass */
+/* line 118, ../sass/site/_type.sass */
 ol {
   list-style: decimal;
 }
 
-/* line 106, ../sass/site/_type.sass */
+/* line 121, ../sass/site/_type.sass */
 li {
   line-height: 18px;
 }
 
-/* line 109, ../sass/site/_type.sass */
+/* line 124, ../sass/site/_type.sass */
 ul.unstyled,
 ol.unstyled {
   margin-left: 0;
   list-style: none;
 }
 
-/* line 115, ../sass/site/_type.sass */
+/* line 130, ../sass/site/_type.sass */
 dl {
   margin-bottom: 18px;
 }
 
-/* line 118, ../sass/site/_type.sass */
+/* line 133, ../sass/site/_type.sass */
 dt,
 dd {
   line-height: 18px;
 }
 
-/* line 122, ../sass/site/_type.sass */
+/* line 137, ../sass/site/_type.sass */
 dt {
   font-weight: normal;
   opacity: 0.6;
   text-align: left;
 }
 
-/* line 127, ../sass/site/_type.sass */
+/* line 142, ../sass/site/_type.sass */
 dd {
   margin-left: 9px;
 }
 
-/* line 134, ../sass/site/_type.sass */
+/* line 149, ../sass/site/_type.sass */
 hr {
   margin: 18px 0;
   border: 0;
@@ -5231,22 +5250,22 @@ hr {
   border-bottom: 1px solid white;
 }
 
-/* line 141, ../sass/site/_type.sass */
+/* line 156, ../sass/site/_type.sass */
 strong {
   font-weight: bold;
 }
 
-/* line 144, ../sass/site/_type.sass */
+/* line 159, ../sass/site/_type.sass */
 em {
   font-style: italic;
 }
 
-/* line 147, ../sass/site/_type.sass */
+/* line 162, ../sass/site/_type.sass */
 .muted {
   color: #cccccc;
 }
 
-/* line 151, ../sass/site/_type.sass */
+/* line 166, ../sass/site/_type.sass */
 abbr {
   font-size: 90%;
   text-transform: uppercase;
@@ -5254,30 +5273,30 @@ abbr {
   cursor: help;
 }
 
-/* line 158, ../sass/site/_type.sass */
+/* line 173, ../sass/site/_type.sass */
 blockquote {
   padding: 0 0 0 15px;
   margin: 0 0 18px;
   border-left: 5px solid #eeeeee;
 }
-/* line 162, ../sass/site/_type.sass */
+/* line 177, ../sass/site/_type.sass */
 blockquote p {
   margin-bottom: 0;
   font-size: 16px;
   font-weight: 300;
   line-height: 22.5px;
 }
-/* line 165, ../sass/site/_type.sass */
+/* line 180, ../sass/site/_type.sass */
 blockquote small {
   display: block;
   line-height: 18px;
   color: #cccccc;
 }
-/* line 169, ../sass/site/_type.sass */
+/* line 184, ../sass/site/_type.sass */
 blockquote small:before {
   content: "\2014 \00A0";
 }
-/* line 172, ../sass/site/_type.sass */
+/* line 187, ../sass/site/_type.sass */
 blockquote.pull-right {
   float: right;
   padding-left: 0;
@@ -5285,13 +5304,13 @@ blockquote.pull-right {
   border-left: 0;
   border-right: 5px solid #eeeeee;
 }
-/* line 178, ../sass/site/_type.sass */
+/* line 193, ../sass/site/_type.sass */
 blockquote.pull-right p,
 blockquote.pull-right small {
   text-align: right;
 }
 
-/* line 184, ../sass/site/_type.sass */
+/* line 199, ../sass/site/_type.sass */
 q:before,
 q:after,
 blockquote:before,
@@ -5299,7 +5318,7 @@ blockquote:after {
   content: "";
 }
 
-/* line 191, ../sass/site/_type.sass */
+/* line 206, ../sass/site/_type.sass */
 address {
   display: block;
   margin-bottom: 18px;
@@ -5307,12 +5326,12 @@ address {
   font-style: normal;
 }
 
-/* line 198, ../sass/site/_type.sass */
+/* line 213, ../sass/site/_type.sass */
 small {
   font-size: 100%;
 }
 
-/* line 201, ../sass/site/_type.sass */
+/* line 216, ../sass/site/_type.sass */
 cite {
   font-style: normal;
 }
@@ -6453,44 +6472,51 @@ ul.tagit input[type="text"] {
 .wmd-preview h1 {
   color: #555555;
   font-size: 16px;
-  line-height: 27px;
+  line-height: 35.1px;
   margin-top: 10px !important;
   margin-bottom: 7px !important;
+  text-transform: none;
 }
-/* line 10, ../sass/element/_markdown.sass */
+/* line 11, ../sass/element/_markdown.sass */
 .wmd-preview h2, .wmd-preview h3, .wmd-preview h4, .wmd-preview h5, .wmd-preview h6 {
   color: #555555;
   font-size: 14px;
-  line-height: 18px;
+  line-height: 23.4px;
   margin-top: 7px !important;
   margin-bottom: 2px !important;
+  text-transform: none;
 }
-/* line 17, ../sass/element/_markdown.sass */
+/* line 19, ../sass/element/_markdown.sass */
 .wmd-preview ul {
   list-style-type: disc;
   list-style-position: outside;
 }
-/* line 20, ../sass/element/_markdown.sass */
+/* line 22, ../sass/element/_markdown.sass */
 .wmd-preview ul, .wmd-preview ol {
   margin-left: 18px;
+  margin-bottom: 8px;
 }
-/* line 23, ../sass/element/_markdown.sass */
+/* line 25, ../sass/element/_markdown.sass */
+.wmd-preview ul > li, .wmd-preview ol > li {
+  margin-bottom: 8px;
+}
+/* line 28, ../sass/element/_markdown.sass */
 .wmd-preview li {
   color: #333333;
 }
-/* line 26, ../sass/element/_markdown.sass */
+/* line 31, ../sass/element/_markdown.sass */
 .wmd-preview hr {
   color: #333333;
   background-color: #333333;
   height: 1px;
   border: none;
 }
-/* line 32, ../sass/element/_markdown.sass */
+/* line 37, ../sass/element/_markdown.sass */
 .wmd-preview p, .wmd-preview span, .wmd-preview pre {
   color: #333333;
   font-size: 12px;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  line-height: 18px;
+  line-height: 23.4px;
 }
 
 /* line 38, ../sass/site/_wmd.sass */
@@ -13679,7 +13705,58 @@ body .subhead .icontitle {
   font-style: italic;
 }
 
-/* line 36, ../sass/site/_style.sass */
+/* line 3, ../sass/element/_markdown.sass */
+.markdown h1 {
+  color: #555555;
+  font-size: 16px;
+  line-height: 35.1px;
+  margin-top: 10px !important;
+  margin-bottom: 7px !important;
+  text-transform: none;
+}
+/* line 11, ../sass/element/_markdown.sass */
+.markdown h2, .markdown h3, .markdown h4, .markdown h5, .markdown h6 {
+  color: #555555;
+  font-size: 14px;
+  line-height: 23.4px;
+  margin-top: 7px !important;
+  margin-bottom: 2px !important;
+  text-transform: none;
+}
+/* line 19, ../sass/element/_markdown.sass */
+.markdown ul {
+  list-style-type: disc;
+  list-style-position: outside;
+}
+/* line 22, ../sass/element/_markdown.sass */
+.markdown ul, .markdown ol {
+  margin-left: 18px;
+  margin-bottom: 8px;
+}
+/* line 25, ../sass/element/_markdown.sass */
+.markdown ul > li, .markdown ol > li {
+  margin-bottom: 8px;
+}
+/* line 28, ../sass/element/_markdown.sass */
+.markdown li {
+  color: #333333;
+}
+/* line 31, ../sass/element/_markdown.sass */
+.markdown hr {
+  color: #333333;
+  background-color: #333333;
+  height: 1px;
+  border: none;
+}
+/* line 37, ../sass/element/_markdown.sass */
+.markdown p, .markdown span, .markdown pre {
+  color: #333333;
+  font-size: 12px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 23.4px;
+}
+
+/* line 37, ../sass/site/_style.sass */
 body.loading-playlist {
   opacity: 0.2;
   cursor: wait;

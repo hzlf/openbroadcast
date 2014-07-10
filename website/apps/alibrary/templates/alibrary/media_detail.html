@@ -277,7 +277,7 @@
                     <td class="value">{{ object.base_filesize|filesizeformat }}</td>
                     <td class="value">{{ object.base_samplerate }}</td>
                     <td class="value">{{ object.base_bitrate }}</td>
-                    <td class="value">{% if obj.filename %}{{ object.filename }}{% endif %}</td>
+                    <td class="value">{% if object.original_filename %}{{ object.original_filename }}{% endif %}</td>
                 </tr>
                 </tbody>
             </table>

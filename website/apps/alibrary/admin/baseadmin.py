@@ -265,7 +265,7 @@ class LicenseAdmin(reversion.VersionAdmin, MultilingualModelAdmin):
     
     inline_instances = ('name_translated', 'restricted', 'parent',)
     
-    list_display   = ('name', 'key', 'slug',)
+    list_display   = ('name', 'parent', 'legacy_id', 'key', 'restricted', 'selectable', 'is_default',)
     search_fields = ('name',)
     
 admin.site.register(License, LicenseAdmin)

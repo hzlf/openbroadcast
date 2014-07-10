@@ -269,6 +269,7 @@ class MediaMigrator(Migrator):
             obj.name = legacy_obj.name
             obj.created = legacy_obj.created
             obj.updated = legacy_obj.updated
+            obj.original_filename = legacy_obj.filename[0:250] if legacy_obj.filename else None
             if legacy_obj.published:
                 obj.publish_date = legacy_obj.published
 
@@ -343,6 +344,29 @@ class MediaMigrator(Migrator):
                 except Exception, e:
                     print e
 
+
+
+            """
+            License mapping
+            """
+            license_id = None
+            if legacy_obj.license_id:
+                license_id = legacy_obj.license_id
+                log.debug('got license from media - license id: %s' % license_id)
+            else:
+                try:
+                    license_id = MediasReleases.objects.using('legacy').filter(media=legacy_obj)[0].release.license_id
+                    log.debug('got license from release - license id: %s' % license_id)
+                except Exception, e:
+                    log.warning('unable to find license: %s' % e)
+
+            if license_id:
+                from alibrary.models import License
+                obj.license, c = License.objects.get_or_create(legacy_id=license_id)
+
+
+
+
             """
             migrate actual file
             """
@@ -351,14 +375,45 @@ class MediaMigrator(Migrator):
             legacy_dir = os.path.join(LEGACY_STORAGE_ROOT, 'media', id_to_location(obj.legacy_id))
 
             log.debug('legacy dir: %s' % legacy_dir)
+            log.debug('legacy dataformat: %s' % legacy_obj.dataformat)
 
+            if legacy_obj.dataformat == 'flac' and os.path.isfile(os.path.join(legacy_dir, 'default.flac')):
+                legacy_path = os.path.join(legacy_dir, 'default.flac')
+                log.debug('got FLAC file: %s' % legacy_path)
+
+            #elif legacy_obj.dataformat == 'wav' and os.path.isfile(os.path.join(legacy_dir, 'default.wav')):
+            #    legacy_path = os.path.join(legacy_dir, 'default.wav')
+            #    log.debug('got WAVE file: %s' % legacy_path)
+
+            elif legacy_obj.dataformat == 'm4a' and os.path.isfile(os.path.join(legacy_dir, 'default.m4a')):
+                legacy_path = os.path.join(legacy_dir, 'default.m4a')
+                log.debug('got M4A file: %s' % legacy_path)
+
+            elif legacy_obj.dataformat == 'mp4' and os.path.isfile(os.path.join(legacy_dir, 'default.mp4')):
+                legacy_path = os.path.join(legacy_dir, 'default.mp4')
+                log.debug('got MP4 file: %s' % legacy_path)
+
+            #elif legacy_obj.dataformat == 'vorbis' and os.path.isfile(os.path.join(legacy_dir, 'default.vorbis')):
+            #    legacy_path = os.path.join(legacy_dir, 'default.vorbis')
+            #    log.debug('got OGG/Vorbis file: %s' % legacy_path)
+
+            #elif legacy_obj.dataformat == 'ogg' and os.path.isfile(os.path.join(legacy_dir, 'default.ogg')):
+            #    legacy_path = os.path.join(legacy_dir, 'default.ogg')
+            #    log.debug('got OGG file: %s' % legacy_path)
+
+            else:
+                legacy_path = os.path.join(legacy_dir, 'default.mp3')
+                log.debug('got MP3 file: %s' % legacy_path)
+
+
+            """
             if legacy_obj.has_flac_default == 1 and os.path.isfile(os.path.join(legacy_dir, 'default.flac')):
                 legacy_path = os.path.join(legacy_dir, 'default.flac')
                 log.debug('got FLAC file: %s' % legacy_path)
             else:
                 legacy_path = os.path.join(legacy_dir, 'default.mp3')
                 log.debug('got MP3 file: %s' % legacy_path)
-
+            """
 
 
             log.debug('legacy path: %s' % legacy_path)
@@ -375,44 +430,7 @@ class MediaMigrator(Migrator):
             except Exception, e:
                 print e
 
-            """
-            try:
 
-                # TODO: refactor to os.path.join()
-                base_path = '%s%s' % (LEGACY_STORAGE_ROOT, 'media/')
-                media_dir = '%s%s/' % (base_path, id_to_location(obj.legacy_id))
-
-                if legacy_obj.has_flac_default == 1 and os.path.isfile('%sdefault.flac' % (media_dir)):
-                    media_path = '%sdefault.flac' % (media_dir)
-                else:
-                    media_path = '%sdefault.mp3' % (media_dir)
-
-                if os.path.isfile(media_path):
-
-                    folder = "private/%s/" % (obj.uuid.replace('-', '/')[5:])
-                    filename, extension = os.path.splitext(media_path)
-                    dst = os.path.join(folder, "master%s" % extension.lower())
-
-                    try:
-                        try:
-                            os.makedirs("%s/%s" % (MEDIA_ROOT, folder))
-                        except:
-                            pass
-                        shutil.copy(media_path, "%s/%s" % (MEDIA_ROOT, dst))
-                        obj.master = dst
-                        obj.save()
-
-                    except Exception, e:
-                        log.error('unable to link %s - %s' % (media_path, e))
-                        print e
-
-                else:
-                    log.error('file does not exist: %s' % media_path)
-
-
-            except:
-                pass
-            """
 
 
             obj.save()
@@ -776,12 +794,56 @@ class LabelMigrator(Migrator):
         return obj, status
 
 
+class LicenseMigrator(Migrator):
+
+    def __init__(self):
+        log = logging.getLogger('util.migrator.__init__')
+
+
+    def run(self, legacy_obj, force=False):
+
+        from alibrary.models import License
+
+        status = 1
+
+        log = logging.getLogger('util.migrator.run')
+        log.info('migrate license: %s' % legacy_obj.id)
+
+        obj, created = License.objects.get_or_create(legacy_id=legacy_obj.id)
+
+        if created:
+            log.info('object created: %s' % obj.pk)
+        else:
+            log.info('object found by legacy_id: %s' % obj.pk)
+
+        if created or force:
+            """
+            Mapping data
+            1-to-1 fields
+            """
+            obj.name = legacy_obj.key
+            obj.key = legacy_obj.key
+            obj.slug = legacy_obj.key.replace('_', '-')
+
+
+            if legacy_obj.restricted == 1:
+                obj.restricted = True
+            else:
+                obj.restricted = False
+
+
+
+            obj.save()
+
+        return obj, status
+
+
 class UserMigrator(Migrator):
     def __init__(self):
         log = logging.getLogger('util.migrator.__init__')
 
 
-    def run(self, legacy_obj):
+    def run(self, legacy_obj, force=False):
 
         from profiles.models import Profile
         #from obp_legacy.models_legacy import *
@@ -1105,7 +1167,7 @@ class PlaylistMigrator(Migrator):
         log = logging.getLogger('util.migrator.__init__')
 
 
-    def run(self, legacy_obj):
+    def run(self, legacy_obj, force):
 
         from alibrary.models import Playlist, PlaylistItemPlaylist
         from obp_legacy.models_legacy import *
@@ -1122,148 +1184,166 @@ class PlaylistMigrator(Migrator):
         else:
             log.info('object found by legacy_id: %s' % obj.pk)
 
-        """
-        Mapping data
-        """
-        obj.name = legacy_obj.title
 
-        print '#######################################################'
-        print 'name: %s' % obj.name
+        if created or force:
+            """
+            Mapping data
+            """
+            obj.name = legacy_obj.title
 
-        """
-        legacy status
-        1: work in progress
-        2: ready to schedule
-        3: scheduled (not possible to go back)
-        4: un-scheduled ?
-        """
-        print 'status: %s' % legacy_obj.status
+            print '#######################################################'
+            print 'name: %s' % obj.name
 
-        if legacy_obj.status == 1:
-            obj.status = 2
-        if legacy_obj.status == 2:
-            obj.status = 1
-        if legacy_obj.status == 3:
-            obj.status = 3
-        if legacy_obj.status == 4:
-            obj.status = 4
+            """
+            legacy status
+            1: work in progress
+            2: ready to schedule
+            3: scheduled (not possible to go back)
+            4: un-scheduled ?
+            """
+            print 'status: %s' % legacy_obj.status
 
-        """
-        Type mapping
-        """
-        if legacy_obj.status in (2, 3, 4):
-            obj.type = 'broadcast'
-        if legacy_obj.status in (0, 1):
-            # maybe exclude '0'
-            obj.type = 'playlist'
+            if legacy_obj.status == 1:
+                obj.status = 2
+            if legacy_obj.status == 2:
+                obj.status = 1
+            if legacy_obj.status == 3:
+                obj.status = 3
+            if legacy_obj.status == 4:
+                obj.status = 4
 
-        """
-        Tag Mapping
-        """
-        nts = ElggTags.objects.using('legacy_legacy').filter(ref=legacy_obj.ident)
-        for nt in nts:
+            """
+            Type mapping
+            """
+            if legacy_obj.status in (2, 3, 4):
+                obj.type = 'broadcast'
+            if legacy_obj.status in (0, 1):
+                # maybe exclude '0'
+                obj.type = 'playlist'
+
+            """
+            Tag Mapping
+            """
+            nts = ElggTags.objects.using('legacy_legacy').filter(ref=legacy_obj.ident)
+            for nt in nts:
+                try:
+                    log.debug('tag for object: %s' % nt.tag)
+                    Tag.objects.add_tag(obj, u'"%s"' % nt.tag[:30])
+                except Exception, e:
+                    print e
+
+            if legacy_obj.intro:
+                print legacy_obj.intro
+                obj.description = legacy_obj.intro
+
+            # date mappings
+            if legacy_obj.posted:
+                obj.created = datetime.datetime.fromtimestamp(int(legacy_obj.posted)).strftime('%Y-%m-%d %H:%M:%S')
+
+            if legacy_obj.lastupdate:
+                obj.updated = datetime.datetime.fromtimestamp(int(legacy_obj.lastupdate)).strftime('%Y-%m-%d %H:%M:%S')
+
+            # TODO: status mapping
+            if legacy_obj.status:
+                print 'status id: %s' % legacy_obj.status
+
+            """
+            User mapping
+            """
             try:
-                log.debug('tag for object: %s' % nt.tag)
-                Tag.objects.add_tag(obj, u'"%s"' % nt.tag[:30])
+                legacy_user = Users.objects.using('legacy').get(legacy_id=legacy_obj.owner)
+                log.debug('mapping user')
+                item, s = get_user_by_legacy_object(legacy_user)
+                if item:
+                    obj.user = item
             except Exception, e:
                 print e
+                pass
 
-        if legacy_obj.intro:
-            print legacy_obj.intro
-            obj.description = legacy_obj.intro
-
-        # date mappings
-        if legacy_obj.posted:
-            obj.created = datetime.datetime.fromtimestamp(int(legacy_obj.posted)).strftime('%Y-%m-%d %H:%M:%S')
-
-        if legacy_obj.lastupdate:
-            obj.updated = datetime.datetime.fromtimestamp(int(legacy_obj.lastupdate)).strftime('%Y-%m-%d %H:%M:%S')
-
-        # TODO: status mapping
-        if legacy_obj.status:
-            print 'status id: %s' % legacy_obj.status
-
-        """
-        User mapping
-        """
-        try:
-            legacy_user = Users.objects.using('legacy').get(legacy_id=legacy_obj.owner)
-            log.debug('mapping user')
-            item, s = get_user_by_legacy_object(legacy_user)
-            if item:
-                obj.user = item
-        except Exception, e:
-            print e
-            pass
-
-        """
-        Getting this f**ing hell stupd content-container thing...
-        """
-        cts = ElggCmContainer.objects.using('legacy_legacy').filter(x_ident=legacy_obj.ident, container_type="Playlist")
-
-        if cts.count() > 0:
-            container = cts[0]
-        else:
-            container = None
-
-        if container:
-
-            print '***********************************************'
-            print container.body
-            print
-            print html2text(container.body)
-            print
-            obj.description = html2text(container.body.replace('&nbsp;', ''))
-
-            print 'target_duration: %s' % container.target_duration
             """
-            target duration, calculation
+            Getting this f**ing hell stupd content-container thing...
             """
-            print 'calculated:      %s' % (int(container.target_duration) * 15 * 60 * 1000)
+            cts = ElggCmContainer.objects.using('legacy_legacy').filter(x_ident=legacy_obj.ident, container_type="Playlist")
 
-            print 'duration:        %s' % container.duration
-            print 'sub_type:        %s' % container.sub_type
-            print 'best_broadcast_segment: %s' % container.best_broadcast_segment
-            print 'rotation_include: %s' % container.rotation_include
+            if cts.count() > 0:
+                container = cts[0]
+            else:
+                container = None
 
-            obj.target_duration = (int(container.target_duration) * 15 * 60)
+            if container and container.sub_type <= 4:
 
-            # TODO: Broadcast segment mapping
-            #bcs = json.loads(container.best_broadcast_segment)
-            #for bc in bcs:
-            #    if bc[0] == 1:
-            #        print 'Mo:',
-            #        print bc[1]
+                print '** description (stripped) *************************************'
+                print html2text(container.body)
+                print
+                obj.description = html2text(container.body.replace('&nbsp;', ''))
 
-            PlaylistItemPlaylist.objects.filter(playlist=obj).delete()
-            """"""
-            legacy_media = json.loads(container.content_list)
-            position = 0
-            for lm in legacy_media:
-                print lm
-                if 'source' in lm and lm['source'] == 'ml' and 'ident' in lm:
-                    tm = Medias.objects.using('legacy').get(id=int(lm['ident']))
-                    print tm.name
-                    print 'pos: %s' % position
+                print 'target_duration: %s' % container.target_duration
+                """
+                target duration, calculation
+                """
+                print 'calculated:      %s' % (int(container.target_duration) * 15 * 60 * 1000)
 
-                    media, s = get_media_by_legacy_object(tm)
-                    print media.pk
+                print 'duration:        %s' % container.duration
+                print 'sub_type:        %s' % container.sub_type
+                print 'best_broadcast_segment: %s' % container.best_broadcast_segment
+                print 'rotation_include: %s' % container.rotation_include
 
-                    #pi = PlaylistItem()
+                obj.target_duration = (int(container.target_duration) * 15 * 60)
 
-                    # map timing
-                    timing = {
-                        'fade_in': lm['fade_in'],
-                        'fade_out': lm['fade_out'],
-                        'cue_in': lm['offset_in'],
-                        'cue_out': lm['offset_out'],
-                    }
+                """
+                mapping of legacy dayparts.
+                structure:
+                  [1,1], [3,5], etc.
+                  first element:
+                    indicates the day, 1-indexed, so 1 dor monday, 7 for sunday
+                  second element:
+                    indicates the slot, 1-indexed.
 
-                    obj.add_items_by_ids(ids=[media.pk,], ct='media', timing=timing)
+                """
+                from alibrary.models.basemodels import Daypart
+                daypart_ids = []
+                bcs = json.loads(container.best_broadcast_segment)
+                for bc in bcs:
+                    dp_offset = int(bc[0]) * 7 - 6
+                    if bc[1] < 7:
+                        dp_pk = bc[1] + dp_offset
+                    else:
+                        dp_pk = dp_offset
+                    daypart_ids.append(dp_pk)
 
-                    position += 1
+                obj.dayparts = Daypart.objects.filter(pk__in=daypart_ids)
 
-        obj.save()
+
+
+                PlaylistItemPlaylist.objects.filter(playlist=obj).delete()
+                """"""
+                legacy_media = json.loads(container.content_list)
+                position = 0
+                for lm in legacy_media:
+                    print lm
+                    if 'source' in lm and lm['source'] == 'ml' and 'ident' in lm:
+                        tm = Medias.objects.using('legacy').get(id=int(lm['ident']))
+                        print tm.name
+                        print 'pos: %s' % position
+
+                        media, s = get_media_by_legacy_object(tm)
+                        print media.pk
+
+                        #pi = PlaylistItem()
+
+                        # map timing
+                        timing = {
+                            'fade_in': lm['fade_in'],
+                            'fade_out': lm['fade_out'],
+                            'cue_in': lm['offset_in'],
+                            'cue_out': lm['offset_out'],
+                        }
+
+                        obj.add_items_by_ids(ids=[media.pk,], ct='media', timing=timing)
+
+                        position += 1
+
+            obj.save()
 
         return obj, status
 
@@ -1296,16 +1376,23 @@ def get_label_by_legacy_object(legacy_obj, force=False):
     return obj, status
 
 
-def get_user_by_legacy_object(legacy_obj):
+def get_user_by_legacy_object(legacy_obj, force=False):
     migrator = UserMigrator()
-    obj, status = migrator.run(legacy_obj)
+    obj, status = migrator.run(legacy_obj, force)
 
     return obj, status
 
 
-def get_playlist_by_legacy_object(legacy_obj):
+def get_playlist_by_legacy_object(legacy_obj, force=False):
     migrator = PlaylistMigrator()
-    obj, status = migrator.run(legacy_obj)
+    obj, status = migrator.run(legacy_obj, force)
+
+    return obj, status
+
+
+def get_license_by_legacy_object(legacy_obj, force=False):
+    migrator = LicenseMigrator()
+    obj, status = migrator.run(legacy_obj, force)
 
     return obj, status
 
