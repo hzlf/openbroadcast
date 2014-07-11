@@ -926,7 +926,10 @@ class Media(MigrationMixin):
         log.debug('versions directory: %s' % versions_directory)
         if versions_directory:
             if not os.path.exists(versions_directory):
-                os.makedirs(versions_directory, 0755)
+                try:
+                    os.makedirs(versions_directory, 0755)
+                except:
+                    pass
 
         else:
             log.warning('unable to create verisons dir: %s' % versions_directory)

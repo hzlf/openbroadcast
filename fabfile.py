@@ -306,7 +306,9 @@ def reload_gunicorn():
 
 def restart_services():
     try:
-        run('supervisorctl restart services.%s:*' % env.site_id)
+        run('supervisorctl stop services.%s:*' % env.site_id)
+        run('supervisorctl reread')
+        run('supervisorctl update')
     except Exception, e:
         print '!!!!!! SERVICES WARNING !!!!!!!'
         print e
