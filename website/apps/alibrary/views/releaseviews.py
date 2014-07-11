@@ -120,6 +120,9 @@ class ReleaseListView(PaginationMixin, ListView):
 
         # return render_to_response('my_app/template.html', {'filter': f})
 
+
+        print produce_error(**kwargs)
+
         kwargs = {}
 
         self.tagcloud = None

@@ -359,6 +359,26 @@ ga('set', '&uid', {{ user.id }});
 </script>
 
 
+<script src="//cdn.ravenjs.com/1.1.15/jquery,native/raven.min.js"></script>
+<script>
+
+    Raven.config('https://c534f44cc9aa4064ad1710e82bf8aeae@sentry.pbi.io/2', {
+        //whitelistUrls: []
+    }).install();
+
+
+    {% if user.is_authenticated %}
+        Raven.setUser({
+            email: '{{ user.email }}',
+            id: '{{ user.pk }}'
+        });
+    {% endif %}
+
+</script>
+
+
+
+{% comment %}
 <script>(function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
   if (d.getElementById(id)) return;
@@ -366,6 +386,6 @@ ga('set', '&uid', {{ user.id }});
   js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId={% value_from_settings "FACEBOOK_APP_ID" %}";
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));</script>
-
+{% endcomment %}
 </body>
 </html>

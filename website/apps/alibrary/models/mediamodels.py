@@ -163,8 +163,8 @@ def audiotools_progress(x, y):
         pass
         #log.debug('conversion: %s' % p)
 
-class Media(CachingMixin, MigrationMixin):
-#class Media(MigrationMixin):
+#class Media(CachingMixin, MigrationMixin):
+class Media(MigrationMixin):
 
     # core fields
     uuid = RUUIDField(primary_key=False)
@@ -311,8 +311,8 @@ class Media(CachingMixin, MigrationMixin):
     #tags = TaggableManager(blank=True)
     
     # manager
-    # objects = models.Manager()
-    objects = CachingManager()
+    objects = models.Manager()
+    #objects = CachingManager()
     
     # auto-update
     created = models.DateTimeField(auto_now_add=True, editable=False)

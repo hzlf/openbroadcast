@@ -353,6 +353,7 @@ INSTALLED_APPS = (
     'gunicorn',
     'django_date_extensions',
     'esi',
+    'raven.contrib.django.raven_compat',
 
     'template_timings_panel',
 
