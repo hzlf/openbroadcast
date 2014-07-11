@@ -87,7 +87,7 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = (
     # sentry
     'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
-    'raven.contrib.django.raven_compat.middleware.Sentry404CatchMiddleware',
+    #'raven.contrib.django.raven_compat.middleware.Sentry404CatchMiddleware',
 
     #'johnny.middleware.LocalStoreClearMiddleware',
     #'johnny.middleware.QueryCacheMiddleware',
@@ -357,6 +357,7 @@ INSTALLED_APPS = (
     'django_date_extensions',
     'esi',
     'raven.contrib.django.raven_compat',
+    'raven.contrib.django.celery',
 
     'template_timings_panel',
 

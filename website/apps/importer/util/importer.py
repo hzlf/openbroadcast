@@ -734,7 +734,10 @@ def mb_complete_media_task(obj, mb_id, mb_release_id, excludes=()):
     tags = result.get('tags', ())
     for tag in tags:
         log.debug('got tag: %s' % (tag['name']))
-        Tag.objects.add_tag(obj, '"%s"' % tag['name'])
+        try:
+            Tag.objects.add_tag(obj, '"%s"' % tag['name'])
+        except:
+            pass
 
     # add mb relation
     mb_url = 'http://musicbrainz.org/recording/%s' % (mb_id)
@@ -937,12 +940,18 @@ def mb_complete_release_task(obj, mb_id):
                 styles = dgs_result.get('styles', [])
                 for style in styles:
                     log.debug('got style: %s' % (style))
-                    Tag.objects.add_tag(obj, '"%s"' % style)
+                    try:
+                        Tag.objects.add_tag(obj, '"%s"' % style)
+                    except:
+                        pass
 
                 genres = dgs_result.get('genres', [])
                 for genre in genres:
                     log.debug('got genre: %s' % (genre))
-                    Tag.objects.add_tag(obj, '"%s"' % genre)
+                    try:
+                        Tag.objects.add_tag(obj, '"%s"' % genre)
+                    except:
+                        pass
 
                 notes = dgs_result.get('notes', None)
                 if notes:
@@ -967,12 +976,18 @@ def mb_complete_release_task(obj, mb_id):
                 styles = dgs_result.get('styles', [])
                 for style in styles:
                     log.debug('got style: %s' % (style))
-                    Tag.objects.add_tag(obj, '"%s"' % style)
+                    try:
+                        Tag.objects.add_tag(obj, '"%s"' % style)
+                    except:
+                        pass
 
                 genres = dgs_result.get('genres', [])
                 for genre in genres:
                     log.debug('got genre: %s' % (genre))
-                    Tag.objects.add_tag(obj, '"%s"' % genre)
+                    try:
+                        Tag.objects.add_tag(obj, '"%s"' % genre)
+                    except:
+                        pass
 
                 notes = dgs_result.get('notes', None)
                 if notes:
@@ -986,7 +1001,10 @@ def mb_complete_release_task(obj, mb_id):
     tags = result.get('tags', ())
     for tag in tags:
         log.debug('got tag: %s' % (tag['name']))
-        Tag.objects.add_tag(obj, '"%s"' % tag['name'])
+        try:
+            Tag.objects.add_tag(obj, '"%s"' % tag['name'])
+        except:
+            pass
 
     status = result.get('status', None)
     if status:
@@ -1144,7 +1162,10 @@ def mb_complete_artist_task(obj, mb_id):
                 styles = dgs_result.get('styles', ())
                 for style in styles:
                     log.debug('got style: %s' % (style))
-                    Tag.objects.add_tag(obj, '"%s"' % style)
+                    try:
+                        Tag.objects.add_tag(obj, '"%s"' % style)
+                    except:
+                        pass
                 """
                 profile = dgs_result.get('profile', None)
                 if profile:
@@ -1244,7 +1265,10 @@ def mb_complete_artist_task(obj, mb_id):
 
     for tag in tags:
         log.debug('got tag: %s' % (tag['name']))
-        Tag.objects.add_tag(obj, '"%s"' % tag['name'])
+        try:
+            Tag.objects.add_tag(obj, '"%s"' % tag['name'])
+        except:
+            pass
 
 
     # add mb relation
