@@ -28,9 +28,13 @@ from base import discogs_image_by_url, discogs_id_by_url
 log = logging.getLogger(__name__)
 
 
+DISCOGS_HOST = getattr(settings, 'DISCOGS_HOST', None)
+
 MUSICBRAINZ_HOST = getattr(settings, 'MUSICBRAINZ_HOST', None)
 MUSICBRAINZ_RATE_LIMIT = getattr(settings, 'MUSICBRAINZ_RATE_LIMIT', True)
 MUSICBRAINZ_RATE_LIMIT = getattr(settings, 'MUSICBRAINZ_RATE_LIMIT', True)
+
+
 
 # promt for continuation
 DEBUG_WAIT = False
@@ -424,6 +428,7 @@ class Importer(object):
             os.makedirs("%s/%s" % (MEDIA_ROOT, folder))
             shutil.copy(src, "%s/%s" % (MEDIA_ROOT, dst))
             m.master = dst
+            m.original_filename = obj.filename
             m.save()
             
         except Exception, e:
@@ -765,6 +770,8 @@ def mb_complete_release_task(obj, mb_id):
     inc = ('artists', 'url-rels', 'aliases', 'tags', 'recording-rels', 'work-rels', 'work-level-rels', 'artist-credits', 'labels', 'label-rels', 'release-groups')
     url = 'http://%s/ws/2/release/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, mb_id, "+".join(inc))
 
+    log.debug('query url: %s' % url)
+
     r = requests.get(url)
     result = r.json()
 
@@ -785,13 +792,13 @@ def mb_complete_release_task(obj, mb_id):
         for relation in result['relations']:
 
             if relation['type'] == 'discogs':
-                log.debug('got discogs url for release: %s' % relation['url'])
+                log.debug('got discogs url for release: %s' % relation['url']['resource'])
                 discogs_url = relation['url']['resource']
 
                 # obj.save()
 
             if relation['type'] == 'purchase for download':
-                log.debug('got purchase url for release: %s' % relation['url'])
+                log.debug('got purchase url for release: %s' % relation['url']['resource'])
 
                 try:
                     rel = Relation.objects.get(object_id=obj.pk, url=relation['url']['resource'])
@@ -810,20 +817,18 @@ def mb_complete_release_task(obj, mb_id):
         r = requests.get(url)
         rg_result = r.json()
 
-        print "*******************************************************************"
-
 
         # try to get relations from master
         if 'relations' in rg_result:
             for relation in rg_result['relations']:
 
                 if relation['type'] == 'discogs':
-                    log.debug('got discogs master-url for release: %s' % relation['url'])
+                    log.debug('got discogs master-url for release: %s' % relation['url']['resource'])
                     discogs_master_url = relation['url']['resource']
 
 
                 if relation['type'] == 'wikipedia':
-                    log.debug('got wikipedia url for release: %s' % relation['url'])
+                    log.debug('got wikipedia url for release: %s' % relation['url']['resource'])
 
                     try:
                         rel = Relation.objects.get(object_id=obj.pk, url=relation['url']['resource'])
@@ -833,7 +838,7 @@ def mb_complete_release_task(obj, mb_id):
 
 
                 if relation['type'] == 'lyrics':
-                    log.debug('got lyrics url for release: %s' % relation['url'])
+                    log.debug('got lyrics url for release: %s' % relation['url']['resource'])
 
                     try:
                         rel = Relation.objects.get(object_id=obj.pk, url=relation['url']['resource'])
@@ -843,7 +848,7 @@ def mb_complete_release_task(obj, mb_id):
 
 
                 if relation['type'] == 'allmusic':
-                    log.debug('got allmusic url for release: %s' % relation['url'])
+                    log.debug('got allmusic url for release: %s' % relation['url']['resource'])
 
                     try:
                         rel = Relation.objects.get(object_id=obj.pk, url=relation['url']['resource'])
@@ -853,7 +858,7 @@ def mb_complete_release_task(obj, mb_id):
 
 
                 if relation['type'] == 'review':
-                    log.debug('got review url for release: %s' % relation['url'])
+                    log.debug('got review url for release: %s' % relation['url']['resource'])
 
                     try:
                         rel = Relation.objects.get(object_id=obj.pk, url=relation['url']['resource'])
@@ -926,13 +931,18 @@ def mb_complete_release_task(obj, mb_id):
         discogs_id = None
         try:
             discogs_id = re.findall(r'\d+', discogs_url)[0]
-            log.info('extracted discogs id: %s' % discogs_id)
+            log.info('extracted discogs id (release): %s' % discogs_id)
         except:
             pass
 
         if discogs_id:
-            url = 'http://api.discogs.com/releases/%s' % discogs_id
+            url = 'http://%s/releases/%s' % (DISCOGS_HOST, discogs_id)
             r = requests.get(url)
+
+            #print '*****************************'
+            #print url
+            #print r.text
+            #print '*****************************'
 
             try:
                 dgs_result = r.json()
@@ -956,20 +966,26 @@ def mb_complete_release_task(obj, mb_id):
                 notes = dgs_result.get('notes', None)
                 if notes:
                     obj.description = notes
-            except:
-                pass
+            except Exception, e:
+                log.warning('unable to get data from discogs: %s' % e)
 
     if discogs_master_url:
         discogs_id = None
         try:
             discogs_id = re.findall(r'\d+', discogs_master_url)[0]
-            log.info('extracted discogs id: %s' % discogs_id)
+            log.info('extracted discogs id (master-release): %s' % discogs_id)
         except:
             pass
 
         if discogs_id:
-            url = 'http://api.discogs.com/masters/%s' % discogs_id
+            url = 'http://%s/masters/%s' % (DISCOGS_HOST, discogs_id)
             r = requests.get(url)
+
+            #print '*****************************'
+            #print url
+            #print r.text
+            #print '*****************************'
+
             try:
                 dgs_result = r.json()
 
@@ -993,8 +1009,8 @@ def mb_complete_release_task(obj, mb_id):
                 if notes:
                     obj.description = notes
 
-            except:
-                pass
+            except Exception, e:
+                log.warning('unable to get data from discogs: %s' % e)
 
 
 
@@ -1048,6 +1064,7 @@ def mb_complete_release_task(obj, mb_id):
 
 
     # add mb relation
+    # TODO: investigate why there are sometimes urls like: http://musicbrainz.org/release/None added!
     mb_url = 'http://musicbrainz.org/release/%s' % (mb_id)
     try:
         rel = Relation.objects.get(object_id=obj.pk, url=mb_url)
@@ -1150,7 +1167,7 @@ def mb_complete_artist_task(obj, mb_id):
             pass
 
         if discogs_id:
-            url = 'http://api.discogs.com/artists/%s' % discogs_id
+            url = 'http://%s/artists/%s' % (DISCOGS_HOST, discogs_id)
             r = requests.get(url)
 
 

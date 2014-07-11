@@ -319,107 +319,6 @@ base.ui.refresh = function () {
 };
 
 
-/* TODO: Move somewhere
- * moved to exporter/base.js
-ExporterApp = (function () {
-
-    var self = this;
-    this.api_url = '/api/v1/export/'
-
-    this.queue = function (items, redirect) {
-
-        var objects;
-        var export_session;
-
-        // try to get an open (status 0) export
-        jQuery.ajax({
-            url: self.api_url + '?status=0',
-            success: function (data) {
-                objects = data.objects;
-            },
-            async: false
-        });
-
-
-        // if none available: > create
-        if (objects.length < 1) {
-            jQuery.ajax({
-                url: self.api_url,
-                type: 'POST',
-                data: JSON.stringify({filename: 'sessionasd'}),
-                dataType: "json",
-                contentType: "application/json",
-                processData: false,
-                success: function (data) {
-                    console.log(data);
-                    export_session = data;
-                },
-                async: false
-            });
-        } else {
-            export_session = objects[0];
-        }
-
-        console.log('export session:', export_session);
-
-        // add export-items
-        for (i in items) {
-            var item = items[i];
-
-            console.log('exporter item:', item);
-
-            var data = {
-                export_session: {'pk': export_session.id },
-                item: item
-            }
-
-            jQuery.ajax({
-                url: '/api/v1/exportitem/',
-                type: 'POST',
-                data: JSON.stringify(data),
-                dataType: "json",
-                contentType: "application/json",
-                processData: false,
-                success: function (data) {
-                    console.log(data);
-                    // export_session = data;
-                },
-                async: false
-            });
-
-
-        }
-
-        // run the queue
-        jQuery.ajax({
-            url: export_session.resource_uri,
-            type: 'PUT',
-            data: JSON.stringify({status: 2}),
-            dataType: "json",
-            contentType: "application/json",
-            processData: false,
-            success: function (data) {
-                console.log('queue:', data);
-                export_session = data;
-                if (redirect) {
-                    window.location.href = export_session.download_url;
-                }
-            },
-            async: true // this is the processing one - could take some time.
-        });
-
-
-        base.ui.ui_message('Download queued', 10000);
-
-
-    };
-
-    this.run = function (items) {
-
-    };
-
-});
- */
 
 /*
  * global interface things
@@ -549,38 +448,6 @@ base.ui.iface = function () {
         return false;
     });
 
-
-    /*
-     * Merge selected items
-     * MOVED: refactored to list.edit.js
-     */
-
-    /*
-     * Dialog opening and parameter collection
-
-    $('.action.selection_merge a').live('click', function () {
-
-        if ($(this).hasClass('disabled')) {
-            return false;
-        }
-
-        var item_type = $(this).attr('href').substring(1);
-
-        item_ids = new Array;
-        $('.list_body_row.selection').each(function (index) {
-            var item_id = $(this).attr('id').split("_").pop();
-            item_ids.push(item_id);
-        });
-
-        // Request url
-        var url = '/ui/items_merge?item_type=' + item_type + '&item_ids=' + item_ids.join(',');
-
-        boxy = new Boxy.load(url, { modal: true });
-        return boxy;
-
-        return false;
-    });
-    */
 
     /*
      * Handlers in dialog window actions and ajax call
@@ -743,28 +610,6 @@ base.ui.iface = function () {
         };
 
         base.ui.collector.collect(items, false);
-
-
-        /*
-         // AJAX Call
-         $.ajax( {
-         url : url,
-         type : "POST",
-         data : data,
-         dataType : "json",
-         success : function(result) {
-         if (true == result['status']) {
-         $('#element').load('/ui/sidebar_playlist' + '?r=' + util.string_random(20));
-         } else {
-         base.ui.ui_message(result['message']);
-         }
-         },
-         error : function(XMLHttpRequest, textStatus, errorThrown) {
-         base.ui.ui_message(errorThrown);
-         }
-         });
-         */
-
 
     });
 
@@ -951,6 +796,23 @@ base.ui.iface = function () {
         e.preventDefault();
         $('.limited', $(this).parents('dd')).toggle();
     });
+
+
+    // color on hover
+    // TODO: where to have this??
+
+    $('.listview.artists.l').on('mouseover', '.item', function(){
+        var src = $(this).data('image_color');
+        $(this).css('background-image', 'url(' + src + ')');
+    })
+    $('.listview.artists.l').on('mouseout', '.item', function(){
+        var src = $(this).data('image_bw');
+        $(this).css('background-image', 'url(' + src + ')');
+    })
+
+
+
+
 
 
 };

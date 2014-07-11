@@ -309,6 +309,7 @@ def restart_services():
         run('supervisorctl stop services.%s:*' % env.site_id)
         run('supervisorctl reread')
         run('supervisorctl update')
+        run('supervisorctl restart services.%s:*' % env.site_id)
     except Exception, e:
         print '!!!!!! SERVICES WARNING !!!!!!!'
         print e

@@ -785,9 +785,9 @@ class Media(MigrationMixin):
             versions_directory = os.path.join(self.get_directory(absolute=True), 'versions')
             dst_path = os.path.join(versions_directory, 'waveform.png')
             
-            print 'create waveform'
-            print 'src_path: %s' % src_path
-            print 'tmp_path: %s' % tmp_path
+            #print 'create waveform'
+            #print 'src_path: %s' % src_path
+            #print 'tmp_path: %s' % tmp_path
             print 'dst_path: %s' % dst_path
 
 
@@ -798,14 +798,14 @@ class Media(MigrationMixin):
             else:
                 sox_binary = '/usr/bin/sox'
 
-            print '%s %s %s' % (sox_binary, src_path, tmp_path)
+            log.debug('running: "%s %s %s"' % (sox_binary, src_path, tmp_path))
 
 
             p = subprocess.Popen([
                 sox_binary, src_path, tmp_path
             ], stdout=subprocess.PIPE)
             stdout = p.communicate()
-            print stdout
+            #print stdout
             
             #audiotools.open(src_path).convert(tmp_path, audiotools.WaveAudio)
             
@@ -1346,7 +1346,8 @@ class Media(MigrationMixin):
                     self.echoprint_status = 0
 
             except Exception, e:
-                print e
+                pass
+                #print e
 
 
 

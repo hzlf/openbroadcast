@@ -538,11 +538,8 @@ def create_wave_images(input_filename, output_filename_w, output_filename_s, ima
     if progress_callback:
         progress_callback(100)
 
-
-    print 'pre-save (create_wave_images)'
     waveform.save(output_filename_w)
     #spectrogram.save(output_filename_s)
-    print 'post-save (create_wave_images)'
 
 
 class NoSpaceLeftException(Exception):

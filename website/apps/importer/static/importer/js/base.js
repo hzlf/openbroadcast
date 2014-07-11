@@ -265,6 +265,9 @@ ImporterUi = function() {
 
 		$.getJSON(self.api_url, function(data) {
 			self.update_import_files_callback(data);
+
+            $('#loading_message').fadeOut(300);
+
 		});
 
 	};

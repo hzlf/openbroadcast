@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 
 USE_CELERYD = True
 
-AUTOIMPORT_MB = False
+AUTOIMPORT_MB = True
         
 GENERIC_STATUS_CHOICES = (
     (0, _('Init')),
@@ -369,7 +369,7 @@ class ImportFile(BaseModel):
             release_name = metadata['release_name'] if 'release_name' in metadata else None
             media_tracknumber = metadata['media_tracknumber'] if 'media_tracknumber' in metadata else None
 
-            if media_mb_id and artist_mb_id and release_mb_id and AUTOIMPORT_MB:
+            if media_mb_id and artist_mb_id and release_mb_id:
                 print
                 print '******************************************************************'
                 print 'got musicbrainz match'
@@ -506,11 +506,8 @@ class ImportFile(BaseModel):
         media, status = importer.run(obj)
 
         if media:
-            print 'GOT MEDIA - SAVE IT'
-            #print media
             obj.media = media
-            print obj.media
-            
+
             obj.status = 1
             
         else:

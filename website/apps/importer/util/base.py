@@ -46,9 +46,7 @@ def discogs_image_by_url(url, type='uri'):
         if type:
 
             url = 'http://%s/%s/%s' %(DISCOGS_HOST, type, id)
-            print '--------------------------'
             log.debug('constructed API url "%s"' % url)
-            print '--------------------------'
 
             r = requests.get(url)
 

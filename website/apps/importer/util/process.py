@@ -6,6 +6,7 @@ import logging
 
 from mutagen import File as MutagenFile
 from mutagen.easyid3 import EasyID3
+from mutagen.easymp4 import EasyMP4
 from django.conf import settings
 import acoustid
 import requests
@@ -118,12 +119,37 @@ class Process(object):
         log.info('Extracting metadata for: %s' % (file.path))
         
         enc = locale.getpreferredencoding()
-        try:
-            meta = EasyID3(file.path)
-            log.debug('using EasyID3')
-        except Exception, e:
-            meta = MutagenFile(file.path)
-            log.debug('using MutagenFile')
+
+
+        meta = None
+        ext = os.path.splitext(file.path)[1]
+        log.debug('detected %s as extension' % ext)
+
+        if ext:
+            ext = ext.lower()
+
+        if ext == '.mp3':
+            try:
+                meta = EasyID3(file.path)
+            except Exception, e:
+                log.debug('unable to process MP3')
+
+        if ext in ['.mp4', '.m4a']:
+            try:
+                meta = EasyMP4(file.path)
+            except Exception, e:
+                log.debug('unable to process M4A')
+
+
+        if not meta:
+            try:
+                meta = MutagenFile(file.path)
+                log.debug('using MutagenFile')
+            except Exception, e:
+                log.warning('even unable to open file with straight mutagen: %s' % e)
+
+
+
 
         dataset = dict(METADATA_SET)
 

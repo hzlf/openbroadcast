@@ -21,13 +21,21 @@ class ImporterTest(object):
         self.verbosity = int(kwargs.get('verbosity', 1))
         
         self.pp = pprint.PrettyPrinter(indent=2)
-        
+
+        print
+        print '********* TEST *************'
         print self.test
-        print self.if_id
+        print '****************************'
+        print
+        #print self.if_id
 
 
 
     def run(self):
+
+
+
+
 
         if self.test == 'process':
             print 'testing process'
@@ -46,25 +54,33 @@ class ImporterTest(object):
             
             self.pp.pprint(obj.results_tag)
 
-            
-            
-
             obj.results_acoustid = processor.get_aid(obj.file)
             processor.get_musicbrainz(obj)
 
+
         if self.test == 'import':
             print 'testing import'
-            
             importer = Importer()
-            
             obj = ImportFile.objects.get(pk=self.if_id)
-
-            
-            
             media, status = importer.run(obj)
-            
+
             print '*************************************'
             print media
+
+
+        if self.test == 'lookup':
+            from alibrary.models.artistmodels import Release
+            from importer.util.importer import mb_complete_release_task
+
+            mb_id = 'a808ae2c-9c89-4b2c-96cb-e527554b4ee2'
+            obj = Release.objects.get(pk=2102)
+
+
+            print 'name:  %s' % obj.name
+            print 'mb id: %s' % mb_id
+
+            mb_complete_release_task(obj, mb_id)
+
             
             
             
