@@ -55,8 +55,8 @@ in python shell:
 ================
 
 Release.objects.all().delete()
-Artist.objects.all().delete()
 Media.objects.all().delete()
+Artist.objects.all().delete()
 Label.objects.all().delete()
 Playlist.objects.all().delete()
 Agency.objects.all().delete()

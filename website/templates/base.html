@@ -1,4 +1,4 @@
-{% load compress cms_tags sekizai_tags value_from_settings esi backfeed_tags %}
+{% load compress cms_tags sekizai_tags value_from_settings esi backfeed_tags raven %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
 
@@ -362,7 +362,7 @@ ga('set', '&uid', {{ user.id }});
 <script src="//cdn.ravenjs.com/1.1.15/jquery,native/raven.min.js"></script>
 <script>
 
-    Raven.config('https://c534f44cc9aa4064ad1710e82bf8aeae@sentry.pbi.io/2', {
+    Raven.config('{% sentry_public_dsn 'https' %}', {
         //whitelistUrls: []
     }).install();
 
