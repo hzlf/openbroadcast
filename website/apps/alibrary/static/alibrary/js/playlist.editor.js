@@ -437,26 +437,6 @@ PlaylistEditor = function () {
     };
 
 
-    /*
-    LEGACY VERSION
-     */
-    this.__update_editor_transform = function () {
-
-        var container = $('#playlist_transform');
-
-        if (this.current_playlist.dayparts.length > 0) {
-            $('.dayparts', container).removeClass('warning');
-            $('.dayparts', container).addClass('success');
-        } else {
-            $('.dayparts', container).removeClass('success');
-            $('.dayparts', container).addClass('warning');
-        }
-
-
-    };
-
-
-
     this.update_editor_transform = function (data) {
         /*
         most information is displayed while page rendering. just override some states for duration
@@ -509,62 +489,6 @@ PlaylistEditor = function () {
 
 
     };
-
-    /*
-    LEGACY VERSION
-     */
-    this.__update_editor_summary = function () {
-
-
-        var total_duration = 0;
-
-        for (i in self.current_items) {
-            if (isInt(i)) {
-                var item = self.current_items[i];
-                total_duration += item.item.content_object.duration;
-                total_duration -= (item.cue_in + item.cue_out + item.fade_cross);
-            }
-        }
-
-        var error = true;
-        if (Math.abs(self.current_playlist.target_duration * 1000 - total_duration) < 2000) {
-            error = false;
-        } else {
-            error = 'Durations do not match.'
-        }
-
-        var durations = {
-            total: total_duration,
-            target: self.current_playlist.target_duration * 1000,
-            difference: self.current_playlist.target_duration * 1000 - total_duration,
-            error: error
-        }
-
-        var data = {
-            durations: durations,
-            object: self.current_playlist
-        }
-
-
-
-        // TODO: make modular
-        var container = $('#playlist_transform');
-        html = nj.render('alibrary/nj/playlist/editor_transform_summary.html', {
-            durations: durations,
-            object: self.current_playlist
-        });
-
-        $('.summary-holder', container).html(html);
-
-        // TODO: make modular
-        if (error) {
-            $('.convert_broadcast', container).addClass('disabled');
-        } else {
-            $('.convert_broadcast', container).removeClass('disabled');
-        }
-    };
-
-
 
     this.update_editor_playlist = function (data) {
 
@@ -751,11 +675,6 @@ PlaylistEditorItem = function () {
 
         var html = '';
         if (self.ct == 'media') {
-            /*
-             html = ich.tpl_playlists_editor_media({
-             object: self.item
-             });
-             */
 
             html = nj.render('alibrary/nj/playlist/editor_item.html', {
                 object: self.item,
@@ -765,19 +684,13 @@ PlaylistEditorItem = function () {
         }
 
         if (self.ct == 'jingle') {
-            /*
-             html = ich.tpl_playlists_editor_media({
-             object: self.item
-             });
-             */
+
             this.waveform_fill = '90-#aaa-#63c:50-#aaa';
 
             html = nj.render('alibrary/nj/playlist/editor_item.html', {
                 object: self.item,
                 readonly: self.readonly
             });
-
-
         }
 
         // check if append or replace
@@ -791,19 +704,15 @@ PlaylistEditorItem = function () {
 
         self.dom_id = 'playlist_item_' + self.item.id;
         self.dom_element = $('#' + self.dom_id);
-
         self.dom_element.css('height', self.size_y + 70);
-
         self.waveform_dom_id = 'playlist_item_waveform_' + self.item.id;
 
-
         self.bindings();
-
         self.init_waveform();
         self.init_player();
 
-
         // set interval and run once
+        // TODO: do we need this?
         if (self.interval_duration) {
             self.set_interval(self.run_interval, self.interval_duration);
         }
@@ -949,7 +858,6 @@ PlaylistEditorItem = function () {
 
     this.update = function (item, playlist_editor) {
         debug.debug('PlaylistEditorItem - update');
-        // self.dom_element.hide(5000);
         self.item = item;
         this.playlist_editor = playlist_editor;
 
@@ -1002,13 +910,27 @@ PlaylistEditorItem = function () {
 
     this.init_waveform = function () {
 
-        // debug.debug('PlaylistEditorItem - init_waveform');
+        debug.debug('PlaylistEditorItem - init_waveform');
+
+        console.log('Waveform image at:', self.item.item.content_object.waveform_image);
+
+        var waveform_image = self.item.item.content_object.waveform_image;
+
+        if(! waveform_image) {
+
+        }
+
         this.r = Raphael(self.waveform_dom_id, 830, self.size_y + 6);
 
         self.el_background = this.r.rect(0, 0, self.size_x, self.size_y).attr({ stroke: "none", fill: '90-#efefef-#bbb:50-#efefef' });
         self.el_buffer = this.r.rect(0, 0, 0, self.size_y).attr({ stroke: "none", fill: self.waveform_fill });
 
-        self.el_waveform = this.r.image(self.item.item.content_object.waveform_image, 0, 0, 830, self.size_y);
+        if(waveform_image) {
+            self.el_waveform = this.r.image(waveform_image, 0, 0, 830, self.size_y);
+        } else {
+
+        }
+
 
         self.el_indicator = this.r.rect(-10, 0, 2, 40).attr({ stroke: "none", fill: '#00bb00' });
 

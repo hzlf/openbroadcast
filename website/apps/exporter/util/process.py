@@ -69,7 +69,7 @@ class Process(object):
         if not self.archive_format in AVAILABLE_ARCHIVE_FORMATS:
             raise Exception('Archive format not available.')
 
-        log.info('running export: %s - %s' % (self.format, self.target))
+        log.info('running export for "%s": %s - %s' % (self.user.username, self.format, self.target))
 
         if not self.prepare_directories():
             log.error('directories could not be created')
@@ -85,14 +85,14 @@ class Process(object):
             if message:
                 self.messages.append(message)
 
-        print '-----------------------------------'
-        print self.messages
-        print self.file_list
+        #print '-----------------------------------'
+        #print self.messages
+        #print self.file_list
 
 
         if self.target == 'download':
             log.info('download as target, compressing directory')
-            shutil.make_archive(self.archive_path, self.archive_format, self.archive_cache_dir, verbose=2)
+            shutil.make_archive(self.archive_path, self.archive_format, self.archive_cache_dir, verbose=1)
 
             if os.path.isfile(self.archive_path + '.%s' % self.archive_format):
                 return 1, self.archive_path + '.%s' % self.archive_format, self.messages
@@ -138,7 +138,7 @@ class Process(object):
 
     def process_item(self, item):
 
-        log.debug('export ctype: %s | id: %s' % (item.content_type, item.object_id))
+        log.info('export ctype: %s | id: %s' % (item.content_type, item.object_id))
 
         media_set = None
         content_object = item.content_object
@@ -217,8 +217,8 @@ class Process(object):
         file_path = os.path.join(item_cache_dir, filename)
         cache_file = media.get_cache_file('mp3', 'base')
 
-        log.debug('processing media: %s' % filename)
-        log.debug('cache file: %s' % cache_file)
+        log.info('processing media: pk %s' % media.pk)
+        #log.debug('cache file: %s' % cache_file)
 
         if not cache_file:
             self.messages.append((media, _('The file seems to be missing. Sorry.')))
@@ -358,12 +358,7 @@ class Process(object):
         if media.release and media.release.label:
             tags.add(TPUB(encoding=3, text=u'%s' % media.release.label.name))
 
-
-
         tags.save(v1=0)
-
-        print 'MUTAGEN DONE'
-
 
         return
 

@@ -41,7 +41,7 @@ import tagging
 
 # logging
 import logging
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
     
 from lib.fields import extra
 
@@ -202,6 +202,10 @@ class Playlist(MigrationMixin, models.Model):
     def get_edit_url(self):
         return ('alibrary-playlist-edit', [self.pk])
 
+    @models.permalink
+    def get_delete_url(self):
+        return ('alibrary-playlist-delete', [self.pk])
+
     def get_admin_url(self):
         from lib.util.get_admin_url import change_url
         return change_url(self)
@@ -252,6 +256,34 @@ class Playlist(MigrationMixin, models.Model):
             'resource_name': 'simpleplaylist',  
             'pk': self.pk  
         }) + ''
+
+
+    def can_be_deleted(self):
+        """
+        check if there is a reason not to allow delete
+        """
+        can_delete = False
+        reason = _('This playlist cannot be deleted.')
+
+        if self.type == 'basket':
+            can_delete = True
+            reason = None
+
+        if self.type == 'playlist':
+            can_delete = False
+            reason = _('Playlist "%s" is public. It cannot be deleted anymore.' % self.name)
+
+        if self.type == 'broadcast':
+            can_delete = False
+            reason = _('Playlist "%s" published for broadcast. It cannot be deleted anymore.' % self.name)
+
+
+
+
+        return can_delete, reason
+
+
+
 
 
     def get_transform_status(self, target_type):
@@ -306,11 +338,12 @@ class Playlist(MigrationMixin, models.Model):
                     status = False
                 criteria = {
                     'key': 'scheduled',
-                    'name': _('Playlist not scheduled'),
+                    'name': _('Playlist already scheduled') if schedule_count > 0 else _('Playlist not scheduled'),
                     'status': schedule_count < 1,
                     'warning': _('This playlist has already ben scheduled %s times. Remove all scheduler entries to "un-broadcast" this playlist.' % schedule_count),
                 }
-                criterias.append(criteria)
+                if schedule_count > 0:
+                    criterias.append(criteria)
 
         if target_type == 'broadcast':
             status = True
@@ -446,6 +479,11 @@ class Playlist(MigrationMixin, models.Model):
 
         status = False
 
+        log.debug('requested to convert "%s" from %s to %s' % (self.name, self.type, type))
+
+        if type == 'broadcast':
+            self.broadcast_status, self.broadcast_status_messages = self.self_check()
+
         transformation = self.get_transform_status(type)
         status = transformation['status']
 
@@ -488,8 +526,8 @@ class Playlist(MigrationMixin, models.Model):
         """
         check if everything is fine to be 'schedulable'
         """
-        log = logging.getLogger()
-        log.debug('Self check: %s' % self.name)
+
+        log.info('Self check requested for: %s' % self.name)
 
         status = 1 # set to 'OK'
         messages = []
@@ -499,9 +537,9 @@ class Playlist(MigrationMixin, models.Model):
             # check ready-status of related media
 
             for item in self.items.all():
-                log.debug('Self check content object: %s' % item.content_object)
-                log.debug('Self check master: %s' % item.content_object.master)
-                log.debug('Self check path: %s' % item.content_object.master.path)
+                #log.debug('Self check content object: %s' % item.content_object)
+                #log.debug('Self check master: %s' % item.content_object.master)
+                #log.debug('Self check path: %s' % item.content_object.master.path)
 
                 # check if file available
                 try:
@@ -526,11 +564,17 @@ class Playlist(MigrationMixin, models.Model):
             diff = self.get_duration() - self.target_duration * 1000
             if abs(diff) > DURATION_MAX_DIFF:
                 messages.append(_('durations do not match. difference is: %s seconds' % int(diff / 1000)) )
+                log.warning('durations do not match. difference is: %s seconds' % int(diff / 1000))
                 status = 2
 
         except Exception, e:
             messages.append(_('Validation error: %s ' % e) )
+            log.warning('validation error: %s ' % e)
             status = 99
+
+        if status == 1:
+            log.info('Playlist "%s" checked - all fine!' % (self.name))
+
 
 
 

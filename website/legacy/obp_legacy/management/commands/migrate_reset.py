@@ -53,6 +53,10 @@ class Command(BaseCommand):
         from bcmon.models import Playout
         from exporter.models import Export
         from importer.models import Import, ImportFile
+        from actstream.models import Action, Follow
+
+        Action.objects.all().delete()
+        Follow.objects.all().delete()
 
         Release.objects.all().delete()
         Media.objects.all().delete()
@@ -90,6 +94,9 @@ class Command(BaseCommand):
         Import.objects.all().delete()
         ImportFile.objects.all().delete()
 
+        from django.contrib.comments import Comment
+        Comment.objects.all().delete()
+
 
 
 
@@ -106,3 +113,12 @@ class Command(BaseCommand):
         from obp_legacy.models_legacy import ElggCmMaster
         ElggCmMaster.objects.using('legacy_legacy').update(migrated = None)
 
+
+
+        print
+        print '* reseting users:'
+        print
+        from django.contrib.auth.models import User
+        from profiles.models import Profile, Community
+        User.objects.exclude(username__in=['root', 'AnonymousUser']).delete()
+        Community.objects.all().delete()

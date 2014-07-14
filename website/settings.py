@@ -1036,11 +1036,13 @@ logging.basicConfig(level=logging.DEBUG)
 
 # try to override from local_config.py
 DEBUG_APPS = None
+DEBUG_MIDDLEWARE = None
 try:
     from local_settings import *
-
     if DEBUG_APPS:
         INSTALLED_APPS += DEBUG_APPS
+    if DEBUG_MIDDLEWARE:
+        MIDDLEWARE_CLASSES += DEBUG_MIDDLEWARE
 except ImportError:
     pass
 

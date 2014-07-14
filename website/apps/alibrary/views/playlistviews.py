@@ -1,6 +1,8 @@
-from django.views.generic import DetailView, ListView, UpdateView, CreateView
+from django.views.generic import DetailView, ListView, UpdateView, CreateView, DeleteView
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
+from django.core.exceptions import PermissionDenied
+from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils.translation import ugettext as _
 from django.db.models import Q
 from django.conf import settings
@@ -12,6 +14,7 @@ from django.contrib.auth.models import User
 from guardian.forms import UserObjectPermissionsForm
 
 from pure_pagination.mixins import PaginationMixin
+from braces.views import PermissionRequiredMixin, LoginRequiredMixin
 from alibrary.models import Playlist
 from alibrary.forms import *
 from alibrary.filters import PlaylistFilter
@@ -199,23 +202,22 @@ class PlaylistDetailView(DetailView):
         return context
     
 
-class PlaylistCreateView(CreateView):
+class PlaylistCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     
     model = Playlist
     
     template_name = 'alibrary/playlist_create.html'
     form_class = PlaylistForm
-    #success_url = lazy(reverse, str)("feedback-feedback-list")
-    
 
+    permission_required = 'alibrary.add_playlist'
+    raise_exception = True
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(PlaylistCreateView, self).dispatch(*args, **kwargs)
+    #@method_decorator(login_required)
+    #def dispatch(self, *args, **kwargs):
+    #    return super(PlaylistCreateView, self).dispatch(*args, **kwargs)
         
 
     def get_context_data(self, **kwargs):
-        
         context = super(PlaylistCreateView, self).get_context_data(**kwargs)
         context['action_form'] = ActionForm()        
         return context
@@ -225,22 +227,64 @@ class PlaylistCreateView(CreateView):
         obj.user = self.request.user
         obj.save()
         return HttpResponseRedirect(obj.get_edit_url())
+
+
+class PlaylistDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+
+    model = Playlist
+    template_name = 'alibrary/playlist_delete.html'
+    permission_required = 'alibrary.delete_playlist'
+    raise_exception = True
+
+    # TODO: this is a hack/bug/issue
+    # http://stackoverflow.com/questions/7039839/how-do-i-use-reverse-or-an-equivalent-to-refer-to-urls-that-are-hooked-into-dj
+    success_url = reverse_lazy('en:alibrary-playlist-list')
+
+
+    def dispatch(self, request, *args, **kwargs):
+
+        # TODO: here we could implement permission check for 'shared-editing' playlists
+        obj = Playlist.objects.get(pk=int(kwargs['pk']))
+        if not obj.user == request.user:
+            raise PermissionDenied
+
+        # check if possible to delete
+        can_delete, reason = obj.can_be_deleted()
+        if not can_delete:
+            messages.add_message(request, messages.ERROR, reason)
+            return HttpResponseRedirect(obj.get_edit_url())
+
+        return super(PlaylistDeleteView, self).dispatch(request, *args, **kwargs)
+
+
+    def get_context_data(self, **kwargs):
+        context = super(PlaylistDeleteView, self).get_context_data(**kwargs)
+        return context
+
     
     
-class PlaylistEditView(UpdateView):
+class PlaylistEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     
     model = Playlist
     template_name = "alibrary/playlist_edit.html"
     success_url = '#'
     form_class = PlaylistForm
 
+    permission_required = 'alibrary.change_playlist'
+    raise_exception = True
+
     def __init__(self, *args, **kwargs):
         super(PlaylistEditView, self).__init__(*args, **kwargs)
 
 
-    #@method_decorator(login_required)
-    #def dispatch(self, *args, **kwargs):
-    #    return super(PlaylistEditView, self).dispatch(*args, **kwargs)
+    def dispatch(self, request, *args, **kwargs):
+
+        # TODO: here we could implement permission check for 'shared-editing' playlists
+        obj = Playlist.objects.get(pk=int(kwargs['pk']))
+        if not obj.user == request.user:
+            raise PermissionDenied
+
+        return super(PlaylistEditView, self).dispatch(request, *args, **kwargs)
 
     def get_initial(self):
         self.initial.update({ 'user': self.request.user })

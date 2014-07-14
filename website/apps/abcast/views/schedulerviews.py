@@ -43,8 +43,6 @@ OVERLAP_TOLERANCE = 2 # seconds
 def schedule(request):
         
     log = logging.getLogger('abcast.schedulerviews.schedule')
-    
-
 
     data = {}
 
@@ -93,33 +91,37 @@ def schedule(request):
     range_start_s = range_start.strftime("%Y-%m-%dT%H:%M:%S")
     range_end_s = range_end.strftime("%Y-%m-%dT%H:%M:%S")
 
-
-
     data['range_filter'] = '&time_start__gte=%s&time_end__lte=%s&' % (range_start_s, range_end_s)
-    
-    
+
     channel_id = request.GET.get('channel_id', SCHEDULER_DEFAULT_CHANNEL_ID)
     channel = Channel.objects.get(pk=int(channel_id))
     dayparts = channel.get_dayparts(days[0])
     data['dayparts'] = dayparts
     data['channel'] = channel
-    
-    print dayparts
-    
-    for dp in dayparts:
-        print dp.duration
-    
-    log.debug('grid pph: %s' % data['pph'])
-    log.debug('grid ppd: %s' % data['ppd'])
-        
-        
+
+
     data['station_time'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
         
     # look for a selected playlist in session
     playlist_id = request.session.get('scheduler_selected_playlist_id', None)
     if playlist_id:
         data['selected_playlist'] = Playlist.objects.get(pk=playlist_id)
-    
+
+    playlist_history = request.session.get('scheduler_selected_playlist_history', None)
+    if playlist_history:
+        history = [[playlist.get_api_url().replace("'", ''),
+                                     1 if playlist.pk == playlist_id else 0] \
+                                     for playlist in \
+                                     Playlist.objects.filter(pk__in=playlist_history)]
+        print '/////////////////////////////////////////'
+        print history
+        print '/////////////////////////////////////////'
+        from django.utils.safestring import mark_safe
+
+        data['playlist_history'] = mark_safe(json.dumps(history))
+
+
+
     
     log.debug('schedule offset: %s' % offset)
     log.debug('schedule today: %s' % today)
@@ -127,7 +129,6 @@ def schedule(request):
     
     
     return render_to_response('abcast/schedule.html', data, context_instance=RequestContext(request))
-
 
 
 class EmissionListView(ListView):
@@ -140,7 +141,6 @@ class EmissionListView(ListView):
         
         self.extra_context['list_style'] = self.request.GET.get('list_style', 's')        
         self.extra_context['get'] = self.request.GET
-        
 
         days = []
         today = datetime.datetime.now() 
@@ -161,12 +161,8 @@ class EmissionListView(ListView):
 
     def get_queryset(self, **kwargs):
 
-        # return render_to_response('my_app/template.html', {'filter': f})
-
         kwargs = {}
-
         self.tagcloud = None
-
         q = self.request.GET.get('q', None)
         
         if q:
@@ -174,11 +170,8 @@ class EmissionListView(ListView):
             .distinct()
         else:
             qs = Emission.objects.all()
-    
-        
+
         return qs
-
-
 
 class EmissionDetailView(DetailView):
 
@@ -186,28 +179,16 @@ class EmissionDetailView(DetailView):
     model = Emission
     extra_context = {}
 
-    
     def render_to_response(self, context):
         return super(EmissionDetailView, self).render_to_response(context, mimetype="text/html")
-    
 
-        
     def get_context_data(self, **kwargs):
         
         obj = kwargs.get('object', None)
-
         context = super(EmissionDetailView, self).get_context_data(**kwargs)
-        
-
         context.update(self.extra_context)
-
         return context
 
-    
-
-
- 
- 
 
 
 """
@@ -220,13 +201,10 @@ def select_playlist(request):
     
     playlist_id = request.GET.get('playlist_id', None) 
     next = request.GET.get('next', None)
-    
-    
-    
+
     if not playlist_id:
         request.session['scheduler_selected_playlist_id'] = None
-        
-    
+
     try:
         playlist = Playlist.objects.get(pk=playlist_id)
     except Playlist.DoesNotExist:
@@ -234,6 +212,17 @@ def select_playlist(request):
         raise Http404   
     
     request.session['scheduler_selected_playlist_id'] = playlist.pk
+    # try to build history
+    history = request.session.get('scheduler_selected_playlist_history', [])
+    if not playlist.pk in history:
+        history.append(playlist.pk)
+    request.session['scheduler_selected_playlist_history'] = history
+
+
+    print 'HISTORY:'
+    print history
+    print '//////////////////////////////'
+
 
     log.debug('nex: %s' % next)
     log.debug('playlist_id: %s' % playlist_id)
@@ -258,6 +247,10 @@ put object to schedule
 def schedule_object(request):
     
     log = logging.getLogger('abcast.schedulerviews.schedule_object')
+
+    if not request.user.has_perm('abcast.schedule_emission'):
+        log.warning('unauthorized attempt to schedule emission by: %s' % request.user)
+        return { 'message': _('Sorry - you are not allowed to schedule an emission.') }
     
     ct = request.POST.get('ct', None) 
     obj_id = request.POST.get('obj_id', None)
@@ -276,6 +269,12 @@ def schedule_object(request):
     if ct == 'playlist':
         obj = Playlist.objects.get(pk=int(obj_id))
         log.debug('object to schedule: %s' % obj.name)
+
+
+        if not (obj.broadcast_status == 1 and obj.type == 'broadcast'):
+            log.warning('attempt to shedule invalid playlist. pk: %s' % obj.pk)
+            return { 'message': _('Sorry - this playlist does not meet all criterias to be scheduled.') }
+
     
     
     pph = SCHEDULER_PPH
@@ -348,6 +347,10 @@ copy a day to another
 def copy_paste_day(request):
     
     log = logging.getLogger('abcast.schedulerviews.copy_day')
+
+    if not request.user.has_perm('abcast.schedule_emission'):
+        log.warning('unauthorized attempt to copypast day by: %s' % request.user)
+        return { 'message': _('Sorry - you are not allowed to edit emissions.') }
     
     source = request.POST.get('source', None) 
     target = request.POST.get('target', None)
@@ -413,6 +416,10 @@ def delete_day(request):
 
     log = logging.getLogger('abcast.schedulerviews.delete_day')
 
+    if not request.user.has_perm('abcast.schedule_emission'):
+        log.warning('unauthorized attempt to delete day by: %s' % request.user)
+        return { 'message': _('Sorry - you are not allowed to delete emissions.') }
+
     date = request.POST.get('date', None)
     channel_id = request.POST.get('channel_id', SCHEDULER_DEFAULT_CHANNEL_ID)
     channel = Channel.objects.get(pk=channel_id)
@@ -450,16 +457,3 @@ def delete_day(request):
     return data
 
  
- 
- 
- 
- 
- 
- 
-
-
-    
-    
-    
-    
-    

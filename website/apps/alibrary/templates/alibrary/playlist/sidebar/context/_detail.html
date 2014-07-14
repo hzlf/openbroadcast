@@ -28,6 +28,15 @@
             </li>
             {% endif %}
 
+            {% if user.is_authenticated and user == object.user %}
+            <li class="link">
+                <a class="hoverable" href="{{ object.get_delete_url }}" title="{% trans "Delete" %}">
+                    <i class="icon icon-trash"></i>
+                    <span>{% trans "Delete" %}</span>
+                </a>
+            </li>
+            {% endif %}
+
             {% if perms.alibrary.change_playlist and user.is_staff %}
             <li class="link">
                 <a class="hoverable" href="{{ object.get_admin_url }}?next={{ object.get_absolute_url }}" title="{% trans "Administration view" %}">

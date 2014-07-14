@@ -291,10 +291,12 @@ SchedulerApp = function () {
             self.selected_object = data;
             self.display_selection(data);
             // call view to save state to session. (hmm...what for?)
-            if(data.id != undefined) {
+            if (data.id != undefined) {
                 var url = '/program/scheduler/select-playlist/?playlist_id=' + data.id;
-                $.get(url, function (data) {})
-            };
+                $.get(url, function (data) {
+                })
+            }
+            ;
         });
 
 
@@ -302,97 +304,96 @@ SchedulerApp = function () {
     this.display_selection = function (data) {
 
         // debug.debug('display_selection', data);
-        var container = $('#container_selection');
-        var d = {
-            object: data
-        }
-        var html = nj.render('abcast/nj/selected_object.html', d);
-        container.html(html);
 
-        // drag bindings
-
-        var draggable = $('#' + data.uuid);
-
-        draggable.draggable({
-            containment: $('#scrolltimedeventswk'),
-            appendTo: $('#scrolltimedeventswk'),
-            // grid : [this.ppd, this.pph / 4],
-            helper: 'clone',
-            cursor: "crosshair",
-            snap: '.tg-quartermarker, .tg-col, .emission',
-            //snapMode: "both"
-
-            start: function (e, ui) {
-                var el = ui.helper;
-
-                // calculate height from target duration
-                var h = data.target_duration / 60 / 60 * self.pph;
-                el.css({
-                    height: h,
-                })
-
-                // el.hide(1000)
-            },
-
-            drag: function (e, ui) {
-                var el = ui.helper,
-                    left = el.position().left,
-                    top = el.position().top;
-
-                /*
-                 var collision = ui.helper.collision("div.chip", {
-                 mode : "collision",
-                 colliderData : "cdata",
-                 as : "<div/>"
-                 });
+        if (!self.readonly) {
 
 
-                 if (collision.length > 1) {
-                 for (var i = 1; i < collision.length; i++) {
-                 var hit = collision[i];
-                 var c = $(hit).data("cdata");
-                 $(c).addClass('colision');
-                 }
-                 } else {
-                 el.removeClass('colision');
-                 }
-                 */
-
-            },
-
-            stop: function (e, ui) {
-                var el = ui.helper,
-                    left = el.position().left,
-                    top = el.position().top;
-                console.log('el:', el)
-                //console.log('l:', left)
-                //console.log('t:', top)
-
-                left = left - self.grid_offset.left;
-                top = top - self.grid_offset.top;
-                if (left < 0) {
-                    left = 0;
-                }
-                if (top < 0) {
-                    top = 0;
-                }
-                //console.log('l:', left)
-                //console.log('t:', top)
-
-                var pos = {
-                    top: top,
-                    left: left
-                }
-
-                // calculate offset
-
-                self.schedule_object(pos);
-
+            var container = $('#container_selection');
+            var d = {
+                object: data
             }
+            var html = nj.render('abcast/nj/selected_object.html', d);
+            container.html(html);
+
+            // drag bindings
+
+            var draggable = $('#' + data.uuid);
+
+            draggable.draggable({
+                containment: $('#scrolltimedeventswk'),
+                appendTo: $('#scrolltimedeventswk'),
+                // grid : [this.ppd, this.pph / 4],
+                helper: 'clone',
+                cursor: "crosshair",
+                snap: '.tg-quartermarker, .tg-col, .emission',
+                //snapMode: "both"
+
+                start: function (e, ui) {
+                    var el = ui.helper;
+
+                    // calculate height from target duration
+                    var h = data.target_duration / 60 / 60 * self.pph;
+                    el.css({
+                        height: h
+                    })
+
+                },
+
+                drag: function (e, ui) {
+                    var el = ui.helper,
+                        left = el.position().left,
+                        top = el.position().top;
+
+                    /*
+                     var collision = ui.helper.collision("div.chip", {
+                     mode : "collision",
+                     colliderData : "cdata",
+                     as : "<div/>"
+                     });
 
 
-        });
+                     if (collision.length > 1) {
+                     for (var i = 1; i < collision.length; i++) {
+                     var hit = collision[i];
+                     var c = $(hit).data("cdata");
+                     $(c).addClass('colision');
+                     }
+                     } else {
+                     el.removeClass('colision');
+                     }
+                     */
 
+                },
+
+                stop: function (e, ui) {
+                    var el = ui.helper,
+                        left = el.position().left,
+                        top = el.position().top;
+                    console.log('el:', el)
+
+                    left = left - self.grid_offset.left;
+                    top = top - self.grid_offset.top;
+                    if (left < 0) {
+                        left = 0;
+                    }
+                    if (top < 0) {
+                        top = 0;
+                    }
+
+                    var pos = {
+                        top: top,
+                        left: left
+                    }
+
+                    self.schedule_object(pos);
+
+                }
+
+
+            });
+
+
+        }
 
     };
     this.schedule_object = function (pos) {
@@ -402,7 +403,7 @@ SchedulerApp = function () {
 
         // alert(color)
 
-        if(!color){
+        if (!color) {
             color = 0;
         }
 
@@ -727,9 +728,9 @@ var EmissionApp = function () {
                     helper: e.altKey ? 'clone' : 'original'
                 });
             }).draggable({
-                    containment: "#board",
-                    grid: [self.ppd, self.pph / 4 / 3] // TODO: remove 3 - just here for 5min dev grid
-                });
+                containment: "#board",
+                grid: [self.ppd, self.pph / 4 / 3] // TODO: remove 3 - just here for 5min dev grid
+            });
 
 
             self.dom_element.bind("dragstart", self.drag_handler);
@@ -947,7 +948,7 @@ BaseAcApp = function () {
 
     this.search = function (q, ct, target, extra_query) {
 
-        console.log('AutocompleteApp - search', q, ct, target, extra_query);
+        // console.log('AutocompleteApp - search', q, ct, target, extra_query);
 
         var url = '/api/v1/' + ct + '/autocomplete-name/?q=' + q + '&';
 

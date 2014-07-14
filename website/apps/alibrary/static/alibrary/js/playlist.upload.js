@@ -47,8 +47,9 @@ PlaylistEditorUpload = function () {
     };
 
     this.if_callback = function (data) {
-        console.log('this.if_callback');
-        console.log(data);
+
+        //console.log('this.if_callback');
+        //console.log(data);
 
         if (data.status == 'done' || data.status == 'duplicate') {
 
@@ -69,7 +70,7 @@ PlaylistEditorUpload = function () {
                         var item = data.items.pop();
                         debug.debug('created item:', item);
                         //data = data;
-                        var html = '<div class="temporary item editable" id="playlist_item_' + item.id + '" data-uuid="' + item.uuid + '"><i class="icon-time icon-spin icon-2x"></i>Computing waveform</div>'
+                        var html = '<div class="temporary item editable" id="playlist_item_' + item.id + '" data-uuid="' + item.uuid + '"><i class="icon-time icon-2x"></i>Computing waveform</div>'
                         $('#playlist_editor_list').append(html);
 
                         // reset

@@ -65,8 +65,6 @@ class MediaResource(ModelResource):
         bundle.data['duration'] = bundle.obj.get_duration()
         try:
             waveform_image = bundle.obj.get_waveform_image()
-            #print '****'
-            #print waveform_image
             if waveform_image:
                 waveform_image = bundle.obj.get_waveform_url()
 
@@ -74,9 +72,9 @@ class MediaResource(ModelResource):
             waveform_image = None
             pass
 
-        if not waveform_image:
-            # actually very bad place to put the default image...
-            waveform_image = '%s%s' % (settings.STATIC_URL, 'img/base/defaults/waveform.png')
+        #if not waveform_image:
+        #    # actually very bad place to put the default image...
+        #    waveform_image = '%s%s' % (settings.STATIC_URL, 'img/base/defaults/waveform.png')
 
         bundle.data['waveform_image'] = waveform_image
 

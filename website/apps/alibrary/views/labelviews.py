@@ -5,8 +5,9 @@ from django.conf import settings
 from django.template import RequestContext
 from pure_pagination.mixins import PaginationMixin
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
+from braces.views import PermissionRequiredMixin, LoginRequiredMixin
+
 from alibrary.models import Label, Release
-#from alibrary.forms import ReleaseForm
 from alibrary.forms import LabelForm, LabelActionForm, LabelRelationFormSet
 from alibrary.filters import LabelFilter
 from tagging.models import Tag
@@ -298,16 +299,18 @@ class LabelDetailView(DetailView):
  
  
     
-class LabelEditView(UpdateView):
+class LabelEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Label
     template_name = "alibrary/label_edit.html"
     success_url = '#'
     form_class = LabelForm
+
+    permission_required = 'alibrary.edit_label'
+    raise_exception = True
     
     def __init__(self, *args, **kwargs):
         super(LabelEditView, self).__init__(*args, **kwargs)
-        
-    """"""
+
     def get_initial(self):
         self.initial.update({ 'user': self.request.user })
         return self.initial

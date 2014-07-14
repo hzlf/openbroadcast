@@ -100,7 +100,7 @@ Tag.objects.all().delete()
 
 # user & profiles
 Invitation.objects.all().delete()
-User.objects.exclude(username='root').delete()
+User.objects.exclude(username__in=['root', 'AnonymousUser']).delete()
 Community.objects.all().delete()
 
 

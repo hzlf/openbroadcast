@@ -561,15 +561,11 @@ class Media(MigrationMixin):
         
         if not waveform_image:
             try:
-                
-                #self.create_waveform_image()
-                # celeryd version
                 self.create_waveform_image.delay(self)
-                waveform_image = self.get_cache_file('png', 'waveform')
+                waveform_image = None
+                # waveform_image = self.get_cache_file('png', 'waveform')
             except Exception, e:
-                print '""""""""""""""""""""""""""'
-                print e
-                print '""""""""""""""""""""""""""'
+                log.warning('unable to request wafeform image for pk: %s' % self.pk)
                 waveform_image = None
             
         return waveform_image

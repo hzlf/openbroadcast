@@ -12,14 +12,12 @@ from pure_pagination.mixins import PaginationMixin
 from alibrary.models import Artist, Label, Release
 from ashop.util.base import get_download_permissions
 
+from braces.views import PermissionRequiredMixin, LoginRequiredMixin
 
 #from alibrary.forms import ReleaseForm
 from alibrary.forms import *
-
 from alibrary.filters import ReleaseFilter
-
 from tagging.models import Tag
-
 from django.db.models import Q
 
 from lib.util import tagging_extra
@@ -64,14 +62,11 @@ ORDER_BY = [
 
 
 class ReleaseListView(PaginationMixin, ListView):
-    
-    # context_object_name = "artist_list"
-    #template_name = "alibrary/release_list.html"
-    
+
     object = Release
     paginate_by = ALIBRARY_PAGINATE_BY_DEFAULT
-    
     model = Release
+
     extra_context = {}
     
     def get_paginate_by(self, queryset):
@@ -102,26 +97,15 @@ class ReleaseListView(PaginationMixin, ListView):
             for tag_id in self.request.GET['tags'].split(','):
                 tag_ids.append(int(tag_id))
             self.extra_context['active_tags'] = tag_ids
-        #self.extra_context['release_list'] = self.filter
-    
-        # hard-coded for the moment
-        
+
         self.extra_context['list_style'] = self.request.GET.get('list_style', 'l')
-        #self.extra_context['list_style'] = 's'
-        
         self.extra_context['get'] = self.request.GET
-        
         context.update(self.extra_context)
 
         return context
     
 
     def get_queryset(self, **kwargs):
-
-        # return render_to_response('my_app/template.html', {'filter': f})
-
-
-        # print produce_error(**kwargs)
 
         kwargs = {}
 
@@ -136,7 +120,7 @@ class ReleaseListView(PaginationMixin, ListView):
             | Q(label__name__icontains=q))\
             .distinct()
         else:
-            qs = Release.objects.select_related('label','media','license').all()
+            qs = Release.objects.select_related('license','media_release').prefetch_related('media_release').all()
             
             
         order_by = self.request.GET.get('order_by', 'created')
@@ -219,54 +203,28 @@ class ReleaseListView(PaginationMixin, ListView):
                 #self.relation_filter.append(f)
 
 
-
-
-
-        # base queryset        
-        #qs = Release.objects.all()
         
         # apply filters
         self.filter = ReleaseFilter(self.request.GET, queryset=qs)
-        # self.filter = ReleaseFilter(self.request.GET, queryset=Release.objects.active().filter(**kwargs))
-        
         qs = self.filter.qs
-        
-        
-        
-        
+
         stags = self.request.GET.get('tags', None)
-        #print "** STAGS:"
-        #print stags
         tstags = []
         if stags:
             stags = stags.split(',')
             for stag in stags:
-                #print int(stag)
                 tstags.append(int(stag))
-        
-        #print "** TSTAGS:"
-        #print tstags
-        
-        #stags = ('Techno', 'Electronic')
-        #stags = (4,)
+
         if stags:
             qs = Release.tagged.with_all(tstags, qs)
-            
-            
+
         # rebuild filter after applying tags
         self.filter = ReleaseFilter(self.request.GET, queryset=qs)
         
         # tagging / cloud generation
         tagcloud = Tag.objects.usage_for_queryset(qs, counts=True, min_count=2)
-        #print '** CLOUD: **'
-        #print tagcloud
-        #print '** END CLOUD **'
-        
         self.tagcloud = tagging_extra.calculate_cloud(tagcloud)
-        
-        #print '** CALCULATED CLOUD'
-        #print self.tagcloud
-        
+
         return qs
 
 
@@ -292,17 +250,17 @@ class ReleaseDetailView(DetailView):
 
     
     
-class ReleaseEditView(UpdateView):
+class ReleaseEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+
     model = Release
-    template_name = "alibrary/release_edit.html"
+    template_name = 'alibrary/release_edit.html'
     success_url = '#'
     form_class = ReleaseForm
+
+    permission_required = 'alibrary.edit_release'
+    raise_exception = True
     
     def __init__(self, *args, **kwargs):
-        #self.user = self.request.user
-        
-        self.user = User.objects.get(pk=1)
-        
         super(ReleaseEditView, self).__init__(*args, **kwargs)
         
     def get_initial(self):
@@ -336,10 +294,10 @@ class ReleaseEditView(UpdateView):
     
 
 
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.has_perm('alibrary.edit_release'):
-            return HttpResponseForbidden()
-        return super(ReleaseEditView, self).dispatch(request, *args, **kwargs)
+    #def dispatch(self, request, *args, **kwargs):
+    #    if not request.user.has_perm('alibrary.edit_release'):
+    #        return HttpResponseForbidden()
+    #    return super(ReleaseEditView, self).dispatch(request, *args, **kwargs)
 
 
     def form_valid(self, form):

@@ -6,11 +6,12 @@ from django.template import RequestContext
 from django.utils.translation import ugettext as _
 from pure_pagination.mixins import PaginationMixin
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
-from alibrary.models import Artist, Label, Release, Media, NameVariation
+from braces.views import PermissionRequiredMixin, LoginRequiredMixin
 
-#from alibrary.forms import ReleaseForm
+from alibrary.models import Artist, Label, Release, Media, NameVariation
 from alibrary.forms import ArtistForm, ArtistActionForm, ArtistRelationFormSet, MemberFormSet, AliasFormSet
 from alibrary.filters import ArtistFilter
+
 from tagging.models import Tag
 import reversion
 from django.db.models import Q
@@ -111,7 +112,7 @@ class ArtistListView(PaginationMixin, ListView):
         else:
             #qs = Artist.objects.all()
             # only display artists with tracks a.t.m.
-            qs = Artist.objects.filter(media_artist__isnull=False).distinct()
+            qs = Artist.objects.filter(media_artist__isnull=False).select_related('license','media_artist').prefetch_related('media_artist').distinct()
 
             
         order_by = self.request.GET.get('order_by', 'created')
@@ -312,11 +313,14 @@ class ArtistDetailView(DetailView):
  
  
     
-class ArtistEditView(UpdateView):
+class ArtistEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Artist
     template_name = "alibrary/artist_edit.html"
     success_url = '#'
     form_class = ArtistForm
+
+    permission_required = 'alibrary.edit_artist'
+    raise_exception = True
     
     def __init__(self, *args, **kwargs):
         super(ArtistEditView, self).__init__(*args, **kwargs)

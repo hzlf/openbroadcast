@@ -14,6 +14,8 @@ import reversion
 from sendfile import sendfile
 
 from pure_pagination.mixins import PaginationMixin
+from braces.views import PermissionRequiredMixin, LoginRequiredMixin
+
 from alibrary.models import Media, Playlist, PlaylistItem, Artist, Release
 from alibrary.forms import MediaForm, MediaActionForm, MediaRelationFormSet, ExtraartistFormSet
 from alibrary.filters import MediaFilter
@@ -274,11 +276,14 @@ class MediaDetailView(DetailView):
  
  
     
-class MediaEditView(UpdateView):
+class MediaEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Media
     template_name = "alibrary/media_edit.html"
     success_url = '#'
     form_class = MediaForm
+
+    permission_required = 'alibrary.edit_media'
+    raise_exception = True
     
     def __init__(self, *args, **kwargs):
         super(MediaEditView, self).__init__(*args, **kwargs)

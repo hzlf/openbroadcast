@@ -1,7 +1,7 @@
-from django.conf.urls.defaults import *
+from django.conf.urls import url, patterns
 
 # app imports
-from alibrary.views import *
+from alibrary.views import PlaylistListView, PlaylistCreateView, PlaylistDetailView, PlaylistEditView, PlaylistDeleteView, playlist_convert
 urlpatterns = patterns('',
 
     url(r'^$', PlaylistListView.as_view(), name='alibrary-playlist-list'),
@@ -13,11 +13,8 @@ urlpatterns = patterns('',
     url(r'^create/$', PlaylistCreateView.as_view(), name='alibrary-playlist-create'),
     url(r'^(?P<slug>[-\w]+)/$', PlaylistDetailView.as_view(), name='alibrary-playlist-detail'),
     url(r'^(?P<pk>\d+)/edit/$', PlaylistEditView.as_view(), name='alibrary-playlist-edit'),
-    url(r'^(?P<pk>\d+)/convert/(?P<type>[-\w]+)/$', 'alibrary.views.playlist_convert', name='alibrary-playlist-convert'),
-    
-    # API-like urls [responding JSON] -> moved to api
-    #url(r'^(?P<pk>\d+)/reorder/$', 'alibrary.views.playlist_reorder', name='alibrary-playlist-reorder'),
-    #url(r'^(?P<pk>\d+)/collect/$', 'alibrary.views.playlist_collect', name='alibrary-playlist-collect'),
-    #url(r'^(?P<pk>\d+)/collect/$', 'alibrary.views.playlist_collect', name='alibrary-playlist-collect-old'),
+    url(r'^(?P<pk>\d+)/delete/$', PlaylistDeleteView.as_view(), name='alibrary-playlist-delete'),
+    url(r'^(?P<pk>\d+)/convert/(?P<type>[-\w]+)/$', playlist_convert, name='alibrary-playlist-convert'),
+
 
 )

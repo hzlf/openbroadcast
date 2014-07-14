@@ -5,11 +5,13 @@ from django.views.generic.detail import TemplateResponseMixin
 from  django.views.generic.edit import FormMixin, ProcessFormView
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.utils.functional import lazy
 from django import http
 from django.utils import simplejson as json
+from braces.views import PermissionRequiredMixin, LoginRequiredMixin
 from sendfile import sendfile
 
 from exporter.models import *
@@ -34,9 +36,12 @@ class JSONResponseMixin(object):
         return json.dumps(context['result'])
 
 
-class ExportListView(ListView):
+class ExportListView(PermissionRequiredMixin, LoginRequiredMixin, ListView):
     
     model = Export
+
+    permission_required = 'exporter.add_export'
+    raise_exception = True
     
     def get_queryset(self):
         kwargs = {}
@@ -44,10 +49,13 @@ class ExportListView(ListView):
     
 
 
-class ExportDeleteView(DeleteView):
+class ExportDeleteView(PermissionRequiredMixin, LoginRequiredMixin, DeleteView):
     
     model = Export
     success_url = lazy(reverse, str)("exporter-export-list")
+
+    permission_required = 'exporter.delete_export'
+    raise_exception = True
     
     def get_queryset(self):
         kwargs = {}
@@ -55,10 +63,13 @@ class ExportDeleteView(DeleteView):
 
 
 
-class ExportDeleteAllView(View):
+class ExportDeleteAllView(PermissionRequiredMixin, LoginRequiredMixin, View):
 
     model = Export
     success_url = lazy(reverse, str)("exporter-export-list")
+
+    permission_required = 'exporter.delete_export'
+    raise_exception = True
 
     def get_queryset(self):
         kwargs = {}
@@ -77,66 +88,15 @@ class ExportDeleteAllView(View):
 
 
 
-"""
-NOT WORKING!!
-"""
-class ExportModifyView(JSONResponseMixin, UpdateView):
-    
-    model = Export
-  
-    def get_queryset(self):
-        kwargs = {}
-        return Export.objects.filter(user=self.request.user)
-    
-    def get(self, cls, **kwargs):
-        cls.object = cls.get_object()
-        kwargs.update({"object": cls.object})
-        return cls, kwargs
-    
-    def render_to_response(self, context):
-    # Look for a 'format=json' GET argument
-        meta = self.request.META
-        if meta.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest' or "json" in meta.get("CONTENT_TYPE") or 1 == 1:
-            context['result'] = {'status' : True }
-            
-            return JSONResponseMixin.render_to_response(self, context)
-        else:
-            return HttpResponseForbidden()
-
-
-
-class __nomod__ExportCreateView(ProcessFormView, FormMixin, TemplateResponseMixin):
-    
-    model = Export
-    
-    template_name = 'exporter/export_create.html'
-    form_class = ExportCreateForm
-    #success_url = lazy(reverse, str)("feedback-feedback-list")
-    
-    def post(self, request, *args, **kwargs):
-        
-        print kwargs
-        
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        if form.is_valid():
-            i = Export(user=request.user)
-            i.save()
-            self.success_url = i.get_absolute_url()            
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form, **kwargs)
-
-"""
-Model version, adding some extra fields to the import session
-"""
-class ExportCreateView(CreateView):
+class ExportCreateView(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     
     model = Export
     
     template_name = 'exporter/import_create.html'
     form_class = ExportCreateModelForm
-    #success_url = lazy(reverse, str)("feedback-feedback-list")
+
+    permission_required = 'exporter.add_export'
+    raise_exception = True
     
     def form_valid(self, form):
         obj = form.save(commit=False)
@@ -145,12 +105,21 @@ class ExportCreateView(CreateView):
         return HttpResponseRedirect(obj.get_absolute_url())
 
 
-class ExportUpdateView(UpdateView):
+class ExportUpdateView(PermissionRequiredMixin, LoginRequiredMixin, UpdateView):
     
     model = Export
     template_name = 'exporter/import_form_jquery.html'
-    #template_name = 'exporter/import_form_backbone.html'
-    #template_name = 'exporter/import_form_rework.html'
+
+    permission_required = 'exporter.edit_export'
+    raise_exception = True
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = Export.objects.get(pk=int(kwargs['pk']))
+        if not obj.user == request.user:
+            raise PermissionDenied
+
+        return super(ExportUpdateView, self).dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         kwargs = {}
         return Export.objects.filter(user=self.request.user)
@@ -162,13 +131,8 @@ def export_download(request, uuid, token):
     
     log = logging.getLogger('exporter.views.export_download')
     log.info('Download Request by: %s' % (request.user.username))
-    
 
-        
     export = get_object_or_404(Export, uuid=uuid)
-    #version = 'base' 
-
-    print 'EXPORT: %s' % export
 
     download_permission = False
     
@@ -177,7 +141,6 @@ def export_download(request, uuid, token):
     
     if not download_permission:
         return HttpResponseForbidden('forbidden')
-    
 
     filename = '%s.%s' % (export.filename, 'zip')
 
