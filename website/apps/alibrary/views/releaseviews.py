@@ -364,6 +364,8 @@ class ReleaseEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
                 obj = form.save()
                 if publish:
                     msg = '%s. \n %s' %('Published release', msg)
+
+                reversion.set_user(self.request.user)
                 reversion.set_comment(msg)
             form.save_m2m()
 

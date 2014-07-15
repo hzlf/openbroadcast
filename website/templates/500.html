@@ -1,20 +1,28 @@
-{% extends "base.html" %}
+{% extends "error_base.html" %}
 {% load i18n %}
 
-{% block breadcrumbs %}
-<ul class="breadcrumbs">
-  <li>{% trans "Error 500" %}</li>
-</ul>
-{% endblock %}
-
-{% block title %}{% trans "Server error" %}{% endblock %}
+{% block title %}You've encountered an error, oh noes!{% endblock %}
 
 {% block body-class %}error-500{% endblock %}
 
-{% block main %}
-<h2>{% trans "Server error" %}</h2>
+{% block content %}
+    <h1>You've encountered an error, oh noes!</h1>
 
-<p>{% trans "There's been an error. It's been reported to the site administrators via e-mail and should be fixed shortly. Thanks for your patience." %}</p>
+    {% if request.sentry.id %}
+        <div class="sentry">
+            <p>If you need assistance, you may reference this error as
+                <strong>{{ request.sentry.id }}</strong>.</p>
 
-{{ block.super }}
+            <p>
+                <a href="mailto:obp.lab@hazelfire.com?body=error-reference:%20{{ request.sentry.id }}">Click
+                    here</a> to create an issue email including references to the occurred problem.
+            </p>
+        </div>
+
+    {% endif %}
+
+    <p>Sorry about that. Please try refreshing and contact us if the problem persists.</p>
+
+    {{ block.super }}
 {% endblock %}
+

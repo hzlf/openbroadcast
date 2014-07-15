@@ -12,7 +12,8 @@
 
         <ul class="event unstyled horizontal clearfix">
 
-            <li class="date">{{ event.created|date:"D m - H:i:s" }}</li>
+            <li class="split-date">{{ event.created|date:"D d" }}</li>
+            <li class="split-date">{{ event.created|date:"H:i:s" }}</li>
 
             <li class="type">{{ event.event_type.title }}</li>
 

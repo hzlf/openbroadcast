@@ -76,6 +76,20 @@
 {% endblock %}
 
 {% block form %}
+
+
+
+    {% if form.errors %}
+    {% with form_errors=form.errors %}
+    {% include "element/forms/_merged_form_errors.html" %}
+    {% endwith %}
+    {% endif %}
+
+    {% if form_errors %}
+    {% include "element/forms/_merged_form_errors.html" %}
+    {% endif %}
+
+
 <div class="item_inner">
 
 	<form class="form-horizontal form-compact form-release" method="post" id="" enctype="multipart/form-data">

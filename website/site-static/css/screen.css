@@ -13702,16 +13702,16 @@ body.tl-loading .container.main * {
 }
 /* line 15, ../sass/site/_style.sass */
 body h1, body h2, body h3, body h4 {
-  font-family: "Times New Roman", Times, serif;
-  font-weight: 700;
-  font-style: italic;
+  font-family: "quatro-slab";
+  font-family: "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial, sans-serif;
+  font-weight: 200;
   color: #5a5a5a;
 }
-/* line 22, ../sass/site/_style.sass */
+/* line 23, ../sass/site/_style.sass */
 body .subhead .icontitle {
-  font-family: "Times New Roman", Times, serif;
-  font-weight: 700;
-  font-style: italic;
+  font-family: "quatro-slab";
+  font-family: "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial, sans-serif;
+  font-weight: 200;
 }
 
 /* line 3, ../sass/element/_markdown.sass */
@@ -13765,10 +13765,33 @@ body .subhead .icontitle {
   line-height: 23.4px;
 }
 
-/* line 37, ../sass/site/_style.sass */
+/* line 39, ../sass/site/_style.sass */
 body.loading-playlist {
   opacity: 0.2;
   cursor: wait;
+}
+
+/* line 47, ../sass/site/_style.sass */
+#site_messages {
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+}
+/* line 52, ../sass/site/_style.sass */
+#site_messages > .messages > .alert {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  min-height: 60px;
+}
+/* line 56, ../sass/site/_style.sass */
+#site_messages > .messages > .alert button {
+  border: none;
+  font-size: 200%;
+  background: transparent;
+}
+/* line 62, ../sass/site/_style.sass */
+#site_messages > .messages > .alert.alert-success {
+  border-top: 4px solid #d1ffc0;
 }
 
 /* line 3, ../sass/apps/_arating.sass */

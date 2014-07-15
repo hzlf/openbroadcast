@@ -4,6 +4,7 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.utils.translation import ugettext
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, authenticate
 from django.contrib.admin.views.decorators import staff_member_required
 from models import InvitationError, Invitation, InvitationStats
 from forms import InvitationForm, RegistrationFormInvitation
@@ -181,7 +182,14 @@ def register(request,
                                  request=request)
             # return HttpResponseRedirect(success_url or reverse('invitation_registered'))
             # return HttpResponseRedirect(success_url or reverse('profiles-profile-detail', kwargs={'slug':new_user.username}))
-            return HttpResponseRedirect(success_url or reverse('auth_login'))
+
+            """
+            bit hackish... authenticate & login the user
+            """
+            new_user.backend = 'django.contrib.auth.backends.ModelBackend'
+            login(request, new_user)
+            return HttpResponseRedirect(new_user.get_absolute_url())
+            #return HttpResponseRedirect(success_url or reverse('auth_login'))
     else:
         form = form_class(invitation.email)
     context = apply_extra_context(RequestContext(request), extra_context)

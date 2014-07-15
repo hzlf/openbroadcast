@@ -1,10 +1,19 @@
 from django.conf.urls.defaults import *
+from django.views.defaults import page_not_found, server_error
 from django.conf import settings
 
 
-# pinax
-#from pinax.apps.account.openid_consumer import PinaxConsumer
-#handler500 = "pinax.views.server_error"
+
+def handler500(request):
+
+    from django.template import Context, loader
+    from django.http import HttpResponseServerError
+
+    t = loader.get_template('500.html') # You need to create a 500.html template.
+    return HttpResponseServerError(t.render(Context({
+        'request': request,
+    })))
+
 
 # error handlers
 #handler403 = 'lib.errors.views.handler403'

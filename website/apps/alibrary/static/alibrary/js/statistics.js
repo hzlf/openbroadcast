@@ -52,7 +52,7 @@ StatisticApp = function () {
                 self.plot(data);
             });
 
-
+            self.loaded = true;
             self.plot(data);
 
 
@@ -98,7 +98,7 @@ StatisticApp = function () {
 
                 },
                 series: {
-                    lines: { show: true, fill: false},
+                    lines: { show: true, fill: true},
                     points: { show: false, fill: false }
                 },
                 colors: ["#47248F", "#00BB00", "#00ffff"],

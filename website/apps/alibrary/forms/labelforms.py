@@ -117,23 +117,6 @@ class LabelForm(ModelForm):
                 LookupField('type', css_class='input-xlarge'),
                 LookupField('labelcode', css_class='input-xlarge'),
                 LookupField('parent', css_class='input-xlarge'),
-                """
-                Row(
-                    Column(
-                        HTML('<label>ksjdh</label>'),
-                           css_class='span2'
-                    ),
-                    Column(
-                           LookupField('date_start', css_class='input-small'),
-                           css_class='span2'
-                           ),
-                    Column(
-                           LookupField('date_end', css_class='input-small'),
-                           css_class='span2'
-                           ),
-                    css_class='row relation-row',
-                ),
-                """
         )
 
 

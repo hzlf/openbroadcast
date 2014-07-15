@@ -869,8 +869,10 @@ class LegacyUserMigrator(Migrator):
 
     def run(self, legacy_obj, force=False):
 
+        force = True
+
         from django.contrib.auth.models import User, Group
-        from profiles.models import Profile, Link, Service, ServiceType, Expertise
+        from profiles.models import Profile, Link, Service, ServiceType, Expertise, Community
         from obp_legacy.models_legacy import *
 
         status = 1
@@ -879,246 +881,296 @@ class LegacyUserMigrator(Migrator):
         log.info('migrate user: %s' % legacy_obj.username)
 
         user, created = User.objects.get_or_create(username=legacy_obj.username)
-
-        user.email = legacy_obj.email
-
-
-        # add user to 'member' group
-        mg, c = Group.objects.get_or_create(name='Member')
-        user.groups.add(mg)
-
         obj = user.profile
 
-        #obj.legacy_id = legacy_obj.id
-        obj.legacy_legacy_id = legacy_obj.ident
+        if created or force:
 
-        """
-        Try to get legacy id (not legacy_legacy_id)
-        """
-        obj.legacy_id = Users.objects.using('legacy').get(legacy_id=legacy_obj.ident).id
+            user.email = legacy_obj.email
 
 
+            # add user to 'member' group
+            mg, c = Group.objects.get_or_create(name='Member')
+            user.groups.add(mg)
 
-        print 'last_action: %s' % legacy_obj.last_action
-        print 'join_date: %s' % legacy_obj.join_date
 
-        if legacy_obj.last_action and legacy_obj.last_action > 0:
-            user.last_login = datetime.datetime.fromtimestamp(int(legacy_obj.last_action)).strftime('%Y-%m-%d %H:%M:%S')
-        else:
-            #user.last_login = datetime.datetime.strftime('2008-01-01 12:00:00')
-            pass
 
-        if legacy_obj.join_date and legacy_obj.join_date > 0:
-            user.date_joined = datetime.datetime.fromtimestamp(int(legacy_obj.join_date)).strftime('%Y-%m-%d %H:%M:%S')
+            #obj.legacy_id = legacy_obj.id
+            obj.legacy_legacy_id = legacy_obj.ident
 
-        """
-        Get image
-        """
-        try:
-            icon = int(legacy_obj.icon)
-            if icon > 0:
-                img_url = 'https://www.openbroadcast.ch/_icon/user/%s/h/300/w/300/302' % icon
-                log.debug('download image: %s' % img_url)
-            #img = filer_extra.url_to_file(img_url, obj.folder)
-            #obj.image = img
-        except Exception, e:
-            print e
-            pass
+            """
+            Try to get legacy id (not legacy_legacy_id)
+            """
+            obj.legacy_id = Users.objects.using('legacy').get(legacy_id=legacy_obj.ident).id
 
-        """
-        user.last_login = legacy_obj.created
-        user.date_joined = legacy_obj.updated
-        """
-        if legacy_obj.name:
-            name = legacy_obj.name.split(' ')
+            """
+            user.last_login = legacy_obj.created
+            user.date_joined = legacy_obj.updated
+            """
+            if legacy_obj.name:
+                name = legacy_obj.name.split(' ')
 
-            if len(name) == 1:
-                user.last_name = name[0][:29]
+                if len(name) == 1:
+                    user.last_name = name[0][:29]
 
-            if len(name) == 2:
-                user.first_name = name[0][:29]
-                user.last_name = name[1][:29]
+                if len(name) == 2:
+                    user.first_name = name[0][:29]
+                    user.last_name = name[1][:29]
 
-            if len(name) > 2:
-                user.first_name = name[0][:29]
-                user.last_name = ', '.join(name[1:])[:29]
+                if len(name) > 2:
+                    user.first_name = name[0][:29]
+                    user.last_name = ' '.join(name[1:])[:29]
 
-            print 'name:       %s' % name
-            print 'first_name: %s' % user.first_name
-            print 'last_name:  %s' % user.last_name
+                print 'name:       %s' % name
+                print 'first_name: %s' % user.first_name
+                print 'last_name:  %s' % user.last_name
 
-        user.save()
 
-        #obj, created = Profile.objects.get_or_create(legacy_id=legacy_obj.id, user=user)
 
-        """
-        Gathering profile data
-        """
-        p_data = ElggProfileData.objects.using('legacy_legacy').filter(owner=legacy_obj.ident)
-        """"""
-        print '//////////////////////////////////////////////'
-        print 'legacy user data'
-        print
-        for item in p_data:
+            print 'last_action: %s' % legacy_obj.last_action
+            print 'join_date: %s' % legacy_obj.join_date
+
+            if legacy_obj.last_action and legacy_obj.last_action > 0:
+                user.last_login = datetime.datetime.fromtimestamp(int(legacy_obj.last_action)).strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                #user.last_login = datetime.datetime.strftime('2008-01-01 12:00:00')
+                pass
+
+            if legacy_obj.join_date and legacy_obj.join_date > 0:
+                user.date_joined = datetime.datetime.fromtimestamp(int(legacy_obj.join_date)).strftime('%Y-%m-%d %H:%M:%S')
+
+
+            user.save()
+
+            """
+            try to get a profile image
+            """
+            if legacy_obj.icon and not legacy_obj.icon == -1:
+                print 'seems to have a profile icon: %s' % legacy_obj.icon
+                li = ElggIcons.objects.using('legacy_legacy').filter(ident=legacy_obj.icon)
+                if li.count() > 0:
+                    li = li[0]
+                    print li.filename
+
+                    try:
+                        img_path = os.path.join(LEGACY_STORAGE_ROOT, 'icons', legacy_obj.username[0:1], legacy_obj.username, li.filename)
+                        log.debug('image path: %s' % img_path)
+                        if os.path.isfile(img_path):
+                            obj.image = get_file_from_path(img_path)
+                        else:
+                            log.debug('image does not exist at: %s' % img_path)
+
+                    except Exception, e:
+                        log.warning('unable to get image: %s - %s' % (img_path, e))
+
+
+            """
+            try to get communities
+            """
+            try:
+                group_ids = ElggFriends.objects.using('legacy_legacy').values_list('friend', flat=True).filter(owner=legacy_obj.ident)
+                groups = ElggUsers.objects.using('legacy_legacy').values_list('name', flat=True).filter(ident__in=group_ids, user_type='community')
+                communities = Community.objects.filter(name__in=[name for name in groups.all()])
+                for community in communities:
+                    community.members.add(user)
+            except:
+                pass
+
+            """
+            try to get 'friends'
+            """
+            try:
+                group_ids = ElggFriends.objects.using('legacy_legacy').values_list('friend', flat=True).filter(owner=legacy_obj.ident)
+                friends = ElggUsers.objects.using('legacy_legacy').values_list('username', flat=True).filter(ident__in=group_ids, user_type='person')
+                users = User.objects.filter(username__in=[username for username in friends.all()])
+
+                print users
+                from actstream.actions import follow
+                for tu in users:
+                    follow(user, tu)
+
+                #communities = Community.objects.filter(name__in=[name for name in groups.all()])
+                #for community in communities:
+                #    community.members.add(user)
+            except Exception, e:
+                print e
+                pass
+
+
+
+
+            #obj, created = Profile.objects.get_or_create(legacy_id=legacy_obj.id, user=user)
+
+            """
+            Gathering profile data
+            """
+            p_data = ElggProfileData.objects.using('legacy_legacy').filter(owner=legacy_obj.ident)
             """"""
-            #print 'access: %s' % item.access
-            print 'name: %s' % item.name
-            print 'value: %s' % item.value
+            print '//////////////////////////////////////////////'
+            print 'legacy user data'
             print
+            for item in p_data:
+                """"""
+                #print 'access: %s' % item.access
+                #print 'name: %s' % item.name
+                #print 'value: %s' % item.value
+                #print
 
-            """
-            Mapping profile data
-            """
-            if item.name == 'interests':
-                # mapped to tags
-                tags = item.value.split(',')
-                for tag in tags:
-                    tag = tag.rstrip(' ').lstrip(' ')
-                    if len(tag) > 2:
+                """
+                Mapping profile data
+                """
+                if item.name == 'interests':
+                    # mapped to tags
+                    tags = item.value.split(',')
+                    for tag in tags:
+                        tag = tag.rstrip(' ').lstrip(' ')
+                        if len(tag) > 2:
+                            try:
+                                Tag.objects.add_tag(obj, u'"%s"' % tag[:30])
+                            except Exception, e:
+                                print e
+
+                if item.name == 'formats':
+                    # mapped to tags
+                    tags = item.value.split(',')
+                    for tag in tags:
+                        tag = tag.rstrip(' ').lstrip(' ')
+                        if len(tag) > 2:
+                            try:
+                                Tag.objects.add_tag(obj, u'"%s"' % tag[:30])
+                            except Exception, e:
+                                print e
+
+                """
+                address/contact related
+                """
+                if item.name == 'emailaddress':
+                    obj.user.email = item.value
+
+                if item.name == 'homestreetaddress':
+                    obj.address1 = item.value
+
+                if item.name == 'homepostcode':
+                    obj.zip = item.value
+
+                if item.name == 'hometown':
+                    obj.city = item.value
+
+                if item.name == 'homephone':
+                    if not obj.phone:
+                        obj.phone = item.value
+
+                if item.name == 'workphone':
+                    if not obj.phone:
+                        obj.phone = item.value
+
+                if item.name == 'mobphone':
+                    obj.mobile = item.value
+
+                if item.name == 'homecountry':
+                    country = None
+                    if len(item.value) == 2:
                         try:
-                            Tag.objects.add_tag(obj, u'"%s"' % tag[:30])
+                            country = Country.objects.get(iso2_code=item.value)
                         except Exception, e:
-                            print e
+                            pass
 
-            if item.name == 'formats':
-                # mapped to tags
-                tags = item.value.split(',')
-                for tag in tags:
-                    tag = tag.rstrip(' ').lstrip(' ')
-                    if len(tag) > 2:
+                    else:
                         try:
-                            Tag.objects.add_tag(obj, u'"%s"' % tag[:30])
+                            country = Country.objects.get(printable_name=item.value)
                         except Exception, e:
-                            print e
+                            pass
 
-            """
-            address/contact related
-            """
-            if item.name == 'emailaddress':
-                obj.user.email = item.value
+                    if country:
+                        obj.country = country
 
-            if item.name == 'homestreetaddress':
-                obj.address1 = item.value
 
-            if item.name == 'homepostcode':
-                obj.zip = item.value
+                """
+                description / biography & co
+                """
+                if item.name == 'artistname':
+                    obj.pseudonym = item.value[0:240]
 
-            if item.name == 'hometown':
-                obj.city = item.value
+                if item.name == 'minibio':
+                    obj.description = item.value[0:240]
 
-            if item.name == 'homephone':
-                if not obj.phone:
-                    obj.phone = item.value
+                if item.name == 'biography':
+                    obj.biography = item.value
 
-            if item.name == 'workphone':
-                if not obj.phone:
-                    obj.phone = item.value
+                if item.name == 'ibanprivate':
+                    obj.iban = item.value
 
-            if item.name == 'mobphone':
-                obj.mobile = item.value
+                if item.name == 'gender':
+                    if item.value == 'male':
+                        obj.gender = 0
+                    elif item.value == 'female':
+                        obj.gender = 1
+                    else:
+                        obj.gender = 2
 
-            if item.name == 'homecountry':
-                country = None
-                if len(item.value) == 2:
+                if item.name == 'birth_date':
                     try:
-                        country = Country.objects.get(iso2_code=item.value)
+                        valid_date = time.strptime('%s' % item.value, '%Y-%m-%d')
+                        obj.birth_date = item.value
                     except Exception, e:
-                        pass
-
-                else:
-                    try:
-                        country = Country.objects.get(printable_name=item.value)
-                    except Exception, e:
-                        pass
-
-                if country:
-                    obj.country = country
+                        print e
 
 
-            """
-            description / biography & co
-            """
-            if item.name == 'minibio':
-                obj.description = item.value[0:240]
+                """
+                links
+                """
+                if item.name == 'workweb':
+                    url = item.value
+                    if not url[0:7] == 'http://':
+                        url = 'http://' + url
+                    link, c = Link.objects.get_or_create(profile=obj, url=url)
+                    link.title = 'Work website'
+                    link.save()
 
-            if item.name == 'biography':
-                obj.biography = item.value
+                if item.name in ['personalweb', 'personalweb1', 'personalweb2', 'personalweb3', 'personalweb4', 'personalweb5']:
+                    url = item.value
+                    if not url[0:7] == 'http://':
+                        url = 'http://' + url
+                    link, c = Link.objects.get_or_create(profile=obj, url=url)
+                    link.title = 'Personal website'
+                    link.save()
 
-            if item.name == 'ibanprivate':
-                obj.iban = item.value
-
-            if item.name == 'gender':
-                if item.value == 'male':
-                    obj.gender = 0
-                elif item.value == 'female':
-                    obj.gender = 1
-                else:
-                    obj.gender = 2
-
-            if item.name == 'birth_date':
-                try:
-                    valid_date = time.strptime('%s' % item.value, '%Y-%m-%d')
-                    obj.birth_date = item.value
-                except Exception, e:
-                    print e
-
-
-            """
-            links
-            """
-            if item.name == 'workweb':
-                url = item.value
-                if not url[0:7] == 'http://':
-                    url = 'http://' + url
-                link, c = Link.objects.get_or_create(profile=obj, url=url)
-                link.title = 'Work website'
-                link.save()
-
-            if item.name in ['personalweb', 'personalweb1', 'personalweb2', 'personalweb3', 'personalweb4', 'personalweb5']:
-                url = item.value
-                if not url[0:7] == 'http://':
-                    url = 'http://' + url
-                link, c = Link.objects.get_or_create(profile=obj, url=url)
-                link.title = 'Personal website'
-                link.save()
-
-            """
-            services
-            """
-            if item.name in ['msn', 'icq', 'skype', 'aim', 'twitter',]:
-                service_type, c = ServiceType.objects.get_or_create(title=item.name.capitalize())
-                service, c = Service.objects.get_or_create(service=service_type,
-                                                           profile=obj,
-                                                           username=item.value.rstrip(' ').lstrip(' '))
+                """
+                services
+                """
+                if item.name in ['msn', 'icq', 'skype', 'aim', 'twitter',]:
+                    service_type, c = ServiceType.objects.get_or_create(title=item.name.capitalize())
+                    service, c = Service.objects.get_or_create(service=service_type,
+                                                               profile=obj,
+                                                               username=item.value.rstrip(' ').lstrip(' '))
 
 
-            """
-            skills & professions
-            """
-            if item.name in ['profession', 'skills___']:
-                print 'parsing %s' % item.name
+                """
+                skills & professions
+                """
+                if item.name in ['profession', 'skills___']:
+                    print 'parsing %s' % item.name
 
-                expertises = item.value.split(',')
-                for expertise in expertises:
-                    expertise = expertise.rstrip(' ').lstrip(' ')
-                    db_expertise, c = Expertise.objects.get_or_create(name=u'%s' % expertise.title())
-                    obj.expertise.add(db_expertise)
+                    expertises = item.value.split(',')
+                    for expertise in expertises:
+                        expertise = expertise.rstrip(' ').lstrip(' ')
+                        db_expertise, c = Expertise.objects.get_or_create(name=u'%s' % expertise.title())
+                        obj.expertise.add(db_expertise)
 
 
 
 
-        if created:
-            log.info('object created: %s' % obj.pk)
-        else:
-            log.info('object found by legacy_id: %s' % obj.pk)
+            if created:
+                log.info('object created: %s' % obj.pk)
+            else:
+                log.info('object found by legacy_id: %s' % obj.pk)
 
-        if created:
-            """
-            Mapping data
-            1-to-1 fields
-            """
+            if created:
+                """
+                Mapping data
+                1-to-1 fields
+                """
 
-        obj.save()
+            obj.save()
 
         return obj, status
 
@@ -1197,15 +1249,14 @@ class CommunityMigrator(Migrator):
                 obj.city = item.value
 
             if item.name == 'homephone':
-                if not obj.ohone:
-                    obj.phone = item.value
+                obj.phone = item.value
 
             if item.name == 'mobphone':
                 obj.phone = item.value
 
             if item.name == 'emailaddress':
                 # assigned to user, not profile
-                obj.user.email = item.value
+                obj.email = item.value
 
             if item.name == 'homecountry':
                 # tries to find country by iso code or full name (english only)

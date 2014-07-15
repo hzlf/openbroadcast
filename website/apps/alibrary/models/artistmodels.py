@@ -354,6 +354,7 @@ def action_handler(sender, instance, created, **kwargs):
         if instance.get_last_editor():
             action.send(instance.get_last_editor(), verb=_('updated'), target=instance)
     except Exception, e:
+        print 'error calling action_handler: %s' % e
         print e
 
 post_save.connect(action_handler, sender=Artist)   
@@ -370,6 +371,9 @@ class ArtistMembership(models.Model):
         verbose_name = _('Membersip')
         verbose_name_plural = _('Membersips')
 
+    def __unicode__(self):
+        return '"%s" <> "%s"' % (self.parent.name, self.child.name)
+
 class ArtistAlias(models.Model):
 
     parent = models.ForeignKey(Artist, related_name='alias_parent')
@@ -380,6 +384,9 @@ class ArtistAlias(models.Model):
         app_label = 'alibrary'
         verbose_name = _('Alias')
         verbose_name_plural = _('Aliases')
+
+    def __unicode__(self):
+        return '"%s" <> "%s"' % (self.parent.name, self.child.name)
     
 
 class ArtistProfessions(models.Model):
@@ -391,6 +398,9 @@ class ArtistProfessions(models.Model):
         app_label = 'alibrary'
         verbose_name = _('Profession')
         verbose_name_plural = _('Professions')
+
+    def __unicode__(self):
+        return '"%s" : "%s"' % (self.artist.name, self.profession.name)
     
     
     

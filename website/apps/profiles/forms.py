@@ -64,6 +64,7 @@ class ProfileForm(ModelForm):
                 ),
                 Field('gender', css_class='input-xlarge'),
                 Field('birth_date', css_class='input-xlarge'),
+                Field('pseudonym', css_class='input-xlarge'),
                 Field('description', css_class='input-xlarge'),
                 Field('biography', css_class='input-xlarge'),
                 Div(

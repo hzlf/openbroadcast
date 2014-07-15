@@ -62,7 +62,7 @@ class LabelListView(PaginationMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(LabelListView, self).get_context_data(**kwargs)
-        
+
         self.extra_context['filter'] = self.filter
         self.extra_context['relation_filter'] = self.relation_filter
         self.extra_context['tagcloud'] = self.tagcloud
@@ -331,47 +331,61 @@ class LabelEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     
         context = self.get_context_data()
 
+        # get linked formsets
         relation_form = context['relation_form']
-
+        relation_form = LabelRelationFormSet(self.request.POST, instance=self.get_initial())
         # validation
         if form.is_valid():
-            print 'form valid'
-            
+
+            from lib.util.form_errors import merge_form_errors
+
+            print 'LABEL FORM VALID'
             self.object.tags = form.cleaned_data['d_tags']
             
             # temporary instance to validate inline forms against
             tmp = form.save(commit=False)
 
-            # bloody hack
-            
-            print self.request.POST
-            
-            aliases_text = self.request.POST.get('aliases_text', None)
-            aliases = self.request.POST.get('aliases', None)
-        
-            print "***"
-            print aliases_text
-            print aliases
+            # inner forms to validate
+            has_form_errors = False
+
         
             relation_form = LabelRelationFormSet(self.request.POST, instance=tmp)
-            print "relation_form.cleaned_data:",
-            print relation_form.is_valid()
-            print relation_form.errors
+            #print "relation_form.cleaned_data:",
+            #print relation_form.is_valid()
+            #print relation_form.errors
         
-            if relation_form.is_valid():                
+            if relation_form.is_valid():
                 relation_form.save()
+            else:
+                print 'RELATION FORM HAS ERRORS'
+                has_form_errors = True
 
+
+            if has_form_errors:
+                print 'WE HAVE ERRORS - RESHOW THE FORM'
+
+
+                form_errors = merge_form_errors([
+                    relation_form,
+                ])
+
+                return self.render_to_response(self.get_context_data(form=form,
+                                                                     relation_form=relation_form,
+                                                                     form_errors=form_errors))
+            else:
 
                 msg = change_message.construct(self.request, form, [relation_form,])
                 with reversion.create_revision():
                     obj = form.save()
+                    reversion.set_user(self.request.user)
                     reversion.set_comment(msg)
                     form.save_m2m()
 
-
             return HttpResponseRedirect('#')
+
         else:
-            return self.render_to_response(self.get_context_data(form=form, relation_form=relation_form))
+            return self.render_to_response(self.get_context_data(form=form,
+                                                                 relation_form=relation_form))
      
  
  

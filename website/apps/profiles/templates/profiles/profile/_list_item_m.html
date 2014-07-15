@@ -25,19 +25,32 @@
 				{% if item.country %}({{ item.country.iso2_code }}){% endif %}
 				{% topflop_for_object item %} </a>
 			</li>
-		
+
+			{% if item.pseudonym %}
+			<li class="small">
+				<span class="key">{% trans "a.k.a." %}:</span> <span class="value">{{ item.pseudonym }}</span>
+			</li>
+            {% else %}
+
+			<li class="small">
+				<span class="key">&nbsp;</span>
+			</li>
+			{% endif %}
+
 			{% if item.user.date_joined %}
 			<li class="small">
 				<span class="key">{% trans "Date joined" %}:</span> <span class="value">{{ item.user.date_joined|date:"SHORT_DATE_FORMAT" }}</span>
 			</li>
 			{% endif %}
-			
+
+            {% comment  %}
 			{% if item.user.last_login %}
 			<li class="small">
 				<span class="key">{% trans "Last login" %}:</span> <span class="value">{{ item.user.last_login|date:"SHORT_DATE_FORMAT" }}</span>
 			</li>
 			{% endif %}
-			
+            {% endcomment  %}
+
 		</ul>
 	</div>
 

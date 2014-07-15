@@ -287,12 +287,10 @@ class MediaEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     
     def __init__(self, *args, **kwargs):
         super(MediaEditView, self).__init__(*args, **kwargs)
-        
-    """"""
+
     def get_initial(self):
         self.initial.update({ 'user': self.request.user })
         return self.initial
-     
 
     def get_context_data(self, **kwargs):
         
@@ -306,18 +304,14 @@ class MediaEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
         return context
 
-    """"""
     def form_valid(self, form):
     
         context = self.get_context_data()
         relation_form = context['relation_form']
 
-
-
-
-
-        
         if form.is_valid():
+
+            print 'MEDIA FORM VALID'
 
             self.object.tags = form.cleaned_data['d_tags']
             
@@ -327,13 +321,9 @@ class MediaEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
             relation_form = MediaRelationFormSet(self.request.POST, instance=tmp)
             extraartist_form = ExtraartistFormSet(self.request.POST, instance=tmp)
 
-
-
-
             if extraartist_form.is_valid():
                 extraartist_form.save()
 
-        
             if relation_form.is_valid():        
                         
                 relation_form.save()
@@ -341,9 +331,9 @@ class MediaEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
                 msg = change_message.construct(self.request, form, [relation_form])
                 with reversion.create_revision():
                     obj = form.save()
+                    reversion.set_user(self.request.user)
                     reversion.set_comment(msg)
-                
-                
+
                 if not obj.artist.pk:
                     obj.artist.creator = context['request'].user
                 
@@ -358,9 +348,6 @@ class MediaEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
                 obj.save()
                 
                 #form.save_m2m()
-                print '----------------------------------------------'
-            
-                
 
             return HttpResponseRedirect('#')
         else:

@@ -353,6 +353,8 @@ class ArtistEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         # validation
         if form.is_valid():
 
+            print 'ARTIST FORM VALID'
+
             self.object.tags = form.cleaned_data['d_tags']
             
             # temporary instance to validate inline forms against
@@ -378,7 +380,6 @@ class ArtistEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
             if alias_form.is_valid():
                 alias_form.save()
             else:
-                print 'ALIAS FORM NOT VALID!!!'
                 print alias_form.errors
         
             relation_form = ArtistRelationFormSet(self.request.POST, instance=tmp)
@@ -387,11 +388,15 @@ class ArtistEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
                # obj = form.save()
 
-                msg = change_message.construct(self.request, form, [relation_form,])
-                with reversion.create_revision():
-                    obj = form.save()
-                    reversion.set_comment(msg)
+            """
+            compose change-message and (re)version
+            """
 
+            msg = change_message.construct(self.request, form, [relation_form, alias_form, member_form,])
+            with reversion.create_revision():
+                obj = form.save()
+                reversion.set_user(self.request.user)
+                reversion.set_comment(msg)
                 form.save_m2m()
 
 

@@ -1502,7 +1502,7 @@ def action_handler(sender, instance, created, **kwargs):
         try:
             action.send(instance.get_last_editor(), verb='updated', target=instance)
         except Exception, e:
-            print 'error attaching action_handler: %s' % e
+            print 'error calling action_handler: %s' % e
 
 post_save.connect(action_handler, sender=Media)
 

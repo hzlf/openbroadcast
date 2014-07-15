@@ -73,6 +73,7 @@ class Profile(MigrationMixin):
     birth_date = models.DateField(_('Date of birth'), blank=True, null=True, help_text=_('Format: YYYY-MM-DD'))
     
     # Profile
+    pseudonym = models.CharField(blank=True, null=True, max_length=250)
     description = models.CharField(_('Disambiguation'), blank=True, null=True, max_length=250)
     biography = extra.MarkdownTextField(blank=True, null=True)
 

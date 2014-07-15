@@ -32,7 +32,6 @@ def construct(request, form, formsets):
                     print el
                     if el[0].__class__.__name__ == 'Media':
                         if el[0].release.publish_date:
-                            print 'SKIPPPPP LICENSE'
                             if 'license' in el[1]: el[1].remove('license')
 
                     if len(el[1]) < 1:

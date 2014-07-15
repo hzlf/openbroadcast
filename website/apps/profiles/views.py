@@ -129,6 +129,9 @@ class ProfileListView(PaginationMixin, ListView):
                 qs = qs.order_by('-%s' % order_by)
             else:
                 qs = qs.order_by('%s' % order_by)
+
+        else:
+            qs = qs.order_by('user__first_name', 'user__last_name')
             
             
             

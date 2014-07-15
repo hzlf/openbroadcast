@@ -130,7 +130,7 @@
         </div>
         -->
 
-
+        {% comment %}
         {% if messages %}
             <div class="row">
                 <div class="span9 messages">
@@ -142,6 +142,7 @@
                 </div>
             </div>
         {% endif %}
+        {% endcomment %}
 
 
 
@@ -170,6 +171,22 @@
 
 
 </div>
+
+
+<section id="site_messages">
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+</section>
 
 
 <!-- start: wrapper_main -->

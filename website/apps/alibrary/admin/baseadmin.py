@@ -235,14 +235,11 @@ class NameVariationInline(admin.TabularInline):
     model = NameVariation
     extra = 3
          
-class ArtistAdmin(PlaceholderAdmin, BaseAdmin):
-    
+class ArtistAdmin(BaseAdmin):
 
     list_display   = ('name', 'type', 'disambiguation', 'listed',)
     search_fields = ['name', 'media__name',]
     list_filter = ('listed',)
-    
-    # inlines = [LabelInline]
     
     # RelationsInline, 
     inlines = [NameVariationInline, RelationsInline, ArtistProfessionsInline, ArtistMembersInline, ArtistParentsInline, AgencyArtistInline]
@@ -254,11 +251,9 @@ class ArtistAdmin(PlaceholderAdmin, BaseAdmin):
         (None,               {'fields': ['name', 'slug', 'main_image', 'real_name', 'country', ('listed', 'disable_link',), 'enable_comments', 'biography', 'excerpt', 'folder', ]}),
         ('Users', {'fields' : ['owner', 'creator', 'publisher']}),
         ('Various', {'fields' : ['booking_contact', 'email',]}),
-        #('Mixed content', {'fields': ['placeholder_1'], 'classes': ['plugin-holder', 'plugin-holder-nopage']}),
     ]
     
-#admin.site.register(Artist, ArtistAdmin)
-admin.site.register(Artist)
+admin.site.register(Artist, ArtistAdmin)
 admin.site.register(NameVariation)
 
 class LicenseAdmin(reversion.VersionAdmin, MultilingualModelAdmin):

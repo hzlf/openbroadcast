@@ -20,6 +20,15 @@
 		<dd>
 			{{ object.user.username }}
 		</dd>
+
+        {% if object.pseudonym %}
+		<dt>
+			{% trans "Pseudonym" %}:
+		</dt>
+		<dd>
+			{{ object.pseudonym }}
+		</dd>
+		{% endif %}
 		
 		{% if object.mentor %}
 		<dt>
