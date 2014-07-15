@@ -1,5 +1,6 @@
 import os
 import re
+import time
 import shutil
 import json
 import datetime
@@ -866,9 +867,10 @@ class LegacyUserMigrator(Migrator):
         log = logging.getLogger('util.migrator.__init__')
 
 
-    def run(self, legacy_obj):
+    def run(self, legacy_obj, force=False):
 
         from django.contrib.auth.models import User, Group
+        from profiles.models import Profile, Link, Service, ServiceType, Expertise
         from obp_legacy.models_legacy import *
 
         status = 1
@@ -895,9 +897,7 @@ class LegacyUserMigrator(Migrator):
         """
         obj.legacy_id = Users.objects.using('legacy').get(legacy_id=legacy_obj.ident).id
 
-        print '***'
-        print obj.legacy_id
-        print '***'
+
 
         print 'last_action: %s' % legacy_obj.last_action
         print 'join_date: %s' % legacy_obj.join_date
@@ -943,9 +943,9 @@ class LegacyUserMigrator(Migrator):
                 user.first_name = name[0][:29]
                 user.last_name = ', '.join(name[1:])[:29]
 
-            print name
-            print user.first_name
-            print user.last_name
+            print 'name:       %s' % name
+            print 'first_name: %s' % user.first_name
+            print 'last_name:  %s' % user.last_name
 
         user.save()
 
@@ -956,16 +956,21 @@ class LegacyUserMigrator(Migrator):
         """
         p_data = ElggProfileData.objects.using('legacy_legacy').filter(owner=legacy_obj.ident)
         """"""
+        print '//////////////////////////////////////////////'
+        print 'legacy user data'
+        print
         for item in p_data:
-            """
-            print 'access: %s' % item.access
+            """"""
+            #print 'access: %s' % item.access
             print 'name: %s' % item.name
             print 'value: %s' % item.value
+            print
+
             """
-
-            # Mapping profile data
-
+            Mapping profile data
+            """
             if item.name == 'interests':
+                # mapped to tags
                 tags = item.value.split(',')
                 for tag in tags:
                     tag = tag.rstrip(' ').lstrip(' ')
@@ -976,6 +981,7 @@ class LegacyUserMigrator(Migrator):
                             print e
 
             if item.name == 'formats':
+                # mapped to tags
                 tags = item.value.split(',')
                 for tag in tags:
                     tag = tag.rstrip(' ').lstrip(' ')
@@ -984,6 +990,32 @@ class LegacyUserMigrator(Migrator):
                             Tag.objects.add_tag(obj, u'"%s"' % tag[:30])
                         except Exception, e:
                             print e
+
+            """
+            address/contact related
+            """
+            if item.name == 'emailaddress':
+                obj.user.email = item.value
+
+            if item.name == 'homestreetaddress':
+                obj.address1 = item.value
+
+            if item.name == 'homepostcode':
+                obj.zip = item.value
+
+            if item.name == 'hometown':
+                obj.city = item.value
+
+            if item.name == 'homephone':
+                if not obj.phone:
+                    obj.phone = item.value
+
+            if item.name == 'workphone':
+                if not obj.phone:
+                    obj.phone = item.value
+
+            if item.name == 'mobphone':
+                obj.mobile = item.value
 
             if item.name == 'homecountry':
                 country = None
@@ -1000,36 +1032,80 @@ class LegacyUserMigrator(Migrator):
                         pass
 
                 if country:
-                    log.debug('got country: %s' % country.name)
                     obj.country = country
+
+
+            """
+            description / biography & co
+            """
+            if item.name == 'minibio':
+                obj.description = item.value[0:240]
+
+            if item.name == 'biography':
+                obj.biography = item.value
+
+            if item.name == 'ibanprivate':
+                obj.iban = item.value
+
+            if item.name == 'gender':
+                if item.value == 'male':
+                    obj.gender = 0
+                elif item.value == 'female':
+                    obj.gender = 1
+                else:
+                    obj.gender = 2
 
             if item.name == 'birth_date':
                 try:
-                    import time
-
-                    valid_date = time.strptime('%s' % obj.birth_date, '%Y-%m-%d')
+                    valid_date = time.strptime('%s' % item.value, '%Y-%m-%d')
                     obj.birth_date = item.value
                 except Exception, e:
-                    print 'Invalid date!'
                     print e
 
-            if item.name == 'streetaddress':
-                obj.address1 = item.value
 
-            if item.name == 'postcode':
-                obj.zip = item.value
+            """
+            links
+            """
+            if item.name == 'workweb':
+                url = item.value
+                if not url[0:7] == 'http://':
+                    url = 'http://' + url
+                link, c = Link.objects.get_or_create(profile=obj, url=url)
+                link.title = 'Work website'
+                link.save()
 
-            if item.name == 'town':
-                obj.city = item.value
+            if item.name in ['personalweb', 'personalweb1', 'personalweb2', 'personalweb3', 'personalweb4', 'personalweb5']:
+                url = item.value
+                if not url[0:7] == 'http://':
+                    url = 'http://' + url
+                link, c = Link.objects.get_or_create(profile=obj, url=url)
+                link.title = 'Personal website'
+                link.save()
 
-            if item.name == 'workphone':
-                obj.phone = item.value
+            """
+            services
+            """
+            if item.name in ['msn', 'icq', 'skype', 'aim', 'twitter',]:
+                service_type, c = ServiceType.objects.get_or_create(title=item.name.capitalize())
+                service, c = Service.objects.get_or_create(service=service_type,
+                                                           profile=obj,
+                                                           username=item.value.rstrip(' ').lstrip(' '))
 
-            if item.name == 'minibio':
-                obj.description = item.value
 
-            if item.name == 'emailaddress':
-                obj.email = item.value
+            """
+            skills & professions
+            """
+            if item.name in ['profession', 'skills___']:
+                print 'parsing %s' % item.name
+
+                expertises = item.value.split(',')
+                for expertise in expertises:
+                    expertise = expertise.rstrip(' ').lstrip(' ')
+                    db_expertise, c = Expertise.objects.get_or_create(name=u'%s' % expertise.title())
+                    obj.expertise.add(db_expertise)
+
+
+
 
         if created:
             log.info('object created: %s' % obj.pk)
@@ -1093,9 +1169,11 @@ class CommunityMigrator(Migrator):
             print 'value: %s' % item.value
 
 
-            # Mapping profile data
-
+            """
+            mapping data profile
+            """
             if item.name == 'interests':
+                # interests are converted to tags
                 tags = item.value.split(',')
                 for tag in tags:
                     tag = tag.rstrip(' ').lstrip(' ')
@@ -1105,7 +1183,32 @@ class CommunityMigrator(Migrator):
                         except Exception, e:
                             print e
 
-            if item.name == 'country':
+
+            """
+            contact related
+            """
+            if item.name == 'homestreetaddress':
+                obj.address1 = item.value
+
+            if item.name == 'homepostcode':
+                obj.zip = item.value
+
+            if item.name == 'hometown':
+                obj.city = item.value
+
+            if item.name == 'homephone':
+                if not obj.ohone:
+                    obj.phone = item.value
+
+            if item.name == 'mobphone':
+                obj.phone = item.value
+
+            if item.name == 'emailaddress':
+                # assigned to user, not profile
+                obj.user.email = item.value
+
+            if item.name == 'homecountry':
+                # tries to find country by iso code or full name (english only)
                 country = None
                 if len(item.value) == 2:
                     try:
@@ -1120,26 +1223,13 @@ class CommunityMigrator(Migrator):
                         pass
 
                 if country:
-                    log.debug('got country: %s' % country.name)
+                    #log.debug('got country: %s' % country.name)
                     obj.country = country
 
-            if item.name == 'streetaddress':
-                obj.address1 = item.value
 
-            if item.name == 'postcode':
-                obj.zip = item.value
-
-            if item.name == 'town':
-                obj.city = item.value
-
-            if item.name == 'workphone':
-                obj.phone = item.value
 
             if item.name == 'minibio':
                 obj.description = item.value
-
-            if item.name == 'emailaddress':
-                obj.email = item.value
 
 
 
@@ -1300,18 +1390,22 @@ class PlaylistMigrator(Migrator):
                     indicates the slot, 1-indexed.
 
                 """
-                from alibrary.models.basemodels import Daypart
-                daypart_ids = []
-                bcs = json.loads(container.best_broadcast_segment)
-                for bc in bcs:
-                    dp_offset = int(bc[0]) * 7 - 6
-                    if bc[1] < 7:
-                        dp_pk = bc[1] + dp_offset
-                    else:
-                        dp_pk = dp_offset
-                    daypart_ids.append(dp_pk)
+                try:
+                    from alibrary.models.basemodels import Daypart
+                    daypart_ids = []
+                    bcs = json.loads(container.best_broadcast_segment)
+                    for bc in bcs:
+                        dp_offset = int(bc[0]) * 7 - 6
+                        if bc[1] < 7:
+                            dp_pk = bc[1] + dp_offset
+                        else:
+                            dp_pk = dp_offset
+                        daypart_ids.append(dp_pk)
 
-                obj.dayparts = Daypart.objects.filter(pk__in=daypart_ids)
+                    obj.dayparts = Daypart.objects.filter(pk__in=daypart_ids)
+                except Exception, e:
+                    print 'unable to sassign daypart: %s' % e
+
 
 
 
@@ -1402,9 +1496,9 @@ Double legacy shortcuts
 """
 
 
-def get_user_by_legacy_legacy_object(legacy_obj):
+def get_user_by_legacy_legacy_object(legacy_obj, force=False):
     migrator = LegacyUserMigrator()
-    obj, status = migrator.run(legacy_obj)
+    obj, status = migrator.run(legacy_obj, force)
 
     return obj, status
 

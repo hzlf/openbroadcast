@@ -10,6 +10,7 @@ from django.utils.translation import ugettext as _
 from django.template import RequestContext
 
 from abcast.models import Emission, Channel
+from actstream import action
 from alibrary.models import Playlist
 
 #from abcast.filters import EmissionFilter
@@ -109,16 +110,17 @@ def schedule(request):
 
     playlist_history = request.session.get('scheduler_selected_playlist_history', None)
     if playlist_history:
+        from django.utils.safestring import mark_safe
+        data['playlist_history'] = mark_safe(json.dumps(playlist_history))
+        """
         history = [[playlist.get_api_url().replace("'", ''),
                                      1 if playlist.pk == playlist_id else 0] \
                                      for playlist in \
                                      Playlist.objects.filter(pk__in=playlist_history)]
-        print '/////////////////////////////////////////'
-        print history
-        print '/////////////////////////////////////////'
         from django.utils.safestring import mark_safe
 
         data['playlist_history'] = mark_safe(json.dumps(history))
+        """
 
 
 
@@ -327,6 +329,8 @@ def schedule_object(request):
     # if no errors so far -> create emission and attach object
     e = Emission(content_object=obj, time_start=time_start, user=request.user, channel=channel, color=color)
     e.save()
+
+    action.send(request.user, verb='scheduled', target=e.content_object)
     
     
     
@@ -394,6 +398,9 @@ def copy_paste_day(request):
                 e.locked = False
                 e.time_start = e.time_start + offset
                 e.save()
+
+                # action.send(request.user, verb='scheduled', target=e)
+
             else:
                 print 'slot not free'
 
@@ -436,17 +443,13 @@ def delete_day(request):
             time_start = now
 
         time_end = time_start + datetime.timedelta(hours=24)
-
         log.debug('range: %s to %s' % (time_start, time_end))
-
 
         # get emissions
         es = Emission.objects.filter(time_start__gte=time_start, time_end__lte=time_end, channel=channel)
         emission_count = es.count()
+
         for e in es:
-            print 'delete:'
-            print e
-            # call delete on every object to have signals emitted
             e.delete()
 
     data = {

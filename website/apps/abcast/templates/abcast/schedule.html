@@ -102,11 +102,14 @@
 
                 scheduler.app.set_selection('playlist', '{{ selected_playlist.get_api_url }}');
 
+                try {
+                    var playlist_history = $.parseJSON('{{ playlist_history }}');
+                } catch (e) {
+                    var playlist_history = [];
+                }
 
+                scheduler.app.set_history(playlist_history);
 
-                var playlist_history = $.parseJSON('{{ playlist_history }}')
-
-            console.log('playlist_history:', playlist_history);
 
 
 

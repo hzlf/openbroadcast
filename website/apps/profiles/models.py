@@ -73,24 +73,20 @@ class Profile(MigrationMixin):
     birth_date = models.DateField(_('Date of birth'), blank=True, null=True, help_text=_('Format: YYYY-MM-DD'))
     
     # Profile
-    description = extra.MarkdownTextField(blank=True, null=True)
+    description = models.CharField(_('Disambiguation'), blank=True, null=True, max_length=250)
+    biography = extra.MarkdownTextField(blank=True, null=True)
+
     image = models.ImageField(verbose_name=_('Profile Image'), upload_to=filename_by_uuid, null=True, blank=True)
-    
-    # hm...
-    # mugshot = models.FileField(_('mugshot'), upload_to='mugshots', null=True, blank=True)
-    
-    # Contact
+
+    # Contact (personal)
     mobile = PhoneNumberField(_('mobile'), blank=True, null=True)
     phone = PhoneNumberField(_('phone'), blank=True, null=True)
     fax = PhoneNumberField(_('fax'), blank=True, null=True)
     
     address1 = models.CharField(_('address'), null=True, blank=True, max_length=100)
     address2 = models.CharField(_('address (secondary)'), null=True, blank=True, max_length=100)
-    # state = models.CharField(_('state'), null=True, blank=True, max_length=100)
     city = models.CharField(_('city'), null=True, blank=True, max_length=100)
     zip = models.CharField(_('zip'), null=True, blank=True, max_length=10)
-    #country = models.CharField(_('country'), null=True, blank=True, max_length=100)
-    #country = CountryField(blank=True, null=True)
     country = models.ForeignKey(Country, blank=True, null=True)
     
     iban = models.CharField(_('IBAN'), null=True, blank=True, max_length=120)
@@ -98,8 +94,7 @@ class Profile(MigrationMixin):
     
     # relations
     expertise = models.ManyToManyField('Expertise', verbose_name=_('Fields of expertise'), null=True, blank=True)
-    
-    
+
     # tagging (d_tags = "display tags")
     d_tags = tagging.fields.TagField(max_length=1024, verbose_name="Tags", blank=True, null=True)
 
@@ -112,7 +107,7 @@ class Profile(MigrationMixin):
         
         permissions = (
             ('mentor_profiles', _('Mentoring profiles')),
-            ('view_profiles_private', _('View private profile-data. (Contact information & co)')),
+            ('view_profiles_private', _('View private profile-data.')),
         )
 
     def __unicode__(self):
@@ -366,7 +361,7 @@ class Service(models.Model):
 
 
 class Link(models.Model):
-    """Service type model"""
+
     profile = models.ForeignKey(Profile)
     title = models.CharField(_('title'), max_length=100, null=True, blank=True)
     url = models.URLField(_('url'), verify_exists=True)
@@ -380,10 +375,7 @@ class Link(models.Model):
         return u"%s" % self.title
     
     
-    
-    
-    
-    
+
     
 class Expertise(models.Model):
     
@@ -393,16 +385,10 @@ class Expertise(models.Model):
         app_label = 'profiles'
         verbose_name = _('Expertise')
         verbose_name_plural = _('Expertise')
-        # ordering = ('name', )
+        ordering = ('name', )
         
     def __unicode__(self):
         return u"%s" % self.name
-        
-"""
-class UserExpertise(models.Model):
-    profile = models.ForeignKey(Profile)
-    expertise = models.ForeignKey(Expertise)
-"""
         
         
         

@@ -5,7 +5,6 @@ import subprocess
 import json
 import ntpath
 
-# django
 from django.db import models
 from django.db.models.signals import post_save, pre_delete
 from django.contrib.auth.models import User
@@ -17,6 +16,8 @@ from django.core.urlresolvers import reverse
 from settings import *
 
 from django.conf import settings
+
+from alibrary import settings as alibrary_settings
 
 
 
@@ -401,7 +402,7 @@ class Media(MigrationMixin):
     
     @models.permalink
     def get_stream_url(self):
-        return ('alibrary-media-stream_html5', [self.uuid])
+        return ('en:alibrary-media-stream_html5', [self.uuid])
 
     @models.permalink
     def get_encode_url(self, format='mp3', bitrate='32'):
@@ -782,28 +783,45 @@ class Media(MigrationMixin):
             dst_path = os.path.join(versions_directory, 'waveform.png')
             
             #print 'create waveform'
-            #print 'src_path: %s' % src_path
+            print 'src_path: %s' % src_path
             #print 'tmp_path: %s' % tmp_path
             print 'dst_path: %s' % dst_path
 
+            """
+            first try to convert using audiotools.
+            if this fails, we try to force the process 'by hand'
+            """
 
+            try:
+                log.debug('trying to convert to .wav using audiotools: %s' % src_path)
+                audiotools.open(src_path).convert(tmp_path, audiotools.WaveAudio)
+            except Exception, e:
+                log.warning('unable to convert with audiotools: %s' % e)
 
+                ext = os.path.splitext(src_path)[1]
+                log.debug('have "%s" format' % ext)
 
-            if os.path.isfile('/opt/local/bin/sox'):
-                sox_binary = '/opt/local/bin/sox'
-            else:
-                sox_binary = '/usr/bin/sox'
+                """
+                different processing depending on audio format
+                """
+                if ext in ['.m4a', '.mp4']:
+                    # decode using faad
+                    pass
+                elif ext in ['.mp5',]:
+                    # just a placeholder
+                    pass
+                else:
+                    # use lame for the rest
+                    sox_binary = alibrary_settings.LAME_BINARY
+                    log.debug('running: "%s %s %s"' % (sox_binary, src_path, tmp_path))
 
-            log.debug('running: "%s %s %s"' % (sox_binary, src_path, tmp_path))
+                    p = subprocess.Popen([
+                        sox_binary, src_path, tmp_path
+                    ], stdout=subprocess.PIPE)
+                    stdout = p.communicate()
 
-
-            p = subprocess.Popen([
-                sox_binary, src_path, tmp_path
-            ], stdout=subprocess.PIPE)
-            stdout = p.communicate()
-            #print stdout
             
-            #audiotools.open(src_path).convert(tmp_path, audiotools.WaveAudio)
+
             
             args = (tmp_path, dst_path, None, 1800, 301, 2048)
             create_wave_images(*args)
@@ -811,6 +829,7 @@ class Media(MigrationMixin):
             try:
                 shutil.rmtree(tmp_directory)
             except Exception, e:
+
                 print e
             
         return
@@ -973,11 +992,9 @@ class Media(MigrationMixin):
 
                 try:
 
-                    lame_binary = '/opt/local/bin/lame'
-
-                    log.info('trying with lame: %s' % lame_binary)
+                    log.info('trying with lame: %s' % alibrary_settings.LAME_BINARY)
                     p = subprocess.Popen([
-                        lame_binary, obj.master.path, version_path
+                        alibrary_settings.LAME_BINARY, obj.master.path, version_path
                     ], stdout=subprocess.PIPE)
                     stdout = p.communicate()
                     print stdout

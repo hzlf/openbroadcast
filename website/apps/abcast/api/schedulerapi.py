@@ -10,6 +10,7 @@ from tastypie.resources import ModelResource
 from tastypie.utils import trailing_slash
 from tastypie.http import HttpUnauthorized
 from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
+from actstream import action
 from alibrary.models import Playlist
 from abcast.models import Emission, Channel
 
@@ -174,6 +175,8 @@ class EmissionResource(ModelResource):
         data = {}
         
         e.save()
+
+        #action.send(request.user, verb='updated', target=e.content_object)
         
         return self.json_response(request, data)
 
@@ -245,6 +248,8 @@ class EmissionResource(ModelResource):
         if success:
             e.time_start = time_start
             data['status'] = True
+
+            action.send(request.user, verb='rescheduled', target=e.content_object)
         
         
         # always save to trigger push-update

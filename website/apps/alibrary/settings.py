@@ -2,6 +2,10 @@
 from django.conf import settings
 from django.utils.translation import ugettext as _
 
+
+
+
+
 """
 Release choices
 """
@@ -89,7 +93,18 @@ DEFAULT_PLAYLIST_BROADCAST_STATUS_CHOICES = (
     (99, _('Error')),
 )
 
+"""
+binaries
+"""
 
+LAME_BINARY = getattr(settings, 'LAME_BINARY', '/usr/bin/lame')
+SOX_BINARY = getattr(settings, 'SOX_BINARY', '/usr/bin/sox')
+FAAD_BINARY = getattr(settings, 'FAAD_BINARY', '/usr/bin/faad')
+
+
+"""
+choice settings
+"""
 
 RELEASETYPE_CHOICES = getattr(settings, 'ALIBRARY_RELEASETYPE_CHOICES', DEFAULT_RELEASETYPE_CHOICES)
 LABELTYPE_CHOICES = getattr(settings, 'ALIBRARY_LABELTYPE_CHOICES', DEFAULT_LABELTYPE_CHOICES)

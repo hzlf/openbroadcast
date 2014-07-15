@@ -22,7 +22,7 @@ def get_schedule_for_pypo(range_start, range_end, exclude=None, channel_id=None)
     media = {}
     print
     print '--------------------------------------------------------------------'
-    print '| getting schedule'
+    print '| getting schedule for PYPO'
     print '--------------------------------------------------------------------'
     print 'range start             : %s ' % range_start
     print 'range end               : %s ' % range_end
@@ -35,7 +35,7 @@ def get_schedule_for_pypo(range_start, range_end, exclude=None, channel_id=None)
         try:
             print
             print 'emission: %s | %s - %s' % (e.name, e.pk, e.get_absolute_url())
-            print 'co      : %s | %s - %s' % (e.content_object.name, e.content_object.pk, e.content_object.get_absolute_url())
+            #print 'co      : %s | %s - %s' % (e.content_object.name, e.content_object.pk, e.content_object.get_absolute_url())
         except:
             pass
 
@@ -58,24 +58,21 @@ def get_schedule_for_pypo(range_start, range_end, exclude=None, channel_id=None)
             i_start_str = i_start.strftime('%Y-%m-%d-%H-%M-%S')
             i_end_str = i_end.strftime('%Y-%m-%d-%H-%M-%S')
 
-            print 'cue_in  -  cue_out  -  fade_in  -  fade_out  -  fade_cross'
-            print '%06d     %06d      %06d      %06d       %06d' % (item.cue_in, item.cue_out, item.fade_in, item.fade_out, item.fade_cross)
+            #print 'cue_in  -  cue_out  -  fade_in  -  fade_out  -  fade_cross'
+            #print '%06d     %06d      %06d      %06d       %06d' % (item.cue_in, item.cue_out, item.fade_in, item.fade_out, item.fade_cross)
 
-            print 'offset:     %s' % offset
+            #print 'offset:     %s' % offset
 
-            print 'start:      %s' % i_start
-            #print 'start str:  %s' % i_start_str
-            print 'end:        %s' % i_end
-            #print 'end str:    %s' % i_end_str
-            #print item.content_object
+            #print 'start:      %s' % i_start
+            #print 'end:        %s' % i_end
+
 
             """
             compose media data
             """
             if i_end < range_start:
-                print
-                print "ALREADY PLAYED!!!! > SKIP!"
-
+                #print 'already played'
+                pass
             else:
 
                 # calculate timings

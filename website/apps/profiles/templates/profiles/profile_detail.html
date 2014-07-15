@@ -135,9 +135,24 @@
 
             <h2>{% trans "Profile" %}</h2>
 
+            {% if object.description %}
             <div class="description markdown padded-h markdown-inline">
-                {{ object.description|markdown|wikilink|safe }}
+                {% if object.description %}
+                    <blockquote>{{ object.description|markdown|wikilink|safe }}</blockquote>
+                {% endif %}
             </div>
+            {% endif %}
+
+
+
+            {% if object.biography %}
+            <h2>{% trans "Biography" %}</h2>
+            <div class="description markdown padded-h markdown-inline">
+                <div>
+                    {{ object.biography|markdown|wikilink|safe }}
+                </div>
+            </div>
+            {% endif %}
 
         </section>
 
@@ -213,7 +228,7 @@
                                 </dd>
                             {% endif %}
 
-                            {% if object.gender %}
+                            {% if object.get_gender_display %}
                                 <dt>{% trans "Gender" %}</dt>
                                 <dd>{{ object.get_gender_display }}</dd>
                             {% endif %}
@@ -251,7 +266,7 @@
 
                             <dt>{{ service.service }}</dt>
                             <dd>
-                                <ul class="unstyled">
+                                <ul class="unstyled" style="margin-bottom: 2px;">
                                     <li><a href="{{ service.service_url }}">{{ service.service_url }}</a></li>
                                     <li>{% trans "User" %}: {{ service.username }}</li>
                                 </ul>
@@ -273,7 +288,7 @@
 
                         <dt>{% trans "Expertise" %}</dt>
                         <dd>
-                            <ul class="unstyled horizontal">
+                            <ul class="unstyled horizontal" style="margin-bottom: 2px;">
                                 {% for item in object.expertise.all %}
 
                                     <li>

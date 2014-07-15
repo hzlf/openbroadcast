@@ -7,9 +7,9 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils import translation
 
-from abcast.models import *
+
 from abcast.util.calc import round_dt
-from alibrary.models import Playlist
+
 
 
 # logging
@@ -17,7 +17,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 START_OFFSET = -1 # hours to look ahead
-SCHEDULE_AHEAD = 12 # hours to fill
+SCHEDULE_AHEAD = 4 # hours to fill
 
 SCHEDULER_DEFAULT_CHANNEL_ID = getattr(settings, 'SCHEDULER_DEFAULT_CHANNEL_ID', 1)
 SCHEDULER_DEFAULT_USERNAME = 'root'
@@ -29,6 +29,8 @@ class Autopilot(object):
     def __init__(self, * args, **kwargs):
 
         translation.activate('en')
+
+        from abcast.models import Channel
 
         self.action = kwargs.get('action')
         self.schedule_ahead = int(kwargs.get('schedule_ahead', SCHEDULE_AHEAD))
@@ -44,6 +46,9 @@ class Autopilot(object):
         
         
     def add_emission(self, slot_start):
+
+        from abcast.models import Channel, Emission
+        from alibrary.models import Playlist
         
         log = logging.getLogger('abcast.autopilot.add_emission')
         log.debug('auto-adding emission, slot start: %s' % slot_start)
@@ -104,6 +109,8 @@ class Autopilot(object):
         
 
     def free_time_in_range(self, range_start, range_end):
+
+        from abcast.models import Channel, Emission
         
         log = logging.getLogger('abcast.autopilot.free_time_in_range')
         log.debug('range_start: %s' % range_start)
@@ -133,6 +140,8 @@ class Autopilot(object):
         log = logging.getLogger('abcast.autopilot.run')
         
         log.debug('running autopilot, action: %s' % self.action)
+
+        from abcast.models import Channel, Emission
         
         
         if self.action == 'schedule':
@@ -175,17 +184,17 @@ class Command(NoArgsCommand):
         make_option('--channel_id',
             action='store',
             dest='channel_id',
-            default=False,
+            default=SCHEDULER_DEFAULT_CHANNEL_ID,
             help='Specify the channel id'),
         make_option('--username',
             action='store',
             dest='username',
-            default=False,
+            default='autopilot',
             help='Specify user to assign for autopilot scheduling'),
         make_option('--schedule_ahead',
             action='store',
             dest='schedule_ahead',
-            default=False,
+            default=SCHEDULE_AHEAD,
             help='Number of hours to schedule ahead. Default 12'),
         )
 

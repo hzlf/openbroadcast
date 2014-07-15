@@ -40,6 +40,8 @@ SchedulerApp = function () {
     this.selected_object = false;
     this.selected_color = false;
 
+    this.playlist_history = [];
+
     // c-p - maybe move
     this.copy_paste_source = false;
 
@@ -291,16 +293,38 @@ SchedulerApp = function () {
             self.selected_object = data;
             self.display_selection(data);
             // call view to save state to session. (hmm...what for?)
+            // maybe to let the backend know what is active right now
             if (data.id != undefined) {
                 var url = '/program/scheduler/select-playlist/?playlist_id=' + data.id;
                 $.get(url, function (data) {
+                    debug.debug('OK');
                 })
             }
-            ;
+        });
+    };
+    this.set_history = function (playlist_ids) {
+
+        debug.debug('set_history', playlist_ids);
+
+        // TODO: make dynamic
+        var url = '/en/api/v1/simpleplaylist/' + '?all=1&id__in=' + playlist_ids.join(',');
+
+        $.get(url, function (data) {
+
+            $.each(data.objects, function(i, el){
+                console.log('el', el)
+
+                var container = $('#container_selection');
+                //container.append('<p>' + el.name + '</p>');
+
+            });
+
         });
 
-
     };
+
+
+
     this.display_selection = function (data) {
 
         // debug.debug('display_selection', data);

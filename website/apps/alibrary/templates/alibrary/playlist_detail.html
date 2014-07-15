@@ -154,19 +154,20 @@
 
                             <!-- actual entry -->
 
-                            <ul class="event unstyled horizontal clearfix">
 
-                                <li class="date">{{ item.time_start|date:"D m - H:i:s" }}</li>
-
-                                <li class="channel">
-
+                            <div class="row-fluid">
+                                <div class="span1">
+                                    {{ item.time_start|date:"D d" }}
+                                </div>
+                                <div class="span2">
+                                    {{ item.time_start|date:"H:i:s" }}
+                                </div>
+                                <div class="span5">
                                     <a href="{{ item.channel.get_absolute_url }}">
                                         {{ item.channel.name }} | {{ item.channel.station.name }}
                                     </a>
-
-                                </li>
-
-                                <li class="user">
+                                </div>
+                                <div class="span4">
                                     {% if  item.user %}
                                         <a href="{{ item.user.get_absolute_url }}">
                                             {% firstof item.user.get_full_name item.user.username %}
@@ -174,10 +175,10 @@
                                     {% else %}
                                         {% trans "Autopilot" %}
                                     {% endif %}
+                                </div>
+                            </div>
 
-                                </li>
 
-                            </ul>
 
 
                         {% endfor %}

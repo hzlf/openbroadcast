@@ -12,6 +12,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django_extensions.db.fields import *
 
+from celery.task import task
+
 from cms.models import CMSPlugin
 
 # filer
@@ -29,7 +31,7 @@ from abcast.models import BaseModel, Channel
 
 from caching.base import CachingMixin, CachingManager
 
-
+USE_CELERY = True
 
 class Broadcast(BaseModel):
     
@@ -242,34 +244,45 @@ class Emission(BaseModel, CachingMixin):
         
         super(Emission, self).save(*args, **kwargs)
         
-        
+
+
+
 def post_save_emission(sender, **kwargs):
-    print 'post_save_emission - kwargs'
+
     obj = kwargs['instance']
 
-    """
-    check if emission is in a critical range (eg it should start soon)
-    """
-    SCHEDULE_AHEAD = 60 * 60 * 3 # seconds
-    range_start = datetime.datetime.now()
-    range_end = datetime.datetime.now() + datetime.timedelta(seconds=SCHEDULE_AHEAD)
-
-    # TODO: think about calculation
-    # if obj.time_start > range_start and obj.time_start < range_end:
-    if obj.time_end > range_start and obj.time_start < range_end:
-        # notify pypy
-        print 'emission in critical range: notify pypo'
-        from lib.pypo_gateway import send as pypo_send
-        from abcast.util import scheduler
-        data = scheduler.get_schedule_for_pypo(range_start=range_start, range_end=range_end)
-
-        message = {
-            'event_type': 'update_schedule',
-            'schedule': {'media': data},
-        }
-        pypo_send(message)
+    if USE_CELERY:
+        post_save_emission_task.delay(obj)
     else:
-        print 'emission NOT in critical range: pass'
+        post_save_emission_task(obj)
+
+
+@task
+def post_save_emission_task(obj):
+
+        """
+        check if emission is in a critical range (eg it should start soon)
+        """
+        SCHEDULE_AHEAD = 60 * 60 * 3 # seconds
+        range_start = datetime.datetime.now()
+        range_end = datetime.datetime.now() + datetime.timedelta(seconds=SCHEDULE_AHEAD)
+
+        # TODO: think about calculation
+        # if obj.time_start > range_start and obj.time_start < range_end:
+        if obj.time_end > range_start and obj.time_start < range_end:
+            # notify pypy
+            print 'emission in critical range: notify pypo'
+            from lib.pypo_gateway import send as pypo_send
+            from abcast.util import scheduler
+            data = scheduler.get_schedule_for_pypo(range_start=range_start, range_end=range_end)
+
+            message = {
+                'event_type': 'update_schedule',
+                'schedule': {'media': data},
+            }
+            pypo_send(message)
+        else:
+            print 'emission NOT in critical range: pass'
 
 
 post_save.connect(post_save_emission, sender=Emission)

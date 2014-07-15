@@ -99,6 +99,7 @@ class SimplePlaylistResource(ModelResource):
             'status': ['exact', 'range',],
             'is_current': ['exact',],
             'type': ['exact','in'],
+            'id': ['in',],
         }
 
     """"""
