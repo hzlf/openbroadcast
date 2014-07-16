@@ -54,6 +54,9 @@ class MediaActionForm(Form):
         """    
     publish = forms.BooleanField(required=False)
 
+    def save(self, *args, **kwargs):
+        return True
+
 
 class MediaForm(ModelForm):
 

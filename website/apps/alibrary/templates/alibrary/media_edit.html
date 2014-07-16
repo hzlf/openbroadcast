@@ -83,32 +83,29 @@
 {% endblock %}
 
 {% block form %}
+
+    {% if form_errors %}
+    {% include "element/forms/_merged_form_errors.html" %}
+    {% endif %}
+
     <div class="item_inner">
 
         <form class="form-horizontal form-compact form-release" method="post" id="" enctype="multipart/form-data">
 
             {{ form.management_form }}
-            {{ relation_form.management_form }}
-            {{ releasemedia_form.management_form }}
-
-            {% crispy action_form %}
+            {{ named_formsets.relation.management_form }}
+            {{ named_formsets.extraartist.management_form }}
 
 
+            {% crispy named_formsets.action %}
             {% crispy form %}
 
             <fieldset>
                 <legend>
                     {% trans "Credits & Credited Artists" %}<span class="pull-right"></span>
                 </legend>
-                <!--
-                <div class="notes-form notes-inline notes-info">
-                    <p>
-                        {% trans "Allows you to add additional Artists and their 'roles'" %}<br>
-                    </p>
-                </div>
-                -->
 
-                {% crispy extraartist_form %}
+                {% crispy named_formsets.extraartist %}
 
             </fieldset>
 
@@ -119,12 +116,12 @@
                 </legend>
 
 
-                {% crispy relation_form %}
+                {% crispy named_formsets.relation %}
                 <div class="lookup-container"></div>
 
             </fieldset>
 
-            {% crispy action_form %}
+            {% crispy named_formsets.action %}
 
 
         </form>

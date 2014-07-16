@@ -5,7 +5,9 @@ from django.http import HttpResponseForbidden, Http404, HttpResponseRedirect
 from django.utils import simplejson as json
 from django.conf import settings
 from django.template import RequestContext
+from django.contrib import messages
 from django.utils.translation import ugettext as _
+from django.db.models import Q
 from sendfile import sendfile
 
 from pure_pagination.mixins import PaginationMixin
@@ -14,14 +16,14 @@ from ashop.util.base import get_download_permissions
 
 from braces.views import PermissionRequiredMixin, LoginRequiredMixin
 
-#from alibrary.forms import ReleaseForm
+from tagging.models import Tag
+
 from alibrary.forms import *
 from alibrary.filters import ReleaseFilter
-from tagging.models import Tag
-from django.db.models import Q
 
 from lib.util import tagging_extra
 from lib.util import change_message
+from lib.util.form_errors import merge_form_errors
 
 import reversion
 
@@ -139,12 +141,7 @@ class ReleaseListView(PaginationMixin, ListView):
         
         artist_filter = self.request.GET.get('artist', None)
         if artist_filter:
-            
-            #qs = qs.filter(media_release__artist__slug=artist_filter).distinct()
-            # incl album_artists
             qs = qs.filter(Q(media_release__artist__slug=artist_filter) | Q(album_artists__slug=artist_filter)).distinct()
-            
-            # add relation filter
             fa = Artist.objects.filter(slug=artist_filter)[0]
             f = {'item_type': 'artist' , 'item': fa, 'label': _('Artist')}
             self.relation_filter.append(f)
@@ -152,7 +149,6 @@ class ReleaseListView(PaginationMixin, ListView):
         label_filter = self.request.GET.get('label', None)
         if label_filter:
             qs = qs.filter(label__slug=label_filter).distinct()
-            # add relation filter
             fa = Label.objects.filter(slug=label_filter)[0]
             f = {'item_type': 'label' , 'item': fa, 'label': _('Label')}
             self.relation_filter.append(f)
@@ -191,16 +187,8 @@ class ReleaseListView(PaginationMixin, ListView):
         if extra_filter:
             if extra_filter == 'no_cover':
                 qs = qs.filter(main_image=None).distinct()
-                # add relation filter
-                #fa = Release.objects.filter(slug=release_filter)[0]
-                #f = {'item_type': 'release' , 'item': fa, 'label': _('Release')}
-                #self.relation_filter.append(f)
             if extra_filter == 'has_cover':
                 qs = qs.exclude(main_image=None).distinct()
-                # add relation filter
-                #fa = Release.objects.filter(slug=release_filter)[0]
-                #f = {'item_type': 'release' , 'item': fa, 'label': _('Release')}
-                #self.relation_filter.append(f)
 
 
         
@@ -248,9 +236,109 @@ class ReleaseDetailView(DetailView):
         
         return context
 
-    
-    
+
+
+
+
+
+
 class ReleaseEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+
+    model = Release
+    form_class = ReleaseForm
+    template_name = 'alibrary/release_edit.html'
+    permission_required = 'alibrary.edit_release'
+    raise_exception = True
+    success_url = '#'
+
+    def __init__(self, *args, **kwargs):
+        super(ReleaseEditView, self).__init__(*args, **kwargs)
+
+    def get_initial(self):
+        self.initial.update({ 'user': self.request.user })
+        return self.initial
+
+    def get_context_data(self, **kwargs):
+        ctx = super(ReleaseEditView, self).get_context_data(**kwargs)
+        ctx['named_formsets'] = self.get_named_formsets()
+        # TODO: is this a good way to pass the instance main form?
+        ctx['form_errors'] = self.get_form_errors(form=ctx['form'])
+
+        return ctx
+
+    def get_named_formsets(self):
+
+        return {
+            'action': ReleaseActionForm(self.request.POST or None, instance=self.object, prefix='action'),
+            'bulkedit': ReleaseBulkeditForm(self.request.POST or None, instance=self.object, prefix='bulkedit'),
+            'relation': ReleaseRelationFormSet(self.request.POST or None, instance=self.object, prefix='relation'),
+            'albumartist': AlbumartistFormSet(self.request.POST or None, instance=self.object, prefix='albumartist'),
+            'media': ReleaseMediaFormSet(self.request.POST or None, instance=self.object, prefix='media'),
+        }
+
+    def get_form_errors(self, form=None):
+
+        named_formsets = self.get_named_formsets()
+        named_formsets.update({'form': form})
+        form_errors = merge_form_errors([formset for name, formset in named_formsets.items()])
+
+        return form_errors
+
+    def form_valid(self, form):
+
+        named_formsets = self.get_named_formsets()
+
+        if not all((x.is_valid() for x in named_formsets.values())):
+            return self.render_to_response(self.get_context_data(form=form))
+
+        self.object = form.save(commit=False)
+
+        for name, formset in named_formsets.items():
+            formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
+            if formset_save_func is not None:
+                formset_save_func(formset)
+            else:
+                formset.save()
+
+
+        # kind of ugly, tries to see if user did 'publish' the object
+        # as this is a one-timer i'll not improve it... feel free!
+        action_form = ReleaseActionForm(self.request.POST)
+        publish = False
+
+        if action_form.is_valid():
+            publish = action_form.cleaned_data['publish']
+
+        if publish:
+            from datetime import datetime
+            self.object.publish_date = datetime.now()
+            self.object.publisher = self.request.user
+            self.object.save()
+
+
+        msg = change_message.construct(self.request, form, [named_formsets['relation'],
+                                                            named_formsets['albumartist'],
+                                                            named_formsets['media'],])
+        if publish:
+            msg = '%s. \n %s' %('Published release', msg)
+        with reversion.create_revision():
+            self.object = form.save()
+            reversion.set_user(self.request.user)
+            reversion.set_comment(msg)
+
+        messages.add_message(self.request, messages.INFO, msg)
+
+        return HttpResponseRedirect('')
+
+
+    def formset_relation_valid(self, formset):
+
+        relations = formset.save(commit=False) # self.save_formset(formset, contact)
+        for relation in relations:
+            relation.save()
+    
+    
+class __ReleaseEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
     model = Release
     template_name = 'alibrary/release_edit.html'
@@ -278,8 +366,6 @@ class ReleaseEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         # 
         context['release_bulkedit_form'] = ReleaseBulkeditForm(instance=self.object)
         context['action_form'] = ReleaseActionForm(instance=self.object)
-        
-        #context['releasemedia_form'] = ReleaseMediaFormSet(instance=self.object)
 
         context['releasemedia_form'] = kwargs.get('releasemedia_form', ReleaseMediaFormSet(instance=self.object))
 

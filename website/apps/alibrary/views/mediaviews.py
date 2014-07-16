@@ -9,9 +9,12 @@ from django.db.models import Q
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext as _
+from django.contrib import messages
+
 from tagging.models import Tag
 import reversion
 from sendfile import sendfile
+import audiotranscode
 
 from pure_pagination.mixins import PaginationMixin
 from braces.views import PermissionRequiredMixin, LoginRequiredMixin
@@ -19,9 +22,11 @@ from braces.views import PermissionRequiredMixin, LoginRequiredMixin
 from alibrary.models import Media, Playlist, PlaylistItem, Artist, Release
 from alibrary.forms import MediaForm, MediaActionForm, MediaRelationFormSet, ExtraartistFormSet
 from alibrary.filters import MediaFilter
+
 from lib.util import tagging_extra
 from lib.util import change_message
-import audiotranscode
+from lib.util.form_errors import merge_form_errors
+
 
 
 ALIBRARY_PAGINATE_BY = getattr(settings, 'ALIBRARY_PAGINATE_BY', (12,24,36,120))
@@ -59,10 +64,7 @@ ORDER_BY = [
 ]
 
 class MediaListView(PaginationMixin, ListView):
-    
-    # context_object_name = "artist_list"
-    #template_name = "alibrary/release_list.html"
-    
+
     object = Media
     paginate_by = ALIBRARY_PAGINATE_BY_DEFAULT
     
@@ -96,15 +98,9 @@ class MediaListView(PaginationMixin, ListView):
             for tag_id in self.request.GET['tags'].split(','):
                 tag_ids.append(int(tag_id))
             self.extra_context['active_tags'] = tag_ids
-        #self.extra_context['release_list'] = self.filter
-    
-        # hard-coded for the moment
-        
+
         self.extra_context['list_style'] = self.request.GET.get('list_style', 's')
-        #self.extra_context['list_style'] = 's'
-        
         self.extra_context['get'] = self.request.GET
-        
         context.update(self.extra_context)
 
         return context
@@ -112,12 +108,8 @@ class MediaListView(PaginationMixin, ListView):
 
     def get_queryset(self, **kwargs):
 
-        # return render_to_response('my_app/template.html', {'filter': f})
-
         kwargs = {}
-
         self.tagcloud = None
-
         q = self.request.GET.get('q', None)
         
         if q:
@@ -146,7 +138,6 @@ class MediaListView(PaginationMixin, ListView):
         artist_filter = self.request.GET.get('artist', None)
         if artist_filter:
             qs = qs.filter(artist__slug=artist_filter).distinct()
-            # add relation filter
             fa = Artist.objects.filter(slug=artist_filter)[0]
             f = {'item_type': 'artist' , 'item': fa, 'label': _('Artist')}
             self.relation_filter.append(f)
@@ -154,7 +145,6 @@ class MediaListView(PaginationMixin, ListView):
         release_filter = self.request.GET.get('release', None)
         if release_filter:
             qs = qs.filter(release__slug=release_filter).distinct()
-            # add relation filter
             fa = Release.objects.filter(slug=release_filter)[0]
             f = {'item_type': 'release' , 'item': fa, 'label': _('Release')}
             self.relation_filter.append(f)
@@ -184,39 +174,24 @@ class MediaListView(PaginationMixin, ListView):
         if extra_filter:
             if extra_filter == 'unassigned':
                 qs = qs.filter(release=None).distinct()
-                # add relation filter
-                #fa = Release.objects.filter(slug=release_filter)[0]
-                #f = {'item_type': 'release' , 'item': fa, 'label': _('Release')}
-                #self.relation_filter.append(f)
-            
 
-        # base queryset        
-        #qs = Release.objects.all()
         
         # apply filters
         self.filter = MediaFilter(self.request.GET, queryset=qs)
         # self.filter = ReleaseFilter(self.request.GET, queryset=Release.objects.active().filter(**kwargs))
-        
         qs = self.filter.qs
         
         
         
         
         stags = self.request.GET.get('tags', None)
-        #print "** STAGS:"
-        #print stags
         tstags = []
         if stags:
             stags = stags.split(',')
             for stag in stags:
                 #print int(stag)
                 tstags.append(int(stag))
-        
-        #print "** TSTAGS:"
-        #print tstags
-        
-        #stags = ('Techno', 'Electronic')
-        #stags = (4,)
+
         if stags:
             qs = Media.tagged.with_all(tstags, qs)
             
@@ -224,23 +199,13 @@ class MediaListView(PaginationMixin, ListView):
         # rebuild filter after applying tags
         self.filter = MediaFilter(self.request.GET, queryset=qs)
         
-        # tagging / cloud generation
+
         tagcloud = Tag.objects.usage_for_queryset(qs, counts=True, min_count=0)
-        #print '** CLOUD: **'
-        #print tagcloud
-        #print '** END CLOUD **'
-        
         self.tagcloud = tagging_extra.calculate_cloud(tagcloud)
-        
-        #print '** CALCULATED CLOUD'
-        #print self.tagcloud
-        
+
         return qs
     
-    
-    
-    
-    
+
 class MediaDetailView(DetailView):
 
     model = Media
@@ -250,8 +215,7 @@ class MediaDetailView(DetailView):
         
         context = super(MediaDetailView, self).get_context_data(**kwargs)
         obj = kwargs.get('object', None)
-        
-        # change history
+
         self.extra_context['history'] = obj.get_versions()
         
         # foreign appearance
@@ -263,20 +227,95 @@ class MediaDetailView(DetailView):
             pass
         
         self.extra_context['appearance'] = ps
-        
         context.update(self.extra_context)
         
         return context
     
-    
-    
-    
- 
- 
- 
- 
-    
+
+
+
 class MediaEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+
+    model = Media
+    form_class = MediaForm
+    template_name = "alibrary/media_edit.html"
+    permission_required = 'alibrary.edit_media'
+    raise_exception = True
+    success_url = '#'
+
+    def __init__(self, *args, **kwargs):
+        super(MediaEditView, self).__init__(*args, **kwargs)
+
+    def get_initial(self):
+        self.initial.update({ 'user': self.request.user })
+        return self.initial
+
+    def get_context_data(self, **kwargs):
+        ctx = super(MediaEditView, self).get_context_data(**kwargs)
+        ctx['named_formsets'] = self.get_named_formsets()
+        # TODO: is this a good way to pass the instance main form?
+        ctx['form_errors'] = self.get_form_errors(form=ctx['form'])
+
+        return ctx
+
+    def get_named_formsets(self):
+
+        return {
+            'action': MediaActionForm(self.request.POST or None, prefix='action'),
+            'relation': MediaRelationFormSet(self.request.POST or None, instance=self.object, prefix='relation'),
+            'extraartist': ExtraartistFormSet(self.request.POST or None, instance=self.object, prefix='extraartist'),
+        }
+
+    def get_form_errors(self, form=None):
+
+        named_formsets = self.get_named_formsets()
+        named_formsets.update({'form': form})
+        form_errors = merge_form_errors([formset for name, formset in named_formsets.items()])
+
+        return form_errors
+
+    def form_valid(self, form):
+
+        named_formsets = self.get_named_formsets()
+
+        if not all((x.is_valid() for x in named_formsets.values())):
+            return self.render_to_response(self.get_context_data(form=form))
+
+        self.object = form.save(commit=False)
+
+        for name, formset in named_formsets.items():
+            formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
+            if formset_save_func is not None:
+                formset_save_func(formset)
+            else:
+                formset.save()
+
+        msg = change_message.construct(self.request, form, [named_formsets['relation'], named_formsets['extraartist'],])
+        with reversion.create_revision():
+            self.object = form.save()
+            reversion.set_user(self.request.user)
+            reversion.set_comment(msg)
+
+        messages.add_message(self.request, messages.INFO, msg)
+
+        return HttpResponseRedirect('')
+
+    def formset_relation_valid(self, formset):
+
+        relations = formset.save(commit=False) # self.save_formset(formset, contact)
+        for relation in relations:
+            #relation.who = self.request.user
+            #relation.contact = self.object
+            relation.save()
+
+
+
+
+
+
+    
+class __MediaEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+
     model = Media
     template_name = "alibrary/media_edit.html"
     success_url = '#'

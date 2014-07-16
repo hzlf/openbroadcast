@@ -232,58 +232,11 @@ class LabelDetailView(DetailView):
                     m_ipp = int(m_ipp)
             except Exception, e:
                 pass
-        
-        """
-        page_num = self.request.GET.get('m_page', 1)
-        media_list = Media.objects.filter(label=obj)
-        p = Paginator(media_list, m_ipp, request=self.request, query_param_prefix='m_')
-        m_list = p.page(page_num)
-
-        self.extra_context['media'] = m_list
-        """
-        
-        """
-        page_num = self.request.GET.get('r_page', 1)
-        release_list = Release.objects.filter(label=obj).distinct()
-        p = Paginator(release_list, m_ipp, request=self.request, query_param_prefix='r_')
-        r_list = p.page(page_num)
-        """
 
 
         releases = Release.objects.filter(label=obj).order_by('-releasedate').distinct()[:8]
         self.extra_context['releases'] = releases
-        
-        
-        
-        """
-        testing top-flop
-        """
-        """
-        m_top = []
-        media_top = Media.objects.filter(label=obj, votes__vote__gt=0).order_by('-votes__vote')
-        if media_top.count() > 0:
-            media_top = media_top[0:10]
-            for media in media_top:
-                m_top.append(media)
-                
-        self.extra_context['m_top'] = m_top
-        
-        m_flop = []
-        media_flop = Media.objects.filter(label=obj, votes__vote__lt=0).order_by('votes__vote')
-        if media_flop.count() > 0:
-            media_flop = media_flop[0:10]
-            for media in media_flop:
-                m_flop.append(media)
-                
-        self.extra_context['m_flop'] = m_flop
-        
-
-        m_contrib = Media.objects.filter(extra_labels=obj)
-        self.extra_context['m_contrib'] = m_contrib
-        """
-
         context.update(self.extra_context)
-
         self.extra_context['history'] = obj.get_versions()
 
         return context

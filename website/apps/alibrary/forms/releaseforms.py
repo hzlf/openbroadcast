@@ -56,10 +56,7 @@ class ReleaseActionForm(Form):
         super(ReleaseActionForm, self).__init__(*args, **kwargs)
 
         self.helper = FormHelper()
-        self.helper.form_class = 'form-horizontal'
         self.helper.form_tag = False
-
-
 
         if self.instance and self.instance.publish_date:
             self.helper.add_layout(ACTION_LAYOUT)
@@ -67,6 +64,9 @@ class ReleaseActionForm(Form):
             self.helper.add_layout(ACTION_LAYOUT_EXTENDED)
 
     publish = forms.BooleanField(required=False)
+
+    def save(self, *args, **kwargs):
+        return True
 
 
 
@@ -132,6 +132,9 @@ class ReleaseBulkeditForm(Form):
     bulk_artist_name = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False, label=_('Artist'))
     #bulk_license = selectable.AutoComboboxSelectField(LicenseLookup, allow_new=False, required=False, label=_('License'))
     bulk_license = forms.ModelChoiceField(queryset=License.objects.all(), required=False, label=_('License'))
+
+    def save(self, *args, **kwargs):
+        return True
 
 
 

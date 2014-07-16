@@ -134,7 +134,7 @@ EditUi = function () {
             var key = id.substring(11); // strip off "bulk_apply_"
 
             if (key == 'license') {
-                var src_id = $("#id_bulk_license").val();
+                var src_id = $("#id_bulkedit-bulk_license").val();
                 var start = 'id_media_release'
                 var end = 'license'
                 var dst_id = $('[id^="' + start + '"][id$="' + end + '"]')
@@ -145,8 +145,8 @@ EditUi = function () {
                 dst_id.val(src_id);
             }
             if (key == 'artist_name') {
-                var src_id = $("#id_bulk_artist_name_1").val()
-                var src_name = $("#id_bulk_artist_name_0").val()
+                var src_id = $("#id_bulkedit-bulk_artist_name_1").val()
+                var src_name = $("#id_bulkedit-bulk_artist_name_0").val()
                 var dst_id = $('[id^="' + 'id_media_release' + '"][id$="' + 'artist_1' + '"]')
                 var dst_name = $('[id^="' + 'id_media_release' + '"][id$="' + 'artist_0' + '"]')
                 if (!src_name) {

@@ -1518,13 +1518,27 @@ except:
 
 
 class MediaExtraartists(models.Model):
-    artist = models.ForeignKey('Artist', related_name='extraartist_artist', on_delete=models.CASCADE)
-    media = models.ForeignKey('Media', related_name='extraartist_media', on_delete=models.CASCADE)
+    artist = models.ForeignKey('Artist', related_name='extraartist_artist', on_delete=models.CASCADE, blank=True, null=True)
+    media = models.ForeignKey('Media', related_name='extraartist_media', on_delete=models.CASCADE, blank=True, null=True)
     # function = models.CharField(max_length=128, blank=True, null=True)
-    profession = models.ForeignKey(Profession, verbose_name='Role/Profession', related_name='media_extraartist_profession', blank=True, null=True)   
+    profession = models.ForeignKey(Profession, verbose_name='Role/Profession', related_name='media_extraartist_profession', blank=True, null=True)
+
     class Meta:
         app_label = 'alibrary'
         ordering = ('artist__name', 'profession__name', )
+
+    def __unicode__(self):
+        if self.artist and self.profession:
+            return 'Credited "%s" as "%s"' % (self.artist.name, self.profession.name)
+        elif self.artist:
+            return 'Credited "%s"' % (self.artist.name)
+        else:
+            return 'Credited "%s"' % self.pk
+
+
+
+
+
     
     
 

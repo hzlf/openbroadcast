@@ -84,21 +84,24 @@
 {% endblock %}
 
 {% block form %}
+
+    {% if form_errors %}
+    {% include "element/forms/_merged_form_errors.html" %}
+    {% endif %}
+
+
     <div class="item_inner">
 
         <form class="form-horizontal form-compact form-artist" method="post" id="" enctype="multipart/form-data">
 
             {{ form.management_form }}
-            {{ relation_form.management_form }}
-            {{ releasemedia_form.management_form }}
+		    {{ named_formsets.relation.management_form }}
+		    {{ named_formsets.member.management_form }}
+		    {{ named_formsets.alias.management_form }}
 
-            {% crispy action_form %}
-
+            {% crispy named_formsets.action %}
 
             {% crispy form %}
-
-
-
 
 
             <fieldset>
@@ -106,7 +109,7 @@
                     {% trans "Aliases" %}<span class="pull-right"></span>
                 </legend>
 
-                {% crispy alias_form %}
+                {% crispy named_formsets.alias %}
 
             </fieldset>
 
@@ -121,7 +124,7 @@
                     </p>
                 </div>
 
-                {% crispy member_form %}
+                {% crispy named_formsets.member %}
 
             </fieldset>
 
@@ -135,13 +138,13 @@
                 </legend>
 
 
-                {% crispy relation_form %}
+                {% crispy named_formsets.relation %}
 
                 <div class="lookup-container"></div>
 
             </fieldset>
 
-            {% crispy action_form %}
+            {% crispy named_formsets.action %}
 
 
         </form>

@@ -3,24 +3,22 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.template import RequestContext
+from django.contrib import messages
 from django.utils.translation import ugettext as _
+from django.db.models import Q
 from pure_pagination.mixins import PaginationMixin
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 from braces.views import PermissionRequiredMixin, LoginRequiredMixin
+from tagging.models import Tag
+import reversion
 
 from alibrary.models import Artist, Label, Release, Media, NameVariation
 from alibrary.forms import ArtistForm, ArtistActionForm, ArtistRelationFormSet, MemberFormSet, AliasFormSet
 from alibrary.filters import ArtistFilter
 
-from tagging.models import Tag
-import reversion
-from django.db.models import Q
 from lib.util import tagging_extra
 from lib.util import change_message
-
-
-
-
+from lib.util.form_errors import merge_form_errors
 
 ALIBRARY_PAGINATE_BY = getattr(settings, 'ALIBRARY_PAGINATE_BY', (12,24,36,120))
 ALIBRARY_PAGINATE_BY_DEFAULT = getattr(settings, 'ALIBRARY_PAGINATE_BY_DEFAULT', 12)
@@ -98,19 +96,14 @@ class ArtistListView(PaginationMixin, ListView):
 
     def get_queryset(self, **kwargs):
 
-        # return render_to_response('my_app/template.html', {'filter': f})
-
         kwargs = {}
-
         self.tagcloud = None
-
         q = self.request.GET.get('q', None)
         
         if q:
             qs = Artist.objects.filter(name__istartswith=q)\
             .distinct()
         else:
-            #qs = Artist.objects.all()
             # only display artists with tracks a.t.m.
             qs = Artist.objects.filter(media_artist__isnull=False).select_related('license','media_artist').prefetch_related('media_artist').distinct()
 
@@ -132,7 +125,6 @@ class ArtistListView(PaginationMixin, ListView):
         artist_filter = self.request.GET.get('artist', None)
         if artist_filter:
             qs = qs.filter(media_release__artist__slug=artist_filter).distinct()
-            # add relation filter
             fa = Artist.objects.filter(slug=artist_filter)[0]
             f = {'item_type': 'artist' , 'item': fa, 'label': _('Artist')}
             self.relation_filter.append(f)
@@ -140,7 +132,6 @@ class ArtistListView(PaginationMixin, ListView):
         label_filter = self.request.GET.get('label', None)
         if label_filter:
             qs = qs.filter(label__slug=label_filter).distinct()
-            # add relation filter
             fa = Label.objects.filter(slug=label_filter)[0]
             f = {'item_type': 'label' , 'item': fa, 'label': _('Label')}
             self.relation_filter.append(f)
@@ -149,12 +140,8 @@ class ArtistListView(PaginationMixin, ListView):
         if date_start_filter:
 
             qs = qs.filter(date_start__lte='%s-12-31' % date_start_filter, date_start__gte='%s-00-00' % date_start_filter).distinct()
-            # add relation filter
             f = {'item_type': 'label' , 'item': '%s-12-31' % date_start_filter, 'label': _('Date start')}
             self.relation_filter.append(f)
-            
-            
-
 
         # filter by import session
         import_session = self.request.GET.get('import', None)
@@ -166,51 +153,30 @@ class ArtistListView(PaginationMixin, ListView):
             ids = import_session.importitem_set.filter(content_type=ctype.pk).values_list('object_id',)
             qs = qs.filter(pk__in=ids).distinct()
 
-        # base queryset        
-        #qs = Release.objects.all()
-        
         # apply filters
         self.filter = ArtistFilter(self.request.GET, queryset=qs)
         # self.filter = ReleaseFilter(self.request.GET, queryset=Release.objects.active().filter(**kwargs))
         
         qs = self.filter.qs
-        
-        
-        
-        
+
         stags = self.request.GET.get('tags', None)
-        #print "** STAGS:"
-        #print stags
         tstags = []
         if stags:
             stags = stags.split(',')
             for stag in stags:
                 #print int(stag)
                 tstags.append(int(stag))
-        
-        #print "** TSTAGS:"
-        #print tstags
-        
-        #stags = ('Techno', 'Electronic')
-        #stags = (4,)
+
         if stags:
             qs = Release.tagged.with_all(tstags, qs)
-            
-            
+
         # rebuild filter after applying tags
         self.filter = ArtistFilter(self.request.GET, queryset=qs)
         
         # tagging / cloud generation
         tagcloud = Tag.objects.usage_for_queryset(qs, counts=True, min_count=0)
-        #print '** CLOUD: **'
-        #print tagcloud
-        #print '** END CLOUD **'
-        
         self.tagcloud = tagging_extra.calculate_cloud(tagcloud)
-        
-        #print '** CALCULATED CLOUD'
-        #print self.tagcloud
-        
+
         return qs
 
 
@@ -230,12 +196,7 @@ class ArtistDetailView(DetailView):
     def get_context_data(self, **kwargs):
         
         obj = kwargs.get('object', None)
-
         context = super(ArtistDetailView, self).get_context_data(**kwargs)
-
-        
-        # media sub query
-        
         m_ipp = self.request.GET.get('m_ipp', ALIBRARY_PAGINATE_BY_DEFAULT)
         if m_ipp:
             try:
@@ -252,9 +213,7 @@ class ArtistDetailView(DetailView):
         m_list = p.page(page_num)
 
         self.extra_context['media'] = m_list
-        
-        
-        
+
         page_num = self.request.GET.get('r_page', 1)
         release_list = Release.objects.filter(Q(media_release__artist=obj)\
             | Q(album_artists=obj))\
@@ -262,8 +221,6 @@ class ArtistDetailView(DetailView):
         p = Paginator(release_list, m_ipp, request=self.request, query_param_prefix='r_')
         r_list = p.page(page_num)
         self.extra_context['releases'] = r_list
-        
-        
         
         """
         testing top-flop
@@ -289,130 +246,97 @@ class ArtistDetailView(DetailView):
 
         m_contrib = Media.objects.filter(extra_artists=obj)
         self.extra_context['m_contrib'] = m_contrib
-
         self.extra_context['history'] = obj.get_versions()
-        
-
         context.update(self.extra_context)
 
         return context
 
-    
 
 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-    
+
+
 class ArtistEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    model = Artist
-    template_name = "alibrary/artist_edit.html"
-    success_url = '#'
-    form_class = ArtistForm
 
+    model = Artist
+    form_class = ArtistForm
+    template_name = "alibrary/artist_edit.html"
     permission_required = 'alibrary.edit_artist'
     raise_exception = True
-    
+    success_url = '#'
+
     def __init__(self, *args, **kwargs):
         super(ArtistEditView, self).__init__(*args, **kwargs)
-        
-    """"""
+
     def get_initial(self):
         self.initial.update({ 'user': self.request.user })
         return self.initial
-     
 
     def get_context_data(self, **kwargs):
-        
-        context = super(ArtistEditView, self).get_context_data(**kwargs)
-        
-        context['action_form'] = ArtistActionForm(instance=self.object)
-        context['relation_form'] = ArtistRelationFormSet(instance=self.object)
-        context['member_form'] = MemberFormSet(instance=self.object)
-        context['alias_form'] = AliasFormSet(instance=self.object)
-        context['user'] = self.request.user
-        context['request'] = self.request
+        ctx = super(ArtistEditView, self).get_context_data(**kwargs)
+        ctx['named_formsets'] = self.get_named_formsets()
+        # TODO: is this a good way to pass the instance main form?
+        ctx['form_errors'] = self.get_form_errors(form=ctx['form'])
 
-        return context
+        return ctx
+
+    def get_named_formsets(self):
+
+        return {
+            'action': ArtistActionForm(self.request.POST or None, prefix='action'),
+            'relation': ArtistRelationFormSet(self.request.POST or None, instance=self.object, prefix='relation'),
+            'member': MemberFormSet(self.request.POST or None, instance=self.object, prefix='member'),
+            'alias': AliasFormSet(self.request.POST or None, instance=self.object, prefix='alias'),
+        }
+
+    def get_form_errors(self, form=None):
+
+        named_formsets = self.get_named_formsets()
+        named_formsets.update({'form': form})
+        form_errors = merge_form_errors([formset for name, formset in named_formsets.items()])
+
+        return form_errors
 
     def form_valid(self, form):
-    
-        context = self.get_context_data()
 
-        relation_form = context['relation_form']
+        named_formsets = self.get_named_formsets()
 
-        # validation
-        if form.is_valid():
+        if not all((x.is_valid() for x in named_formsets.values())):
+            return self.render_to_response(self.get_context_data(form=form))
 
-            print 'ARTIST FORM VALID'
+        self.object = form.save(commit=False)
 
-            self.object.tags = form.cleaned_data['d_tags']
-            
-            # temporary instance to validate inline forms against
-            tmp = form.save(commit=False)
-
-            aliases_text = self.request.POST.get('aliases_text', None)
-            aliases = self.request.POST.get('aliases', None)
-
-            # hack
-            self.object.namevariations.all().delete()
-            namevariations_text = form.cleaned_data['namevariations']
-            if namevariations_text:
-                variations = namevariations_text.split(',')
-                for v in variations:
-                    nv = NameVariation(name=v.strip(), artist=self.object)
-                    nv.save()
-
-            member_form = MemberFormSet(self.request.POST, instance=tmp)
-            if member_form.is_valid():
-                member_form.save()
-
-            alias_form = AliasFormSet(self.request.POST, instance=tmp)
-            if alias_form.is_valid():
-                alias_form.save()
+        for name, formset in named_formsets.items():
+            formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
+            if formset_save_func is not None:
+                formset_save_func(formset)
             else:
-                print alias_form.errors
-        
-            relation_form = ArtistRelationFormSet(self.request.POST, instance=tmp)
-            if relation_form.is_valid():                
-                relation_form.save()
+                formset.save()
 
-               # obj = form.save()
+        msg = change_message.construct(self.request, form, [named_formsets['relation'],
+                                                            named_formsets['member'],
+                                                            named_formsets['alias'], ])
+        with reversion.create_revision():
+            self.object = form.save()
+            reversion.set_user(self.request.user)
+            reversion.set_comment(msg)
 
-            """
-            compose change-message and (re)version
-            """
-
-            msg = change_message.construct(self.request, form, [relation_form, alias_form, member_form,])
-            with reversion.create_revision():
-                obj = form.save()
-                reversion.set_user(self.request.user)
-                reversion.set_comment(msg)
-                form.save_m2m()
+        messages.add_message(self.request, messages.INFO, msg)
 
 
-            return HttpResponseRedirect('#')
-        else:
-            return self.render_to_response(self.get_context_data(form=form, relation_form=relation_form))
-     
- 
- 
- 
- 
-    
+        return HttpResponseRedirect('')
+
+    def formset_relation_valid(self, formset):
+
+        relations = formset.save(commit=False)
+        for relation in relations:
+            #relation.who = self.request.user
+            #relation.contact = self.object
+            relation.save()
+
 
     
 # autocompleter views
-# TODO: write!
+# TODO: rewrite!
 def artist_autocomplete(request):
 
     q = request.GET.get('q', None)
