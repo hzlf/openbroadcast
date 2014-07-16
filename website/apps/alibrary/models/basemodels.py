@@ -109,9 +109,9 @@ class Distributor(MPTTModel, MigrationMixin):
     
     TYPE_CHOICES = (
         ('unknown', _('Unknown')),
-        ('major', _('Major Label')),
-        ('indy', _('Independent Label')),
-        ('net', _('Netlabel')),
+        ('major', _('Major')),
+        ('indy', _('Independent')),
+        ('other', _('Other')),
     )
     
     type = models.CharField(verbose_name="Distributor type", max_length=12, default='unknown', choices=TYPE_CHOICES)
@@ -144,14 +144,11 @@ class Distributor(MPTTModel, MigrationMixin):
 
     @models.permalink
     def get_absolute_url(self):
-        if self.disable_link:
-            return None
-        
-        return ('alibrary-label-detail', [self.slug])
+        return ('alibrary-distributor-detail', [self.slug])
 
     @models.permalink
     def get_edit_url(self):
-        return ('alibrary-label-edit', [self.pk])
+        return ('alibrary-distributor-edit', [self.pk])
     
 
     def save(self, *args, **kwargs):

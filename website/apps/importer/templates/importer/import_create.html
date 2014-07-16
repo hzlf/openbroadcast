@@ -6,6 +6,11 @@
 
 {% block heading %} <!-- heading / icon (large one) -->
     {% addtoblock "js-post" %}{% istats_scripts %}{% endaddtoblock %}
+
+    <div id="heading">
+        {% include "skeleton/heading.html" %}
+    </div>
+
 {% endblock %}
 
 {% block list_inner %}

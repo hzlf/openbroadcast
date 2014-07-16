@@ -212,6 +212,18 @@ var ImportfileApp = function () {
 
         $('.start-import', self.container).live('click', function (e) {
 
+
+            // check if required fields here
+            var media_name = $('.media input', self.container).val()
+            var artist_name = $('.artist input', self.container).val()
+            var release_name = $('.release input', self.container).val()
+
+            if(! (media_name.length > 1 && artist_name.length > 1 && release_name.length > 1)) {
+                alert('"Title", "Artist" and "Release" are required fields!');
+                return false;
+            }
+
+
             var data = {
                 status: 6
             };

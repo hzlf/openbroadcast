@@ -2,7 +2,13 @@
 <div class="span6 padded-h container_content">
 
 	<div class="page-header">
-		<h2>{{ object.name|truncate_chars_inner:40 }} <small>{{ object.get_type_display }}</small></h2>
+		<h2>{{ object.name|truncate_chars_inner:40 }}
+            <small>{{ object.get_type_display }}</small>
+            <small>
+                {% if object.date_start %}&nbsp;*{{ object.date_start.year }}{% endif %}
+                {% if object.date_end %}&nbsp;&#10013;{{ object.date_end.year }}{% endif %}
+            </small>
+        </h2>
 	</div>
 
 	<dl class="dl-horizontal main">
@@ -36,20 +42,33 @@
 		<dd>
 			<ul class="unstyled">
 			{% for dl in object.distributorlabel_set.all %}
-			
-			<li>{{ dl.distributor }}
-			[
-			{% for country in dl.countries.all %}
-			{{ country.iso2_code }}{% if not forloop.last %},{% endif %}
-			
-			{% endfor %}
-			]</li>
+			<li>
+                <a href="{{ dl.distributor.get_absolute_url }}"
+                   title="{% for country in dl.countries.all %}{{ country.iso2_code }}{% if not forloop.last %}, {% endif %}{% endfor %}">
+                {{ dl.distributor }}</a>
+            </li>
 			{% endfor %}
 			</ul>
 		</dd>
 		{% endif %}
 
 
+
+
+		{% if object.get_root and object.get_root !=  object and object.parent != object.get_root %}
+		<dt>
+			{% trans "Umbrella Label" %}:
+		</dt>
+		<dd>
+			<ul class="unstyled">
+			<li><a href="{{ object.get_root.get_absolute_url }}">{{ object.get_root.name }}</a>
+            {% if object.get_root.type %}<small>
+			[{{ object.get_root.get_type_display }}]
+            </small>{% endif %}
+            </li>
+			</ul>
+		</dd>
+		{% endif %}
 
 
 		{% if object.parent %}

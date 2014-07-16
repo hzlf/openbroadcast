@@ -3,24 +3,19 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.template import RequestContext
-from django.contrib import messages
-from django.db.models import Q
-from django.utils.translation import ugettext as _
 from pure_pagination.mixins import PaginationMixin
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
-from tagging.models import Tag
-import reversion
-
 from braces.views import PermissionRequiredMixin, LoginRequiredMixin
 
 from alibrary.models import Label, Release
 from alibrary.forms import LabelForm, LabelActionForm, LabelRelationFormSet
 from alibrary.filters import LabelFilter
-
-
+from tagging.models import Tag
+from django.db.models import Q
+from django.utils.translation import ugettext as _
+import reversion
 from lib.util import tagging_extra
 from lib.util import change_message
-from lib.util.form_errors import merge_form_errors
 
 
 
@@ -291,87 +286,116 @@ class LabelDetailView(DetailView):
     
 
 
-
-
-
-
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    
 class LabelEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-
     model = Label
-    form_class = LabelForm
     template_name = "alibrary/label_edit.html"
+    success_url = '#'
+    form_class = LabelForm
+
     permission_required = 'alibrary.edit_label'
     raise_exception = True
-    success_url = '#'
-
+    
     def __init__(self, *args, **kwargs):
         super(LabelEditView, self).__init__(*args, **kwargs)
 
     def get_initial(self):
         self.initial.update({ 'user': self.request.user })
         return self.initial
+     
 
     def get_context_data(self, **kwargs):
-        ctx = super(LabelEditView, self).get_context_data(**kwargs)
-        ctx['named_formsets'] = self.get_named_formsets()
-        # TODO: is this a good way to pass the instance main form?
-        ctx['form_errors'] = self.get_form_errors(form=ctx['form'])
+        
+        context = super(LabelEditView, self).get_context_data(**kwargs)
+        
+        context['action_form'] = LabelActionForm(instance=self.object)
+        context['relation_form'] = LabelRelationFormSet(instance=self.object)
+        context['user'] = self.request.user
+        context['request'] = self.request
 
-        return ctx
-
-    def get_named_formsets(self):
-
-        return {
-            'action': LabelActionForm(self.request.POST or None, prefix='action'),
-            'relation': LabelRelationFormSet(self.request.POST or None, instance=self.object, prefix='relation'),
-        }
-
-    def get_form_errors(self, form=None):
-
-        named_formsets = self.get_named_formsets()
-        named_formsets.update({'form': form})
-        form_errors = merge_form_errors([formset for name, formset in named_formsets.items()])
-
-        return form_errors
+        return context
 
     def form_valid(self, form):
+    
+        context = self.get_context_data()
 
-        named_formsets = self.get_named_formsets()
+        # get linked formsets
+        relation_form = context['relation_form']
+        relation_form = LabelRelationFormSet(self.request.POST, instance=self.get_initial())
+        # validation
+        if form.is_valid():
 
-        if not all((x.is_valid() for x in named_formsets.values())):
-            return self.render_to_response(self.get_context_data(form=form))
+            from lib.util.form_errors import merge_form_errors
 
-        self.object = form.save(commit=False)
+            print 'LABEL FORM VALID'
+            self.object.tags = form.cleaned_data['d_tags']
+            
+            # temporary instance to validate inline forms against
+            tmp = form.save(commit=False)
 
-        for name, formset in named_formsets.items():
-            formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
-            if formset_save_func is not None:
-                formset_save_func(formset)
+            # inner forms to validate
+            has_form_errors = False
+
+        
+            relation_form = LabelRelationFormSet(self.request.POST, instance=tmp)
+            #print "relation_form.cleaned_data:",
+            #print relation_form.is_valid()
+            #print relation_form.errors
+        
+            if relation_form.is_valid():
+                relation_form.save()
             else:
-                formset.save()
-
-        msg = change_message.construct(self.request, form, [named_formsets['relation'],])
-        with reversion.create_revision():
-            self.object = form.save()
-            reversion.set_user(self.request.user)
-            reversion.set_comment(msg)
-
-        messages.add_message(self.request, messages.INFO, msg)
+                print 'RELATION FORM HAS ERRORS'
+                has_form_errors = True
 
 
-        return HttpResponseRedirect('')
+            if has_form_errors:
+                print 'WE HAVE ERRORS - RESHOW THE FORM'
 
-    def formset_relation_valid(self, formset):
 
-        relations = formset.save(commit=False) # self.save_formset(formset, contact)
-        for relation in relations:
-            #relation.who = self.request.user
-            #relation.contact = self.object
-            relation.save()
+                form_errors = merge_form_errors([
+                    relation_form,
+                ])
+
+                return self.render_to_response(self.get_context_data(form=form,
+                                                                     relation_form=relation_form,
+                                                                     form_errors=form_errors))
+            else:
+
+                msg = change_message.construct(self.request, form, [relation_form,])
+                with reversion.create_revision():
+                    obj = form.save()
+                    reversion.set_user(self.request.user)
+                    reversion.set_comment(msg)
+                    form.save_m2m()
+
+            return HttpResponseRedirect('#')
+
+        else:
+            return self.render_to_response(self.get_context_data(form=form,
+                                                                 relation_form=relation_form))
+     
+ 
+ 
+ 
+ 
+    
 
     
 # autocompleter views
-# TODO: rewrite!
+# TODO: write!
 def label_autocomplete(request):
 
     q = request.GET.get('q', None)

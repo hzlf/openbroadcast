@@ -2726,30 +2726,30 @@ section.item_inner .tab-pane section.profile.information dl {
 
 /* line 52, ../sass/element/_filterbox.sass */
 .box.boxon {
-  background-color: whitesmoke;
-  border-left: 1px solid #dddddd;
-  border-right: 1px solid #dddddd;
+  background-color: #fafafa;
+  border-left: 1px solid white;
+  border-right: 1px solid #fafafa;
 }
 
-/* line 61, ../sass/element/_filterbox.sass */
+/* line 60, ../sass/element/_filterbox.sass */
 .box.has_active {
   background-color: #ddffd9;
 }
 
-/* line 66, ../sass/element/_filterbox.sass */
+/* line 65, ../sass/element/_filterbox.sass */
 .boxtitle.boxon {
   color: black;
   background-image: url(/static/img/prototype/box_handler_on.png);
 }
 
-/* line 71, ../sass/element/_filterbox.sass */
+/* line 70, ../sass/element/_filterbox.sass */
 .boxend {
   border-top: 1px solid #dddddd;
 }
 
 /* ---------- content box classes ---------- */
 /*|s| */
-/* line 78, ../sass/element/_filterbox.sass */
+/* line 77, ../sass/element/_filterbox.sass */
 .content_box {
   margin-bottom: 8px;
   border-left: 1px solid white;
@@ -2758,7 +2758,7 @@ section.item_inner .tab-pane section.profile.information dl {
   border-bottom: 1px solid #cccccc;
 }
 
-/* line 85, ../sass/element/_filterbox.sass */
+/* line 84, ../sass/element/_filterbox.sass */
 .content_boxtitle {
   float: left;
   color: #333333;
@@ -2767,18 +2767,18 @@ section.item_inner .tab-pane section.profile.information dl {
   background-image: url(/static/img/prototype/box_handler.png);
   background-repeat: no-repeat;
 }
-/* line 92, ../sass/element/_filterbox.sass */
+/* line 91, ../sass/element/_filterbox.sass */
 .content_boxtitle:hover {
   cursor: pointer;
 }
 
-/* line 95, ../sass/element/_filterbox.sass */
+/* line 94, ../sass/element/_filterbox.sass */
 .content_boxcontent {
   padding: 0px 0px 0px 0px;
   display: none;
 }
 
-/* line 100, ../sass/element/_filterbox.sass */
+/* line 99, ../sass/element/_filterbox.sass */
 .content_box.boxon {
   background-color: whitesmoke;
   border-top: 1px solid #dddddd;
@@ -2789,74 +2789,74 @@ section.item_inner .tab-pane section.profile.information dl {
   /*|s| */
 }
 
-/* line 112, ../sass/element/_filterbox.sass */
+/* line 111, ../sass/element/_filterbox.sass */
 .content_boxtitle.boxon {
   color: black;
   background-image: url(/static/img/prototype/box_handler_on.png);
 }
 
-/* line 117, ../sass/element/_filterbox.sass */
+/* line 116, ../sass/element/_filterbox.sass */
 .content_boxmore {
   float: right;
   margin-top: 2px;
   width: 20px;
 }
 
-/* line 122, ../sass/element/_filterbox.sass */
+/* line 121, ../sass/element/_filterbox.sass */
 .content_boxend {
   border-top: 1px solid #dddddd;
 }
 
-/* line 125, ../sass/element/_filterbox.sass */
+/* line 124, ../sass/element/_filterbox.sass */
 .content_boxextra {
   padding: 2px 0px 2px 7px;
 }
 
 /* ---------- basket ---------- */
-/* line 133, ../sass/element/_filterbox.sass */
+/* line 132, ../sass/element/_filterbox.sass */
 .boxtitle .count {
   color: #999999;
 }
 
-/* line 136, ../sass/element/_filterbox.sass */
+/* line 135, ../sass/element/_filterbox.sass */
 .boxsub {
   margin: 1px 2px 0px 2px;
   background: #eeeeee;
 }
 
-/* line 140, ../sass/element/_filterbox.sass */
+/* line 139, ../sass/element/_filterbox.sass */
 .boxsub-title {
   border: 1px solid #bbbbbb;
   padding: 1px 2px 0px 16px;
   background: #dddddd url(/static/img/prototype/box_handler.png) no-repeat -2px -2px;
   cursor: pointer;
 }
-/* line 146, ../sass/element/_filterbox.sass */
+/* line 145, ../sass/element/_filterbox.sass */
 .boxsub-title.open {
   background-image: url(/static/img/prototype/box_handler_on.png) !important;
 }
 
-/* line 149, ../sass/element/_filterbox.sass */
+/* line 148, ../sass/element/_filterbox.sass */
 .boxsub-content {
   display: none;
   color: #6633cc;
 }
 
-/* line 154, ../sass/element/_filterbox.sass */
+/* line 153, ../sass/element/_filterbox.sass */
 .boxsub .b-closer {
   float: right;
   background: url(/static/img/prototype/basket_remove.png) no-repeat;
   width: 17px;
   height: 18px;
 }
-/* line 159, ../sass/element/_filterbox.sass */
+/* line 158, ../sass/element/_filterbox.sass */
 .boxsub .i-closer {
   float: right;
   background: url(/static/img/prototype/boxsub_item_remove.png) no-repeat;
   width: 17px;
   height: 18px;
 }
-/* line 164, ../sass/element/_filterbox.sass */
+/* line 163, ../sass/element/_filterbox.sass */
 .boxsub .i-add {
   float: right;
   background: url(/static/img/prototype/boxsub_item_add.png) no-repeat;
@@ -2864,19 +2864,19 @@ section.item_inner .tab-pane section.profile.information dl {
   height: 18px;
 }
 
-/* line 170, ../sass/element/_filterbox.sass */
+/* line 169, ../sass/element/_filterbox.sass */
 .b-closer:hover, .i-closer:hover {
   background: url(/static/img/prototype/boxsub_remove_on.png) no-repeat !important;
 }
 
-/* line 174, ../sass/element/_filterbox.sass */
+/* line 173, ../sass/element/_filterbox.sass */
 .boxsub .b-pl {
   float: right;
   background: url(/static/img/prototype/basket_to_pl.png) no-repeat;
   width: 17px;
   height: 18px;
 }
-/* line 179, ../sass/element/_filterbox.sass */
+/* line 178, ../sass/element/_filterbox.sass */
 .boxsub .b-play {
   float: right;
   background: url(/static/img/prototype/list_play_button2_s.png) no-repeat;
@@ -2884,7 +2884,7 @@ section.item_inner .tab-pane section.profile.information dl {
   height: 18px;
 }
 
-/* line 185, ../sass/element/_filterbox.sass */
+/* line 184, ../sass/element/_filterbox.sass */
 .boxsub-item {
   padding: 2px 2px 1px 16px;
   cursor: pointer;
@@ -2892,32 +2892,32 @@ section.item_inner .tab-pane section.profile.information dl {
   border-top: 1px solid #cccccc;
   margin-top: -1px;
 }
-/* line 191, ../sass/element/_filterbox.sass */
+/* line 190, ../sass/element/_filterbox.sass */
 .boxsub-item:hover {
   background-color: #e4e4e4 !important;
 }
 
-/* line 194, ../sass/element/_filterbox.sass */
+/* line 193, ../sass/element/_filterbox.sass */
 .boxsub.drop-over .boxsub-title {
   background-color: #c8efc8 !important;
 }
 
-/* line 203, ../sass/element/_filterbox.sass */
+/* line 202, ../sass/element/_filterbox.sass */
 .box.special.releasedate .range-select {
   clear: both;
 }
-/* line 205, ../sass/element/_filterbox.sass */
+/* line 204, ../sass/element/_filterbox.sass */
 .box.special.releasedate .range-select select {
   width: 80px;
   height: 20px;
   margin-bottom: 0;
   padding: 0 4px !important;
 }
-/* line 211, ../sass/element/_filterbox.sass */
+/* line 210, ../sass/element/_filterbox.sass */
 .box.special.releasedate #predefined_selector {
   padding: 8px 10px 2px 20px;
 }
-/* line 214, ../sass/element/_filterbox.sass */
+/* line 213, ../sass/element/_filterbox.sass */
 .box.special.releasedate #predefined_selector ul > li {
   padding-right: 8px;
   float: left;
@@ -3655,23 +3655,37 @@ section.item_inner .tab-pane section.profile.information dl {
 #playlist_editor .upload .importfile.item .result-set.provider-tag .checkbox input {
   display: none;
 }
-/* line 340, ../sass/apps/_playlist_editor.sass */
+/* line 339, ../sass/apps/_playlist_editor.sass */
+#playlist_editor .upload .importfile.item .result-set ul {
+  margin: 0;
+}
+/* line 342, ../sass/apps/_playlist_editor.sass */
+#playlist_editor .upload .importfile.item .result-set ul > li.small {
+  font-size: 11px;
+}
+/* line 344, ../sass/apps/_playlist_editor.sass */
+#playlist_editor .upload .importfile.item .result-set ul > li.key {
+  font-weight: bold;
+  padding: 0 5px 0 0;
+  width: 50px;
+}
+/* line 351, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .advanced-fields, #playlist_editor .upload .importfile.item .toggle {
   display: none;
 }
-/* line 343, ../sass/apps/_playlist_editor.sass */
+/* line 354, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .form-result {
   margin: 10px 0;
 }
-/* line 345, ../sass/apps/_playlist_editor.sass */
+/* line 356, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .form-result h4 {
   display: none;
 }
-/* line 348, ../sass/apps/_playlist_editor.sass */
+/* line 359, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .form-result .row-fluid label, #playlist_editor .upload .importfile.item .form-result .row-fluid input {
   margin: 0;
 }
-/* line 352, ../sass/apps/_playlist_editor.sass */
+/* line 363, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .progress {
   width: 100%;
   height: 2px;
@@ -3679,117 +3693,117 @@ section.item_inner .tab-pane section.profile.information dl {
   margin: 0 5px;
   width: 808px;
 }
-/* line 358, ../sass/apps/_playlist_editor.sass */
+/* line 369, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .progress .bar {
   background: #00bb00;
   padding: 0;
 }
-/* line 364, ../sass/apps/_playlist_editor.sass */
+/* line 375, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .summary {
   border-top: 1px solid #efefef !important;
 }
-/* line 366, ../sass/apps/_playlist_editor.sass */
+/* line 377, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .summary.error {
   background-color: #fcf8e3;
 }
-/* line 374, ../sass/apps/_playlist_editor.sass */
+/* line 385, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .summary .row-fluid > div {
   padding: 5px;
   margin: 1px 0;
 }
-/* line 379, ../sass/apps/_playlist_editor.sass */
+/* line 390, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .summary span {
   text-align: right;
   color: #5a5a5a;
   padding-right: 2px;
 }
-/* line 384, ../sass/apps/_playlist_editor.sass */
+/* line 395, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .summary span.duration-total {
   font-weight: bold;
 }
-/* line 388, ../sass/apps/_playlist_editor.sass */
+/* line 399, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .summary span.duration-difference {
   color: red;
 }
 
-/* line 398, ../sass/apps/_playlist_editor.sass */
+/* line 409, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .criterias {
   margin-top: 20px;
 }
-/* line 400, ../sass/apps/_playlist_editor.sass */
+/* line 411, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .criterias .title {
   font-weight: bold;
 }
-/* line 403, ../sass/apps/_playlist_editor.sass */
+/* line 414, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .action-group ul {
   border-top: 1px solid #cccccc !important;
 }
-/* line 408, ../sass/apps/_playlist_editor.sass */
+/* line 419, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform.listing.fixed {
   position: fixed;
   width: 260px;
   top: 120px;
 }
-/* line 413, ../sass/apps/_playlist_editor.sass */
+/* line 424, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item {
   padding: 2px 4px 2px 4px;
   margin: 5px 0 5px 0;
   background-color: #fafafa;
 }
-/* line 419, ../sass/apps/_playlist_editor.sass */
+/* line 430, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item a.toggle {
   color: #333333;
 }
-/* line 421, ../sass/apps/_playlist_editor.sass */
+/* line 432, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item a.toggle:hover {
   text-decoration: none;
 }
-/* line 427, ../sass/apps/_playlist_editor.sass */
+/* line 438, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item .information p {
   padding: 4px 0 0 0;
   margin: 0;
 }
-/* line 431, ../sass/apps/_playlist_editor.sass */
+/* line 442, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item .information dl {
   margin: 0;
 }
-/* line 433, ../sass/apps/_playlist_editor.sass */
+/* line 444, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item .information dl dt {
   font-weight: normal;
   text-align: left;
 }
-/* line 436, ../sass/apps/_playlist_editor.sass */
+/* line 447, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item .information dl dd {
   font-style: italic;
   text-align: right;
   padding-right: 4px;
 }
-/* line 441, ../sass/apps/_playlist_editor.sass */
+/* line 452, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item .information dl dd.mark, .playlist-edit.transform .item .information dl dt.mark {
   font-weight: bold;
   color: orangered;
 }
-/* line 445, ../sass/apps/_playlist_editor.sass */
+/* line 456, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item .title {
   font-weight: normal;
 }
-/* line 449, ../sass/apps/_playlist_editor.sass */
+/* line 460, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item.warning {
   background-color: #fcf8e3;
 }
-/* line 452, ../sass/apps/_playlist_editor.sass */
+/* line 463, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item.warning .information {
   display: block;
 }
-/* line 455, ../sass/apps/_playlist_editor.sass */
+/* line 466, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item.success {
   background-color: #ddffd9;
 }
-/* line 462, ../sass/apps/_playlist_editor.sass */
+/* line 473, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item.hover.done {
   background-color: #ddffd9;
 }
-/* line 468, ../sass/apps/_playlist_editor.sass */
+/* line 479, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item.hover.ready {
   background-color: #ddffd9;
 }

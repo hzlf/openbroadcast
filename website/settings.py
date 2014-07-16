@@ -429,6 +429,7 @@ INSTALLED_APPS = (
     #'cmsplugin_soundcloud',
     'cmsplugin_pagedown',
     'cmsplugin_git',
+    'stepguide',
 
 
 

@@ -24,8 +24,7 @@ $footer_fix-height: 20px
   color: #222
   background: #fff
   margin: 0
-  padding: 0 0 $footer_fix-height 0
-  //padding: 0 0 0 0
+  padding: 0 0 0 0
   &.ajax_loading
     /*cursor: wait !important*/
     cursor: progress !important
@@ -43,25 +42,10 @@ $footer_fix-height: 20px
   opacity: 0.2
   
   
-div#footer_fix
-  position: scroll
-  bottom: 0
-  left: 0
-  width: 100%
-  height: $footer_fix-height
-  background-color: #EAEAEA
-  border-top: 1px solid #999999
-  z-index: 3
-
-@media screen
-  body>div#footer
-    position: fixed
-
 
 html body
   overflow: auto
 
-  
   #cms_toolbar-toggle
     top: 40px
     
@@ -91,6 +75,68 @@ div.container.main
 .subhead
   .subnav
     padding: 0 0 0 0
+
+
+
+
+// sticky-footer setup
+html, body
+  height: 100%
+
+body #wrap
+  min-height: 100%
+  height: auto !important
+  height: 100%
+  // Negative indent footer by it's height
+  //margin: 0 auto -130px
+  margin: 0 auto -80px
+
+#push
+  height: 130px
+
+#footer
+  min-height: 130px
+
+
+#footer
+  background-color: #f5f5f5
+
+  .container
+    padding: 10px 0 0px 0
+
+  ul.sitemap
+
+    li > a
+      color: #999
+
+    > li
+      width: 14%
+      float: left
+      > a
+        color: #5a5a5a
+      ul
+        list-style: none
+        list-style-position: outside
+        margin: 0 0 9px 8px
+
+
+    li.selected
+      > a
+        color: $main-a
+
+    li.ancestor
+      > a
+        color: $main-a
+
+
+  p.credit
+    margin: 0
+    color: #ccc
+    a, a.external
+      color: #ccc
+
+
+
 
 
 
@@ -1049,44 +1095,7 @@ div
 .apptext
   padding: 0px 0px 15px 0px
 
-.footer
-  margin: 29px 0px 0px 0px
-  padding: 5px 0px 0px 0px
-  border-top: 1px solid #aaa
-  
-#footer
 
-  max-width: 830px
-
-  div.subline
-    
-    p
-      color: #A5A5A5
-      font-size: 92%
-      line-height: 130%
-      span
-        font-size: 92%
-		
-  div.sitemap
-    font-size: 92%
-    line-height: 152%
-	
-    h5
-      font-size: 95%
-      padding: 0 0 2px 0
-      margin: 0
-    >div
-      float: left
-      width: ($width-inner_content / 4) - 8
-      border-left: 1px solid #DDDDDD
-      padding: 0 0 0 8px
-      &:first-child
-        padding: 0 0 0 0
-        border-left: none
-	
-    >div.clear
-      float: none !important	
-      clear: both !important
 
 #homenav
   padding-bottom: 100px

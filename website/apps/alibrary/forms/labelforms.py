@@ -57,6 +57,9 @@ class LabelActionForm(Form):
         """    
     publish = forms.BooleanField(required=False)
 
+    def save(self, *args, **kwargs):
+        return True
+
 
 class LabelForm(ModelForm):
 
