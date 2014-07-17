@@ -24,6 +24,9 @@
                 $('.save-and-publish').click(function () {
                     $('.form-actions #div_id_action-publish input').prop('checked', true);
                 });
+                $('.save-without-publish').click(function () {
+                    $('.form-actions #div_id_action-publish input').prop('checked', false);
+                });
 
                 $('select[readonly] option[selected]').each(function (i, el) {
                     var val = $(el).text();
@@ -52,7 +55,7 @@
         <style>
             .form-actions #div_id_action-publish {
                 display: none;
-            }
+             }
         </style>
     {% endaddtoblock %}
 
@@ -100,6 +103,7 @@
         <form class="form-horizontal form-compact form-release" method="post" id="" enctype="multipart/form-data">
 
             {{ form.management_form }}
+            {{ named_formsets.action.management_form }}
             {{ named_formsets.relation.management_form }}
             {{ named_formsets.albumartist.management_form }}
             {{ named_formsets.media.management_form }}

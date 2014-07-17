@@ -300,21 +300,13 @@ class ReleaseEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
             else:
                 formset.save()
 
-
-        # kind of ugly, tries to see if user did 'publish' the object
-        # as this is a one-timer i'll not improve it... feel free!
-        action_form = ReleaseActionForm(self.request.POST)
-        publish = False
-
-        if action_form.is_valid():
-            publish = action_form.cleaned_data['publish']
+        publish = self.do_publish
 
         if publish:
             from datetime import datetime
             self.object.publish_date = datetime.now()
             self.object.publisher = self.request.user
             self.object.save()
-
 
         msg = change_message.construct(self.request, form, [named_formsets['relation'],
                                                             named_formsets['albumartist'],
@@ -327,15 +319,17 @@ class ReleaseEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
             reversion.set_comment(msg)
 
         messages.add_message(self.request, messages.INFO, msg)
-
         return HttpResponseRedirect('')
 
 
     def formset_relation_valid(self, formset):
-
-        relations = formset.save(commit=False) # self.save_formset(formset, contact)
+        relations = formset.save(commit=False)
         for relation in relations:
             relation.save()
+
+    def formset_action_valid(self, formset):
+        self.do_publish = formset.cleaned_data.get('publish', False)
+
     
     
 class __ReleaseEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):

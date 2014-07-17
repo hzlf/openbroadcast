@@ -40,7 +40,7 @@ ACTION_LAYOUT =  action_layout = FormActions(
         )
 ACTION_LAYOUT_EXTENDED =  action_layout = FormActions(
                 Field('publish', css_class='input-hidden' ),
-                HTML('<button type="submit" name="save" value="save" class="btn btn-primary pull-right ajax_submit" id="submit-id-save-i-classicon-arrow-upi"><i class="icon-save icon-white"></i> Save</button>'),
+                HTML('<button type="submit" name="save" value="save" class="btn btn-primary pull-right ajax_submit save-without-publish" id="submit-id-save-i-classicon-arrow-upi"><i class="icon-save icon-white"></i> Save</button>'),
                 HTML('<button type="submit" name="save-and-publish" value="save" class="btn pull-right ajax_submit save-and-publish" id="submit-id-save-i-classicon-arrow-upi"><i class="icon-bullhorn icon-white"></i> Save & Publish</button>'),
                 HTML('<button type="reset" name="reset" value="reset" class="reset resetButton btn btn-secondary pull-right" id="reset-id-reset"><i class="icon-trash"></i> Cancel</button>'),
         )
@@ -63,10 +63,31 @@ class ReleaseActionForm(Form):
         else:
             self.helper.add_layout(ACTION_LAYOUT_EXTENDED)
 
-    publish = forms.BooleanField(required=False)
+    publish = forms.BooleanField(label=_('Save & Publish'), required=False)
+
+
+    def clean(self, *args, **kwargs):
+
+        cd = super(ReleaseActionForm, self).clean()
+        publish = cd.get('publish', False)
+
+        if publish:
+            missing_licenses = []
+            for media in self.instance.get_media():
+                if not media.license:
+                    missing_licenses.append(_('No license set for "%s"' % media.name))
+
+            if len(missing_licenses) > 0:
+                msg = 'Event end date should not occur before start date.'
+                self._errors['publish'] = self.error_class(missing_licenses)
+                del cd['publish']
+
+        return cd
+
 
     def save(self, *args, **kwargs):
         return True
+
 
 
 
@@ -98,32 +119,53 @@ class ReleaseBulkeditForm(Form):
             form_class = 'hidden'
 
 
-        base_layout = Div(
-                Div(HTML('<h4>%s</h4><p>%s</p>' % (_('Bulk Edit'), _('Choose Artist name and/or license to apply on each track.'))), css_class='form-help'),
-                Row(
-                    Column(
-                           Field('bulk_artist_name', css_class='input-xlarge'),
-                           css_class='span6'
-                           ),
-                    Column(
-                           HTML('<button type="button" id="bulk_apply_artist_name" value="apply" class="btn btn-mini pull-right bulk_apply" id="submit-"><i class="icon-plus"></i> %s</button>' % _('Apply Artist to all tracks')),
-                           css_class='span2'
-                           ),
-                    css_class='releasemedia-row row',
-                ),
-                Row(
-                    Column(
-                           Field('bulk_license', css_class=form_class),
-                           css_class='span6'
-                           ),
-                    Column(
-                           HTML('<button type="button" id="bulk_apply_license" value="apply" class="btn btn-mini pull-right bulk_apply" id="submit-"><i class="icon-plus"></i> %s</button>' % _('Apply License to all tracks')),
-                           css_class='span2'
-                           ),
-                    css_class='releasemedia-row row',
-                ),
-                css_class='bulk_edit',
-        )
+
+        if self.instance and self.instance.publish_date:
+
+            base_layout = Div(
+                    Div(HTML('<h4>%s</h4><p>%s</p>' % (_('Bulk Edit'), _('Choose Artist name to apply on each track.'))), css_class='form-help'),
+                    Row(
+                        Column(
+                               Field('bulk_artist_name', css_class='input-xlarge'),
+                               css_class='span6'
+                               ),
+                        Column(
+                               HTML('<button type="button" id="bulk_apply_artist_name" value="apply" class="btn btn-mini pull-right bulk_apply" id="submit-"><i class="icon-plus"></i> %s</button>' % _('Apply Artist to all tracks')),
+                               css_class='span2'
+                               ),
+                        css_class='releasemedia-row row',
+                    ),
+                    css_class='bulk_edit',
+            )
+
+        else:
+
+            base_layout = Div(
+                    Div(HTML('<h4>%s</h4><p>%s</p>' % (_('Bulk Edit'), _('Choose Artist name and/or license to apply on each track.'))), css_class='form-help'),
+                    Row(
+                        Column(
+                               Field('bulk_artist_name', css_class='input-xlarge'),
+                               css_class='span6'
+                               ),
+                        Column(
+                               HTML('<button type="button" id="bulk_apply_artist_name" value="apply" class="btn btn-mini pull-right bulk_apply" id="submit-"><i class="icon-plus"></i> %s</button>' % _('Apply Artist to all tracks')),
+                               css_class='span2'
+                               ),
+                        css_class='releasemedia-row row',
+                    ),
+                    Row(
+                        Column(
+                               Field('bulk_license', css_class=form_class),
+                               css_class='span6'
+                               ),
+                        Column(
+                               HTML('<button type="button" id="bulk_apply_license" value="apply" class="btn btn-mini pull-right bulk_apply" id="submit-"><i class="icon-plus"></i> %s</button>' % _('Apply License to all tracks')),
+                               css_class='span2'
+                               ),
+                        css_class='releasemedia-row row',
+                    ),
+                    css_class='bulk_edit',
+            )
 
 
         self.helper.add_layout(base_layout)
@@ -306,7 +348,7 @@ class BaseReleaseMediaFormSet(BaseInlineFormSet):
                        Field('tracknumber', css_class='input-small'),
                        Field('mediatype', css_class='input-small'),
                        Field('license', css_class='input-small'),
-                       Field('DELETE', css_class='input-mini'),
+                       #Field('DELETE', css_class='input-mini'),
                        css_class='span3'
                        ),
                 Column(

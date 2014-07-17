@@ -64,19 +64,22 @@
     // width: 730px
     .list_header
       display: table-row
-      background-color: #E5E5E5
+      //background-color: #E5E5E5
       color: #666666
-      text-transform: uppercase
+      //text-transform: uppercase
+      font-style: italic
+      font-size: 12px !important
       .list_header_item
         display: table-cell
         border-bottom: 1px solid #BBBBBB
         &.sortable
-          background-color: #dddddd
+          //background-color: #dddddd
           background-position: right center
           background-repeat: no-repeat
           background-image: url('/static/img/prototype/table_order_indicator.png')
         &.active
           background-color: #CCCCCC
+          background-color: #fafafa
           background-position: right center
           background-repeat: no-repeat
           &.ascending
@@ -104,7 +107,8 @@
           		
         /* Status dependant styleing */
         &.selection
-          background-color: #E4FFE4
+          //background-color: #E4FFE4
+          background-color: #EEE6FF
           li.indicator
             background-image: url(/static/img/base/listview.row.selection.bg.png)
             background-repeat: no-repeat
@@ -284,7 +288,8 @@
     &.s
       font-size: 90%
       .list_body_item, .list_header_item
-        padding: 2px
+        //padding: 2px
+        padding: 3px 4px 4px
       .c1
         width: 42px
 		
@@ -839,7 +844,7 @@
 
   font-size: 90%
   .list_body_item, .list_header_item
-    padding: 2px
+    padding: 2px 5px
 
   
 
@@ -858,24 +863,31 @@
       display: block
       float: left
       width: 197px
-      // height with animation
-      height: 235px
-      // height always open
-      height: 278px
+      height: 277px
+
+      margin: 14px 14px 0 0
+      &:nth-child(4n)
+        margin: 14px 0 0 0
 
       background-repeat: no-repeat
       overflow: hidden
-      border-bottom: 1px solid #DDDDDD
 
-      //background-color: #333
+      // changed to shadow style
+      //border-bottom: 1px solid #DDDDDD
+      border-bottom: none
+      -moz-box-shadow: 1px 1px 4px 2px #EFEFEF
+      -webkit-box-shadow: 1px 1px 4px 2px #EFEFEF
+      box-shadow: 1px 1px 4px 2px #EFEFEF
+
 
       position: relative
 	  
       &.selection
         div.wrapper_info, div.wrapper_action
-          background-color: #E4FFE4
+          background-color: $selection-bg-color
 		  
       &.hover
+        border-bottom: none
         background-color: #ffffff
         .wrapper_info
           background-color: #F5F5F5
@@ -888,12 +900,7 @@
         ul li
           &.play a
             background-position: 0 -16px
-      
-		
-      margin: 9px 14px 0 0
-      
-      &:nth-child(4n)
-        margin: 9px 0 0 0
+
       
       //&.pos3		
       //  margin: 9px 0 0 0
@@ -910,7 +917,7 @@
       /* Play icon */
       .wrapper_icon
         width: 24px
-        height: 32px
+        height: 44px
         padding: 2px 0 0 4px
 
 	
@@ -943,7 +950,7 @@
         position: relative
         cursor: pointer
         // height: 150px
-        height: 163px
+        height: 151px
         // height: 82px // simulate hover state
         -webkit-transition-property: height
         -webkit-transition-duration: .1s
@@ -996,7 +1003,7 @@
           /*padding: 2px 2px 2px 5px
         .wrapper_inner
           //height: 98px
-          height: 59px
+          height: 60px
           overflow: hidden
 
 
@@ -1176,6 +1183,9 @@
 .searchbar
   padding: 0 0 3px 0
   background-color: #efefef
+  //margin-top: 8px
+  margin-top: 0
+  z-index: 1002
   -webkit-transition-property: background-color
   -webkit-transition-duration: .3s
 
@@ -1270,9 +1280,3 @@
       float: right
       padding: 0px 6px 0px 5px !important
       margin: 3px 2px 0px 1px !important
-
-  margin-top: 8px
-
-  //position: absolute // TODO: how to achieve this.. ???
-  //width: 100%
-  z-index: 1002

@@ -2,7 +2,14 @@
 <div class="span6 padded-h container_content">
 
 	<div class="page-header">
-		<h2>{{ object.name|truncate_chars_inner:40 }} <small>{{ object.get_mediatype_display }}</small></h2>
+		<h2>{{ object.name|truncate_chars_inner:40 }}
+            {% if object.mediatype %}
+            <small>{{ object.get_mediatype_display }}</small>
+            {% endif %}
+            {% if object.version %}
+            <small>({{ object.get_version_display }})</small>
+            {% endif %}
+        </h2>
 	</div>
 
 	<dl class="dl-horizontal main">
@@ -31,6 +38,18 @@
 		</dd>
 		{% endif %}
 
+		{% if object.release and object.release.label %}
+		<dt>
+			{% trans "Label" %}:
+		</dt>
+		<dd>
+			{% with item=object.release.label %}
+			{% include "alibrary/element/_inline_link.html" %}
+			{% endwith %}
+			&nbsp;
+		</dd>
+		{% endif %}
+
 		{% if object.base_duration %}
 		<dt>
 			{% trans "Duration" %}:
@@ -38,6 +57,15 @@
 		<dd>
 			{{ object.base_duration|sec_to_time }}
 			&nbsp;
+		</dd>
+		{% endif %}
+
+		{% if object.opus_number %}
+		<dt>
+			{% trans "Opus N." %}:
+		</dt>
+		<dd>
+			{{ object.opus_number }}
 		</dd>
 		{% endif %}
 

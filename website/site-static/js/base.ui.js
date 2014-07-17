@@ -800,15 +800,25 @@ base.ui.iface = function () {
 
     // color on hover
     // TODO: where to have this??
-
     $('.listview.artists.l').on('mouseover', '.item', function(){
         var src = $(this).data('image_color');
-        $(this).css('background-image', 'url(' + src + ')');
+        if (src != undefined) {
+            //$(this).css('background-image', 'url(' + src + ')');
+        }
     })
     $('.listview.artists.l').on('mouseout', '.item', function(){
         var src = $(this).data('image_bw');
-        $(this).css('background-image', 'url(' + src + ')');
+        //$(this).css('background-image', 'url(' + src + ')');
     })
+
+    // preload color images
+    $('.listview.artists.l .item').each(function(i){
+        var src = $(this).data('image_color');
+        if (src != undefined) {
+            //$('<img/>')[0].src = src;
+        }
+    });
+
 
     // site messages (django notification, green bar at bottom)
     $('#site_messages').on('click', 'button', function(e){

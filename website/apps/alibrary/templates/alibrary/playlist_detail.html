@@ -51,12 +51,16 @@
             <li class="active">
                 <a href="#tracklist" data-toggle="tab">{% trans "Tracklist" %}</a>
             </li>
-            <li>
-                <a href="#description" data-toggle="tab">{% trans "Description" %}</a>
-            </li>
+            {% if object.description %}
+                <li>
+                    <a href="#description" data-toggle="tab">{% trans "Description" %}</a>
+                </li>
+            {% endif %}
+            <!--
             <li>
                 <a href="#history" data-toggle="tab">{% trans "Edit History" %}</a>
             </li>
+            -->
             <li>
                 <a href="#emissions" data-toggle="tab">{% trans "Emissions" %} ({{ object.get_emissions.count }})</a>
             </li>
@@ -71,72 +75,53 @@
 
             <div class="tab-pane active" id="tracklist">
 
-                <div class="listview container medias s">
+                <section class="tracklist">
 
-                    <div class="list_header"></div>
+                    <h2>{% trans "Tracklist" %}</h2>
 
-                    <div class="list_body">
-                        {% for item in object.items.all %}
+                    <div class="listview container medias s">
 
-                            {% if item.content_type.model == "media" %}
-                                {% with item=item.content_object %}
-                                    {% include "alibrary/media/_list_item_foreign_xs.html" %}
-                                {% endwith %}
-                            {% endif %}
+                        <div class="list_body">
+                            {% for item in object.items.all %}
 
-                            {% if item.content_type.model == "release" %}
-                                {% with item=item.content_object %}
-                                    <h1>{{ item.name }}</h1>
-                                {% endwith %}
-                            {% endif %}
+                                {% if item.content_type.model == "media" %}
+                                    {% with item=item.content_object %}
+                                        {% include "alibrary/media/_list_item_foreign_xs.html" %}
+                                    {% endwith %}
+                                {% endif %}
+
+                                {% if item.content_type.model == "release" %}
+                                    {% with item=item.content_object %}
+                                        <h1>{{ item.name }}</h1>
+                                    {% endwith %}
+                                {% endif %}
 
 
-                        {% endfor %}
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
+
+                </section>
 
             </div>
 
             <div class="tab-pane" id="history">
 
 
-                <!--
-				<table class="table table-condensed history">
-
-					<thead>
-						<tr>
-							<th>User</th>
-							<th>Time</th>
-							<th>Comment</th>
-						</tr>
-					</thead>
-					<tbody>
-
-						{% for r in object.get_versions.all %}
-						<tr>
-							<td><a href="{{ r.revision.user.get_profile.get_absolute_url }}">{{ r.revision.user }}</a></td>
-							<td>{{ r.revision.date_created }}</td>
-							<td>{{ r.revision.comment }}</td>
-
-						</tr>
-
-						{% endfor %}
-
-					</tbody>
-				</table>
-				-->
-
             </div>
 
-            <div class="tab-pane" id="description">
-                <section class="description">
+                <div class="tab-pane" id="description">
 
-                    <div class="description markdown padded-h">
-                        {% wikify object.description %}
-                    </div>
+                    <section class="description">
 
-                </section>
-            </div>
+                        <h2>{% trans "Playlist description" %}</h2>
+
+                        <div class="description markdown padded-h">
+                            {% wikify object.description %}
+                        </div>
+                    </section>
+
+                </div>
 
 
             <div class="tab-pane" id="emissions">
