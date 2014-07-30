@@ -97,6 +97,12 @@
                 </li>
             {% endif %}
 
+            {% if object.has_soundcloud %}
+                <li>
+                    <a href="#soundcloud" data-toggle="tab">{% trans "Soundcloud" %}</a>
+                </li>
+            {% endif %}
+
             {% if object.appearances.count > 0 %}
                 <li>
                     <a href="#appearance" data-toggle="tab">{% trans "Appearance" %}
@@ -325,6 +331,40 @@
                 {% for video in object.get_videos %}
                     {% video_by_url video %}
                 {% endfor %}
+
+            </section>
+
+        </div>
+    {% endif %}
+
+
+
+    {% if object.has_soundcloud %}
+        <div class="tab-pane" id="soundcloud">
+
+            <section class="soundcloud">
+
+                <h2>{% trans "Soundcloud" %}</h2>
+
+
+                <div id="soundcloud_player">{% trans "Loading track from soundcloud..." %}</div>
+
+                {% addtoblock "js-uncompressed" %}
+                <script>
+                    $.getJSON('http://soundcloud.com/oembed?callback=?',
+                        {
+                            format: 'js',
+                            url: '{{ object.get_soundcloud }}',
+                            iframe: true,
+                            color: '00bb00'
+                        },
+                        function(data) {
+                            $('#soundcloud_player').html(data['html'])
+                        }
+                    )
+                </script>
+                {% endaddtoblock %}
+
 
             </section>
 
