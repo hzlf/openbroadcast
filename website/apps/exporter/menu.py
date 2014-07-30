@@ -15,13 +15,13 @@ class ExportMenu(CMSAttachMenu):
         
         """"""
         node = NavigationNode(
-            _('My Exports'),
+            _('My Downloads'),
             reverse('exporter-export-list'),
             191,
         )
         nodes.append(node)
         
-        """"""
+        """
         node = NavigationNode(
             _('Settings'),
             reverse('exporter-export-settings'),
@@ -29,6 +29,7 @@ class ExportMenu(CMSAttachMenu):
 
         )
         nodes.append(node)
+        """
         
         
         return nodes
