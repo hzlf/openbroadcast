@@ -306,9 +306,10 @@ SchedulerApp = function () {
 
         debug.debug('set_history', playlist_ids);
 
-        // TODO: make dynamic
-        var url = '/en/api/v1/simpleplaylist/' + '?all=1&id__in=' + playlist_ids.join(',');
+        // TODO: implement
 
+        /*
+        var url = '/en/api/v1/simpleplaylist/' + '?all=1&id__in=' + playlist_ids.join(',');
         $.get(url, function (data) {
 
             $.each(data.objects, function(i, el){
@@ -320,6 +321,7 @@ SchedulerApp = function () {
             });
 
         });
+        */
 
     };
 
