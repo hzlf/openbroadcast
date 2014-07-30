@@ -480,6 +480,7 @@ class PlaylistFilter(django_filters.FilterSet):
 
 
                 # TODO: extreme hackish...
+                """
                 if name == 'type':
                     nd = []
                     for d in ds:
@@ -487,6 +488,20 @@ class PlaylistFilter(django_filters.FilterSet):
                             nd.append([d[0], d[1], _('Unknown')])
                         else:
                             nd.append([d[0], d[1], u'%s' % d[0].replace('_', ' ').title()])
+
+                    filter_.entries = nd
+                """
+
+                if name == 'type':
+                    nd = []
+                    for d in ds:
+                        if d[0] == 'NULL':
+                            pass
+                        else:
+                            if d[0] != None:
+                                for x in alibrary_settings.PLAYLIST_TYPE_CHOICES:
+                                    if x[0] == d[0]:
+                                        nd.append([d[0], d[1], '%s' % x[1]])
 
                     filter_.entries = nd
 
