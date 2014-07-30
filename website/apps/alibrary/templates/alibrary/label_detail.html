@@ -48,6 +48,11 @@
 			<li class="active">
 				<a href="#overview" data-toggle="tab">{% trans "Overview" %}</a>
 			</li>
+            {% if object.distributors.count > 0 %}
+			<li>
+				<a href="#distribution" data-toggle="tab">{% trans "Distribution" %}</a>
+			</li>
+            {% endif %}
 			<li>
 				<a href="#history" data-toggle="tab">{% trans "Edit History" %}</a>
 			</li>
@@ -108,6 +113,65 @@
 					<h2>{% trans "Edit history" %}</h2>
 
 					{% include "alibrary/element/_object_history.html" %}
+				</section>
+
+			</div>
+
+			<div class="tab-pane" id="distribution">
+
+				<section class="distribution">
+
+					<h2>{% trans "Distribution" %}</h2>
+
+
+
+                    {% for dl in object.distributorlabel_set.all %}
+
+                    <h4>{{ dl.distributor }}</h4>
+
+
+                    {% if dl.distributor.address %}
+                    <dt>
+                        {% trans "Address" %}:
+                    </dt>
+                    <dd>
+                        <ul class="unstyled">
+                            {% if dl.distributor.address %}
+                            <li>{{ dl.distributor.address|linebreaksbr }}</li>
+                            {% endif %}
+                            {% if dl.distributor.country %}
+                            <li>{{ dl.distributor.country }}</li>
+                            {% endif %}
+                            {% if dl.distributor.phone %}
+                            <li>P: {{ dl.distributor.phone }}</li>
+                            {% endif %}
+                            {% if dl.distributor.fax %}
+                            <li>F: {{ dl.distributor.fax }}</li>
+                            {% endif %}
+                            {% if dl.distributor.email %}
+                            <li>{{ dl.distributor.email }}</li>
+                            {% endif %}
+                        </ul>
+                    </dd>
+                    {% endif %}
+
+                    <dt>
+                        {% trans "Countries" %}:
+                    </dt>
+                    <dd>
+                        <ul class="unstyled horizontal_">
+                            {% for country in dl.countries.all %}<li>{{ country }}{% if not forloop.last %}, {% endif %} &nbsp;</li>{% endfor %}
+                        </ul>
+                    </dd>
+
+
+                    <div class="clear"></div>
+                    <br>
+                    <br>
+
+                    {% endfor %}
+
+
 				</section>
 
 			</div>
