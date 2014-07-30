@@ -33,6 +33,7 @@ class MediaResource(ModelResource):
         include_absolute_url = True
         authentication = Authentication()
         authorization = Authorization()
+        limit = 50
         filtering = {
             #'channel': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
@@ -254,7 +255,7 @@ class MediaResource(ModelResource):
     def stats(self, request, **kwargs):
 
         self.method_check(request, allowed=['get'])
-        self.is_authenticated(request)
+        #self.is_authenticated(request)
         self.throttle_check(request)
 
         obj = Media.objects.get(**self.remove_api_resource_names(kwargs))

@@ -16,12 +16,13 @@ from django.contrib.contenttypes import generic
 from django_extensions.db.fields.json import JSONField
 import magic
 from celery.task import task
+from lib.signals.unsignal import disable_for_loaddata
 
 from alibrary.models import Media
 
 log = logging.getLogger(__name__)
 
-USE_CELERYD = True
+USE_CELERYD = False
 
 AUTOIMPORT_MB = True
         
@@ -555,9 +556,8 @@ class ImportFile(BaseModel):
 
         super(ImportFile, self).save(*args, **kwargs)
 
-        
+@disable_for_loaddata
 def post_save_importfile(sender, **kwargs):
-    print 'post_save_importfile - kwargs'
 
     obj = kwargs['instance']
 

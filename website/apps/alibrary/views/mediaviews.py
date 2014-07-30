@@ -312,89 +312,6 @@ class MediaEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
 
 
-
-    
-class __MediaEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-
-    model = Media
-    template_name = "alibrary/media_edit.html"
-    success_url = '#'
-    form_class = MediaForm
-
-    permission_required = 'alibrary.edit_media'
-    raise_exception = True
-    
-    def __init__(self, *args, **kwargs):
-        super(MediaEditView, self).__init__(*args, **kwargs)
-
-    def get_initial(self):
-        self.initial.update({ 'user': self.request.user })
-        return self.initial
-
-    def get_context_data(self, **kwargs):
-        
-        context = super(MediaEditView, self).get_context_data(**kwargs)
-        
-        context['action_form'] = MediaActionForm(instance=self.object)
-        context['relation_form'] = MediaRelationFormSet(instance=self.object)
-        context['extraartist_form'] = ExtraartistFormSet(instance=self.object)
-        context['user'] = self.request.user
-        context['request'] = self.request
-
-        return context
-
-    def form_valid(self, form):
-    
-        context = self.get_context_data()
-        relation_form = context['relation_form']
-
-        if form.is_valid():
-
-            print 'MEDIA FORM VALID'
-
-            self.object.tags = form.cleaned_data['d_tags']
-            
-            # temporary instance to validate inline forms against
-            tmp = form.save(commit=False)
-
-            relation_form = MediaRelationFormSet(self.request.POST, instance=tmp)
-            extraartist_form = ExtraartistFormSet(self.request.POST, instance=tmp)
-
-            if extraartist_form.is_valid():
-                extraartist_form.save()
-
-            if relation_form.is_valid():        
-                        
-                relation_form.save()
-
-                msg = change_message.construct(self.request, form, [relation_form])
-                with reversion.create_revision():
-                    obj = form.save()
-                    reversion.set_user(self.request.user)
-                    reversion.set_comment(msg)
-
-                if not obj.artist.pk:
-                    obj.artist.creator = context['request'].user
-                
-                obj.artist.save()
-                obj.artist = obj.artist
-                
-                if not obj.release.pk:
-                    obj.release.creator = context['request'].user
-                
-                obj.release.save()
-                obj.release = obj.release
-                obj.save()
-                
-                #form.save_m2m()
-
-            return HttpResponseRedirect('#')
-        else:
-            return self.render_to_response(self.get_context_data(form=form, relation_form=relation_form))
-     
-    
-    
-    
     
 
 @never_cache
@@ -405,11 +322,11 @@ def media_download(request, slug, format, version):
 
 
     download_permission = False
-    for product in media.mediaproduct.filter(active=True): # users who purchase hardware can download the software part as well
-        if get_download_permissions(request, product, format, version):
-            download_permission = True
-        if product.unit_price == 0:
-            download_permission = True
+    #for product in media.mediaproduct.filter(active=True): # users who purchase hardware can download the software part as well
+    #    if get_download_permissions(request, product, format, version):
+    #        download_permission = True
+    #    if product.unit_price == 0:
+    #        download_permission = True
     
     if not download_permission:
         return HttpResponseForbidden('forbidden')
@@ -434,8 +351,8 @@ def stream_html5(request, uuid):
 
     stream_permission = False
 
-    #if request.user and request.user.has_perm('alibrary.play_media'):
-    if request.user:
+    if request.user and request.user.has_perm('alibrary.play_media'):
+    #if request.user.is_authenticated():
         stream_permission = True
 
     # check if unrestricted license
@@ -460,13 +377,15 @@ def stream_html5(request, uuid):
     return sendfile(request, media_file)
 
 
-
 def __encode(path, bitrate, format):
     at = audiotranscode.AudioTranscode()
     for data in at.transcode_stream(path, format, bitrate=bitrate):
         # do something with chuck of data
         # e.g. sendDataToClient(data)
         yield data
+
+
+
 @never_cache
 def encode(request, uuid, bitrate=128, format='mp3'):
 
@@ -490,8 +409,6 @@ def encode(request, uuid, bitrate=128, format='mp3'):
         create_event(request.user, media, None, 'stream')
     except:
         pass
-
-
 
 
     return HttpResponse(__encode(media.master.path, bitrate, format), mimetype='audio/mpeg')

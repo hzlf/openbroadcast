@@ -991,6 +991,13 @@ EditUi = function () {
             skip_apply = true;
         }
 
+        // release type mapping
+        if (key == 'releasetype' && $('form.form-release').length) {
+            var target = $('#' + self.field_prefix + 'releasetype option:contains(' + val + ')');
+            target.prop("selected", "selected");
+            skip_apply = true;
+        }
+
 
 
         // handle pagedown-preview

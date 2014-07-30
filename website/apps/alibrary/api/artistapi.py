@@ -128,7 +128,7 @@ class ArtistResource(ModelResource):
     def stats(self, request, **kwargs):
 
         self.method_check(request, allowed=['get'])
-        self.is_authenticated(request)
+        #self.is_authenticated(request)
         self.throttle_check(request)
 
         artist = Artist.objects.get(**self.remove_api_resource_names(kwargs))

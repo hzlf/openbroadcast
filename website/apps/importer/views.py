@@ -1,4 +1,4 @@
-from django.views.generic import ListView, UpdateView, CreateView, DeleteView
+from django.views.generic import ListView, UpdateView, CreateView, DeleteView, View
 
 from django.views.generic.detail import TemplateResponseMixin
 from  django.views.generic.edit import FormMixin, ProcessFormView
@@ -65,6 +65,22 @@ class ImportDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     def get_queryset(self):
         kwargs = {}
         return Import.objects.filter(user=self.request.user)
+
+
+class ImportDeleteAllView(LoginRequiredMixin, PermissionRequiredMixin, View):
+
+    url = lazy(reverse, str)("importer-import-list")
+
+    permission_required = 'importer.delete_import'
+    raise_exception = True
+
+    def get(self, request, *args, **kwargs):
+        return HttpResponseRedirect(self.url)
+
+    def post(self, request, *args, **kwargs):
+        Import.objects.filter(user=self.request.user).delete()
+        return HttpResponseRedirect(self.url)
+
 
 
 """

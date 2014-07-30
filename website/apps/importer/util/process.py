@@ -24,6 +24,12 @@ MUSICBRAINZ_HOST = getattr(settings, 'MUSICBRAINZ_HOST', None)
 MUSICBRAINZ_RATE_LIMIT = getattr(settings, 'MUSICBRAINZ_RATE_LIMIT', True)
 
 
+LIMIT_AID_RESULTS = 10
+AID_MIN_SCORE = 0.9
+LIMIT_MB_RELEASES = 12
+LIMIT_EQUAL_NAMES = 7
+
+
 METADATA_SET = {
                 # media
                 'obp_media_uuid': None,
@@ -352,9 +358,17 @@ class Process(object):
                  }
 
 
-            if i < 5:
-                log.debug('acoustid: got result - score: %s | mb id: %s' % (d[0], d[1]))
-                res.append(t)
+            if i < LIMIT_AID_RESULTS:
+                log.debug('acoustid: got result (loop: %s) - score: %s | mb id: %s' % (i, d[0], d[1]))
+                if i < 1:
+                    res.append(t)
+                else:
+                    # only append further releases if score is high enough
+                    if float(d[0]) > AID_MIN_SCORE:
+                        res.append(t)
+                    else:
+                        log.debug('skipping acoustid, score %s < %s (AID_MIN_SCORE)' % (float(d[0]), AID_MIN_SCORE))
+
             else:
                 pass
                 #log.debug('skipping acoustid, we have %s of them' % i)
@@ -444,7 +458,15 @@ class Process(object):
             
             if tracknumber and not skip_tracknumber:
                 url = '%s%s%s' % (url, '%20AND%20number:', tracknumber)
-            
+
+
+            #mdata = MutagenFile(obj.file.path)
+            #qdur = (float(mdata.info.length * 1000) / 2000.0)
+            #print 'QDUR: %s' % qdur
+            #url = '%s%s%s' % (url, '%20AND%20qdur:', qdur)
+
+
+
             """    
             if releasedate:
                 url = '%s%s%s' % (url, '%20AND%20date:', releasedate)
@@ -488,19 +510,26 @@ class Process(object):
                         except Exception, e:
                             log.warning('Unable to sort by date: %s' % e)
                             sorted_releases = result['recording'][0]['releases']
+
+                        #sorted_releases = result['recording'][0]['releases']
                             
-                            
+
+
+
+                        """
+                        1. implementation
+                        pull out a selection of gathered releases.
+                        basically we limit releases with equal names
+                        """
+
+                        """
                         selected_releases = []
                         if len(sorted_releases) > 1:
-                            
-                            """
-                            Append releases with unique names
-                            """
+                            # get releases with unique name
                             count = 0
                             current_names = []
                             for t_rel in sorted_releases:
-                                if (not t_rel['title'] in current_names and count < 8):
-                                    #print 'FRESH NAME: %s' % t_rel['title']
+                                if (not t_rel['title'] in current_names and count < LIMIT_MB_RELEASES):
                                     log.debug('adding new release name to results: %s' % t_rel['title'])
                                     current_names.append(t_rel['title'])
                                     selected_releases.append(t_rel)
@@ -508,19 +537,41 @@ class Process(object):
                                 else:
                                     pass
                                     #log.debug('release name already in results: %s' % t_rel['title'])
-                                    
-                            
-                            """
-                            if len(sorted_releases) > 3:
-                                limit = 3
-                            else:
-                                limit = len(sorted_releases) 
-                            for i in range(limit):
-                                selected_releases.append(sorted_releases[i])
-                            """ 
-                                
+
                         else:
                             selected_releases.append(sorted_releases[0])
+                        """
+
+
+                        """
+                        2. implementation
+                        pull out a selection of gathered releases.
+                        basically we limit releases with equal names
+                        """
+                        selected_releases = []
+
+                        if len(sorted_releases) > 1:
+                            named_releases = {}
+                            for t_rel in sorted_releases:
+                                if (not t_rel['title'] in named_releases):
+                                    named_releases[t_rel['title']] = []
+                                    named_releases[t_rel['title']].append(t_rel)
+                                    log.debug('adding new release name: "%s"' % t_rel['title'])
+                                else:
+                                    named_releases[t_rel['title']].append(t_rel)
+                                    log.debug('appending to existing: "%s"' % t_rel['title'])
+
+                            for k, v in named_releases.iteritems():
+                                log.debug('got %s releases for "%s"' % (len(v), k))
+                                selected_releases += v[0:LIMIT_EQUAL_NAMES]
+
+                            #selected_releases.append(sorted_releases[0])
+
+                        else:
+                            selected_releases.append(sorted_releases[0])
+
+
+
                             
                               
                               
@@ -552,7 +603,7 @@ class Process(object):
                                 releases.append(selected_release)
 
         # TODO: think about limit
-        releases = releases[0:5]
+        releases = releases[0:LIMIT_MB_RELEASES]
 
         releases = self.complete_releases(releases)
         releases = self.format_releases(releases)

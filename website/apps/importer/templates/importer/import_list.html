@@ -211,6 +211,16 @@
 
 </table>
 
+
+
+
+    <div>
+        <form action="{% url importer-import-delete-all %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-mini pull-right">{% trans "Clear all imports" %}</button>
+        </form>
+    </div>
+
 {% endblock %}
 
 {% block sidebar %}

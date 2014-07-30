@@ -24,7 +24,7 @@ class ImportFileResource(ModelResource):
     class Meta:
         queryset = ImportFile.objects.all()
         list_allowed_methods = ['get', 'post']
-        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        detail_allowed_methods = ['get', 'post', 'put', 'delete',]
         resource_name = 'importfile'
         # excludes = ['type','results_musicbrainz']
         excludes = ['type',]
@@ -136,6 +136,7 @@ class ImportResource(ModelResource):
         return [
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/import-all%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('import_all'), name="importer_api_import_all"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/apply-to-all%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('apply_to_all'), name="importer_api_apply_to_all"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/retry-pending%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('retry_pending'), name="importer_api_retry_pending"),
         ]
 
     def import_all(self, request, **kwargs):
@@ -145,7 +146,7 @@ class ImportResource(ModelResource):
         self.throttle_check(request)
 
         import_session = Import.objects.get(**self.remove_api_resource_names(kwargs))
-        import_files = import_session.files.filter(status=2)
+        import_files = import_session.files.filter(status=2, import_session=import_session)
         
         for import_file in import_files:
             import_file.status = 6
@@ -177,7 +178,7 @@ class ImportResource(ModelResource):
         if not (ct and item_id):
             raise ImmediateHttpResponse(response=HttpResponse(status=410))
         
-        import_files = import_session.files.filter(status__in=(2,4))
+        import_files = import_session.files.filter(status__in=(2,4), import_session=import_session)
         source = import_files.filter(pk=item_id)
         # exclude current one
         import_files = import_files.exclude(pk=item_id)
@@ -220,6 +221,26 @@ class ImportResource(ModelResource):
         self.log_throttled_access(request)
         return self.create_response(request, bundle)
 
+
+    def retry_pending(self, request, **kwargs):
+
+        self.method_check(request, allowed=['post'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        import_session = Import.objects.get(**self.remove_api_resource_names(kwargs))
+        import_files = import_session.files.filter(status=2, import_session=import_session)
+
+        for import_file in import_files:
+            import_file.status = 3
+            import_file.save()
+
+
+        bundle = {'count': import_files.count()}
+
+
+        self.log_throttled_access(request)
+        return self.create_response(request, bundle)
         
 
     

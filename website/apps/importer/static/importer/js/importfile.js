@@ -382,7 +382,15 @@ var ImportfileApp = function () {
                         url: $(this).data('resource_uri')
                     })
                     .then(function(data) {
-                        data.ct = 'release';
+
+                        // hack! extract object type
+                        if(data.absolute_url.indexOf("/artists/") > -1) {
+                            data.ct = 'artist';
+                        }
+                        if(data.absolute_url.indexOf("/releases/") > -1) {
+                            data.ct = 'release';
+                        }
+
                         var d = { item: data }
                         var html = nj.render('importer/nj/popover.html', d);
                         api.set('content.text', html);
@@ -399,7 +407,7 @@ var ImportfileApp = function () {
                 effect: false
             },
             style: {
-                classes: 'qtip-dark'
+                classes: 'qtip-dark qtip-importer'
             }
         });
 

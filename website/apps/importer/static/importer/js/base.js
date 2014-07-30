@@ -103,6 +103,24 @@ ImporterUi = function() {
                 });
             }, 0);
 
+		});
+
+
+		$('.retry-pending', $('#import_summary')).live('click', function(e){
+
+			var url = self.api_url + 'retry-pending/';
+            // alert('retry-pending');
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: "application/json",
+                contentType: 'application/json',
+                processData:  false,
+                success: function(data) {
+                    debug.debug(data);
+                }
+            });
+
 
 
 
@@ -296,12 +314,14 @@ ImporterUi = function() {
             num_done: 0,
             num_ready: 0,
             num_working: 0,
+            num_pending: 0,
             num_warning: 0,
             num_duplicate: 0,
             num_error: 0
         };
+
 		$.each(self.importfiles, function(i, item) {
-			// console.log('update importfile / ImporterApp');
+
 			var data = item.local_data;
 
 			if (data.status == 'done') {
@@ -309,6 +329,9 @@ ImporterUi = function() {
 			}
 			if (data.status == 'ready') {
 				counters.num_ready++;
+			}
+			if (data.status == 'init') {
+				counters.num_pending++;
 			}
 			if (data.status == 'working') {
 				counters.num_working++;
@@ -322,6 +345,7 @@ ImporterUi = function() {
 			if (data.status == 'error') {
 				counters.num_error++;
 			}
+
 		});
 
         // calculate inserts

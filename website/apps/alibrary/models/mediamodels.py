@@ -62,9 +62,8 @@ from shop.models import Product
 
 # audio processing / waveform
 from lib.audioprocessing.processing import create_wave_images, AudioProcessingException
-
 from lib.fields.languages import LanguageField
-
+from lib.signals.unsignal import disable_for_loaddata
 # hash
 from lib.util.sha1 import sha1_by_file
 
@@ -449,6 +448,15 @@ class Media(MigrationMixin):
     @property
     def get_videos(self):
         return self.relations.filter(service__in=['youtube', 'vimeo'])
+
+
+    @property
+    def has_soundcloud(self):
+        return self.relations.filter(service='soundcloud').exists()
+
+    @property
+    def get_soundcloud(self):
+        return self.relations.filter(service='soundcloud').all()[0]
     
 
     # TODO: still needed?
@@ -1388,6 +1396,7 @@ class Media(MigrationMixin):
 
         
 # media post save
+@disable_for_loaddata
 def media_post_save(sender, **kwargs):
 
     obj = kwargs['instance']
@@ -1495,6 +1504,7 @@ def media_pre_delete(sender, **kwargs):
 pre_delete.connect(media_pre_delete, sender=Media)
 
 from actstream import action
+@disable_for_loaddata
 def action_handler(sender, instance, created, **kwargs):
 
     if instance.get_last_editor() and instance.status == 1:

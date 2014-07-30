@@ -1,6 +1,5 @@
 <div class="po-inline">
 
-
     <div class="row-fluid">
 
         <div class="span2">
@@ -15,11 +14,15 @@
             <div class="span10">
                 <ul class="unstyled">
                     <li><strong>{{ item.name }}</strong>
+                        {% if item.catalognumber %}{{ item.catalognumber }}{% endif %}
                         <small class="pull-right">{{ item.releasedate }}</small>
                     </li>
                     {% if item.artist %}
                         <li>{% for artist in item.artist %}{{ artist }}{% if not loop.last %},
                         {% endif %}{% endfor %}</li>
+                    {% endif %}
+                    {% if item.label %}
+                        <li>{{ item.label.name }}</li>
                     {% endif %}
                 </ul>
             </div>
@@ -31,9 +34,8 @@
                     <li><strong>{{ item.name }}</strong>
                         <small class="pull-right">{{ item.type }}</small>
                     </li>
-                    {% if item.d_tags %}
-                        {{ item.d_tags }}
-                    {% endif %}
+                    {% if item.date_start %}*{{ item.date_start }}{% endif %}
+                    {% if item.date_end %}✝{{ item.date_end }}{% endif %}
                 </ul>
             </div>
         {% endif %}

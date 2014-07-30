@@ -503,8 +503,7 @@ class Importer(object):
                 if tag_release_name and 'name' in res:
                     result_release_name = res['name']
 
-                    print
-                    dist = distance(tag_release_name, result_release_name)
+                    dist = distance(tag_release_name.lower(), result_release_name.lower())
                     print 'matching "%s" vs "%s" - dist: %s' % (tag_release_name, result_release_name, dist)
 
                     if dist < 4:
@@ -1060,7 +1059,7 @@ def mb_complete_release_task(obj, mb_id):
     barcode = result.get('barcode', None)
     if barcode:
         log.debug('got barcode: %s' % (barcode))
-        # obj.barcode = barcode
+        obj.barcode = barcode
 
 
     # add mb relation
@@ -1074,6 +1073,68 @@ def mb_complete_release_task(obj, mb_id):
         log.debug('relation not here yet, add it: %s' % (mb_url))
         rel = Relation(content_object=obj, url=mb_url)
         rel.save()
+
+
+
+    """
+    trying to get label information
+    """
+    print '//////////////////////////////////////////////////////////'
+    print 'trying to get label info'
+    label_info = result.get('label-info', None)
+    if label_info:
+        print label_info
+        catalog_number = label_info[0].get('catalog-number', None)
+        label = label_info[0].get('label', None)
+
+        print 'catno: %s' % catalog_number
+        #print 'label: %s' % label
+
+        label_name = label.get('name', None)
+        label_code = label.get('label-code', None)
+        mb_label_id = label.get('id', None)
+        print 'label_name:  %s' % label_name
+        print 'label_code:  %s' % label_code
+        print 'label_mb_id: %s' % mb_label_id
+
+        l = obj.label
+        l_created = False
+        if label_name and mb_label_id and not l:
+            log.debug('label, lookup by mb_label_id: %s' % mb_label_id)
+            try:
+                lls = lookup.label_by_mb_id(mb_label_id)
+                l = lls[0]
+                log.debug('got label: %s by mb_label_id: %s' % (l.pk, mb_label_id))
+            except Exception, e:
+                log.debug('could not get label by mb_label_id: %s' % mb_label_id)
+                log.info('create label with mb_id: %s' % mb_label_id)
+                from alibrary.models.labelmodels import Label
+                l = Label(name=label_name)
+                l_created = True
+                l.save()
+
+
+        if l:
+            log.debug('got label, attach it to release')
+            obj.label = l
+
+
+        if l_created and l:
+            log.info('label created, try to complete: %s' % l)
+            #l.creator = obj.import_session.user
+            #action.send(l.creator, verb='created', target=l)
+
+            if USE_CELERYD:
+                mb_complete_label_task.delay(l, mb_label_id)
+            else:
+                mb_complete_label_task(l, mb_label_id)
+
+
+
+
+
+
+
 
     obj.save()
 
@@ -1302,4 +1363,197 @@ def mb_complete_artist_task(obj, mb_id):
 
     return obj
 
-        
+
+
+
+@task
+def mb_complete_label_task(obj, mb_id):
+
+    log = logging.getLogger('util.importer.mb_complete_label')
+    log.info('complete label, l: %s | mb_id: %s' % (obj.name, mb_id))
+
+
+
+    inc = ('url-rels', 'tags', 'aliases', )
+    url = 'http://%s/ws/2/label/%s/?fmt=json&inc=%s' % (MUSICBRAINZ_HOST, mb_id, "+".join(inc))
+
+    r = requests.get(url)
+    result = r.json()
+
+
+
+    discogs_url = None
+    discogs_image = None
+
+    valid_relations = ('wikipedia', 'allmusic', 'BBC Music page', 'social network', 'official homepage', 'youtube', 'myspace', 'wikidata', 'official site')
+
+    relations = result.get('relations', ())
+    print
+    print
+    print
+    for relation in relations:
+
+        print relation
+        print '---'
+        if relation['type'] == 'discogs':
+            log.debug('got discogs url for label: %s' % relation['url']['resource'])
+            discogs_url = relation['url']['resource']
+
+        if relation['type'] in valid_relations:
+
+
+
+            log.debug('got %s url for label: %s' % (relation['type'], relation['url']['resource']))
+
+
+            try:
+                rel = Relation.objects.get(object_id=obj.pk, url=relation['url']['resource'])
+            except:
+                rel = Relation(content_object=obj, url=relation['url']['resource'])
+
+                if relation['type'] == 'official homepage':
+                    rel.service = 'official'
+
+                rel.save()
+
+
+
+
+    if discogs_url:
+
+        try:
+            rel = Relation.objects.get(object_id=obj.pk, url=discogs_url)
+        except:
+            rel = Relation(content_object=obj, url=discogs_url)
+            rel.save()
+
+        # try to get image
+        try:
+            discogs_image = discogs_image_by_url(discogs_url, 'resource_url')
+            log.debug('discogs image located at: %s' % discogs_image)
+        except:
+            pass
+
+
+    # try to load & assign image
+    if discogs_image:
+        try:
+            #img = filer_extra.url_to_file(discogs_image, obj.folder)
+            img = get_file_from_url(discogs_image)
+            obj.main_image = img
+            obj.save()
+        except:
+            log.info('unable to assign discogs image')
+
+
+    if discogs_url:
+
+        try:
+            rel = Relation.objects.get(object_id=obj.pk, url=discogs_url)
+        except:
+            rel = Relation(content_object=obj, url=discogs_url)
+            rel.save()
+
+        # try to get image
+        try:
+            discogs_image = discogs_image_by_url(discogs_url, 'resource_url')
+            log.debug('discogs image located at: %s' % discogs_image)
+        except:
+            pass
+
+
+
+    type = result.get('type', None)
+    if type:
+        log.debug('got type: %s' % (type))
+        obj.type = type
+
+
+
+
+    times = result.get('life-span', None)
+    if times:
+        log.debug('got times: %s' % (times))
+        date_start = times['begin'] if 'begin' in times else None
+        date_end = times['end'] if 'begin' in times else None
+        log.debug('date_start: %s' % (date_start))
+        log.debug('date_end: %s' % (date_end))
+
+        if date_start:
+            if len(date_start) == 4:
+                date = '%s-00-00' % (date_start)
+            elif len(date_start) == 7:
+                date = '%s-00' % (date_start)
+            elif len(date_start) == 10:
+                date = '%s' % (date_start)
+
+            re_date = re.compile('^\d{4}-\d{2}-\d{2}$')
+            if re_date.match(date) and date != '0000-00-00':
+                obj.date_start = '%s' % date
+
+        if date_end:
+            if len(date_end) == 4:
+                date = '%s-00-00' % (date_end)
+            elif len(date_end) == 7:
+                date = '%s-00' % (date_end)
+            elif len(date_end) == 10:
+                date = '%s' % (date_end)
+
+            re_date = re.compile('^\d{4}-\d{2}-\d{2}$')
+            if re_date.match(date) and date != '0000-00-00':
+                obj.date_end = '%s' % date
+
+
+
+
+
+
+
+    labelcode = result.get('label-code', None)
+    if labelcode:
+        log.debug('got labelcode: %s' % (labelcode))
+        obj.labelcode = labelcode
+
+    disambiguation = result.get('disambiguation', None)
+    if disambiguation:
+        log.debug('got disambiguation: %s' % (disambiguation))
+        obj.disambiguation = disambiguation
+
+    tags = result.get('tags', ())
+
+    for tag in tags:
+        log.debug('got tag: %s' % (tag['name']))
+        try:
+            Tag.objects.add_tag(obj, '"%s"' % tag['name'])
+        except:
+            pass
+
+
+
+    country = result.get('country', None)
+    if country:
+        log.debug('got country: %s' % (country))
+        try:
+            country = Country.objects.filter(iso2_code=country)[0]
+            obj.country = country
+        except:
+            pass
+
+    # add mb relation
+    mb_url = 'http://musicbrainz.org/label/%s' % (mb_id)
+    try:
+        rel = Relation.objects.get(object_id=obj.pk, url=mb_url)
+    except:
+        log.debug('relation not here yet, add it: %s' % (mb_url))
+        rel = Relation(content_object=obj, url=mb_url)
+        rel.save()
+
+    obj.save()
+
+    print obj.name
+    print obj.pk
+
+
+    return obj
+
+

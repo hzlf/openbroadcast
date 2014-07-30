@@ -421,6 +421,12 @@ class APILookup(models.Model):
         print 'DTAGS:'
         print d_tags
 
+        try:
+            res['totaltracks'] = len(d_release.data['tracklist'])
+        except:
+            pass
+
+
         res['d_tags'] = ', '.join(d_tags)
         self.api_data = res
         self.save()
@@ -550,12 +556,9 @@ class APILookup(models.Model):
         id = self.uri.split('/')[-1]
         url = "http://%s/ws/2/release/%s?fmt=json&inc=aliases+url-rels+annotation+tags+artist-rels+recordings+artists+labels" % (MUSICBRAINZ_HOST, id)
 
-        print "#########################################"
         print url
         r = requests.get(url)
         data= r.json()
-
-        print data
 
         res = {}
         d_tags = [] # needed as merged from different keys

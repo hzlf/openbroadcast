@@ -69,17 +69,27 @@ class ImporterTest(object):
 
 
         if self.test == 'lookup':
-            from alibrary.models.artistmodels import Release
-            from importer.util.importer import mb_complete_release_task
+            from alibrary.models.artistmodels import Release, Label, Artist
+            from importer.util.importer import mb_complete_release_task, mb_complete_label_task
 
-            mb_id = 'a808ae2c-9c89-4b2c-96cb-e527554b4ee2'
-            obj = Release.objects.get(pk=2102)
+            # "Visitors"
+            mb_id = '1924bf90-15e3-4a34-902e-18ba2f11acef'
+            obj = Release.objects.get(pk=2137)
+
+            # "American Life"
+            mb_id = 'a6af8564-2ce7-4ca5-ba02-a5488ebe3083'
+            obj = Release.objects.get(pk=2139)
+
+            # Maverik Label
+            mb_id = '79afd9ce-c6b2-4e9a-9b23-a13e25d70688'
+            obj = Label.objects.get(pk=1005)
 
 
             print 'name:  %s' % obj.name
             print 'mb id: %s' % mb_id
 
-            mb_complete_release_task(obj, mb_id)
+            mb_complete_label_task(obj, mb_id)
+            #mb_complete_release_task(obj, mb_id)
 
             
             

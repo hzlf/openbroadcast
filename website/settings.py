@@ -387,6 +387,7 @@ INSTALLED_APPS = (
     #'debug_toolbar',
     'mailer',
     'djcelery',
+    'django_bleach',
 
     'cms',
     'menus',
@@ -482,6 +483,7 @@ INSTALLED_APPS = (
     'alibrary',
     'aplayer',
     'importer',
+    'massimporter',
     'exporter',
     'abcast',
     'multiuploader',
@@ -625,6 +627,10 @@ EMAIL_CONFIRMATION_DAYS = 5
 EMAIL_DEBUG = DEBUG
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+
+
+BLEACH_ALLOWED_TAGS = ['p', 'b', 'i', 'u', 'em', 'strong', 'a']
+BLEACH_STRIP_TAGS = True
 
 """
 Identity

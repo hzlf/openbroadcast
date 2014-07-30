@@ -874,6 +874,7 @@ class LegacyUserMigrator(Migrator):
         from django.contrib.auth.models import User, Group
         from profiles.models import Profile, Link, Service, ServiceType, Expertise, Community
         from obp_legacy.models_legacy import *
+        from phonenumber_field.validators import validate_international_phonenumber
 
         status = 1
 
@@ -1010,10 +1011,10 @@ class LegacyUserMigrator(Migrator):
             print
             for item in p_data:
                 """"""
-                #print 'access: %s' % item.access
-                #print 'name: %s' % item.name
-                #print 'value: %s' % item.value
-                #print
+                print 'access: %s' % item.access
+                print 'name: %s' % item.name
+                print 'value: %s' % item.value
+                print
 
                 """
                 Mapping profile data
@@ -1056,15 +1057,30 @@ class LegacyUserMigrator(Migrator):
                     obj.city = item.value
 
                 if item.name == 'homephone':
-                    if not obj.phone:
-                        obj.phone = item.value
+                    try:
+                        validate_international_phonenumber(item.value)
+                        if not obj.phone:
+                            obj.phone = item.value
+
+                    except ValidationError:
+                        pass
 
                 if item.name == 'workphone':
-                    if not obj.phone:
-                        obj.phone = item.value
+                    try:
+                        validate_international_phonenumber(item.value)
+                        if not obj.phone:
+                            obj.phone = item.value
+
+                    except ValidationError:
+                        pass
 
                 if item.name == 'mobphone':
-                    obj.mobile = item.value
+                    try:
+                        validate_international_phonenumber(item.value)
+                        obj.phone = item.value
+
+                    except ValidationError:
+                        pass
 
                 if item.name == 'homecountry':
                     country = None

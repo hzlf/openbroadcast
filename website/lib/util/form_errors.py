@@ -26,6 +26,13 @@ def merge_form_errors(forms_to_merge=[]):
                         key = NON_FIELD_MESSAGE
                     else:
                         key = inner_form.fields[field].label
+                        if not key:
+                            key = 'Other'
+
                     form_errors[key] = errors
+
+
+    print form_errors
+
 
     return form_errors

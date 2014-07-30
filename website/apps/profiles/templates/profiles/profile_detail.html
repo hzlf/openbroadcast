@@ -1,6 +1,6 @@
 {% extends "layout_base.html" %}
 
-{% load truncate ctype i18n thumbnail arating_tags markup wiki_tags sekizai_tags activity_tags atracker_tags spurl %}
+{% load truncate ctype i18n thumbnail arating_tags markup wiki_tags sekizai_tags activity_tags atracker_tags spurl bleach_tags %}
 
 {% block heading %}
     <!-- heading / icon (large one) -->
@@ -56,7 +56,9 @@
     {% endaddtoblock %}
 
     <div id="heading">
+        {% with page_title="My Profile" %}
         {% include "skeleton/heading.html" %}
+        {% endwith %}
     </div>
     <!-- heading / icon (large one) -->
 {% endblock %}
@@ -149,7 +151,7 @@
             <h2>{% trans "Biography" %}</h2>
             <div class="description markdown padded-h markdown-inline">
                 <div>
-                    {{ object.biography|markdown|wikilink|safe }}
+                    {{ object.biography|markdown|wikilink|safe|bleach }}
                 </div>
             </div>
             {% endif %}

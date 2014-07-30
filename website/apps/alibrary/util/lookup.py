@@ -44,6 +44,15 @@ def artist_by_mb_id(mb_id):
 
     return Artist.objects.filter(pk__in=rel_ids)
 
+def label_by_mb_id(mb_id):
+
+    rels = object_by_mb_id(mb_id, 'label')
+    rel_ids = []
+    for rel in rels:
+        rel_ids.append(rel.content_object.pk)
+
+    return Label.objects.filter(pk__in=rel_ids)
+
 
 
 

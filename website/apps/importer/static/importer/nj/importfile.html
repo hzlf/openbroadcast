@@ -393,7 +393,7 @@
 
                     <a class="external" href="http://musicbrainz.org/release/{{ item.mb_id }}">{{ item.name }}</a>
                     <ul class="unstyled">
-                        <li class="small">{{ item.country }} - {{ item.releasedate }}</li>
+                        <li class="small">{{ item.country }} - {{ item.releasedate }} | {{ item.status }}</li>
                         <li class="small">{{ item.label.name }} - {{ item.catalognumber }}</li>
                     </ul>
 
@@ -692,15 +692,15 @@
 
     <div class="row-fluid pull-righ result-actions">
 
-        <div class="span8">
+        <div class="span2">
             &nbsp;
         </div>
 
-        <div class="pull-right span4">
+        <div class="pull-right span10">
             <a class="btn btn-secondary btn-small delete-importfile">Delete this File</a>
-            <!--
+            <!---->
             <a class="btn btn-secondary btn-small rescan" data-settings="skip_tracknumber">Scan witouth tracknumber</a>
-            -->
+
             <a class="btn btn-secondary btn-small rescan">Scan again</a>
             {% if object.status == 'ready' or object.status == 'warning' %}
                 <a class="btn btn-primary btn-small start-import">Start Import</a>

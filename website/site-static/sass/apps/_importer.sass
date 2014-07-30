@@ -56,9 +56,6 @@ section.importer-importfiles
 
   // base
   .listing
-
-
-
   
     .loading
       // opacity: 0.5
@@ -345,23 +342,25 @@ section.importer-importfiles
         background-color: #DDFFD9
 
 // hacks
-.popover
-  .popover-title
-    // display: none !important
-  .popover-content
-    padding: 8px
-    background: #333
+
+.qtip-importer
+
+  //box-shadow: 2px 2px 3px 1px rgba(12, 12, 12, 0.5)
+  .po-inline
+    padding: 4px 0
+
+  color: $white
+  img
+    width: 70px
+    height: 70px
+  h1
+    line-height: 100%
     color: $white
-    img
-      width: 70px
-      height: 70px
-    h1
-      line-height: 100%
-      color: $white
-      margin-bottom: 8px !important
-    .alert
-      margin-bottom: 0px
-      margin-top: 8px
+    margin-bottom: 8px !important
+
+  .alert
+    margin-top: 10px
+    margin-bottom: 0px
 
 span.dim
   background: transparent

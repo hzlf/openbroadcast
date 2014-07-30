@@ -77,6 +77,28 @@
         </div>
     </div>
 
+    <div class="summary item pending hoverable">
+        <strong><i class="icon-time"></i> Processing</strong>
+
+        <div class="row-fluid ">
+            <div class="span3">
+                <span class="num-files">{{ counters.num_working }}</span> files
+            </div>
+            <div class="span9">
+
+            </div>
+        </div>
+
+        <div class="row-fluid ">
+            <div class="span12">
+                <button class=" pull-right btn btn-mini btn-secondary retry-pending"
+                        type="button">Retry all
+                </button>
+            </div>
+        </div>
+
+    </div>
+
     <div class="summary item warning hoverable">
         <strong><i class="icon-question-sign"></i> Information needed</strong>
 
@@ -95,7 +117,7 @@
 
         <div class="row-fluid ">
             <div class="span3">
-                <span class="num-files">{{ counters.error }}</span> files
+                <span class="num-files">{{ counters.num_error }}</span> files
             </div>
             <div class="span9">
 
