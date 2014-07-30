@@ -48,6 +48,11 @@
 			<li class="active">
 				<a href="#overview" data-toggle="tab">{% trans "Overview" %}</a>
 			</li>
+            {% if object.description %}
+                <li>
+                    <a href="#description" data-toggle="tab">{% trans "Description" %}</a>
+                </li>
+            {% endif %}
             {% if object.distributors.count > 0 %}
 			<li>
 				<a href="#distribution" data-toggle="tab">{% trans "Distribution" %}</a>
@@ -66,7 +71,9 @@
 		<div class="tab-content">
 
 			<div class="tab-pane active" id="overview" class="topflop">
-				
+
+
+                {% comment %}
 				<section class="description">
 					<h2>{% trans "Label description" %}</h2>
 					<div class="description markdown padded-h">
@@ -74,7 +81,7 @@
 					</div>
 			
 				</section>
-					
+			    {% endcomment %}
 
 
                 <section class="top">
@@ -105,6 +112,21 @@
                 </section>
 
 			</div>
+
+
+
+            <div class="tab-pane" id="description">
+
+                <section class="description">
+
+                    <h2>{% trans "Label description" %}</h2>
+
+                    <div class="description markdown padded-h">
+                        {% wikify object.description %}
+                    </div>
+                </section>
+
+            </div>
 
 			<div class="tab-pane" id="history">
 
