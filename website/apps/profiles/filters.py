@@ -69,6 +69,15 @@ class ProfileFilter(django_filters.FilterSet):
                     nd.sort()
                     filter_.entries = nd
 
+
+                elif name == 'expertise__name':
+                    nd = []
+                    for d in ds:
+                        nd.append([d[0], d[1]])
+
+                    nd.sort()
+                    filter_.entries = nd
+
                 else:
                     filter_.entries = ds
 
