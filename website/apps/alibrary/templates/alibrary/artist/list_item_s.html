@@ -41,7 +41,8 @@
 			{% endif %}
 			{% if item.media_artist.count > 0 %}
 			<li>
-				{% trans "Tracks" %}:&nbsp;<a href="#" style="vertical-align: top;">{{ item.media_artist.count }}<span class="filter icon"></span></a>
+                {% url alibrary-media-list as media_list %}
+				{% trans "Tracks" %}:&nbsp;<a href="{% spurl path=media_list query="artist={{ item.slug }}" %}" style="vertical-align: top;">{{ item.media_artist.count }}<span class="filter icon"></span></a>
 			</li>
 			{% endif %}
 			
