@@ -8,7 +8,13 @@
             <i class="icon {{ icon }}"></i>
         </div>
         <div class="title">
-            <h1>{{ page_title }}{% page_attribute "page_title" %}</h1>
+            <h1>
+                {% if page_title %}
+                    {{ page_title }}
+                {% else %}
+                    {% page_attribute "page_title" %}
+                {% endif %}
+            </h1>
         </div>
     </div>
 
@@ -19,8 +25,14 @@
     <!--
     <div class="left icontitle green icon60-library">
     -->
-    <div class="left icontitle green pull-right" style="padding: 24px 10px 24px 10px; font-size: 32px;">
-        {{ page_title }}{% page_attribute "page_title" %}
+    <div class="left icontitle green pull-right"
+         style="padding: 24px 10px 24px 10px; font-size: 32px;">
+        {% if page_title %}
+            {{ page_title }}
+        {% else %}
+            {% page_attribute "page_title" %}
+        {% endif %}
+
     </div>
     <div class="clear"></div>
 
