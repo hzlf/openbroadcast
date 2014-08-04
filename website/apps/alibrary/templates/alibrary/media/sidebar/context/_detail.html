@@ -14,7 +14,7 @@
         <ul class="unstyled">
 
 
-            {% if perms.alibrary.change_release %}
+            {% if perms.alibrary.change_media %}
             <li class="link">
                 <a class="hoverable" href="{{ object.get_edit_url }}" title="{% trans "Edit" %}">
                     <i class="icon icon-edit"></i>
@@ -23,7 +23,7 @@
             </li>
             {% endif %}
 
-            {% if perms.alibrary.change_release and user.is_staff %}
+            {% if perms.alibrary.change_media and user.is_staff %}
             <li class="link">
                 <a class="hoverable" href="{{ object.get_admin_url }}?next={{ object.get_absolute_url }}" title="{% trans "Administration view" %}">
                     <i class="icon icon-lock"></i>

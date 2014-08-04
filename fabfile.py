@@ -27,12 +27,12 @@ def skip_db():
 # available instances
 def openbroadcast_ch():
     env.site_id = 'openbroadcast.ch'
-    env.hosts = ['node05.scd.hazelfire.com']
+    env.hosts = ['172.20.10.204', '172.20.10.205']
     env.git_url = 'git@lab.hazelfire.com:hazelfire/obp/openbroadcast-ch.git'
     env.git_branches = ['development', 'master',]
     env.git_default_branch = 'development'
     env.path = '/var/www/openbroadcast.ch'
-    env.storage = '/storage/www_data/openbroadcast.ch'
+    env.storage = '/nas/storage/prod.openbroadcast.ch'
     env.user = 'root'
 
 def stage_openbroadcast_ch():

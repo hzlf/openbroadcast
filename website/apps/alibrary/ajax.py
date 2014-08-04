@@ -8,10 +8,11 @@ import requests
 from alibrary.models import APILookup, Release, Relation, Label, Artist, Media
 from lib.util.merge import merge_model_objects
 
+from alibrary.util.api_compare import get_from_provider
 
-# logging
+
 import logging
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 MUSICBRAINZ_HOST = getattr(settings, 'MUSICBRAINZ_HOST', None)
 DISCOGS_HOST = getattr(settings, 'DISCOGS_HOST', None)
@@ -20,65 +21,23 @@ DISCOGS_HOST = getattr(settings, 'DISCOGS_HOST', None)
 @dajaxice_register
 def api_lookup(request, *args, **kwargs):
 
-
-    log = logging.getLogger('alibrary.ajax.api_lookup')
-
     item_type = kwargs.get('item_type', None)
     item_id = kwargs.get('item_id', None)
     provider = kwargs.get('provider', None)
 
-    log.debug('type: %s - id: %s - provider: %s' % (item_type, item_id, provider))
-
-    data = {}
-
+    log.debug('api_lookup: %s - id: %s - provider: %s' % (item_type, item_id, provider))
 
     try:
-        if item_type == 'release':
-            i = Release.objects.get(pk=item_id)
-            ctype = ContentType.objects.get_for_model(i)
-            al, created = APILookup.objects.get_or_create(content_type=ctype, object_id=i.id, provider=provider)
-            if created:
-                log.debug('APILookup created: %s' % (al.pk))
-
-        if item_type == 'artist':
-            i = Artist.objects.get(pk=item_id)
-            ctype = ContentType.objects.get_for_model(i)
-            al, created = APILookup.objects.get_or_create(content_type=ctype, object_id=i.id, provider=provider)
-            if created:
-                log.debug('APILookup created: %s' % (al.pk))
-
-        if item_type == 'media':
-            i = Media.objects.get(pk=item_id)
-            ctype = ContentType.objects.get_for_model(i)
-            al, created = APILookup.objects.get_or_create(content_type=ctype, object_id=i.id, provider=provider)
-            if created:
-                log.debug('APILookup created: %s' % (al.pk))
-
-        if item_type == 'label':
-            i = Label.objects.get(pk=item_id)
-            ctype = ContentType.objects.get_for_model(i)
-            al, created = APILookup.objects.get_or_create(content_type=ctype, object_id=i.id, provider=provider)
-            if created:
-                log.debug('APILookup created: %s' % (al.pk))
-
-
-
-        data = al.get_from_api()
-
-        #print data
-
-
+        data = get_from_provider(item_type, item_id, provider)
+        return json.dumps(data, encoding="utf-8")
     except Exception, e:
-        log.warning('%s' % e)
+        log.warning('api_lookup error: %s', e)
+        return json.dumps({'error': e}, encoding="utf-8")
 
-    return json.dumps(data, encoding="utf-8")
 
 
 @dajaxice_register
 def provider_search_query(request, *args, **kwargs):
-
-
-    log = logging.getLogger('alibrary.ajax.api_lookup')
 
     item_type = kwargs.get('item_type', None)
     item_id = kwargs.get('item_id', None)
@@ -129,8 +88,6 @@ def provider_search_query(request, *args, **kwargs):
 
 @dajaxice_register
 def provider_search(request, *args, **kwargs):
-
-    log = logging.getLogger('alibrary.ajax.api_lookup')
 
     item_type = kwargs.get('item_type', None)
     item_id = kwargs.get('item_id', None)
@@ -207,11 +164,6 @@ def provider_search(request, *args, **kwargs):
 @dajaxice_register
 def provider_update(request, *args, **kwargs):
 
-    log = logging.getLogger('alibrary.ajax.api_lookup')
-
-
-    print kwargs
-
     item_type = kwargs.get('item_type', None)
     item_id = kwargs.get('item_id', None)
     provider = kwargs.get('provider', None)
@@ -265,11 +217,6 @@ listview functions (merge etc)
 
 @dajaxice_register
 def merge_items(request, *args, **kwargs):
-
-    log = logging.getLogger('alibrary.ajax.merge_items')
-
-
-    print kwargs
 
     item_type = kwargs.get('item_type', None)
     item_ids = kwargs.get('item_ids', None)

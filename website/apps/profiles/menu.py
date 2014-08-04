@@ -37,7 +37,7 @@ class ProfileMenu(CMSAttachMenu):
             )
             nodes.append(node)
 
-        if request.user.is_authenticated() and request.user.profile and request.user.profile.is_approved:
+        if request.user.has_perm('invitation.change_invitation'):
 
             node = NavigationNode(
                 _('My Invitations'),

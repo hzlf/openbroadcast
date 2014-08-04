@@ -3392,44 +3392,48 @@ section.item_inner .tab-pane section.profile.information dl {
 #playlist_editor .list_body .item.hover {
   background: transparent;
 }
-/* line 112, ../sass/apps/_playlist_editor.sass */
+/* line 109, ../sass/apps/_playlist_editor.sass */
+#playlist_editor .list_body .item.hover a {
+  text-decoration: none;
+}
+/* line 113, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .item.hover .row-fluid.playhead .waveform {
   background-color: #ddffd9;
 }
-/* line 114, ../sass/apps/_playlist_editor.sass */
+/* line 115, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .item.hover .row-fluid.playhead .envelope {
   opacity: 0.5;
   border-bottom-color: #ddffd9;
   border-left-color: transparent;
   border-right-color: transparent;
 }
-/* line 120, ../sass/apps/_playlist_editor.sass */
+/* line 121, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .item.readonly {
   height: 68px !important;
 }
-/* line 123, ../sass/apps/_playlist_editor.sass */
+/* line 124, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .item .waveform {
   width: 100%;
   height: 40px;
 }
-/* line 128, ../sass/apps/_playlist_editor.sass */
+/* line 129, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .item .fade-cue .row-fluid > div {
   text-align: right;
   padding: 0 0 0 0;
   margin-left: 4px;
 }
-/* line 132, ../sass/apps/_playlist_editor.sass */
+/* line 133, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .item .fade-cue .row-fluid > div input {
   margin: 0;
 }
-/* line 135, ../sass/apps/_playlist_editor.sass */
+/* line 136, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .item .fade-cue .row-fluid > div span {
   text-align: right;
   color: #5a5a5a;
   color: rgba(90, 90, 90, 0);
   padding-right: 2px;
 }
-/* line 140, ../sass/apps/_playlist_editor.sass */
+/* line 141, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .item .fade-cue input {
   font-size: 11px;
   width: 60px;
@@ -3440,150 +3444,150 @@ section.item_inner .tab-pane section.profile.information dl {
   text-align: right;
   padding: 1px 2px 1px 0;
 }
-/* line 154, ../sass/apps/_playlist_editor.sass */
+/* line 155, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .item.temporary {
   background: #efefef;
   padding: 10px;
   height: 30px;
 }
-/* line 158, ../sass/apps/_playlist_editor.sass */
+/* line 159, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .item.temporary i {
   font-size: 300%;
   margin-right: 10px;
 }
-/* line 163, ../sass/apps/_playlist_editor.sass */
+/* line 164, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body [class^="visible-while-"], #playlist_editor .list_body [class*=" visible-while-"] {
   display: none;
 }
-/* line 167, ../sass/apps/_playlist_editor.sass */
+/* line 168, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .paused .visible-while-paused {
   display: inline-block;
 }
-/* line 170, ../sass/apps/_playlist_editor.sass */
+/* line 171, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .playing {
   background-color: transparent;
 }
-/* line 173, ../sass/apps/_playlist_editor.sass */
+/* line 174, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .playing a {
   color: #00bb00 !important;
 }
-/* line 175, ../sass/apps/_playlist_editor.sass */
+/* line 176, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .playing .visible-while-playing {
   display: inline-block;
 }
-/* line 177, ../sass/apps/_playlist_editor.sass */
+/* line 178, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .playing .hidden-while-playing {
   display: none;
 }
-/* line 182, ../sass/apps/_playlist_editor.sass */
+/* line 183, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_body .hover .fade-cue input {
   background-color: white;
   border: 1px dotted #bbbbbb;
 }
-/* line 190, ../sass/apps/_playlist_editor.sass */
+/* line 191, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .add-content {
   margin-top: 20px;
   background: #efefef;
 }
-/* line 193, ../sass/apps/_playlist_editor.sass */
+/* line 194, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .add-content .info {
   padding: 10px 10px 0;
 }
-/* line 195, ../sass/apps/_playlist_editor.sass */
+/* line 196, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .add-content .info p {
   padding: 5px 0 0 0;
 }
-/* line 200, ../sass/apps/_playlist_editor.sass */
+/* line 201, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_search {
   background: #efefef;
 }
-/* line 203, ../sass/apps/_playlist_editor.sass */
+/* line 204, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_search.hover, #playlist_editor .list_search.focus {
   background: #eee6ff;
 }
-/* line 206, ../sass/apps/_playlist_editor.sass */
+/* line 207, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_search form {
   padding: 10px;
   margin-bottom: 0;
   -moz-placeholder-color: #777777;
 }
-/* line 209, ../sass/apps/_playlist_editor.sass */
+/* line 210, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_search form input {
   width: 806px;
 }
-/* line 212, ../sass/apps/_playlist_editor.sass */
+/* line 213, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_search form ::-webkit-input-placeholder {
   color: #777777;
 }
-/* line 220, ../sass/apps/_playlist_editor.sass */
+/* line 221, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_search .result {
   z-index: 10;
   position: absolute;
   background: #333333;
   width: 830px;
 }
-/* line 227, ../sass/apps/_playlist_editor.sass */
+/* line 228, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_search .result .listing .item {
   cursor: pointer;
   padding: 5px;
   clear: both;
   border-bottom: 1px solid #666666;
 }
-/* line 232, ../sass/apps/_playlist_editor.sass */
+/* line 233, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_search .result .listing .item .image {
   width: 60px;
   float: left;
 }
-/* line 235, ../sass/apps/_playlist_editor.sass */
+/* line 236, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_search .result .listing .item .image img {
   width: 40px;
   height: 40px;
 }
-/* line 238, ../sass/apps/_playlist_editor.sass */
+/* line 239, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_search .result .listing .item .information {
   color: white;
 }
-/* line 240, ../sass/apps/_playlist_editor.sass */
+/* line 241, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_search .result .listing .item .information span.title {
   font-weight: bold;
   font-size: 110%;
 }
-/* line 243, ../sass/apps/_playlist_editor.sass */
+/* line 244, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_search .result .listing .item .information span.title small {
   font-size: 94%;
   font-weight: normal;
 }
-/* line 248, ../sass/apps/_playlist_editor.sass */
+/* line 249, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_search .result .listing .item .information ul {
   margin: 0 0 0px 25px;
 }
-/* line 251, ../sass/apps/_playlist_editor.sass */
+/* line 252, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_search .result .listing .item.hover {
   background: #ddffd9;
 }
-/* line 253, ../sass/apps/_playlist_editor.sass */
+/* line 254, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .list_search .result .listing .item.hover .information {
   color: #333333;
 }
-/* line 260, ../sass/apps/_playlist_editor.sass */
+/* line 261, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload {
   background: #efefef;
 }
-/* line 264, ../sass/apps/_playlist_editor.sass */
+/* line 265, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload.hover {
   background: #eee6ff;
 }
-/* line 267, ../sass/apps/_playlist_editor.sass */
+/* line 268, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload form, #playlist_editor .upload table {
   padding: 10px;
   margin-bottom: 0;
   width: 806px;
 }
-/* line 272, ../sass/apps/_playlist_editor.sass */
+/* line 273, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload form .fileupload-buttonbar, #playlist_editor .upload table .fileupload-buttonbar {
   position: relative;
 }
-/* line 274, ../sass/apps/_playlist_editor.sass */
+/* line 275, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload form .fileupload-buttonbar input, #playlist_editor .upload table .fileupload-buttonbar input {
   position: absolute;
   top: 0;
@@ -3598,105 +3602,105 @@ section.item_inner .tab-pane section.profile.information dl {
   cursor: pointer;
   width: 100%;
 }
-/* line 287, ../sass/apps/_playlist_editor.sass */
+/* line 288, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload form .fileupload-buttonbar span, #playlist_editor .upload table .fileupload-buttonbar span {
   width: 786px;
 }
-/* line 291, ../sass/apps/_playlist_editor.sass */
+/* line 292, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload table > .files {
   background: white;
 }
-/* line 293, ../sass/apps/_playlist_editor.sass */
+/* line 294, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload table > .files .progress-holder {
   width: 200px;
 }
-/* line 297, ../sass/apps/_playlist_editor.sass */
+/* line 298, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload table > .files .cancel {
   text-align: right;
 }
-/* line 301, ../sass/apps/_playlist_editor.sass */
+/* line 302, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item {
   padding: 5px;
   margin-bottom: 2px;
   background: #fafafa;
 }
-/* line 305, ../sass/apps/_playlist_editor.sass */
+/* line 306, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item h3 {
   font-family: Helvetica, Arial, sans-serif;
   font-size: 12px;
   text-transform: none;
   font-style: normal;
 }
-/* line 311, ../sass/apps/_playlist_editor.sass */
+/* line 312, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .image img {
   width: 60px;
   height: 60px;
 }
-/* line 315, ../sass/apps/_playlist_editor.sass */
+/* line 316, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item.done, #playlist_editor .upload .importfile.item.duplicate {
   display: none;
 }
-/* line 318, ../sass/apps/_playlist_editor.sass */
+/* line 319, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item.ready {
   background: #fafafa;
 }
-/* line 322, ../sass/apps/_playlist_editor.sass */
+/* line 323, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .result-set {
   padding: 2px 0;
   border-bottom: 1px solid white;
 }
-/* line 325, ../sass/apps/_playlist_editor.sass */
+/* line 326, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .result-set ul {
   margin-bottom: 0;
 }
-/* line 327, ../sass/apps/_playlist_editor.sass */
+/* line 328, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .result-set img {
   width: 60px;
   height: 60px;
 }
-/* line 330, ../sass/apps/_playlist_editor.sass */
+/* line 331, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .result-set.selected {
   background-color: #f4fff3;
 }
-/* line 332, ../sass/apps/_playlist_editor.sass */
+/* line 333, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .result-set.hover {
   background-color: #fefefe;
 }
-/* line 336, ../sass/apps/_playlist_editor.sass */
+/* line 337, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .result-set.provider-tag .checkbox input {
   display: none;
 }
-/* line 339, ../sass/apps/_playlist_editor.sass */
+/* line 340, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .result-set ul {
   margin: 0;
 }
-/* line 342, ../sass/apps/_playlist_editor.sass */
+/* line 343, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .result-set ul > li.small {
   font-size: 11px;
 }
-/* line 344, ../sass/apps/_playlist_editor.sass */
+/* line 345, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .result-set ul > li.key {
   font-weight: bold;
   padding: 0 5px 0 0;
   width: 50px;
 }
-/* line 351, ../sass/apps/_playlist_editor.sass */
+/* line 352, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .advanced-fields, #playlist_editor .upload .importfile.item .toggle {
   display: none;
 }
-/* line 354, ../sass/apps/_playlist_editor.sass */
+/* line 355, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .form-result {
   margin: 10px 0;
 }
-/* line 356, ../sass/apps/_playlist_editor.sass */
+/* line 357, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .form-result h4 {
   display: none;
 }
-/* line 359, ../sass/apps/_playlist_editor.sass */
+/* line 360, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .form-result .row-fluid label, #playlist_editor .upload .importfile.item .form-result .row-fluid input {
   margin: 0;
 }
-/* line 363, ../sass/apps/_playlist_editor.sass */
+/* line 364, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .progress {
   width: 100%;
   height: 2px;
@@ -3704,117 +3708,117 @@ section.item_inner .tab-pane section.profile.information dl {
   margin: 0 5px;
   width: 808px;
 }
-/* line 369, ../sass/apps/_playlist_editor.sass */
+/* line 370, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .upload .importfile.item .progress .bar {
   background: #00bb00;
   padding: 0;
 }
-/* line 375, ../sass/apps/_playlist_editor.sass */
+/* line 376, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .summary {
   border-top: 1px solid #efefef !important;
 }
-/* line 377, ../sass/apps/_playlist_editor.sass */
+/* line 378, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .summary.error {
   background-color: #fcf8e3;
 }
-/* line 385, ../sass/apps/_playlist_editor.sass */
+/* line 386, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .summary .row-fluid > div {
   padding: 5px;
   margin: 1px 0;
 }
-/* line 390, ../sass/apps/_playlist_editor.sass */
+/* line 391, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .summary span {
   text-align: right;
   color: #5a5a5a;
   padding-right: 2px;
 }
-/* line 395, ../sass/apps/_playlist_editor.sass */
+/* line 396, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .summary span.duration-total {
   font-weight: bold;
 }
-/* line 399, ../sass/apps/_playlist_editor.sass */
+/* line 400, ../sass/apps/_playlist_editor.sass */
 #playlist_editor .summary span.duration-difference {
   color: red;
 }
 
-/* line 409, ../sass/apps/_playlist_editor.sass */
+/* line 410, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .criterias {
   margin-top: 20px;
 }
-/* line 411, ../sass/apps/_playlist_editor.sass */
+/* line 412, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .criterias .title {
   font-weight: bold;
 }
-/* line 414, ../sass/apps/_playlist_editor.sass */
+/* line 415, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .action-group ul {
   border-top: 1px solid #cccccc !important;
 }
-/* line 419, ../sass/apps/_playlist_editor.sass */
+/* line 420, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform.listing.fixed {
   position: fixed;
   width: 260px;
   top: 120px;
 }
-/* line 424, ../sass/apps/_playlist_editor.sass */
+/* line 425, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item {
   padding: 2px 4px 2px 4px;
   margin: 5px 0 5px 0;
   background-color: #fafafa;
 }
-/* line 430, ../sass/apps/_playlist_editor.sass */
+/* line 431, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item a.toggle {
   color: #333333;
 }
-/* line 432, ../sass/apps/_playlist_editor.sass */
+/* line 433, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item a.toggle:hover {
   text-decoration: none;
 }
-/* line 438, ../sass/apps/_playlist_editor.sass */
+/* line 439, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item .information p {
   padding: 4px 0 0 0;
   margin: 0;
 }
-/* line 442, ../sass/apps/_playlist_editor.sass */
+/* line 443, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item .information dl {
   margin: 0;
 }
-/* line 444, ../sass/apps/_playlist_editor.sass */
+/* line 445, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item .information dl dt {
   font-weight: normal;
   text-align: left;
 }
-/* line 447, ../sass/apps/_playlist_editor.sass */
+/* line 448, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item .information dl dd {
   font-style: italic;
   text-align: right;
   padding-right: 4px;
 }
-/* line 452, ../sass/apps/_playlist_editor.sass */
+/* line 453, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item .information dl dd.mark, .playlist-edit.transform .item .information dl dt.mark {
   font-weight: bold;
   color: orangered;
 }
-/* line 456, ../sass/apps/_playlist_editor.sass */
+/* line 457, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item .title {
   font-weight: normal;
 }
-/* line 460, ../sass/apps/_playlist_editor.sass */
+/* line 461, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item.warning {
   background-color: #fcf8e3;
 }
-/* line 463, ../sass/apps/_playlist_editor.sass */
+/* line 464, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item.warning .information {
   display: block;
 }
-/* line 466, ../sass/apps/_playlist_editor.sass */
+/* line 467, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item.success {
   background-color: #ddffd9;
 }
-/* line 473, ../sass/apps/_playlist_editor.sass */
+/* line 474, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item.hover.done {
   background-color: #ddffd9;
 }
-/* line 479, ../sass/apps/_playlist_editor.sass */
+/* line 480, ../sass/apps/_playlist_editor.sass */
 .playlist-edit.transform .item.hover.ready {
   background-color: #ddffd9;
 }

@@ -277,40 +277,76 @@ table.front td
 // heading new
 #heading
   position: relative
-  div.inner
-    clear: both
-    height: 60px
-    div.icon
-      float: left
-      i
-        font-size: 50px
-        line-height: 50px
-        color: $main-a
-    div.title
-      padding: 14px 0 0 66px !important
-      h1
-        font-size: 26px
-        line-height: 26px
-        color: $main-a
-        //font-family: "quatro-slab"
-        font-family: "Times New Roman", Times, serif
-        font-weight: 700
-        font-style: italic
+
+  width: 830px
+  padding: 12px 0 24px
+
+  .page-title
+    float: left
+    width: 330px
+    h1
+      margin: 0 0 0 0 !important
+      padding: 0 0 0 0 !important
+      font-size: 32px
+      line-height: 32px
+      text-align: right
+      color: #0b0
+
+  .global-search
+    float: left
+    width: 500px
+    form
+      margin: 0 0 0 0 !important
+      padding: 0 0 0 0 !important
+      input
+        border: none
+        height: 19px
+        padding: 6px
 
 
-// heading legacy. TODO: remove after refactoring
-#heading
-  position: relative
-  /* margin: 10px 250px 19px 0px */
-  // margin: 10px 0px 19px 0px
-  .title
-    font-size: 26px
-    line-height: 28px
-    padding: 21px 0px 18px 0px
-  .icontitle
-    font-size: 26px
-    line-height: 30px
-    padding: 22px 0px 18px 75px
+      .ac-results
+        background: #333
+        position: absolute
+        top: 44px
+        width: 830px
+        a
+          color: white
+          padding: 8px !important
+
+
+
+#heading.heading-alt
+
+  padding-bottom: 12px
+  margin-bottom: 12px
+  border-bottom: 1px solid #eee
+
+  .page-title
+    float: left
+    width: 330px
+    h1
+      margin: 0 0 0 0 !important
+      padding: 0 0 0 0 !important
+      font-size: 32px
+      line-height: 32px
+      text-align: left
+      color: #63C
+      font-weight: bold
+
+      span.extra
+        font-weight: normal !important
+        text-transform: lowercase
+
+  .global-search
+    float: left
+    width: 500px
+    form
+      //text-align: right
+
+
+
+
+
 
 .headingaction
   margin-top: 19px

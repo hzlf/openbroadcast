@@ -27,17 +27,17 @@ def construct(request, form, formsets):
 
 
                 # remove some 'wrong' messages
+
                 co = formset.changed_objects
+                """
                 for el in formset.changed_objects:
-                    print el
                     if el[0].__class__.__name__ == 'Media':
                         if el[0].release.publish_date:
                             if 'license' in el[1]: el[1].remove('license')
-
                     if len(el[1]) < 1:
                         co.remove(el)
+                """
 
-                print co
 
                 for changed_object, changed_fields in co:
 
@@ -45,12 +45,14 @@ def construct(request, form, formsets):
                     skip = False
                     if changed_object.__class__.__name__ == 'Relation':
                         if 'service' in changed_fields:
+                            #pass
                             skip = True
 
                     if changed_object.__class__.__name__ == 'Media':
                         if 'license' in changed_fields:
                             if changed_object.release.publish_date:
-                                skip = True
+                                pass
+                                #skip = True
 
 
                     if not skip:

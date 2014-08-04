@@ -325,7 +325,7 @@ def profile_mentor(request, pk, cancel = False):
 
 
 @login_required
-def profile_approve(request, pk):
+def profile_approve(request, pk, level):
 
     profile = get_object_or_404(Profile, pk=pk)
     
@@ -333,8 +333,7 @@ def profile_approve(request, pk):
         return respond(request, 403)
     
     # assign groups
-    profile.approve(mentor=request.user)
-    
+    profile.approve(mentor=request.user, level=level)
 
     return respond(request, 201)
 

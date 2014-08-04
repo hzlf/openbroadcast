@@ -83,18 +83,6 @@
 			{{ object.updated|date:"DATETIME_FORMAT" }}
 		</dd>
 
-		{% if object.publish_date %}
-		<dt>
-			{% trans "Published" %}:
-		</dt>
-		<dd>
-			{{ object.publish_date|date:"SHORT_DATE_FORMAT" }}
-			{% if object.publisher %}
-			{% trans "by" %}: <a href="#">{{ object.publisher }}</a>
-			{% endif %}
-		</dd>
-		{% endif %}
-
 		{% if object.releasedate %}
 		<dt>
 			{% trans "Releasedate" %}:

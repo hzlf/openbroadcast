@@ -25,8 +25,9 @@ def invite(request, success_url=None,
            template_name='invitation/invitation_form.html',
            extra_context=None):
 
-    if not request.user.profile.is_approved:
+    if not request.user.has_perm('invitation.add_invitation'):
         return HttpResponseForbidden('Unauthorized')
+
 
     """
     Create an invitation and send invitation email.

@@ -1,4 +1,4 @@
-{% load compress cms_tags sekizai_tags value_from_settings esi backfeed_tags raven %}<!DOCTYPE html>
+{% load compress cms_tags sekizai_tags value_from_settings esi backfeed_tags raven loginas_tags %}<!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
     <head>
 
@@ -75,8 +75,9 @@
 
     </head>
 
+    {% loginas_is_active as loginas_active %}
     <body id="body"
-          class="base {% block body_class %}{% endblock %}{% if user.is_authenticated %} authenticated{% endif %}"
+          class="base {% block body_class %}{% endblock %}{% if user.is_authenticated %} authenticated{% endif %} {% if loginas_active %}loginas-active{% endif %}"
           data-spy="scroll"
           data-target=".subnav"
           data-offset="50">
@@ -133,7 +134,7 @@
                             <div class="span9 messages">
                                 {% for message in messages %}
                                     <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-                                        {{ message }}
+                                        {{ message|linebreaksbr }}
                                     </div>
                                 {% endfor %}
                             </div>
@@ -192,6 +193,27 @@
 
         </section>
         {% endcomment %}
+
+        {% if loginas_active %}
+        <section id="loginas_message">
+
+            <div>
+                <h2>WARNING: Currently logged in as user "{{ user }}"!</h2>
+                <p>
+                    <a href="{% url loginas-user-login loginas_active %}" class="btn btn-primary">Back to own account</a>
+                </p>
+            </div>
+
+        </section>
+        {% endif %}
+
+
+
+
+
+
+
+
 
 
 

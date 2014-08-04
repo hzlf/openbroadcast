@@ -131,7 +131,7 @@
 
             <li>
                 <a href="#"
-                   class="{% if not perms.alibrary.downoad_media or not item.release.publish_date %} disabled{% endif %}"
+                   class="{% if not perms.alibrary.downoad_media %} disabled{% endif %}"
                    data-ct="media"
                    data-id="{{ item.pk }}"
                    data-action="download"

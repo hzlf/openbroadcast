@@ -21,7 +21,6 @@ from l10n.models import Country
 
 
 DEFAULT_GROUP = 'Listener'
-APPROVED_GROUPS = ('Member', 'Mentor',)
 
 class MigrationMixin(models.Model):
     
@@ -116,17 +115,29 @@ class Profile(MigrationMixin):
 
     @property
     def is_approved(self):
-
-        if self.user in Group.objects.get(name='Member').user_set.all():
+        if self.user in Group.objects.get(name='Mentor').user_set.all():
             return True
 
         return
     
-    def approve(self, mentor):
-        groups = Group.objects.filter(name__in=APPROVED_GROUPS)
+    def approve(self, mentor, level):
+
+        groups_to_add = []
+
+        if level == 'music_pro':
+            groups_to_add = ('Music PRO', 'Mentor',)
+
+        if level == 'radio_pro':
+            groups_to_add = ('Radio PRO', 'Mentor',)
+
+
+        groups = Group.objects.filter(name__in=groups_to_add)
         
         for group in groups:
             self.user.groups.add(group)
+
+        self.user.groups.remove(Group.objects.get(name=DEFAULT_GROUP))
+
 
     @property
     def age(self):
@@ -278,11 +289,9 @@ def add_to_group(sender, instance, **kwargs):
     default_group, created = Group.objects.get_or_create(name=DEFAULT_GROUP)
     
     if not instance.groups.filter(pk=default_group.pk).exists():
-        print 'NOT IN GROUP'
         instance.groups.add(default_group)
         instance.save()
-    else:
-        print 'ALREADY IN GROUP'
+
        
 #post_save.connect(add_to_group, sender=User) 
 

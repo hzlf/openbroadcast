@@ -260,7 +260,7 @@ class ArtistEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Artist
     form_class = ArtistForm
     template_name = "alibrary/artist_edit.html"
-    permission_required = 'alibrary.edit_artist'
+    permission_required = 'alibrary.change_artist'
     raise_exception = True
     success_url = '#'
 
@@ -315,6 +315,22 @@ class ArtistEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         msg = change_message.construct(self.request, form, [named_formsets['relation'],
                                                             named_formsets['member'],
                                                             named_formsets['alias'], ])
+
+
+        # hack
+        namevariations_text = form.cleaned_data['namevariations']
+        if namevariations_text:
+            self.object.namevariations.all().delete()
+            variations = namevariations_text.split(',')
+            for v in variations:
+                nv = NameVariation(name=v.strip(), artist=self.object)
+                nv.save()
+
+        d_tags = form.cleaned_data['d_tags']
+        if d_tags:
+            self.object.tags = d_tags
+
+
         with reversion.create_revision():
             self.object = form.save()
             reversion.set_user(self.request.user)

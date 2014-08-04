@@ -16,13 +16,28 @@ def mentor_for_user(context, profile, mentor):
     
     if profile.mentor == mentor and not profile.is_approved:
         
-        notes = _("You're mentoring this user. Approving his/her profile will give full platform-access to the respective user. Pleace think twice before handling!")
-        
+        notes = _("You're mentoring this user. Approving his/her profile will give full platform-access to the respective user. Think twice before handling!\nPlease remember, only professionals (radio or music business) should be given access to the platform!")
+
+
         actions.append({
                         'description': _('asd'),
-                        'name': _('Approve profile'),
+                        'name': _('Approve as MUSIC PROFESSIONAL'),
                         'icon': 'star',
-                        'url': reverse('profiles-profile-mentor-approve', kwargs={'pk': profile.pk}),
+                        'url': reverse('profiles-profile-mentor-approve',
+                                       kwargs={
+                                           'pk': profile.pk,
+                                           'level': 'music_pro',
+                                       }),
+                        })
+        actions.append({
+                        'description': _('asd'),
+                        'name': _('Approve as RADIO PROFESSIONAL'),
+                        'icon': 'star',
+                        'url': reverse('profiles-profile-mentor-approve',
+                                       kwargs={
+                                           'pk': profile.pk,
+                                           'level': 'radio_pro',
+                                       }),
                         })
         actions.append({
                         'description': _('asd'),

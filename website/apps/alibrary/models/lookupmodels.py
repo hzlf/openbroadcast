@@ -19,7 +19,7 @@ from alibrary.util.relations import get_service_by_url
 
 # logging
 import logging
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 MUSICBRAINZ_HOST = getattr(settings, 'MUSICBRAINZ_HOST', 'musicbrainz.org')
@@ -88,8 +88,7 @@ class APILookup(models.Model):
     Generic wrapper - distributes to corresponding method
     """
     def get_from_api(self):
-        
-        log = logging.getLogger('alibrary.lookupmodels.get_from_api')
+
         log.debug('provider: %s' % self.provider)
         
         if self.provider == 'discogs':
@@ -110,8 +109,7 @@ class APILookup(models.Model):
     Discogs wrapper - distribute to entities
     """
     def get_from_discogs(self):
-        
-        log = logging.getLogger('alibrary.lookupmodels.get_from_discogs')
+
         log.debug('content_object: %s' % self.content_object)
 
         self.uri = self.content_object.relations.filter(service='discogs')[0].url
@@ -133,7 +131,6 @@ class APILookup(models.Model):
     """
     def get_from_musicbrainz(self):
 
-        log = logging.getLogger('alibrary.lookupmodels.get_from_musicbrainz')
         log.debug('content_object: %s' % self.content_object)
 
         try:
@@ -159,9 +156,8 @@ class APILookup(models.Model):
 
     def get_artist_from_discogs(self):
 
-        log = logging.getLogger('alibrary.lookupmodels.get_artist_from_discogs')
 
-        log.info('uri: %s' % self.uri)
+        log.info('discogs artist uri: %s' % self.uri)
 
 
         # some hacks to convert site url to api id
@@ -550,8 +546,6 @@ class APILookup(models.Model):
 
         log.info('uri: %s' % self.uri)
 
-
-        # TODO: make more dynamic...
         # some hacks to convert site url to api id
         id = self.uri.split('/')[-1]
         url = "http://%s/ws/2/release/%s?fmt=json&inc=aliases+url-rels+annotation+tags+artist-rels+recordings+artists+labels" % (MUSICBRAINZ_HOST, id)

@@ -344,6 +344,7 @@ class License(MPTTModel, MigrationMixin):
     
     is_default = models.NullBooleanField(default=False, null=True, blank=True)
     selectable = models.NullBooleanField(default=True, null=True, blank=True)
+    is_promotional = models.NullBooleanField(default=False, null=True, blank=True)
 
 
     class Translation(TranslationModel):

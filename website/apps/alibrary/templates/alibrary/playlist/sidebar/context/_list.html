@@ -1,11 +1,11 @@
-{% load i18n %}
+{% load i18n guardian_tags %}
 
 <div class="menu-context">
 
 
     <div class="action-group">
         <ul class="unstyled">
-            {% if user.is_authenticated %}
+            {% if perms.alibrary.create_playlist %}
                 <li class="link">
                     <a class="hoverable"
                        href="{% url alibrary-playlist-create %}"

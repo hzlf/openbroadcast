@@ -496,7 +496,8 @@ class PlaylistFilter(django_filters.FilterSet):
                     nd = []
                     for d in ds:
                         if d[0] == 'NULL':
-                            pass
+                            nd.append([d[0], d[1], _('Unknown')])
+                            #pass
                         else:
                             if d[0] != None:
                                 for x in alibrary_settings.PLAYLIST_TYPE_CHOICES:

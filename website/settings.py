@@ -218,8 +218,9 @@ CMS_REDIRECTS = True
 
 CMS_TEMPLATES = (
     # generic templates
-    ('_templates/layout_a.html', 'Base - X column & Menu'),
-    ('_templates/home.html', 'Home template'),
+    ('_templates/layout_a.html', 'Base Template'),
+    ('_templates/layout_b.html', 'Alternative Title'),
+    ('_templates/home.html', 'Home Template'),
 )
 
 WIDTH_INNER = 960
@@ -430,6 +431,7 @@ INSTALLED_APPS = (
     #'cmsplugin_soundcloud',
     'cmsplugin_pagedown',
     'cmsplugin_git',
+    'cmsplugin_toc',
     'stepguide',
 
 
@@ -458,6 +460,8 @@ INSTALLED_APPS = (
     # alternative registration
     'registration',
     'social_auth',
+    #'django_auth_policy',
+    'loginas',
     'dropbox',
     'invitation',
 
@@ -490,6 +494,7 @@ INSTALLED_APPS = (
     'arating',
     'asearch',
     'backfeed',
+    'statistics',
     #'django_db_signals',
 
     # blog
@@ -518,7 +523,7 @@ INSTALLED_APPS = (
     'obp_legacy',
 
     # helpers
-    'dev',
+    #'dev',
 
     # spf
     #'csvimport',
@@ -1044,11 +1049,14 @@ logging.basicConfig(level=logging.DEBUG)
 
 # try to override from local_config.py
 DEBUG_APPS = None
+DEV_APPS = None
 DEBUG_MIDDLEWARE = None
 try:
     from local_settings import *
     if DEBUG_APPS:
         INSTALLED_APPS += DEBUG_APPS
+    if DEV_APPS:
+        INSTALLED_APPS += DEV_APPS
     if DEBUG_MIDDLEWARE:
         MIDDLEWARE_CLASSES += DEBUG_MIDDLEWARE
 except ImportError:

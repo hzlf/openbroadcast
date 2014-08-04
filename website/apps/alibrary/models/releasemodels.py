@@ -157,8 +157,12 @@ class Release(MigrationMixin):
     
     releasestatus = models.CharField(max_length=60, blank=True, choices=RELEASESTATUS_CHOICES)
     
-    #publish_date = models.DateTimeField(default=datetime.now, blank=True, null=True, help_text=_('If set this Release will not be published on the site before the given date.'))
-    publish_date = models.DateTimeField(blank=True, null=True, help_text=_('If set this Release will not be published on the site before the given date.'))
+    # publish_date = models.DateTimeField(default=datetime.now, blank=True, null=True, help_text=_('If set this Release will not be published on the site before the given date.'))
+    # publish_date = models.DateTimeField(blank=True, null=True, help_text=_('If set this Release will not be published on the site before the given date.'))
+    @property
+    def publish_date(self):
+        # compatibility hack TODO: refactor all dependencies
+        return datetime.utcnow()
 
     main_format = models.ForeignKey(Mediaformat, null=True, blank=True, on_delete=models.SET_NULL)
     
@@ -282,9 +286,15 @@ class Release(MigrationMixin):
 
     @property
     def is_promotional(self):
-        if self.releasedate and self.publish_date:
-            if self.releasedate > self.publish_date.date() and self.releasedate > datetime.now().date():
-                return True
+        # TODO: refactor to license query
+        #if self.releasedate and self.publish_date:
+        #    if self.releasedate > self.publish_date.date() and self.releasedate > datetime.now().date():
+        #        return True
+
+        if License.objects.filter(media_license__in=self.get_media(),
+                                  is_promotional=True).distinct().exists():
+            return True
+
 
         return False
 

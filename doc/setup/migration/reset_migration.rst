@@ -30,17 +30,17 @@ Tables on ":abbr:`legacy-legacy (a.k.a. ELGG)`"
 
 .. code-block:: sql
 
-    UPDATE `elgg_cm_master` SET `migrated` = NULL WHERE `ident` > '0';
+    UPDATE `elgg_cm_master` SET `migrated` = NULL WHERE;
 
 
 Tables on ":abbr:`legacy (a.k.a. Music Library)`"
 
 .. code-block:: sql
 
-    UPDATE `medias` SET `migrated` = NULL WHERE `id` > '0';
-    UPDATE `artists` SET `migrated` = NULL WHERE `id` > '0';
-    UPDATE `labels` SET `migrated` = NULL WHERE `id` > '0';
-    UPDATE `releases` SET `migrated` = NULL WHERE `id` > '0';
+    UPDATE `medias` SET `migrated` = NULL;
+    UPDATE `artists` SET `migrated` = NULL;
+    UPDATE `labels` SET `migrated` = NULL;
+    UPDATE `releases` SET `migrated` = NULL;
 
 
 ./manage.py cleanup

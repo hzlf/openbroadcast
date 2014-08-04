@@ -23,11 +23,12 @@ consult a specific backend's documentation for details.
 
 """
 
+
 from django.conf.urls import patterns
 from django.conf.urls import url
 
 from django.contrib.auth import views as auth_views
-
+from django.contrib.auth.forms import SetPasswordForm
 
 urlpatterns = patterns('',
                        url(r'^login/$',
@@ -40,6 +41,8 @@ urlpatterns = patterns('',
                            name='auth_logout'),
                        url(r'^password/change/$',
                            auth_views.password_change,
+                           {'post_change_redirect': '/network/profiles/edit/',
+                            'password_change_form': SetPasswordForm},
                            name='auth_password_change'),
                        url(r'^password/change/done/$',
                            auth_views.password_change_done,

@@ -239,7 +239,7 @@ class MediaEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Media
     form_class = MediaForm
     template_name = "alibrary/media_edit.html"
-    permission_required = 'alibrary.edit_media'
+    permission_required = 'alibrary.change_media'
     raise_exception = True
     success_url = '#'
 
@@ -289,6 +289,10 @@ class MediaEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
                 formset_save_func(formset)
             else:
                 formset.save()
+
+        d_tags = form.cleaned_data['d_tags']
+        if d_tags:
+            self.object.tags = d_tags
 
         msg = change_message.construct(self.request, form, [named_formsets['relation'], named_formsets['extraartist'],])
         with reversion.create_revision():

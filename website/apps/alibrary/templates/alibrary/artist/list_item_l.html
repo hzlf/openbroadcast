@@ -26,7 +26,6 @@
         </ul>
 
     </div>
-
     <div class="wrapper_info">
 
         <div class="wrapper_inner">
@@ -49,17 +48,10 @@
                             {% if item.date_start %}&nbsp;*{{ item.date_start.year }}{% endif %}
                             {% if item.date_end %}&nbsp;&#10013;{{ item.date_end.year }}{% endif %}
                         </span>
-                        <!--
-                        {% if item.disambiguation %}
-                            {{ item.disambiguation }}
-                        {% endif %}&nbsp;
-                        -->
                     </li>
                 </ul>
 
                 <ul class="unstyled horizontal">
-
-
                     {% if item.get_releases.count > 0 %}
                         <li>
                             {% url alibrary-release-list as release_list %}
@@ -70,8 +62,6 @@
                                 class="filter icon"></span></a>
                         </li>
                     {% endif %}
-
-
                     {% if item.media_artist.count > 0 %}
                         <li style="padding-left: 30px">
                             {% url alibrary-media-list as media_list %}
@@ -82,7 +72,6 @@
                                 class="filter icon"></span></a>
                         </li>
                     {% endif %}
-
                 </ul>
             </div>
 
@@ -93,48 +82,16 @@
                             <a href="{{ relation.url }}" class="skip-external"
                                title="Show on {{ relation.get_service_display }}"><i
                                     class="cicon-{{ relation.service }}"></i></a>
-                            <!--
-					<a href="{{ relation.url }}" class="skip-external" title="Show on {{ relation.get_service_display }}">{{ relation.service }}</a>
-					-->
                         </li>
                     {% endfor %}
                 </ul>
             </div>
-
-
         </div>
-
-
     </div>
 
-
     <div class="wrapper_action">
-
-
         <ul class="unstyled action secondary horizontal clearfix">
-
-            {% comment %}
-            <li>
-                <a href="#"
-                   class="{% if not user.is_authenticated %} disabled{% endif %}"
-                   data-action="collect"
-                   title="{% trans "Add to playlist" %}">
-                    <i class="icon icon-plus"></i>
-                </a>
-            </li>
-
-            <li>
-                <a href="#release:{{ item.pk }}:mp3"
-                   class="downloadable queue{% if not perms.alibrary.downoad_media %} disabled{% endif %}"
-                   data-ct="release"
-                   data-resource_uri="{{ item.get_api_url }}"
-                   title="{% trans "Download" %}">
-                    <i class="icon icon-download-alt"></i>
-                </a>
-            </li>
-            {% endcomment %}
-
-            {% if  perms.alibrary.edit_release %}
+            {% if  perms.alibrary.change_artist %}
                 <li>
                     <a href="{{ item.get_edit_url }}"
                        class=""
@@ -143,12 +100,8 @@
                     </a>
                 </li>
             {% endif %}
-
         </ul>
-
     </div>
-
-
 </div>
 
 

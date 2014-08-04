@@ -48,10 +48,10 @@ ORDER_BY = [
         'key': 'releasedate',
         'name': _('Releasedate')
     },
-    {
-        'key': 'publish_date',
-        'name': _('Publishing date')
-    },
+    #{
+    #    'key': 'publish_date',
+    #    'name': _('Publishing date')
+    #},
     {
         'key': 'updated',
         'name': _('Last modified')
@@ -174,6 +174,7 @@ class ReleaseListView(PaginationMixin, ListView):
             self.relation_filter.append(f)
 
         # filter by promo flag
+        # TODO: refactor query, publish_date is depreciated
         promo_filter = self.request.GET.get('promo', None)
         if promo_filter and promo_filter.isnumeric() and int(promo_filter) == 1:
             from django.db.models import F
@@ -247,7 +248,7 @@ class ReleaseEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Release
     form_class = ReleaseForm
     template_name = 'alibrary/release_edit.html'
-    permission_required = 'alibrary.edit_release'
+    permission_required = 'alibrary.change_release'
     raise_exception = True
     success_url = '#'
 
@@ -302,11 +303,18 @@ class ReleaseEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
         publish = self.do_publish
 
+        d_tags = form.cleaned_data['d_tags']
+        if d_tags:
+            self.object.tags = d_tags
+
+        """
+        # publishing is depreciated
         if publish:
             from datetime import datetime
             self.object.publish_date = datetime.now()
             self.object.publisher = self.request.user
             self.object.save()
+        """
 
         msg = change_message.construct(self.request, form, [named_formsets['relation'],
                                                             named_formsets['albumartist'],
@@ -339,7 +347,7 @@ class __ReleaseEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
     success_url = '#'
     form_class = ReleaseForm
 
-    permission_required = 'alibrary.edit_release'
+    permission_required = 'alibrary.change_release'
     raise_exception = True
     
     def __init__(self, *args, **kwargs):
@@ -375,7 +383,7 @@ class __ReleaseEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
 
 
     #def dispatch(self, request, *args, **kwargs):
-    #    if not request.user.has_perm('alibrary.edit_release'):
+    #    if not request.user.has_perm('alibrary.change_release'):
     #        return HttpResponseForbidden()
     #    return super(ReleaseEditView, self).dispatch(request, *args, **kwargs)
 
@@ -450,14 +458,15 @@ class __ReleaseEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
             form.save_m2m()
 
 
-
+            """
+            # publishing is depreciated
             if publish:
                 from datetime import datetime
                 obj.publish_date = datetime.now()
                 obj.publisher = self.request.user
 
                 obj.save()
-
+            """
 
 
 

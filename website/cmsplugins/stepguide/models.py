@@ -38,6 +38,7 @@ class Step(models.Model):
     hint_type = models.CharField(max_length=10, default='info', choices=HINT_CHOICES)
     image = models.ImageField(upload_to='stepguide', blank=True, null=True)
     image_caption = models.CharField(max_length=255, blank=True, null=True)
+    vimeo_video_id = models.CharField(help_text="Show vimeo video. If id is set, the video will be displayed instead of an image.", max_length=255, blank=True, null=True)
 
     position = models.PositiveSmallIntegerField(default=0)
     guide = models.ForeignKey(Guide, blank=True, null=True)

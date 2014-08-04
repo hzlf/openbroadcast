@@ -58,8 +58,7 @@ urlpatterns = patterns('',
     #url(r"^profiles/", include("profiles.urls")),
     
     url(r'uploader/', include('multiuploader.urls')),
-    
-    (r'^dev/', include('dev.urls')), # shop main urls
+
 
     url(r"^vote/", include('arating.urls')),
     url(r'^ac_tagging/', include('ac_tagging.urls')),
@@ -102,16 +101,12 @@ urlpatterns = patterns('',
     
     # registration
     url(r'^accounts/', include('invitation.urls')),
-    url(r'^accounts/', include('registration.backends.default.urls')),
+    # url(r'^accounts/', include('registration.backends.default.urls')),
+    url(r'^accounts/', include('registration.backends.simple.urls')),
+    url(r"^accounts/login_as/(?P<user_id>.+)/$", "loginas.views.user_login", name="loginas-user-login"),
     # socialauth
     url(r'^sa/', include('social_auth.urls')),
-    
-    # old accounts
-    #url(r'^allauth_accounts/', include('allauth.urls')),
-    
-    #(r'^accounts/notification/', include('notification.urls')),
-    
-    
+
     # filer (protected)
     (r'^', include('filer.server.urls')),
     
@@ -126,8 +121,8 @@ urlpatterns = patterns('',
     (r'^shop/cart/', include('shop_ajax.urls')), # urls for variations
     (r'^shop/', include('shop.urls')), # shop main urls
     
-    (r'^search/', include('asearch.urls')),
-    (r'^search/', include('haystack.urls')),
+    url(r'^search/', include('asearch.urls')),
+    url(r'^search/', include('haystack.urls')),
     
     url(r'^sitemap.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': sitemaps}),
     

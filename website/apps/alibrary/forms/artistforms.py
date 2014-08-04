@@ -94,12 +94,7 @@ class ArtistForm(ModelForm):
 
         self.user = kwargs['initial']['user']
         self.instance = kwargs['instance']
-        
 
-        # print self.user.has_perm("alibrary.edit_release")
-        # print self.user.has_perm("alibrary.admin_release", self.instance)
-
-        
         self.label = kwargs.pop('label', None)
         
 

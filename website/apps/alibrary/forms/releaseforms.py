@@ -58,10 +58,15 @@ class ReleaseActionForm(Form):
         self.helper = FormHelper()
         self.helper.form_tag = False
 
+        """
+        # publishing removed
         if self.instance and self.instance.publish_date:
             self.helper.add_layout(ACTION_LAYOUT)
         else:
             self.helper.add_layout(ACTION_LAYOUT_EXTENDED)
+        """
+        self.helper.add_layout(ACTION_LAYOUT)
+
 
     publish = forms.BooleanField(label=_('Save & Publish'), required=False)
 
@@ -78,7 +83,6 @@ class ReleaseActionForm(Form):
                     missing_licenses.append(_('No license set for "%s"' % media.name))
 
             if len(missing_licenses) > 0:
-                msg = 'Event end date should not occur before start date.'
                 self._errors['publish'] = self.error_class(missing_licenses)
                 del cd['publish']
 
@@ -100,9 +104,12 @@ class ReleaseBulkeditForm(Form):
 
         self.instance = kwargs.pop('instance', False)
         self.disable_license = False
+
+        """
+        # publishing removed
         if self.instance and self.instance.publish_date:
             self.disable_license = True
-
+        """
         super(ReleaseBulkeditForm, self).__init__(*args, **kwargs)
 
 
@@ -120,25 +127,7 @@ class ReleaseBulkeditForm(Form):
 
 
 
-        if self.instance and self.instance.publish_date:
-
-            base_layout = Div(
-                    Div(HTML('<h4>%s</h4><p>%s</p>' % (_('Bulk Edit'), _('Choose Artist name to apply on each track.'))), css_class='form-help'),
-                    Row(
-                        Column(
-                               Field('bulk_artist_name', css_class='input-xlarge'),
-                               css_class='span6'
-                               ),
-                        Column(
-                               HTML('<button type="button" id="bulk_apply_artist_name" value="apply" class="btn btn-mini pull-right bulk_apply" id="submit-"><i class="icon-plus"></i> %s</button>' % _('Apply Artist to all tracks')),
-                               css_class='span2'
-                               ),
-                        css_class='releasemedia-row row',
-                    ),
-                    css_class='bulk_edit',
-            )
-
-        else:
+        if self.instance:
 
             base_layout = Div(
                     Div(HTML('<h4>%s</h4><p>%s</p>' % (_('Bulk Edit'), _('Choose Artist name and/or license to apply on each track.'))), css_class='form-help'),
@@ -172,8 +161,13 @@ class ReleaseBulkeditForm(Form):
 
     # Fields
     bulk_artist_name = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False, label=_('Artist'))
-    #bulk_license = selectable.AutoComboboxSelectField(LicenseLookup, allow_new=False, required=False, label=_('License'))
-    bulk_license = forms.ModelChoiceField(queryset=License.objects.all(), required=False, label=_('License'))
+    bulk_license = forms.ModelChoiceField(queryset=License.objects.filter(selectable=True), required=False, label=_('License'))
+    #from lib.fields.choices import NestedModelChoiceField
+    #bulk_license = NestedModelChoiceField(queryset=License.objects.all(),
+    #                                      related_name='license_children',
+    #                                      parent_field='parent',
+    #                                      label_field='name',
+    #                                      required=False, label=_('License'))
 
     def save(self, *args, **kwargs):
         return True
@@ -202,14 +196,7 @@ class ReleaseForm(ModelForm):
         self.user = kwargs['initial']['user']
         self.instance = kwargs['instance']
 
-        print self.instance
-
-        print self.user.has_perm("alibrary.edit_release")
-        print self.user.has_perm("alibrary.admin_release", self.instance)
-
-
         self.label = kwargs.pop('label', None)
-
 
         super(ReleaseForm, self).__init__(*args, **kwargs)
 
@@ -394,25 +381,26 @@ class BaseReleaseMediaForm(ModelForm):
         self.instance = kwargs['instance']
         super(BaseReleaseMediaForm, self).__init__(*args, **kwargs)
 
-        # self.fields['filename'].widget.attrs['readonly'] = True
-
+        """
+        # publishing removed
         if self.instance and self.instance.release and self.instance.release.publish_date:
             self.fields['license'].widget.attrs['readonly'] = True
-            #self.fields['license'].widget = forms.TextInput(attrs={'readonly':'readonly'})
-
+        """
 
     artist = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False)
     TRACKNUMBER_CHOICES =  [(None, '---')] + list(((str(x), x) for x in range(1, 101)))
     tracknumber =  forms.ChoiceField(label=_('No.'), required=False, choices=TRACKNUMBER_CHOICES)
     #filename =  forms.CharField(widget=ReadOnlyField(), label=_('Original File'), required=False)
 
+    """
+    # publishing disabled
     def clean_license(self):
         instance = getattr(self, 'instance', None)
         if instance and instance.release.publish_date:
             return instance.license
         else:
             return self.cleaned_data['license']
-
+    """
 
 
 """

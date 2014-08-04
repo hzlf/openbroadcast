@@ -591,6 +591,8 @@ class Media(MigrationMixin):
                 #self.save()
                 return self.duration
             except Exception, e:
+                print 'ERROR GETTING DURATION'
+                print e
                 return None
     
     """
@@ -999,7 +1001,6 @@ class Media(MigrationMixin):
                 log.warning('audiotools exception: %s' % e)
 
                 try:
-
                     log.info('trying with lame: %s' % alibrary_settings.LAME_BINARY)
                     p = subprocess.Popen([
                         alibrary_settings.LAME_BINARY, obj.master.path, version_path

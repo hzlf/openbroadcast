@@ -21,7 +21,7 @@
             </li>
             {% endif %}
 
-            {% if perms.alibrary.change_release and user.is_staff %}
+            {% if user.is_staff %}
             <li class="link">
                 <a class="hoverable" href="{{ object.get_admin_url }}?next={{ object.get_admin_url }}" title="{% trans "Administration view" %}">
                     <i class="icon icon-lock"></i>
@@ -30,9 +30,9 @@
             </li>
             {% endif %}
 
-            {% if perms.alibrary.change_release and user.is_staff %}
+            {% if user.is_staff %}
             <li class="link">
-                <a class="hoverable" href="{% url profiles-profile-force-login object.user %}" title="{% trans "Login as user" %}">
+                <a class="hoverable" href="{% url loginas-user-login object.user.pk %}" title="{% trans "Login as user" %}">
                     <i class="icon icon-key"></i>
                     <span>{% trans "Login as user" %}</span>
                 </a>

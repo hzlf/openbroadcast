@@ -111,8 +111,82 @@ class ObjectStatistics(object):
             ts = int((time.mktime(el['date'].timetuple()))) * 1000
             data.append([ts, el['count']] )
 
-        data_ = [[1383648900000, 100], [1384518018000, 75], [1386858602000, 50], [1386863302000, 50]]
         return data
+
+
+
+
+
+
+
+class PlatformStatistics(object):
+
+    """
+    generates global overview
+    to be extended...
+    """
+
+    def __init__(self):
+        pass
+
+    def generate(self):
+
+        from alibrary.models import Release, Artist, Media, Label, Playlist
+        stats = []
+
+        # gather release stats
+        num_total = Release.objects.count()
+        num_week = Release.objects.filter(updated__gte=(datetime.datetime.utcnow() - datetime.timedelta(days=7))).count()
+        num_day = Release.objects.filter(updated__gte=(datetime.datetime.utcnow() - datetime.timedelta(hours=24))).count()
+        stats.append({
+            'name': 'Releases',
+            'stats': {
+                'num_total': num_total,
+                'num_week': num_week,
+                'num_day': num_day,
+            }
+        })
+
+        num_total = Artist.objects.count()
+        num_week = Artist.objects.filter(updated__gte=(datetime.datetime.utcnow() - datetime.timedelta(days=7))).count()
+        num_day = Artist.objects.filter(updated__gte=(datetime.datetime.utcnow() - datetime.timedelta(hours=24))).count()
+        stats.append({
+            'name': 'Artists',
+            'stats': {
+                'num_total': num_total,
+                'num_week': num_week,
+                'num_day': num_day,
+            }
+        })
+
+        num_total = Media.objects.count()
+        num_week = Media.objects.filter(updated__gte=(datetime.datetime.utcnow() - datetime.timedelta(days=7))).count()
+        num_day = Media.objects.filter(updated__gte=(datetime.datetime.utcnow() - datetime.timedelta(hours=24))).count()
+        stats.append({
+            'name': 'Tracks',
+            'stats': {
+                'num_total': num_total,
+                'num_week': num_week,
+                'num_day': num_day,
+            }
+        })
+
+        num_total = Label.objects.count()
+        num_week = Label.objects.filter(updated__gte=(datetime.datetime.utcnow() - datetime.timedelta(days=7))).count()
+        num_day = Label.objects.filter(updated__gte=(datetime.datetime.utcnow() - datetime.timedelta(hours=24))).count()
+        stats.append({
+            'name': 'Labels',
+            'stats': {
+                'num_total': num_total,
+                'num_week': num_week,
+                'num_day': num_day,
+            }
+        })
+
+
+        return stats
+
+
 
 
 

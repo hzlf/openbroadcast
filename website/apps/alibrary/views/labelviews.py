@@ -253,7 +253,7 @@ class LabelEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Label
     form_class = LabelForm
     template_name = "alibrary/label_edit.html"
-    permission_required = 'alibrary.edit_label'
+    permission_required = 'alibrary.change_label'
     raise_exception = True
     success_url = '#'
 
@@ -302,6 +302,10 @@ class LabelEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
                 formset_save_func(formset)
             else:
                 formset.save()
+
+        d_tags = form.cleaned_data['d_tags']
+        if d_tags:
+            self.object.tags = d_tags
 
         msg = change_message.construct(self.request, form, [named_formsets['relation'],])
         with reversion.create_revision():

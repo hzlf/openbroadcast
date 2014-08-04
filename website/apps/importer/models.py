@@ -22,7 +22,7 @@ from alibrary.models import Media
 
 log = logging.getLogger(__name__)
 
-USE_CELERYD = False
+USE_CELERYD = True
 
 AUTOIMPORT_MB = True
         

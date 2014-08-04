@@ -229,7 +229,7 @@ class ImportResource(ModelResource):
         self.throttle_check(request)
 
         import_session = Import.objects.get(**self.remove_api_resource_names(kwargs))
-        import_files = import_session.files.filter(status=2, import_session=import_session)
+        import_files = import_session.files.filter(status=0, import_session=import_session)
 
         for import_file in import_files:
             import_file.status = 3

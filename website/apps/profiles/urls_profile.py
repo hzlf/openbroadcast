@@ -12,6 +12,6 @@ urlpatterns = patterns('profiles.views',
     
     url(r'^(?P<pk>\d+)/mentor/become/$', profile_mentor, {'cancel': False}, name='profiles-profile-mentor-become'),
     url(r'^(?P<pk>\d+)/mentor/cancel/$', profile_mentor, {'cancel': True}, name='profiles-profile-mentor-cancel'),
-    url(r'^(?P<pk>\d+)/mentor/approve/$', profile_approve, name='profiles-profile-mentor-approve'),
+    url(r'^(?P<pk>\d+)/mentor/approve/(?P<level>[-\w]+)/$', profile_approve, name='profiles-profile-mentor-approve'),
 
 )
