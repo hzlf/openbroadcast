@@ -521,6 +521,7 @@ INSTALLED_APPS = (
     'ac_tagging',
     'pure_pagination',
     'obp_legacy',
+    'apiv1cache',
 
     # helpers
     #'dev',

@@ -337,16 +337,20 @@ class Media(MigrationMixin):
     
     def __unicode__(self):
         return self.name
+
+
+    @property
+    def duration_s(self):
+        return self.get_duration(units='s')
+
+    @property
+    def duration_ms(self):
+        return self.get_duration(units='ms')
+
     
     @property
     def classname(self):
         return self.__class__.__name__
-
-    # TODO: remove - duplicate
-    """
-    def get_duration(self):
-        return self.base_duration
-    """
 
     def get_versions(self):
         try:
@@ -581,28 +585,49 @@ class Media(MigrationMixin):
         
 
         
-    def get_duration(self):
-    
-        if self.duration:
-            return self.duration
-        else:
+    def get_duration(self, units='ms'):
+
+        log.debug('get duration for %s' % self.name)
+
+        duration = None
+
+        if self.base_duration:
+            log.debug('duration from "base_duration": %s' % self.base_duration)
+
+            if self.base_duration > 5:
+                duration = self.base_duration * 1000
+
+
+        if not duration:
+            log.debug('duration from ffmpeg')
+            from alibrary.util.duration import duration_ffmpeg
+            duration = duration_ffmpeg(self.master.path)
+
+        if not duration:
+            log.debug('duration from audiotools')
             try:
-                self.duration = int(self.get_audiofile().seconds_length() * 1000)
-                #self.save()
-                return self.duration
+                duration = self.get_audiofile().seconds_length() * 1000
             except Exception, e:
-                print 'ERROR GETTING DURATION'
-                print e
-                return None
+                log.warning('unable to get duration with audiotools: %s' % e)
+
+        if duration and units == 'ms':
+            return int(duration)
+
+        if duration and units == 's':
+            return duration / 1000
+
+        return None
     
     """
     shortcut to audiotools api
     """
     def get_audiofile(self):
+
         try:
             return audiotools.open(self.get_master_path())
+
         except Exception, e:
-            print e
+            log.warning('unable to get audiofile audiotools: %s' % e)
             return None
         
         
@@ -667,15 +692,15 @@ class Media(MigrationMixin):
 
     
         """
-        get duration
-        """
+        get duration (removed)
+        # TODO: refactor to @property
         if not self.duration:
             try:
                 self.duration = int(self.get_audiofile().seconds_length() * 1000)
             except Exception, e:
                 print e
                 self.duration = 0
-        
+        """
         
         """
         create a converted version of the master, stored in temp location

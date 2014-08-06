@@ -1,17 +1,15 @@
 #-*- coding: utf-8 -*-
+import subprocess
 from django.core.management.base import NoArgsCommand
 
 import logging
 log = logging.getLogger(__name__)
 
-
-
-
 class MediaFix(object):
     def __init__(self, * args, **kwargs):
         self.verbosity = int(kwargs.get('verbosity', 1))
 
-    def fix_durations(self):
+    def fix_mp3_durations(self):
 
         from alibrary.models import Media
 
@@ -21,37 +19,44 @@ class MediaFix(object):
         print '-----------------------------------------------'
         print
 
-        print 'Num. tracks:        %s' % Media.objects.count();
-        print 'Without duration:   %s' % Media.objects.filter(duration=None).count();
-        print 'With ZERO duration: %s' % Media.objects.filter(duration=0).count();
+        qs = Media.objects.filter(base_samplerate=22050, base_format='mp3', base_duration__lt=10)
 
-        ms = Media.objects.filter(duration=None)
-        for m in ms:
+        print 'Num. tracks:        %s' % Media.objects.count();
+        print 'Without duration:   %s' % qs.count();
+
+
+        ffprobe_binary = '/usr/bin/ffprobe'
+
+        for m in qs[0:10]:
+
+            print '%s - %s' % (m.base_duration, m.name)
+
             try:
-                m.duration = m.get_duration()
-                if m.duration and m.duration > 0:
-                    log.debug('got duration "%s" for: id: %s - %s' % (m.duration, m.pk, m.name))
-                else:
-                    log.warning('zero or none duration "%s" for: id: %s - %s' % (m.duration, m.pk, m.name))
+                p = subprocess.Popen([
+                    ffprobe_binary, m.master.path, "-show_format"
+                ], stdout=subprocess.PIPE)
+                stdout = p.communicate()
+
+                dur = stdout[0].split('duration=')[1]
+                dur = dur.split("\n")[0]
+                print float(dur)
+
+                m.base_duration = dur
                 m.save()
             except Exception, e:
-                log.warning('unable to get duration for: id: %s - %s' % (m.pk, m.name))
+                print 'ERROR'
+                print e
+
+            print
+
+
+
+
         
-        ms = Media.objects.filter(duration=0)
-        for m in ms:
-            try:
-                m.duration = m.get_duration()
-                if m.duration and m.duration > 0:
-                    log.debug('got duration "%s" for: id: %s - %s' % (m.duration, m.pk, m.name))
-                else:
-                    log.warning('zero or none duration "%s" for: id: %s - %s' % (m.duration, m.pk, m.name))
-                m.save()
-            except Exception, e:
-                log.warning('unable to get duration for: id: %s - %s' % (m.pk, m.name))
 
 class Command(NoArgsCommand):
 
     def handle_noargs(self, **options):
         media_fix = MediaFix(**options)
         # file_importer.walker()
-        media_fix.fix_durations()
+        media_fix.fix_mp3_durations()

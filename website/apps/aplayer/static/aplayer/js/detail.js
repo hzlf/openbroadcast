@@ -151,14 +151,16 @@ DetailPlayer = function () {
 
     this.init_waveform = function () {
 
-        // debug.debug('PlaylistEditorItem - init_waveform');
+        var waveform_image = self.item.waveform_image;
+
         this.r = Raphael(self.waveform_dom_id, self.size_x, self.size_y + 16);
 
         self.el_background = this.r.rect(0, 0, self.size_x, self.size_y).attr({ stroke: "none", fill: self.waveform_fill });
         self.el_buffer = this.r.rect(0, 0, 0, self.size_y).attr({ stroke: "none", fill: self.waveform_fill });
-        self.el_waveform = this.r.image(self.item.waveform_image, 0, 0, 830, self.size_y);
+        if(waveform_image) {
+            self.el_waveform = this.r.image(waveform_image, 0, 0, 830, self.size_y);
+        }
         self.el_indicator = this.r.rect(-10, 0, 2, self.size_y).attr({ stroke: "none", fill: '#00bb00' });
-
 
         // self.set_envelope();
 

@@ -3,6 +3,7 @@ from optparse import make_option
 
 from django.core.management.base import BaseCommand, NoArgsCommand
 from django.conf import settings
+from django.db.models import F, Q
 
 #from alibrary.models import Artist, Release, Media, Label, Relation, License
 
@@ -27,6 +28,7 @@ from obp_legacy.util.migrator import get_license_by_legacy_object
 
 
 DEFAULT_LIMIT = 100
+FORCE_UPDATE = True
 
 
 def id_to_location(id):
@@ -119,43 +121,45 @@ class LegacyImporter(object):
 
         if(self.object_type == 'release'):
 
-            objects = Releases.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:self.limit]
-        
+            objects = Releases.objects.using('legacy').filter(Q(migrated__lte=F('updated')) | Q(migrated=None)).exclude(name=u'').all()[0:self.limit]
+
             for legacy_obj in objects:
-                obj, status = get_release_by_legacy_object(legacy_obj)                
+                obj, status = get_release_by_legacy_object(legacy_obj, force=FORCE_UPDATE)
                 legacy_obj.migrated = datetime.now()
                 legacy_obj.save()
         
         
         if(self.object_type == 'media'):
 
-            #objects = Medias.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:self.limit]
-            objects = Medias.objects.using('legacy').filter(migrated=None).exclude(name=u'').order_by('-created').all()[0:self.limit]
+            #objects = Medias.objects.using('legacy').filter(migrated=None).exclude(name=u'').order_by('-created').all()[0:self.limit]
+            objects = Medias.objects.using('legacy').filter(Q(migrated__lte=F('updated')) | Q(migrated=None)).exclude(name=u'').order_by('-created').all()[0:self.limit]
 
             print 'NUM OBJECTS: %s' % objects.count()
         
             for legacy_obj in objects:
-                obj, status = get_media_by_legacy_object(legacy_obj)                
+                obj, status = get_media_by_legacy_object(legacy_obj, force=FORCE_UPDATE)
                 legacy_obj.migrated = datetime.now()
                 legacy_obj.save()
                 
                         
         if(self.object_type == 'label'):
 
-            objects = Labels.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:self.limit]
+            #objects = Labels.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:self.limit]
+            objects = Labels.objects.using('legacy').filter(Q(migrated__lte=F('updated')) | Q(migrated=None)).exclude(name=u'').all()[0:self.limit]
         
             for legacy_obj in objects:
-                obj, status = get_label_by_legacy_object(legacy_obj)                
+                obj, status = get_label_by_legacy_object(legacy_obj, force=FORCE_UPDATE)
                 legacy_obj.migrated = datetime.now()
                 legacy_obj.save()
                 
                         
         if(self.object_type == 'artist'):
 
-            objects = Artists.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:self.limit]
+            #objects = Artists.objects.using('legacy').filter(migrated=None).exclude(name=u'').all()[0:self.limit]
+            objects = Artists.objects.using('legacy').filter(Q(migrated__lte=F('updated')) | Q(migrated=None)).exclude(name=u'').all()[0:self.limit]
         
             for legacy_obj in objects:
-                obj, status = get_artist_by_legacy_object(legacy_obj)                
+                obj, status = get_artist_by_legacy_object(legacy_obj, force=FORCE_UPDATE)
                 legacy_obj.migrated = datetime.now()
                 legacy_obj.save()
                 

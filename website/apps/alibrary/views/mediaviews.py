@@ -38,7 +38,7 @@ ORDER_BY = [
         'name': _('Name')
     },
     {
-        'key': 'duration',
+        'key': 'base_duration',
         'name': _('Duration')
     },
     {

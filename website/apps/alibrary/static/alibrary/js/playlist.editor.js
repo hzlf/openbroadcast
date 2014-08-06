@@ -910,28 +910,16 @@ PlaylistEditorItem = function () {
 
     this.init_waveform = function () {
 
-        debug.debug('PlaylistEditorItem - init_waveform');
-
-        console.log('Waveform image at:', self.item.item.content_object.waveform_image);
 
         var waveform_image = self.item.item.content_object.waveform_image;
-
-        if(! waveform_image) {
-
-        }
 
         this.r = Raphael(self.waveform_dom_id, 830, self.size_y + 6);
 
         self.el_background = this.r.rect(0, 0, self.size_x, self.size_y).attr({ stroke: "none", fill: '90-#efefef-#bbb:50-#efefef' });
         self.el_buffer = this.r.rect(0, 0, 0, self.size_y).attr({ stroke: "none", fill: self.waveform_fill });
-
         if(waveform_image) {
             self.el_waveform = this.r.image(waveform_image, 0, 0, 830, self.size_y);
-        } else {
-
         }
-
-
         self.el_indicator = this.r.rect(-10, 0, 2, 40).attr({ stroke: "none", fill: '#00bb00' });
 
         self.set_envelope(true);

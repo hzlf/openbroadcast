@@ -120,5 +120,5 @@ class Command(BaseCommand):
         print
         from django.contrib.auth.models import User
         from profiles.models import Profile, Community
-        User.objects.exclude(username__in=['root', 'AnonymousUser']).delete()
-        Community.objects.all().delete()
+        #User.objects.exclude(username__in=['root', 'AnonymousUser']).delete()
+        #Community.objects.all().delete()

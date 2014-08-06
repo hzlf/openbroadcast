@@ -16,6 +16,13 @@
                 | <a href="{{ object.get_admin_url }}">admin</a>
                 {% endif %}
 
+                {% if object.folder %}
+                <br>
+                    lsdakj
+                {% endif %}
+
+
+
             </dd>
             {% endif %}
 
@@ -36,6 +43,7 @@
                 {% if object|ct_name_by_object|lower == 'track' %}
                 | <a href="http://openbroadcast.ch/en/content/library/media/{{ object.legacy_id }}/detail.html">show legacy page</a>
                 {% endif %}
+
 
 
 

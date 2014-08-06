@@ -50,15 +50,17 @@
 		</dd>
 		{% endif %}
 
-		{% if object.base_duration %}
+
 		<dt>
 			{% trans "Duration" %}:
 		</dt>
 		<dd>
-			{{ object.base_duration|sec_to_time }}
+            {% if object.duration_s %}
+			{{ object.duration_s|sec_to_time }}
+            {% endif %}
 			&nbsp;
 		</dd>
-		{% endif %}
+
 
 		{% if object.opus_number %}
 		<dt>
@@ -112,23 +114,28 @@
 
 	</dl>
 
-	<dl class="dl-horizontal license">
+    <dl class="dl-horizontal license">
 
-		<dt>
-			{% trans "License" %}:
-		</dt>
-		<dd>
+        <dt>
+            {% trans "License" %}:
+        </dt>
+        <dd>
+            {% if object.license %}
+                {% if object.license.iconset %}
+                    <a href="{{ object.license.get_absolute_url }}"
+                       title="{% trans "License details" %}"
+                       class="iconset iconset-license">
+                           {{ object.license.iconset_display }}
+                    </a>
+                {% else %}
+                    <span>{{ object.license.name }}</span>
+                {% endif %}
+            {% else %}
+                &nbsp;
+            {% endif %}
+        </dd>
 
-        {% if object.license %}
-            <a href="{{ object.license.get_absolute_url }}" title="{% trans "License details" %}" class="iconset iconset-license">{{ object.license.iconset_display }}</a>
-        {% else %}
-            &nbsp;
-        {% endif %}
-
-
-		</dd>
-
-	</dl>
+    </dl>
 
 {% comment %}
 	<dl class="dl-horizontal">
@@ -183,21 +190,6 @@
 	</dl>
 	{% endif %}
 
-	<!--
-	<dl class="dl-horizontal links external">
-
-	<dt>
-	{% trans "Show on" %}:
-	</dt>
-	<dd class="horizontal">
-	{% for relation in object.relations.specific %}
-	<a href="{{ relation.url }}" title="Show on {{ relation.get_service_display }}" class="external {{ relation.service }}"><img src="/static/img/base/spacer.png" alt="{{ relation.get_service_display }}" style="width: 16px; height: 16px;"></a>
-	{% endfor %}
-	<div class="clear"></div>
-	</dd>
-
-	</dl>
-	-->
 
 	<dl class="dl-horizontal sub">
 
@@ -214,11 +206,6 @@
 			<span class="key">{% trans "Added by" %}:</span><span class="value"><a href="{{ object.creator.get_absolute_url }}">{{ object.creator }}</a></span> |
 			{% endif %}
 
-			<!--
-			{% if object.publisher %}
-			<span class="key">{% trans "Published by" %}:</span> <span class="value"><a href="#">{{ object.publisher }}</a></span> |
-			{% endif %}
-			-->
 
 			{% if object.get_last_revision %}
 			<span class="key">{% trans "Last edit by" %}:</span><span class="value"><a href="{{ object.get_last_revision.user.get_profile.get_absolute_url }}">{{ object.get_last_revision.user }}</a></span>
@@ -227,7 +214,6 @@
 		</dd>
 
 
-		
 
 
 		<dt>

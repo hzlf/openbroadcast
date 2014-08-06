@@ -82,8 +82,8 @@ class ReleaseMigrator(Migrator):
             if legacy_obj.releasestatus:
                 obj.releasestatus = legacy_obj.releasestatus
 
-            if legacy_obj.published:
-                obj.publish_date = legacy_obj.published
+            #if legacy_obj.published:
+            #    obj.publish_date = legacy_obj.published
 
             if legacy_obj.notes:
                 obj.description = legacy_obj.notes
@@ -271,8 +271,8 @@ class MediaMigrator(Migrator):
             obj.created = legacy_obj.created
             obj.updated = legacy_obj.updated
             obj.original_filename = legacy_obj.filename[0:250] if legacy_obj.filename else None
-            if legacy_obj.published:
-                obj.publish_date = legacy_obj.published
+            #if legacy_obj.published:
+            #    obj.publish_date = legacy_obj.published
 
             if legacy_obj.tracknumber:
                 log.debug('tracknumber: %s' % legacy_obj.tracknumber)
@@ -469,7 +469,7 @@ class ArtistMigrator(Migrator):
             obj.name = legacy_obj.name
             obj.created = legacy_obj.created
             obj.updated = legacy_obj.updated
-            obj.published = legacy_obj.published
+            #obj.published = legacy_obj.published
 
             if legacy_obj.profile:
                 obj.biography = legacy_obj.profile
@@ -647,8 +647,8 @@ class LabelMigrator(Migrator):
             obj.created = legacy_obj.created
             obj.updated = legacy_obj.updated
 
-            if legacy_obj.published:
-                obj.published = legacy_obj.published
+            #if legacy_obj.published:
+            #    obj.published = legacy_obj.published
 
             if legacy_obj.label_type:
                 obj.type = legacy_obj.label_type

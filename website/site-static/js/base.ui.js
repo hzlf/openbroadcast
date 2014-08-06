@@ -828,6 +828,18 @@ base.ui.iface = function () {
     $('#site_messages .alert').fadeIn(500);
 
 
+    // form reset
+    $('form').on('click', 'button:reset', function(e){
+        $('body').css('opacity', 0.5);
+        e.preventDefault();
+        e.stopPropagation();
+        document.location.href = document.location.href;
+        return false;
+    });
+
+
+
+
 
 };
 

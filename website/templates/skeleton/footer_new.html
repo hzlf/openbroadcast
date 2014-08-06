@@ -43,8 +43,20 @@
                 | <a href="{{ object.get_admin_url }}">admin</a>
                 {% endif %}
 
+
             </dd>
             {% endif %}
+
+            {% if object.folder %}
+            <dt>Directory:</dt>
+            <dd>
+                {{ object.folder }}
+            </dd>
+            {% endif %}
+
+
+
+
 
             {% if object and object.legacy_id %}
             <dt>Legacy ID:</dt>
