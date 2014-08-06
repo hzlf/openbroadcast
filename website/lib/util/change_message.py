@@ -14,7 +14,10 @@ def construct(request, form, formsets):
             pass
             
         if len(form.changed_data) > 0:
-            change_message.append(_('Changed %s. \n') % get_text_list(form.changed_data, _('and')))
+            #change_message.append(_('Changed %s. \n') % get_text_list(form.changed_data, _('and')))
+            change_message.append(_('Changed %s. \n') % get_text_list(convert_changed_list(form.instance, form.changed_data), _('and')))
+
+
 
     if formsets:
         try:
@@ -70,4 +73,18 @@ def construct(request, form, formsets):
             pass
 
     change_message = ' '.join(change_message)
-    return change_message or _('Nothing changed.')
+    return change_message or _('Changed:')
+
+
+
+
+
+def convert_changed_list(obj, changed_data):
+    cls = type(obj)
+    verbose_names = []
+    for field in changed_data:
+        try:
+            verbose_names.append(cls._meta.get_field_by_name(field)[0].verbose_name)
+        except Exception:
+            verbose_names.append(field)
+    return verbose_names
