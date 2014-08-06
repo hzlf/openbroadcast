@@ -328,6 +328,7 @@ class ArtistEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
         d_tags = form.cleaned_data['d_tags']
         if d_tags:
+            msg += '\nTags: %s' % d_tags
             self.object.tags = d_tags
 
 

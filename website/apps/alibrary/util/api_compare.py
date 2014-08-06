@@ -498,8 +498,11 @@ class DiscogsAPILookup(APILookup):
             if k == 'images':
                 res['remote_image'] = res['main_image'] = self.map_image(data[k])
 
-            if not mk in res:
-                res[mk] = data[k]
+            try:
+                if not mk in res:
+                    res[mk] = data[k]
+            except:
+                pass
 
 
         res['d_tags'] = ', '.join(d_tags)
@@ -554,8 +557,13 @@ class DiscogsAPILookup(APILookup):
             if k == 'images':
                 res['remote_image'] = res['main_image'] = self.map_image(data[k])
 
-            if not mk in res:
-                res[mk] = data[k]
+
+
+            try:
+                if not mk in res:
+                    res[mk] = data[k]
+            except:
+                pass
 
 
         res['d_tags'] = ', '.join(d_tags)

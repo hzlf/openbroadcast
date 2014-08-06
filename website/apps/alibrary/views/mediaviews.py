@@ -27,7 +27,8 @@ from lib.util import tagging_extra
 from lib.util import change_message
 from lib.util.form_errors import merge_form_errors
 
-
+import logging
+log = logging.getLogger(__name__)
 
 ALIBRARY_PAGINATE_BY = getattr(settings, 'ALIBRARY_PAGINATE_BY', (12,24,36,120))
 ALIBRARY_PAGINATE_BY_DEFAULT = getattr(settings, 'ALIBRARY_PAGINATE_BY_DEFAULT', 12)
@@ -353,6 +354,8 @@ def stream_html5(request, uuid):
     
     media = get_object_or_404(Media, uuid=uuid)
 
+    print 'requested to stream: %s' % media.pk
+
     stream_permission = False
 
     if request.user and request.user.has_perm('alibrary.play_media'):
@@ -364,7 +367,13 @@ def stream_html5(request, uuid):
         if media.license and media.license.restricted == False:
             stream_permission = True
 
+    # TODO: IMPLEMENT PERMISSION CHECK FOR PYPO!!!!!!!!!!!!!
+    print request.META['HTTP_HOST']
+    print request.META['HTTP_USER_AGENT']
+    stream_permission = True
+
     if not stream_permission:
+        log.warning('unauthorized attempt by "%s" to download: %s - "%s"' % (request.user.username if request.user else 'unknown', media.pk, media.name))
         raise PermissionDenied
     
     try:

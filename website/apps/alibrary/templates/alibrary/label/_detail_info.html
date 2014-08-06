@@ -14,6 +14,28 @@
 	<dl class="dl-horizontal main">
 
 
+    	<dt>
+			{% trans "Appearance" %}:
+		</dt>
+		<dd>
+			<ul class="unstyled horizontal">
+				{% if object.release_label.count > 0 %}
+				<li>
+					{% url alibrary-release-list as release_list %}
+					<a href="{% spurl path=release_list query="label={{ object.slug }}" %}" title="{% trans "Only show releases on" %} {{ object.name }}">
+					{{ object.release_label.count }} {% trans 'Releases' %}
+					</a>
+				</li>
+				{% else %}
+				<li>{{ object.release_label.count }} {% trans 'Releases' %}</li>
+				{% endif %}
+
+			</ul>
+            <div class="clear"></div>
+		</dd>
+
+
+        {% comment %}
 		<dt>
 			{% trans "Releases" %}:
 		</dt>
@@ -31,8 +53,21 @@
 				{% endif %}
 			</ul>
 		</dd>
+        {% endcomment %}
 		
 
+
+
+		{% if object.labelcode %}
+		<dt>
+			{% trans "Labelcode" %}:
+		</dt>
+		<dd>
+			<ul class="unstyled">
+			<li>{{ object.labelcode }}</li>
+			</ul>
+		</dd>
+		{% endif %}
 
 
 		{% if object.distributors.count > 0 %}

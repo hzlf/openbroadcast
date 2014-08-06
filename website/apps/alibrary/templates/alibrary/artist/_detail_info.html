@@ -20,6 +20,39 @@
 
 
 		<dt>
+			{% trans "Appearance" %}:
+		</dt>
+		<dd>
+			<ul class="unstyled horizontal">
+				{% if object.get_releases.count > 0 %}
+				<li>
+					{% url alibrary-release-list as release_list %}
+					<a href="{% spurl path=release_list query="artist={{ object.slug }}" %}" title="{% trans "Only show releases by" %} {{ object.name }}">
+					{{ object.get_releases.count }} {% trans 'Releases' %}
+					</a>
+				</li>
+				{% else %}		
+				<li>{{ object.get_releases.count }} {% trans 'Releases' %}</li>
+				{% endif %}
+                {% if object.get_releases.count > 0 and object.get_media.count %}<li>&nbsp;|&nbsp;</li>{% endif %}
+				{% if object.get_media.count > 0 %}
+				<li>
+					{% url alibrary-media-list as media_list %}
+					<a href="{% spurl path=media_list query="artist={{ object.slug }}" %}" title="{% trans "Only show tracks by" %} {{ object.name }}">
+					{{ object.get_media.count }} {% trans 'Tracks' %}
+					</a>
+				</li>
+				{% else %}
+				<li>{{ object.get_media.count }}</li>
+				{% endif %}
+
+			</ul>
+            <div class="clear"></div>
+		</dd>
+
+
+        {% comment %}
+		<dt>
 			{% trans "Releases" %}:
 		</dt>
 		<dd>
@@ -28,10 +61,10 @@
 				<li>
 					{% url alibrary-release-list as release_list %}
 					<a href="{% spurl path=release_list query="artist={{ object.slug }}" %}" title="{% trans "Only show releases by" %} {{ object.name }}">
-					{{ object.get_releases.count }}<i class="icon-search"></i>	
+					{{ object.get_releases.count }}<i class="icon-search"></i>
 					</a>
 				</li>
-				{% else %}		
+				{% else %}
 				<li>{{ object.get_releases.count }}</li>
 				{% endif %}
 			</ul>
@@ -54,6 +87,7 @@
 				{% endif %}
 			</ul>
 		</dd>
+		{% endcomment %}
 
 
 		{% if object.real_name %}

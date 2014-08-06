@@ -92,7 +92,7 @@
                                     <span class="pull-right">
                                         <a href="{% spurl path=release_list query="label={{ object.slug }}" %}">
                                             <i class="icon-chevron-sign-right"></i>
-                                            {% trans "Show all" %} {{ object.get_releases.count }} {% trans "releases on" %} {{ object.name }}
+                                            {% trans "Show all" %} {{ object.release_label.count }} {% trans "releases on" %} {{ object.name }}
                                         </a>
                                     </span>
                     </h2>
