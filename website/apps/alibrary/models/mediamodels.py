@@ -586,14 +586,8 @@ class Media(MigrationMixin):
 
         
     def get_duration(self, units='ms'):
-
-        log.debug('get duration for %s' % self.name)
-
         duration = None
-
         if self.base_duration:
-            log.debug('duration from "base_duration": %s' % self.base_duration)
-
             if self.base_duration > 5:
                 duration = self.base_duration * 1000
 

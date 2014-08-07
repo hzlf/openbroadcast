@@ -51,14 +51,7 @@ class ReleaseResource(ModelResource):
         bundle.data['artist'] = bundle.obj.get_artists()
 
         return bundle
-    
-    
-    
-    
-    
-    
-    
-    
+
     # additional methods
     def prepend_urls(self):
         
@@ -67,8 +60,6 @@ class ReleaseResource(ModelResource):
               url(r"^(?P<resource_name>%s)/autocomplete-name%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('autocomplete_name'), name="alibrary-release_api-autocomplete_name"),
               url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/stats%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('stats'), name="alibrary-release_api-stats"),
         ]
-
-
 
     def autocomplete(self, request, **kwargs):
         
@@ -234,3 +225,43 @@ class ReleaseResource(ModelResource):
 
         self.log_throttled_access(request)
         return self.create_response(request, stats)
+
+
+
+
+class SimpleReleaseResource(ModelResource):
+
+    media = fields.ToManyField('alibrary.api.MediaResource', 'media_release', null=True, full=True, max_depth=3)
+    label = fields.ForeignKey('alibrary.api.LabelResource', 'label', null=True, full=True, max_depth=2)
+
+    class Meta:
+        queryset = Release.objects.order_by('-created').all()
+        list_allowed_methods = ['get',]
+        detail_allowed_methods = ['get',]
+        resource_name = 'release'
+        excludes = ['updated',]
+        include_absolute_url = True
+        authentication =  MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
+        authorization = Authorization()
+        filtering = {
+            #'channel': ALL_WITH_RELATIONS,
+            'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
+            'id': ['exact', 'in'],
+        }
+        cache = SimpleCache(timeout=600)
+
+
+    def dehydrate(self, bundle):
+
+        if(bundle.obj.main_image):
+            bundle.data['main_image'] = None
+            try:
+                opt = THUMBNAIL_OPT
+                main_image = image = get_thumbnailer(bundle.obj.main_image).get_thumbnail(opt)
+                bundle.data['main_image'] = main_image.url
+            except:
+                pass
+
+        bundle.data['artist'] = bundle.obj.get_artists()
+
+        return bundle
