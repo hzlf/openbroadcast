@@ -1,8 +1,8 @@
-{% load spurl i18n truncate %}
+{% load spurl i18n truncate adv_cache hash_tags %}
+{% cache 600 "searchbar" request.get_full_path %}
+
 <div id="searchbar" class="searchbar hoverable" data-ct="{{ ct }}">
 
-
-    <!-- search field -->
     <div style="float: left;" class="search-input{% if get.q %} active{% endif %}">
 
         <div class="inner">
@@ -15,20 +15,15 @@
 
     </div>
 
-
-    <!-- clear all search & filter button -->
     <div style="padding: 4px 3px 0px;" class="search-clear pull-right">
         {% if request.path != request.get_full_path %}
             <a class="pull-right clear-search" href="{{ request.path }}" title="{% trans "Clear Search" %}">
             <i class="icon icon-large icon-remove-sign"></i>
-            <!--
-                <img class="search_clear" src="/static/img/prototype/i_clearsearch.png" alt="Clear search"/>
-            -->
+
             </a>
         {% endif %}
     </div>
 
-    <!-- relation based filters-->
     <ul class="filter-bar unstyled horizontal">
         {% for filter in relation_filter %}
             <li>
@@ -40,7 +35,6 @@
         {% endfor %}
     </ul>
 
-    <!-- object based filters-->
     <ul class="filter-bar unstyled horizontal">
         {% for item in filter.filterlist %}
 
@@ -79,8 +73,6 @@
                 {% endfor %}
             {% endif %}
 
-
-
         {% endfor %}
     </ul>
 
@@ -89,3 +81,5 @@
 </div>
 
 <div id="autocomplete_holder" class="autocomplete holder"></div>
+
+{% endcache %}

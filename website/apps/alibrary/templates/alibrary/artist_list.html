@@ -1,5 +1,5 @@
 {% extends "layout_base.html" %}
-{% load spurl adv_cache i18n truncate dajaxice_templatetags sekizai_tags %}
+{% load spurl adv_cache hash_tags i18n truncate dajaxice_templatetags sekizai_tags %}
 
 {% block heading %}
 <!-- view specific scripts -->
@@ -104,12 +104,14 @@
 	
 	<div class="list_body">
 
+        {% hash_user_groups request.user as group_hash %}
+
 		{% for item in object_list %}
-		
+
 		{# switching list styles #}
 		{% if list_style == "s" %}
 
-            {% cache 0 "artist_list_item_s" item.pk item.updated user.is_authenticated %}
+            {% cache 600 "artist_list_item_s" item.pk item.updated group_hash %}
             {% include "alibrary/artist/list_item_s.html" %}
             {% endcache %}
 
@@ -121,7 +123,7 @@
 		
 		{% if list_style == "l" %}
 
-            {% cache 0 "artist_list_item_l" item.pk item.updated user.is_authenticated %}
+            {% cache 600 "artist_list_item_l" item.pk item.updated group_hash %}
             {% include "alibrary/artist/list_item_l.html" %}
             {% endcache %}
 
@@ -171,6 +173,6 @@
 {% endblock %}
 
 {% block sidebar %}
-{% include "alibrary/artist/sidebar/_list.html" %}
+    {% include "alibrary/artist/sidebar/_list.html" %}
 {% endblock %}
 

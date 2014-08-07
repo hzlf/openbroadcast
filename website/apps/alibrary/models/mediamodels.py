@@ -591,6 +591,9 @@ class Media(MigrationMixin):
             if self.base_duration > 5:
                 duration = self.base_duration * 1000
 
+        if not self.master:
+            return None
+
 
         if not duration:
             log.debug('duration from ffmpeg')

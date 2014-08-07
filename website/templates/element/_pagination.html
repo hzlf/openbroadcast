@@ -1,4 +1,6 @@
-{% load i18n %}
+{% load i18n adv_cache %}
+{% cache 600 "pagination" request.get_full_path %}
+
 <p class="pagination">
     {% if page_obj.has_previous %}
         <a href="?{{ page_obj.previous_page_number.querystring }}" class="prev">&lsaquo;&lsaquo; {% trans "previous" %}</a>
@@ -22,3 +24,4 @@
         <span class="disabled next">{% trans "next" %} &rsaquo;&rsaquo;</span>
     {% endif %}
 </p>
+{% endcache %}

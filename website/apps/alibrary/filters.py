@@ -24,7 +24,6 @@ class CharListFilter(django_filters.Filter):
 
         if value and values:
 
-
             if len(values) > 1:
                 lookup = 'in'
                 return qs.filter(**{'%s__%s' % (self.name, lookup): values})
@@ -91,12 +90,13 @@ class DateRangeFilter(django_filters.Filter):
 class ReleaseFilter(django_filters.FilterSet):
     releasetype = CharListFilter(label="Release type")
     release_country__printable_name = CharListFilter(label="Release Country")
-    media_release__license__name = CharListFilter(label="License")
+    #media_release__license__name = CharListFilter(label="License")
     #main_format__name = CharListFilter(label="Release Format")
     releasedate = DateRangeFilter(label="Release date")
     class Meta:
         model = Release
-        fields = ['releasedate', 'releasetype', 'release_country__printable_name', 'media_release__license__name', 'label__type', ]
+        #fields = ['releasedate', 'releasetype', 'release_country__printable_name', 'media_release__license__name', 'label__type', ]
+        fields = ['releasedate', 'releasetype', 'release_country__printable_name',]
 
     @property
     def filterlist(self):

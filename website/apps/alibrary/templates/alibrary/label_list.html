@@ -1,5 +1,5 @@
 {% extends "layout_base.html" %}
-{% load spurl cache i18n truncate dajaxice_templatetags sekizai_tags %}
+{% load spurl adv_cache hash_tags i18n truncate dajaxice_templatetags sekizai_tags %}
 
 {% block heading %}
     <!-- view specific scripts -->
@@ -132,6 +132,8 @@
 
         <div class="list_body">
 
+            {% hash_user_groups request.user as group_hash %}
+
             {% for item in object_list %}
 
                 {# switching list styles #}
@@ -140,11 +142,15 @@
                 {% endif %}
 
                 {% if list_style == "m" %}
+                    {% cache 600 "label_list_item_m" item.pk item.updated group_hash %}
                     {% include "alibrary/label/list_item_m.html" %}
+                    {% endcache %}
                 {% endif %}
 
                 {% if list_style == "l" %}
+
                     {% include "alibrary/label/list_item_l.html" %}
+
                 {% endif %}
 
             {% endfor %}

@@ -1,4 +1,4 @@
-{% load calc i18n arating_tags truncate spurl %}
+{% load calc i18n arating_tags truncate spurl adv_cache hash_tags %}
 
 <div class="list_body_row selectable item media {{ item.uuid }} {% if item.creator == user %} owner{% endif %}"
      id="list_item_{{ item.id }}"
@@ -46,7 +46,10 @@
 				<a href="{{ item.get_absolute_url }}" title="{{ item.name }}">
 				{{ item.name|truncate_chars_inner:32 }}
 				{% if item.country %}({{ item.country }}){% endif %}
-				{% topflop_for_object item %} </a>
+                {% cache 600 "topflop_media" item.pk %}
+                {% topflop_for_object item %}
+                {% endcache %}
+                </a>
                 {% if item.lyrics %}
                 <small class="type" title="{{ item.lyrics }}">L</small>
                 {% endif %}

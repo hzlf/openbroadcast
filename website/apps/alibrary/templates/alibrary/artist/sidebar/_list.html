@@ -1,9 +1,11 @@
-{% load spurl %}
+{% load spurl adv_cache %}
 
 {% include "alibrary/artist/sidebar/context/_list.html" %}
 {% include "alibrary/element/sidebar/_ordering.html" %}
-{% include "alibrary/artist/sidebar/_filter.html" %}
 
+{% cache 600 "list_filter" request.get_full_path %}
+{% include "alibrary/artist/sidebar/_filter.html" %}
+{% endcache %}
 
 {% if user.is_authenticated %}
 {% include "alibrary/sidebar/_playlist.html" %}

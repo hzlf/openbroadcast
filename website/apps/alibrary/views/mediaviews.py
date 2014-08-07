@@ -119,7 +119,7 @@ class MediaListView(PaginationMixin, ListView):
             | Q(artist__name__icontains=q))\
             .distinct()
         else:
-            qs = Media.objects.exclude(name=u'')
+            qs = Media.objects.all()
             
             
         order_by = self.request.GET.get('order_by', 'created')
@@ -130,8 +130,7 @@ class MediaListView(PaginationMixin, ListView):
                 qs = qs.order_by('-%s' % order_by)
             else:
                 qs = qs.order_by('%s' % order_by)
-            
-            
+
             
         # special relation filters
         self.relation_filter = []
