@@ -35,7 +35,7 @@ class CommentResource(ModelResource):
     
     content_object = GenericForeignKeyField(to=co_to, attribute='content_object', null=False, full=False)
     """
-    curl --dump-header - -H "Content-Type: application/json" -X POST --data '{"comment":"sdfsdfsdf", "content_object": "/de/api/v1/release/1963/"}' http://localhost:8080/api/v1/comment/
+    curl --dump-header - -H "Content-Type: application/json" -X POST --data '{"comment":"sdfsdfsdf", "content_object": "/de/api/v1/library/release/1963/"}' http://localhost:8080/api/v1/comment/
     """
     
     class Meta:

@@ -217,9 +217,20 @@ class Artist(MigrationMixin):
     def get_api_url(self):
         return reverse('api_dispatch_detail', kwargs={  
             'api_name': 'v1',  
-            'resource_name': 'artist',  
+            'resource_name': 'library/artist',
             'pk': self.pk  
         }) + ''
+
+
+
+    @property
+    def has_soundcloud(self):
+        return self.relations.filter(service='soundcloud').exists()
+
+    @property
+    def get_soundcloud(self):
+        return self.relations.filter(service='soundcloud').all()[0]
+
     
     def get_membership(self):
 

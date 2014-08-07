@@ -225,7 +225,7 @@ PlaylistEditor = function () {
 
         // autocomplete search box TODO: maybe move
         self.ac = new AutocompleteApp();
-        self.ac.api_url = '/api/v1/track/autocomplete/';
+        self.ac.api_url = '/api/v1/library/track/autocomplete/';
         self.ac.container = $("#playlist_editor_search .result");
         this.ac.template = 'alibrary/nj/playlist/editor_search.html';
 

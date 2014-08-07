@@ -287,7 +287,7 @@
             $(function(){
 
                 alibrary.collector = new CollectorApp;
-                alibrary.collector.api_url = "{% url api_dispatch_list resource_name='playlist' api_name='v1'%}";
+                alibrary.collector.api_url = "{% url api_dispatch_list resource_name='library/playlist' api_name='v1'%}";
                 // alibrary.collector.playlist_app = alibrary.playlist;
                 alibrary.collector.init();
 

@@ -18,33 +18,44 @@ from ep.API import fp
 THUMBNAIL_OPT = dict(size=(70, 70), crop=True, bw=False, quality=80)
 
 
+#from tastypie.contrib.specifiedfields import SpecifiedFields
+
+
 class MediaResource(ModelResource):
+
     release = fields.ForeignKey('alibrary.api.ReleaseResource', 'release', null=True, full=True, max_depth=2)
     artist = fields.ForeignKey('alibrary.api.ArtistResource', 'artist', null=True, full=True, max_depth=2)
-
     message = fields.CharField(attribute='message', null=True)
 
     class Meta:
         queryset = Media.objects.order_by('tracknumber').all()
         list_allowed_methods = ['get', ]
         detail_allowed_methods = ['get', ]
-        resource_name = 'track'
+        resource_name = 'library/track'
         excludes = ['updated', 'release__media']
         include_absolute_url = True
         authentication = Authentication()
         authorization = Authorization()
         limit = 50
         filtering = {
-            #'channel': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
             'id': ['exact', 'in'],
         }
-        cache = SimpleCache(timeout=600)
+        #cache = SimpleCache(timeout=600)
 
 
-    """
-    Add streaming information
-    """
+    def apply_sorting(self, obj_list, options=None):
+
+        sorting = options.get('id__in', None)
+        if not sorting:
+            return obj_list
+
+        obj_list_sorted = list()
+        for pk in sorting.split(','):
+            obj_list_sorted.append(obj_list.get(pk=int(pk)))
+
+        return obj_list_sorted
+
 
     def dehydrate(self, bundle):
 
@@ -279,20 +290,28 @@ class SimpleMediaResource(ModelResource):
         queryset = Media.objects.order_by('tracknumber').all()
         list_allowed_methods = ['get', ]
         detail_allowed_methods = ['get', ]
-        resource_name = 'track'
+        # not so nice - force resource to full version
+        resource_name = 'library/simpletrack'
         excludes = ['updated', 'release__media']
         include_absolute_url = True
         authentication = Authentication()
         authorization = Authorization()
         filtering = {
-            #'channel': ALL_WITH_RELATIONS,
             'created': ['exact', 'range', 'gt', 'gte', 'lt', 'lte'],
+            'id': ['exact', 'in'],
         }
 
+    def apply_sorting(self, obj_list, options=None):
 
-    """
-    Add streaming information
-    """
+        sorting = options.get('id__in', None)
+        if not sorting:
+            return obj_list
+
+        obj_list_sorted = list()
+        for pk in sorting.split(','):
+            obj_list_sorted.append(obj_list.get(pk=int(pk)))
+
+        return obj_list_sorted
 
     def dehydrate(self, bundle):
 

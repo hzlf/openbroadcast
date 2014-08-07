@@ -309,7 +309,7 @@ SchedulerApp = function () {
         // TODO: implement
 
         /*
-        var url = '/en/api/v1/simpleplaylist/' + '?all=1&id__in=' + playlist_ids.join(',');
+        var url = '/en/api/v1/library/simpleplaylist/' + '?all=1&id__in=' + playlist_ids.join(',');
         $.get(url, function (data) {
 
             $.each(data.objects, function(i, el){

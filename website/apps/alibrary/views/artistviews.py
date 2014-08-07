@@ -194,36 +194,17 @@ class ArtistDetailView(DetailView):
 
         
     def get_context_data(self, **kwargs):
-        
-        obj = kwargs.get('object', None)
+
         context = super(ArtistDetailView, self).get_context_data(**kwargs)
-        m_ipp = self.request.GET.get('m_ipp', ALIBRARY_PAGINATE_BY_DEFAULT)
-        if m_ipp:
-            try:
-                if int(m_ipp) in ALIBRARY_PAGINATE_BY:
-                    m_ipp = int(m_ipp)
-                else:
-                    m_ipp = int(m_ipp)
-            except Exception, e:
-                pass
-        
-        page_num = self.request.GET.get('m_page', 1)
-        media_list = Media.objects.filter(artist=obj)
-        p = Paginator(media_list, m_ipp, request=self.request, query_param_prefix='m_')
-        m_list = p.page(page_num)
+        obj = kwargs.get('object', None)
 
-        self.extra_context['media'] = m_list
 
-        page_num = self.request.GET.get('r_page', 1)
-        release_list = Release.objects.filter(Q(media_release__artist=obj)\
+        self.extra_context['releases'] = Release.objects.filter(Q(media_release__artist=obj)\
             | Q(album_artists=obj))\
-            .distinct()
-        p = Paginator(release_list, m_ipp, request=self.request, query_param_prefix='r_')
-        r_list = p.page(page_num)
-        self.extra_context['releases'] = r_list
+            .distinct()[0:8]
         
         """
-        testing top-flop
+        top-flop
         """
         m_top = []
         media_top = Media.objects.filter(artist=obj, votes__vote__gt=0).order_by('-votes__vote').distinct()
@@ -244,9 +225,8 @@ class ArtistDetailView(DetailView):
         self.extra_context['m_flop'] = m_flop
         
 
-        m_contrib = Media.objects.filter(extra_artists=obj)
-        self.extra_context['m_contrib'] = m_contrib
-        self.extra_context['history'] = obj.get_versions()
+        self.extra_context['m_contrib'] = Media.objects.filter(extra_artists=obj)[0:48]
+        self.extra_context['history'] = reversion.get_unique_for_object(obj)
         context.update(self.extra_context)
 
         return context
@@ -328,7 +308,7 @@ class ArtistEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
         d_tags = form.cleaned_data['d_tags']
         if d_tags:
-            msg += '\nTags: %s' % d_tags
+            msg = change_message.parse_tags(obj=self.object, d_tags=d_tags, msg=msg)
             self.object.tags = d_tags
 
 

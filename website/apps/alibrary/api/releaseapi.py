@@ -24,7 +24,7 @@ class ReleaseResource(ModelResource):
         queryset = Release.objects.order_by('-created').all()
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
-        resource_name = 'release'
+        resource_name = 'library/release'
         excludes = ['updated',]
         include_absolute_url = True
         authentication =  MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
@@ -231,14 +231,14 @@ class ReleaseResource(ModelResource):
 
 class SimpleReleaseResource(ModelResource):
 
-    media = fields.ToManyField('alibrary.api.MediaResource', 'media_release', null=True, full=True, max_depth=3)
-    label = fields.ForeignKey('alibrary.api.LabelResource', 'label', null=True, full=True, max_depth=2)
+    media = fields.ToManyField('alibrary.api.MediaResource', 'media_release', null=True, full=True, max_depth=2)
+    #label = fields.ForeignKey('alibrary.api.LabelResource', 'label', null=True, full=True, max_depth=2)
 
     class Meta:
         queryset = Release.objects.order_by('-created').all()
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
-        resource_name = 'release'
+        resource_name = 'library/simplerelease'
         excludes = ['updated',]
         include_absolute_url = True
         authentication =  MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
@@ -253,15 +253,5 @@ class SimpleReleaseResource(ModelResource):
 
     def dehydrate(self, bundle):
 
-        if(bundle.obj.main_image):
-            bundle.data['main_image'] = None
-            try:
-                opt = THUMBNAIL_OPT
-                main_image = image = get_thumbnailer(bundle.obj.main_image).get_thumbnail(opt)
-                bundle.data['main_image'] = main_image.url
-            except:
-                pass
-
-        bundle.data['artist'] = bundle.obj.get_artists()
 
         return bundle

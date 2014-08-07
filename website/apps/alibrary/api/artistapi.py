@@ -18,7 +18,7 @@ class ArtistResource(ModelResource):
         queryset = Artist.objects.all()
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
-        resource_name = 'artist'
+        resource_name = 'library/artist'
         excludes = ['updated',]
         include_absolute_url = True
         authentication =  MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())

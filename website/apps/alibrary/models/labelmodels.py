@@ -212,7 +212,7 @@ class Label(MPTTModel, MigrationMixin):
     def get_api_url(self):
         return reverse('api_dispatch_detail', kwargs={
             'api_name': 'v1',
-            'resource_name': 'label',
+            'resource_name': 'library/label',
             'pk': self.pk
         }) + ''
 
@@ -226,8 +226,8 @@ class Label(MPTTModel, MigrationMixin):
         for tag in self.tags:
             t_tags += '%s, ' % tag    
         
-        self.tags = t_tags;
-        self.d_tags = t_tags;
+        self.tags = t_tags
+        self.d_tags = t_tags
         
         super(Label, self).save(*args, **kwargs)
     

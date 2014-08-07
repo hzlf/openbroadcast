@@ -339,8 +339,15 @@ class Release(MigrationMixin):
     def get_api_url(self):
         return reverse('api_dispatch_detail', kwargs={  
             'api_name': 'v1',  
-            'resource_name': 'release',  
+            'resource_name': 'library/release',
             'pk': self.pk  
+        }) + ''
+
+    def get_api_simple_url(self):
+        return reverse('api_dispatch_detail', kwargs={
+            'api_name': 'v1',
+            'resource_name': 'library/simplerelease',
+            'pk': self.pk
         }) + ''
     
     

@@ -1,4 +1,4 @@
-from alibrary.api.releaseapi import ReleaseResource
+from alibrary.api.releaseapi import ReleaseResource, SimpleReleaseResource
 from alibrary.api.mediaapi import MediaResource, SimpleMediaResource
 from alibrary.api.labelapi import LabelResource
 from alibrary.api.artistapi import ArtistResource

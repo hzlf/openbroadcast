@@ -20095,7 +20095,7 @@ aplayer.ui.bind = function () {
                 }
                 item_ids.push(current_id)
             })
-            uri = '/api/v1/track/?id__in=' + item_ids.join(',')
+            uri = '/api/v1/library/track/?id__in=' + item_ids.join(',')
         }
         aplayer.base.play_in_popup(uri, token, offset, mode, false, source);
     });
@@ -20131,7 +20131,7 @@ aplayer.ui.bind = function () {
                 }
                 item_ids.push(current_id)
             })
-            uri = '/api/v1/track/?id__in=' + item_ids.join(',');
+            uri = '/api/v1/library/track/?id__in=' + item_ids.join(',');
         }
         aplayer.base.play_in_popup(uri, token, offset, mode, false, source);
     });
@@ -20487,7 +20487,7 @@ AplayerApp = function (context) {
                     }
                     item_ids.push(current_id)
                 })
-                uri = '/api/v1/track/?id__in=' + item_ids.join(',');
+                uri = '/api/v1/library/track/?id__in=' + item_ids.join(',');
             }
             aplayer.base.play_in_popup(uri, token, offset, mode, false, source);
         });

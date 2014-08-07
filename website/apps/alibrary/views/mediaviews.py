@@ -217,7 +217,7 @@ class MediaDetailView(DetailView):
         context = super(MediaDetailView, self).get_context_data(**kwargs)
         obj = kwargs.get('object', None)
 
-        self.extra_context['history'] = obj.get_versions()
+        self.extra_context['history'] = reversion.get_unique_for_object(obj)
         
         # foreign appearance
         ps = []
@@ -291,11 +291,13 @@ class MediaEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
             else:
                 formset.save()
 
+        msg = change_message.construct(self.request, form, [named_formsets['relation'], named_formsets['extraartist'],])
+
         d_tags = form.cleaned_data['d_tags']
         if d_tags:
+            msg = change_message.parse_tags(obj=self.object, d_tags=d_tags, msg=msg)
             self.object.tags = d_tags
 
-        msg = change_message.construct(self.request, form, [named_formsets['relation'], named_formsets['extraartist'],])
         with reversion.create_revision():
             self.object = form.save()
             reversion.set_user(self.request.user)

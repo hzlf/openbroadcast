@@ -67,18 +67,12 @@ aplayer.ui.bind = function() {
                 item_ids.push(current_id)
             })
 
-            uri = '/api/v1/track/?id__in=' + item_ids.join(','); // sorry, kind of ugly..
+            // sorry, kind of ugly..
+            uri = '/api/v1/library/simpletrack/?id__in=' + item_ids.join(',');
 
         }
 
 		aplayer.base.play_in_popup(uri, token, offset, mode, false, source);
-
-        /* TESTING:
-        aplayer.base.play_in_popup('/api/v1/track/?id__in=11,12', 'xyz', 0, 'replace', false, 'alibrary')
-        http://local.openbroadcast.ch:8080/api/v1/track/?format=json&id__in=11,12
-         */
-
-		// return false;
 
 	});
 

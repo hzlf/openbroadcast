@@ -215,29 +215,15 @@ class LabelDetailView(DetailView):
 
         
     def get_context_data(self, **kwargs):
-        
-        obj = kwargs.get('object', None)
 
         context = super(LabelDetailView, self).get_context_data(**kwargs)
-
-        
-        # media sub query
-        
-        m_ipp = self.request.GET.get('m_ipp', ALIBRARY_PAGINATE_BY_DEFAULT)
-        if m_ipp:
-            try:
-                if int(m_ipp) in ALIBRARY_PAGINATE_BY:
-                    m_ipp = int(m_ipp)
-                else:
-                    m_ipp = int(m_ipp)
-            except Exception, e:
-                pass
-
+        obj = kwargs.get('object', None)
 
         releases = Release.objects.filter(label=obj).order_by('-releasedate').distinct()[:8]
         self.extra_context['releases'] = releases
+        self.extra_context['history'] = reversion.get_unique_for_object(obj)
+
         context.update(self.extra_context)
-        self.extra_context['history'] = obj.get_versions()
 
         return context
 
@@ -303,11 +289,13 @@ class LabelEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
             else:
                 formset.save()
 
+        msg = change_message.construct(self.request, form, [named_formsets['relation'],])
         d_tags = form.cleaned_data['d_tags']
         if d_tags:
+            msg = change_message.parse_tags(obj=self.object, d_tags=d_tags, msg=msg)
             self.object.tags = d_tags
 
-        msg = change_message.construct(self.request, form, [named_formsets['relation'],])
+
         with reversion.create_revision():
             self.object = form.save()
             reversion.set_user(self.request.user)

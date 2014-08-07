@@ -141,6 +141,10 @@ class Playlist(MigrationMixin, models.Model):
     
     items = models.ManyToManyField('PlaylistItem', through='PlaylistItemPlaylist', blank=True, null=True)
 
+    @property
+    def sorted_items(self):
+        return self.items.order_by('playlistitemplaylist__position')
+
 
     # tagging (d_tags = "display tags")
     d_tags = tagging.fields.TagField(max_length=1024, verbose_name="Tags", blank=True, null=True)
@@ -246,14 +250,14 @@ class Playlist(MigrationMixin, models.Model):
     def get_api_url(self):
         return reverse('api_dispatch_detail', kwargs={  
             'api_name': 'v1',  
-            'resource_name': 'playlist',  
+            'resource_name': 'library/playlist',
             'pk': self.pk  
         }) + ''
     
     def get_api_simple_url(self):
         return reverse('api_dispatch_detail', kwargs={  
             'api_name': 'v1',  
-            'resource_name': 'simpleplaylist',  
+            'resource_name': 'library/simpleplaylist',
             'pk': self.pk  
         }) + ''
 
@@ -689,6 +693,7 @@ class PlaylistItemPlaylist(models.Model):
     fade_cross = models.PositiveIntegerField(max_length=12, default=0)
     class Meta:
         app_label = 'alibrary'
+        ordering = ('position', )
 
     def save(self, *args, **kwargs):
 

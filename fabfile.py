@@ -15,6 +15,7 @@ env.nginx = '/etc/nginx/sites-enabled'
 # skip functions for faster deploy...
 env.skip_requirements = False
 env.skip_db = False
+env.reboot = False
 
 def skip_req():
     env.skip_requirements = True
@@ -22,18 +23,9 @@ def skip_req():
 def skip_db():
     env.skip_db = True
 
+def reboot():
+    env.reboot = True
 
-
-# available instances
-def openbroadcast_ch():
-    env.site_id = 'openbroadcast.ch'
-    env.hosts = ['172.20.10.204', '172.20.10.205']
-    env.git_url = 'git@lab.hazelfire.com:hazelfire/obp/openbroadcast-ch.git'
-    env.git_branches = ['development', 'master',]
-    env.git_default_branch = 'development'
-    env.path = '/var/www/openbroadcast.ch'
-    env.storage = '/nas/storage/prod.openbroadcast.ch'
-    env.user = 'root'
 
 def stage_openbroadcast_ch():
     env.site_id = 'openbroadcast.ch'
@@ -269,16 +261,18 @@ def deploy(branch=None):
 
         # restart app-server
 
-        try:
-            run('supervisorctl restart %s' % env.site_id)
-        except Exception, e:
-            print '!!!!!! APP-SERVER WARNING !!!!!!!'
-            print e
-            print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        if not env.reboot:
+
+            try:
+                run('supervisorctl restart %s' % env.site_id)
+            except Exception, e:
+                print '!!!!!! APP-SERVER WARNING !!!!!!!'
+                print e
+                print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 
 
-        # reload_gunicorn()
-        restart_services()
+            # reload_gunicorn()
+            restart_services()
 
         # cleanup
         with cd(env.path):
@@ -286,6 +280,9 @@ def deploy(branch=None):
                 run('rm -R src_old')
             except Exception, e:
                 print e
+
+        if env.reboot:
+            run('shutdown -r now')
 
 
 def reload_gunicorn():

@@ -12,8 +12,9 @@ from django.utils.safestring import mark_safe
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-class BaseAdmin(reversion.VersionAdmin, GuardedModelAdmin):
-    
+#class BaseAdmin(reversion.VersionAdmin, GuardedModelAdmin):
+class BaseAdmin(GuardedModelAdmin):
+
     search_fields = ['name']
     save_on_top = True
     

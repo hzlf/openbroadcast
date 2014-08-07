@@ -5,7 +5,7 @@ from base.api import BaseResource
 
 from bcmon.api import PlayoutResource as BcmonPlayoutResource
 from bcmon.api import ChannelResource as BcmonChannelResource
-from alibrary.api import MediaResource, ReleaseResource, ArtistResource, LabelResource, SimplePlaylistResource, PlaylistResource, PlaylistItemPlaylistResource
+from alibrary.api import MediaResource, SimpleMediaResource, ReleaseResource, SimpleReleaseResource, ArtistResource, LabelResource, SimplePlaylistResource, PlaylistResource, PlaylistItemPlaylistResource
 from importer.api import ImportResource, ImportFileResource
 from exporter.api import ExportResource, ExportItemResource
 from abcast.api import StationResource, ChannelResource, JingleResource, JingleSetResource, EmissionResource
@@ -28,7 +28,9 @@ api.register(BcmonChannelResource())
 
 # library
 api.register(MediaResource())
+api.register(SimpleMediaResource())
 api.register(ReleaseResource())
+api.register(SimpleReleaseResource())
 api.register(ArtistResource())
 api.register(LabelResource())
 api.register(SimplePlaylistResource())

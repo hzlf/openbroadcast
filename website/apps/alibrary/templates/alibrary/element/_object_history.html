@@ -1,5 +1,5 @@
 <div class="object history">
-	{% for r in history.all|slice:":20" %}
+	{% for r in history|slice:":20" %}
 	<div class="item">
 		<ul class="unstyled horizontal">
 			<li class="created">{{ r.revision.date_created }}</li>
@@ -9,6 +9,9 @@
 		<div class="clear"></div>
         {% comment %}{% endcomment %}
 		<p>{{ r.revision.comment|urlize|linebreaksbr }}</p>
+        <p class="debug">
+            Revision PK: {{ r.revision.pk }}
+        </p>
 
 	</div>
 	{% endfor %}

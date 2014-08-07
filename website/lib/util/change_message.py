@@ -1,5 +1,6 @@
 from django.utils.text import get_text_list
 from django.utils.encoding import force_unicode
+from django.utils.translation import ugettext as _
 
 def construct(request, form, formsets):
     """
@@ -73,7 +74,7 @@ def construct(request, form, formsets):
             pass
 
     change_message = ' '.join(change_message)
-    return change_message or _('Changed:')
+    return change_message or _('Nothing changed')
 
 
 
@@ -88,3 +89,38 @@ def convert_changed_list(obj, changed_data):
         except Exception:
             verbose_names.append(field)
     return verbose_names
+
+
+
+
+def parse_tags(obj, d_tags, msg=''):
+
+    try:
+
+        d_tags = ['"%s"' % x.strip() for x in d_tags.split(',')]
+        tags = ['"%s"' % x.name for x in obj.tags]
+
+        tags_added = diff_lists(d_tags, tags)
+        tags_removed = diff_lists(tags, d_tags)
+
+        if (tags_added or tags_removed) and msg == 'Nothing changed':
+            msg = _('Changed: \n')
+
+        if tags_added:
+            msg += _('Tags added: %s' % get_text_list(tags_added, _('and')))
+
+        if tags_added and tags_removed:
+            msg += '\n'
+
+        if tags_removed:
+            msg += _('Tags removed: %s' % get_text_list(tags_removed, _('and')))
+
+        return msg
+
+    except:
+        return ''
+
+
+def diff_lists(a, b):
+    b = set(b)
+    return [aa for aa in a if aa not in b]

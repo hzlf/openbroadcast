@@ -176,7 +176,7 @@ ImporterUi = function() {
 
 			
 
-			url = '/api/v1/playlist/collect/';
+			url = '/api/v1/library/playlist/collect/';
 			
 			/**/
 			jQuery.ajax({

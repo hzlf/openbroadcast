@@ -741,7 +741,7 @@ CollectorApp = (function () {
             }, 10);
             return self.render_dialog_content(self.playlists_local)
         } else {
-            var uri = '/api/v1/simpleplaylist/'
+            var uri = '/api/v1/library/simpleplaylist/'
             $.ajax({
                 url: uri + '?limit=500&type__in=playlist,basket',
                 success: function (data) {

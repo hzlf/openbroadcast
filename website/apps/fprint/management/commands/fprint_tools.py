@@ -92,7 +92,7 @@ class FPWorker(object):
             print
             print '#####################################################'
             print 'API SAYS...'
-            r = requests.get("http://local.openbroadcast.ch:8080/en/api/v1/track/?format=json&code=%s" % code)
+            r = requests.get("http://local.openbroadcast.ch:8080/en/api/v1/library/track/?format=json&code=%s" % code)
             res = r.json()
 
             print res

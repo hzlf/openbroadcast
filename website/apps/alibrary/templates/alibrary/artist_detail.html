@@ -75,6 +75,7 @@
                 <a href="#management" data-toggle="tab">{% trans "Management" %}</a>
             </li>
             {% endif %}
+
             <li>
                 <a href="#history" data-toggle="tab">{% trans "Edit History" %}</a>
             </li>
@@ -90,7 +91,7 @@
 
     <div class="tab-content">
 
-    <div class="tab-pane {% if releases.object_list.count > 0 %}active{% endif %}" id="tracklist"
+    <div class="tab-pane {% if releases.count > 0 %}active{% endif %}" id="tracklist"
          class="topflop">
 
         <!--
@@ -164,7 +165,7 @@
                             <span class="pull-right">
                                 <a href="{% spurl path=release_list query="artist={{ object.slug }}" %}">
                                     <i class="icon-chevron-sign-right"></i>
-                                    {% trans "Show all" %} {{ object.get_releases.count }} {% trans "releases by" %} {{ object.name }}
+                                    {% trans "Show all" %} {{ object.releases.count }} {% trans "releases by" %} {{ object.name }}
                                 </a>
                             </span>
             </h2>
@@ -175,7 +176,7 @@
 
                 <div class="list_body">
 
-                    {% for item in releases.object_list %}
+                    {% for item in releases %}
                         {% include "alibrary/release/list_item_l.html" %}
                     {% endfor %}
                 </div>
@@ -196,7 +197,7 @@
 
     </div>
 
-    <div class="tab-pane {% if releases.object_list.count < 1 and m_contrib > 1 %}active{% endif %}"
+    <div class="tab-pane {% if releases.count < 1 and m_contrib > 1 %}active{% endif %}"
          id="contribution">
 
         <section class="contribution">
@@ -290,6 +291,8 @@
         </section>
 
     </div>
+
+
 
     <div class="tab-pane" id="statistics">
 

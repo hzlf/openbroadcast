@@ -231,8 +231,9 @@ class ReleaseDetailView(DetailView):
         
         context = super(ReleaseDetailView, self).get_context_data(**kwargs)
         obj = kwargs.get('object', None)
-        
-        self.extra_context['history'] = obj.get_versions()
+
+        self.extra_context['history'] = reversion.get_unique_for_object(obj)
+
         context.update(self.extra_context)
         
         return context
@@ -303,10 +304,6 @@ class ReleaseEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
         publish = self.do_publish
 
-        d_tags = form.cleaned_data['d_tags']
-        if d_tags:
-            self.object.tags = d_tags
-
         """
         # publishing is depreciated
         if publish:
@@ -319,6 +316,12 @@ class ReleaseEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         msg = change_message.construct(self.request, form, [named_formsets['relation'],
                                                             named_formsets['albumartist'],
                                                             named_formsets['media'],])
+
+        d_tags = form.cleaned_data['d_tags']
+        if d_tags:
+            msg = change_message.parse_tags(obj=self.object, d_tags=d_tags, msg=msg)
+            self.object.tags = d_tags
+
         if publish:
             msg = '%s. \n %s' %('Published release', msg)
         with reversion.create_revision():

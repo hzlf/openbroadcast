@@ -209,13 +209,16 @@ aplayer.base.load_playlist = function (uri) {
     if (uri) {
         data = {};
 
-        // hack - sorry
+        // hacks - sorry
         if (uri.indexOf("playlist") != -1) {
             uri += '?all=true';
         }
+        if (uri.indexOf("/release/") != -1) {
+            uri = uri.replace("/release/", "/simplerelease/");
+        }
 
         $.ajax({
-            //url : uri + "?format=json", // FUCK U IE! TODO: do we support ie???
+            //url : uri + "?format=json", // FUCK U IE!
             url: uri,
             traditional: true,
             type: "GET",
@@ -226,12 +229,17 @@ aplayer.base.load_playlist = function (uri) {
                 debug.debug('loaded playlist:', result);
 
                 // switch to handle releases & media api listings
-                if (uri.indexOf("release") != -1) {
+                if (uri.indexOf("release/") != -1) {
 
-                    aplayer.base.set_playlist(result.media);
+                    // version for fully hydrated data
+                    // aplayer.base.set_playlist(result.media)
 
-                } else if (uri.indexOf("track") != -1) {
+                    // version for 'simple-release'
+                    aplayer.base.set_playlist(result.media)
+                    aplayer.base.complete_playlist()
 
+
+                } else if (uri.indexOf("/track/") != -1) {
 
                     if (result.objects) {
                         // got collection of tracks (playing media_set eg)
@@ -242,7 +250,21 @@ aplayer.base.load_playlist = function (uri) {
                     }
 
 
-                } else if (uri.indexOf("playlist") != -1) {
+                }  else if (uri.indexOf("/simpletrack/") != -1) {
+
+                    if (result.objects) {
+                        // got collection of tracks (playing media_set eg)
+                        aplayer.base.set_playlist(result.objects);
+                    } else {
+                        // single media
+                        aplayer.base.set_playlist([result]);
+                    }
+
+
+                    aplayer.base.complete_playlist()
+
+
+                } else if (uri.indexOf("playlist/") != -1) {
 
                     var media = [];
                     $.each(result.items, function (i, item) {
@@ -252,7 +274,7 @@ aplayer.base.load_playlist = function (uri) {
                     aplayer.base.set_playlist(media);
                     aplayer.base.complete_playlist()
 
-                } else if (uri.indexOf("artist") != -1) {
+                } else if (uri.indexOf("artist/") != -1) {
 
                     var media = [];
 
@@ -262,7 +284,7 @@ aplayer.base.load_playlist = function (uri) {
                     $.get(url, function(data){
                        debug.debug(data)
                         aplayer.base.set_playlist(data);
-                        aplayer.base.complete_playlist()
+                        aplayer.base.complete_playlist();
                     });
 
 
@@ -293,16 +315,32 @@ aplayer.base.load_playlist = function (uri) {
 aplayer.base.complete_playlist = function () {
 
     $.each(aplayer.vars.playlist, function (i, item) {
-        if (!item.release) {
 
-            $.get(item.resource_uri, function (data) {
+        console.log('complete_playlist:', i, item)
+
+        // hack - sorry!
+        console.log('complete_playlist relations:', typeof item.release, typeof item.artist);
+
+        var do_reload = true;
+        // check if reload needed
+        if(item.release) {
+            if (typeof item.release == 'object') {
+                do_reload = false;
+            }
+
+        }
+
+        if (do_reload) {
+
+            // more hack - more sorry...
+            var uri = item.resource_uri.replace("/simpletrack/", "/track/");
+
+            $.get(uri, function (data) {
                 item.release = data.release;
                 item.artist = data.artist;
                 debug.debug('got data:', data)
-                aplayer.vars.playlist[i] = el;
+                //aplayer.vars.playlist[i] = el;
                 aplayer.ui.playlist_display(aplayer, $('#aplayer_playlist'));
-
-
             })
         }
     });
@@ -333,7 +371,38 @@ aplayer.base.set_playlist = function (media) {
 
     // replace playlist with newly loaded one
     if (aplayer.vars.mode == 'replace') {
-        aplayer.vars.playlist = playlist;
+
+        // bad version, always does full replace
+        // aplayer.vars.playlist = playlist;
+
+
+        var uuids = [];
+        var new_playlist = [];
+        // get all uuids in playlist
+        $.each(playlist, function (i, item) {
+            uuids.push(item.uuid);
+        });
+
+        // check if elemet already exists
+        $.each(playlist, function (i, item) {
+            var item_exists = false;
+            $.each(aplayer.vars.playlist, function (j, xitem) {
+                if(xitem.uuid == item.uuid) {
+                    item_exists = true;
+                    new_playlist.push(xitem);
+                }
+            });
+            if(!item_exists) {
+                console.log('not here, we have to load');
+                new_playlist.push(item);
+            } else {
+                console.log('item already loaded');
+            }
+        })
+
+        aplayer.vars.playlist = new_playlist;
+
+
     }
 
     // add loaded playlist to current one
