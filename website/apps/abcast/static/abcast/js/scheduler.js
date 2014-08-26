@@ -205,7 +205,7 @@ SchedulerApp = function () {
                 at: 'top right'
             },
             style: {
-                classes: 'qtip-default'
+                classes: 'qtip-default qtip-daypart-hint'
             },
             show: {
                 delay: 10

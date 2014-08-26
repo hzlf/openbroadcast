@@ -89,26 +89,10 @@
 										<div class="tg-quartermarker"></div>
 									</div>
 
-									<div class="tg-markercell marker-limit">
-										<div class="tg-quartermarker"></div>
-										<div class="tg-quartermarker"></div>
-									</div>
-
 									<div class="tg-markercell marker">
 										<div class="tg-quartermarker"></div>
 										<div class="tg-quartermarker"></div>
 									</div>
-
-									<div class="tg-markercell marker">
-										<div class="tg-quartermarker"></div>
-										<div class="tg-quartermarker"></div>
-									</div>
-
-									<div class="tg-markercell marker">
-										<div class="tg-quartermarker"></div>
-										<div class="tg-quartermarker"></div>
-									</div>
-
 
 									<div class="tg-markercell marker-limit">
 										<div class="tg-quartermarker"></div>
@@ -125,27 +109,13 @@
 										<div class="tg-quartermarker"></div>
 									</div>
 
-									<div class="tg-markercell marker">
+
+									<div class="tg-markercell marker-limit">
 										<div class="tg-quartermarker"></div>
 										<div class="tg-quartermarker"></div>
 									</div>
 
-									<div class="tg-markercell marker">
-										<div class="tg-quartermarker"></div>
-										<div class="tg-quartermarker"></div>
-									</div>
-
-									<div class="tg-markercell marker">
-										<div class="tg-quartermarker"></div>
-										<div class="tg-quartermarker"></div>
-									</div>
-
-									<div class="tg-markercell marker">
-										<div class="tg-quartermarker"></div>
-										<div class="tg-quartermarker"></div>
-									</div>
-
-									<div class="tg-markercell marker">
+									<div class="tg-markercell marker-limit">
 										<div class="tg-quartermarker"></div>
 										<div class="tg-quartermarker"></div>
 									</div>
@@ -166,6 +136,36 @@
 									</div>
 
 									<div class="tg-markercell marker">
+										<div class="tg-quartermarker"></div>
+										<div class="tg-quartermarker"></div>
+									</div>
+
+									<div class="tg-markercell marker">
+										<div class="tg-quartermarker"></div>
+										<div class="tg-quartermarker"></div>
+									</div>
+
+									<div class="tg-markercell marker-limit">
+										<div class="tg-quartermarker"></div>
+										<div class="tg-quartermarker"></div>
+									</div>
+
+									<div class="tg-markercell marker-limit">
+										<div class="tg-quartermarker"></div>
+										<div class="tg-quartermarker"></div>
+									</div>
+
+									<div class="tg-markercell marker">
+										<div class="tg-quartermarker"></div>
+										<div class="tg-quartermarker"></div>
+									</div>
+
+									<div class="tg-markercell marker">
+										<div class="tg-quartermarker"></div>
+										<div class="tg-quartermarker"></div>
+									</div>
+
+									<div class="tg-markercell marker-limit">
 										<div class="tg-quartermarker"></div>
 										<div class="tg-quartermarker"></div>
 									</div>
@@ -213,44 +213,45 @@
 							<div class="daypart" style="height:{{ daypart.duration|multiply:pph }}px;">
 								<div class="tg-time-pri {% if forloop.last %}tg-time-pri-last{% endif %}" style="height:{{ daypart.duration|multiply:pph }}px;">
 
-									{{ daypart.time_start|time:"H" }} - {{ daypart.time_end|time:"H" }}
+									<span>{{ daypart.time_start|time:"H" }} - {{ daypart.time_end|time:"H" }}</span>
 								</div>
 
 								<div class="tt-content" style="display: none;">
+
 									<h4 style="color: white;">{{ daypart.name }} <small class="pull-right">{{ daypart.time_start|time:"H" }} - {{ daypart.time_end|time:"H" }}</small></h4>
 
 									{% if daypart.mood %}
-									<div class="mood">
+									<div class="info mood">
 										<div class="row-fluid">
 											<div class="span3">
-												<i class="icon-heart"></i>
+												<i class="icon-heart"></i> <span>{%  trans "Mood" %}</span>
 											</div>
 											<div class="span9">
-												{{ daypart.mood }}
+												{{ daypart.mood|linebreaks }}
 											</div>
 										</div>
 									</div>
 									{% endif %}
-									{% if daypart.music %}
-									<div class="mood">
+									{% if daypart.sound %}
+									<div class="info sound">
 										<div class="row-fluid">
 											<div class="span3">
-												<i class="icon-headphones"></i>
+												<i class="icon-headphones"></i> <span>{%  trans "Sound" %}</span>
 											</div>
 											<div class="span9">
-												{{ daypart.music }}
+												{{ daypart.sound|linebreaks }}
 											</div>
 										</div>
 									</div>
 									{% endif %}
 									{% if daypart.talk %}
-									<div class="mood">
+									<div class="info mood">
 										<div class="row-fluid">
 											<div class="span3">
-												<i class="icon-microphone"></i>
+												<i class="icon-microphone"></i> <span>{%  trans "Talk" %}</span>
 											</div>
 											<div class="span9">
-												{{ daypart.talk }}
+												{{ daypart.talk|linebreaks }}
 											</div>
 										</div>
 									</div>
