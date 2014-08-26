@@ -105,8 +105,8 @@ class ArtistListView(PaginationMixin, ListView):
             .distinct()
         else:
             # only display artists with tracks a.t.m.
-            # qs = Artist.objects.filter(media_artist__isnull=False).select_related('license','media_artist').prefetch_related('media_artist').distinct()
-            qs = Artist.objects.all()
+            qs = Artist.objects.filter(media_artist__isnull=False).select_related('media_artist').prefetch_related('media_artist').distinct()
+            # qs = Artist.objects.all()
 
             
         order_by = self.request.GET.get('order_by', 'created')

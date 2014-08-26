@@ -304,10 +304,13 @@ class BaseExtraartistForm(ModelForm):
     def clean_artist(self):
 
         artist = self.cleaned_data['artist']
-        if not artist.pk:
-            log.debug('saving not existant artist: %s' % artist.name)
-            artist.save()
-        return artist
+        try:
+            if not artist.pk:
+                log.debug('saving not existant artist: %s' % artist.name)
+                artist.save()
+            return artist
+        except:
+            return None
 
 
 

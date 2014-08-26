@@ -97,6 +97,19 @@ EditUi = function () {
 
         });
 
+        // auto-check delete checkmark if textfield is empty
+        /*
+        $('.form-autogrow', $('fieldset')).on('blur', '.controls input[type="text"]', function(e){
+            var value = $(this).val();
+            if (value=='') {
+                $('input[type="checkbox"]', $(this).parents('.form-autogrow')).prop('checked', true);
+            } else {
+                $('input[type="checkbox"]', $(this).parents('.form-autogrow')).prop('checked', false);
+            }
+        });
+        */
+
+
 
         $(container).on('click', '.item', function (e) {
 

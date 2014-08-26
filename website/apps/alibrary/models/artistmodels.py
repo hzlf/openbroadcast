@@ -344,7 +344,7 @@ class Artist(MigrationMixin):
         
         self.tags = t_tags;
         self.d_tags = t_tags;
-        
+
         super(Artist, self).save(*args, **kwargs)
     
     
@@ -372,8 +372,8 @@ post_save.connect(action_handler, sender=Artist)
 
 class ArtistMembership(models.Model):
     
-    parent = models.ForeignKey(Artist, related_name='artist_parent')
-    child = models.ForeignKey(Artist, related_name='artist_child')
+    parent = models.ForeignKey(Artist, related_name='artist_parent', blank=True, null=True)
+    child = models.ForeignKey(Artist, related_name='artist_child', blank=True, null=True)
     profession = models.ForeignKey(Profession, related_name='artist_membership_profession', blank=True, null=True)
 
     # meta
@@ -384,6 +384,18 @@ class ArtistMembership(models.Model):
 
     def __unicode__(self):
         return '"%s" <> "%s"' % (self.parent.name, self.child.name)
+
+
+
+    def save(self, *args, **kwargs):
+
+        if not self.child:
+            self.delete()
+
+        if not self.parent:
+            self.delete()
+
+        super(ArtistMembership, self).save(*args, **kwargs)
 
 class ArtistAlias(models.Model):
 

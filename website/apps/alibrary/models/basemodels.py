@@ -576,6 +576,9 @@ class RelationManager(models.Manager):
 
         #return qs.order_by('service')
 
+
+
+
     
 class Relation(models.Model):
     
@@ -644,7 +647,7 @@ class Relation(models.Model):
         if self.service != 'generic':
             # TODO: fix unique problem
             reld = Relation.objects.filter(service=self.service, content_type=self.content_type, object_id=self.object_id).delete()
-        
+
         super(Relation, self).save(*args, **kwargs)    
         
 

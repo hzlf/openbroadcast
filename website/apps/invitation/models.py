@@ -194,7 +194,7 @@ class Invitation(models.Model):
             'site': site
         })
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
-        messages.add_message(request, messages.SUCCESS, _('Invitatuion sent to %(email)s.')% {'email': email})
+        messages.add_message(request, messages.SUCCESS, _('Invitation sent to %(email)s.')% {'email': email})
         signals.invitation_sent.send(sender=self)
 
     def mark_accepted(self, new_user):

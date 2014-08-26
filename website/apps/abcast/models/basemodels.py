@@ -234,7 +234,7 @@ class Channel(BaseModel):
         daypart_set = None
         if daypart_sets.count() > 0:
             daypart_set = daypart_sets[0]
-        broker
+
         if daypart_set:
             for dp in daypart_set.daypart_set.all():
                 dayparts.append(dp)

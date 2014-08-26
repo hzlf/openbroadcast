@@ -223,11 +223,7 @@ class Media(MigrationMixin):
     medianumber = models.PositiveIntegerField(verbose_name=_('a.k.a. "Disc number'), blank=True, null=True, max_length=12, choices=MEDIANUMBER_CHOICES)
     
 
-
-
-
     mediatype = models.CharField(verbose_name=_('Type'), max_length=12, default='song', choices=MEDIATYPE_CHOICES)
-
 
     version = models.CharField(max_length=12, blank=True, null=True, default='track', choices=VERSION_CHOICES)
 
@@ -1364,6 +1360,7 @@ class Media(MigrationMixin):
         log.debug('Media id: %s - Save' % (self.pk))
 
         # Assign a default license
+        """ not applying default license anymore
         if not self.license:
             try:
                 license = License.objects.filter(is_default=True)[0]
@@ -1371,6 +1368,7 @@ class Media(MigrationMixin):
                 log.debug('applied default license: %s' % license.name)
             except Exception, e:
                 log.warning('unable to apply default license: %s' % e)
+        """
         
 
         # check if master changed. if yes we need to reprocess the cached files
@@ -1409,8 +1407,16 @@ class Media(MigrationMixin):
         for tag in self.tags:
             t_tags += '%s, ' % tag    
         
-        self.tags = t_tags;
-        self.d_tags = t_tags;
+        self.tags = t_tags
+        self.d_tags = t_tags
+
+        # kind of ugly, clean empty relations
+        for ea in MediaExtraartists.objects.filter(media=self):
+            try:
+                if not ea.artist:
+                    ea.delete()
+            except:
+                pass
 
         super(Media, self).save(*args, **kwargs)
 

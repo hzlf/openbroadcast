@@ -264,9 +264,15 @@ class BaseMemberForm(ModelForm):
     def clean_child(self):
 
         child = self.cleaned_data['child']
-        if not child.pk:
-            logger.debug('saving not existant child: %s' % child.name)
-            child.save()
+        try:
+            if not child.pk:
+                logger.debug('saving not existant child: %s' % child.name)
+                child.save()
+                return child
+        except:
+            return None
+
+
         return child
 
 

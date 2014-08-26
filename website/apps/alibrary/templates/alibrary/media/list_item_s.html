@@ -84,7 +84,9 @@
 
         <ul class="__horizontal unstyled small">
 
-            <!--
+
+
+            {% comment %}
             {% regroup item.extraartist_media.all by artist.profession as eas %}
             <ul>
             {% for ea in eas %}
@@ -97,12 +99,15 @@
                 </li>
             {% endfor %}
             </ul>
-            -->
+            {% endcomment %}
+
 
             {% for ea in item.extraartist_media.all %}
                 <li>
                     <a href="{{ ea.artist.get_absolute_url }}">{{ ea.artist.name }}</a>
+                    {% if ea.profession.name %}
                     <small>[{{ ea.profession.name }}]</small>
+                    {% endif %}
                 </li>
             {% endfor %}
 
