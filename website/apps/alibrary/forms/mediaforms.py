@@ -1,4 +1,5 @@
 from django import forms
+import logging
 from django.forms import ModelForm, Form
 from django.forms.models import BaseInlineFormSet, inlineformset_factory
 from django.contrib.contenttypes.generic import BaseGenericInlineFormSet, generic_inlineformset_factory
@@ -19,6 +20,8 @@ from tagging.forms import TagField
 from ac_tagging.widgets import TagAutocompleteTagIt
 
 from lib.widgets.widgets import ReadOnlyIconField
+
+log = logging.getLogger(__name__)
 
 MAX_TRACKNUMBER = 100 + 1
 
@@ -296,6 +299,15 @@ class BaseExtraartistForm(ModelForm):
 
     artist = selectable.AutoCompleteSelectField(ArtistLookup, allow_new=True, required=False, label=_('Credited Artist'))
     #profession = forms.ChoiceField()
+
+
+    def clean_artist(self):
+
+        artist = self.cleaned_data['artist']
+        if not artist.pk:
+            log.debug('saving not existant artist: %s' % artist.name)
+            artist.save()
+        return artist
 
 
 
