@@ -2,13 +2,15 @@ import datetime
 from django.contrib.sites.models import Site
 from abcast.models import Emission
 
+EXCHANGE = 'fs' # 'fs' or 'http'
 
-def get_schedule(range_start, range_end, exclude=None, channel_id=None):
+
+def get_schedule(range_start, range_end, exclude=None, channel=None):
 
     return
 
 
-def get_schedule_for_pypo(range_start, range_end, exclude=None, channel_id=None):
+def get_schedule_for_pypo(range_start, range_end, exclude=None, channel=None):
 
 
     es = Emission.objects.filter(time_end__gte=range_start, time_start__lte=range_end)
@@ -22,7 +24,7 @@ def get_schedule_for_pypo(range_start, range_end, exclude=None, channel_id=None)
     media = {}
     print
     print '--------------------------------------------------------------------'
-    print '| getting schedule for PYPO'
+    print '| getting schedule for PYPO                                        |'
     print '--------------------------------------------------------------------'
     print 'range start             : %s ' % range_start
     print 'range end               : %s ' % range_end
@@ -71,17 +73,24 @@ def get_schedule_for_pypo(range_start, range_end, exclude=None, channel_id=None)
             compose media data
             """
             if i_end < range_start:
-                #print 'already played'
                 pass
             else:
 
-                # calculate timings
+                if EXCHANGE == 'http':
 
-                try:
-                    uri = "http://%s%s" % (base_url, co.get_stream_url())
-                except Exception, ex:
-                    print ex
-                    uri = None
+                    try:
+                        uri = "http://%s%s" % (base_url, co.get_stream_url())
+                    except Exception, ex:
+                        uri = None
+
+                if EXCHANGE == 'fs':
+
+                    uri = co.get_playout_file(absolute=False)
+
+                    #try:
+                    #    uri = co.get_cache_file(format='mp3', version='base', absolute=False)
+                    #except Exception, ex:
+                    #    uri = None
 
 
                 data = {
@@ -98,6 +107,8 @@ def get_schedule_for_pypo(range_start, range_end, exclude=None, channel_id=None)
                         'independent_event': False,
                         'start': "%s" % i_start_str,
                         'end': "%s" % i_end_str,
+                        'artist': 'artsi',
+                        'title': 'fartsi',
                         'show_name': "%s" % e.name,
                         'uri': uri,
                         'row_id': co.uuid,

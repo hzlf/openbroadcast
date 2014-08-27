@@ -46,12 +46,17 @@ class JingleSetAdmin(admin.ModelAdmin):
     
     inlines = [JingleInline, ]
     
-    
+
+#class MountpointInline(admin.TabularInline):
+#    model = StreamMountpoint
+#    extra = 1
+
 class StreamServerAdmin(admin.ModelAdmin):    
     
     list_display = ('name', 'host', 'type' )
     list_filter = ('type',)
     readonly_fields = ('uuid',)
+    inlines = []
     
     
 
@@ -59,6 +64,9 @@ admin.site.register(Station, StationAdmin)
 admin.site.register(Channel, ChannelAdmin)
 admin.site.register(Jingle, JingleAdmin)
 admin.site.register(JingleSet, JingleSetAdmin)
+
+
+
 
 admin.site.register(StreamServer, StreamServerAdmin)
 admin.site.register(StreamFormat)

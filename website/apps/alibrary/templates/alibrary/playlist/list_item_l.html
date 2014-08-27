@@ -141,8 +141,9 @@
                 </a>
             </li>
 
+            {% if perms.alibrary.schedule_playlist and item.type == "broadcast" and item.broadcast_status == 1 %}
             <li>
-                <a href="#"
+                <a href="{% url abcast-schedule-select-playlist  %}?playlist_id={{ item.pk }}&next={% url abcast-schedule %}"
                    class="{% if not perms.alibrary.schedule_playlist or not item.type == "broadcast" or not item.broadcast_status == 1 %} disabled{% endif %}"
                    data-action="schedule"
                    data-ct="playlist"
@@ -152,6 +153,7 @@
                     <i class="icon icon-calendar"></i>
                 </a>
             </li>
+            {% endif %}
 
         </ul>
 

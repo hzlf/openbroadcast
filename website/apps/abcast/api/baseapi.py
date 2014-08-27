@@ -5,6 +5,7 @@ from django.conf.urls.defaults import *
 from django.http import HttpResponse
 from django.contrib.sites.models import Site
 from django.core.cache import cache
+from django.shortcuts import get_object_or_404
 from tastypie import fields
 from tastypie.authentication import *
 from tastypie.authorization import *
@@ -435,8 +436,8 @@ class BaseResource(Resource):
                 channel.save()
 
             
-            print 'item: %s' % item.name
-            print 'channel: %s' % channel.name
+            #print 'item: %s' % item.name
+            #print 'channel: %s' % channel.name
             
         data = {
             'status': True,
@@ -447,7 +448,21 @@ class BaseResource(Resource):
 
     def get_bootstrap_info(self, request, **kwargs):
 
-        data = {"switch_status":{"live_dj":"off","master_dj":"off","scheduled_play":"on"},"station_name":"My Station","stream_label":"","transition_fade":"00.000000"}
+        print '** get_bootstrap_info **'
+        channel_uuid = request.GET.get('channel_id', None)
+
+        if channel_uuid:
+            channel = get_object_or_404(Channel, uuid=channel_uuid)
+
+        data = {"switch_status":
+                    {"live_dj": "off",
+                     "master_dj": "off",
+                     "scheduled_play": "on"
+                    },
+                    "station_name": u'%s' % channel.name,
+                    "stream_label": u'%s' % channel.teaser,
+                    "transition_fade": "00.000000"
+        }
         return self.json_response(request, data)
 
     def recorded_shows(self, request, **kwargs):
@@ -464,10 +479,19 @@ class BaseResource(Resource):
 
     def get_schedule(self, request, **kwargs):
 
+        print '** get_schedule **'
+        channel_uuid = request.GET.get('channel_id', None)
+
+        if channel_uuid:
+            channel = get_object_or_404(Channel, uuid=channel_uuid)
+        else:
+            channel = None
+
         range_start = datetime.datetime.now()
         range_end = datetime.datetime.now() + datetime.timedelta(seconds=SCHEDULE_AHEAD)
 
-        media = scheduler.get_schedule_for_pypo(range_start, range_end)
+        # TODO: it would be possible to implement multi-channel way here
+        media = scheduler.get_schedule_for_pypo(range_start, range_end, channel=channel)
         # map
         data = {'media': media}
 

@@ -307,7 +307,12 @@ class StreamServer(BaseModel):
     admin_pass = models.CharField(max_length=64, null=True, blank=True)
     
     active = models.BooleanField(default=True)
+    mountpoint = models.CharField(max_length=64, null=True, help_text=_('e.g. main-hifi.mp3'))
+    meta_prefix = models.CharField(max_length=64, null=True, blank=True, help_text=_('e.g. My Station!'))
+
+
     formats = models.ManyToManyField('StreamFormat', null=True, blank=True)
+
     
     
      
@@ -326,6 +331,20 @@ class StreamServer(BaseModel):
 
     def __unicode__(self):
         return "%s" % self.name
+
+"""
+class StreamMountpoint(BaseModel):
+
+    server = models.ForeignKey(StreamServer, null=True, blank=True)
+    path = models.CharField(max_length=64, null=True, help_text=_('e.g. main-hifi.mp3'))
+
+
+    class Meta:
+        app_label = 'abcast'
+        verbose_name = _('Mountpoint')
+        ordering = ('server', 'path',)
+"""
+
 
 class StreamFormat(BaseModel):
 
